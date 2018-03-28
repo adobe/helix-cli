@@ -29,8 +29,7 @@ The test repositories are located int the  `dishes` directory:
 dishes/
 ├── github_soupdemo_code/
 │   └── master/
-│       ├── homepage.htl
-│       └── homepage.js
+│       └── homepage.htl
 └── github_soupdemo_content/
     └── master/
         └── index.md
