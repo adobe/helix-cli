@@ -18,7 +18,7 @@ $ npm start
 
 Open http://localhost:3000/demo/petri/master/index.html
 
-![Demo](docs/demo.gif_)
+![Demo](docs/demo.gif)
 
 How it works
 ------------
