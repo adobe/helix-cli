@@ -1,0 +1,29 @@
+{
+    "name": "petridish",
+    "version": "1.0.0",
+    "description": "Helix Testing Environment",
+    "main": "src/server.js",
+    "license": "Apache-2.0",
+    "scripts": {
+        "start": "nodemon src/server.js",
+        "test": "mocha"
+    },
+    "dependencies": {
+        "eslint-plugin-import": "^2.9.0",
+        "lodash": "^4.17.5",
+        "htlengine": "file:../htlengine",
+        "md2json": "file:../md2json"
+    },
+    "devDependencies": {
+        "express": "^4.16.3",
+        "mocha": "^5.0.5",
+        "nodemon": "^1.17.2"
+    },
+    "nodemonConfig": {
+        "ignore": [
+            "test/*",
+            "dishes/*",
+            "docs/*"
+        ]
+    }
+}
