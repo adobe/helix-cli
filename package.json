@@ -10,14 +10,15 @@
     },
     "dependencies": {
         "eslint-plugin-import": "^2.9.0",
-        "lodash": "^4.17.5",
         "htlengine": "file:../htlengine",
+        "lodash": "^4.17.5",
         "md2json": "file:../md2json"
     },
     "devDependencies": {
         "express": "^4.16.3",
         "mocha": "^5.0.5",
-        "nodemon": "^1.17.2"
+        "nodemon": "^1.17.2",
+        "mocha-junit-reporter": "^1.17.0"
     },
     "nodemonConfig": {
         "ignore": [
