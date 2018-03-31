@@ -20,19 +20,18 @@
 
 const assert = require('assert');
 const utils = require('../src/utils.js');
+const RequestContext = require('../src/RequestContext.js');
 
 describe('Utils Test', function() {
 
-    describe('Path Info Tests', function() {
+    describe('Request context', function() {
 
         const TESTS = [
             {url: '/', valid: false},
-            {url: '/org0', valid: false},
-            {url: '/org0/repo0', valid: false},
-            {url: '/org0/repo0/branch0', valid: true, org: 'org0', repo: 'repo0', branch: 'branch0', path: '/'},
-            {url: '/org0/repo0/branch0/', valid: true, org: 'org0', repo: 'repo0', branch: 'branch0', path: '/'},
-            {url: '/org0/repo0/branch0/content', valid: true, org: 'org0', repo: 'repo0', branch: 'branch0', path: '/content'},
-            {url: '/org0/repo0/branch0/content/index.html', valid: true, org: 'org0', repo: 'repo0', branch: 'branch0', path: '/content/index.html'}
+            {url: '/strain0', valid: true, strain: 'strain0', path: '/', resourcePath: '/index'},
+            {url: '/strain0/', valid: true, strain: 'strain0', path: '/', resourcePath: '/index'},
+            {url: '/strain0/content', valid: true, strain: 'strain0', path: '/content', resourcePath: '/content'},
+            {url: '/strain0/content/index.html', valid: true, strain: 'strain0', path: '/content/index.html', resourcePath: '/content/index'}
         ];
 
         TESTS.forEach(function(t) {
@@ -40,38 +39,13 @@ describe('Utils Test', function() {
                 const mockReq = {
                     url: t.url
                 };
-                const p = utils.getPathInfo(mockReq);
+                const p = new RequestContext(mockReq);
                 assert.equal(p.valid, t.valid, 'valid');
                 if (p.valid) {
-                    assert.equal(p.org, t.org, 'org');
-                    assert.equal(p.repo, t.repo, 'repo');
+                    assert.equal(p.strain, t.strain, 'strain');
                     assert.equal(p.path, t.path, 'path');
+                    assert.equal(p.resourcePath, t.resourcePath, 'resourcePath');
                 }
-            });
-        });
-    });
-
-    describe('Resolve Tests', function() {
-
-        const TESTS = [
-            {branch: 'master', path: '/content.html', resolved: '/usr/local/share/helix/content_repo/master/content.md'},
-            {branch: 'master', path: '/content', resolved: '/usr/local/share/helix/content_repo/master/content.md'},
-            {branch: 'master', path: '/content/', resolved: '/usr/local/share/helix/content_repo/master/content/index.md'},
-            {branch: 'master', path: '/', resolved: '/usr/local/share/helix/content_repo/master/index.md'},
-            {branch: 'master', path: '/content.selectors.not.supported.html', resolved: '/usr/local/share/helix/content_repo/master/content.selectors.not.supported.md'}
-        ];
-
-        TESTS.forEach(function(t) {
-            it(`parses ${t.path} correctly`, function() {
-                const mockCfg = {
-                    baseDir: '/usr/local/share/helix'
-                };
-                const mockStrain = {
-                    content: 'content_repo'
-                };
-                return utils.resolve(mockCfg, mockStrain, t).then(resolved => {
-                    assert.equal(resolved, t.resolved, 'resolved');
-                });
             });
         });
     });

@@ -15,56 +15,14 @@
  * limitations under the License.
  *
  */
-const path = require('path');
-const fs = require('fs');
+const fs = require('fs-extra');
 const util = require('util');
 const stat = util.promisify(fs.stat);
+const readFile = util.promisify(fs.readFile);
+const request = require('request-promise');
+
 const {Compiler} = require('htlengine');
-
-class PathInfo {
-
-    constructor(req) {
-        const url = req.url;
-
-        // regex for:   /   org   /   repo  /  branch / path
-        const matcher = /([^\/]+)\/([^\/]+)\/([^\/]+)(.*)/;
-        const match = matcher.exec(url);
-        this._url = url;
-        if (!match) {
-            this._valid = false;
-        } else {
-            this._valid = true;
-            this._org = match[1];
-            this._repo = match[2];
-            this._branch = match[3];
-            this._path = match[4] || '/';
-        }
-    }
-
-    get url() {
-        return this._url;
-    }
-
-    get valid() {
-        return this._valid;
-    }
-
-    get org() {
-        return this._org;
-    }
-
-    get repo() {
-        return this._repo;
-    }
-
-    get branch() {
-        return this._branch;
-    }
-
-    get path() {
-        return this._path;
-    }
-}
+const {converter} = require('md2json');
 
 const utils = {
 
@@ -85,82 +43,82 @@ const utils = {
     },
 
     /**
-     * Parses the url of the given request and returns a path info object.
-     * @param {Express.req} req Express request
-     * @returns {PathInfo} A path info
+     * Fetches content from the given uri.
+     * @param {String} uri Either filesystem path (starting with '/') or URL
+     * @returns {*} The requested content
      */
-    getPathInfo: function(req) {
-        return new PathInfo(req);
-    },
-
-    /**
-     * Resolves the resource addressed by path info.
-     * @param {*} cfg Global config.
-     * @param {*} strain Current strain configuration
-     * @param {PathInfo} pathInfo Path info
-     * @param {boolean} [mustExist] If {@code true} only resolves if file exists
-     * @return {Promise<String>} Promise that resolves to the resolved filesystem path or rejects if not defined
-     */
-    resolve: function(cfg, strain, pathInfo, mustExist = false) {
-        // for now, just do simple extension trimming - no selectors support
-        let relPath = pathInfo.path;
-        const lastSlash = relPath.lastIndexOf('/');
-        const lastDot = relPath.lastIndexOf('.');
-        if (lastDot > lastSlash) {
-            relPath = relPath.substring(0, lastDot);
-        } else if (lastSlash === relPath.length - 1) {
-            relPath += 'index';
+    fetch: function(uri) {
+        if (uri.charAt(0) === '/') {
+            return readFile(uri);
         }
-        const fullpath = path.join(cfg.baseDir, strain.content, pathInfo.branch, relPath + '.md');
-        if (!mustExist) {
-            return Promise.resolve(fullpath);
-        }
-        return utils.isFile(fullpath);
+        return request(uri);
     },
 
     /**
-     * Resolves the template given the configuration and resource metadata.
-     * @param {*} cfg Global config.
-     * @param {*} strain Current strain configuration
-     * @param {PathInfo} pathInfo Path info
-     * @param {*} mdInfo The markdown info
-     * @returns {Promise<T>} A promise that resolves to an object holding information about the paths
+     * Fetches the content and stores it in the context.
+     * @param {RequestContext} ctx Context
+     * @return {Promise} A promise that resolves to the request context.
      */
-    resolveTemplate: function(cfg, strain, pathInfo, mdInfo) {
-        const templateBasePath = path.join(cfg.baseDir, strain.code, pathInfo.branch, mdInfo.meta.template);
-        const compiledPath = templateBasePath + '.js';
-
-        // for now, just check for .htl templates
-        return utils
-            .isFile(templateBasePath + '.htl')
-            .then(templatePath => {
-                return { templatePath, compiledPath };
-            });
+    fetchContent: function(ctx) {
+        const uri = ctx.strainConfig.content + ctx.resourcePath + '.md';
+        return utils.fetch(uri).then(data => {
+            ctx.content = data.toString();
+            return ctx;
+        });
     },
 
     /**
-     * Compiles a HTL template.
-     * @param {*} options Compile options
-     * @param {String} options.templatePath Path of the HTL template
-     * @param {String} options.compiledPath Path of the output file.
-     * @returns {Promise<String>} A promise that resolves to the compiled path
+     * Converts the markdown content into JSON and stores it in the context.
+     * @param {RequestContext} ctx Context
+     * @return {Promise} A promise that resolves to the request context.
      */
-    compileHtlTemplate: function(options) {
+    convertContent: function(ctx) {
+        return converter.convert(ctx.content).then(json => {
+            ctx.resource = json;
+            return ctx;
+        });
+    },
+
+    /**
+     * Fetches the code based on the template and stores it in the context.
+     * @param {RequestContext} ctx Context
+     * @return {Promise} A promise that resolves to the request context.
+     */
+    fetchCode: function(ctx) {
+        ctx.templateName = ctx.resource.meta.template;
+        const uri = ctx.strainConfig.code + '/' + ctx.templateName + '.htl';
+        return utils.fetch(uri).then(data => {
+            ctx.code = data.toString();
+            return ctx;
+        });
+    },
+
+    /**
+     * Compiles the template and stores the compiled filepath in the context
+     * @param {RequestContext} ctx Context
+     * @return {Promise} A promise that resolves to the request context.
+     */
+    compileHtlTemplate: function(ctx) {
         // console.log('Compiling ' + options.templatePath);
+        fs.mkdirpSync(ctx.strainConfig.cache);
         const compiler = new Compiler()
-            .withOutputFile(options.compiledPath)
+            .withOutputDirectory(ctx.strainConfig.cache)
             .includeRuntime(true)
             .withRuntimeGlobalName('it');
 
-        const filename = compiler.compileFile(options.templatePath);
-        // console.log(`Compiled: ${filename}`);
-        return Promise.resolve(filename);
+        ctx.compiledTemplate = compiler.compile(ctx.code, ctx.templateName + '.js');
+        return ctx;
     },
 
-    executeTemplate: function(compiledPath, payload) {
-        delete require.cache[require.resolve(compiledPath)];
-        const mod = require(compiledPath);
-        return Promise.resolve(mod.main(payload));
+    /**
+     * Executes the template and resolves with the content.
+     * @param {RequestContext} ctx Context
+     * @return {Promise} A promise that resolves to generated output.
+     */
+    executeTemplate: function(ctx) {
+        delete require.cache[require.resolve(ctx.compiledTemplate)];
+        const mod = require(ctx.compiledTemplate);
+        return Promise.resolve(mod.main(ctx.resource));
     }
 };
 

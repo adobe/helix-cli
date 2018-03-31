@@ -17,19 +17,22 @@
  */
 const path = require('path');
 
+const baseDir = path.join(__dirname, 'dishes');
+
 module.exports = {
-
-    // the base directory for the dishes defined below
-    baseDir: path.join(__dirname, 'dishes'),
-
-    orgs: {
+    strains: {
         'demo': {
-            repos: {
-                'petri': {
-                    code: 'github_soupdemo_code',
-                    content: 'github_soupdemo_content'
-                }
-            }
+            // example of using the local filesystem as source
+            code: path.join(baseDir, 'github_soupdemo_code/master'),
+            content: path.join(baseDir, 'github_soupdemo_content/master'),
+            cache: path.join(baseDir, 'tmp', 'demo')
+        },
+
+        'localgit': {
+            // example of using a local git server as source
+            code: 'http://localhost:5000/raw/helix/helix-demo-code/master',
+            content: 'http://localhost:5000/raw/helix/helix-demo-content/master',
+            cache: path.join(baseDir, 'tmp', 'localgit')
         }
     }
 };
