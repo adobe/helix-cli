@@ -1,0 +1,19 @@
+{
+  "name": "helix-cli",
+  "version": "0.1.0",
+  "description": "Project Helix CLI",
+  "main": "cli.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/adobe/project-helix.git"
+  },
+  "author": "",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/adobe/project-helix/issues"
+  },
+  "homepage": "https://github.com/adobe/project-helix#readme"
+}
