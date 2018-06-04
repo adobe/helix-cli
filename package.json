@@ -15,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/adobe/project-helix/issues"
   },
-  "homepage": "https://github.com/adobe/project-helix#readme"
+  "homepage": "https://github.com/adobe/project-helix#readme",
+  "dependencies": {
+    "yargs": "^11.0.0"
+  }
 }
