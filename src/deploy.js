@@ -12,17 +12,17 @@
 
 'use strict';
 
+const ow = require('openwhisk');
+
 module.exports = [
-  'init [name]',
-  'Initialize the project structure',
+  'deploy',
+  'Deploy packaged functions to Adobe I/O runtime',
   yargs => {
-    yargs.positional('name', {
-      type: 'string',
-      describe: 'Name of the project to initialize'
-    });
+    // TODO define parameters
   },
   argv => {
     // handler function
-    console.log('Init', argv.name);
+    // TODO implement
+    console.log('Deploy', argv.name);
   }
 ];

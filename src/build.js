@@ -13,16 +13,14 @@
 'use strict';
 
 module.exports = [
-  'init [name]',
-  'Initialize the project structure',
+  'build',
+  'Compile the template functions and build package',
   yargs => {
-    yargs.positional('name', {
-      type: 'string',
-      describe: 'Name of the project to initialize'
-    });
+    // TODO define parameters
   },
   argv => {
     // handler function
-    console.log('Init', argv.name);
+    // TODO implement
+    console.log('Build', argv.name);
   }
 ];

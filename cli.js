@@ -17,16 +17,10 @@
 const yargs = require('yargs');
 
 yargs.usage('hlx <cmd> [args]')
-.command(...require('./src/init.js'))
-.command('hello [name]', 'welcome ter yargs!', (yargs) => {
-    yargs.positional('name', {
-      type: 'string',
-      default: 'Cambi',
-      describe: 'the name to say hello to'
-    })
-  }, argv => {
-    console.log('hello', argv.name, 'welcome to yargs!')
-  })
+  .command(...require('./src/init.js'))
+  .command(...require('./src/build.js'))
+  .command(...require('./src/deploy.js'))
+  .command(...require('./src/perf.js'))
   .demandCommand()
   .help()
   .argv

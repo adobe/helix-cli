@@ -13,16 +13,14 @@
 'use strict';
 
 module.exports = [
-  'init [name]',
-  'Initialize the project structure',
+  ['perf', 'performance'],
+  'Test performance',
   yargs => {
-    yargs.positional('name', {
-      type: 'string',
-      describe: 'Name of the project to initialize'
-    });
+    // TODO define parameters
   },
   argv => {
     // handler function
-    console.log('Init', argv.name);
+    // TODO implement
+    console.log('Performance', argv.name);
   }
 ];
