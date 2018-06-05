@@ -60,7 +60,7 @@ const utils = {
      * @return {Promise} A promise that resolves to the request context.
      */
     fetchContent: function(ctx) {
-        const uri = ctx.strainConfig.content + ctx.resourcePath + '.md';
+        const uri = ctx.strainConfig.content + ctx.resourcePath + ('html' === ctx.extension ? '.md' : '.' + ctx.extension);
         return utils.fetch(uri).then(data => {
             ctx.content = data.toString();
             return ctx;

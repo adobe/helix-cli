@@ -42,18 +42,32 @@ app.get('*', (req, res) => {
         return;
     }
 
-    Promise.resolve(ctx)
-        .then(utils.fetchContent)
-        .then(utils.convertContent)
-        .then(utils.fetchCode)
-        .then(utils.compileHtlTemplate)
-        .then(utils.executeTemplate)
-        .then(result => {
-            res.send(result.body);
-        }).catch((err) => {
-            console.log('resolved path does not exist: %j', err);
-            res.status(404).send();
-        });
+    if ('html' === ctx.extension || 'md' === ctx.extension) {
+        // md files to be transformed
+        Promise.resolve(ctx)
+            .then(utils.fetchContent)
+            .then(utils.convertContent)
+            .then(utils.fetchCode)
+            .then(utils.compileHtlTemplate)
+            .then(utils.executeTemplate)
+            .then(result => {
+                res.send(result.body);
+            }).catch((err) => {
+                console.log('resolved path does not exist: %j', err);
+                res.status(404).send();
+            });
+    } else {
+        // all the other files (css, images...)
+        Promise.resolve(ctx)
+            .then(utils.fetchContent)
+            .then(result => {
+                res.type(ctx.extension);
+                res.send(result.content);
+            }).catch((err) => {
+                console.log('resolved path does not exist: %j', err);
+                res.status(404).send();
+            });
+    }
 });
 
 app.listen(3000, () => console.log('Petridish server listening on port 3000.\nhttp://localhost:3000/demo/index.html'));

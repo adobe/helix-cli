@@ -36,16 +36,17 @@ module.exports = class RequestContext {
             this._valid = true;
             this._strain = match[1];
             this._path = match[2] || '/';
-
+            
             let relPath = this._path;
             const lastSlash = relPath.lastIndexOf('/');
             const lastDot = relPath.lastIndexOf('.');
             if (lastDot > lastSlash) {
                 relPath = relPath.substring(0, lastDot);
+                this._extension = this._path.substring(lastDot + 1);
             } else if (lastSlash === relPath.length - 1) {
                 relPath += 'index';
             }
-            this._resourcePath = relPath;
+            this._resourcePath = relPath; 
         }
     }
 
@@ -75,5 +76,9 @@ module.exports = class RequestContext {
 
     get resourcePath() {
         return this._resourcePath;
+    }
+
+    get extension() {
+        return this._extension;
     }
 };
