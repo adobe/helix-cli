@@ -1,6 +1,6 @@
 {
   "name": "helix-cli",
-  "version": "0.1.0",
+  "version": "0.1.0-SNAPSHOT.1",
   "description": "Project Helix CLI",
   "main": "cli.js",
   "scripts": {
@@ -20,6 +20,7 @@
     "yargs": "^11.0.0"
   },
   "devDependencies": {
-    "mocha": "^5.2.0"
+    "mocha": "^5.2.0",
+    "npm-snapshot": "^1.0.3"
   }
 }
