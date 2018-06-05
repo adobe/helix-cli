@@ -10,18 +10,16 @@
  *  governing permissions and limitations under the License.
  */
 
-'use strict';
-
-module.exports = [
-  'init [name]',
-  'Initialize the project structure',
-  yargs => {
-    yargs.positional('name', {
-      type: 'string',
-      describe: 'Name of the project to initialize'
-    });
+module.exports = {
+  'env': {
+    'node': true
   },
-  argv => {
-    console.log('Init', argv.name);
-  }
-];
+  'parserOptions': {
+    'sourceType': 'script',
+    // async/await support
+    'ecmaVersion': 8
+  },
+  'extends': 'airbnb',
+  'rules': {
+   }
+};
