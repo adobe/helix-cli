@@ -12,17 +12,22 @@
 
 'use strict';
 
-module.exports = [
-  'init [name]',
-  'Initialize the project structure',
-  yargs => {
-    yargs.positional('name', {
+const fse = require('fs-extra');
+
+const NAME_PARAM = 'name';
+
+module.exports = {
+  command: `init <${NAME_PARAM}>`,
+  aliases: ['i'],
+  desc: 'Initialize the project structure',
+  builder: (yargs) =>  {
+    yargs.positional(NAME_PARAM, {
       type: 'string',
       describe: 'Name of the project to initialize'
     });
   },
-  argv => {
-    // handler function
+  handler: (argv) => {
+    // TODO implement
     console.log('Init', argv.name);
   }
-];
+};

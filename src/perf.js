@@ -12,15 +12,15 @@
 
 'use strict';
 
-module.exports = [
-  ['perf', 'performance'],
-  'Test performance',
-  yargs => {
+module.exports = {
+  command: 'perf',
+  aliases: ['p'],
+  desc: 'Test performance',
+  builder: (yargs) =>  {
     // TODO define parameters
   },
-  argv => {
-    // handler function
+  handler: (argv) => {
     // TODO implement
     console.log('Performance', argv.name);
   }
-];
+};

@@ -12,15 +12,15 @@
 
 'use strict';
 
-module.exports = [
-  'build',
-  'Compile the template functions and build package',
-  yargs => {
+module.exports = {
+  command: 'build',
+  aliases: ['b'],
+  desc: 'Compile the template functions and build package',
+  builder: (yargs) =>  {
     // TODO define parameters
   },
-  argv => {
-    // handler function
+  handler: (argv) => {
     // TODO implement
     console.log('Build', argv.name);
   }
-];
+};

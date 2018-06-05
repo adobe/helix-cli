@@ -14,15 +14,15 @@
 
 const ow = require('openwhisk');
 
-module.exports = [
-  'deploy',
-  'Deploy packaged functions to Adobe I/O runtime',
-  yargs => {
+module.exports = {
+  command: 'deploy',
+  aliases: ['d'],
+  desc: 'Deploy packaged functions to Adobe I/O runtime',
+  builder: (yargs) =>  {
     // TODO define parameters
   },
-  argv => {
-    // handler function
+  handler: (argv) => {
     // TODO implement
     console.log('Deploy', argv.name);
   }
-];
+};

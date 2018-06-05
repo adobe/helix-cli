@@ -17,10 +17,10 @@
 const yargs = require('yargs');
 
 yargs.usage('hlx <cmd> [args]')
-  .command(...require('./src/init.js'))
-  .command(...require('./src/build.js'))
-  .command(...require('./src/deploy.js'))
-  .command(...require('./src/perf.js'))
+  .command(require('./src/init.js'))
+  .command(require('./src/build.js'))
+  .command(require('./src/deploy.js'))
+  .command(require('./src/perf.js'))
   .demandCommand()
   .help()
   .argv
