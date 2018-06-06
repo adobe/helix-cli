@@ -12,22 +12,39 @@
 
 'use strict';
 
+const path = require('path');
+
 const fse = require('fs-extra');
+const chalk = require('chalk');
 
 const NAME_PARAM = 'name';
+const DIR_PARAM = 'dir';
 
 module.exports = {
-  command: `init <${NAME_PARAM}>`,
+  command: `init <${NAME_PARAM}> [${DIR_PARAM}]`,
   aliases: ['i'],
   desc: 'Initialize the project structure',
   builder: (yargs) =>  {
     yargs.positional(NAME_PARAM, {
       type: 'string',
       describe: 'Name of the project to initialize'
-    });
+    })
+    .positional(DIR_PARAM, {
+      type: 'string',
+      describe: 'Parent directory of new project',
+      default: '.'
+    })
   },
   handler: (argv) => {
+    const projectDir = path.resolve(path.join(argv.dir, argv.name));
+    fse.ensureDir(projectDir)
+    .then(() => {
+      console.log(chalk.green(`Successfully created ${projectDir}`));
+    })
+    .catch(err => {
+      console.error(chalk.red(err)
+    });
     // TODO implement
-    console.log('Init', argv.name);
+    console.log(chalk.green('Init'), argv.name, argv.dir);
   }
 };
