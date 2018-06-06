@@ -47,7 +47,8 @@ app.get('*', (req, res) => {
         Promise.resolve(ctx)
             .then(utils.fetchContent)
             .then(utils.convertContent)
-            .then(utils.fetchCode)
+            .then(utils.collectMetadata)
+            .then(utils.fetchTemplate)
             .then(utils.compileHtlTemplate)
             .then(utils.executeTemplate)
             .then(result => {
@@ -58,11 +59,13 @@ app.get('*', (req, res) => {
             });
     } else {
         // all the other files (css, images...)
+        //for now, fetch code if resource under /dist other, fetch in content.
+        const fetch = ctx.path.startsWith('/dist') ? utils.fetchCode : utils.fetchContent;
         Promise.resolve(ctx)
-            .then(utils.fetchContent)
+            .then(fetch)
             .then(result => {
                 res.type(ctx.extension);
-                res.send(result.content);
+                res.send(ctx.path.startsWith('/dist') ? result.code : result.content);
             }).catch((err) => {
                 console.log('resolved path does not exist: %j', err);
                 res.status(404).send();

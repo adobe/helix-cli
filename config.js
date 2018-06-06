@@ -33,6 +33,14 @@ module.exports = {
             code: 'http://localhost:5000/raw/helix/helix-demo-code/master',
             content: 'http://localhost:5000/raw/helix/helix-demo-content/master',
             cache: path.join(baseDir, 'tmp', 'localgit')
+        },
+
+        'helpx': {
+            // example of using a local git server as source
+            code: 'http://localhost:5000/raw/adobe/helix-helpx/master/src',
+            content: 'http://localhost:5000/raw/Adobe-Marketing-Cloud/reactor-user-docs/master',
+            cache: path.join(baseDir, 'tmp', 'localgit')
         }
+
     }
 };
