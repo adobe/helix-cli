@@ -65,42 +65,14 @@ const utils = {
      * @return {Promise} A promise that resolves to the request context.
      */
     fetchContent: function(ctx) {
-<<<<<<< HEAD
-        const uri = ctx.strainConfig.content.raw + ctx.resourcePath + ('html' === ctx.extension ? '.md' : '.' + ctx.extension);
-=======
-        const uri = ctx.strandConfig.content + ctx.resourcePath + ('html' === ctx.extension ? '.md' : '.' + ctx.extension);
->>>>>>> master
+        const uri = ctx.strandConfig.content.raw + ctx.resourcePath + ('html' === ctx.extension ? '.md' : '.' + ctx.extension);
+
         return utils.fetch(uri).then(data => {
             ctx.content = Buffer.from(data, 'utf8');
             return ctx;
         });
     },
 
-<<<<<<< HEAD
-=======
-    collectMetadata: function(ctx) {
-        // const options = {
-        //     uri:
-        //         ctx.strandConfig.api + 
-        //         '/commits?path=' + 
-        //         ctx.resourcePath + '.md',
-        //     headers: {
-        //         'User-Agent': 'Request-Promise'
-        //     },
-        //     json: true
-        // };
-
-        // return request(options).then(metadata => {
-        //     ctx.resource.metadata = metadata;
-        //     return ctx;
-        // });
-
-        // TODO: remove temp solution - WIP
-        ctx.resource.metadata = METADATA;
-        return Promise.resolve(ctx);
-    },
-
->>>>>>> master
     /**
      * Converts the markdown content into JSON and stores it in the context.
      * @param {RequestContext} ctx Context
@@ -134,11 +106,11 @@ const utils = {
      */
     fetchPre: function(ctx) {
         ctx.templateName = ctx.resource.meta && ctx.resource.meta.template ? ctx.resource.meta.template : 'default' ;
-        const uri = ctx.strainConfig.code.raw    + '/' + ctx.templateName + '.pre.js';
+        const uri = ctx.strandConfig.code.raw    + '/' + ctx.templateName + '.pre.js';
         return utils.fetch(uri).then(data => {
-            fs.mkdirpSync(ctx.strainConfig.cache);
+            fs.mkdirpSync(ctx.strandConfig.cache);
 
-            const fileName = ctx.strainConfig.cache + '/' + ctx.templateName + '.pre.js';
+            const fileName = ctx.strandConfig.cache + '/' + ctx.templateName + '.pre.js';
             fs.writeFileSync(fileName, data.toString());
             
             ctx.precode = fileName;
@@ -166,11 +138,8 @@ const utils = {
      */
     fetchTemplate: function(ctx) {
         ctx.templateName = ctx.resource.meta && ctx.resource.meta.template ? ctx.resource.meta.template : 'default' ;
-<<<<<<< HEAD
-        const uri = ctx.strainConfig.code.raw + '/' + ctx.templateName + '.htl';
-=======
-        const uri = ctx.strandConfig.code + '/' + ctx.templateName + '.htl';
->>>>>>> master
+        const uri = ctx.strandConfig.code.raw + '/' + ctx.templateName + '.htl';
+
         return utils.fetch(uri).then(data => {
             ctx.code = data.toString();
             return ctx;
