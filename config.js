@@ -39,7 +39,19 @@ module.exports = {
                 api: 'http://api.localtest.me:5000/repos/Adobe-Marketing-Cloud/reactor-user-docs'
             },
             cache: path.join(baseDir, 'tmp', 'helpx')
-        }
+        },
 
+        'helpx-remote': {
+            // example of using a local git server as source
+            code: {
+                raw: 'https://raw.githubusercontent.com/adobe/helix-helpx/master/src',
+                api: 'https://api.github.com/repos//adobe/helix-helpx',
+            },
+            content: {
+                raw: 'https://raw.githubusercontent.com/Adobe-Marketing-Cloud/reactor-user-docs/master',
+                api: 'https://api.github.com/repos/Adobe-Marketing-Cloud/reactor-user-docs'
+            },
+            cache: path.join(baseDir, 'tmp', 'helpx')
+        }
     }
 };
