@@ -14,6 +14,7 @@
         "htlengine": "file:../htlengine",
         "lodash": "^4.17.5",
         "md2json": "file:../md2json",
+        "moment": "^2.22.2",
         "request": "^2.85.0",
         "request-promise": "^4.2.2"
     },

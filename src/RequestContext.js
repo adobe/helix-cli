@@ -42,7 +42,8 @@ module.exports = class RequestContext {
             const lastDot = relPath.lastIndexOf('.');
             if (lastDot > lastSlash) {
                 relPath = relPath.substring(0, lastDot);
-                this._extension = this._path.substring(lastDot + 1);
+                const queryParamIndex = this._path.lastIndexOf('?');
+                this._extension = this._path.substring(lastDot + 1, (queryParamIndex !== -1 ? queryParamIndex : this._path.length));
             } else if (lastSlash === relPath.length - 1) {
                 relPath += 'index';
             }

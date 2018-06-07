@@ -28,18 +28,17 @@ module.exports = {
             cache: path.join(baseDir, 'tmp', 'demo')
         },
 
-        'localgit': {
-            // example of using a local git server as source
-            code: 'http://localhost:5000/raw/helix/helix-demo-code/master',
-            content: 'http://localhost:5000/raw/helix/helix-demo-content/master',
-            cache: path.join(baseDir, 'tmp', 'localgit')
-        },
-
         'helpx': {
             // example of using a local git server as source
-            code: 'http://localhost:5000/raw/adobe/helix-helpx/master/src',
-            content: 'http://localhost:5000/raw/Adobe-Marketing-Cloud/reactor-user-docs/master',
-            cache: path.join(baseDir, 'tmp', 'localgit')
+            code: {
+                raw: 'http://raw.localtest.me:5000/adobe/helix-helpx/master/src',
+                api: 'http://api.localtest.me:5000/repos/adobe/helix-helpx',
+            },
+            content: {
+                raw: 'http://raw.localtest.me:5000/Adobe-Marketing-Cloud/reactor-user-docs/master',
+                api: 'http://api.localtest.me:5000/repos/Adobe-Marketing-Cloud/reactor-user-docs'
+            },
+            cache: path.join(baseDir, 'tmp', 'helpx')
         }
 
     }

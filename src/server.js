@@ -48,18 +48,21 @@ app.get('*', (req, res) => {
             .then(utils.fetchContent)
             .then(utils.convertContent)
             .then(utils.collectMetadata)
+            .then(utils.fetchPre)
+            .then(utils.executePre)
             .then(utils.fetchTemplate)
             .then(utils.compileHtlTemplate)
             .then(utils.executeTemplate)
             .then(result => {
                 res.send(result.body);
             }).catch((err) => {
-                console.log('resolved path does not exist: %j', err);
+                console.error('Error while delivering resource', err);
                 res.status(404).send();
             });
     } else {
         // all the other files (css, images...)
         //for now, fetch code if resource under /dist other, fetch in content.
+        // TODO: revisit completely...
         const fetch = ctx.path.startsWith('/dist') ? utils.fetchCode : utils.fetchContent;
         Promise.resolve(ctx)
             .then(fetch)
@@ -67,10 +70,21 @@ app.get('*', (req, res) => {
                 res.type(ctx.extension);
                 res.send(ctx.path.startsWith('/dist') ? result.code : result.content);
             }).catch((err) => {
-                console.log('resolved path does not exist: %j', err);
+                console.error('Error while delivering resource', err);
                 res.status(404).send();
             });
     }
 });
 
 app.listen(3000, () => console.log('Petridish server listening on port 3000.\nhttp://localhost:3000/demo/index.html'));
+
+process.on('uncaughtException', err => {
+    logger.error('Encountered uncaught exception at process level', err);
+    // in case of fatal errors which cause process termination errors sometimes don’t get logged:
+    // => print error directly to console
+    console.log('Encountered uncaught exception at process level', err);
+});
+
+process.on('unhandledRejection', err => {
+    logger.error('Encountered unhandled promise rejection at process level', err);
+});
