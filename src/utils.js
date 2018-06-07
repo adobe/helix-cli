@@ -65,13 +65,42 @@ const utils = {
      * @return {Promise} A promise that resolves to the request context.
      */
     fetchContent: function(ctx) {
+<<<<<<< HEAD
         const uri = ctx.strainConfig.content.raw + ctx.resourcePath + ('html' === ctx.extension ? '.md' : '.' + ctx.extension);
+=======
+        const uri = ctx.strandConfig.content + ctx.resourcePath + ('html' === ctx.extension ? '.md' : '.' + ctx.extension);
+>>>>>>> master
         return utils.fetch(uri).then(data => {
             ctx.content = Buffer.from(data, 'utf8');
             return ctx;
         });
     },
 
+<<<<<<< HEAD
+=======
+    collectMetadata: function(ctx) {
+        // const options = {
+        //     uri:
+        //         ctx.strandConfig.api + 
+        //         '/commits?path=' + 
+        //         ctx.resourcePath + '.md',
+        //     headers: {
+        //         'User-Agent': 'Request-Promise'
+        //     },
+        //     json: true
+        // };
+
+        // return request(options).then(metadata => {
+        //     ctx.resource.metadata = metadata;
+        //     return ctx;
+        // });
+
+        // TODO: remove temp solution - WIP
+        ctx.resource.metadata = METADATA;
+        return Promise.resolve(ctx);
+    },
+
+>>>>>>> master
     /**
      * Converts the markdown content into JSON and stores it in the context.
      * @param {RequestContext} ctx Context
@@ -90,7 +119,8 @@ const utils = {
      * @return {Promise} A promise that resolves to the request.
      */
     fetchCode: function(ctx) {
-        const uri = ctx.strainConfig.code.raw + ctx.path;
+        const uri = ctx.strandConfig.code.raw + ctx.path;
+
         return utils.fetch(uri).then(data => {
             ctx.code = data;
             return ctx;
@@ -136,7 +166,11 @@ const utils = {
      */
     fetchTemplate: function(ctx) {
         ctx.templateName = ctx.resource.meta && ctx.resource.meta.template ? ctx.resource.meta.template : 'default' ;
+<<<<<<< HEAD
         const uri = ctx.strainConfig.code.raw + '/' + ctx.templateName + '.htl';
+=======
+        const uri = ctx.strandConfig.code + '/' + ctx.templateName + '.htl';
+>>>>>>> master
         return utils.fetch(uri).then(data => {
             ctx.code = data.toString();
             return ctx;
@@ -150,9 +184,9 @@ const utils = {
      */
     compileHtlTemplate: function(ctx) {
         // console.log('Compiling ' + options.templatePath);
-        fs.mkdirpSync(ctx.strainConfig.cache);
+        fs.mkdirpSync(ctx.strandConfig.cache);
         const compiler = new Compiler()
-            .withOutputDirectory(ctx.strainConfig.cache)
+            .withOutputDirectory(ctx.strandConfig.cache)
             .includeRuntime(true)
             .withRuntimeGlobalName('it');
 
