@@ -20,7 +20,7 @@ const path = require('path');
 const baseDir = path.join(__dirname, 'dishes');
 
 module.exports = {
-    strains: {
+    strands: {
         'demo': {
             // example of using the local filesystem as source
             code: path.join(baseDir, 'github_soupdemo_code/master'),

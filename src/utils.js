@@ -61,7 +61,7 @@ const utils = {
      * @return {Promise} A promise that resolves to the request context.
      */
     fetchContent: function(ctx) {
-        const uri = ctx.strainConfig.content + ctx.resourcePath + ('html' === ctx.extension ? '.md' : '.' + ctx.extension);
+        const uri = ctx.strandConfig.content + ctx.resourcePath + ('html' === ctx.extension ? '.md' : '.' + ctx.extension);
         return utils.fetch(uri).then(data => {
             ctx.content = data.toString();
             return ctx;
@@ -71,7 +71,7 @@ const utils = {
     collectMetadata: function(ctx) {
         // const options = {
         //     uri:
-        //         ctx.strainConfig.api + 
+        //         ctx.strandConfig.api + 
         //         '/commits?path=' + 
         //         ctx.resourcePath + '.md',
         //     headers: {
@@ -108,7 +108,7 @@ const utils = {
      * @return {Promise} A promise that resolves to the request.
      */
     fetchCode: function(ctx) {
-        const uri = ctx.strainConfig.code + ctx.path;
+        const uri = ctx.strandConfig.code + ctx.path;
         return utils.fetch(uri).then(data => {
             ctx.code = data.toString();
             return ctx;
@@ -123,7 +123,7 @@ const utils = {
      */
     fetchTemplate: function(ctx) {
         ctx.templateName = ctx.resource.meta && ctx.resource.meta.template ? ctx.resource.meta.template : 'default' ;
-        const uri = ctx.strainConfig.code + '/' + ctx.templateName + '.htl';
+        const uri = ctx.strandConfig.code + '/' + ctx.templateName + '.htl';
         return utils.fetch(uri).then(data => {
             ctx.code = data.toString();
             return ctx;
@@ -137,9 +137,9 @@ const utils = {
      */
     compileHtlTemplate: function(ctx) {
         // console.log('Compiling ' + options.templatePath);
-        fs.mkdirpSync(ctx.strainConfig.cache);
+        fs.mkdirpSync(ctx.strandConfig.cache);
         const compiler = new Compiler()
-            .withOutputDirectory(ctx.strainConfig.cache)
+            .withOutputDirectory(ctx.strandConfig.cache)
             .includeRuntime(true)
             .withRuntimeGlobalName('it');
 
