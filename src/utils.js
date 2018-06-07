@@ -21,7 +21,7 @@ const stat = util.promisify(fs.stat);
 const readFile = util.promisify(fs.readFile);
 const request = require('request-promise');
 
-const {Compiler} = require('htlengine');
+const {Compiler} = require('@adobe/htlengine');
 const {converter} = require('md2json');
 
 const utils = {

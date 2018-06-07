@@ -12,9 +12,9 @@ Quick Start
 
 ```
 # npm doesn't want to recursively install file:// dependencies 
-$ cd ../htlengine && npm install
 $ cd ../md2json && npm install
 $ cd ../petridish && npm install
+$ npm install
 $ npm start
 ```
 
