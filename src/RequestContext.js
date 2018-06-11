@@ -26,7 +26,7 @@ module.exports = class RequestContext {
         const url = req.url;
         this._cfg = cfg;
 
-        // regex for:   /<strain>/<path>
+        // regex for:   /<strand>/<path>
         const matcher = /([^\/]+)(.*)/;
         const match = matcher.exec(url);
         this._url = url;
@@ -34,7 +34,7 @@ module.exports = class RequestContext {
             this._valid = false;
         } else {
             this._valid = true;
-            this._strain = match[1];
+            this._strand = match[1];
             this._path = match[2] || '/';
             
             let relPath = this._path;
@@ -42,7 +42,8 @@ module.exports = class RequestContext {
             const lastDot = relPath.lastIndexOf('.');
             if (lastDot > lastSlash) {
                 relPath = relPath.substring(0, lastDot);
-                this._extension = this._path.substring(lastDot + 1);
+                const queryParamIndex = this._path.lastIndexOf('?');
+                this._extension = this._path.substring(lastDot + 1, (queryParamIndex !== -1 ? queryParamIndex : this._path.length));
             } else if (lastSlash === relPath.length - 1) {
                 relPath += 'index';
             }
@@ -58,8 +59,8 @@ module.exports = class RequestContext {
         return this._valid;
     }
 
-    get strain() {
-        return this._strain;
+    get strand() {
+        return this._strand;
     }
 
     get path() {
@@ -70,8 +71,8 @@ module.exports = class RequestContext {
         return this._cfg;
     }
 
-    get strainConfig() {
-        return this._cfg.strains[this._strain];
+    get strandConfig() {
+        return this._cfg.strands[this._strand];
     }
 
     get resourcePath() {

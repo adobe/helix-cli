@@ -48,10 +48,15 @@ const utils = {
      * @returns {*} The requested content
      */
     fetch: function(uri) {
+        console.debug('Fetching...', uri);
         if (uri.charAt(0) === '/') {
             return readFile(uri);
         }
-        return request(uri);
+        return request({
+            uri: uri, 
+            // only solution found to proxy images
+            encoding: null
+        });
     },
 
     /**
@@ -60,9 +65,10 @@ const utils = {
      * @return {Promise} A promise that resolves to the request context.
      */
     fetchContent: function(ctx) {
-        const uri = ctx.strainConfig.content + ctx.resourcePath + ('html' === ctx.extension ? '.md' : '.' + ctx.extension);
+        const uri = ctx.strandConfig.content.raw + ctx.resourcePath + ('html' === ctx.extension ? '.md' : '.' + ctx.extension);
+
         return utils.fetch(uri).then(data => {
-            ctx.content = data.toString();
+            ctx.content = Buffer.from(data, 'utf8');
             return ctx;
         });
     },
@@ -80,13 +86,60 @@ const utils = {
     },
 
     /**
+     * Fetches a resource in the code repo.
+     * @param {RequestContext} ctx Context
+     * @return {Promise} A promise that resolves to the request.
+     */
+    fetchCode: function(ctx) {
+        const uri = ctx.strandConfig.code.raw + ctx.path;
+
+        return utils.fetch(uri).then(data => {
+            ctx.code = data;
+            return ctx;
+        });
+    },
+
+    /**
      * Fetches the code based on the template and stores it in the context.
      * @param {RequestContext} ctx Context
      * @return {Promise} A promise that resolves to the request context.
      */
-    fetchCode: function(ctx) {
-        ctx.templateName = ctx.resource.meta.template;
-        const uri = ctx.strainConfig.code + '/' + ctx.templateName + '.htl';
+    fetchPre: function(ctx) {
+        ctx.templateName = ctx.resource.meta && ctx.resource.meta.template ? ctx.resource.meta.template : 'default' ;
+        const uri = ctx.strandConfig.code.raw    + '/' + ctx.templateName + '.pre.js';
+        return utils.fetch(uri).then(data => {
+            fs.mkdirpSync(ctx.strandConfig.cache);
+
+            const fileName = ctx.strandConfig.cache + '/' + ctx.templateName + '.pre.js';
+            fs.writeFileSync(fileName, data.toString());
+            
+            ctx.precode = fileName;
+            return ctx;
+        }).catch(error => {
+            console.log('No pre file found for template', ctx.templateName);
+        });
+    },
+
+    /**
+     * Executes the template and resolves with the content.
+     * @param {RequestContext} ctx Context
+     * @return {Promise} A promise that resolves to generated output.
+     */
+    executePre: function(ctx) {
+        delete require.cache[require.resolve(ctx.precode)];
+        const mod = require(ctx.precode);
+        return mod.main(ctx);
+    },
+
+    /**
+     * Fetches the code based on the template and stores it in the context.
+     * @param {RequestContext} ctx Context
+     * @return {Promise} A promise that resolves to the request context.
+     */
+    fetchTemplate: function(ctx) {
+        ctx.templateName = ctx.resource.meta && ctx.resource.meta.template ? ctx.resource.meta.template : 'default' ;
+        const uri = ctx.strandConfig.code.raw + '/' + ctx.templateName + '.htl';
+
         return utils.fetch(uri).then(data => {
             ctx.code = data.toString();
             return ctx;
@@ -100,9 +153,9 @@ const utils = {
      */
     compileHtlTemplate: function(ctx) {
         // console.log('Compiling ' + options.templatePath);
-        fs.mkdirpSync(ctx.strainConfig.cache);
+        fs.mkdirpSync(ctx.strandConfig.cache);
         const compiler = new Compiler()
-            .withOutputDirectory(ctx.strainConfig.cache)
+            .withOutputDirectory(ctx.strandConfig.cache)
             .includeRuntime(true)
             .withRuntimeGlobalName('it');
 
