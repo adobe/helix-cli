@@ -36,7 +36,10 @@ module.exports = {
             },
             content: {
                 raw: 'http://raw.localtest.me:5000/Adobe-Marketing-Cloud/reactor-user-docs/master',
-                api: 'http://api.localtest.me:5000/repos/Adobe-Marketing-Cloud/reactor-user-docs'
+                api: 'http://api.localtest.me:5000/repos/Adobe-Marketing-Cloud/reactor-user-docs',
+                org: 'Adobe-Marketing-Cloud',
+                repo: 'reactor-user-docs',
+                tree: 'master'
             },
             cache: path.join(baseDir, 'tmp', 'helpx')
         },
@@ -49,9 +52,12 @@ module.exports = {
             },
             content: {
                 raw: 'https://raw.githubusercontent.com/Adobe-Marketing-Cloud/reactor-user-docs/master',
-                api: 'https://api.github.com/repos/Adobe-Marketing-Cloud/reactor-user-docs'
+                api: 'https://api.github.com/repos/Adobe-Marketing-Cloud/reactor-user-docs',
+                org: 'Adobe-Marketing-Cloud',
+                repo: 'reactor-user-docs',
+                tree: 'master'
             },
-            cache: path.join(baseDir, 'tmp', 'helpx')
+            cache: path.join(baseDir, 'tmp', 'helpx-remote')
         },
 
         'helpx-mix': {
@@ -62,9 +68,12 @@ module.exports = {
             },
             content: {
                 raw: 'https://raw.githubusercontent.com/Adobe-Marketing-Cloud/reactor-user-docs/master',
-                api: 'https://api.github.com/repos/Adobe-Marketing-Cloud/reactor-user-docs'
+                api: 'https://api.github.com/repos/Adobe-Marketing-Cloud/reactor-user-docs',
+                org: 'Adobe-Marketing-Cloud',
+                repo: 'reactor-user-docs',
+                tree: 'master'
             },
-            cache: path.join(baseDir, 'tmp', 'helpx')
+            cache: path.join(baseDir, 'tmp', 'helpx-mix')
         }
 
     }
