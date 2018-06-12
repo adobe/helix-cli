@@ -16,6 +16,7 @@
  *
  */
 const path = require('path');
+const StrandConfig = require('strandconfig').StrandConfig;
 
 const baseDir = path.join(__dirname, 'dishes');
 
@@ -30,40 +31,28 @@ module.exports = {
 
         'helpx': {
             // helpx using a local git server as source for content and code
-            code: {
-                raw: 'http://raw.localtest.me:5000/adobe/helix-helpx/master/src',
-                api: 'http://api.localtest.me:5000/repos/adobe/helix-helpx',
-            },
-            content: {
-                raw: 'http://raw.localtest.me:5000/Adobe-Marketing-Cloud/reactor-user-docs/master',
-                api: 'http://api.localtest.me:5000/repos/Adobe-Marketing-Cloud/reactor-user-docs'
-            },
+            urls: new StrandConfig({
+                code: 'http://localtest.me:5000/adobe/helix-helpx',
+                content: 'http://localtest.me:5000/Adobe-Marketing-Cloud/reactor-user-docs'
+            }),
             cache: path.join(baseDir, 'tmp', 'helpx')
         },
 
         'helpx-remote': {
             // helpx using a github as source for content and code
-            code: {
-                raw: 'https://raw.githubusercontent.com/adobe/helix-helpx/master/src',
-                api: 'https://api.github.com/repos//adobe/helix-helpx',
-            },
-            content: {
-                raw: 'https://raw.githubusercontent.com/Adobe-Marketing-Cloud/reactor-user-docs/master',
-                api: 'https://api.github.com/repos/Adobe-Marketing-Cloud/reactor-user-docs'
-            },
+            urls: new StrandConfig({
+                code: 'http://github.com/adobe/helix-helpx',
+                content: 'http://github.com/Adobe-Marketing-Cloud/reactor-user-docs'
+            }),
             cache: path.join(baseDir, 'tmp', 'helpx')
         },
 
         'helpx-mix': {
             // helpx using a github as source for content and a local git server as source for code
-            code: {
-                raw: 'http://raw.localtest.me:5000/adobe/helix-helpx/master/src',
-                api: 'http://api.localtest.me:5000/repos/adobe/helix-helpx',
-            },
-            content: {
-                raw: 'https://raw.githubusercontent.com/Adobe-Marketing-Cloud/reactor-user-docs/master',
-                api: 'https://api.github.com/repos/Adobe-Marketing-Cloud/reactor-user-docs'
-            },
+            urls: new StrandConfig({
+                code: 'http://localtest.me:5000/adobe/helix-helpx',
+                content: 'http://github.com/Adobe-Marketing-Cloud/reactor-user-docs'
+            }),
             cache: path.join(baseDir, 'tmp', 'helpx')
         }
 
