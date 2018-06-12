@@ -33,7 +33,6 @@ module.exports = {
             code: {
                 raw: 'http://raw.localtest.me:5000/adobe/helix-helpx/master/src',
                 api: 'http://api.localtest.me:5000/repos/adobe/helix-helpx',
-                org: 'adobe'
             },
             content: {
                 raw: 'http://raw.localtest.me:5000/Adobe-Marketing-Cloud/reactor-user-docs/master',
