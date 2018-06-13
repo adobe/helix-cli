@@ -42,7 +42,7 @@ dishes/
 
 For now, this is just normal content of _this_ repository, but could be cloned or submoduled here.
 
-In the `config.js` we define the strand configurations and the location of the code and content repositories.
+In the `config.js` we define the strain configurations and the location of the code and content repositories.
 For local development, one can choose either a (local) git server URL or a filesystem path that points to a directory.
 
 ```js
@@ -50,7 +50,7 @@ For local development, one can choose either a (local) git server URL or a files
 const baseDir = path.join(__dirname, 'dishes');
 
 module.exports = {
-    strands: {
+    strains: {
         'demo': {
             // example of using the local filesystem as source
             code: path.join(baseDir, 'github_soupdemo_code/master'),
@@ -68,11 +68,11 @@ module.exports = {
 };
 ```
 
-The `sever.js` provides a simple _express_ server that resolves the path to the respective _strand_, which is a 
-code + content configuration. Please note that the exact definition and usage of _strands_ need to be 
+The `sever.js` provides a simple _express_ server that resolves the path to the respective _strain_, which is a 
+code + content configuration. Please note that the exact definition and usage of _strains_ need to be 
 elaborated. 
 
-The url has the format: `/<strand>/<resource>` and is then resolved to the respective markdown file
+The url has the format: `/<strain>/<resource>` and is then resolved to the respective markdown file
 located in the `content` dish. 
 
 The markdown file is converted to JSON using the (usual) [md2json](../md2json) converter. The resulting JSON also contains

@@ -28,10 +28,10 @@ describe('Utils Test', function() {
 
         const TESTS = [
             {url: '/', valid: false},
-            {url: '/strand0', valid: true, strand: 'strand0', path: '/', resourcePath: '/index'},
-            {url: '/strand0/', valid: true, strand: 'strand0', path: '/', resourcePath: '/index'},
-            {url: '/strand0/content', valid: true, strand: 'strand0', path: '/content', resourcePath: '/content'},
-            {url: '/strand0/content/index.html', valid: true, strand: 'strand0', path: '/content/index.html', resourcePath: '/content/index'}
+            {url: '/strain0', valid: true, strain: 'strain0', path: '/', resourcePath: '/index'},
+            {url: '/strain0/', valid: true, strain: 'strain0', path: '/', resourcePath: '/index'},
+            {url: '/strain0/content', valid: true, strain: 'strain0', path: '/content', resourcePath: '/content'},
+            {url: '/strain0/content/index.html', valid: true, strain: 'strain0', path: '/content/index.html', resourcePath: '/content/index'}
         ];
 
         TESTS.forEach(function(t) {
@@ -42,7 +42,7 @@ describe('Utils Test', function() {
                 const p = new RequestContext(mockReq);
                 assert.equal(p.valid, t.valid, 'valid');
                 if (p.valid) {
-                    assert.equal(p.strand, t.strand, 'strand');
+                    assert.equal(p.strain, t.strain, 'strain');
                     assert.equal(p.path, t.path, 'path');
                     assert.equal(p.resourcePath, t.resourcePath, 'resourcePath');
                 }

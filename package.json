@@ -17,7 +17,7 @@
         "moment": "^2.22.2",
         "request": "^2.85.0",
         "request-promise": "^4.2.2",
-        "strandconfig": "file:../strandconfig"
+        "strainconfig": "file:../strainconfig"
     },
     "devDependencies": {
         "express": "^4.16.3",

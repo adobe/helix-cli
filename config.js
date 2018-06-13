@@ -16,12 +16,12 @@
  *
  */
 const path = require('path');
-const StrandURLs = require('strandconfig').StrandURLs;
+const StrainURLs = require('strainconfig').StrainURLs;
 
 const baseDir = path.join(__dirname, 'dishes');
 
 module.exports = {
-    strands: {
+    strains: {
         'demo': {
             // example of using the local filesystem as source
             code: path.join(baseDir, 'github_soupdemo_code/master'),
@@ -31,7 +31,7 @@ module.exports = {
 
         'helpx': {
             // helpx using a local git server as source for content and code
-            urls: new StrandURLs({
+            urls: new StrainURLs({
                 code: 'http://localtest.me:5000/adobe/helix-helpx',
                 content: 'http://localtest.me:5000/Adobe-Marketing-Cloud/reactor-user-docs'
             }),
@@ -40,7 +40,7 @@ module.exports = {
 
         'helpx-remote': {
             // helpx using a github as source for content and code
-            urls: new StrandURLs({
+            urls: new StrainURLs({
                 code: 'http://github.com/adobe/helix-helpx',
                 content: 'http://github.com/Adobe-Marketing-Cloud/reactor-user-docs'
             }),
@@ -49,7 +49,7 @@ module.exports = {
 
         'helpx-mix': {
             // helpx using a github as source for content and a local git server as source for code
-            urls: new StrandURLs({
+            urls: new StrainURLs({
                 code: 'http://localtest.me:5000/adobe/helix-helpx',
                 content: 'http://github.com/Adobe-Marketing-Cloud/reactor-user-docs'
             }),
