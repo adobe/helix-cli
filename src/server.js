@@ -34,10 +34,10 @@ app.get('*', (req, res) => {
         return;
     }
 
-    // check if strand exists
-    const strand = ctx.strandConfig;
-    if (!strand) {
-        console.log('no config found for: %j', ctx.strand);
+    // check if strain exists
+    const strain = ctx.strainConfig;
+    if (!strain) {
+        console.log('no config found for: %j', ctx.strain);
         res.status(404).send();
         return;
     }
