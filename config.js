@@ -54,7 +54,16 @@ module.exports = {
                 content: 'http://github.com/Adobe-Marketing-Cloud/reactor-user-docs'
             }),
             cache: path.join(baseDir, 'tmp', 'helpx')
-        }
+        },
+
+        'helpx-v01': {
+            // helpx using a local git server as source for content and code but branch v0.1 (sample release tag) of the code.
+            urls: new StrainURLs({
+                code: 'http://localtest.me:5000/adobe/helix-helpx/tree/v0.1',
+                content: 'http://localtest.me:5000/Adobe-Marketing-Cloud/reactor-user-docs/tree/master'
+            }),
+            cache: path.join(baseDir, 'tmp', 'helpx')
+        },
 
     }
 };
