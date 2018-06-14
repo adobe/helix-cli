@@ -11,7 +11,7 @@
     "dependencies": {
         "eslint-plugin-import": "^2.9.0",
         "fs-extra": "^5.0.0",
-        "@adobe/htlengine": "1.0.0-SNAPSHOT.3588",
+        "@adobe/htlengine": "1.0.1-SNAPSHOT.6",
         "lodash": "^4.17.5",
         "md2json": "file:../md2json",
         "moment": "^2.22.2",
