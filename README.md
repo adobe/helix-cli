@@ -29,15 +29,15 @@ Open http://localhost:3000/demo/index.md
 
 This uses the content and code located on the file system under `dishes/` directory.
 
-Note: this is useful for testing the `md2json` transformation and the `htlengine` but is far from the production deployment leveraging git a repo.
-Please use the local git server to use an environment closer to production.
+Note: this is useful for testing the `md2json` transformation and the `htlengine` but this setup is far from the production deployment leveraging git as a repo for content and code.
+Use the local git server to for an environment closer to a production setup.
 
 ### Using the local git server
 
  You need to start a local git server based on local checkout of the content and code. See details for the [git-server](../git-server)
 
 1. Follow [Setup](#Setup) steps.
-2. To test the various `helpx` example, proceed as follow to checkout content and code repos and start the `git-server`: 
+2. To test the various `helpx` example, proceed as follow to checkout content and code repos and start the `git-server`:
 
 ```
 cd ../git-server/repos
