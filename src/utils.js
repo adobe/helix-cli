@@ -105,7 +105,8 @@ const utils = {
      * @return {Promise} A promise that resolves to the request context.
      */
     fetchPre: function(ctx) {
-        ctx.templateName = ctx.resource.meta && ctx.resource.meta.template ? ctx.resource.meta.template : 'default' ;
+        // TODO move to proper template selection
+        ctx.templateName = ctx.resource.meta && ctx.resource.meta.template ? ctx.resource.meta.template : (ctx.path.indexOf('SUMMARY') !== -1 ? 'nav' : 'default');
         const uri = ctx.strainConfig.urls.code.raw    + '/src/' + ctx.templateName + '.pre.js';
         return utils.fetch(uri).then(data => {
             fs.mkdirpSync(ctx.strainConfig.cache);
@@ -116,7 +117,7 @@ const utils = {
             ctx.precode = fileName;
             return ctx;
         }).catch(error => {
-            console.debug('No pre file found for template', ctx.templateName);
+            console.debug('No pre file found for template \'' + ctx.templateName + '\'');
             return ctx;
         });
     },
@@ -150,7 +151,8 @@ const utils = {
      * @return {Promise} A promise that resolves to the request context.
      */
     fetchTemplate: function(ctx) {
-        ctx.templateName = ctx.resource.meta && ctx.resource.meta.template ? ctx.resource.meta.template : 'default' ;
+        // TODO move to proper template selection
+        ctx.templateName = ctx.resource.meta && ctx.resource.meta.template ? ctx.resource.meta.template : (ctx.path.indexOf('SUMMARY') !== -1 ? 'nav' : 'default');
         const uri = ctx.strainConfig.urls.code.raw + '/src/' + ctx.templateName + '.htl';
 
         return utils.fetch(uri).then(data => {

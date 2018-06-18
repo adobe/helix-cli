@@ -18,13 +18,16 @@
 
 const express = require('express');
 const utils = require('./utils.js');
-const _ = require('lodash');
-
+const nodesi = require('nodesi');
+ 
 const RequestContext = require('./RequestContext.js');
 
+const PORT = 3000;
 const cfg = require('../config.js');
 const app = express();
-
+const esi = new nodesi({
+    baseUrl: 'http://localhost:' + PORT
+});
 
 app.get('*', (req, res) => {
 
@@ -54,7 +57,9 @@ app.get('*', (req, res) => {
             .then(utils.compileHtlTemplate)
             .then(utils.executeTemplate)
             .then(result => {
-                res.send(result.body);
+                 esi.process(result.body).then(body =>{
+                    res.send(body);
+                 });
             }).catch((err) => {
                 console.error('Error while delivering resource', err);
                 res.status(404).send();
@@ -76,7 +81,7 @@ app.get('*', (req, res) => {
     }
 });
 
-app.listen(3000, () => console.log('Petridish server listening on port 3000.\nhttp://localhost:3000/demo/index.html'));
+app.listen(PORT, () => console.log('Petridish server listening on port 3000.\nhttp://localhost:3000/demo/index.html'));
 
 process.on('uncaughtException', err => {
     logger.error('Encountered uncaught exception at process level', err);
