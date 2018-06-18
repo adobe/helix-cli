@@ -13,9 +13,6 @@ Setup
 ```
 # npm doesn't want to recursively install file:// dependencies 
 cd ../openwhisk-loggly-wrapper && npm install
-cd ../parcel-plugin-jst && npm install
-cd ../parcel-plugin-htl && npm install
-cd ../htlengine && npm install
 cd ../md2json && npm install
 cd ../strainconfig && npm install
 cd ../petridish && npm install
