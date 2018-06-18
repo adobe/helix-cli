@@ -42,7 +42,7 @@ module.exports = {
         },
 
         'helpx-remote': {
-            // helpx using a github as source for content and code
+            // helpx using github as source for content and code
             urls: new StrainURLs({
                 code: 'http://github.com/adobe/helix-helpx',
                 content: 'http://github.com/Adobe-Marketing-Cloud/reactor-user-docs'
