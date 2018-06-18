@@ -116,7 +116,8 @@ const utils = {
             ctx.precode = fileName;
             return ctx;
         }).catch(error => {
-            console.log('No pre file found for template', ctx.templateName);
+            console.debug('No pre file found for template', ctx.templateName);
+            return ctx;
         });
     },
 
@@ -126,15 +127,21 @@ const utils = {
      * @return {Promise} A promise that resolves to generated output.
      */
     executePre: function(ctx) {
-        try {
-            delete require.cache[require.resolve(ctx.precode)];
-            const mod = require(ctx.precode);
-            return mod.main(ctx).catch(error => {
-                console.error('Error while executing pre file', error);
-            });
-        } catch(error) {
-            console.error('Error while trying to execute pre file', error);
+        if (ctx.precode) {
+            try {
+                delete require.cache[require.resolve(ctx.precode)];
+                const mod = require(ctx.precode);
+                return mod.main(ctx).catch(error => {
+                    console.error('Error while executing pre file', error);
+                    return ctx;
+                });
+            } catch(error) {
+                console.error('Error while trying to execute pre file', error);
+                return ctx;
+            }
         }
+        // no pre file found.
+        return ctx;
     },
 
     /**

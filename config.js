@@ -17,6 +17,7 @@
  */
 const path = require('path');
 const StrainURLs = require('strainconfig').StrainURLs;
+const LocalURLs = require('./src/LocalURLs');
 
 const baseDir = path.join(__dirname, 'dishes');
 
@@ -24,8 +25,10 @@ module.exports = {
     strains: {
         'demo': {
             // example of using the local filesystem as source
-            code: path.join(baseDir, 'github_soupdemo_code/master'),
-            content: path.join(baseDir, 'github_soupdemo_content/master'),
+            urls: new LocalURLs({
+                code: path.join(baseDir, 'github_soupdemo_code/master'),
+                content: path.join(baseDir, 'github_soupdemo_content/master')
+            }),
             cache: path.join(baseDir, 'tmp', 'demo')
         },
 
