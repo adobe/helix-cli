@@ -81,15 +81,12 @@ app.get('*', (req, res) => {
     }
 });
 
-app.listen(PORT, () => console.log('Petridish server listening on port 3000.\nhttp://localhost:3000/demo/index.html'));
+app.listen(PORT, () => console.log('Petridish server listening on port '+PORT+'.\nhttp://localhost:'+PORT+'/demo/index.html'));
 
 process.on('uncaughtException', err => {
-    logger.error('Encountered uncaught exception at process level', err);
-    // in case of fatal errors which cause process termination errors sometimes don’t get logged:
-    // => print error directly to console
-    console.log('Encountered uncaught exception at process level', err);
+    console.error('Encountered uncaught exception at process level', err);
 });
 
 process.on('unhandledRejection', err => {
-    logger.error('Encountered unhandled promise rejection at process level', err);
+    console.error('Encountered unhandled promise rejection at process level', err);
 });
