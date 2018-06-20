@@ -44,8 +44,8 @@ module.exports = {
         'helpx-remote': {
             // helpx using github as source for content and code
             urls: new StrainURLs({
-                code: 'http://github.com/adobe/helix-helpx',
-                content: 'http://github.com/Adobe-Marketing-Cloud/reactor-user-docs'
+                code: 'https://github.com/adobe/helix-helpx',
+                content: 'https://github.com/Adobe-Marketing-Cloud/reactor-user-docs'
             }),
             cache: path.join(baseDir, 'tmp', 'helpx')
         },
@@ -54,7 +54,7 @@ module.exports = {
             // helpx using a github as source for content and a local git server as source for code
             urls: new StrainURLs({
                 code: 'http://localtest.me:5000/adobe/helix-helpx',
-                content: 'http://github.com/Adobe-Marketing-Cloud/reactor-user-docs'
+                content: 'https://github.com/Adobe-Marketing-Cloud/reactor-user-docs'
             }),
             cache: path.join(baseDir, 'tmp', 'helpx')
         },
