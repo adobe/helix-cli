@@ -18,75 +18,84 @@
 
 const express = require('express');
 const utils = require('./utils.js');
-const nodesi = require('nodesi');
- 
+const NodeESI = require('nodesi');
+
 const RequestContext = require('./RequestContext.js');
 
 const PORT = 3000;
 const cfg = require('../config.js');
+
 const app = express();
-const esi = new nodesi({
-    baseUrl: 'http://localhost:' + PORT
+const esi = new NodeESI({
+  baseUrl: `http://localhost:${PORT}`,
 });
 
 app.get('*', (req, res) => {
+  const ctx = new RequestContext(req, cfg);
+  if (!ctx.valid) {
+    res.status(404).send();
+    return;
+  }
 
-    const ctx = new RequestContext(req, cfg);
-    if (!ctx.valid) {
+  // check if strain exists
+  const strain = ctx.strainConfig;
+  if (!strain) {
+    // eslint-disable-next-line no-console
+    console.log('no config found for: %j', ctx.strain);
+    res.status(404).send();
+    return;
+  }
+
+  if (ctx.extension === 'html' || ctx.extension === 'md') {
+    // md files to be transformed
+    Promise.resolve(ctx)
+      .then(utils.fetchContent)
+      .then(utils.convertContent)
+      .then(utils.collectMetadata)
+      .then(utils.fetchPre)
+      .then(utils.executePre)
+      .then(utils.fetchTemplate)
+      .then(utils.compileHtlTemplate)
+      .then(utils.executeTemplate)
+      .then((result) => {
+        esi.process(result.body).then((body) => {
+          res.send(body);
+        });
+      })
+      .catch((err) => {
+        // eslint-disable-next-line no-console
+        console.error('Error while delivering resource', err);
         res.status(404).send();
-        return;
-    }
-
-    // check if strain exists
-    const strain = ctx.strainConfig;
-    if (!strain) {
-        console.log('no config found for: %j', ctx.strain);
+      });
+  } else {
+    // all the other files (css, images...)
+    // for now, fetch code if resource under /dist other, fetch in content.
+    // TODO: revisit completely...
+    const fetch = ctx.path.startsWith('/dist') ? utils.fetchCode : utils.fetchContent;
+    Promise.resolve(ctx)
+      .then(fetch)
+      .then((result) => {
+        res.type(ctx.extension);
+        res.send(ctx.path.startsWith('/dist') ? result.code : result.content);
+      }).catch((err) => {
+      // eslint-disable-next-line no-console
+        console.error('Error while delivering resource', err);
         res.status(404).send();
-        return;
-    }
-
-    if ('html' === ctx.extension || 'md' === ctx.extension) {
-        // md files to be transformed
-        Promise.resolve(ctx)
-            .then(utils.fetchContent)
-            .then(utils.convertContent)
-            .then(utils.collectMetadata)
-            .then(utils.fetchPre)
-            .then(utils.executePre)
-            .then(utils.fetchTemplate)
-            .then(utils.compileHtlTemplate)
-            .then(utils.executeTemplate)
-            .then(result => {
-                 esi.process(result.body).then(body =>{
-                    res.send(body);
-                 });
-            }).catch((err) => {
-                console.error('Error while delivering resource', err);
-                res.status(404).send();
-            });
-    } else {
-        // all the other files (css, images...)
-        //for now, fetch code if resource under /dist other, fetch in content.
-        // TODO: revisit completely...
-        const fetch = ctx.path.startsWith('/dist') ? utils.fetchCode : utils.fetchContent;
-        Promise.resolve(ctx)
-            .then(fetch)
-            .then(result => {
-                res.type(ctx.extension);
-                res.send(ctx.path.startsWith('/dist') ? result.code : result.content);
-            }).catch((err) => {
-                console.error('Error while delivering resource', err);
-                res.status(404).send();
-            });
-    }
+      });
+  }
 });
 
-app.listen(PORT, () => console.log('Petridish server listening on port '+PORT+'.\nhttp://localhost:'+PORT+'/demo/index.html'));
-
-process.on('uncaughtException', err => {
-    console.error('Encountered uncaught exception at process level', err);
+app.listen(PORT, () => {
+  // eslint-disable-next-line no-console
+  console.log(`Petridish server listening on port ${PORT}.\nhttp://localhost:${PORT}/demo/index.html`);
 });
 
-process.on('unhandledRejection', err => {
-    console.error('Encountered unhandled promise rejection at process level', err);
+process.on('uncaughtException', (err) => {
+  // eslint-disable-next-line no-console
+  console.error('Encountered uncaught exception at process level', err);
+});
+
+process.on('unhandledRejection', (err) => {
+  // eslint-disable-next-line no-console
+  console.error('Encountered unhandled promise rejection at process level', err);
 });

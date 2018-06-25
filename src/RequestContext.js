@@ -21,65 +21,67 @@
  * @type {module.RequestContext}
  */
 module.exports = class RequestContext {
+  constructor(req, cfg) {
+    const { url } = req;
+    this._cfg = cfg;
 
-    constructor(req, cfg) {
-        const url = req.url;
-        this._cfg = cfg;
+    // regex for:   /<strain>/<path>
+    const matcher = /([^/]+)(.*)/;
+    const match = matcher.exec(url);
+    this._url = url;
+    if (!match) {
+      this._valid = false;
+    } else {
+      this._valid = true;
+      this._strain = match[1]; // eslint-disable-line prefer-destructuring
+      this._path = match[2] || '/';
 
-        // regex for:   /<strain>/<path>
-        const matcher = /([^\/]+)(.*)/;
-        const match = matcher.exec(url);
-        this._url = url;
-        if (!match) {
-            this._valid = false;
-        } else {
-            this._valid = true;
-            this._strain = match[1];
-            this._path = match[2] || '/';
-            
-            let relPath = this._path;
-            const lastSlash = relPath.lastIndexOf('/');
-            const lastDot = relPath.lastIndexOf('.');
-            if (lastDot > lastSlash) {
-                relPath = relPath.substring(0, lastDot);
-                const queryParamIndex = this._path.lastIndexOf('?');
-                this._extension = this._path.substring(lastDot + 1, (queryParamIndex !== -1 ? queryParamIndex : this._path.length));
-            } else if (lastSlash === relPath.length - 1) {
-                relPath += 'index';
-            }
-            this._resourcePath = relPath; 
-        }
+      let relPath = this._path;
+      const lastSlash = relPath.lastIndexOf('/');
+      const lastDot = relPath.lastIndexOf('.');
+      if (lastDot > lastSlash) {
+        relPath = relPath.substring(0, lastDot);
+        const queryParamIndex = this._path.lastIndexOf('?');
+        this._extension = this._path.substring(
+          lastDot + 1,
+          (queryParamIndex !== -1 ? queryParamIndex : this._path.length),
+        );
+      } else if (lastSlash === relPath.length - 1) {
+        relPath += 'index';
+      }
+      this._resourcePath = relPath;
     }
+  }
 
-    get url() {
-        return this._url;
-    }
+  get url() {
+    return this._url;
+  }
 
-    get valid() {
-        return this._valid;
-    }
+  get valid() {
+    return this._valid;
+  }
 
-    get strain() {
-        return this._strain;
-    }
+  get strain() {
+    return this._strain;
+  }
 
-    get path() {
-        return this._path;
-    }
+  get path() {
+    return this._path;
+  }
 
-    get config() {
-        return this._cfg;
-    }
+  get config() {
+    return this._cfg;
+  }
 
-    get strainConfig() {
-        return this._cfg.strains[this._strain];
-    }
+  get strainConfig() {
+    return this._cfg.strains[this._strain];
+  }
 
-    get resourcePath() {
-        return this._resourcePath;
-    }
+  get resourcePath() {
+    return this._resourcePath;
+  }
 
-    get extension() {
-        return this._extension;
-    }
+  get extension() {
+    return this._extension;
+  }
 };

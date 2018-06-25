@@ -19,35 +19,39 @@
 /* global describe, it */
 
 const assert = require('assert');
-const utils = require('../src/utils.js');
 const RequestContext = require('../src/RequestContext.js');
 
-describe('Utils Test', function() {
+describe('Utils Test', () => {
+  describe('Request context', () => {
+    const TESTS = [
+      { url: '/', valid: false },
+      {
+        url: '/strain0', valid: true, strain: 'strain0', path: '/', resourcePath: '/index',
+      },
+      {
+        url: '/strain0/', valid: true, strain: 'strain0', path: '/', resourcePath: '/index',
+      },
+      {
+        url: '/strain0/content', valid: true, strain: 'strain0', path: '/content', resourcePath: '/content',
+      },
+      {
+        url: '/strain0/content/index.html', valid: true, strain: 'strain0', path: '/content/index.html', resourcePath: '/content/index',
+      },
+    ];
 
-    describe('Request context', function() {
-
-        const TESTS = [
-            {url: '/', valid: false},
-            {url: '/strain0', valid: true, strain: 'strain0', path: '/', resourcePath: '/index'},
-            {url: '/strain0/', valid: true, strain: 'strain0', path: '/', resourcePath: '/index'},
-            {url: '/strain0/content', valid: true, strain: 'strain0', path: '/content', resourcePath: '/content'},
-            {url: '/strain0/content/index.html', valid: true, strain: 'strain0', path: '/content/index.html', resourcePath: '/content/index'}
-        ];
-
-        TESTS.forEach(function(t) {
-            it(`parses ${t.url} correctly`, function() {
-                const mockReq = {
-                    url: t.url
-                };
-                const p = new RequestContext(mockReq);
-                assert.equal(p.valid, t.valid, 'valid');
-                if (p.valid) {
-                    assert.equal(p.strain, t.strain, 'strain');
-                    assert.equal(p.path, t.path, 'path');
-                    assert.equal(p.resourcePath, t.resourcePath, 'resourcePath');
-                }
-            });
-        });
+    TESTS.forEach((t) => {
+      it(`parses ${t.url} correctly`, () => {
+        const mockReq = {
+          url: t.url,
+        };
+        const p = new RequestContext(mockReq);
+        assert.equal(p.valid, t.valid, 'valid');
+        if (p.valid) {
+          assert.equal(p.strain, t.strain, 'strain');
+          assert.equal(p.path, t.path, 'path');
+          assert.equal(p.resourcePath, t.resourcePath, 'resourcePath');
+        }
+      });
     });
-
+  });
 });

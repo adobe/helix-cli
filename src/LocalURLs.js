@@ -22,46 +22,49 @@
  */
 
 class LocalUrl {
-    constructor(url) {
-        this._url = url;
-    }
+  constructor(url) {
+    this._url = url;
+  }
 
-    get raw() {
-        return this._url;
-    }
+  get raw() {
+    return this._url;
+  }
 
-    get rawRoot() {
-        return this._url;
-    }
+  get rawRoot() {
+    return this._url;
+  }
 
-    get apiRoot() {
-        return this._url;
-    }
+  get apiRoot() {
+    return this._url;
+  }
 
-    get owner() {
-        throw new Error('Not implemented');
-    }
+  // eslint-disable-next-line class-methods-use-this
+  get owner() {
+    throw new Error('Not implemented');
+  }
 
-    get repo() {
-        throw new Error('Not implemented');
-    }
+  // eslint-disable-next-line class-methods-use-this
+  get repo() {
+    throw new Error('Not implemented');
+  }
 
-    get ref() {
-        throw new Error('Not implemented');
-    }
+  // eslint-disable-next-line class-methods-use-this
+  get ref() {
+    throw new Error('Not implemented');
+  }
 }
 
 module.exports = class StrainURLs {
-    constructor(cfg) {
-        this._content = new LocalUrl(cfg.content);
-        this._code = new LocalUrl(cfg.code);
-    }
+  constructor(cfg) {
+    this._content = new LocalUrl(cfg.content);
+    this._code = new LocalUrl(cfg.code);
+  }
 
-    get content() {
-        return this._content;
-    }
+  get content() {
+    return this._content;
+  }
 
-    get code() {
-        return this._code;
-    }
-}
+  get code() {
+    return this._code;
+  }
+};
