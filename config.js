@@ -16,57 +16,58 @@
  *
  */
 const path = require('path');
-const StrainURLs = require('strainconfig').StrainURLs;
+const strainconfig = require('strainconfig');
 const LocalURLs = require('./src/LocalURLs');
 
 const baseDir = path.join(__dirname, 'dishes');
 
 module.exports = {
-    strains: {
-        'demo': {
-            // example of using the local filesystem as source
-            urls: new LocalURLs({
-                code: path.join(baseDir, 'github_soupdemo_code/master'),
-                content: path.join(baseDir, 'github_soupdemo_content/master')
-            }),
-            cache: path.join(baseDir, 'tmp', 'demo')
-        },
+  strains: {
+    demo: {
+      // example of using the local filesystem as source
+      urls: new LocalURLs({
+        code: path.join(baseDir, 'github_soupdemo_code/master'),
+        content: path.join(baseDir, 'github_soupdemo_content/master'),
+      }),
+      cache: path.join(baseDir, 'tmp', 'demo'),
+    },
 
-        'helpx': {
-            // helpx using a local git server as source for content and code
-            urls: new StrainURLs({
-                code: 'http://localtest.me:5000/adobe/helix-helpx',
-                content: 'http://localtest.me:5000/Adobe-Marketing-Cloud/reactor-user-docs'
-            }),
-            cache: path.join(baseDir, 'tmp', 'helpx')
-        },
+    helpx: {
+      // helpx using a local git server as source for content and code
+      urls: new strainconfig.StrainURLs({
+        code: 'http://localtest.me:5000/adobe/helix-helpx',
+        content: 'http://localtest.me:5000/Adobe-Marketing-Cloud/reactor-user-docs',
+      }),
+      cache: path.join(baseDir, 'tmp', 'helpx'),
+    },
 
-        'helpx-remote': {
-            // helpx using github as source for content and code
-            urls: new StrainURLs({
-                code: 'https://github.com/adobe/helix-helpx',
-                content: 'https://github.com/Adobe-Marketing-Cloud/reactor-user-docs'
-            }),
-            cache: path.join(baseDir, 'tmp', 'helpx')
-        },
+    'helpx-remote': {
+      // helpx using github as source for content and code
+      urls: new strainconfig.StrainURLs({
+        code: 'https://github.com/adobe/helix-helpx',
+        content: 'https://github.com/Adobe-Marketing-Cloud/reactor-user-docs',
+      }),
+      cache: path.join(baseDir, 'tmp', 'helpx'),
+    },
 
-        'helpx-mix': {
-            // helpx using a github as source for content and a local git server as source for code
-            urls: new StrainURLs({
-                code: 'http://localtest.me:5000/adobe/helix-helpx',
-                content: 'https://github.com/Adobe-Marketing-Cloud/reactor-user-docs'
-            }),
-            cache: path.join(baseDir, 'tmp', 'helpx')
-        },
+    'helpx-mix': {
+      // helpx using a github as source for content and a local git server as source for code
+      urls: new strainconfig.StrainURLs({
+        code: 'http://localtest.me:5000/adobe/helix-helpx',
+        content: 'https://github.com/Adobe-Marketing-Cloud/reactor-user-docs',
+      }),
+      cache: path.join(baseDir, 'tmp', 'helpx'),
+    },
 
-        'helpx-v02': {
-            // helpx using a local git server as source for content and code but branch v0.1 (sample release tag) of the code.
-            urls: new StrainURLs({
-                code: 'http://localtest.me:5000/adobe/helix-helpx/tree/v0.2',
-                content: 'http://localtest.me:5000/Adobe-Marketing-Cloud/reactor-user-docs/tree/master'
-            }),
-            cache: path.join(baseDir, 'tmp', 'helpx')
-        },
+    'helpx-v02': {
+      // helpx using a local git server as source for content
+      // and code but branch v0.1 (sample release tag) of the code.
+      urls: new strainconfig.StrainURLs({
+        code: 'http://localtest.me:5000/adobe/helix-helpx/tree/v0.2',
+        content: 'http://localtest.me:5000/Adobe-Marketing-Cloud/reactor-user-docs/tree/master',
+      }),
+      cache: path.join(baseDir, 'tmp', 'helpx'),
+    },
 
-    }
+  },
 };

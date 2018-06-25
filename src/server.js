@@ -17,8 +17,8 @@
  */
 
 const express = require('express');
-const utils = require('./utils.js');
 const NodeESI = require('nodesi');
+const utils = require('./utils.js');
 
 const RequestContext = require('./RequestContext.js');
 
