@@ -32,10 +32,18 @@
         "eslint-plugin-react": "^7.9.1"
     },
     "nodemonConfig": {
+        "ignoreRoot": [
+            ".git"
+        ],
         "ignore": [
             "test/*",
             "dishes/*",
             "docs/*"
+        ],
+        "watch": [
+            "src",
+            "node_modules/@adobe/md2json/src",
+            "node_modules/@adobe/strainconfig/src"
         ]
     }
 }
