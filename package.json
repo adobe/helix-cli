@@ -7,7 +7,7 @@
     "scripts": {
         "start": "nodemon src/server.js",
         "test": "mocha",
-        "lint": "./node_modules/.bin/eslint src/ test/"
+        "lint": "./node_modules/.bin/eslint ."
     },
     "dependencies": {
         "@adobe/htlengine": "1.0.1-SNAPSHOT.6",
