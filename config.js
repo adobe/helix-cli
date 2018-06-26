@@ -16,7 +16,7 @@
  *
  */
 const path = require('path');
-const strainconfig = require('strainconfig');
+const strainconfig = require('@adobe/strainconfig');
 const LocalURLs = require('./src/LocalURLs');
 
 const baseDir = path.join(__dirname, 'dishes');
