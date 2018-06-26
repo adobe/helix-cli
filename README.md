@@ -13,10 +13,9 @@ Setup
 ```
 # npm doesn't want to recursively install file:// dependencies 
 cd ../openwhisk-loggly-wrapper && npm install
-cd ../md2json && npm install
-cd ../strainconfig && npm install
-cd ../petridish && npm install
-npm install
+cd ../md2json && npm install && npm link
+cd ../strainconfig && npm install && npm link
+cd ../petridish && npm link @adobe/md2json && npm link @adibe/strainconfig && npm install
 npm start
 ```
 
