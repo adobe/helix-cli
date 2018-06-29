@@ -16,15 +16,62 @@
 // TODO: remove the following line
 /* eslint no-unused-vars: off */
 
+const Bundler = require('parcel-bundler');
+const glob = require('glob');
+
+const DEFAULT_OPTIONS = {
+  watch: false,
+  cacheDir: '.hlx/cache',
+  target: 'node',
+  logLevel: 3,
+  detailedReport: true,
+};
+
+const DEFAULT_PATTERNS = ["src/*.htl"];
+
 module.exports = {
-  command: 'build',
+  command: 'build [files..]',
   aliases: ['b'],
   desc: 'Compile the template functions and build package',
   builder: (yargs) => {
-    // TODO: define parameters
+    yargs.option('target', {
+      alias: 'o',
+      default: '.hlx/build',
+      describe: 'Target directory for compiled JS'
+    })
+    .option('no-cache', {
+      describe: 'Disable compile cache',
+      default: false,
+      type: 'boolean'
+    })
+    .option('minify', {
+      describe: 'Minify JS',
+      default: false,
+      type: 'boolean'
+    })
+    .positional('files', {
+      describe: 'The template files to compile',
+      default: DEFAULT_PATTERNS,
+      type: 'string'
+    })
+    yargs.help()
   },
   handler: (argv) => {
-    // TODO: implement
-    console.log('Build', argv.name);
+    // override default options with command line arguments
+    const myoptions = {
+      ...DEFAULT_OPTIONS,
+      cache: argv.cache,
+      minify: argv.minify,
+      outDir: argv.target,
+    }
+
+    // expand patterns from command line arguments
+    const myfiles = argv.files.reduce((a, f) => {
+      return [...a, ...glob.sync(f)];
+    }, []);
+
+    const bundler = new Bundler(['./src/html.htl'], myoptions);
+
+    const bundle = bundler.bundle().then(r => console.log);
   },
 };
