@@ -27,7 +27,7 @@ const DEFAULT_OPTIONS = {
   detailedReport: true,
 };
 
-const DEFAULT_PATTERNS = ["src/*.htl"];
+const DEFAULT_PATTERNS = ['src/*.htl'];
 
 module.exports = {
   command: 'build [files..]',
@@ -37,24 +37,24 @@ module.exports = {
     yargs.option('target', {
       alias: 'o',
       default: '.hlx/build',
-      describe: 'Target directory for compiled JS'
+      describe: 'Target directory for compiled JS',
     })
-    .option('no-cache', {
-      describe: 'Disable compile cache',
-      default: false,
-      type: 'boolean'
-    })
-    .option('minify', {
-      describe: 'Minify JS',
-      default: false,
-      type: 'boolean'
-    })
-    .positional('files', {
-      describe: 'The template files to compile',
-      default: DEFAULT_PATTERNS,
-      type: 'string'
-    })
-    yargs.help()
+      .option('no-cache', {
+        describe: 'Disable compile cache',
+        default: false,
+        type: 'boolean',
+      })
+      .option('minify', {
+        describe: 'Minify JS',
+        default: false,
+        type: 'boolean',
+      })
+      .positional('files', {
+        describe: 'The template files to compile',
+        default: DEFAULT_PATTERNS,
+        type: 'string',
+      });
+    yargs.help();
   },
   handler: (argv) => {
     // override default options with command line arguments
@@ -63,12 +63,10 @@ module.exports = {
       cache: argv.cache,
       minify: argv.minify,
       outDir: argv.target,
-    }
+    };
 
     // expand patterns from command line arguments
-    const myfiles = argv.files.reduce((a, f) => {
-      return [...a, ...glob.sync(f)];
-    }, []);
+    const myfiles = argv.files.reduce((a, f) => [...a, ...glob.sync(f)], []);
 
     const bundler = new Bundler(['./src/html.htl'], myoptions);
 
