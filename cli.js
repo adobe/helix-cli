@@ -15,11 +15,12 @@
 'use strict';
 
 const yargs = require('yargs');
-
+/* eslint-disable no-unused-expressions */
 yargs.usage('hlx <cmd> [args]')
   .command(require('./src/init.js'))
   .command(require('./src/build.js'))
   .command(require('./src/deploy.js'))
   .command(require('./src/perf.js'))
   .demandCommand()
-  .help();
+  .help()
+  .argv;
