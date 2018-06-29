@@ -104,7 +104,7 @@ const utils = {
   fetchPre(ctx) {
     // TODO move to proper template selection
     // eslint-disable-next-line no-nested-ternary
-    ctx.templateName = ctx.resource.meta && ctx.resource.meta.template ? ctx.resource.meta.template : (ctx.path.indexOf('SUMMARY') !== -1 ? 'nav' : 'default');
+    ctx.templateName = ctx.resource.meta && ctx.resource.meta.template ? ctx.resource.meta.template : 'default';
     const uri = `${ctx.strainConfig.urls.code.raw}/src/${ctx.templateName}.pre.js`;
     return utils.fetch(uri).then((data) => {
       fs.mkdirpSync(ctx.strainConfig.cache);
@@ -156,7 +156,7 @@ const utils = {
   fetchTemplate(ctx) {
     // TODO move to proper template selection
     // eslint-disable-next-line no-nested-ternary
-    ctx.templateName = ctx.resource.meta && ctx.resource.meta.template ? ctx.resource.meta.template : (ctx.path.indexOf('SUMMARY') !== -1 ? 'nav' : 'default');
+    ctx.templateName = ctx.resource.meta && ctx.resource.meta.template ? ctx.resource.meta.template : 'default';
     const uri = `${ctx.strainConfig.urls.code.raw}/src/${ctx.templateName}.htl`;
 
     return utils.fetch(uri).then((data) => {
