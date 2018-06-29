@@ -68,7 +68,7 @@ module.exports = {
     // expand patterns from command line arguments
     const myfiles = argv.files.reduce((a, f) => [...a, ...glob.sync(f)], []);
 
-    const bundler = new Bundler(['./src/html.htl'], myoptions);
+    const bundler = new Bundler(myfiles, myoptions);
 
     const bundle = bundler.bundle().then(r => console.log);
   },
