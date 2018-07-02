@@ -82,7 +82,7 @@ $ hlx build
 
 ```bash
 # In <my-cool-project>
-$ hlx text
+$ hlx test
 ```
 
 ## (Optional) Deploy to Adobe I/O Runtime
