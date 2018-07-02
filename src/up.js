@@ -38,11 +38,10 @@ module.exports = {
 
     const bundler = new Bundler(myfiles, myoptions);
 
-    bundler.bundle();
-
     const project = new HelixProject();
-    project.init().then(e => project.start());
 
-    // TODO: start petridish
+    bundler.bundle()
+      .then(() => project.init())
+      .then(() => project.start());
   },
 };
