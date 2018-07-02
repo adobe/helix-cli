@@ -22,6 +22,7 @@
   "homepage": "https://github.com/adobe/project-helix#readme",
   "dependencies": {
     "@adobe/parcel-plugin-htl": "^0.1.1-SNAPSHOT.60",
+    "@adobe/petridish": "^1.0.1",
     "chalk": "^2.4.1",
     "fs-extra": "^6.0.1",
     "glob": "^7.1.2",

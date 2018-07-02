@@ -11,6 +11,11 @@ $ cd ../git-server && npm install && npm link
 $ cd ../strainconfig && npm install && npm link
 $ cd ../petridish && npm link @adobe/md2json && npm link @adobe/strainconfig && npm link @adobe/git-server && npm install && npm link
 $ cd ../helix-cli && npm link @adobe/md2json && npm link @adobe/strainconfig && npm link @adobe/git-server && npm link @adobe/petridish && npm install
+#
+# make this local module available on the path:
+$ cd ../helix-cli && npm link
+$ hlx --help
+
 ```
 
 ## Example Projects
