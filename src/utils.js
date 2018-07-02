@@ -11,12 +11,13 @@
  */
 const fs = require('fs-extra');
 const util = require('util');
+const path = require('path');
+const logger = require('./logger.js');
 
 const stat = util.promisify(fs.stat);
 const readFile = util.promisify(fs.readFile);
 const request = require('request-promise');
 
-const { Compiler } = require('@adobe/htlengine');
 const { converter } = require('@adobe/md2json');
 
 const utils = {
@@ -30,8 +31,7 @@ const utils = {
     return stat(filename)
       .then((stats) => {
         if (!stats.isFile()) {
-          // eslint-disable-next-line no-console
-          console.log('resolved path no regular file: %j', stats);
+          logger.debug('resolved path no regular file: %j', stats);
           return Promise.reject(new Error('no regular file'));
         }
         return filename;
@@ -44,8 +44,7 @@ const utils = {
    * @returns {*} The requested content
    */
   fetch(uri) {
-    // eslint-disable-next-line no-console
-    console.debug('Fetching...', uri);
+    logger.debug(`fetching content from ${uri}`);
     if (uri.charAt(0) === '/') {
       return readFile(uri);
     }
@@ -62,7 +61,7 @@ const utils = {
    * @return {Promise} A promise that resolves to the request context.
    */
   fetchContent(ctx) {
-    const uri = ctx.strainConfig.urls.content.raw + ctx.resourcePath + (ctx.extension === 'html' ? '.md' : `.${ctx.extension}`);
+    const uri = ctx.config.contentRepo.raw + ctx.resourcePath + (ctx.extension === 'html' ? '.md' : `.${ctx.extension}`);
 
     return utils.fetch(uri).then((data) => {
       ctx.content = Buffer.from(data, 'utf8');
@@ -97,89 +96,24 @@ const utils = {
   },
 
   /**
-   * Fetches the code based on the template and stores it in the context.
+   * Resolves the location of the template based on the metadata
    * @param {RequestContext} ctx Context
    * @return {Promise} A promise that resolves to the request context.
    */
-  fetchPre(ctx) {
+  resolveTemplate(ctx) {
     // TODO move to proper template selection
     // eslint-disable-next-line no-nested-ternary
-    ctx.templateName = ctx.resource.meta && ctx.resource.meta.template ? ctx.resource.meta.template : 'default';
-    const uri = `${ctx.strainConfig.urls.code.raw}/src/${ctx.templateName}.pre.js`;
-    return utils.fetch(uri).then((data) => {
-      fs.mkdirpSync(ctx.strainConfig.cache);
+    ctx.templateName = ctx.resource.meta && ctx.resource.meta.template ? ctx.resource.meta.template : (ctx.path.indexOf('SUMMARY') !== -1 ? 'nav' : 'default');
 
-      const fileName = `${ctx.strainConfig.cache}/${ctx.templateName}.pre.js`;
-      fs.writeFileSync(fileName, data.toString());
-
-      ctx.precode = fileName;
+    const templatePath = path.resolve(ctx.config.buildDir, `${ctx.templateName}.js`);
+    return utils.isFile(templatePath).then(() => {
+      logger.debug(`found template at ${templatePath}`);
+      ctx.templatePath = templatePath;
       return ctx;
-    }).catch(() => {
-      // eslint-disable-next-line no-console
-      console.debug(`No pre file found for template '${ctx.templateName}'`);
+    }).catch((error) => {
+      logger.error('Error while loading template', error);
       return ctx;
     });
-  },
-
-  /**
-   * Executes the template and resolves with the content.
-   * @param {RequestContext} ctx Context
-   * @return {Promise} A promise that resolves to generated output.
-   */
-  executePre(ctx) {
-    if (ctx.precode) {
-      try {
-        delete require.cache[require.resolve(ctx.precode)];
-        // todo: consider flushing module cache
-        // eslint-disable-next-line import/no-dynamic-require,global-require
-        const mod = require(ctx.precode);
-        return mod.main(ctx).catch((error) => {
-          // eslint-disable-next-line no-console
-          console.error('Error while executing pre file', error);
-          return ctx;
-        });
-      } catch (error) {
-        // eslint-disable-next-line no-console
-        console.error('Error while trying to execute pre file', error);
-        return ctx;
-      }
-    }
-    // no pre file found.
-    return ctx;
-  },
-
-  /**
-   * Fetches the code based on the template and stores it in the context.
-   * @param {RequestContext} ctx Context
-   * @return {Promise} A promise that resolves to the request context.
-   */
-  fetchTemplate(ctx) {
-    // TODO move to proper template selection
-    // eslint-disable-next-line no-nested-ternary
-    ctx.templateName = ctx.resource.meta && ctx.resource.meta.template ? ctx.resource.meta.template : 'default';
-    const uri = `${ctx.strainConfig.urls.code.raw}/src/${ctx.templateName}.htl`;
-
-    return utils.fetch(uri).then((data) => {
-      ctx.code = data.toString();
-      return ctx;
-    });
-  },
-
-  /**
-   * Compiles the template and stores the compiled filepath in the context
-   * @param {RequestContext} ctx Context
-   * @return {Promise} A promise that resolves to the request context.
-   */
-  compileHtlTemplate(ctx) {
-    // console.log('Compiling ' + options.templatePath);
-    fs.mkdirpSync(ctx.strainConfig.cache);
-    const compiler = new Compiler()
-      .withOutputDirectory(ctx.strainConfig.cache)
-      .includeRuntime(true)
-      .withRuntimeGlobalName('it');
-
-    ctx.compiledTemplate = compiler.compile(ctx.code, `${ctx.templateName}.js`);
-    return ctx;
   },
 
   /**
@@ -188,9 +122,9 @@ const utils = {
    * @return {Promise} A promise that resolves to generated output.
    */
   executeTemplate(ctx) {
-    delete require.cache[require.resolve(ctx.compiledTemplate)];
+    delete require.cache[require.resolve(ctx.templatePath)];
     // eslint-disable-next-line import/no-dynamic-require,global-require
-    const mod = require(ctx.compiledTemplate);
+    const mod = require(ctx.templatePath);
     return Promise.resolve(mod.main(ctx.resource));
   },
 };

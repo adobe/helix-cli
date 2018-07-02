@@ -13,11 +13,11 @@
 const express = require('express');
 const NodeESI = require('nodesi');
 const utils = require('./utils.js');
+const logger = require('./logger.js');
 
 const RequestContext = require('./RequestContext.js');
 
 const PORT = 3000;
-const cfg = require('../config.js');
 
 const app = express();
 const esi = new NodeESI({
@@ -25,17 +25,8 @@ const esi = new NodeESI({
 });
 
 app.get('*', (req, res) => {
-  const ctx = new RequestContext(req, cfg);
+  const ctx = new RequestContext(req, app.locals.cfg);
   if (!ctx.valid) {
-    res.status(404).send();
-    return;
-  }
-
-  // check if strain exists
-  const strain = ctx.strainConfig;
-  if (!strain) {
-    // eslint-disable-next-line no-console
-    console.log('no config found for: %j', ctx.strain);
     res.status(404).send();
     return;
   }
@@ -46,19 +37,15 @@ app.get('*', (req, res) => {
       .then(utils.fetchContent)
       .then(utils.convertContent)
       .then(utils.collectMetadata)
-      .then(utils.fetchPre)
-      .then(utils.executePre)
-      .then(utils.fetchTemplate)
-      .then(utils.compileHtlTemplate)
+      .then(utils.resolveTemplate)
       .then(utils.executeTemplate)
       .then((result) => {
-        esi.process(result.body).then((body) => {
+        esi.process(result.response.body).then((body) => {
           res.send(body);
         });
       })
       .catch((err) => {
-        // eslint-disable-next-line no-console
-        console.error('Error while delivering resource', err);
+        logger.error('Error while delivering resource', err);
         res.status(404).send();
       });
   } else {
@@ -72,24 +59,23 @@ app.get('*', (req, res) => {
         res.type(ctx.extension);
         res.send(ctx.path.startsWith('/dist') ? result.code : result.content);
       }).catch((err) => {
-      // eslint-disable-next-line no-console
-        console.error('Error while delivering resource', err);
+        logger.error('Error while delivering resource', err);
         res.status(404).send();
       });
   }
 });
 
-app.listen(PORT, () => {
-  // eslint-disable-next-line no-console
-  console.log(`Petridish server listening on port ${PORT}.\nhttp://localhost:${PORT}/demo/index.html`);
-});
+async function start(hlxProject) {
+  app.locals.cfg = hlxProject;
+  return new Promise((resolve) => {
+    app.listen(PORT, () => {
+      logger.info(`Petridish server listening on port ${PORT}.`);
+      logger.info(`Open soupdemo at http://localhost:${PORT}/index.html`);
+      resolve(PORT);
+    });
+  });
+}
 
-process.on('uncaughtException', (err) => {
-  // eslint-disable-next-line no-console
-  console.error('Encountered uncaught exception at process level', err);
-});
-
-process.on('unhandledRejection', (err) => {
-  // eslint-disable-next-line no-console
-  console.error('Encountered unhandled promise rejection at process level', err);
-});
+module.exports = {
+  start,
+};

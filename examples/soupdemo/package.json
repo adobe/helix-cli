@@ -1,0 +1,15 @@
+{
+  "name": "soupdemo",
+  "description": "Demo repository for helix",
+  "version": "1.0.0",
+  "scripts": {
+    "start": "node ../../src/init.js",
+    "build": "parcel build --log-level 3 --no-minify --target node --out-dir .hlx/build --no-source-maps src/*.htl",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "license": "Apache-2.0",
+  "devDependencies": {
+    "@adobe/parcel-plugin-htl": "^0.1.1-SNAPSHOT.58",
+    "parcel": "^1.9.3"
+  }
+}

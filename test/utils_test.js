@@ -18,18 +18,14 @@ const RequestContext = require('../src/RequestContext.js');
 describe('Utils Test', () => {
   describe('Request context', () => {
     const TESTS = [
-      { url: '/', valid: false },
       {
-        url: '/strain0', valid: true, strain: 'strain0', path: '/', resourcePath: '/index',
+        url: '/', valid: true, path: '/', resourcePath: '/index',
       },
       {
-        url: '/strain0/', valid: true, strain: 'strain0', path: '/', resourcePath: '/index',
+        url: '/content', valid: true, path: '/content', resourcePath: '/content',
       },
       {
-        url: '/strain0/content', valid: true, strain: 'strain0', path: '/content', resourcePath: '/content',
-      },
-      {
-        url: '/strain0/content/index.html', valid: true, strain: 'strain0', path: '/content/index.html', resourcePath: '/content/index',
+        url: '/content/index.html', valid: true, path: '/content/index.html', resourcePath: '/content/index',
       },
     ];
 
@@ -41,7 +37,6 @@ describe('Utils Test', () => {
         const p = new RequestContext(mockReq);
         assert.equal(p.valid, t.valid, 'valid');
         if (p.valid) {
-          assert.equal(p.strain, t.strain, 'strain');
           assert.equal(p.path, t.path, 'path');
           assert.equal(p.resourcePath, t.resourcePath, 'resourcePath');
         }

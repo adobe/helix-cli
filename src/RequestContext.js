@@ -18,45 +18,32 @@ module.exports = class RequestContext {
   constructor(req, cfg) {
     const { url } = req;
     this._cfg = cfg;
-
-    // regex for:   /<strain>/<path>
-    const matcher = /([^/]+)(.*)/;
-    const match = matcher.exec(url);
     this._url = url;
-    if (!match) {
-      this._valid = false;
-    } else {
-      this._valid = true;
-      this._strain = match[1]; // eslint-disable-line prefer-destructuring
-      this._path = match[2] || '/';
+    this._path = url || '/';
 
-      let relPath = this._path;
-      const lastSlash = relPath.lastIndexOf('/');
-      const lastDot = relPath.lastIndexOf('.');
-      if (lastDot > lastSlash) {
-        relPath = relPath.substring(0, lastDot);
-        const queryParamIndex = this._path.lastIndexOf('?');
-        this._extension = this._path.substring(
-          lastDot + 1,
-          (queryParamIndex !== -1 ? queryParamIndex : this._path.length),
-        );
-      } else if (lastSlash === relPath.length - 1) {
-        relPath += 'index';
-      }
-      this._resourcePath = relPath;
+    let relPath = this._path;
+    const lastSlash = relPath.lastIndexOf('/');
+    const lastDot = relPath.lastIndexOf('.');
+    if (lastDot > lastSlash) {
+      relPath = relPath.substring(0, lastDot);
+      const queryParamIndex = this._path.lastIndexOf('?');
+      this._extension = this._path.substring(
+        lastDot + 1,
+        (queryParamIndex !== -1 ? queryParamIndex : this._path.length),
+      );
+    } else if (lastSlash === relPath.length - 1) {
+      relPath += 'index';
     }
+    this._resourcePath = relPath;
   }
 
   get url() {
     return this._url;
   }
 
+  // eslint-disable-next-line class-methods-use-this
   get valid() {
-    return this._valid;
-  }
-
-  get strain() {
-    return this._strain;
+    return true;
   }
 
   get path() {
@@ -65,10 +52,6 @@ module.exports = class RequestContext {
 
   get config() {
     return this._cfg;
-  }
-
-  get strainConfig() {
-    return this._cfg.strains[this._strain];
   }
 
   get resourcePath() {
