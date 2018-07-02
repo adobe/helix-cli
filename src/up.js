@@ -9,19 +9,17 @@
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-
-'use strict';
-
 /* eslint no-console: off */
 
 const Bundler = require('parcel-bundler');
 const glob = require('glob');
 const { DEFAULT_OPTIONS, defaultArgs } = require('./defaults.js');
+const HelixProject = require('@adobe/petridish/src/HelixProject.js');
 
 module.exports = {
-  command: 'build [files..]',
-  aliases: ['b'],
-  desc: 'Compile the template functions and build package',
+  command: 'up',
+  aliases: 'u',
+  description: 'Run a Helix development server',
   builder: (yargs) => {
     defaultArgs(yargs).help();
   },
@@ -29,7 +27,7 @@ module.exports = {
     // override default options with command line arguments
     const myoptions = {
       ...DEFAULT_OPTIONS,
-      watch: false,
+      watch: true,
       cache: argv.cache,
       minify: argv.minify,
       outDir: argv.target,
@@ -41,5 +39,10 @@ module.exports = {
     const bundler = new Bundler(myfiles, myoptions);
 
     bundler.bundle();
+
+    const project = new HelixProject();
+    project.init().then(e => project.start());
+
+    // TODO: start petridish
   },
 };
