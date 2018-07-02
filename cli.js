@@ -17,6 +17,7 @@
 const yargs = require('yargs');
 /* eslint-disable no-unused-expressions */
 yargs.usage('hlx <cmd> [args]')
+  .env('HLX')
   .command(require('./src/init.js'))
   .command(require('./src/up.js'))
   .command(require('./src/build.js'))

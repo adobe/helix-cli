@@ -1,21 +1,22 @@
-# Helix Command Line
+# Helix Command Line Interface (`hlx`)
 
-`hlx` (short for Helix) is a command line for developing websites that use Project Helix.
+The Helix Command Line Interface allows web developers to create, develop, and deploy digital experiences using Project Helix
 
 ## Installation
 
-```bash
-# npm link the various modules first
-$ cd ../md2json && npm install && npm link
-$ cd ../git-server && npm install && npm link
-$ cd ../strainconfig && npm install && npm link
-$ cd ../petridish && npm link @adobe/md2json && npm link @adobe/strainconfig && npm link @adobe/git-server && npm install && npm link
-$ cd ../helix-cli && npm link @adobe/md2json && npm link @adobe/strainconfig && npm link @adobe/git-server && npm link @adobe/petridish && npm install
-#
-# make this local module available on the path:
-$ cd ../helix-cli && npm link
-$ hlx --help
+For now, manual installation only:
 
+```bash
+$ git clone git@github.com:adobe/project-helix.git
+$ cd prototypes/helix-cli
+$ npm install
+$ npm link
+```
+
+In the future, this will become easier, boiling down to:
+
+```bash
+$ npm install -g @adobe/helix-cli
 ```
 
 ## Example Projects
@@ -35,3 +36,60 @@ $ cd test/integration
 $ git init &&  git add -A && git commit -m "inital commit"
 $ hlx up
 ```
+
+## Quick Start
+
+```bash
+$ hlx --help
+hlx <cmd> [args]
+
+Commands:
+  hlx init <name> [dir]  Initialize the project structure           [aliases: i]
+  hlx build              Compile the template functions and build package
+                                                                    [aliases: b]
+  hlx deploy             Deploy packaged functions to Adobe I/O runtime
+                                                                    [aliases: d]
+  hlx perf               Test performance                           [aliases: p]
+
+Options:
+  --version  Show version number                                       [boolean]
+  --help     Show help                                                 [boolean]
+```
+
+## Setting up a project
+
+```bash
+$ hlx init <my-cool-project>
+```
+
+## Starting development
+
+```bash
+$ cd <my-cool-project>
+$ hlx up
+```
+
+Just change contents in your project directory and reload `http://localhost:3000` to see the results.
+
+## (Optional) Build artifacts
+
+```bash
+# In <my-cool-project>
+$ hlx build
+```
+
+## (Optional) Test functions
+
+```bash
+# In <my-cool-project>
+$ hlx text
+```
+
+## (Optional) Deploy to Adobe I/O Runtime
+
+```bash
+# In <my-cool-project>
+$ hlx deploy --no-auto --namespace <your-namespace> --auth <your-key>
+```
+
+Instead of passing `--auth` as a command line option, you can also set the `HLX_AUTH` environment variable.
