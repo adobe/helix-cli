@@ -26,7 +26,7 @@
     "chalk": "^2.4.1",
     "fs-extra": "^6.0.1",
     "glob": "^7.1.2",
-    "openwhisk": "git@github.com:trieloff/incubator-openwhisk-client-js.git",
+    "openwhisk": "trieloff/incubator-openwhisk-client-js",
     "shelljs": "^0.8.2",
     "parcel-bundler": "^1.9.3",
     "yargs": "^11.0.0"
