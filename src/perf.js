@@ -18,7 +18,6 @@
 
 module.exports = {
   command: 'perf',
-  aliases: ['p'],
   desc: 'Test performance',
   builder: (yargs) => {
     // TODO: define parameters

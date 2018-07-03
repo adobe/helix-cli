@@ -24,7 +24,6 @@ const DIR_PARAM = 'dir';
 
 module.exports = {
   command: `init <${NAME_PARAM}> [${DIR_PARAM}]`,
-  aliases: ['i'],
   desc: 'Initialize the project structure',
   builder: (yargs) => {
     yargs.positional(NAME_PARAM, {

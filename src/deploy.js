@@ -51,7 +51,6 @@ const repo = $
 
 module.exports = {
   command: 'deploy',
-  aliases: ['d'],
   desc: 'Deploy packaged functions to Adobe I/O runtime',
   builder: (yargs) => {
     yargs

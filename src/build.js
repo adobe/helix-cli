@@ -20,7 +20,6 @@ const { DEFAULT_OPTIONS, defaultArgs } = require('./defaults.js');
 
 module.exports = {
   command: 'build [files..]',
-  aliases: ['b'],
   desc: 'Compile the template functions and build package',
   builder: (yargs) => {
     defaultArgs(yargs).help();

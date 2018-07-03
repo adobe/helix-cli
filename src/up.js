@@ -18,7 +18,6 @@ const HelixProject = require('@adobe/petridish/src/HelixProject.js');
 
 module.exports = {
   command: 'up',
-  aliases: 'u',
   description: 'Run a Helix development server',
   builder: (yargs) => {
     defaultArgs(yargs).help();
