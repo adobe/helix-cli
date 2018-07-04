@@ -15,24 +15,38 @@
 const NAME_PARAM = 'name';
 const DIR_PARAM = 'dir';
 
-/* eslint no-console: off */
-/* eslint global-require: off */
+module.exports = function init() {
+  let executor;
 
-module.exports = {
-  command: `init <${NAME_PARAM}> [${DIR_PARAM}]`,
-  desc: 'Initialize the project structure',
-  builder: (yargs) => {
-    yargs.positional(NAME_PARAM, {
-      type: 'string',
-      describe: 'Name of the project to initialize',
-    })
-      .positional(DIR_PARAM, {
-        type: 'string',
-        describe: 'Parent directory of new project',
-        default: '.',
-      });
-  },
-  handler: (argv) => {
-    require('./init.cmd').handler(argv);
-  },
+  return {
+    set executor(value) {
+      executor = value;
+    },
+    command: `init <${NAME_PARAM}> [${DIR_PARAM}]`,
+    desc: 'Initialize the project structure',
+    builder: (yargs) => {
+      yargs
+        .positional(NAME_PARAM, {
+          type: 'string',
+          describe: 'Name of the project to initialize',
+        })
+        .positional(DIR_PARAM, {
+          type: 'string',
+          describe: 'Parent directory of new project',
+          default: '.',
+        });
+    },
+    handler: async (argv) => {
+      if (!executor) {
+        // eslint-disable-next-line global-require
+        const InitCommand = require('./init.cmd'); // lazy load the handler to speed up execution time
+        executor = new InitCommand();
+      }
+
+      await executor
+        .withDirectory(argv.dir)
+        .withName(argv.name)
+        .run();
+    },
+  };
 };

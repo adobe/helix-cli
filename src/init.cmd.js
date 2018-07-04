@@ -13,23 +13,50 @@
 'use strict';
 
 const path = require('path');
-
 const fse = require('fs-extra');
 const chalk = require('chalk');
 
-/* eslint no-console: off */
+/* eslint-disable no-console */
 
-const handler = (argv) => {
-  const projectDir = path.resolve(path.join(argv.dir, argv.name));
-  fse.ensureDir(projectDir)
-    .then(() => {
-      console.log(chalk.green(`Successfully created ${projectDir}`));
-    })
-    .catch((err) => {
-      console.error(chalk.red(err));
-    });
-  // TODO: implement
-  console.log(chalk.green('Init'), argv.name, argv.dir);
-};
+class InitCommand {
+  constructor() {
+    this._name = '';
+    this._dir = process.cwd();
+  }
 
-module.exports.handler = handler;
+  withName(name) {
+    this._name = name;
+    return this;
+  }
+
+  withDirectory(dir) {
+    if (dir) {
+      this._dir = dir;
+    }
+    return this;
+  }
+
+  async run() {
+    if (!this._name) {
+      throw new Error('init needs name.');
+    }
+    if (!this._dir) {
+      throw new Error('init needs directory.');
+    }
+
+    const projectDir = path.resolve(path.join(this._dir, this._name));
+
+    console.log(chalk.green('Init'), this._name, this._dir);
+
+    try {
+      await fse.ensureDir(projectDir);
+    } catch (e) {
+      throw new Error(`Unable to create project directory: ${e}`);
+    }
+
+    // TODO: implement
+    console.log(chalk.green(`Successfully created project in ${projectDir}`));
+  }
+}
+
+module.exports = InitCommand;

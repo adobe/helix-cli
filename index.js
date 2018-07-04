@@ -14,15 +14,6 @@
 
 'use strict';
 
-const yargs = require('yargs');
-/* eslint-disable no-unused-expressions */
-yargs.usage('hlx <cmd> [args]')
-  .env('HLX')
-  .command(require('./src/init.js'))
-  .command(require('./src/up.js'))
-  .command(require('./src/build.js'))
-  .command(require('./src/deploy.js'))
-  .command(require('./src/perf.js'))
-  .demandCommand()
-  .help()
-  .argv;
+const CLI = require('./src/cli.js');
+
+CLI.run(process.argv.slice(2));

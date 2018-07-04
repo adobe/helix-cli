@@ -2,9 +2,9 @@
   "name": "@adobe/helix-cli",
   "version": "0.1.0",
   "description": "Project Helix CLI",
-  "main": "cli.js",
+  "main": "index.js",
   "bin": {
-    "hlx": "./cli.js"
+    "hlx": "./index.js"
   },
   "scripts": {
     "test": "mocha",
