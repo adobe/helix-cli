@@ -39,8 +39,20 @@ module.exports = {
 
     const project = new HelixProject();
 
-    bundler.bundle()
-      .then(() => project.init())
-      .then(() => project.start());
+    bundler.on('buildEnd', () => {
+      if (project.started) {
+        // todo
+        // project.invalidateCache();
+        return;
+      }
+      project.start();
+    });
+
+    project.init().then(() => {
+      bundler.bundle();
+    }).catch((e) => {
+      // todo: use proper logger
+      console.error(`${e}`);
+    });
   },
 };
