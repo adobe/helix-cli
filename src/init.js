@@ -12,15 +12,11 @@
 
 'use strict';
 
-const path = require('path');
-
-const fse = require('fs-extra');
-const chalk = require('chalk');
-
 const NAME_PARAM = 'name';
 const DIR_PARAM = 'dir';
 
 /* eslint no-console: off */
+/* eslint global-require: off */
 
 module.exports = {
   command: `init <${NAME_PARAM}> [${DIR_PARAM}]`,
@@ -37,15 +33,6 @@ module.exports = {
       });
   },
   handler: (argv) => {
-    const projectDir = path.resolve(path.join(argv.dir, argv.name));
-    fse.ensureDir(projectDir)
-      .then(() => {
-        console.log(chalk.green(`Successfully created ${projectDir}`));
-      })
-      .catch((err) => {
-        console.error(chalk.red(err));
-      });
-    // TODO: implement
-    console.log(chalk.green('Init'), argv.name, argv.dir);
+    require('./init.cmd').handler(argv);
   },
 };

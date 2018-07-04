@@ -13,17 +13,27 @@
 'use strict';
 
 /* eslint no-console: off */
-/* eslint global-require: off */
 
-const { defaultArgs } = require('./defaults.js');
+const Bundler = require('parcel-bundler');
+const glob = require('glob');
+const { DEFAULT_OPTIONS } = require('./defaults.js');
 
-module.exports = {
-  command: 'build [files..]',
-  desc: 'Compile the template functions and build package',
-  builder: (yargs) => {
-    defaultArgs(yargs).help();
-  },
-  handler: (argv) => {
-    require('./build.cmd').handler(argv);
-  },
+const handler = (argv) => {
+  // override default options with command line arguments
+  const myoptions = {
+    ...DEFAULT_OPTIONS,
+    watch: false,
+    cache: argv.cache,
+    minify: argv.minify,
+    outDir: argv.target,
+  };
+
+  // expand patterns from command line arguments
+  const myfiles = argv.files.reduce((a, f) => [...a, ...glob.sync(f)], []);
+
+  const bundler = new Bundler(myfiles, myoptions);
+
+  bundler.bundle();
 };
+
+module.exports.handler = handler;

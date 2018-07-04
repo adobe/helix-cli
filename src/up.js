@@ -9,12 +9,11 @@
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-/* eslint no-console: off */
 
-const Bundler = require('parcel-bundler');
-const glob = require('glob');
-const { DEFAULT_OPTIONS, defaultArgs } = require('./defaults.js');
-const HelixProject = require('@adobe/petridish/src/HelixProject.js');
+/* eslint no-console: off */
+/* eslint global-require: off */
+
+const { defaultArgs } = require('./defaults.js');
 
 module.exports = {
   command: 'up',
@@ -23,36 +22,6 @@ module.exports = {
     defaultArgs(yargs).help();
   },
   handler: (argv) => {
-    // override default options with command line arguments
-    const myoptions = {
-      ...DEFAULT_OPTIONS,
-      watch: true,
-      cache: argv.cache,
-      minify: argv.minify,
-      outDir: argv.target,
-    };
-
-    // expand patterns from command line arguments
-    const myfiles = argv.files.reduce((a, f) => [...a, ...glob.sync(f)], []);
-
-    const bundler = new Bundler(myfiles, myoptions);
-
-    const project = new HelixProject();
-
-    bundler.on('buildEnd', () => {
-      if (project.started) {
-        // todo
-        // project.invalidateCache();
-        return;
-      }
-      project.start();
-    });
-
-    project.init().then(() => {
-      bundler.bundle();
-    }).catch((e) => {
-      // todo: use proper logger
-      console.error(`${e}`);
-    });
+    require('./up.cmd').handler(argv);
   },
 };

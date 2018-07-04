@@ -12,18 +12,24 @@
 
 'use strict';
 
+const path = require('path');
+
+const fse = require('fs-extra');
+const chalk = require('chalk');
+
 /* eslint no-console: off */
-/* eslint global-require: off */
 
-const { defaultArgs } = require('./defaults.js');
-
-module.exports = {
-  command: 'build [files..]',
-  desc: 'Compile the template functions and build package',
-  builder: (yargs) => {
-    defaultArgs(yargs).help();
-  },
-  handler: (argv) => {
-    require('./build.cmd').handler(argv);
-  },
+const handler = (argv) => {
+  const projectDir = path.resolve(path.join(argv.dir, argv.name));
+  fse.ensureDir(projectDir)
+    .then(() => {
+      console.log(chalk.green(`Successfully created ${projectDir}`));
+    })
+    .catch((err) => {
+      console.error(chalk.red(err));
+    });
+  // TODO: implement
+  console.log(chalk.green('Init'), argv.name, argv.dir);
 };
+
+module.exports.handler = handler;
