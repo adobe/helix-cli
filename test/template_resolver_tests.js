@@ -23,13 +23,16 @@ describe('Template Resolver', () => {
   describe('Simple', () => {
     const TESTS = [
       {
-        url: '/', template: 'default.html', script: 'default.html.js',
+        url: '/', template: 'html', script: 'html.js',
       },
       {
-        url: '/index.html', template: 'default.html', script: 'default.html.js',
+        url: '/index.html', template: 'html', script: 'html.js',
       },
       {
-        url: '/index.print.html', template: 'print.html', script: 'print.html.js',
+        url: '/index.print.html', template: 'print_html', script: 'print_html.js',
+      },
+      {
+        url: '/homepage.txt', template: 'txt', script: 'txt.js',
       },
     ];
 

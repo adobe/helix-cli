@@ -22,7 +22,8 @@ const utils = require('./utils');
  */
 const simple = (ctx) => {
   // TODO: be more sophisticated and also check what templates are available for sensitive fallbacks
-  const template = `${ctx.selector || 'default'}.${ctx.extension || 'html'}`;
+  let template = ctx.selector ? `${ctx.selector}_` : '';
+  template += `${ctx.extension || 'html'}`;
   logger.debug(`resolved ${ctx.path} -> ${template}`);
   return template;
 };
