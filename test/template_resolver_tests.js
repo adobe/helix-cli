@@ -14,14 +14,13 @@
 
 const assert = require('assert');
 const path = require('path');
-const { TemplateResolver, Plugins: TemplateResolverPlugins, } = require('../src/template_resolver');
+const { TemplateResolver, Plugins: TemplateResolverPlugins } = require('../src/template_resolver');
 const RequestContext = require('../src/RequestContext.js');
 
 const BUILD_DIR = path.resolve(__dirname, 'specs', 'builddir');
 
 describe('Template Resolver', () => {
   describe('Simple', () => {
-
     const TESTS = [
       {
         url: '/', template: 'default.html', script: 'default.html.js',
@@ -62,7 +61,5 @@ describe('Template Resolver', () => {
         }).catch(done);
       });
     });
-
   });
-
 });

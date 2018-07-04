@@ -40,7 +40,7 @@ function executeTemplate(ctx) {
     ref: 'master',
     path: `${ctx.resourcePath.substr(1)}.md`, // either pipeline or git-server don't like the double slash here
   }, {
-    REPO_RAW_ROOT: ctx.config.contentRepo.rawRoot + '/', // the pipeline needs the final slash here
+    REPO_RAW_ROOT: `${ctx.config.contentRepo.rawRoot}/`, // the pipeline needs the final slash here
   }, logger));
 }
 
