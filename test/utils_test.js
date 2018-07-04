@@ -19,13 +19,16 @@ describe('Utils Test', () => {
   describe('Request context', () => {
     const TESTS = [
       {
-        url: '/', valid: true, path: '/', resourcePath: '/index',
+        url: '/', valid: true, path: '/', resourcePath: '/index', selector: '', extension: '',
       },
       {
-        url: '/content', valid: true, path: '/content', resourcePath: '/content',
+        url: '/content', valid: true, path: '/content', resourcePath: '/content', selector: '', extension: '',
       },
       {
-        url: '/content/index.html', valid: true, path: '/content/index.html', resourcePath: '/content/index',
+        url: '/content/index.html', valid: true, path: '/content/index.html', resourcePath: '/content/index', selector: '', extension: 'html',
+      },
+      {
+        url: '/content/index.foo.html', valid: true, path: '/content/index.foo.html', resourcePath: '/content/index', selector: 'foo', extension: 'html',
       },
     ];
 
@@ -39,6 +42,8 @@ describe('Utils Test', () => {
         if (p.valid) {
           assert.equal(p.path, t.path, 'path');
           assert.equal(p.resourcePath, t.resourcePath, 'resourcePath');
+          assert.equal(p.selector, t.selector, 'selector');
+          assert.equal(p.extension, t.extension, 'extension');
         }
       });
     });

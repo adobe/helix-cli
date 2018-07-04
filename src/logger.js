@@ -56,4 +56,5 @@ module.exports = {
   info: (...args) => logger.info(...args),
   warn: (...args) => logger.warn(...args),
   error: (...args) => logger.error(...args),
+  silly: (...args) => logger.silly(...args),
 };

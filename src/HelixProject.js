@@ -97,6 +97,7 @@ class HelixProject {
     this._needLocalServer = false;
     this._buildDir = '';
     this._contentRepo = '';
+    this._httpPort = -1;
   }
 
   withCwd(cwd) {
@@ -118,6 +119,11 @@ class HelixProject {
 
   get contentRepo() {
     return this._contentRepo;
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  get started() {
+    return this._httpPort !== -1;
   }
 
   async loadConfig() {
@@ -199,7 +205,7 @@ class HelixProject {
 
   async startPetridishServer() {
     logger.info('Launching petridish server for development...');
-    await dshServer.start(this);
+    this._httpPort = await dshServer.start(this);
   }
 
   async start() {

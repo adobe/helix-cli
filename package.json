@@ -9,8 +9,6 @@
         "lint": "./node_modules/.bin/eslint ."
     },
     "dependencies": {
-        "@adobe/htlengine": "1.0.1-SNAPSHOT.6",
-        "@adobe/md2json": "^0.0.2",
         "@adobe/strainconfig": "^0.0.1",
         "@adobe/git-server": "^0.0.1",
         "colors": "^1.3.0",

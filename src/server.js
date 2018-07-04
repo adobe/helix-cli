@@ -16,6 +16,7 @@ const utils = require('./utils.js');
 const logger = require('./logger.js');
 
 const RequestContext = require('./RequestContext.js');
+const { TemplateResolver, Plugins: TemplateResolverPlugins } = require('../src/template_resolver');
 
 const PORT = 3000;
 
@@ -23,6 +24,25 @@ const app = express();
 const esi = new NodeESI({
   baseUrl: `http://localhost:${PORT}`,
 });
+
+/**
+ * Executes the template and resolves with the content.
+ * @param {RequestContext} ctx Context
+ * @return {Promise} A promise that resolves to generated output.
+ */
+function executeTemplate(ctx) {
+  delete require.cache[require.resolve(ctx.templatePath)];
+  // eslint-disable-next-line import/no-dynamic-require,global-require
+  const mod = require(ctx.templatePath);
+  return Promise.resolve(mod.main({
+    owner: 'helix',
+    repo: 'content',
+    ref: 'master',
+    path: `${ctx.resourcePath.substr(1)}.md`, // either pipeline or git-server don't like the double slash here
+  }, {
+    REPO_RAW_ROOT: ctx.config.contentRepo.rawRoot + '/', // the pipeline needs the final slash here
+  }, logger));
+}
 
 app.get('*', (req, res) => {
   const ctx = new RequestContext(req, app.locals.cfg);
@@ -34,18 +54,15 @@ app.get('*', (req, res) => {
   if (ctx.extension === 'html' || ctx.extension === 'md') {
     // md files to be transformed
     Promise.resolve(ctx)
-      .then(utils.fetchContent)
-      .then(utils.convertContent)
-      .then(utils.collectMetadata)
-      .then(utils.resolveTemplate)
-      .then(utils.executeTemplate)
+      .then(app.locals.templateResolver.resolve.bind(app.locals.templateResolver))
+      .then(executeTemplate)
       .then((result) => {
         esi.process(result.response.body).then((body) => {
           res.send(body);
         });
       })
       .catch((err) => {
-        logger.error('Error while delivering resource', err);
+        logger.error(`Error while delivering resource: ${err.stack || err}`);
         res.status(404).send();
       });
   } else {
@@ -59,7 +76,7 @@ app.get('*', (req, res) => {
         res.type(ctx.extension);
         res.send(ctx.path.startsWith('/dist') ? result.code : result.content);
       }).catch((err) => {
-        logger.error('Error while delivering resource', err);
+        logger.error(`Error while delivering resource: ${err.stack || err}`);
         res.status(404).send();
       });
   }
@@ -67,6 +84,10 @@ app.get('*', (req, res) => {
 
 async function start(hlxProject) {
   app.locals.cfg = hlxProject;
+
+  // todo: make configurable
+  app.locals.templateResolver = new TemplateResolver().with(TemplateResolverPlugins.simple);
+
   return new Promise((resolve) => {
     app.listen(PORT, () => {
       logger.info(`Petridish server listening on port ${PORT}.`);

@@ -20,6 +20,8 @@ module.exports = class RequestContext {
     this._cfg = cfg;
     this._url = url;
     this._path = url || '/';
+    this._selector = '';
+    this._extension = '';
 
     let relPath = this._path;
     const lastSlash = relPath.lastIndexOf('/');
@@ -31,6 +33,12 @@ module.exports = class RequestContext {
         lastDot + 1,
         (queryParamIndex !== -1 ? queryParamIndex : this._path.length),
       );
+      // check for selector
+      const selDot = relPath.lastIndexOf('.');
+      if (selDot > lastSlash) {
+        this._selector = relPath.substring(selDot + 1);
+        relPath = relPath.substring(0, selDot);
+      }
     } else if (lastSlash === relPath.length - 1) {
       relPath += 'index';
     }
@@ -60,5 +68,9 @@ module.exports = class RequestContext {
 
   get extension() {
     return this._extension;
+  }
+
+  get selector() {
+    return this._selector;
   }
 };
