@@ -32,7 +32,7 @@ jobs:
         - run: mkdir junit
         - run:
             name: Running Tests
-            command: npx mocha test --reporter mocha-junit-reporter
+            command: npx mocha --reporter mocha-junit-reporter
             working_directory: prototypes/helix-cli
             environment:
                 MOCHA_FILE: junit/test-results.xml
