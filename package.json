@@ -33,12 +33,14 @@
     "yargs": "^11.0.0"
   },
   "devDependencies": {
+    "codecov": "^3.0.2",
     "eslint": "^4.19.1",
     "eslint-config-airbnb": "^16.1.0",
     "eslint-plugin-header": "^1.2.0",
     "eslint-plugin-import": "^2.12.0",
     "eslint-plugin-jsx-a11y": "^6.0.3",
     "eslint-plugin-react": "^7.9.1",
+    "istanbul": "^1.1.0-alpha.1",
     "mocha": "^5.2.0",
     "mocha-junit-reporter": "^1.17.0",
     "npm-snapshot": "^1.0.3",
