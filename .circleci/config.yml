@@ -37,7 +37,7 @@ jobs:
           command: git config --global user.email "you@example.com" && git config --global user.name "Your Name"
       - run:
           name: Running Tests
-          command: ./node_modules/.bin/mocha test --reporter mocha-junit-reporter
+          command: npx mocha --reporter mocha-junit-reporter
           environment:
             MOCHA_FILE: junit/test-results.xml
           when: always
