@@ -1,0 +1,48 @@
+version: 2
+jobs:
+  build:
+    docker:
+      # specify the version you desire here
+      # using the clojurescript image because it has node, java, antlr and the openwhisk tools
+      - image: circleci/node:8
+        environment:
+            NPM_CONFIG_PREFIX: "~/.npm-global"
+
+    working_directory: ~/repo
+
+    steps:
+      - checkout
+
+      # Download and cache dependencies
+      - restore_cache:
+          keys:
+            - v2-dependencies-{{ checksum "package-lock.json" }}
+      - run:
+          name: Set up global NPM
+          command: mkdir ~/.npm-global
+
+      - run: 
+          name: Install Dependencies
+          command: npm install
+
+      - save_cache:
+          paths:
+            - node_modules
+          key: v2-dependencies-{{ checksum "package-lock.json" }}
+
+      # run tests!
+      - run: mkdir junit
+      - run:
+          name: prepare test git user
+          command: git config --global user.email "you@example.com" && git config --global user.name "Your Name"
+      - run:
+          name: Running Tests
+          command: ./node_modules/.bin/mocha test --reporter mocha-junit-reporter
+          environment:
+            MOCHA_FILE: junit/test-results.xml
+          when: always
+
+      - store_test_results:
+          path: junit
+      - store_artifacts:
+          path: junit 
