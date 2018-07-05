@@ -6,10 +6,10 @@
     "main": "src/server.js",
     "license": "Apache-2.0",
     "scripts": {
-      "test": "mocha",
-      "lint": "./node_modules/.bin/eslint .",
-      "snyk-protect": "snyk protect",
-      "prepare": "npm run snyk-protect"
+        "test": "mocha",
+        "lint": "./node_modules/.bin/eslint .",
+        "snyk-protect": "snyk protect",
+        "prepare": "npm run snyk-protect"
     },
     "dependencies": {
         "@adobe/git-server": "0.0.1-SNAPSHOT.6",
@@ -56,5 +56,5 @@
             "node_modules/@adobe/strainconfig/src"
         ]
     },
-"snyk": true
+    "snyk": true
 }
