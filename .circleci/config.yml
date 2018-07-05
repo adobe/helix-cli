@@ -42,6 +42,15 @@ jobs:
             MOCHA_FILE: junit/test-results.xml
           when: always
 
+
+      # get code coverage
+      - run:
+          name: Getting Code Coverage
+          command: npx istanbul cover ./node_modules/mocha/bin/_mocha -- -R spec && npx codecov
+          environment:
+            MOCHA_FILE: junit/test-results.xml
+          when: always
+
       - store_test_results:
           path: junit
       - store_artifacts:
