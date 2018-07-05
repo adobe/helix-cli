@@ -36,7 +36,6 @@ jobs:
         - run:
             name: Running Tests
             command: npx mocha --reporter mocha-junit-reporter
-            working_directory: prototypes/helix-cli
             environment:
                 MOCHA_FILE: junit/test-results.xml
             when: always
