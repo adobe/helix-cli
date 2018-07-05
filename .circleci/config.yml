@@ -1,0 +1,44 @@
+version: 2
+jobs:
+  build:
+    docker:
+      # specify the version you desire here
+      - image: circleci/node:8
+      
+      # Specify service dependencies here if necessary
+      # CircleCI maintains a library of pre-built images
+      # documented at https://circleci.com/docs/2.0/circleci-images/
+      # - image: circleci/mongo:3.4.4
+    working_directory: ~/repo
+
+    steps:
+        - checkout
+
+        # Download and cache dependencies
+        - restore_cache:
+            keys:
+            - v1-dependencies-{{ checksum "package.json" }}
+
+        - run: 
+            name: Installing Dependencies
+            command: npm install 
+
+        - save_cache:
+            paths:
+                - node_modules
+            key: v1-dependencies-{{ checksum "package.json" }}
+            
+            # run tests!
+        - run: mkdir junit
+        - run:
+            name: Running Tests
+            command: npx mocha test --reporter mocha-junit-reporter
+            working_directory: prototypes/helix-cli
+            environment:
+                MOCHA_FILE: junit/test-results.xml
+            when: always
+
+        - store_test_results:
+            path: prototypes/helix-cli/junit
+        - store_artifacts:
+            path: prototypes/helix-cli/junit 
