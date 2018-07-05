@@ -8,10 +8,7 @@ Setup
 
 ```
 # npm link the various modules first
-$ cd ../openwhisk-loggly-wrapper && npm install
-$ cd ../md2json && npm install && npm link
-$ cd ../git-server && npm install && npm link
-$ cd ../petridish && npm link @adobe/md2json && npm link @adobe/git-server && npm install
+$ npm install
 
 $ cd examples/soupdemo
 $ ./setup.sh
