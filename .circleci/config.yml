@@ -31,6 +31,9 @@ jobs:
             # run tests!
         - run: mkdir junit
         - run:
+            name: Lint
+            command: npm run lint
+        - run:
             name: Running Tests
             command: npx mocha --reporter mocha-junit-reporter
             working_directory: prototypes/helix-cli
