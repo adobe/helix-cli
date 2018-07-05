@@ -2,6 +2,7 @@
     "name": "@adobe/petridish",
     "version": "1.0.1",
     "description": "Helix Testing Environment",
+    "repository": "https://github.com/adobe/petridish",
     "main": "src/server.js",
     "license": "Apache-2.0",
     "scripts": {
