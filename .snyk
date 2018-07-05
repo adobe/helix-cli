@@ -1,0 +1,62 @@
+# Snyk (https://snyk.io) policy file, patches or ignores known vulnerabilities.
+version: v1.12.0
+ignore: {}
+# patches apply the minimum changes required to fix a vulnerability
+patch:
+  'npm:hoek:20180212':
+    - '@adobe/petridish > nodesi > good-guy-http > request > hawk > sntp > hoek':
+        patched: '2018-07-05T15:23:49.272Z'
+    - '@adobe/git-server > nodegit > node-gyp > request > hawk > hoek':
+        patched: '2018-07-05T15:23:49.272Z'
+    - '@adobe/git-server > nodegit > node-gyp > request > hawk > sntp > hoek':
+        patched: '2018-07-05T15:23:49.272Z'
+    - '@adobe/git-server > nodegit > node-gyp > request > hawk > cryptiles > boom > hoek':
+        patched: '2018-07-05T15:23:49.272Z'
+    - '@adobe/git-server > nodegit > node-pre-gyp > hawk > hoek':
+        patched: '2018-07-05T15:23:49.272Z'
+    - '@adobe/git-server > nodegit > node-pre-gyp > hawk > boom > hoek':
+        patched: '2018-07-05T15:23:49.272Z'
+    - '@adobe/git-server > nodegit > node-pre-gyp > hawk > sntp > hoek':
+        patched: '2018-07-05T15:23:49.272Z'
+    - '@adobe/git-server > nodegit > node-pre-gyp > hawk > cryptiles > boom > hoek':
+        patched: '2018-07-05T15:23:49.272Z'
+    - '@adobe/git-server > nodegit > node-pre-gyp > request > hawk > hoek':
+        patched: '2018-07-05T15:23:49.272Z'
+    - '@adobe/git-server > nodegit > node-pre-gyp > request > hawk > boom > hoek':
+        patched: '2018-07-05T15:23:49.272Z'
+    - '@adobe/git-server > nodegit > node-pre-gyp > request > hawk > sntp > hoek':
+        patched: '2018-07-05T15:23:49.272Z'
+    - '@adobe/git-server > nodegit > node-pre-gyp > request > hawk > cryptiles > boom > hoek':
+        patched: '2018-07-05T15:23:49.272Z'
+    - '@adobe/petridish > nodesi > good-guy-http > request > hawk > hoek':
+        patched: '2018-07-05T15:23:49.272Z'
+    - '@adobe/petridish > nodesi > good-guy-http > request > hawk > boom > hoek':
+        patched: '2018-07-05T15:23:49.272Z'
+    - '@adobe/git-server > nodegit > node-gyp > request > hawk > boom > hoek':
+        patched: '2018-07-05T15:23:49.272Z'
+    - '@adobe/petridish > nodesi > good-guy-http > request > hawk > cryptiles > boom > hoek':
+        patched: '2018-07-05T15:23:49.272Z'
+    - '@adobe/petridish > @adobe/git-server > nodegit > node-gyp > request > hawk > hoek':
+        patched: '2018-07-05T15:23:49.272Z'
+    - '@adobe/petridish > @adobe/git-server > nodegit > node-gyp > request > hawk > boom > hoek':
+        patched: '2018-07-05T15:23:49.272Z'
+    - '@adobe/petridish > @adobe/git-server > nodegit > node-gyp > request > hawk > sntp > hoek':
+        patched: '2018-07-05T15:23:49.272Z'
+    - '@adobe/petridish > @adobe/git-server > nodegit > node-gyp > request > hawk > cryptiles > boom > hoek':
+        patched: '2018-07-05T15:23:49.272Z'
+    - '@adobe/petridish > @adobe/git-server > nodegit > node-pre-gyp > hawk > hoek':
+        patched: '2018-07-05T15:23:49.272Z'
+    - '@adobe/petridish > @adobe/git-server > nodegit > node-pre-gyp > hawk > boom > hoek':
+        patched: '2018-07-05T15:23:49.272Z'
+    - '@adobe/petridish > @adobe/git-server > nodegit > node-pre-gyp > hawk > sntp > hoek':
+        patched: '2018-07-05T15:23:49.272Z'
+    - '@adobe/petridish > @adobe/git-server > nodegit > node-pre-gyp > hawk > cryptiles > boom > hoek':
+        patched: '2018-07-05T15:23:49.272Z'
+    - '@adobe/petridish > @adobe/git-server > nodegit > node-pre-gyp > request > hawk > hoek':
+        patched: '2018-07-05T15:23:49.272Z'
+    - '@adobe/petridish > @adobe/git-server > nodegit > node-pre-gyp > request > hawk > boom > hoek':
+        patched: '2018-07-05T15:23:49.272Z'
+    - '@adobe/petridish > @adobe/git-server > nodegit > node-pre-gyp > request > hawk > sntp > hoek':
+        patched: '2018-07-05T15:23:49.272Z'
+    - '@adobe/petridish > @adobe/git-server > nodegit > node-pre-gyp > request > hawk > cryptiles > boom > hoek':
+        patched: '2018-07-05T15:23:49.272Z'
