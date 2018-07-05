@@ -35,9 +35,9 @@ function executeTemplate(ctx) {
   // eslint-disable-next-line import/no-dynamic-require,global-require
   const mod = require(ctx.templatePath);
   return Promise.resolve(mod.main({
-    owner: 'helix',
-    repo: 'content',
-    ref: 'master',
+    owner: ctx.config.contentRepo.owner,
+    repo: ctx.config.contentRepo.repo,
+    ref: ctx.config.contentRepo.ref,
     path: `${ctx.resourcePath.substr(1)}.md`, // either pipeline or git-server don't like the double slash here
   }, {
     REPO_RAW_ROOT: `${ctx.config.contentRepo.rawRoot}/`, // the pipeline needs the final slash here
