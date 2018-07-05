@@ -16,34 +16,36 @@
 
 const yargs = require('yargs');
 
-const commands = {
-  init: require('./init.js')(),
-  up: require('./up.js'),
-  build: require('./build.js'),
-  deploy: require('./deploy.js'),
-  perf: require('./perf.js'),
-};
-
-let failFn;
-
 class CLI {
-  static setCommandExecutor(name, exec) {
-    commands[name].executor = exec;
+  constructor() {
+    this._commands = {
+      init: require('./init.js')(),
+      up: require('./up.js')(),
+      build: require('./build.js')(),
+      deploy: require('./deploy.js')(),
+      perf: require('./perf.js')(),
+    };
+    this._failFn = null;
   }
 
-  static onFail(fn) {
-    failFn = fn;
+  withCommandExecutor(name, exec) {
+    this._commands[name].executor = exec;
+    return this;
   }
 
-  static run(args) {
+  onFail(fn) {
+    this._failFn = fn;
+    return this;
+  }
+
+  run(args) {
     const argv = yargs()
       .env('HLX');
-    Object.values(commands).forEach((cmd) => {
-      argv.command(cmd);
-    });
-    if (failFn) {
+    Object.values(this._commands).forEach(cmd => argv.command(cmd));
+
+    if (this._failFn) {
       argv.exitProcess(false);
-      argv.fail(failFn);
+      argv.fail(this._failFn);
     }
 
     return argv

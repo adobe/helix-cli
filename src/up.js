@@ -15,13 +15,30 @@
 
 const { defaultArgs } = require('./defaults.js');
 
-module.exports = {
-  command: 'up',
-  description: 'Run a Helix development server',
-  builder: (yargs) => {
-    defaultArgs(yargs).help();
-  },
-  handler: (argv) => {
-    require('./up.cmd').handler(argv);
-  },
+module.exports = function up() {
+  let executor;
+  return {
+    set executor(value) {
+      executor = value;
+    },
+    command: 'up [files...]',
+    description: 'Run a Helix development server',
+    builder: (yargs) => {
+      defaultArgs(yargs).help();
+    },
+    handler: async (argv) => {
+      if (!executor) {
+        // eslint-disable-next-line global-require
+        const UpCommand = require('./up.cmd'); // lazy load the handler to speed up execution time
+        executor = new UpCommand();
+      }
+
+      await executor
+        .withCacheEnabled(argv.cache)
+        .withMinifyEnabled(argv.minify)
+        .withTargetDir(argv.target)
+        .withFiles(argv.files)
+        .run();
+    },
+  };
 };

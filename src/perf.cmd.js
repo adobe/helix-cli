@@ -1,5 +1,3 @@
-#!/usr/bin/env node
-
 /*
  * Copyright 2018 Adobe. All rights reserved.
  * This file is licensed to you under the Apache License, Version 2.0 (the "License");
@@ -14,6 +12,16 @@
 
 'use strict';
 
-const CLI = require('./src/cli.js');
+const chalk = require('chalk');
 
-new CLI().run(process.argv.slice(2));
+/* eslint-disable no-console */
+
+class PerfCommand {
+// eslint-disable-next-line class-methods-use-this
+  async run() {
+    // TODO: implement
+    console.log(chalk.green('Performance...'));
+  }
+}
+
+module.exports = PerfCommand;

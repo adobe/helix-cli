@@ -16,38 +16,67 @@ const glob = require('glob');
 const { DEFAULT_OPTIONS } = require('./defaults.js');
 const HelixProject = require('@adobe/petridish/src/HelixProject.js');
 
-const handler = (argv) => {
-  // override default options with command line arguments
-  const myoptions = {
-    ...DEFAULT_OPTIONS,
-    watch: true,
-    cache: argv.cache,
-    minify: argv.minify,
-    outDir: argv.target,
-  };
+class UpCommand {
+  constructor() {
+    this._cache = null;
+    this._minify = false;
+    this._target = null;
+    this._files = null;
+  }
 
-  // expand patterns from command line arguments
-  const myfiles = argv.files.reduce((a, f) => [...a, ...glob.sync(f)], []);
+  withCacheEnabled(cache) {
+    this._cache = cache;
+    return this;
+  }
 
-  const bundler = new Bundler(myfiles, myoptions);
+  withMinifyEnabled(target) {
+    this._minify = target;
+    return this;
+  }
 
-  const project = new HelixProject();
+  withTargetDir(target) {
+    this._target = target;
+    return this;
+  }
 
-  bundler.on('buildEnd', () => {
-    if (project.started) {
-      // todo
-      // project.invalidateCache();
-      return;
-    }
-    project.start();
-  });
+  withFiles(files) {
+    this._files = files;
+    return this;
+  }
 
-  project.init().then(() => {
-    bundler.bundle();
-  }).catch((e) => {
-    // todo: use proper logger
-    console.error(`${e}`);
-  });
-};
+  async run() {
+    // override default options with command line arguments
+    const myoptions = {
+      ...DEFAULT_OPTIONS,
+      watch: true,
+      cache: this._cache,
+      minify: this._minify,
+      outDir: this._target,
+    };
 
-module.exports.handler = handler;
+    // expand patterns from command line arguments
+    const myfiles = this._files.reduce((a, f) => [...a, ...glob.sync(f)], []);
+
+    const bundler = new Bundler(myfiles, myoptions);
+
+    const project = new HelixProject();
+
+    bundler.on('buildEnd', () => {
+      if (project.started) {
+        // todo
+        // project.invalidateCache();
+        return;
+      }
+      project.start();
+    });
+
+    project.init().then(() => {
+      bundler.bundle();
+    }).catch((e) => {
+      // todo: use proper logger
+      console.error(`${e}`);
+    });
+  }
+}
+
+module.exports = UpCommand;

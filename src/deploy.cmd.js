@@ -10,6 +10,8 @@
  * governing permissions and limitations under the License.
  */
 
+/* eslint no-console: off */
+
 'use strict';
 
 const ow = require('openwhisk');
@@ -18,160 +20,171 @@ const path = require('path');
 const fs = require('fs');
 const $ = require('shelljs');
 
-const rev = $
-  .exec('git rev-parse HEAD', {
-    silent: true,
-  })
-  .stdout.replace(/\n/, '')
-  .replace(/[\W]/g, '-');
-
-const tag = $
-  .exec(`git name-rev --tags --name-only ${rev}`, {
-    silent: true,
-  })
-  .stdout.replace(/\n/, '')
-  .replace(/[\W]/g, '-');
-
-const branchname = $
-  .exec('git rev-parse --abbrev-ref HEAD', {
-    silent: true,
-  })
-  .stdout.replace(/\n/, '')
-  .replace(/[\W]/g, '-');
-
-const dirty = $
-  .exec('git status --porcelain', {
-    silent: true,
-  })
-  .stdout.replace(/\n/, '')
-  .replace(/[\W]/g, '-')
-  .length;
-
-const branch = tag !== 'undefined' ? tag : branchname;
-const branchflag = dirty ? 'dirty' : branch;
-
-const repo = $
-  .exec('git config --get remote.origin.url', {
-    silent: true,
-  })
-  .stdout.replace(/\n/, '')
-  .replace(/[\W]/g, '-');
-/* eslint no-console: off */
-
-const builder = (yargs) => {
-  yargs
-    .option('auto', {
-      describe: 'Enable auto-deployment',
-      type: 'boolean',
-      default: true,
-      demandOption: true,
-    })
-    .option('auth', {
-      describe: 'Adobe I/O Runtime Authentication key',
-      type: 'string',
-    })
-    .option('namespace', {
-      describe: 'Adobe I/O Runtime Namespace',
-      type: 'string',
-      demandOption: true,
-    })
-    .option('apihost', {
-      describe: 'Adobe I/O Runtime API Host',
-      type: 'string',
-      default: 'runtime.adobe.io',
-    })
-    .option('loghost', {
-      describe: 'API Host for Log Appender',
-      type: 'string',
-      default: 'trieloff.loggly.com',
-    })
-    .option('logkey', {
-      describe: 'API Key for Log Appender ($HLX_LOGKEY)',
-      type: 'string',
-      default: '',
-    })
-    .option('target', {
-      alias: 'o',
-      default: '.hlx/build',
-      describe: 'Target directory for compiled JS',
-    })
-    .option('docker', {
-      default: 'trieloff/custom-ow-nodejs8:latest',
-      describe: 'Docker image for Adobe I/O Runtime function',
-    })
-    .option('prefix', {
-      alias: 'p',
-      default: `${repo}--${branchflag}--`,
-      describe: 'Prefix for the deployed action name',
-    })
-    .option('default', {
-      describe: 'Adds a default parameter to the function',
-      type: 'string',
-    })
-    .option('dirty', {
-      describe: 'Allows deploying a working copy with uncommitted changes (dangerous)',
-      type: 'boolean',
-      default: false,
-    })
-    .array('default')
-    .nargs('default', 2)
-    .coerce('default', arg => arg.reduce((result, value, index, array) => {
-      const res = {};
-      if (index % 2 === 0) {
-        res[value.toUpperCase()] = array[index + 1];
-      }
-      return Object.assign(res, result);
-    }, {}))
-    .demandOption(
-      'auth',
-      'Authentication is required. You can pass the key via the HLX_AUTH environment variable, too',
-    )
-    .group(['auto', 'auth', 'namespace', 'default', 'dirty'], 'Deployment Options')
-    .group(['apihost', 'loghost', 'logkey', 'target', 'docker', 'prefix'], 'Advanced Options:')
-    .help();
-};
-
-const handler = (argv) => {
-  if (argv.auto) {
-    console.error('Auto-deployment not implemented yet, please try hlx deploy --no-auto');
-    process.exit(1);
-  }
-  if (dirty && !argv.dirty) {
-    console.error('hlx will not deploy a working copy that has uncommitted changes. Re-run with flag --dirty to force.');
-    process.exit(dirty);
+class DeployCommand {
+  constructor() {
+    this._enableAuto = true;
+    this._apikey = null;
+    this._namespace = null;
+    this._apihost = null;
+    this._loghost = null;
+    this._logkey = null;
+    this._target = null;
+    this._docker = null;
+    this._prefix = null;
+    this._default = null;
+    this._enableDirty = false;
   }
 
-  const owoptions = { apihost: argv.apihost, api_key: argv.auth, namespace: argv.namespace };
-  const openwhisk = ow(owoptions);
+  static isDirty() {
+    return $
+      .exec('git status --porcelain', {
+        silent: true,
+      })
+      .stdout.replace(/\n/, '')
+      .replace(/[\W]/g, '-')
+      .length;
+  }
 
-  const scripts = glob.sync(`${argv.target}/*.js`);
+  static getBranch() {
+    const rev = $
+      .exec('git rev-parse HEAD', {
+        silent: true,
+      })
+      .stdout.replace(/\n/, '')
+      .replace(/[\W]/g, '-');
 
-  const params = { ...argv.default, LOGGLY_HOST: argv.loghost, LOGGLY_KEY: argv.logkey };
+    const tag = $
+      .exec(`git name-rev --tags --name-only ${rev}`, {
+        silent: true,
+      })
+      .stdout.replace(/\n/, '')
+      .replace(/[\W]/g, '-');
 
-  scripts.map((script) => {
-    const name = argv.prefix + path.basename(script, '.js');
-    console.log(`⏳  Deploying ${script} as ${name}`);
+    const branchname = $
+      .exec('git rev-parse --abbrev-ref HEAD', {
+        silent: true,
+      })
+      .stdout.replace(/\n/, '')
+      .replace(/[\W]/g, '-');
 
-    fs.readFile(script, { encoding: 'utf8' }, (err, action) => {
-      if (!err) {
-        const actionoptions = {
-          name,
-          action,
-          params,
-          kind: 'blackbox',
-          exec: { image: argv.docker },
-          annotations: { 'web-export': true },
-        };
-        // console.log(actionoptions)
-        openwhisk.actions.update(actionoptions).then((result) => {
-          console.log(`✅  Action ${result.name} has been created.`);
-        });
-      }
+    return tag !== 'undefined' ? tag : branchname;
+  }
+
+  static getBranchFlag() {
+    return DeployCommand.isDirty() ? 'dirty' : DeployCommand.getBranch();
+  }
+
+  static getRepository() {
+    return $
+      .exec('git config --get remote.origin.url', {
+        silent: true,
+      })
+      .stdout.replace(/\n/, '')
+      .replace(/[\W]/g, '-');
+  }
+
+  withEnableAuto(value) {
+    this._enableAuto = value;
+    return this;
+  }
+
+  withApihost(value) {
+    this._apihost = value;
+    return this;
+  }
+
+  withApikey(value) {
+    this._apikey = value;
+    return this;
+  }
+
+  withNamespace(value) {
+    this._namespace = value;
+    return this;
+  }
+
+  withLoghost(value) {
+    this._loghost = value;
+    return this;
+  }
+
+  withLogkey(value) {
+    this._logkey = value;
+    return this;
+  }
+
+  withTarget(value) {
+    this._target = value;
+    return this;
+  }
+
+  withDocker(value) {
+    this._docker = value;
+    return this;
+  }
+
+  withPrefix(value) {
+    this._prefix = value;
+    return this;
+  }
+
+  withDefault(value) {
+    this._default = value;
+    return this;
+  }
+
+  withEnableDirty(value) {
+    this._enableDirty = value;
+    return this;
+  }
+
+  async run() {
+    if (this._enableAuto) {
+      console.error('Auto-deployment not implemented yet, please try hlx deploy --no-auto');
+      process.exit(1);
+    }
+
+    const dirty = DeployCommand.isDirty();
+    if (dirty && !this._enableDirty) {
+      console.error('hlx will not deploy a working copy that has uncommitted changes. Re-run with flag --dirty to force.');
+      process.exit(dirty);
+    }
+
+    const owoptions = { apihost: this._apihost, api_key: this._apikey, namespace: this._namespace };
+    const openwhisk = ow(owoptions);
+
+    const scripts = glob.sync(`${this._target}/*.js`);
+
+    const params = { ...this._default, LOGGLY_HOST: this._loghost, LOGGLY_KEY: this._logkey };
+
+    if (!this._prefix) {
+      this._prefix = `${DeployCommand.getRepository()}--${DeployCommand.getBranchFlag()}--`;
+    }
+
+    scripts.map((script) => {
+      const name = this._prefix + path.basename(script, '.js');
+      console.log(`⏳  Deploying ${script} as ${name}`);
+
+      fs.readFile(script, { encoding: 'utf8' }, (err, action) => {
+        if (!err) {
+          const actionoptions = {
+            name,
+            action,
+            params,
+            kind: 'blackbox',
+            exec: { image: this._docker },
+            annotations: { 'web-export': true },
+          };
+          // console.log(actionoptions)
+          openwhisk.actions.update(actionoptions).then((result) => {
+            console.log(`✅  Action ${result.name} has been created.`);
+          });
+        }
+      });
+
+      return name;
     });
-
-    return name;
-  });
-};
-
-module.exports.handler = handler;
-module.exports.builder = builder;
+    return this;
+  }
+}
+module.exports = DeployCommand;

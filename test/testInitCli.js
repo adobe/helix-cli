@@ -10,71 +10,55 @@
  * governing permissions and limitations under the License.
  */
 
-/* eslint-disable global-require */
+/* global describe, it, beforeEach */
 
 'use strict';
 
 const assert = require('assert');
-
-class MockInit {
-  withDirectory(dir) {
-    this.dir = dir;
-    return this;
-  }
-
-  withName(name) {
-    this.name = name;
-    return this;
-  }
-
-  run() {
-    this.runCalled = true;
-    return this;
-  }
-}
-
-
-/* global describe, it, beforeEach */
+const sinon = require('sinon');
+const CLI = require('../src/cli.js');
+const InitCommand = require('../src/init.cmd');
 
 describe('hlx init', () => {
+  // mocked command instance
+  let mockInit;
+
   beforeEach(() => {
-    delete require.cache[require.resolve('../src/cli.js')];
+    mockInit = sinon.createStubInstance(InitCommand);
+    mockInit.withDirectory.returnsThis();
+    mockInit.withName.returnsThis();
+    mockInit.run.returnsThis();
   });
 
   it('hlx init accepts name and directory', () => {
-    const CLI = require('../src/cli.js');
+    new CLI()
+      .withCommandExecutor('init', mockInit)
+      .run(['init', 'name', 'dir']);
 
-    const mockInit = new MockInit();
-    CLI.setCommandExecutor('init', mockInit);
-    CLI.run(['init', 'name', 'dir']);
-
-    assert.equal(mockInit.name, 'name');
-    assert.equal(mockInit.dir, 'dir');
-    assert.equal(mockInit.runCalled, true);
+    sinon.assert.calledWith(mockInit.withName, 'name');
+    sinon.assert.calledWith(mockInit.withDirectory, 'dir');
+    sinon.assert.calledOnce(mockInit.run);
   });
 
   it('hlx init directory is optional', () => {
-    const CLI = require('../src/cli.js');
+    new CLI()
+      .withCommandExecutor('init', mockInit)
+      .run(['init', 'name']);
 
-    const mockInit = new MockInit();
-    CLI.setCommandExecutor('init', mockInit);
-    CLI.run(['init', 'name']);
-
-    assert.equal(mockInit.name, 'name');
-    assert.equal(mockInit.dir, '.');
-    assert.equal(mockInit.runCalled, true);
+    sinon.assert.calledWith(mockInit.withName, 'name');
+    sinon.assert.calledWith(mockInit.withDirectory, '.');
+    sinon.assert.calledOnce(mockInit.run);
   });
 
   it('hlx init fails with no name', (done) => {
-    const CLI = require('../src/cli.js');
+    new CLI()
+      .withCommandExecutor('init', mockInit)
+      .onFail((err) => {
+        assert.equal(err, 'Not enough non-option arguments: got 0, need at least 1');
+        done();
+      })
+      .run(['init']);
 
-    const mockInit = new MockInit();
-    CLI.setCommandExecutor('init', mockInit);
-    CLI.onFail((err) => {
-      assert.equal(err, 'Not enough non-option arguments: got 0, need at least 1');
-      done();
-    });
-    CLI.run(['init']);
     assert.fail('init w/o arguments should fail.');
   });
 });

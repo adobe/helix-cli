@@ -18,22 +18,51 @@ const Bundler = require('parcel-bundler');
 const glob = require('glob');
 const { DEFAULT_OPTIONS } = require('./defaults.js');
 
-const handler = (argv) => {
-  // override default options with command line arguments
-  const myoptions = {
-    ...DEFAULT_OPTIONS,
-    watch: false,
-    cache: argv.cache,
-    minify: argv.minify,
-    outDir: argv.target,
-  };
+class BuildCommand {
+  constructor() {
+    this._cache = null;
+    this._minify = false;
+    this._target = null;
+    this._files = null;
+  }
 
-  // expand patterns from command line arguments
-  const myfiles = argv.files.reduce((a, f) => [...a, ...glob.sync(f)], []);
+  withCacheEnabled(cache) {
+    this._cache = cache;
+    return this;
+  }
 
-  const bundler = new Bundler(myfiles, myoptions);
+  withMinifyEnabled(target) {
+    this._minify = target;
+    return this;
+  }
 
-  bundler.bundle();
-};
+  withTargetDir(target) {
+    this._target = target;
+    return this;
+  }
 
-module.exports.handler = handler;
+  withFiles(files) {
+    this._files = files;
+    return this;
+  }
+
+  async run() {
+    // override default options with command line arguments
+    const myoptions = {
+      ...DEFAULT_OPTIONS,
+      watch: true,
+      cache: this._cache,
+      minify: this._minify,
+      outDir: this._target,
+    };
+
+    // expand patterns from command line arguments
+    const myfiles = this._files.reduce((a, f) => [...a, ...glob.sync(f)], []);
+
+    const bundler = new Bundler(myfiles, myoptions);
+
+    bundler.bundle();
+  }
+}
+
+module.exports = BuildCommand;

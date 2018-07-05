@@ -16,14 +16,27 @@
 // TODO: remove the following line
 /* eslint no-unused-vars: off */
 
-module.exports = {
-  command: 'perf',
-  desc: 'Test performance',
-  builder: (yargs) => {
-    // TODO: define parameters
-  },
-  handler: (argv) => {
-    // TODO: implement
-    console.log('Performance', argv.name);
-  },
+module.exports = function perf() {
+  let executor;
+
+  return {
+    set executor(value) {
+      executor = value;
+    },
+    command: 'perf',
+    desc: 'Test performance',
+    builder: (yargs) => {
+      // TODO: define parameters
+    },
+    handler: async (argv) => {
+      if (!executor) {
+        // eslint-disable-next-line global-require
+        const PerfCommand = require('./perf.cmd'); // lazy load the handler to speed up execution time
+        executor = new PerfCommand();
+      }
+
+      await executor
+        .run();
+    },
+  };
 };

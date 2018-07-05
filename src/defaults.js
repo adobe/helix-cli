@@ -18,24 +18,27 @@ module.exports.DEFAULT_OPTIONS = {
 
 const DEFAULT_PATTERNS = ['src/*.htl'];
 
-module.exports.defaultArgs = yargs => yargs.option('target', {
-  alias: 'o',
-  default: '.hlx/build',
-  describe: 'Target directory for compiled JS',
-})
-  .option('no-cache', {
-    describe: 'Disable compile cache',
-    default: false,
-    type: 'boolean',
+module.exports.defaultArgs = yargs => yargs
+  .option('target', {
+    alias: 'o',
+    default: '.hlx/build',
+    describe: 'Target directory for compiled JS',
+  })
+  .option('cache', {
+    alias: 'no-cache', // make it show up in the help
+    describe: 'Enable or disable compile cache',
+    boolean: true,
+    default: true,
   })
   .option('minify', {
     describe: 'Minify JS',
+    boolean: true,
     default: false,
-    type: 'boolean',
   })
   .positional('files', {
     describe: 'The template files to compile',
     default: DEFAULT_PATTERNS,
     type: 'string',
-  });
+  })
+  .array('files');
 

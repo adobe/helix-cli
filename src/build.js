@@ -17,13 +17,30 @@
 
 const { defaultArgs } = require('./defaults.js');
 
-module.exports = {
-  command: 'build [files..]',
-  desc: 'Compile the template functions and build package',
-  builder: (yargs) => {
-    defaultArgs(yargs).help();
-  },
-  handler: (argv) => {
-    require('./build.cmd').handler(argv);
-  },
+module.exports = function build() {
+  let executor;
+  return {
+    set executor(value) {
+      executor = value;
+    },
+    command: 'build [files..]',
+    desc: 'Compile the template functions and build package',
+    builder: (yargs) => {
+      defaultArgs(yargs).help();
+    },
+    handler: async (argv) => {
+      if (!executor) {
+        // eslint-disable-next-line global-require
+        const BuildCommand = require('./build.cmd'); // lazy load the handler to speed up execution time
+        executor = new BuildCommand();
+      }
+
+      await executor
+        .withCacheEnabled(argv.cache)
+        .withMinifyEnabled(argv.minify)
+        .withTargetDir(argv.target)
+        .withFiles(argv.files)
+        .run();
+    },
+  };
 };

@@ -10,15 +10,27 @@
  * governing permissions and limitations under the License.
  */
 
+/* global describe, it, beforeEach */
+
 'use strict';
 
-const assert = require('assert');
+const sinon = require('sinon');
+const CLI = require('../src/cli.js');
+const PerfCommand = require('../src/perf.cmd');
 
-/* global describe, it */
+describe('hlx perf', () => {
+  // mocked command instance
+  let mockUp;
 
-describe('Test CLI', () => {
-  it('Run CLI', () => {
-    // TODO: implement test
-    assert(true);
+  beforeEach(() => {
+    mockUp = sinon.createStubInstance(PerfCommand);
+    mockUp.run.returnsThis();
+  });
+
+  it('hlx perf runs w/o arguments', () => {
+    new CLI()
+      .withCommandExecutor('perf', mockUp)
+      .run(['perf']);
+    sinon.assert.calledOnce(mockUp.run);
   });
 });
