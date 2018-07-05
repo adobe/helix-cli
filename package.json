@@ -9,7 +9,7 @@
         "lint": "./node_modules/.bin/eslint ."
     },
     "dependencies": {
-        "@adobe/git-server": "^0.0.1",
+        "@adobe/git-server": "0.0.1-SNAPSHOT.6",
         "express": "^4.16.3",
         "fs-extra": "^5.0.0",
         "git-url-parse": "^9.0.1",
