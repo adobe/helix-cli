@@ -41,6 +41,6 @@ jobs:
             when: always
 
         - store_test_results:
-            path: prototypes/helix-cli/junit
+            path: junit
         - store_artifacts:
-            path: prototypes/helix-cli/junit 
+            path: junit 
