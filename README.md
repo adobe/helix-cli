@@ -7,8 +7,7 @@ The Helix Command Line Interface allows web developers to create, develop, and d
 For now, manual installation only:
 
 ```bash
-$ git clone git@github.com:adobe/project-helix.git
-$ cd prototypes/helix-cli
+$ git clone git@github.com:adobe/helix-cli.git
 $ npm install
 $ npm link
 ```
