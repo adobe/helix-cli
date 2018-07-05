@@ -11,8 +11,7 @@ Setup
 $ cd ../openwhisk-loggly-wrapper && npm install
 $ cd ../md2json && npm install && npm link
 $ cd ../git-server && npm install && npm link
-$ cd ../strainconfig && npm install && npm link
-$ cd ../petridish && npm link @adobe/md2json && npm link @adobe/strainconfig && npm link @adobe/git-server && npm install
+$ cd ../petridish && npm link @adobe/md2json && npm link @adobe/git-server && npm install
 
 $ cd examples/soupdemo
 $ ./setup.sh
