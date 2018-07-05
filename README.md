@@ -1,5 +1,7 @@
 # Helix Command Line Interface (`hlx`)
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/adobe/helix-cli.svg)](https://greenkeeper.io/)
+
 The Helix Command Line Interface allows web developers to create, develop, and deploy digital experiences using Project Helix
 
 ## Installation
