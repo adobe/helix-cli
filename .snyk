@@ -60,3 +60,11 @@ patch:
         patched: '2018-07-05T15:23:49.272Z'
     - '@adobe/petridish > @adobe/git-server > nodegit > node-pre-gyp > request > hawk > cryptiles > boom > hoek':
         patched: '2018-07-05T15:23:49.272Z'
+    - codecov > request > hawk > hoek:
+        patched: '2018-07-06T10:49:39.622Z'
+    - codecov > request > hawk > boom > hoek:
+        patched: '2018-07-06T10:49:39.622Z'
+    - codecov > request > hawk > sntp > hoek:
+        patched: '2018-07-06T10:49:39.622Z'
+    - codecov > request > hawk > cryptiles > boom > hoek:
+        patched: '2018-07-06T10:49:39.622Z'
