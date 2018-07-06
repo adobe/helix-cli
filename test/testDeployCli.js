@@ -55,8 +55,8 @@ describe('hlx deploy', () => {
     new CLI()
       .withCommandExecutor('deploy', mockDeploy)
       .onFail((err) => {
-        assert.equal(err, 'Missing required arguments: namespace, auth\n' +
-          'Authentication is required. You can pass the key via the HLX_AUTH environment variable, too');
+        assert.equal(err, 'Missing required arguments: namespace, auth\n'
+          + 'Authentication is required. You can pass the key via the HLX_AUTH environment variable, too');
         done();
       })
       .run(['deploy']);
@@ -68,8 +68,8 @@ describe('hlx deploy', () => {
     new CLI()
       .withCommandExecutor('deploy', mockDeploy)
       .onFail((err) => {
-        assert.equal(err, 'Missing required arguments: namespace, auth\n' +
-          'Authentication is required. You can pass the key via the HLX_AUTH environment variable, too');
+        assert.equal(err, 'Missing required arguments: namespace, auth\n'
+          + 'Authentication is required. You can pass the key via the HLX_AUTH environment variable, too');
         done();
       })
       .run(['deploy', '--auth secret-key']);

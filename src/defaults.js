@@ -41,4 +41,3 @@ module.exports.defaultArgs = yargs => yargs
     type: 'string',
   })
   .array('files');
-
