@@ -13,8 +13,8 @@
 
 const Bundler = require('parcel-bundler');
 const glob = require('glob');
-const { DEFAULT_OPTIONS } = require('./defaults.js');
 const HelixProject = require('@adobe/petridish/src/HelixProject.js');
+const { DEFAULT_OPTIONS } = require('./defaults.js');
 
 class UpCommand {
   constructor() {
