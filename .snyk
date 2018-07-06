@@ -28,3 +28,11 @@ patch:
         patched: '2018-07-05T14:38:14.310Z'
     - '@adobe/git-server > nodegit > node-pre-gyp > request > hawk > cryptiles > boom > hoek':
         patched: '2018-07-05T14:38:14.310Z'
+    - codecov > request > hawk > hoek:
+        patched: '2018-07-06T07:07:11.470Z'
+    - codecov > request > hawk > boom > hoek:
+        patched: '2018-07-06T07:07:11.470Z'
+    - codecov > request > hawk > sntp > hoek:
+        patched: '2018-07-06T07:07:11.470Z'
+    - codecov > request > hawk > cryptiles > boom > hoek:
+        patched: '2018-07-06T07:07:11.470Z'
