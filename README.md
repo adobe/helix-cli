@@ -3,6 +3,10 @@ Petri Dish
 
 his is an early POC to see how local development could work w/o running a runtime container.
 
+Status
+------
+[![codecov](https://codecov.io/gh/adobe/petridish/branch/master/graph/badge.svg)](https://codecov.io/gh/adobe/petridish)
+
 Setup
 -----------
 
