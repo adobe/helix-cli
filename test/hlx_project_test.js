@@ -157,4 +157,50 @@ describe('Helix Project', () => {
       })
       .catch(done);
   });
+
+  it('can set relative build dir', (done) => {
+    const cwd = path.join(SPEC_ROOT, 'remote');
+    new HelixProject()
+      .withCwd(cwd)
+      .withBuildDir('tmp/mybuild')
+      .init()
+      .then((cfg) => {
+        assert.equal(cfg.buildDir, path.resolve(cwd, 'tmp/mybuild'));
+        done();
+      })
+      .catch(done);
+  });
+
+  it('can set absolute build dir', (done) => {
+    const cwd = path.join(SPEC_ROOT, 'remote');
+    new HelixProject()
+      .withCwd(cwd)
+      .withBuildDir('/tmp/helix-build')
+      .init()
+      .then((cfg) => {
+        assert.equal(cfg.buildDir, path.resolve('/tmp/helix-build'));
+        done();
+      })
+      .catch(done);
+  });
+
+  it('can set port', (done) => {
+    const cwd = path.join(SPEC_ROOT, 'remote');
+    new HelixProject()
+      .withCwd(cwd)
+      .withHttpPort(0)
+      .init()
+      .then(cfg => cfg.start())
+      .then((cfg) => {
+        assert.equal(true, cfg.started);
+        assert.notEqual(cfg.server.port, 0);
+        assert.notEqual(cfg.server.port, 3000);
+        return cfg.stop();
+      })
+      .then((cfg) => {
+        assert.equal(false, cfg.started);
+        done();
+      })
+      .catch(done);
+  });
 });

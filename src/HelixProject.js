@@ -17,7 +17,7 @@ const yaml = require('js-yaml');
 const _ = require('lodash');
 const GitUrl = require('./GitUrl.js');
 const gitServer = require('@adobe/git-server/lib/server.js');
-const dshServer = require('./server.js');
+const HelixServer = require('./HelixServer.js');
 const logger = require('./logger.js');
 
 const stat = util.promisify(fs.stat);
@@ -31,7 +31,7 @@ const README_MD = 'README.md';
 
 const SRC_DIR = 'src';
 
-const BUILD_DIR = '.hlx/build';
+const DEFAULT_BUILD_DIR = '.hlx/build';
 
 const GIT_DIR = '.git';
 
@@ -95,13 +95,23 @@ class HelixProject {
     this._cfg = {};
     this._gitConfig = _.cloneDeep(GIT_SERVER_CONFIG);
     this._needLocalServer = false;
-    this._buildDir = '';
+    this._buildDir = DEFAULT_BUILD_DIR;
     this._contentRepo = '';
-    this._httpPort = -1;
+    this._server = new HelixServer(this);
   }
 
   withCwd(cwd) {
     this._cwd = cwd;
+    return this;
+  }
+
+  withHttpPort(port) {
+    this._server.withPort(port);
+    return this;
+  }
+
+  withBuildDir(dir) {
+    this._buildDir = dir;
     return this;
   }
 
@@ -121,29 +131,29 @@ class HelixProject {
     return this._contentRepo;
   }
 
-  // eslint-disable-next-line class-methods-use-this
   get started() {
-    return this._httpPort !== -1;
+    return this._server.isStarted();
+  }
+
+  /**
+   * Returns the helix server
+   * @returns {HelixServer}
+   */
+  get server() {
+    return this._server;
   }
 
   async loadConfig() {
-    const cfgPath = path.join(this._cwd, HELIX_CONFIG);
+    const cfgPath = path.resolve(this._cwd, HELIX_CONFIG);
     if (await isFile(cfgPath)) {
-      this._cfgPath = cfgPath;
       this._cfg = yaml.safeLoad(await readFile(cfgPath, 'utf8'));
     }
   }
   async checkPaths() {
-    const idxPath = path.join(this._cwd, INDEX_MD);
+    const idxPath = path.resolve(this._cwd, INDEX_MD);
     if (await isFile(idxPath)) {
       this._indexMd = idxPath;
     }
-
-    const buildPath = path.join(this._cwd, BUILD_DIR);
-    if (!await isDirectory(buildPath)) {
-      await fs.ensureDir(buildPath);
-    }
-    this._buildDir = buildPath;
 
     const readmePath = path.join(this._cwd, README_MD);
     if (await isFile(readmePath)) {
@@ -155,6 +165,8 @@ class HelixProject {
       this._srcDir = srcPath;
     }
 
+    this._buildDir = path.resolve(this._cwd, this._buildDir);
+
     const dotGitPath = path.join(this._cwd, GIT_DIR);
     if (await isDirectory(dotGitPath)) {
       this._repoPath = path.resolve(dotGitPath, '../');
@@ -163,8 +175,6 @@ class HelixProject {
 
   async init() {
     await this.loadConfig();
-    // somehow doesn't work... logger.configure(this._cfg);
-
     await this.checkPaths();
 
     const cfg = this._cfg;
@@ -203,16 +213,31 @@ class HelixProject {
     await gitServer.start(this._gitConfig);
   }
 
-  async startPetridishServer() {
-    logger.info('Launching petridish server for development...');
-    this._httpPort = await dshServer.start(this);
+  // eslint-disable-next-line class-methods-use-this
+  async stopGitServer() {
+    logger.info('Stopping local git server for development...');
+    // todo
+    // await gitServer.stop();
   }
 
   async start() {
     if (this._needLocalServer) {
       await this.startGitServer();
     }
-    await this.startPetridishServer();
+
+    logger.info('Launching petridish server for development...');
+    this._server.init();
+    await this._server.start(this);
+    return this;
+  }
+
+  async stop() {
+    logger.info('Stopping petridish server..');
+    await this._server.stop();
+
+    if (this._needLocalServer) {
+      await this.stopGitServer();
+    }
     return this;
   }
 }

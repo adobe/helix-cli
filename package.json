@@ -3,7 +3,7 @@
     "version": "1.0.1",
     "description": "Helix Testing Environment",
     "repository": "https://github.com/adobe/petridish",
-    "main": "src/server.js",
+    "main": "src/init.js",
     "license": "Apache-2.0",
     "scripts": {
         "test": "mocha",
