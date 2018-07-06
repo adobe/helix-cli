@@ -61,7 +61,7 @@ class BuildCommand {
 
     const bundler = new Bundler(myfiles, myoptions);
 
-    bundler.bundle();
+    await bundler.bundle();
   }
 }
 
