@@ -64,5 +64,40 @@ describe('Template Resolver', () => {
         }).catch(done);
       });
     });
+
+    it('fails for non existent file', (done) => {
+      const mockReq = {
+        url: '/index.nonexistent.html',
+      };
+      const ctx = new RequestContext(mockReq, {
+        buildDir: BUILD_DIR,
+      });
+      const res = new TemplateResolver().with(TemplateResolverPlugins.simple);
+      res.resolve(ctx).then(() => {
+        done(Error('resolution for non existent file should fail.'));
+      }).catch((err) => {
+        const expected = 'Unable to resolve template: ENOENT: no such file or directory';
+        assert.equal(err.message.substring(0, expected.length), expected);
+        done();
+      }).catch(done);
+    });
+
+    it('fails for directory instead of file', (done) => {
+      const mockReq = {
+        url: '/index.wrong.html',
+      };
+      const ctx = new RequestContext(mockReq, {
+        buildDir: BUILD_DIR,
+      });
+      const res = new TemplateResolver().with(TemplateResolverPlugins.simple);
+      res.resolve(ctx).then(() => {
+        done(Error('resolution for non existent file should fail.'));
+      }).catch((err) => {
+        const expected = 'Unable to resolve template: no regular file';
+        assert.equal(err.message.substring(0, expected.length), expected);
+        done();
+      }).catch(done);
+    });
   });
+
 });

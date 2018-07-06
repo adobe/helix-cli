@@ -14,6 +14,7 @@
 /* eslint-disable no-underscore-dangle */
 
 const assert = require('assert');
+const fs = require('fs-extra');
 const path = require('path');
 const shell = require('shelljs'); // eslint-disable-line import/no-extraneous-dependencies
 const HelixProject = require('../src/HelixProject.js');
@@ -29,6 +30,10 @@ shell.config.fatal = true;
 const SPEC_ROOT = path.resolve(__dirname, 'specs');
 
 const SPECS_WITH_GIT = [
+  path.join(SPEC_ROOT, 'local'),
+];
+
+const SPECS_WITH_FAKE_GIT = [
   path.join(SPEC_ROOT, 'invalid_no_src'),
   path.join(SPEC_ROOT, 'invalid_no_content'),
   path.join(SPEC_ROOT, 'local'),
@@ -42,14 +47,20 @@ function initRepository(dir) {
   shell.exec('git commit -m"initial commit."');
 }
 
+function initFakeRepository(dir) {
+  fs.ensureDirSync(dir);
+}
+
 function removeRepository(dir) {
   shell.rm('-rf', path.resolve(dir, '.git'));
 }
 
 describe('Helix Project', () => {
   before(() => {
-    // create fake git repos
+    // create git repos
     SPECS_WITH_GIT.forEach(initRepository);
+    // create fake git repos
+    SPECS_WITH_FAKE_GIT.forEach(initFakeRepository);
   });
 
   after(() => {

@@ -58,8 +58,9 @@ class TemplateResolver {
       ctx.templateName = templateName;
       return ctx;
     }).catch((error) => {
-      logger.error('Error while loading template', error);
-      return ctx;
+      const msg = `Unable to resolve template: ${error.message}`;
+      logger.error(msg);
+      throw Error(msg);
     });
   }
 }

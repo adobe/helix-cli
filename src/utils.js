@@ -11,7 +11,6 @@
  */
 const fs = require('fs-extra');
 const util = require('util');
-const logger = require('./logger.js');
 
 const stat = util.promisify(fs.stat);
 
@@ -26,8 +25,7 @@ const utils = {
     return stat(filename)
       .then((stats) => {
         if (!stats.isFile()) {
-          logger.debug('resolved path no regular file: %j', stats);
-          return Promise.reject(new Error('no regular file'));
+          throw Error(`no regular file: ${filename}`);
         }
         return filename;
       });

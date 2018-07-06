@@ -6,7 +6,7 @@
   "main": "src/init.js",
   "license": "Apache-2.0",
   "scripts": {
-    "test": "mocha",
+    "test": "nyc mocha",
     "lint": "./node_modules/.bin/eslint .",
     "snyk-protect": "snyk protect",
     "prepare": "npm run snyk-protect"
@@ -39,6 +39,7 @@
     "mocha-junit-reporter": "^1.17.0",
     "nodemon": "^1.17.2",
     "npm-snapshot": "^1.0.3",
+    "nyc": "^12.0.2",
     "shelljs": "^0.8.2"
   },
   "nodemonConfig": {

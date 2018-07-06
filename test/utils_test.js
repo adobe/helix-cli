@@ -40,6 +40,7 @@ describe('Utils Test', () => {
         const p = new RequestContext(mockReq);
         assert.equal(p.valid, t.valid, 'valid');
         if (p.valid) {
+          assert.equal(p.url, t.url);
           assert.equal(p.path, t.path, 'path');
           assert.equal(p.resourcePath, t.resourcePath, 'resourcePath');
           assert.equal(p.selector, t.selector, 'selector');
