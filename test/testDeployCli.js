@@ -37,6 +37,7 @@ describe('hlx deploy', () => {
     mockDeploy.withPrefix.returnsThis();
     mockDeploy.withDefault.returnsThis();
     mockDeploy.withEnableDirty.returnsThis();
+    mockDeploy.withDryRun.returnsThis();
     mockDeploy.run.returnsThis();
 
     // disable static functions as well to avoid shelljs executions.

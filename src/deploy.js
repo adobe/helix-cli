@@ -68,6 +68,7 @@ module.exports = function deploy() {
         .option('target', {
           alias: 'o',
           default: '.hlx/build',
+          type: 'string',
           describe: 'Target directory for compiled JS',
         })
         .option('docker', {
@@ -85,6 +86,11 @@ module.exports = function deploy() {
         })
         .option('dirty', {
           describe: 'Allows deploying a working copy with uncommitted changes (dangerous)',
+          type: 'boolean',
+          default: false,
+        })
+        .option('dry-run', {
+          describe: 'List the actions that would be created, but do not actually deploy',
           type: 'boolean',
           default: false,
         })
@@ -124,6 +130,7 @@ module.exports = function deploy() {
         .withDocker(argv.docker)
         .withPrefix(argv.prefix)
         .withDefault(argv.default)
+        .withDryRun(argv.dryRun)
         .run();
     },
 

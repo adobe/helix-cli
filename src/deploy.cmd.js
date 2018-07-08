@@ -35,6 +35,7 @@ class DeployCommand {
     this._prefix = null;
     this._default = null;
     this._enableDirty = false;
+    this._dryRun = false;
   }
 
   static isDirty() {
@@ -139,6 +140,11 @@ class DeployCommand {
     return this;
   }
 
+  withDryRun(value) {
+    this._dryRun = value;
+    return this;
+  }
+
   async run() {
     if (this._enableAuto) {
       console.error('Auto-deployment not implemented yet, please try hlx deploy --no-auto');
@@ -184,10 +190,15 @@ class DeployCommand {
             exec: { image: this._docker },
             annotations: { 'web-export': true },
           };
-          // console.log(actionoptions)
-          openwhisk.actions.update(actionoptions).then((result) => {
-            console.log(`✅  Action ${result.name} has been created.`);
-          });
+          if (this._dryRun) {
+            console.log(`❎  Action ${name} has been skipped.`);
+          } else {
+            openwhisk.actions.update(actionoptions).then((result) => {
+              console.log(`✅  Action ${result.name} has been created.`);
+            });
+          }
+        } else {
+          console.err(`❌  File ${script} could not be read. ${err.message}`);
         }
       });
 
