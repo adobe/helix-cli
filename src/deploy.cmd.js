@@ -23,11 +23,13 @@ const $ = require('shelljs');
 class DeployCommand {
   constructor() {
     this._enableAuto = true;
-    this._apikey = null;
-    this._namespace = null;
-    this._apihost = null;
-    this._loghost = null;
-    this._logkey = null;
+    this._wsk_auth = null;
+    this._wsk_namespace = null;
+    this._wsk_host = null;
+    this._loggly_host = null;
+    this._loggly_auth = null;
+    this._fastly_namespace = null;
+    this._fastly_auth = null;
     this._target = null;
     this._docker = null;
     this._prefix = null;
@@ -88,28 +90,28 @@ class DeployCommand {
     return this;
   }
 
-  withApihost(value) {
-    this._apihost = value;
+  withWskHost(value) {
+    this._wsk_host = value;
     return this;
   }
 
-  withApikey(value) {
-    this._apikey = value;
+  withWskAuth(value) {
+    this._wsk_auth = value;
     return this;
   }
 
-  withNamespace(value) {
-    this._namespace = value;
+  withWskNamespace(value) {
+    this._wsk_namespace = value;
     return this;
   }
 
-  withLoghost(value) {
-    this._loghost = value;
+  withLogglyHost(value) {
+    this._loggly_host = value;
     return this;
   }
 
-  withLogkey(value) {
-    this._logkey = value;
+  withLogglyAuth(value) {
+    this._loggly_auth = value;
     return this;
   }
 
@@ -150,12 +152,12 @@ class DeployCommand {
       process.exit(dirty);
     }
 
-    const owoptions = { apihost: this._apihost, api_key: this._apikey, namespace: this._namespace };
+    const owoptions = { apihost: this._wsk_host, api_key: this._wsk_auth, namespace: this._wsk_namespace };
     const openwhisk = ow(owoptions);
 
     const scripts = glob.sync(`${this._target}/*.js`);
 
-    const params = { ...this._default, LOGGLY_HOST: this._loghost, LOGGLY_KEY: this._logkey };
+    const params = { ...this._default, LOGGLY_HOST: this._loggly_host, LOGGLY_KEY: this._loggly_auth };
 
     if (!this._prefix) {
       this._prefix = `${DeployCommand.getRepository()}--${DeployCommand.getBranchFlag()}--`;

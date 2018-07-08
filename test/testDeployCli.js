@@ -27,11 +27,11 @@ describe('hlx deploy', () => {
   beforeEach(() => {
     mockDeploy = sinon.createStubInstance(DeployCommand);
     mockDeploy.withEnableAuto.returnsThis();
-    mockDeploy.withApihost.returnsThis();
-    mockDeploy.withApikey.returnsThis();
-    mockDeploy.withNamespace.returnsThis();
-    mockDeploy.withLoghost.returnsThis();
-    mockDeploy.withLogkey.returnsThis();
+    mockDeploy.withWskHost.returnsThis();
+    mockDeploy.withWskAuth.returnsThis();
+    mockDeploy.withWskNamespace.returnsThis();
+    mockDeploy.withLogglyHost.returnsThis();
+    mockDeploy.withLogglyAuth.returnsThis();
     mockDeploy.withTarget.returnsThis();
     mockDeploy.withDocker.returnsThis();
     mockDeploy.withPrefix.returnsThis();
@@ -55,8 +55,8 @@ describe('hlx deploy', () => {
     new CLI()
       .withCommandExecutor('deploy', mockDeploy)
       .onFail((err) => {
-        assert.equal(err, 'Missing required arguments: namespace, auth\n'
-          + 'Authentication is required. You can pass the key via the HLX_AUTH environment variable, too');
+        assert.equal(err, 'Missing required arguments: wsk-namespace, wsk-auth\n'
+          + 'Authentication is required. You can pass the key via the HLX_WSK_AUTH environment variable, too');
         done();
       })
       .run(['deploy']);
@@ -68,29 +68,30 @@ describe('hlx deploy', () => {
     new CLI()
       .withCommandExecutor('deploy', mockDeploy)
       .onFail((err) => {
-        assert.equal(err, 'Missing required arguments: namespace, auth\n'
-          + 'Authentication is required. You can pass the key via the HLX_AUTH environment variable, too');
+        assert.equal(err, 'Missing required arguments: wsk-namespace, wsk-auth\n'
+          + 'Authentication is required. You can pass the key via the HLX_WSK_AUTH environment variable, too');
         done();
       })
-      .run(['deploy', '--auth secret-key']);
+      .run(['deploy', '--wsk-auth secret-key']);
 
     assert.fail('deploy w/o arguments should fail.');
   });
+
   it('hlx deploy works with minimal arguments', () => {
     new CLI()
       .withCommandExecutor('deploy', mockDeploy)
       .run(['deploy',
-        '--auth', 'secret-key',
-        '--namespace', 'hlx',
+        '--wsk-auth', 'secret-key',
+        '--wsk-namespace', 'hlx',
       ]);
 
     sinon.assert.calledWith(mockDeploy.withEnableAuto, true);
     sinon.assert.calledWith(mockDeploy.withEnableDirty, false);
-    sinon.assert.calledWith(mockDeploy.withApihost, 'runtime.adobe.io');
-    sinon.assert.calledWith(mockDeploy.withApikey, 'secret-key');
-    sinon.assert.calledWith(mockDeploy.withNamespace, 'hlx');
-    sinon.assert.calledWith(mockDeploy.withLoghost, 'trieloff.loggly.com'); // TODO !!
-    sinon.assert.calledWith(mockDeploy.withLogkey, '');
+    sinon.assert.calledWith(mockDeploy.withWskHost, 'runtime.adobe.io');
+    sinon.assert.calledWith(mockDeploy.withWskAuth, 'secret-key');
+    sinon.assert.calledWith(mockDeploy.withWskNamespace, 'hlx');
+    sinon.assert.calledWith(mockDeploy.withLogglyHost, 'trieloff.loggly.com'); // TODO !!
+    sinon.assert.calledWith(mockDeploy.withLogglyAuth, '');
     sinon.assert.calledWith(mockDeploy.withTarget, '.hlx/build');
     sinon.assert.calledWith(mockDeploy.withDocker, 'trieloff/custom-ow-nodejs8:latest');
     sinon.assert.calledWith(mockDeploy.withPrefix, 'git-github-com-example-project-helix--master--');
@@ -98,12 +99,12 @@ describe('hlx deploy', () => {
     sinon.assert.calledOnce(mockDeploy.run);
   });
 
-  it('hlx deploy works can disable auto', () => {
+  it('hlx deploy can disable auto', () => {
     new CLI()
       .withCommandExecutor('deploy', mockDeploy)
       .run(['deploy',
-        '--auth', 'secret-key',
-        '--namespace', 'hlx',
+        '--wsk-auth', 'secret-key',
+        '--wsk-namespace', 'hlx',
         '--no-auto',
       ]);
 
@@ -115,8 +116,8 @@ describe('hlx deploy', () => {
     new CLI()
       .withCommandExecutor('deploy', mockDeploy)
       .run(['deploy',
-        '--auth', 'secret-key',
-        '--namespace', 'hlx',
+        '--wsk-auth', 'secret-key',
+        '--wsk-namespace', 'hlx',
         '--dirty',
       ]);
 
@@ -128,12 +129,12 @@ describe('hlx deploy', () => {
     new CLI()
       .withCommandExecutor('deploy', mockDeploy)
       .run(['deploy',
-        '--auth', 'secret-key',
-        '--namespace', 'hlx',
-        '--apihost', 'stage.runtime.adobe.io',
+        '--wsk-auth', 'secret-key',
+        '--wsk-namespace', 'hlx',
+        '--wsk-host', 'stage.runtime.adobe.io',
       ]);
 
-    sinon.assert.calledWith(mockDeploy.withApihost, 'stage.runtime.adobe.io');
+    sinon.assert.calledWith(mockDeploy.withWskHost, 'stage.runtime.adobe.io');
     sinon.assert.calledOnce(mockDeploy.run);
   });
 
@@ -141,14 +142,14 @@ describe('hlx deploy', () => {
     new CLI()
       .withCommandExecutor('deploy', mockDeploy)
       .run(['deploy',
-        '--auth', 'secret-key',
-        '--namespace', 'hlx',
-        '--loghost', 'example.logly.com',
-        '--logkey', 'some-secret-logger-key',
+        '--wsk-auth', 'secret-key',
+        '--wsk-namespace', 'hlx',
+        '--loggly-host', 'example.logly.com',
+        '--loggly-auth', 'some-secret-logger-key',
       ]);
 
-    sinon.assert.calledWith(mockDeploy.withLoghost, 'example.logly.com');
-    sinon.assert.calledWith(mockDeploy.withLogkey, 'some-secret-logger-key');
+    sinon.assert.calledWith(mockDeploy.withLogglyHost, 'example.logly.com');
+    sinon.assert.calledWith(mockDeploy.withLogglyAuth, 'some-secret-logger-key');
     sinon.assert.calledOnce(mockDeploy.run);
   });
 
@@ -156,8 +157,8 @@ describe('hlx deploy', () => {
     new CLI()
       .withCommandExecutor('deploy', mockDeploy)
       .run(['deploy',
-        '--auth', 'secret-key',
-        '--namespace', 'hlx',
+        '--wsk-auth', 'secret-key',
+        '--wsk-namespace', 'hlx',
         '--target', 'tmp/build',
       ]);
 
@@ -169,8 +170,8 @@ describe('hlx deploy', () => {
     new CLI()
       .withCommandExecutor('deploy', mockDeploy)
       .run(['deploy',
-        '--auth', 'secret-key',
-        '--namespace', 'hlx',
+        '--wsk-auth', 'secret-key',
+        '--wsk-namespace', 'hlx',
         '-o', 'tmp/build',
       ]);
 
@@ -182,8 +183,8 @@ describe('hlx deploy', () => {
     new CLI()
       .withCommandExecutor('deploy', mockDeploy)
       .run(['deploy',
-        '--auth', 'secret-key',
-        '--namespace', 'hlx',
+        '--wsk-auth', 'secret-key',
+        '--wsk-namespace', 'hlx',
         '--docker', 'example/node8:latest',
       ]);
 
@@ -195,8 +196,8 @@ describe('hlx deploy', () => {
     new CLI()
       .withCommandExecutor('deploy', mockDeploy)
       .run(['deploy',
-        '--auth', 'secret-key',
-        '--namespace', 'hlx',
+        '--wsk-auth', 'secret-key',
+        '--wsk-namespace', 'hlx',
         '--prefix', '_hlx_',
       ]);
 
@@ -208,8 +209,8 @@ describe('hlx deploy', () => {
     new CLI()
       .withCommandExecutor('deploy', mockDeploy)
       .run(['deploy',
-        '--auth', 'secret-key',
-        '--namespace', 'hlx',
+        '--wsk-auth', 'secret-key',
+        '--wsk-namespace', 'hlx',
         '--default', 'FEATURE', 'red, green',
       ]);
 

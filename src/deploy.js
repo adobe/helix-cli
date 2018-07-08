@@ -32,27 +32,36 @@ module.exports = function deploy() {
           default: true,
           demandOption: true,
         })
-        .option('auth', {
+        .option('wsk-auth', {
           describe: 'Adobe I/O Runtime Authentication key',
           type: 'string',
         })
-        .option('namespace', {
+        .option('wsk-namespace', {
           describe: 'Adobe I/O Runtime Namespace',
           type: 'string',
           demandOption: true,
         })
-        .option('apihost', {
+        .option('wsk-host', {
           describe: 'Adobe I/O Runtime API Host',
           type: 'string',
           default: 'runtime.adobe.io',
         })
-        .option('loghost', {
+        .option('loggly-host', {
           describe: 'API Host for Log Appender',
           type: 'string',
           default: 'trieloff.loggly.com',
         })
-        .option('logkey', {
-          describe: 'API Key for Log Appender ($HLX_LOGKEY)',
+        .option('loggly-auth', {
+          describe: 'API Key for Log Appender ($HLX_LOGGLY_AUTH)',
+          type: 'string',
+          default: '',
+        })
+        .option('fastly-namespace', {
+          describe: 'CDN Namespace (e.g. Fastly Service ID)',
+          type: 'string',
+        })
+        .option('fastly-auth', {
+          describe: 'API Key for Fastly API ($HLX_FASTLY_AUTH)',
           type: 'string',
           default: '',
         })
@@ -89,11 +98,11 @@ module.exports = function deploy() {
           return Object.assign(res, result);
         }, {}))
         .demandOption(
-          'auth',
-          'Authentication is required. You can pass the key via the HLX_AUTH environment variable, too',
+          'wsk-auth',
+          'Authentication is required. You can pass the key via the HLX_WSK_AUTH environment variable, too',
         )
-        .group(['auto', 'auth', 'namespace', 'default', 'dirty'], 'Deployment Options')
-        .group(['apihost', 'loghost', 'logkey', 'target', 'docker', 'prefix'], 'Advanced Options:')
+        .group(['auto', 'wsk-auth', 'wsk-namespace', 'default', 'dirty'], 'Deployment Options')
+        .group(['wsk-host', 'loggly-host', 'loggly-auth', 'target', 'docker', 'prefix'], 'Advanced Options')
         .help();
     },
     handler: async (argv) => {
@@ -106,11 +115,11 @@ module.exports = function deploy() {
       await executor
         .withEnableAuto(argv.auto)
         .withEnableDirty(argv.dirty)
-        .withApikey(argv.auth)
-        .withApihost(argv.apihost)
-        .withNamespace(argv.namespace)
-        .withLoghost(argv.loghost)
-        .withLogkey(argv.logkey)
+        .withWskAuth(argv.wskAuth)
+        .withWskHost(argv.wskHost)
+        .withWskNamespace(argv.wskNamespace)
+        .withLogglyHost(argv.logglyHost)
+        .withLogglyAuth(argv.logglyAuth)
         .withTarget(argv.target)
         .withDocker(argv.docker)
         .withPrefix(argv.prefix)
