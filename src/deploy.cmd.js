@@ -43,8 +43,7 @@ class DeployCommand {
         silent: true,
       })
       .stdout.replace(/\n/, '')
-      .replace(/[\W]/g, '-')
-      .length;
+      .replace(/[\W]/g, '-').length;
   }
 
   static getBranch() {
@@ -152,12 +151,20 @@ class DeployCommand {
       process.exit(dirty);
     }
 
-    const owoptions = { apihost: this._wsk_host, api_key: this._wsk_auth, namespace: this._wsk_namespace };
+    const owoptions = {
+      apihost: this._wsk_host,
+      api_key: this._wsk_auth,
+      namespace: this._wsk_namespace,
+    };
     const openwhisk = ow(owoptions);
 
     const scripts = glob.sync(`${this._target}/*.js`);
 
-    const params = { ...this._default, LOGGLY_HOST: this._loggly_host, LOGGLY_KEY: this._loggly_auth };
+    const params = {
+      ...this._default,
+      LOGGLY_HOST: this._loggly_host,
+      LOGGLY_KEY: this._loggly_auth,
+    };
 
     if (!this._prefix) {
       this._prefix = `${DeployCommand.getRepository()}--${DeployCommand.getBranchFlag()}--`;
