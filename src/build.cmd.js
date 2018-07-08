@@ -50,7 +50,7 @@ class BuildCommand {
     // override default options with command line arguments
     const myoptions = {
       ...DEFAULT_OPTIONS,
-      watch: true,
+      watch: false,
       cache: this._cache,
       minify: this._minify,
       outDir: this._target,
@@ -61,7 +61,7 @@ class BuildCommand {
 
     const bundler = new Bundler(myfiles, myoptions);
 
-    bundler.bundle();
+    await bundler.bundle();
   }
 }
 
