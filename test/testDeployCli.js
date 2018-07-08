@@ -99,6 +99,28 @@ describe('hlx deploy', () => {
     sinon.assert.calledOnce(mockDeploy.run);
   });
 
+  it('hlx deploy works with arguments provided in environment', () => {
+    process.env.HLX_WSK_AUTH = 'sekret-key';
+    new CLI()
+      .withCommandExecutor('deploy', mockDeploy)
+      .run(['deploy',
+        '--wsk-namespace', 'hlx',
+      ]);
+
+    sinon.assert.calledWith(mockDeploy.withEnableAuto, true);
+    sinon.assert.calledWith(mockDeploy.withEnableDirty, false);
+    sinon.assert.calledWith(mockDeploy.withWskHost, 'runtime.adobe.io');
+    sinon.assert.calledWith(mockDeploy.withWskAuth, 'sekret-key');
+    sinon.assert.calledWith(mockDeploy.withWskNamespace, 'hlx');
+    sinon.assert.calledWith(mockDeploy.withLogglyHost, 'trieloff.loggly.com'); // TODO !!
+    sinon.assert.calledWith(mockDeploy.withLogglyAuth, '');
+    sinon.assert.calledWith(mockDeploy.withTarget, '.hlx/build');
+    sinon.assert.calledWith(mockDeploy.withDocker, 'trieloff/custom-ow-nodejs8:latest');
+    sinon.assert.calledWith(mockDeploy.withPrefix, 'git-github-com-example-project-helix--master--');
+    sinon.assert.calledWith(mockDeploy.withDefault, undefined);
+    sinon.assert.calledOnce(mockDeploy.run);
+  });
+
   it('hlx deploy can disable auto', () => {
     new CLI()
       .withCommandExecutor('deploy', mockDeploy)
