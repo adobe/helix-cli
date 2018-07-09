@@ -68,6 +68,6 @@ $ npm publish --access public
 Do not forget to add a `git tag` corresponding to the released version number
 
 ```bash
-$ git tag $(npm view @adobe/helix-cli@next version) 
-$ git push origin $(npm view @adobe/helix-cli@next version)
+$ git tag $(npm view @adobe/helix-cli@latest version) 
+$ git push origin $(npm view @adobe/helix-cli@latest version)
 ```
