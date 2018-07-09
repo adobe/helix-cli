@@ -99,5 +99,4 @@ describe('Template Resolver', () => {
       }).catch(done);
     });
   });
-
 });
