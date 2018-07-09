@@ -11,17 +11,21 @@
  */
 /* eslint no-console: off */
 
+const EventEmitter = require('events');
 const Bundler = require('parcel-bundler');
 const glob = require('glob');
 const HelixProject = require('@adobe/petridish/src/HelixProject.js');
 const { DEFAULT_OPTIONS } = require('./defaults.js');
 
-class UpCommand {
+class UpCommand extends EventEmitter {
   constructor() {
+    super();
     this._cache = null;
     this._minify = false;
     this._target = null;
     this._files = null;
+    this._httpPort = -1;
+    this._cwd = process.cwd();
   }
 
   withCacheEnabled(cache) {
@@ -44,6 +48,33 @@ class UpCommand {
     return this;
   }
 
+  withDirectory(dir) {
+    this._cwd = dir;
+    return this;
+  }
+
+  withHttpPort(p) {
+    this._httpPort = p;
+    return this;
+  }
+
+  get project() {
+    return this._project;
+  }
+
+  async stop() {
+    if (this._bundler) {
+      await this._bundler.stop();
+      this._bundler = null;
+    }
+    if (this._project) {
+      await this._project.stop();
+      this._project = null;
+    }
+    console.log('Helix project stopped.');
+    this.emit('stopped', this);
+  }
+
   async run() {
     // override default options with command line arguments
     const myoptions = {
@@ -57,25 +88,35 @@ class UpCommand {
     // expand patterns from command line arguments
     const myfiles = this._files.reduce((a, f) => [...a, ...glob.sync(f)], []);
 
-    const bundler = new Bundler(myfiles, myoptions);
+    this._bundler = new Bundler(myfiles, myoptions);
 
-    const project = new HelixProject();
+    this._project = new HelixProject()
+      .withCwd(this._cwd)
+      .withBuildDir(this._target);
 
-    bundler.on('buildEnd', () => {
-      if (project.started) {
+    if (this._httpPort >= 0) {
+      this._project.withHttpPort(this._httpPort);
+    }
+
+    this._bundler.on('buildEnd', () => {
+      if (this._project.started) {
+        this.emit('build', this);
         // todo
-        // project.invalidateCache();
+        // this._project.invalidateCache();
         return;
       }
-      project.start();
+      this._project.start().then(() => {
+        this.emit('started', this);
+      });
     });
 
-    project.init().then(() => {
-      bundler.bundle();
-    }).catch((e) => {
-      // todo: use proper logger
-      console.error(`${e}`);
-    });
+    return this._project
+      .init()
+      .then(() => {
+        this._bundler.bundle();
+      }).catch((e) => {
+        throw Error(`Unable to start helix: ${e.message}`);
+      });
   }
 }
 

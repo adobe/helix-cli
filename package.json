@@ -32,8 +32,8 @@
     "openwhisk": "https://github.com/trieloff/incubator-openwhisk-client-js.git",
     "parcel-bundler": "^1.9.3",
     "shelljs": "^0.8.2",
-    "yargs": "^11.0.0",
-    "snyk": "^1.88.1"
+    "snyk": "^1.88.1",
+    "yargs": "^11.0.0"
   },
   "devDependencies": {
     "codecov": "^3.0.2",
