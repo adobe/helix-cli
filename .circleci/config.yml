@@ -47,7 +47,7 @@ jobs:
 
         - run:
             name: Deploy Snapshot to Adobe I/O Runtime
-            command: hlx deploy --no-auto
+            command: hlx deploy --no-auto --wsk-namespace trieloff --wsk-auth $WSK_AUTH --loggly-host trieloff --loggly-auth $LOGGLY_AUTH
             working_directory: test/integration
 
         - store_test_results:
