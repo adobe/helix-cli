@@ -187,7 +187,7 @@ class DeployCommand {
             action,
             params,
             kind: 'blackbox',
-            exec: { image: this._docker },
+            exec: { image: this._docker, main: 'module.exports.main' },
             annotations: { 'web-export': true },
           };
           if (this._dryRun) {
