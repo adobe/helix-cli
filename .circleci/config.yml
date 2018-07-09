@@ -11,8 +11,7 @@ jobs:
       # - image: circleci/mongo:3.4.4
     working_directory: ~/repo
     environment:
-        NPM_CONFIG_PREFIX: ./.npm-global
-        PATH: ~/.npm-global/bin:$PATH
+        NPM_CONFIG_PREFIX: ~/.npm-global
 
     steps:
         - checkout
@@ -54,7 +53,7 @@ jobs:
 
         - run:
             name: Deploy Snapshot to Adobe I/O Runtime
-            command: hlx deploy --no-auto --wsk-namespace trieloff --wsk-auth $WSK_AUTH --loggly-host trieloff --loggly-auth $LOGGLY_AUTH
+            command: ~/.npm-global/bin/hlx deploy --no-auto --wsk-namespace trieloff --wsk-auth $WSK_AUTH --loggly-host trieloff --loggly-auth $LOGGLY_AUTH
             working_directory: test/integration
 
         - store_test_results:
