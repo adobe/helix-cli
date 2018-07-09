@@ -11,8 +11,8 @@ jobs:
       # - image: circleci/mongo:3.4.4
     working_directory: ~/repo
     environment:
-        NPM_CONFIG_PREFIX=~/.npm-global
-        PATH=$PATH:$NPM_CONFIG_PREFIX
+        NPM_CONFIG_PREFIX: ./.npm-global
+        PATH: ~/.npm-global/bin:$PATH
 
     steps:
         - checkout
