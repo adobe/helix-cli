@@ -45,6 +45,11 @@ jobs:
             name: Getting Code Coverage
             command: npx istanbul cover ./node_modules/mocha/bin/_mocha -- -R spec && npx codecov
 
+        - run:
+            name: Deploy Snapshot to Adobe I/O Runtime
+            command: hlx deploy --no-auto
+            working_directory: test/integration
+
         - store_test_results:
             path: junit
         - store_artifacts:
