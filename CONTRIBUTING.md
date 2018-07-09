@@ -59,9 +59,18 @@ The project's committers will release to the [Adobe organization on npmjs.org](h
 Please contact the [Adobe Open Source Advisory Board](https://git.corp.adobe.com/OpenSourceAdvisoryBoard/discuss/issues) to get access to the npmjs organization.
 Then, you can release using:
 
+### Versioning
+
+use `npm verison` to set the new package version create the git tag. eg:
+
+```bash
+$ npm version 1.0.1-SNAPSHOT.30
+$ git push --tags
+```
+
+### Publishing
+
 ```bash
 $ npm login
 $ npm publish --access public
 ```
-
-Do not forget to add a `git tag` corresponding to the released version number
