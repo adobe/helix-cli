@@ -10,6 +10,9 @@ jobs:
       # documented at https://circleci.com/docs/2.0/circleci-images/
       # - image: circleci/mongo:3.4.4
     working_directory: ~/repo
+    environment:
+        NPM_CONFIG_PREFIX=~/.npm-global
+        PATH=$PATH:$NPM_CONFIG_PREFIX
 
     steps:
         - checkout
@@ -44,6 +47,10 @@ jobs:
         - run:
             name: Getting Code Coverage
             command: npx istanbul cover ./node_modules/mocha/bin/_mocha -- -R spec && npx codecov
+
+        - run:
+            name: Install Globally
+            command: mkdir -p ~/.npm-global && npm link
 
         - run:
             name: Deploy Snapshot to Adobe I/O Runtime
