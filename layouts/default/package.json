@@ -1,0 +1,13 @@
+{
+  "name": "{{project.name}}",
+  "version": "0.1.0",
+  "description": "Helix Example Project",
+  "scripts": {
+    "start": "hlx up",
+    "test": "hlx text"
+  },
+  "devDependencies": {
+    "@adobe/parcel-plugin-htl": "^0.4.0-SNAPSHOT.124"
+  },
+  "license": "Apache-2.0"
+}

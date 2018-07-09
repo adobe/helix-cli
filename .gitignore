@@ -3,3 +3,4 @@
 node_modules/
 pipeline.log
 test/integration/.hlx/
+tmp

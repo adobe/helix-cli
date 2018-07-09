@@ -15,8 +15,83 @@
 const path = require('path');
 const fse = require('fs-extra');
 const chalk = require('chalk');
+const shell = require('shelljs');
 
 /* eslint-disable no-console */
+
+const LAYOUT_DEFAULT = {
+  dir: path.resolve(__dirname, '../layouts/default'),
+  files: [
+    {
+      name: 'README.md',
+      filter: true,
+      msg: 'created README.md with welcome message.',
+    },
+    {
+      name: 'index.md',
+      filter: true,
+      msg: 'created index.md with sample content.',
+    },
+    {
+      name: 'src/html.htl',
+      filter: true,
+      msg: 'created src/html.htl with minimal example.',
+    },
+    {
+      name: 'package.json',
+      filter: true,
+      msg: 'created package.json with sensible defaults and required dependencies.',
+    },
+    {
+      name: 'helix-config.yaml',
+      filter: true,
+      msg: 'created helix-config.yaml for your convenience.',
+    },
+    {
+      name: '.gitignore',
+    },
+  ],
+};
+
+function execAsync(cmd) {
+  return new Promise((resolve, reject) => {
+    shell.exec(cmd, (code, stdout, stderr) => {
+      if (code === 0) {
+        resolve(0);
+      } else {
+        reject(stderr);
+      }
+    });
+  });
+}
+
+function msg(txt) {
+  console.log(chalk.green('+ ') + txt);
+}
+
+
+async function initGitRepository(dir) {
+  shell.cd(dir);
+  try {
+    await execAsync('git init -q');
+    await execAsync('git add -A');
+    await execAsync('git commit -q -m"Initial commit."');
+    msg('initialized git repository.');
+  } catch (e) {
+    throw Error(`Unable to initialize git repository: ${e}`);
+  }
+}
+
+async function initNpm(dir) {
+  try {
+    console.log(`${chalk.yellow('+')} running npm install...`);
+    shell.cd(dir);
+    await execAsync('npm install');
+    msg('setup all npm dependencies.');
+  } catch (e) {
+    throw Error(`Unable to initialize nmp: ${e}`);
+  }
+}
 
 class InitCommand {
   constructor() {
@@ -45,17 +120,53 @@ class InitCommand {
     }
 
     const projectDir = path.resolve(path.join(this._dir, this._name));
-
-    console.log(chalk.green('Init'), this._name, this._dir);
+    const relPath = path.relative(process.cwd(), projectDir);
+    if (await fse.pathExists(projectDir)) {
+      throw new Error(`cowardly rejecting to re-initialize project: ./${relPath}`);
+    }
 
     try {
       await fse.ensureDir(projectDir);
     } catch (e) {
       throw new Error(`Unable to create project directory: ${e}`);
     }
+    msg(`created ${relPath}`);
 
-    // TODO: implement
-    console.log(chalk.green(`Successfully created project in ${projectDir}`));
+
+    const project = {
+      name: this._name,
+    };
+
+    function processFile(srcFile, dstFile, filter) {
+      if (filter) {
+        return fse.readFile(srcFile, 'utf8').then((text) => {
+          const result = text.replace(/{{\s*project\.name\s*}}/g, project.name);
+          return fse.outputFile(dstFile, result);
+        });
+      }
+      return fse.copy(srcFile, dstFile);
+    }
+
+    const jobs = LAYOUT_DEFAULT.files.map((f) => {
+      const srcFile = path.resolve(LAYOUT_DEFAULT.dir, f.name);
+      const dstFile = path.resolve(projectDir, f.name);
+      return processFile(srcFile, dstFile, f.filter).then(() => {
+        if (f.msg) {
+          msg(f.msg);
+        }
+      });
+    });
+
+    return Promise.all(jobs)
+      .then(() => initGitRepository(projectDir))
+      .then(() => initNpm(projectDir))
+      .then(() => {
+        console.log(chalk.green(`Successfully created project in ./${relPath}`));
+      })
+      .catch((err) => {
+        console.error(err);
+        throw err;
+      });
   }
 }
 
