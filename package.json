@@ -7,7 +7,7 @@
     "hlx": "./index.js"
   },
   "scripts": {
-    "test": "mocha",
+    "test": "nyc mocha",
     "lint": "./node_modules/.bin/eslint .",
     "snyk-protect": "snyk protect",
     "prepare": "npm run snyk-protect"
@@ -47,6 +47,7 @@
     "mocha": "^5.2.0",
     "mocha-junit-reporter": "^1.17.0",
     "npm-snapshot": "^1.0.3",
+    "nyc": "^12.0.2",
     "sinon": "^6.1.0"
   },
   "snyk": true
