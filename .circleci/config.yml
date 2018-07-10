@@ -10,6 +10,8 @@ jobs:
       # documented at https://circleci.com/docs/2.0/circleci-images/
       # - image: circleci/mongo:3.4.4
     working_directory: ~/repo
+    environment:
+        NPM_CONFIG_PREFIX: ~/.npm-global
 
     steps:
         - checkout
@@ -44,6 +46,15 @@ jobs:
         - run:
             name: Getting Code Coverage
             command: npx istanbul cover ./node_modules/mocha/bin/_mocha -- -R spec && npx codecov
+
+        - run:
+            name: Install Globally
+            command: mkdir -p ~/.npm-global && npm link
+
+        - run:
+            name: Deploy Snapshot to Adobe I/O Runtime
+            command: ~/.npm-global/bin/hlx build && ~/.npm-global/bin/hlx deploy --dirty --no-auto --wsk-namespace trieloff --wsk-auth $WSK_AUTH --loggly-host trieloff --loggly-auth $LOGGLY_AUTH
+            working_directory: test/integration
 
         - store_test_results:
             path: junit
@@ -81,7 +92,11 @@ jobs:
 
       - run: 
           name: Publish Snapshot
-          command: npm publish --access public
+          command: npm publish --access public --tag next
+
+      - run:
+          name: Tag Release in Git
+          command: git tag $(npm view @adobe/helix-cli@next version) && git push origin $(npm view @adobe/helix-cli@next version)
 
       - store_test_results:
           path: junit

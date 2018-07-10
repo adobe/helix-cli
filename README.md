@@ -95,7 +95,7 @@ $ hlx test
 
 ```bash
 # In <my-cool-project>
-$ hlx deploy --no-auto --namespace <your-namespace> --auth <your-key>
+$ hlx deploy --no-auto --wsk-namespace <your-namespace> --wsk-auth <your-key>
 ```
 
-Instead of passing `--auth` as a command line option, you can also set the `HLX_AUTH` environment variable.
+Instead of passing `--wsk-auth` as a command line option, you can also set the `HLX_WSK_AUTH` environment variable.
