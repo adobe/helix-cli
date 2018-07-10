@@ -23,7 +23,9 @@
     <div class="container-fluid">${item}</div>
 </div>
 
-<em>generated at ${it.resource.time}</em>
+<div class="container-fluid">
+    <em>generated at ${it.resource.time}</em>
+</div>
 
 <!-- Including Bootstrap JS (with its jQuery dependency) so that dynamic components work -->
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>

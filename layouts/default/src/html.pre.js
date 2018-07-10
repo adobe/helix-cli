@@ -9,9 +9,6 @@
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-function currentTime() {
-  return `${new Date()}`;
-}
 
 // the most compact way to write a html.pre.js:
 //
@@ -21,7 +18,7 @@ function currentTime() {
 module.exports.pre = next => (payload, secrets, logger) => {
   const mypayload = Object.assign({}, payload);
 
-  mypayload.resource.time = currentTime();
+  mypayload.resource.time = `${new Date()}`;
 
   return next(mypayload, secrets, logger);
-}
+};
