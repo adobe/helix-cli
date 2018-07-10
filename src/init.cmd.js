@@ -38,6 +38,11 @@ const LAYOUT_DEFAULT = {
       msg: 'created src/html.htl with minimal example.',
     },
     {
+      name: 'src/html.pre.js',
+      filter: true,
+      msg: 'created src/html.pre.js with minimal example.',
+    },
+    {
       name: 'package.json',
       filter: true,
       msg: 'created package.json with sensible defaults and required dependencies.',
