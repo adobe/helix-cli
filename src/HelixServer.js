@@ -74,13 +74,30 @@ class HelixServer {
           .then(boundResolve)
           .then(executeTemplate)
           .then((result) => {
+            if (result instanceof Error) {
+              // full response is an error: engine error
+              throw result;
+            }
+
+            if (result.response &&
+              result.response.error &&
+              result.response.error instanceof Error) {
+              // response contains an error: processing error
+              throw result.response.error;
+            }
+
+            if (!result.response.body) {
+              // empty body: nothing to render
+              throw new Error('Response has no body, don\'t know what to do');
+            }
+
             esi.process(result.response.body).then((body) => {
               res.send(body);
             });
           })
           .catch((err) => {
             logger.error(`Error while delivering resource: ${err.stack || err}`);
-            res.status(404).send();
+            res.status(500).send();
           });
       } else {
         // all the other files (css, images...)
