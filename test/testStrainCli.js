@@ -10,7 +10,7 @@
  * governing permissions and limitations under the License.
  */
 
-/* env: mocha */
+/* eslint-env mocha */
 
 'use strict';
 
@@ -22,7 +22,6 @@ const StrainCommand = require('../src/strain.cmd');
 describe('hlx strain', () => {
   // mocked command instance
   let mockStrain;
-  let stubs;
 
   beforeEach(() => {
     mockStrain = sinon.createStubInstance(StrainCommand);
@@ -35,32 +34,14 @@ describe('hlx strain', () => {
     mockStrain.run.returnsThis();
   });
 
-  afterEach(() => {
-    stubs.forEach((s) => { s.restore(); });
-  });
-
-  it('hlx strain required auth', (done) => {
+  it('hlx strain requires auth', (done) => {
     new CLI()
       .withCommandExecutor('strain', mockStrain)
       .onFail((err) => {
-        assert.equal(err, 'Missing required arguments: wsk-namespace, wsk-auth\n'
-          + 'Authentication is required. You can pass the key via the HLX_WSK_AUTH environment variable, too');
+        assert.ok(err.indexOf('required'));
         done();
       })
       .run(['strain']);
-
-    assert.fail('strain w/o arguments should fail.');
-  });
-
-  it('hlx strain requires namespace', (done) => {
-    new CLI()
-      .withCommandExecutor('strain', mockStrain)
-      .onFail((err) => {
-        assert.equal(err, 'Missing required arguments: wsk-namespace, wsk-auth\n'
-          + 'Authentication is required. You can pass the key via the HLX_WSK_AUTH environment variable, too');
-        done();
-      })
-      .run(['strain', '--wsk-auth secret-key']);
 
     assert.fail('strain w/o arguments should fail.');
   });
@@ -71,33 +52,15 @@ describe('hlx strain', () => {
       .run(['strain',
         '--wsk-auth', 'secret-key',
         '--wsk-namespace', 'hlx',
+        '--fastly-auth', 'secret-key',
+        '--fastly-namespace', 'hlx',
       ]);
 
-    sinon.assert.calledWith(mockStrain.withEnableAuto, true);
-    sinon.assert.calledWith(mockStrain.withEnableDirty, false);
     sinon.assert.calledWith(mockStrain.withWskHost, 'runtime.adobe.io');
     sinon.assert.calledWith(mockStrain.withWskAuth, 'secret-key');
     sinon.assert.calledWith(mockStrain.withWskNamespace, 'hlx');
-    sinon.assert.calledWith(mockStrain.withLogglyHost, 'trieloff.loggly.com'); // TODO !!
-    sinon.assert.calledWith(mockStrain.withLogglyAuth, '');
-    sinon.assert.calledWith(mockStrain.withTarget, '.hlx/build');
-    sinon.assert.calledWith(mockStrain.withDocker, 'trieloff/custom-ow-nodejs8:latest');
-    sinon.assert.calledWith(mockStrain.withPrefix, 'git-github-com-example-project-helix--master--');
-    sinon.assert.calledWith(mockStrain.withDefault, undefined);
+    sinon.assert.calledWith(mockStrain.withFastlyNamespace, 'hlx'); // TODO !!
+    sinon.assert.calledWith(mockStrain.withFastlyAuth, 'secret-key');
     sinon.assert.calledOnce(mockStrain.run);
   });
-
-  it('hlx deploy can set api host', () => {
-    new CLI()
-      .withCommandExecutor('deploy', mockStrain)
-      .run(['deploy',
-        '--wsk-auth', 'secret-key',
-        '--wsk-namespace', 'hlx',
-        '--wsk-host', 'stage.runtime.adobe.io',
-      ]);
-
-    sinon.assert.calledWith(mockStrain.withWskHost, 'stage.runtime.adobe.io');
-    sinon.assert.calledOnce(mockStrain.run);
-  });
-
 });

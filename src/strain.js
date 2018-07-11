@@ -30,7 +30,6 @@ module.exports = function strain() {
         .option('wsk-namespace', {
           describe: 'Adobe I/O Runtime Namespace',
           type: 'string',
-          demandOption: true,
         })
         .option('wsk-host', {
           describe: 'Adobe I/O Runtime API Host',
@@ -40,13 +39,10 @@ module.exports = function strain() {
         .option('fastly-namespace', {
           describe: 'CDN Namespace (e.g. Fastly Service ID)',
           type: 'string',
-          demandOption: true,
         })
         .option('fastly-auth', {
           describe: 'API Key for Fastly API ($HLX_FASTLY_AUTH)',
           type: 'string',
-          default: '',
-          demandOption: true,
         })
         .option('dry-run', {
           describe: 'List the actions that would be created, but do not actually deploy',
@@ -58,8 +54,16 @@ module.exports = function strain() {
           'Authentication is required. You can pass the key via the HLX_WSK_AUTH environment variable, too',
         )
         .demandOption(
+          'wsk-namespace',
+          'OpenWhisk Namespace is required',
+        )
+        .demandOption(
           'fastly-auth',
           'Authentication is required. You can pass the key via the HLX_FASTLY_AUTH environment variable, too',
+        )
+        .demandOption(
+          'fastly-namespace',
+          'Fastly Service ID is required',
         )
         .group(['wsk-auth', 'wsk-namespace', 'fastly-auth', 'fastly-namespace'], 'Deployment Options')
         .group(['wsk-host', 'dry-run'], 'Advanced Options')
