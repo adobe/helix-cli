@@ -45,7 +45,7 @@ describe('Integration test for build', () => {
     fse.removeSync(BUILD_DIR_ALT);
   });
 
-  it('up command fails outside git repository', (done) => {
+  it.skip('up command fails outside git repository', (done) => {
     new UpCommand()
       .withFiles([path.join(TEST_DIR, 'src', '*.htl')])
       .withTargetDir(BUILD_DIR)
