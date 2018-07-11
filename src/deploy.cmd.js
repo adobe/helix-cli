@@ -242,7 +242,7 @@ class DeployCommand {
       };
       const newstrains = strainconfig.append(oldstrains, strain);
       if (newstrains.length > oldstrains.length) {
-        console.log('Updating strain config, adding strain ' + strainconfig.name(strain) + ' as configuration has changed');
+        console.log(`Updating strain config, adding strain ${strainconfig.name(strain)} as configuration has changed`);
         fs.writeFileSync(
           STRAIN_FILE,
           strainconfig.write(newstrains),
