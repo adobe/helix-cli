@@ -38,6 +38,7 @@ const SPECS_WITH_FAKE_GIT = [
   path.join(SPEC_ROOT, 'invalid_no_content'),
   path.join(SPEC_ROOT, 'local'),
   path.join(SPEC_ROOT, 'remote'),
+  path.join(SPEC_ROOT, 'emptycfg'),
 ];
 
 function initRepository(dir) {
@@ -48,7 +49,7 @@ function initRepository(dir) {
 }
 
 function initFakeRepository(dir) {
-  fs.ensureDirSync(dir);
+  fs.ensureDirSync(path.resolve(dir, '.git'));
 }
 
 function removeRepository(dir) {
@@ -151,6 +152,19 @@ describe('Helix Project', () => {
         assert.equal(cfg.contentRepo.raw, 'http://raw.localtest.me:5000/helix/content/master');
         assert.equal(cfg._needLocalServer, true);
         assert.deepEqual(cfg.gitConfig, GIT_CONFIG);
+        done();
+      })
+      .catch(done);
+  });
+
+  it('local code and content with empty config', (done) => {
+    const cwd = path.join(SPEC_ROOT, 'emptycfg');
+    new HelixProject()
+      .withCwd(cwd)
+      .init()
+      .then((cfg) => {
+        assert.equal(cfg.contentRepo.raw, 'http://raw.localtest.me:5000/helix/content/master');
+        assert.equal(cfg._needLocalServer, true);
         done();
       })
       .catch(done);
