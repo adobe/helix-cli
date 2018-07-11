@@ -1,21 +1,21 @@
-# these are all the strains that get deployed to production
 - strain:
     name: default
+    code: /trieloff/git-github-com-adobe-helix-cli-git--dirty--
     content:
-      owner: trieloff
-      repo: soupdemo
+      repo: helix-cli
       ref: master
-    code: /trieloff/default/git-github-com-adobe-helix-cli-git--dirty
-
+      owner: adobe
 - strain:
-    name: xdm
-    condition: req.http.host == "xdm.primordialsoup.life"
-    code: /trieloff/default/git-github-com-adobe-helix-cli-git--dirty
-
-- strain:
+    name: 5209e540154653d1
+    code: /trieloff/git-github-com-adobe-helix-cli-git--dirty--
     content:
-      owner: trieloff
-      repo: soupdemo
+      repo: helix-cli
       ref: master
-      root: moscow
-    code: /trieloff/default/git-github-com-adobe-helix-cli-git--dirty
+      owner: adobe
+- strain:
+    name: db5d4350c13924ad
+    code: /trieloff/git-github-com-adobe-helix-cli-git--dirty--
+    content:
+      repo: reactor-user-docs
+      ref: master
+      owner: Adobe-Marketing-Cloud

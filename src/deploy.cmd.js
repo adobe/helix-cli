@@ -20,6 +20,10 @@ const path = require('path');
 const fs = require('fs-extra');
 const yaml = require('js-yaml');
 const $ = require('shelljs');
+const GitUrl = require('@adobe/petridish/src/GitUrl');
+const strainconfig = require('./strain-config');
+
+const STRAIN_FILE = path.resolve(process.cwd(), '.hlx', 'strains.yaml');
 
 class DeployCommand {
   constructor() {
@@ -90,7 +94,6 @@ class DeployCommand {
   static getDefaultContentURL() {
     if (fs.existsSync('helix-config.yaml')) {
       const conf = yaml.safeLoad(fs.readFileSync('helix-config.yaml'));
-      console.log(conf);
       if (conf.contentRepo) {
         return conf.contentRepo;
       }
@@ -225,6 +228,40 @@ class DeployCommand {
 
       return name;
     });
+
+    const giturl = new GitUrl(this._content);
+    if (fs.existsSync(STRAIN_FILE)) {
+      const oldstrains = strainconfig.load(fs.readFileSync(STRAIN_FILE));
+      const strain = {
+        code: `/${this._wsk_namespace}/${this._prefix}`,
+        content: {
+          repo: giturl.repo,
+          ref: giturl.ref,
+          owner: giturl.owner,
+        },
+      };
+      const newstrains = strainconfig.append(oldstrains, strain);
+      if (newstrains.length > oldstrains.length) {
+        console.log('Updating strain config, adding strain ' + strainconfig.name(strain) + ' as configuration has changed');
+        fs.writeFileSync(
+          STRAIN_FILE,
+          strainconfig.write(newstrains),
+        );
+      }
+    } else {
+      console.log('Generating new strain config');
+      const defaultstrain = {
+        name: 'default',
+        code: `/${this._wsk_namespace}/${this._prefix}`,
+        content: {
+          repo: giturl.repo,
+          ref: giturl.ref,
+          owner: giturl.owner,
+        },
+      };
+      fs.writeFileSync(STRAIN_FILE, strainconfig.write([defaultstrain]));
+    }
+
     return this;
   }
 }

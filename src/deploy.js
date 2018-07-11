@@ -136,6 +136,7 @@ module.exports = function deploy() {
         .withPrefix(argv.prefix)
         .withDefault(argv.default)
         .withDryRun(argv.dryRun)
+        .withContent(argv.content)
         .run();
     },
 
