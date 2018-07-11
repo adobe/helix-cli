@@ -67,6 +67,136 @@ describe('Strain Config', () => {
     code: /trieloff/default/git-github-com-adobe-helix-cli-git--dirty
 `;
 
+  const unsorted = `
+# these are all the strains that get deployed to production
+- strain:
+    name: xdm4
+    content:
+      owner: trieloff
+      repo: soupdemo
+      ref: test
+    code: /trieloff/default/git-github-com-adobe-helix-cli-git--dirty
+- strain:
+    name: xdm5
+    content:
+      owner: trieloff
+      repo: soupdemo
+      ref: test
+    code: /trieloff/default/git-github-com-adobe-helix-cli-git--dirty
+- strain:
+    name: xdm3
+    content:
+      owner: trieloff
+      repo: soupdemo
+      ref: test
+    code: /trieloff/default/git-github-com-adobe-helix-cli-git--dirty
+- strain:
+    name: xdmfoo
+    content:
+      owner: trieloff
+      repo: soupdemo
+      ref: foo
+    code: /trieloff/default/git-github-com-adobe-helix-cli-git--dirty
+- strain:
+    name: xdm
+    content:
+      owner: trieloff
+      repo: soupdemo
+      ref: master
+    code: /trieloff/default/git-github-com-adobe-helix-cli-git--dirty
+- strain:
+    name: xdm2
+    content:
+      owner: trieloff
+      repo: soupdemo
+      ref: branch
+    code: /trieloff/default/git-github-com-adobe-helix-cli-git--dirty
+- strain:
+    name: default
+    content:
+      owner: trieloff
+      repo: soupdemo
+      ref: master
+    code: /trieloff/default/git-github-com-adobe-helix-cli-git--dirty
+- strain:
+    content:
+      owner: trieloff
+      repo: soupdemo
+      ref: master-one
+      root: moscow
+    code: /trieloff/default/git-github-com-adobe-helix-cli-git--dirty
+- strain:
+    content:
+      owner: trieloff
+      repo: soupdemo
+      ref: master-1
+      root: moscow
+    code: /trieloff/default/git-github-com-adobe-helix-cli-git--dirty
+- strain:
+    content:
+      owner: trieloff
+      repo: soupdemo
+      ref: master-2
+      root: moscow
+    code: /trieloff/default/git-github-com-adobe-helix-cli-git--dirty
+- strain:
+    content:
+      owner: trieloff
+      repo: soupdemo
+      ref: master-3
+      root: moscow
+    code: /trieloff/default/git-github-com-adobe-helix-cli-git--dirty
+- strain:
+    content:
+      owner: trieloff
+      repo: soupdemo
+      ref: master-4
+      root: moscow
+    code: /trieloff/default/git-github-com-adobe-helix-cli-git--dirty
+- strain:
+    content:
+      owner: trieloff
+      repo: soupdemo
+      ref: master-5
+      root: moscow
+    code: /trieloff/default/git-github-com-adobe-helix-cli-git--dirty
+- strain:
+    content:
+      owner: trieloff
+      repo: soupdemo
+      ref: master-6
+      root: moscow
+    code: /trieloff/default/git-github-com-adobe-helix-cli-git--dirty
+- strain:
+    content:
+      owner: trieloff
+      repo: soupdemo
+      ref: master-7
+      root: moscow
+    code: /trieloff/default/git-github-com-adobe-helix-cli-git--dirty
+- strain:
+    content:
+      owner: trieloff
+      repo: soupdemo
+      ref: master-8
+      root: moscow
+    code: /trieloff/default/git-github-com-adobe-helix-cli-git--dirty
+- strain:
+    content:
+      owner: trieloff
+      repo: soupdemo
+      ref: master-9
+      root: moscow
+    code: /trieloff/default/git-github-com-adobe-helix-cli-git--dirty
+- strain:
+    content:
+      owner: trieloff
+      repo: soupdemo
+      ref: master
+      root: moscow
+    code: /trieloff/default/git-github-com-adobe-helix-cli-git--dirty
+`;
+
   const result = `- strain:
     name: default
     content:
@@ -104,15 +234,29 @@ describe('Strain Config', () => {
     assert.equal(strainconfig.write(strainconfig.load(result)), result);
   });
 
+  it('Strains get sorted in the right way', () => {
+    const sorted = strainconfig.load(strainconfig.write(strainconfig.load(unsorted)));
+    assert.equal('default', sorted[0].name);
+  });
+
   it('New strains can be appended', () => {
     const mystrains = strainconfig.load(config);
-    const newstrains = strainconfig.append(mystrains, {name: "xdm-address", content: {owner: 'adobe', repo: "xdm", ref: 'address'}});
-    assert.equal(newstrains.length, 4);
+    const newstrains = strainconfig.append(
+      strainconfig.append(mystrains, {
+        name: 'xdm-address',
+        content: { owner: 'adobe', repo: 'xdm', ref: 'address' },
+      }),
+      { content: { owner: 'adobe', repo: 'xdm', ref: 'appendanother' } },
+    );
+    assert.equal(newstrains.length, 5);
   });
 
   it('New strains override existing strains with same name', () => {
     const mystrains = strainconfig.load(config);
-    const newstrains = strainconfig.append(mystrains, {name: "xdm", content: {owner: 'adobe', repo: "xdm", ref: 'address'}});
+    const newstrains = strainconfig.append(mystrains, {
+      name: 'xdm',
+      content: { owner: 'adobe', repo: 'xdm', ref: 'address' },
+    });
     assert.equal(newstrains.length, 3);
   });
 });

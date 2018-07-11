@@ -13,7 +13,6 @@
 const yaml = require('js-yaml');
 const hash = require('object-hash');
 
-
 function anon(stname) {
   return !!stname.match(/^[0-9a-f]{16}$/);
 }
@@ -75,7 +74,7 @@ function write(strains) {
 
 function append(strains, strain) {
   const stname = strain.name || name(strain);
-  const oldstrains = strains.filter(e => e.name!==stname);
+  const oldstrains = strains.filter(e => e.name !== stname);
   oldstrains.push(strain);
   return oldstrains;
 }
@@ -91,5 +90,5 @@ module.exports = {
   load,
   name,
   write,
-  append
+  append,
 };
