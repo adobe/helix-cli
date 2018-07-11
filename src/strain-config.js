@@ -13,6 +13,11 @@
 const yaml = require('js-yaml');
 const hash = require('object-hash');
 
+
+function anon(stname) {
+  return !!stname.match(/^[0-9a-f]{16}$/);
+}
+
 function name(strain) {
   if (strain) {
     return hash.sha1(strain).substr(24);
@@ -21,7 +26,7 @@ function name(strain) {
 }
 
 function clean(strain) {
-  if (strain.strain && strain.strain.name) {
+  if (strain.strain && strain.strain.name && !anon(strain.strain.name)) {
     return strain.strain;
   }
   return { name: name(strain.strain), ...strain.strain };
@@ -38,6 +43,36 @@ function validate(strain) {
   );
 }
 
+function wrap(strain) {
+  return { strain };
+}
+
+function compare(straina, strainb) {
+  // default strain always comes first
+  if (straina.strain.name === 'default') {
+    return -1;
+  } else if (strainb.strain.name === 'default') {
+    return 1;
+  }
+  // named strains come next
+  const anona = anon(straina.strain.name);
+  const anonb = anon(strainb.strain.name);
+  if (anonb && !anona) {
+    return -1;
+  } else if (anona && !anonb) {
+    return 1;
+  }
+  return straina.strain.name.localeCompare(strainb.strain.name);
+}
+
+function write(strains) {
+  return yaml.safeDump(strains
+    .map(wrap)
+    .map(clean)
+    .map(wrap)
+    .sort(compare));
+}
+
 function load(yml) {
   return yaml
     .safeLoad(yml)
@@ -48,4 +83,5 @@ function load(yml) {
 module.exports = {
   load,
   name,
+  write,
 };

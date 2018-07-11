@@ -19,6 +19,13 @@ describe('Strain Config', () => {
   const config = `
 # these are all the strains that get deployed to production
 - strain:
+    content:
+      owner: trieloff
+      repo: soupdemo
+      ref: master
+      root: moscow
+    code: /trieloff/default/git-github-com-adobe-helix-cli-git--dirty
+- strain:
     name: default
     content:
       owner: trieloff
@@ -33,14 +40,6 @@ describe('Strain Config', () => {
       owner: adobe
       repo: xdm
       ref: master
-    code: /trieloff/default/git-github-com-adobe-helix-cli-git--dirty
-
-- strain:
-    content:
-      owner: trieloff
-      repo: soupdemo
-      ref: master
-      root: moscow
     code: /trieloff/default/git-github-com-adobe-helix-cli-git--dirty
 `;
 
@@ -68,12 +67,41 @@ describe('Strain Config', () => {
     code: /trieloff/default/git-github-com-adobe-helix-cli-git--dirty
 `;
 
+  const result = `- strain:
+    name: default
+    content:
+      owner: trieloff
+      repo: soupdemo
+      ref: master
+    code: /trieloff/default/git-github-com-adobe-helix-cli-git--dirty
+- strain:
+    name: xdm
+    condition: req.http.host == "xdm.primordialsoup.life"
+    content:
+      owner: adobe
+      repo: xdm
+      ref: master
+    code: /trieloff/default/git-github-com-adobe-helix-cli-git--dirty
+- strain:
+    name: bbed5838db880907
+    content:
+      owner: trieloff
+      repo: soupdemo
+      ref: master
+      root: moscow
+    code: /trieloff/default/git-github-com-adobe-helix-cli-git--dirty
+`;
+
   it('config can be parsed', () => {
     assert.equal(3, strainconfig.load(config).length);
   });
 
   it('invalid config does not throw errors', () => {
     assert.equal(1, strainconfig.load(invalid).length);
+  });
+
+  it('Can be saved as YAML', () => {
+    assert.equal(strainconfig.write(strainconfig.load(result)), result);
   });
 });
 
