@@ -1,0 +1,51 @@
+/*
+ * Copyright 2018 Adobe. All rights reserved.
+ * This file is licensed to you under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License. You may obtain a copy
+ * of the License at http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under
+ * the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR REPRESENTATIONS
+ * OF ANY KIND, either express or implied. See the License for the specific language
+ * governing permissions and limitations under the License.
+ */
+
+const yaml = require('js-yaml');
+const hash = require('object-hash');
+
+function name(strain) {
+  if (strain) {
+    return hash.sha1(strain).substr(24);
+  }
+  return null;
+}
+
+function clean(strain) {
+  if (strain.strain && strain.strain.name) {
+    return strain.strain;
+  }
+  return { name: name(strain.strain), ...strain.strain };
+}
+
+function validate(strain) {
+  return (
+    !!strain &&
+    strain.name &&
+    strain.content &&
+    strain.content.owner &&
+    strain.content.repo &&
+    strain.code
+  );
+}
+
+function load(yml) {
+  return yaml
+    .safeLoad(yml)
+    .map(clean)
+    .filter(validate);
+}
+
+module.exports = {
+  load,
+  name,
+};
