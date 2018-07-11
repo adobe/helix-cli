@@ -5,7 +5,7 @@ his is an early POC to see how local development could work w/o running a runtim
 
 Status
 ------
-[![codecov](https://codecov.io/gh/adobe/petridish/branch/master/graph/badge.svg)](https://codecov.io/gh/adobe/petridish)
+[![codecov](https://codecov.io/gh/adobe/petridish/branch/master/graph/badge.svg)](https://codecov.io/gh/adobe/petridish) [![Greenkeeper badge](https://badges.greenkeeper.io/adobe/petridish.svg)](https://greenkeeper.io/)
 
 Setup
 -----------

@@ -15,8 +15,8 @@ const util = require('util');
 const path = require('path');
 const yaml = require('js-yaml');
 const _ = require('lodash');
-const GitUrl = require('./GitUrl.js');
 const gitServer = require('@adobe/git-server/lib/server.js');
+const GitUrl = require('./GitUrl.js');
 const HelixServer = require('./HelixServer.js');
 const logger = require('./logger.js');
 
@@ -149,6 +149,7 @@ class HelixProject {
       this._cfg = yaml.safeLoad(await readFile(cfgPath, 'utf8'));
     }
   }
+
   async checkPaths() {
     const idxPath = path.resolve(this._cwd, INDEX_MD);
     if (await isFile(idxPath)) {
