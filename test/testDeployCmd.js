@@ -40,11 +40,11 @@ describe('hlx deploy (Integration)', () => {
         '--dry-run',
         '--target', 'test/integration/.hlx/build',
       ]);
-      assert.ok(fs.existsSync('.hlx/strains.yaml'));
-      const secondrun = fs.readFileSync('.hlx/strains.yaml').toString();
-      assert.equal(firstrun, secondrun);
+    assert.ok(fs.existsSync('.hlx/strains.yaml'));
+    const secondrun = fs.readFileSync('.hlx/strains.yaml').toString();
+    assert.equal(firstrun, secondrun);
 
-      new CLI()
+    new CLI()
       .run(['deploy',
         '--wsk-auth', 'secret-key',
         '--wsk-namespace', 'hlx',
@@ -54,9 +54,9 @@ describe('hlx deploy (Integration)', () => {
         '--content', 'https://github.com/adobe/helix-cli/tree/implement-init',
         '--target', 'test/integration/.hlx/build',
       ]);
-      assert.ok(fs.existsSync('.hlx/strains.yaml'));
-      const thirdrun = fs.readFileSync('.hlx/strains.yaml').toString();
-      assert.notEqual(firstrun, thirdrun);
+    assert.ok(fs.existsSync('.hlx/strains.yaml'));
+    const thirdrun = fs.readFileSync('.hlx/strains.yaml').toString();
+    assert.notEqual(firstrun, thirdrun);
 
     done();
   }).timeout(5000);

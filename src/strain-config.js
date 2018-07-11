@@ -75,8 +75,8 @@ function write(strains) {
 function append(strains, strain) {
   if (!strain.name) {
     const olddefault = strains[0];
-    const newdefault = Object.assign({name: 'default', ...strain});
-    if (hash.sha1(olddefault)==hash.sha1(newdefault)) {
+    const newdefault = Object.assign({ name: 'default', ...strain });
+    if (hash.sha1(olddefault) === hash.sha1(newdefault)) {
       // this is a non-substantial update to the default, not appending
       return strains;
     }
