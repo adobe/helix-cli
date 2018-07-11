@@ -259,6 +259,7 @@ class DeployCommand {
           owner: giturl.owner,
         },
       };
+      fs.mkdirpSync(path.resolve(process.cwd(), '.hlx'));
       fs.writeFileSync(STRAIN_FILE, strainconfig.write([defaultstrain]));
     }
 
