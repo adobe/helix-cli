@@ -73,6 +73,13 @@ function write(strains) {
     .sort(compare));
 }
 
+function append(strains, strain) {
+  const stname = strain.name || name(strain);
+  const oldstrains = strains.filter(e => e.name!==stname);
+  oldstrains.push(strain);
+  return oldstrains;
+}
+
 function load(yml) {
   return yaml
     .safeLoad(yml)
@@ -84,4 +91,5 @@ module.exports = {
   load,
   name,
   write,
+  append
 };

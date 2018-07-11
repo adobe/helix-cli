@@ -103,6 +103,18 @@ describe('Strain Config', () => {
   it('Can be saved as YAML', () => {
     assert.equal(strainconfig.write(strainconfig.load(result)), result);
   });
+
+  it('New strains can be appended', () => {
+    const mystrains = strainconfig.load(config);
+    const newstrains = strainconfig.append(mystrains, {name: "xdm-address", content: {owner: 'adobe', repo: "xdm", ref: 'address'}});
+    assert.equal(newstrains.length, 4);
+  });
+
+  it('New strains override existing strains with same name', () => {
+    const mystrains = strainconfig.load(config);
+    const newstrains = strainconfig.append(mystrains, {name: "xdm", content: {owner: 'adobe', repo: "xdm", ref: 'address'}});
+    assert.equal(newstrains.length, 3);
+  });
 });
 
 describe('Generated names are stable', () => {
