@@ -94,6 +94,11 @@ module.exports = function deploy() {
           type: 'boolean',
           default: false,
         })
+        .option('content', {
+          describe: 'Overrides the GitHub content URL',
+          type: 'string',
+          default: DeployCommand.getDefaultContentURL(),
+        })
         .array('default')
         .nargs('default', 2)
         .coerce('default', arg => arg.reduce((result, value, index, array) => {
@@ -108,7 +113,7 @@ module.exports = function deploy() {
           'Authentication is required. You can pass the key via the HLX_WSK_AUTH environment variable, too',
         )
         .group(['auto', 'wsk-auth', 'wsk-namespace', 'default', 'dirty'], 'Deployment Options')
-        .group(['wsk-host', 'loggly-host', 'loggly-auth', 'target', 'docker', 'prefix'], 'Advanced Options')
+        .group(['wsk-host', 'loggly-host', 'loggly-auth', 'target', 'docker', 'prefix', 'content'], 'Advanced Options')
         .help();
     },
     handler: async (argv) => {

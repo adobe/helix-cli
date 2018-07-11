@@ -17,7 +17,8 @@
 const ow = require('openwhisk');
 const glob = require('glob');
 const path = require('path');
-const fs = require('fs');
+const fs = require('fs-extra');
+const yaml = require('js-yaml');
 const $ = require('shelljs');
 
 class DeployCommand {
@@ -36,6 +37,7 @@ class DeployCommand {
     this._default = null;
     this._enableDirty = false;
     this._dryRun = false;
+    this._content = null;
   }
 
   static isDirty() {
@@ -83,6 +85,20 @@ class DeployCommand {
       })
       .stdout.replace(/\n/, '')
       .replace(/[\W]/g, '-');
+  }
+
+  static getDefaultContentURL() {
+    if (fs.existsSync('helix-config.yaml')) {
+      const conf = yaml.safeLoad(fs.readFileSync('helix-config.yaml'));
+      console.log(conf);
+      if (conf.contentRepo) {
+        return conf.contentRepo;
+      }
+    }
+    const giturl = $.exec('git config --get remote.origin.url', {
+      silent: true,
+    }).stdout.replace(/\n/, '');
+    return giturl;
   }
 
   withEnableAuto(value) {
@@ -142,6 +158,11 @@ class DeployCommand {
 
   withDryRun(value) {
     this._dryRun = value;
+    return this;
+  }
+
+  withContent(value) {
+    this._content = value;
     return this;
   }
 
