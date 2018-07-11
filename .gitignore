@@ -1,7 +1,9 @@
 coverage
-.hlx/
+.hlx/build
+.hlx/cache
 .nyc_output/
 node_modules/
 pipeline.log
-test/integration/.hlx/
+test/integration/.hlx/build
+test/integration/.hlx/cache
 junit
