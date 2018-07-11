@@ -146,7 +146,7 @@ class HelixProject {
   async loadConfig() {
     const cfgPath = path.resolve(this._cwd, HELIX_CONFIG);
     if (await isFile(cfgPath)) {
-      this._cfg = yaml.safeLoad(await readFile(cfgPath, 'utf8'));
+      this._cfg = yaml.safeLoad(await readFile(cfgPath, 'utf8')) || {};
     }
   }
 

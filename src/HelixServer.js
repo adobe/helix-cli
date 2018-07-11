@@ -79,9 +79,9 @@ class HelixServer {
               throw result;
             }
 
-            if (result.response &&
-              result.response.error &&
-              result.response.error instanceof Error) {
+            if (result.response
+              && result.response.error
+              && result.response.error instanceof Error) {
               // response contains an error: processing error
               throw result.response.error;
             }
