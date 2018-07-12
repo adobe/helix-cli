@@ -263,7 +263,7 @@ class StrainCommand {
           const strainjobs = [];
           strains.map((strain) => {
             strainjobs.push(this.putDict('strain_action_roots', strain.name, strain.code).then(() => {
-              console.log(`👾  Set action root for strain   ${strain.name}`);
+              console.log(`👾  Set action root for strain  ${strain.name}`);
             }));
             strainjobs.push(this.putDict('strain_owners', strain.name, strain.content.owner).then(() => {
               console.log(`🏢  Set owner for strain        ${strain.name}`);
