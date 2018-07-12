@@ -50,7 +50,6 @@ class StrainCommand {
       strain_refs: null,
       strain_repos: null,
       strain_root_paths: null,
-      super_new: null,
     };
   }
 
@@ -264,17 +263,22 @@ class StrainCommand {
           const strainjobs = [];
           strains.map((strain) => {
             strainjobs.push(this.putDict('strain_action_roots', strain.name, strain.code).then(() => {
-              console.log(`👾  Set action root for strain ${strain.name}`);
+              console.log(`👾  Set action root for strain   ${strain.name}`);
             }));
             strainjobs.push(this.putDict('strain_owners', strain.name, strain.content.owner).then(() => {
-              console.log(`🏢  Set owner for strain       ${strain.name}`);
+              console.log(`🏢  Set owner for strain        ${strain.name}`);
             }));
             strainjobs.push(this.putDict('strain_repos', strain.name, strain.content.repo).then(() => {
-              console.log(`🌳  Set repo for strain        ${strain.name}`);
+              console.log(`🌳  Set repo for strain         ${strain.name}`);
             }));
             if (strain.content.ref) {
               strainjobs.push(this.putDict('strain_refs', strain.name, strain.content.ref).then(() => {
-                console.log(`🏷  Set ref for strain         ${strain.name}`);
+                console.log(`🏷  Set ref for strain          ${strain.name}`);
+              }));
+            }
+            if (strain.content.root) {
+              strainjobs.push(this.putDict('strain_root_paths', strain.name, strain.content.root).then(() => {
+                console.log(`🌲  Set content root for strain ${strain.name}`);
               }));
             }
             return strain;
