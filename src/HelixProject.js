@@ -46,7 +46,7 @@ const GIT_SERVER_CONFIG = {
   repoRoot: '.',
   listen: {
     http: {
-      // port: 5000,
+      port: 0,
       host: '0.0.0.0',
     },
   },
@@ -94,9 +94,10 @@ class HelixProject {
     this._repoPath = '';
     this._cfg = {};
     this._gitConfig = _.cloneDeep(GIT_SERVER_CONFIG);
+    this._gitState = null;
     this._needLocalServer = false;
     this._buildDir = DEFAULT_BUILD_DIR;
-    this._contentRepo = '';
+    this._contentRepo = null;
     this._server = new HelixServer(this);
   }
 
@@ -193,7 +194,6 @@ class HelixProject {
         path: this._repoPath,
       };
       this._needLocalServer = true;
-      this._contentRepo = new GitUrl(`http://${GIT_LOCAL_HOST}:5000/${GIT_LOCAL_OWNER}/${GIT_LOCAL_CONTENT_REPO}`);
     } else {
       throw new Error('Invalid config. No "content" location specified and no "README.md" or "index.md" found.');
     }
@@ -211,19 +211,19 @@ class HelixProject {
 
   async startGitServer() {
     logger.info('Launching local git server for development...');
-    await gitServer.start(this._gitConfig);
+    this._gitState = await gitServer.start(this._gitConfig);
   }
 
-  // eslint-disable-next-line class-methods-use-this
   async stopGitServer() {
-    logger.info('Stopping local git server for development...');
-    // todo
-    // await gitServer.stop();
+    logger.info('Stopping local git server..');
+    await gitServer.stop();
+    this._gitState = null;
   }
 
   async start() {
     if (this._needLocalServer) {
       await this.startGitServer();
+      this._contentRepo = new GitUrl(`http://${GIT_LOCAL_HOST}:${this._gitState.httpPort}/${GIT_LOCAL_OWNER}/${GIT_LOCAL_CONTENT_REPO}`);
     }
 
     logger.info('Launching petridish server for development...');

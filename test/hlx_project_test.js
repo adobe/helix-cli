@@ -118,6 +118,7 @@ describe('Helix Project', () => {
       configPath: '<internal>',
       listen: {
         http: {
+          port: 0,
           host: '0.0.0.0',
         },
       },
@@ -149,7 +150,7 @@ describe('Helix Project', () => {
       .withCwd(cwd)
       .init()
       .then((cfg) => {
-        assert.equal(cfg.contentRepo.raw, 'http://raw.localtest.me:5000/helix/content/master');
+        assert.equal(cfg.contentRepo, undefined);
         assert.equal(cfg._needLocalServer, true);
         assert.deepEqual(cfg.gitConfig, GIT_CONFIG);
         done();
@@ -163,7 +164,7 @@ describe('Helix Project', () => {
       .withCwd(cwd)
       .init()
       .then((cfg) => {
-        assert.equal(cfg.contentRepo.raw, 'http://raw.localtest.me:5000/helix/content/master');
+        assert.equal(cfg.contentRepo, undefined);
         assert.equal(cfg._needLocalServer, true);
         done();
       })
@@ -225,6 +226,31 @@ describe('Helix Project', () => {
       .then((cfg) => {
         assert.equal(false, cfg.started);
         done();
+      })
+      .catch(done);
+  });
+
+  it('can start and stop local project', (done) => {
+    const cwd = path.join(SPEC_ROOT, 'local');
+    const project = new HelixProject()
+      .withCwd(cwd)
+      .withHttpPort(0);
+    project
+      .init()
+      .then(cfg => cfg.start())
+      .then((cfg) => {
+        assert.equal(true, cfg.started);
+        assert.ok(/http:\/\/raw.localtest.me:\d+\/helix\/content\/master/.test(cfg.contentRepo.raw));
+        return cfg.stop();
+      })
+      .then((cfg) => {
+        assert.equal(false, cfg.started);
+        done();
+      })
+      .catch((err) => {
+        project.stop().then(() => {
+          done(err);
+        });
       })
       .catch(done);
   });
