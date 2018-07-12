@@ -31,6 +31,7 @@ describe('hlx deploy (Integration)', () => {
     assert.ok(fs.existsSync('.hlx/strains.yaml'));
     const firstrun = fs.readFileSync('.hlx/strains.yaml').toString();
 
+    fs.removeSync('.hlx');
     new CLI()
       .run(['deploy',
         '--wsk-auth', 'secret-key',
@@ -42,7 +43,7 @@ describe('hlx deploy (Integration)', () => {
       ]);
     assert.ok(fs.existsSync('.hlx/strains.yaml'));
     const secondrun = fs.readFileSync('.hlx/strains.yaml').toString();
-    assert.equal(firstrun, secondrun);
+    assert.equal(firstrun, secondrun, 'generated strains.yaml differs between first and second run');
 
     new CLI()
       .run(['deploy',
