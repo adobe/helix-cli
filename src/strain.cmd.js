@@ -18,7 +18,7 @@ const request = require('request-promise');
 const Promise = require('bluebird');
 const path = require('path');
 const { toBase64 } = require('request/lib/helpers');
-const strainconfig = require('./strain-config');
+const strainconfig = require('./strain-config-utils');
 
 const STRAIN_FILE = path.resolve(process.cwd(), '.hlx', 'strains.yaml');
 

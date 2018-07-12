@@ -13,7 +13,7 @@
 /* eslint-env mocha */
 
 const assert = require('assert');
-const strainconfig = require('../src/strain-config');
+const strainconfig = require('../src/strain-config-utils');
 
 describe('Strain Config', () => {
   const config = `

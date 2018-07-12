@@ -21,7 +21,7 @@ const fs = require('fs-extra');
 const yaml = require('js-yaml');
 const $ = require('shelljs');
 const GitUrl = require('@adobe/petridish/src/GitUrl');
-const strainconfig = require('./strain-config');
+const strainconfig = require('./strain-config-utils');
 
 const STRAIN_FILE = path.resolve(process.cwd(), '.hlx', 'strains.yaml');
 
