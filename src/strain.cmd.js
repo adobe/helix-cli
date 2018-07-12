@@ -247,7 +247,7 @@ class StrainCommand {
       this.initDictionaries();
 
 
-      const owsecret = `Basic ${toBase64(`${this._wsk_namespace}:${this._wsk_auth}`)}`;
+      const owsecret = `Basic ${toBase64(`${this._wsk_auth}`)}`;
       this.putDict('secrets', 'OPENWHISK_AUTH', owsecret).then((_s) => {
         console.log('🗝  Enabled Fastly to call secure OpenWhisk actions');
       });
