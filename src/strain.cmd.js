@@ -15,6 +15,7 @@
 
 const fs = require('fs-extra');
 const request = require('request-promise');
+const Promise = require('bluebird');
 const path = require('path');
 const { toBase64 } = require('request/lib/helpers');
 const strainconfig = require('./strain-config');
@@ -241,7 +242,7 @@ class StrainCommand {
   }
 
   async run() {
-    console.log('Publishing strains');
+    console.log('🐑 👾 🚀  hlx is publishing strains');
 
     this.cloneVersion((_r) => {
       this.initDictionaries();
@@ -259,28 +260,32 @@ class StrainCommand {
           const strainsVCL = StrainCommand.getVCL(strains);
           this.setVCL(strainsVCL, 'strains.vcl');
 
-          this.publishVersion(() => {
-            // waiting for the new version to be activated before populating
-            // dictionaries, so that new dictionaries can be used
-            strains.map((strain) => {
-              this.putDict('strain_action_roots', strain.name, strain.code).then(() => {
-                console.log(`👾  Set action root for strain ${strain.name}`);
-              });
-              this.putDict('strain_owners', strain.name, strain.content.owner).then(() => {
-                console.log(`🏢  Set owner for strain       ${strain.name}`);
-              });
-              this.putDict('strain_repos', strain.name, strain.content.repo).then(() => {
-                console.log(`🌳  Set repo for strain        ${strain.name}`);
-              });
-              if (strain.content.ref) {
-                this.putDict('strain_refs', strain.name, strain.content.ref).then(() => {
-                  console.log(`🏷  Set ref for strain         ${strain.name}`);
-                });
-              }
-              return strain;
-            });
 
-            this.purgeAll();
+          const strainjobs = [];
+          strains.map((strain) => {
+            strainjobs.push(this.putDict('strain_action_roots', strain.name, strain.code).then(() => {
+              console.log(`👾  Set action root for strain ${strain.name}`);
+            }));
+            strainjobs.push(this.putDict('strain_owners', strain.name, strain.content.owner).then(() => {
+              console.log(`🏢  Set owner for strain       ${strain.name}`);
+            }));
+            strainjobs.push(this.putDict('strain_repos', strain.name, strain.content.repo).then(() => {
+              console.log(`🌳  Set repo for strain        ${strain.name}`);
+            }));
+            if (strain.content.ref) {
+              strainjobs.push(this.putDict('strain_refs', strain.name, strain.content.ref).then(() => {
+                console.log(`🏷  Set ref for strain         ${strain.name}`);
+              }));
+            }
+            return strain;
+          });
+
+          Promise.all(strainjobs).then(() => {
+            console.log('📕  All dicts have been updated.');
+
+            this.publishVersion(() => {
+              this.purgeAll();
+            });
           });
         }
       });

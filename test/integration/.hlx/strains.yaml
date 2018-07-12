@@ -13,6 +13,14 @@
       ref: master
       owner: trieloff
 - strain:
+    name: xdm
+    code: /trieloff/default/git-github-com-adobe-helix-cli-git--dirty--
+    content:
+      repo: xdm
+      ref: master
+      owner: adobe
+    condition: req.http.host == "xdm.primordialsoup.life"
+- strain:
     name: 5209e540154653d1
     code: /trieloff/default/git-github-com-adobe-helix-cli-git--dirty--
     condition: req.http.host == "helix.primordialsoup.life"
