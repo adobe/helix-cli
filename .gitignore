@@ -1,6 +1,7 @@
 coverage
 .hlx/build
 .hlx/cache
+.hlx/strains.yaml
 .nyc_output/
 node_modules/
 pipeline.log
