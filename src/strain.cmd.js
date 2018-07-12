@@ -11,12 +11,14 @@
  */
 
 /* eslint no-console: off */
+/* eslint no-unused-vars: ["error", { "argsIgnorePattern": "^_" }] */
 
 const fs = require('fs-extra');
 const request = require('request-promise');
 const path = require('path');
 const { toBase64 } = require('request/lib/helpers');
 const strainconfig = require('./strain-config');
+
 const STRAIN_FILE = path.resolve(process.cwd(), '.hlx', 'strains.yaml');
 
 
@@ -33,9 +35,9 @@ class StrainCommand {
     this._options = {
       headers: {
         'User-Agent': 'Project Helix CLI',
-        'Accept': 'application/json'
+        Accept: 'application/json',
       },
-      json: true
+      json: true,
     };
 
     this._version = null;
@@ -47,7 +49,7 @@ class StrainCommand {
       strain_refs: null,
       strain_repos: null,
       strain_root_paths: null,
-      super_new: null
+      super_new: null,
     };
   }
 
@@ -82,29 +84,32 @@ class StrainCommand {
     return this;
   }
 
-  options(path) {
-    return Object.assign({uri: `https://api.fastly.com/service/${this._fastly_namespace}${path}`}, this._options);
+  options(pathext) {
+    return Object.assign({ uri: `https://api.fastly.com/service/${this._fastly_namespace}${pathext}` }, this._options);
   }
 
-  async version(path) {
-    const ver = await this.getCurrentVersion()
-    return this.options('/version/' + ver + path);
+  async version(pathext) {
+    const ver = await this.getCurrentVersion();
+    return this.options(`/version/${ver}${pathext}`);
   }
 
-  putOpts(path, value) {
-    const ver = this.options(path);
-    return Object.assign({method: 'PUT', form: {
-      item_value: value
-    }}, ver);
+  putOpts(pathext, value) {
+    const ver = this.options(pathext);
+    return Object.assign({
+      method: 'PUT',
+      form: {
+        item_value: value,
+      },
+    }, ver);
   }
 
-  async putVersionOpts(path) {
-    const ver = await this.version(path);
-    return Object.assign({method: 'PUT'}, ver);
+  async putVersionOpts(pathext) {
+    const ver = await this.version(pathext);
+    return Object.assign({ method: 'PUT' }, ver);
   }
 
   async getService(refresh) {
-    if (!this._service||refresh) {
+    if (!this._service || refresh) {
       this._service = await request(this.options(''));
     }
     return this._service;
@@ -123,10 +128,11 @@ class StrainCommand {
     if (Object.values(this._dictionaries).some(e => e == null)) {
       const opts = await this.version('/dictionary');
       const dicts = await request(opts);
-      Object.values(dicts).map(dict => {
+      Object.values(dicts).map((dict) => {
         if (!dict.deleted_at) {
           this._dictionaries[dict.name] = dict.id;
         }
+        return dict.id;
       });
     }
 
@@ -135,19 +141,22 @@ class StrainCommand {
 
   async initDictionaries() {
     const dictionaries = await this.getDictionaries();
-    const missingdicts = Object.entries(dictionaries).filter(([key, value]) => value === null).map(([key, value]) => key);
+    const missingdicts = Object.entries(dictionaries)
+      .filter(([_key, value]) => value === null)
+      .map(([key, _value]) => key);
     if (missingdicts.length > 0) {
       const baseopts = await this.version('/dictionary');
-      missingdicts.map(dict => {
+      missingdicts.map((dict) => {
         const opts = Object.assign({
           method: 'POST',
           form: {
             name: dict,
-            write_only: true
-          }
+            write_only: true,
+          },
         }, baseopts);
-        request(opts).then(r => {
-          console.log('📕  Dictionary ' + r.name + ' has been created');
+        return request(opts).then((r) => {
+          console.log(`📕  Dictionary ${r.name} has been created`);
+          return r;
         });
       });
     }
@@ -155,8 +164,8 @@ class StrainCommand {
 
   async cloneVersion(next) {
     const cloneOpts = await this.putVersionOpts('/clone');
-    return request(cloneOpts).then(r => {
-      console.log('🐑  Cloned latest version, version ' + r.number + ' is ready');
+    return request(cloneOpts).then((r) => {
+      console.log(`🐑  Cloned latest version, version ${r.number} is ready`);
       this._version = r.number;
       if (next) {
         next(r);
@@ -166,8 +175,8 @@ class StrainCommand {
 
   async publishVersion(next) {
     const actOpts = await this.putVersionOpts('/activate');
-    return request(actOpts).then(r => {
-      console.log('🚀  Activated latest version, version ' + r.number + ' is live');
+    return request(actOpts).then((r) => {
+      console.log(`🚀  Activated latest version, version ${r.number} is live`);
       this._version = r.number;
       if (next) {
         next(r);
@@ -175,57 +184,74 @@ class StrainCommand {
     });
   }
 
-  async putDict(dict, key ,value) {
+  async putDict(dict, key, value) {
     await this.getDictionaries();
-    const mydict =this._dictionaries[dict];
+    const mydict = this._dictionaries[dict];
     if (!mydict) {
-      console.log(dict + '  does not exist');
-    } else {
-      const opts = await this.putOpts('/dictionary/' + mydict + '/item/' + key, value);
-      return await request(opts);
+      console.error(`${dict}  does not exist`);
+      return null;
     }
+    const opts = await this.putOpts(`/dictionary/${mydict}/item/${key}`, value);
+    return request(opts);
+  }
+
+  getVCL(strains) {
+    return strains
+      .filter(strain => strain.condition)
+      .reduce((vcl, {name, condition}) => {
+        // the following is in VCL (Varnish Configuration Language) syntax
+        return vcl + `if (${condition}) {
+  set req.http.X-Strain = "${name}";
+} else `;
+      }, "# This file handles the strain resolution\n") + ` {
+  set req.http.X-Strain = "default";
+}`;
   }
 
   async run() {
     console.log('Publishing strains');
 
-    this.cloneVersion((r) => {
-
+    this.cloneVersion((_r) => {
       this.initDictionaries();
 
-      this.publishVersion(r => {
-        console.log(r);
-      })
-    });
 
-    return; //for now
+      const owsecret = `Basic ${toBase64(`${this._wsk_namespace}:${this._wsk_auth}`)}`;
+      this.putDict('secrets', 'OPENWHISK_AUTH', owsecret).then((_s) => {
+        console.log('🗝  Enabled Fastly to call secure OpenWhisk actions');
+      });
 
-    const owsecret = "Basic " + toBase64(this._wsk_namespace + ':' + this._wsk_auth);
-    this.putDict('secrets', 'OPENWHISK_AUTH', owsecret).then(r => {
-      console.log('🗝  Enabled Fastly to call secure OpenWhisk actions');
-    });
+      fs.readFile(STRAIN_FILE, (err, content) => {
+        if (!err) {
+          const strains = strainconfig.load(content);
 
-    fs.readFile(STRAIN_FILE, (err, content) => {
-      if (!err) {
-        const strains = strainconfig.load(content);
-        strains.map(strain => {
-          this.putDict('strain_action_roots', strain.name ,strain.code).then(r => {
-            console.log('👾  Set action root for strain ' + strain.name);
-          });
-          this.putDict('strain_owners', strain.name ,strain.content.owner).then(r => {
-            console.log('🏢  Set owner for strain       ' + strain.name);
-          });
-          this.putDict('strain_repos', strain.name ,strain.content.repo).then(r => {
-            console.log('🌳  Set repo for strain        ' + strain.name);
-          });
-          if (strain.content.ref) {
-            this.putDict('strain_refs', strain.name ,strain.content.ref).then(r => {
-              console.log('🏷  Set ref for strain         ' + strain.name);
+          const strains_vcl = this.getVCL(strains);
+          
+          console.log(strains_vcl);
+
+          this.publishVersion((r) => {
+            // waiting for the new version to be activated before populating
+            // dictionaries, so that new dictionaries can be used
+            strains.map((strain) => {
+              this.putDict('strain_action_roots', strain.name, strain.code).then(() => {
+                console.log(`👾  Set action root for strain ${strain.name}`);
+              });
+              this.putDict('strain_owners', strain.name, strain.content.owner).then(() => {
+                console.log(`🏢  Set owner for strain       ${strain.name}`);
+              });
+              this.putDict('strain_repos', strain.name, strain.content.repo).then(() => {
+                console.log(`🌳  Set repo for strain        ${strain.name}`);
+              });
+              if (strain.content.ref) {
+                this.putDict('strain_refs', strain.name, strain.content.ref).then(() => {
+                  console.log(`🏷  Set ref for strain         ${strain.name}`);
+                });
+              }
+              return strain;
             });
-          }       
-        });
-      }
-    })
+          });
+        }
+      });
+    });
 
     return this;
   }

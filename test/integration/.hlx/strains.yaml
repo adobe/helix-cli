@@ -8,6 +8,7 @@
 - strain:
     name: 5209e540154653d1
     code: /trieloff/git-github-com-adobe-helix-cli-git--dirty--
+    condition: true
     content:
       repo: helix-cli
       ref: master
@@ -15,6 +16,7 @@
 - strain:
     name: db5d4350c13924ad
     code: /trieloff/git-github-com-adobe-helix-cli-git--dirty--
+    condition: req.http.host == "launch.primordialsoup.life"
     content:
       repo: reactor-user-docs
       ref: master
