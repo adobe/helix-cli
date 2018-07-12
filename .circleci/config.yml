@@ -33,6 +33,9 @@ jobs:
             # run tests!
         - run: mkdir junit
         - run:
+            name: prepare test git user
+            command: git config --global user.email "you@example.com" && git config --global user.name "Your Name"
+        - run:
             name: Lint
             command: npm run lint
         - run:
