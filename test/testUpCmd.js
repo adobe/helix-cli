@@ -36,11 +36,6 @@ function initGit() {
   shell.exec('git commit -m"initial commit."');
 }
 
-function initNpm() {
-  shell.cd(TEST_DIR);
-  shell.exec('npm install');
-}
-
 // todo: use polly.js ?
 async function assertHttp(url, status, spec) {
   return new Promise((resolve, reject) => {
@@ -72,7 +67,7 @@ async function assertHttp(url, status, spec) {
   });
 }
 
-describe('Integration test for build', () => {
+describe('Integration test for up command', () => {
   after(() => {
     fse.removeSync(path.resolve(TEST_DIR, '.git'));
   });
@@ -117,7 +112,6 @@ describe('Integration test for build', () => {
 
   it('up command delivers correct response.', (done) => {
     initGit();
-    initNpm();
     let error = null;
     const cmd = new UpCommand()
       .withFiles([path.join(TEST_DIR, 'src', '*.htl')])
@@ -131,18 +125,52 @@ describe('Integration test for build', () => {
     };
 
     cmd
-      .on('started', () => {
-        assertHttp(`http://localhost:${cmd.project.server.port}/index.html`, 200, 'simple_response.html')
-          .then(() => myDone())
-          .catch(myDone);
+      .on('started', async () => {
+        try {
+          await assertHttp(`http://localhost:${cmd.project.server.port}/index.html`, 200, 'simple_response.html');
+          myDone();
+        } catch (e) {
+          myDone(e);
+        }
       })
       .on('stopped', () => {
         done(error);
       })
       .run()
       .catch(done);
-  }).timeout(60000);
+  });
 
-  it('up command delivers correct response with different build dir.');
+  it('up command delivers correct response with different build dir.', (done) => {
+    initGit();
+    let error = null;
+    const cmd = new UpCommand()
+      .withFiles([path.join(TEST_DIR, 'src', '*.htl')])
+      .withTargetDir(BUILD_DIR_ALT)
+      .withDirectory(TEST_DIR)
+      .withHttpPort(0);
+
+    const myDone = (err) => {
+      error = err;
+      return cmd.stop();
+    };
+
+    cmd
+      .on('started', async () => {
+        try {
+          const exists = await fse.pathExistsSync(path.resolve(BUILD_DIR_ALT, 'html.js'));
+          assert.ok(exists, 'compiled html.js');
+          await assertHttp(`http://localhost:${cmd.project.server.port}/index.html`, 200, 'simple_response.html');
+          myDone();
+        } catch (e) {
+          myDone(e);
+        }
+      })
+      .on('stopped', () => {
+        done(error);
+      })
+      .run()
+      .catch(done);
+  }).timeout(5000);
+
   it('up command detected modified sources and delivers correct response.');
 });
