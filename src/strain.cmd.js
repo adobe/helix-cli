@@ -195,17 +195,38 @@ class StrainCommand {
     return request(opts);
   }
 
-  getVCL(strains) {
-    return strains
+  static getVCL(strains) {
+    return `${strains
       .filter(strain => strain.condition)
-      .reduce((vcl, {name, condition}) => {
+      .reduce(
+        (vcl, { name, condition }) =>
         // the following is in VCL (Varnish Configuration Language) syntax
-        return vcl + `if (${condition}) {
+          `${vcl}if (${condition}) {
   set req.http.X-Strain = "${name}";
-} else `;
-      }, "# This file handles the strain resolution\n") + ` {
+} else `
+        , '# This file handles the strain resolution\n',
+      )} {
   set req.http.X-Strain = "default";
 }`;
+  }
+
+  async setVCL(vcl, name) {
+    const baseopts = await this.version(`/vcl/${name}`);
+    const opts = Object.assign({
+      method: 'PUT',
+      form: {
+        name,
+        content: vcl,
+      },
+    }, baseopts);
+    return request(opts)
+      .then((r) => {
+        console.log(`✅  VCL ${r.name} has been updated`);
+        return r;
+      })
+      .catch((e) => {
+        console.error(e);
+      });
   }
 
   async run() {
@@ -224,11 +245,10 @@ class StrainCommand {
         if (!err) {
           const strains = strainconfig.load(content);
 
-          const strains_vcl = this.getVCL(strains);
-          
-          console.log(strains_vcl);
+          const strainsVCL = StrainCommand.getVCL(strains);
+          this.setVCL(strainsVCL, 'strains.vcl');
 
-          this.publishVersion((r) => {
+          this.publishVersion(() => {
             // waiting for the new version to be activated before populating
             // dictionaries, so that new dictionaries can be used
             strains.map((strain) => {
