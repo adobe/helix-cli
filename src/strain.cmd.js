@@ -229,6 +229,17 @@ class StrainCommand {
       });
   }
 
+  async purgeAll() {
+    const baseopts = this.options('/purge_all');
+    const opts = Object.assign({
+      method: 'POST',
+    }, baseopts);
+    return request(opts).then((r) => {
+      console.log('💀  Purged entire cache');
+      return r;
+    });
+  }
+
   async run() {
     console.log('Publishing strains');
 
@@ -268,6 +279,8 @@ class StrainCommand {
               }
               return strain;
             });
+
+            this.purgeAll();
           });
         }
       });

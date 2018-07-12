@@ -2,13 +2,13 @@
     name: default
     code: /trieloff/git-github-com-adobe-helix-cli-git--dirty--
     content:
-      repo: helix-cli
+      repo: soupdemo
       ref: master
-      owner: adobe
+      owner: trieloff
 - strain:
     name: 5209e540154653d1
     code: /trieloff/git-github-com-adobe-helix-cli-git--dirty--
-    condition: true
+    condition: req.http.host == "helix.primordialsoup.life"
     content:
       repo: helix-cli
       ref: master
