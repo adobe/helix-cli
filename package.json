@@ -3,9 +3,10 @@
   "version": "1.0.2",
   "description": "Helix Testing Environment",
   "repository": "https://github.com/adobe/petridish",
-  "main": "src/init.js",
+  "main": "src/index.js",
   "license": "Apache-2.0",
   "scripts": {
+    "start": "node src/run.js",
     "test": "nyc mocha",
     "lint": "./node_modules/.bin/eslint .",
     "snyk-protect": "snyk protect",
