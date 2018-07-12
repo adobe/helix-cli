@@ -27,7 +27,7 @@
     "@adobe/htlengine": "^1.0.2-SNAPSHOT.68",
     "@adobe/hypermedia-pipeline": "^0.3.2-SNAPSHOT.74",
     "@adobe/openwhisk-loggly-wrapper": "^0.2.0-SNAPSHOT.35",
-    "@adobe/petridish": "^1.0.1-SNAPSHOT.29",
+    "@adobe/petridish": "^1.0.3-SNAPSHOT.68",
     "chalk": "^2.4.1",
     "fs-extra": "^6.0.1",
     "glob": "^7.1.2",

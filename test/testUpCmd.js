@@ -16,6 +16,7 @@ const assert = require('assert');
 const path = require('path');
 const shell = require('shelljs');
 const fse = require('fs-extra');
+const http = require('http');
 
 const UpCommand = require('../src/up.cmd');
 
@@ -33,6 +34,42 @@ function initGit() {
   shell.exec('git init');
   shell.exec('git add -A');
   shell.exec('git commit -m"initial commit."');
+}
+
+function initNpm() {
+  shell.cd(TEST_DIR);
+  shell.exec('npm install');
+}
+
+// todo: use polly.js ?
+async function assertHttp(url, status, spec) {
+  return new Promise((resolve, reject) => {
+    const expected = fse.readFileSync(path.resolve(__dirname, 'specs', spec)).toString();
+    let data = '';
+    http.get(url, (res) => {
+      try {
+        assert.equal(res.statusCode, status);
+      } catch (e) {
+        res.resume();
+        reject(e);
+      }
+
+      res
+        .on('data', (chunk) => {
+          data += chunk;
+        })
+        .on('end', () => {
+          try {
+            assert.equal(data, expected);
+            resolve();
+          } catch (e) {
+            reject(e);
+          }
+        });
+    }).on('error', (e) => {
+      reject(e);
+    });
+  });
 }
 
 describe('Integration test for build', () => {
@@ -59,9 +96,7 @@ describe('Integration test for build', () => {
       .catch(done);
   });
 
-  // TODO: implement after git-server.stop() has been implemented. otherwise the project.stop()
-  // TODO: below will not complete
-  it.skip('up command succeeds and can be stopped', (done) => {
+  it('up command succeeds and can be stopped', (done) => {
     initGit();
     new UpCommand()
       .withFiles([path.join(TEST_DIR, 'src', '*.htl')])
@@ -71,18 +106,43 @@ describe('Integration test for build', () => {
       .on('started', (cmd) => {
         // eslint-disable-next-line no-console
         console.log(`test server running on port ${cmd.project.server.port}`);
-        // todo: issue http request and check result (polly.js) ?
         cmd.stop();
       })
       .on('stopped', () => {
         done();
       })
       .run()
-      .then(() => done())
       .catch(done);
   });
 
-  it('up command delivers correct response.');
+  it('up command delivers correct response.', (done) => {
+    initGit();
+    initNpm();
+    let error = null;
+    const cmd = new UpCommand()
+      .withFiles([path.join(TEST_DIR, 'src', '*.htl')])
+      .withTargetDir(BUILD_DIR)
+      .withDirectory(TEST_DIR)
+      .withHttpPort(0);
+
+    const myDone = (err) => {
+      error = err;
+      return cmd.stop();
+    };
+
+    cmd
+      .on('started', () => {
+        assertHttp(`http://localhost:${cmd.project.server.port}/index.html`, 200, 'simple_response.html')
+          .then(() => myDone())
+          .catch(myDone);
+      })
+      .on('stopped', () => {
+        done(error);
+      })
+      .run()
+      .catch(done);
+  }).timeout(60000);
+
   it('up command delivers correct response with different build dir.');
   it('up command detected modified sources and delivers correct response.');
 });
