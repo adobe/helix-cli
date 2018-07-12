@@ -38,6 +38,8 @@ class StrainCommand {
       json: true
     };
 
+    this._version = null;
+
     this._dictionaries = {
       secrets: null,
       strain_action_roots: null,
@@ -95,6 +97,11 @@ class StrainCommand {
     }}, ver);
   }
 
+  async putVersionOpts(path) {
+    const ver = await this.version(path);
+    return Object.assign({method: 'PUT'}, ver);
+  }
+
   async getService(refresh) {
     if (!this._service||refresh) {
       this._service = await request(this.options(''));
@@ -103,6 +110,9 @@ class StrainCommand {
   }
 
   async getCurrentVersion() {
+    if (this._version) {
+      return this._version;
+    }
     const service = await this.getService();
     return [...service.versions].pop().number;
   }
@@ -122,6 +132,28 @@ class StrainCommand {
     return this._dictionaries;
   }
 
+  async cloneVersion(next) {
+    const cloneOpts = await this.putVersionOpts('/clone');
+    return request(cloneOpts).then(r => {
+      console.log('🐑  Cloned latest version, version ' + r.number + ' is ready');
+      this._version = r.number;
+      if (next) {
+        next(r);
+      }
+    });
+  }
+
+  async publishVersion(next) {
+    const actOpts = await this.putVersionOpts('/activate');
+    return request(actOpts).then(r => {
+      console.log('🚀  Activated latest version, version ' + r.number + ' is live');
+      this._version = r.number;
+      if (next) {
+        next(r);
+      }
+    });
+  }
+
   async putDict(dict, key ,value) {
     await this.getDictionaries();
     const mydict =this._dictionaries[dict];
@@ -135,6 +167,14 @@ class StrainCommand {
 
   async run() {
     console.log('Publishing strains');
+
+    this.cloneVersion((r) => {
+      this.publishVersion(r => {
+        console.log(r);
+      })
+    });
+
+    return; //for now
 
     const owsecret = "Basic " + toBase64(this._wsk_namespace + ':' + this._wsk_auth);
     this.putDict('secrets', 'OPENWHISK_AUTH', owsecret).then(r => {
