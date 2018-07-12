@@ -233,7 +233,7 @@ class DeployCommand {
     if (fs.existsSync(STRAIN_FILE)) {
       const oldstrains = strainconfig.load(fs.readFileSync(STRAIN_FILE));
       const strain = {
-        code: `/${this._wsk_namespace}/${this._prefix}`,
+        code: `/${this._wsk_namespace}/default/${this._prefix}`,
         content: {
           repo: giturl.repo,
           ref: giturl.ref,

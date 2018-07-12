@@ -1,13 +1,20 @@
 - strain:
     name: default
-    code: /trieloff/git-github-com-adobe-helix-cli-git--dirty--
+    code: /trieloff/default/git-github-com-adobe-helix-cli-git--dirty--
+    content:
+      repo: soupdemo
+      ref: master
+      owner: trieloff
+- strain:
+    name: soupdemo
+    code: /trieloff/default/git-github-com-adobe-helix-cli-git--dirty--
     content:
       repo: soupdemo
       ref: master
       owner: trieloff
 - strain:
     name: 5209e540154653d1
-    code: /trieloff/git-github-com-adobe-helix-cli-git--dirty--
+    code: /trieloff/default/git-github-com-adobe-helix-cli-git--dirty--
     condition: req.http.host == "helix.primordialsoup.life"
     content:
       repo: helix-cli
@@ -15,7 +22,7 @@
       owner: adobe
 - strain:
     name: db5d4350c13924ad
-    code: /trieloff/git-github-com-adobe-helix-cli-git--dirty--
+    code: /trieloff/default/git-github-com-adobe-helix-cli-git--dirty--
     condition: req.http.host == "launch.primordialsoup.life"
     content:
       repo: reactor-user-docs
