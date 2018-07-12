@@ -46,7 +46,8 @@ class StrainCommand {
       strain_owners: null,
       strain_refs: null,
       strain_repos: null,
-      strain_root_paths: null
+      strain_root_paths: null,
+      super_new: null
     };
   }
 
@@ -132,6 +133,26 @@ class StrainCommand {
     return this._dictionaries;
   }
 
+  async initDictionaries() {
+    const dictionaries = await this.getDictionaries();
+    const missingdicts = Object.entries(dictionaries).filter(([key, value]) => value === null).map(([key, value]) => key);
+    if (missingdicts.length > 0) {
+      const baseopts = await this.version('/dictionary');
+      missingdicts.map(dict => {
+        const opts = Object.assign({
+          method: 'POST',
+          form: {
+            name: dict,
+            write_only: true
+          }
+        }, baseopts);
+        request(opts).then(r => {
+          console.log('📕  Dictionary ' + r.name + ' has been created');
+        });
+      });
+    }
+  }
+
   async cloneVersion(next) {
     const cloneOpts = await this.putVersionOpts('/clone');
     return request(cloneOpts).then(r => {
@@ -169,6 +190,9 @@ class StrainCommand {
     console.log('Publishing strains');
 
     this.cloneVersion((r) => {
+
+      this.initDictionaries();
+
       this.publishVersion(r => {
         console.log(r);
       })
