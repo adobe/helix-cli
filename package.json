@@ -23,7 +23,7 @@
   },
   "homepage": "https://github.com/adobe/project-helix#readme",
   "dependencies": {
-    "@adobe/git-server": "0.0.1-SNAPSHOT.6",
+    "@adobe/git-server": "0.0.1-SNAPSHOT.13",
     "@adobe/parcel-plugin-htl": "^0.4.0-SNAPSHOT.90",
     "@adobe/petridish": "^1.0.1-SNAPSHOT.29",
     "chalk": "^2.4.1",
