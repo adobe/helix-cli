@@ -60,5 +60,5 @@ describe('hlx deploy (Integration)', () => {
     assert.notEqual(firstrun, thirdrun);
 
     done();
-  }).timeout(5000);
+  }).timeout(10000);
 });
