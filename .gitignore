@@ -9,3 +9,4 @@ test/integration/.hlx/build
 test/integration/.hlx/cache
 junit
 tmp
+logs
