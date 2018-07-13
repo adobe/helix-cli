@@ -14,7 +14,7 @@
 const EventEmitter = require('events');
 const Bundler = require('parcel-bundler');
 const glob = require('glob');
-const HelixProject = require('@adobe/petridish/src/HelixProject.js');
+const { HelixProject } = require('@adobe/petridish');
 const { DEFAULT_OPTIONS } = require('./defaults.js');
 
 class UpCommand extends EventEmitter {
@@ -89,6 +89,7 @@ class UpCommand extends EventEmitter {
     const myfiles = this._files.reduce((a, f) => [...a, ...glob.sync(f)], []);
 
     this._bundler = new Bundler(myfiles, myoptions);
+    this._bundler.addAssetType('htl', require.resolve('@adobe/parcel-plugin-htl/HTLAsset.js'));
 
     this._project = new HelixProject()
       .withCwd(this._cwd)
