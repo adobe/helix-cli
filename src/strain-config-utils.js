@@ -13,10 +13,18 @@
 const yaml = require('js-yaml');
 const hash = require('object-hash');
 
+/**
+ * Determines if a strain name is auto-generated, i.e. for an anonymous strain.
+ * @param {String} stname name of the strain
+ * @returns true for anonymous strains
+ */
 function anon(stname) {
   return !!stname.match(/^[0-9a-f]{16}$/);
 }
-
+/**
+ * Generates a strain name for unnamed strains by hashing the contents
+ * @param {Object} strain the strain configuration
+ */
 function name(strain) {
   if (strain) {
     return hash.sha1(strain).substr(24);
@@ -24,6 +32,33 @@ function name(strain) {
   return null;
 }
 
+/**
+ * @typedef {Object} Content
+ * @property {String} owner
+ * @property {String} ref
+ * @property {String} repo
+ * @property {String} root the root path for all served documents
+ */
+
+/**
+ * @typedef {Object} Strain
+ * @property {String} name
+ * @property {String} code
+ * @property {Content} content
+ */
+
+ /**
+  * @typedef {Object} Wrapped
+  * @property {Strain} strain
+  */
+
+/**
+ * Each element in the YAML file should be a strain object underneath the strain key
+ * This function extracts that strain object and cleans it by adding missing required
+ * properties (such as name)
+ * @param {Wrapped} strain the wrapped strain
+ * @returns {Strain} the unwrapped strain
+ */
 function clean(strain) {
   if (strain.strain && strain.strain.name && !anon(strain.strain.name)) {
     return strain.strain;
@@ -31,6 +66,10 @@ function clean(strain) {
   return { name: name(strain.strain), ...strain.strain };
 }
 
+/**
+ * Validates that all required properties are set for a loaded strain
+ * @param {Strain} strain 
+ */
 function validate(strain) {
   return (
     !!strain &&
@@ -42,10 +81,24 @@ function validate(strain) {
   );
 }
 
+/**
+ * Wraps a strain for writing into a YAML list
+ * @param {Strain} strain
+ * @returns {Wrapped} 
+ */
 function wrap(strain) {
   return { strain };
 }
 
+/**
+ * Helper function for sorting strains in the output file.
+ * Desired order:
+ * 1. default
+ * 2. named strains (alphabetically)
+ * 3. anonymous strains (alphabetically)
+ * @param {Strain} straina 
+ * @param {Strain} strainb 
+ */
 function compare(straina, strainb) {
   // default strain always comes first
   if (straina.strain.name === 'default') {
@@ -64,6 +117,11 @@ function compare(straina, strainb) {
   return straina.strain.name.localeCompare(strainb.strain.name);
 }
 
+/**
+ * Converts a list of strains into YAML
+ * @param {Strain[]} strains 
+ * @returns {String} YAML
+ */
 function write(strains) {
   return yaml.safeDump(strains
     .map(wrap)
@@ -72,6 +130,11 @@ function write(strains) {
     .sort(compare));
 }
 
+/**
+ * Appends a strain to a list of known strains, avoiding duplicates
+ * @param {Strain[]} strains 
+ * @param {Strain} strain 
+ */
 function append(strains, strain) {
   if (!strain.name) {
     const olddefault = strains[0];
@@ -87,6 +150,11 @@ function append(strains, strain) {
   return oldstrains;
 }
 
+/**
+ * Loads a list of strains from a YAML string
+ * @param {String} yml
+ * @returns {Strain[]} the loaded strains 
+ */
 function load(yml) {
   return yaml
     .safeLoad(yml)
