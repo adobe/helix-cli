@@ -20,9 +20,10 @@ describe('hlx strain (Integration)', () => {
   it('Dry-Run Strain Publishing', (done) => {
     const cmd = new StrainCommand()
       .withDryRun(true)
-      .withFastlyAuth('fakefakesofake')
+      .withFastlyAuth('fakefakefakeohsofake')
       .withFastlyNamespace('3l2MjGcHgWw5NUJz7OKYH3')
-      .withWskAuth('fakeuser:fakepassword')
+      .withWskHost('runtime.adobe.io')
+      .withWskAuth('fakeuser:faketoken')
       .withWskNamespace('trieloff');
 
     cmd.run().then(() => {

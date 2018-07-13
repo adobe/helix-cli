@@ -8,17 +8,17 @@ HTTP/1.1 200 OK
 status: 200 OK
 content-type: application/json
 cache-control: no-cache
-fastly-ratelimit-remaining: 946
+fastly-ratelimit-remaining: 868
 fastly-ratelimit-reset: 1531486800
 via: 1.1 varnish, 1.1 varnish
 content-length: 164
 accept-ranges: bytes
-date: Fri, 13 Jul 2018 12:13:59 GMT
+date: Fri, 13 Jul 2018 12:49:17 GMT
 connection: close
-x-served-by: app-slwdc9051-SL, cache-fra19129-FRA
+x-served-by: app-slwdc9051-SL, cache-fra19140-FRA
 x-cache: MISS, MISS
 x-cache-hits: 0, 0
-x-timer: S1531484039.640254,VS0,VE532
+x-timer: S1531486157.114967,VS0,VE494
 vary: Accept-Encoding
 
 {"dictionary_id":"MtnkNsTqYeMG9yRJo4f1q","service_id":"3l2MjGcHgWw5NUJz7OKYH3","item_key":"default","item_value":"/hlx/git-github-com-adobe-helix-cli-git--dirty--"}

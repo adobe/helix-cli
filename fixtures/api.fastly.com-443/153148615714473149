@@ -2,23 +2,23 @@ PUT /service/3l2MjGcHgWw5NUJz7OKYH3/dictionary/4h4r7Z2N5BqnLkYkw25EKj/item/OPENW
 accept: application/json
 host: api.fastly.com
 content-type: application/x-www-form-urlencoded
-body: item_value=Basic%20ZmFrZXVzZXI6ZmFrZXBhc3N3b3Jk
+body: item_value=Basic%20ZmFrZXVzZXI6ZmFrZXRva2Vu
 
 HTTP/1.1 200 OK
 status: 200 OK
 content-type: application/json
 cache-control: no-cache
-fastly-ratelimit-remaining: 948
+fastly-ratelimit-remaining: 873
 fastly-ratelimit-reset: 1531486800
 via: 1.1 varnish, 1.1 varnish
-content-length: 158
+content-length: 154
 accept-ranges: bytes
-date: Fri, 13 Jul 2018 12:13:59 GMT
+date: Fri, 13 Jul 2018 12:49:17 GMT
 connection: close
-x-served-by: app-slwdc9051-SL, cache-fra19147-FRA
+x-served-by: app-slwdc9051-SL, cache-fra19132-FRA
 x-cache: MISS, MISS
 x-cache-hits: 0, 0
-x-timer: S1531484039.723922,VS0,VE1087
+x-timer: S1531486157.612032,VS0,VE516
 vary: Accept-Encoding
 
-{"dictionary_id":"4h4r7Z2N5BqnLkYkw25EKj","service_id":"3l2MjGcHgWw5NUJz7OKYH3","item_key":"OPENWHISK_AUTH","item_value":"Basic ZmFrZXVzZXI6ZmFrZXBhc3N3b3Jk"}
+{"dictionary_id":"4h4r7Z2N5BqnLkYkw25EKj","service_id":"3l2MjGcHgWw5NUJz7OKYH3","item_key":"OPENWHISK_AUTH","item_value":"Basic ZmFrZXVzZXI6ZmFrZXRva2Vu"}

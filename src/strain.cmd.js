@@ -50,6 +50,7 @@ class StrainCommand {
       strain_refs: null,
       strain_repos: null,
       strain_root_paths: null,
+      extra_just_for_testing: null,
     };
   }
 
