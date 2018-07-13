@@ -47,7 +47,7 @@ function name(strain) {
  * @property {Content} content
  */
 
- /**
+/**
   * @typedef {Object} Wrapped
   * @property {Strain} strain
   */
@@ -68,7 +68,7 @@ function clean(strain) {
 
 /**
  * Validates that all required properties are set for a loaded strain
- * @param {Strain} strain 
+ * @param {Strain} strain
  */
 function validate(strain) {
   return (
@@ -84,7 +84,7 @@ function validate(strain) {
 /**
  * Wraps a strain for writing into a YAML list
  * @param {Strain} strain
- * @returns {Wrapped} 
+ * @returns {Wrapped}
  */
 function wrap(strain) {
   return { strain };
@@ -96,8 +96,8 @@ function wrap(strain) {
  * 1. default
  * 2. named strains (alphabetically)
  * 3. anonymous strains (alphabetically)
- * @param {Strain} straina 
- * @param {Strain} strainb 
+ * @param {Strain} straina
+ * @param {Strain} strainb
  */
 function compare(straina, strainb) {
   // default strain always comes first
@@ -119,7 +119,7 @@ function compare(straina, strainb) {
 
 /**
  * Converts a list of strains into YAML
- * @param {Strain[]} strains 
+ * @param {Strain[]} strains
  * @returns {String} YAML
  */
 function write(strains) {
@@ -132,8 +132,8 @@ function write(strains) {
 
 /**
  * Appends a strain to a list of known strains, avoiding duplicates
- * @param {Strain[]} strains 
- * @param {Strain} strain 
+ * @param {Strain[]} strains
+ * @param {Strain} strain
  */
 function append(strains, strain) {
   if (!strain.name) {
@@ -153,7 +153,7 @@ function append(strains, strain) {
 /**
  * Loads a list of strains from a YAML string
  * @param {String} yml
- * @returns {Strain[]} the loaded strains 
+ * @returns {Strain[]} the loaded strains
  */
 function load(yml) {
   return yaml
