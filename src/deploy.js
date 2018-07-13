@@ -12,6 +12,8 @@
 
 'use strict';
 
+const deployCommon = require('./deploy-common');
+
 module.exports = function deploy() {
   let executor;
 
@@ -24,27 +26,12 @@ module.exports = function deploy() {
     builder: (yargs) => {
       // eslint-disable-next-line global-require
       const DeployCommand = require('./deploy.cmd'); // lazy load the handler to speed up execution time
-
-      yargs
+      deployCommon(yargs)
         .option('auto', {
           describe: 'Enable auto-deployment',
           type: 'boolean',
           default: true,
           demandOption: true,
-        })
-        .option('wsk-auth', {
-          describe: 'Adobe I/O Runtime Authentication key',
-          type: 'string',
-        })
-        .option('wsk-namespace', {
-          describe: 'Adobe I/O Runtime Namespace',
-          type: 'string',
-          demandOption: true,
-        })
-        .option('wsk-host', {
-          describe: 'Adobe I/O Runtime API Host',
-          type: 'string',
-          default: 'runtime.adobe.io',
         })
         .option('loggly-host', {
           describe: 'API Host for Log Appender',
@@ -89,11 +76,6 @@ module.exports = function deploy() {
           type: 'boolean',
           default: false,
         })
-        .option('dry-run', {
-          describe: 'List the actions that would be created, but do not actually deploy',
-          type: 'boolean',
-          default: false,
-        })
         .option('content', {
           describe: 'Overrides the GitHub content URL',
           type: 'string',
@@ -108,10 +90,6 @@ module.exports = function deploy() {
           }
           return Object.assign(res, result);
         }, {}))
-        .demandOption(
-          'wsk-auth',
-          'Authentication is required. You can pass the key via the HLX_WSK_AUTH environment variable, too',
-        )
         .group(['auto', 'wsk-auth', 'wsk-namespace', 'default', 'dirty'], 'Deployment Options')
         .group(['wsk-host', 'loggly-host', 'loggly-auth', 'target', 'docker', 'prefix', 'content'], 'Advanced Options')
         .help();

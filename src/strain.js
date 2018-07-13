@@ -12,6 +12,8 @@
 
 'use strict';
 
+const deployCommon = require('./deploy-common');
+
 module.exports = function strain() {
   let executor;
 
@@ -22,20 +24,7 @@ module.exports = function strain() {
     command: 'strain',
     desc: 'Activate strains in the Fastly CDN',
     builder: (yargs) => {
-      yargs
-        .option('wsk-auth', {
-          describe: 'Adobe I/O Runtime Authentication key',
-          type: 'string',
-        })
-        .option('wsk-namespace', {
-          describe: 'Adobe I/O Runtime Namespace',
-          type: 'string',
-        })
-        .option('wsk-host', {
-          describe: 'Adobe I/O Runtime API Host',
-          type: 'string',
-          default: 'runtime.adobe.io',
-        })
+      deployCommon(yargs)
         .option('fastly-namespace', {
           describe: 'CDN Namespace (e.g. Fastly Service ID)',
           type: 'string',
@@ -49,14 +38,6 @@ module.exports = function strain() {
           type: 'boolean',
           default: false,
         })
-        .demandOption(
-          'wsk-auth',
-          'Authentication is required. You can pass the key via the HLX_WSK_AUTH environment variable, too',
-        )
-        .demandOption(
-          'wsk-namespace',
-          'OpenWhisk Namespace is required',
-        )
         .demandOption(
           'fastly-auth',
           'Authentication is required. You can pass the key via the HLX_FASTLY_AUTH environment variable, too',
