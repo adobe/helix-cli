@@ -110,7 +110,12 @@ class StrainCommand {
 
   async getService(refresh) {
     if (!this._service || refresh) {
-      this._service = await request(this.options(''));
+      try {
+        this._service = await request(this.options(''));
+      } catch (e) {
+        console.error('Unable to get service', e);
+        throw e;
+      }
     }
     return this._service;
   }

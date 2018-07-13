@@ -13,15 +13,16 @@
 /* eslint-env mocha */
 
 const StrainCommand = require('../src/strain.cmd');
+const Replay  = require('replay');
 
 describe('hlx strain (Integration)', () => {
   it('Dry-Run Strain Publishing', (done) => {
     const cmd = new StrainCommand()
       .withDryRun(true)
-      .withFastlyAuth('fake')
-      .withFastlyNamespace('alsofake')
-      .withWskAuth('faketoo')
-      .withWskNamespace('megafake');
+      .withFastlyAuth('fakefakesofake')
+      .withFastlyNamespace('3l2MjGcHgWw5NUJz7OKYH3')
+      .withWskAuth('fakeuser:fakepassword')
+      .withWskNamespace('trieloff');
 
     cmd.run().then(() => {
       done();

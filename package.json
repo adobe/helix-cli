@@ -53,6 +53,7 @@
     "mocha-junit-reporter": "^1.17.0",
     "npm-snapshot": "^1.0.3",
     "nyc": "^12.0.2",
+    "replay": "^2.3.0",
     "sinon": "^6.1.0"
   },
   "snyk": true
