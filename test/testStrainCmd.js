@@ -13,7 +13,8 @@
 /* eslint-env mocha */
 
 const StrainCommand = require('../src/strain.cmd');
-const Replay  = require('replay');
+// eslint-disable-next-line no-unused-vars
+const Replay = require('replay');
 
 describe('hlx strain (Integration)', () => {
   it('Dry-Run Strain Publishing', (done) => {
