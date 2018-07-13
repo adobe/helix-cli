@@ -84,16 +84,27 @@ class StrainCommand {
     this._dryRun = value;
     return this;
   }
-
+  /**
+   * Prepares a request to the Fastly API for the current service, using a given path extension
+   * @param {String} pathext the path extension
+   */
   options(pathext) {
     return Object.assign({ uri: `https://api.fastly.com/service/${this._fastly_namespace}${pathext}` }, this._options);
   }
 
+  /**
+   * Prepares a request to the Fastly APU for the current version of the current service,
+   * using a given path extension
+   * @param {String} pathext the path extension
+   */
   async version(pathext) {
     const ver = await this.getCurrentVersion();
     return this.options(`/version/${ver}${pathext}`);
   }
 
+  /**
+   * Prepares a PUT request to the Fastly API, setting a given value for a given path extension
+   */
   putOpts(pathext, value) {
     const ver = this.options(pathext);
     return Object.assign({
@@ -104,11 +115,18 @@ class StrainCommand {
     }, ver);
   }
 
+  /**
+   * Prepares a PUT request to the Fastly API at the latest service version
+   */
   async putVersionOpts(pathext) {
     const ver = await this.version(pathext);
     return Object.assign({ method: 'PUT' }, ver);
   }
 
+  /**
+   * Pulls the service configuration from the Fastly API
+   * @param {boolean} refresh
+   */
   async getService(refresh) {
     if (!this._service || refresh) {
       try {
@@ -121,6 +139,9 @@ class StrainCommand {
     return this._service;
   }
 
+  /**
+   * Determines the latest version of the service
+   */
   async getCurrentVersion() {
     if (this._version) {
       return this._version;
@@ -129,6 +150,9 @@ class StrainCommand {
     return [...service.versions].pop().number;
   }
 
+  /**
+   * Refreshes the map of edge dictionaries defined in the service
+   */
   async getDictionaries() {
     // if there are undefined dictionaries, we have to reload them
     if (Object.values(this._dictionaries).some(e => e == null)) {
@@ -145,6 +169,9 @@ class StrainCommand {
     return this._dictionaries;
   }
 
+  /**
+   * Creates edge dictionaries in the service config
+   */
   async initDictionaries() {
     const dictionaries = await this.getDictionaries();
     const missingdicts = Object.entries(dictionaries)
@@ -174,6 +201,10 @@ class StrainCommand {
     }
   }
 
+  /**
+   * Clones an existing configuration version
+   * @param {function} next continuation
+   */
   async cloneVersion(next) {
     const cloneOpts = await this.putVersionOpts('/clone');
     return request(cloneOpts).then((r) => {
@@ -191,6 +222,10 @@ class StrainCommand {
       });
   }
 
+  /**
+   * Publishes the latest (cloned) service version
+   * @param {Function} next continuation
+   */
   async publishVersion(next) {
     const actOpts = await this.putVersionOpts('/activate');
     return request(actOpts).then((r) => {
@@ -208,6 +243,12 @@ class StrainCommand {
       });
   }
 
+  /**
+   * Sets a value in a named edge dictionary
+   * @param {String} dict dictionary name
+   * @param {String} key
+   * @param {String} value
+   */
   async putDict(dict, key, value) {
     await this.getDictionaries();
     const mydict = this._dictionaries[dict];
@@ -219,6 +260,9 @@ class StrainCommand {
     return request(opts);
   }
 
+  /**
+   * Generates VCL for strain resolution from a list of strains
+   */
   static getVCL(strains) {
     return `${strains
       .filter(strain => strain.condition)
@@ -234,6 +278,11 @@ class StrainCommand {
 }`;
   }
 
+  /**
+   * Creates or updates a VCL file in the service with the given VCL code
+   * @param {*} vcl code
+   * @param {*} name name of the file
+   */
   async setVCL(vcl, name) {
     const baseopts = await this.version(`/vcl/${name}`);
     const opts = Object.assign({
@@ -256,6 +305,9 @@ class StrainCommand {
       });
   }
 
+  /**
+   * Purges the entire Fastly cache for the given service version.
+   */
   async purgeAll() {
     const baseopts = this.options('/purge_all');
     const opts = Object.assign({
