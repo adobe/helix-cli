@@ -157,7 +157,13 @@ class StrainCommand {
         return request(opts).then((r) => {
           console.log(`📕  Dictionary ${r.name} has been created`);
           return r;
-        });
+        })
+          .catch((e) => {
+            const message = `Dictionary ${dict} could not be created`;
+            console.error(message);
+            console.error(e);
+            throw new Error(message, e);
+          });
       });
     }
   }
@@ -170,7 +176,13 @@ class StrainCommand {
       if (next) {
         next(r);
       }
-    });
+    })
+      .catch((e) => {
+        const message = 'Unable to create new service version';
+        console.error(message);
+        console.error(e);
+        throw new Error(message, e);
+      });
   }
 
   async publishVersion(next) {
@@ -181,7 +193,13 @@ class StrainCommand {
       if (next) {
         next(r);
       }
-    });
+    })
+      .catch((e) => {
+        const message = 'Unable to activate new configuration';
+        console.error(message);
+        console.error(e);
+        throw new Error(message, e);
+      });
   }
 
   async putDict(dict, key, value) {
@@ -225,7 +243,10 @@ class StrainCommand {
         return r;
       })
       .catch((e) => {
+        const message = `Unable to update VCL ${name}`;
+        console.error(message);
         console.error(e);
+        throw new Error(message, e);
       });
   }
 
@@ -237,7 +258,13 @@ class StrainCommand {
     return request(opts).then((r) => {
       console.log('💀  Purged entire cache');
       return r;
-    });
+    })
+      .catch((e) => {
+        const message = 'Cache could not be purged';
+        console.error(message);
+        console.error(e);
+        throw new Error(message, e);
+      });
   }
 
   async run() {
@@ -250,7 +277,13 @@ class StrainCommand {
       const owsecret = `Basic ${toBase64(`${this._wsk_auth}`)}`;
       this.putDict('secrets', 'OPENWHISK_AUTH', owsecret).then((_s) => {
         console.log('🗝  Enabled Fastly to call secure OpenWhisk actions');
-      });
+      })
+        .catch((e) => {
+          const message = 'OpenWhisk authentication could not be passed on';
+          console.error(message);
+          console.error(e);
+          throw new Error(message, e);
+        });
 
       fs.readFile(STRAIN_FILE, (err, content) => {
         if (!err) {
@@ -264,22 +297,52 @@ class StrainCommand {
           strains.map((strain) => {
             strainjobs.push(this.putDict('strain_action_roots', strain.name, strain.code).then(() => {
               console.log(`👾  Set action root for strain  ${strain.name}`);
-            }));
+            })
+              .catch((e) => {
+                const message = 'Error setting edge dictionary value';
+                console.error(message);
+                console.error(e);
+                throw new Error(message, e);
+              }));
             strainjobs.push(this.putDict('strain_owners', strain.name, strain.content.owner).then(() => {
               console.log(`🏢  Set owner for strain        ${strain.name}`);
-            }));
+            })
+              .catch((e) => {
+                const message = 'Error setting edge dictionary value';
+                console.error(message);
+                console.error(e);
+                throw new Error(message, e);
+              }));
             strainjobs.push(this.putDict('strain_repos', strain.name, strain.content.repo).then(() => {
               console.log(`🌳  Set repo for strain         ${strain.name}`);
-            }));
+            })
+              .catch((e) => {
+                const message = 'Error setting edge dictionary value';
+                console.error(message);
+                console.error(e);
+                throw new Error(message, e);
+              }));
             if (strain.content.ref) {
               strainjobs.push(this.putDict('strain_refs', strain.name, strain.content.ref).then(() => {
                 console.log(`🏷  Set ref for strain          ${strain.name}`);
-              }));
+              })
+                .catch((e) => {
+                  const message = 'Error setting edge dictionary value';
+                  console.error(message);
+                  console.error(e);
+                  throw new Error(message, e);
+                }));
             }
             if (strain.content.root) {
               strainjobs.push(this.putDict('strain_root_paths', strain.name, strain.content.root).then(() => {
                 console.log(`🌲  Set content root for strain ${strain.name}`);
-              }));
+              })
+                .catch((e) => {
+                  const message = 'Error setting edge dictionary value';
+                  console.error(message);
+                  console.error(e);
+                  throw new Error(message, e);
+                }));
             }
             return strain;
           });
@@ -290,7 +353,13 @@ class StrainCommand {
             this.publishVersion(() => {
               this.purgeAll();
             });
-          });
+          })
+            .catch((e) => {
+              const message = 'Error setting one or more edge dictionary values';
+              console.error(message);
+              console.error(e);
+              throw new Error(message, e);
+            });
         }
       });
     });
