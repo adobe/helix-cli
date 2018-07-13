@@ -140,7 +140,7 @@ describe('Integration test for up command', () => {
       })
       .run()
       .catch(done);
-  });
+  }).timeout(5000);
 
   it('up command delivers correct response with different build dir.', (done) => {
     initGit();
