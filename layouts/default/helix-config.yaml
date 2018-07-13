@@ -1,0 +1,11 @@
+#
+# helix configuration for local development
+#
+
+# title of this project. not really needed
+title: '{{project.name}}'
+
+# Specifies the git url to the content repository. helix will use the local directory if
+# not configured.
+#
+#contentRepo: https://github.com/Adobe-Marketing-Cloud/reactor-user-docs
