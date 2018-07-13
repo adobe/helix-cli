@@ -60,7 +60,7 @@ class BuildCommand {
     const myfiles = this._files.reduce((a, f) => [...a, ...glob.sync(f)], []);
 
     const bundler = new Bundler(myfiles, myoptions);
-    bundler.addAssetType('htl', require.resolve('@adobe/parcel-plugin-htl'));
+    bundler.addAssetType('htl', require.resolve('@adobe/parcel-plugin-htl/HTLAsset.js'));
     await bundler.bundle();
   }
 }
