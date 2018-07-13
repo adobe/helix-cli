@@ -30,10 +30,12 @@ const BUILD_DIR_ALT = path.resolve(TEST_DIR, 'tmp/');
  * init git in integration so that petridish can run
  */
 function initGit() {
+  const pwd = shell.pwd();
   shell.cd(TEST_DIR);
   shell.exec('git init');
   shell.exec('git add -A');
   shell.exec('git commit -m"initial commit."');
+  shell.cd(pwd);
 }
 
 // todo: use polly.js ?

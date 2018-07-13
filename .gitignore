@@ -6,3 +6,4 @@ pipeline.log
 test/integration/.hlx/
 tmp
 junit
+logs

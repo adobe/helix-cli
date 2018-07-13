@@ -76,18 +76,22 @@ function msg(txt) {
 
 
 async function initGitRepository(dir) {
-  shell.cd(dir);
+  const pwd = shell.pwd();
   try {
+    shell.cd(dir);
     await execAsync('git init -q');
     await execAsync('git add -A');
     await execAsync('git commit -q -m"Initial commit."');
     msg('initialized git repository.');
   } catch (e) {
     throw Error(`Unable to initialize git repository: ${e}`);
+  } finally {
+    shell.cd(pwd);
   }
 }
 
 async function initNpm(dir) {
+  const pwd = shell.pwd();
   try {
     console.log(`${chalk.yellow('+')} running npm install...`);
     shell.cd(dir);
@@ -95,6 +99,8 @@ async function initNpm(dir) {
     msg('setup all npm dependencies.');
   } catch (e) {
     throw Error(`Unable to initialize nmp: ${e}`);
+  } finally {
+    shell.cd(pwd);
   }
 }
 
