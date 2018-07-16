@@ -45,7 +45,7 @@
 - strain:
     name: experience-adobe
     code: /acapt/default/https---github-com-adobe-helix-helpx--249-adjust-to-helix-cli--
-    condition: req.http.host == "www.experience-adobe.com"
+    condition: req.http.host == "helpx.experience-adobe.com"
     content:
       repo: reactor-user-docs
       ref: master
