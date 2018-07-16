@@ -43,6 +43,15 @@
       owner: Adobe-Marketing-Cloud
       root: /
 - strain:
+    name: experience-adobe
+    code: /acapt/default/https---github-com-adobe-helix-helpx--249-adjust-to-helix-cli--
+    condition: req.http.host == "www.experience-adobe.com"
+    content:
+      repo: reactor-user-docs
+      ref: master
+      owner: Adobe-Marketing-Cloud
+      root: /
+- strain:
     name: db5d4350c13924ad
     code: /trieloff/default/git-github-com-adobe-helix-cli-git--dirty--
     condition: req.http.host == "launch.primordialsoup.life"
