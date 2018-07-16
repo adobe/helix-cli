@@ -7,6 +7,6 @@ node_modules/
 pipeline.log
 test/integration/.hlx/build
 test/integration/.hlx/cache
+test/integration
+fixtures
 junit
-tmp
-logs

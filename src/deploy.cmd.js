@@ -17,8 +17,13 @@
 const ow = require('openwhisk');
 const glob = require('glob');
 const path = require('path');
-const fs = require('fs');
+const fs = require('fs-extra');
+const yaml = require('js-yaml');
 const $ = require('shelljs');
+const GitUrl = require('@adobe/petridish/src/GitUrl');
+const strainconfig = require('./strain-config-utils');
+
+const STRAIN_FILE = path.resolve(process.cwd(), '.hlx', 'strains.yaml');
 
 class DeployCommand {
   constructor() {
@@ -36,6 +41,7 @@ class DeployCommand {
     this._default = null;
     this._enableDirty = false;
     this._dryRun = false;
+    this._content = null;
   }
 
   static isDirty() {
@@ -83,6 +89,19 @@ class DeployCommand {
       })
       .stdout.replace(/\n/, '')
       .replace(/[\W]/g, '-');
+  }
+
+  static getDefaultContentURL() {
+    if (fs.existsSync('helix-config.yaml')) {
+      const conf = yaml.safeLoad(fs.readFileSync('helix-config.yaml'));
+      if (conf.contentRepo) {
+        return conf.contentRepo;
+      }
+    }
+    const giturl = $.exec('git config --get remote.origin.url', {
+      silent: true,
+    }).stdout.replace(/\n/, '');
+    return giturl;
   }
 
   withEnableAuto(value) {
@@ -145,6 +164,11 @@ class DeployCommand {
     return this;
   }
 
+  withContent(value) {
+    this._content = value;
+    return this;
+  }
+
   async run() {
     if (this._enableAuto) {
       console.error('Auto-deployment not implemented yet, please try hlx deploy --no-auto');
@@ -204,6 +228,41 @@ class DeployCommand {
 
       return name;
     });
+
+    const giturl = new GitUrl(this._content);
+    if (fs.existsSync(STRAIN_FILE)) {
+      const oldstrains = strainconfig.load(fs.readFileSync(STRAIN_FILE));
+      const strain = {
+        code: `/${this._wsk_namespace}/default/${this._prefix}`,
+        content: {
+          repo: giturl.repo,
+          ref: giturl.ref,
+          owner: giturl.owner,
+        },
+      };
+      const newstrains = strainconfig.append(oldstrains, strain);
+      if (newstrains.length > oldstrains.length) {
+        console.log(`Updating strain config, adding strain ${strainconfig.name(strain)} as configuration has changed`);
+        fs.writeFileSync(
+          STRAIN_FILE,
+          strainconfig.write(newstrains),
+        );
+      }
+    } else {
+      console.log('Generating new strain config');
+      const defaultstrain = {
+        name: 'default',
+        code: `/${this._wsk_namespace}/${this._prefix}`,
+        content: {
+          repo: giturl.repo,
+          ref: giturl.ref,
+          owner: giturl.owner,
+        },
+      };
+      fs.mkdirpSync(path.resolve(process.cwd(), '.hlx'));
+      fs.writeFileSync(STRAIN_FILE, strainconfig.write([defaultstrain]));
+    }
+
     return this;
   }
 }

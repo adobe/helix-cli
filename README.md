@@ -11,15 +11,7 @@ The Helix Command Line Interface allows web developers to create, develop, and d
 
 ## Installation
 
-For now, manual installation only:
-
-```bash
-$ git clone git@github.com:adobe/helix-cli.git
-$ npm install
-$ npm link
-```
-
-In the future, this will become easier, boiling down to:
+Install `hlx` as a global command. You need Node 8 or newer.
 
 ```bash
 $ npm install -g @adobe/helix-cli
@@ -99,3 +91,42 @@ $ hlx deploy --no-auto --wsk-namespace <your-namespace> --wsk-auth <your-key>
 ```
 
 Instead of passing `--wsk-auth` as a command line option, you can also set the `HLX_WSK_AUTH` environment variable.
+
+## (Optional) Publish your Site
+
+```bash
+# In <my-cool-project>
+$ hlx hlx strain --fastly-auth <key> --fastly-namespace <serviceid>
+🐑 👾 🚀  hlx is publishing strains
+🐑  Cloned latest version, version 356 is ready
+🗝  Enabled Fastly to call secure OpenWhisk actions
+🌲  Set content root for strain preview
+👾  Set action root for strain  preview
+👾  Set action root for strain  xdm
+🏢  Set owner for strain        xdm
+🌳  Set repo for strain         default
+🌳  Set repo for strain         soupdemo
+🌳  Set repo for strain         xdm
+🏷  Set ref for strain          default
+🏢  Set owner for strain        preview
+👾  Set action root for strain  db5d4350c13924ad
+🏷  Set ref for strain          db5d4350c13924ad
+👾  Set action root for strain  soupdemo
+👾  Set action root for strain  default
+🏢  Set owner for strain        soupdemo
+🏷  Set ref for strain          soupdemo
+🏢  Set owner for strain        default
+🏷  Set ref for strain          preview
+🏢  Set owner for strain        db5d4350c13924ad
+🏷  Set ref for strain          xdm
+🌳  Set repo for strain         preview
+🌳  Set repo for strain         db5d4350c13924ad
+🌲  Set content root for strain default
+✅  VCL strains.vcl has been updated
+🌲  Set content root for strain soupdemo
+🌲  Set content root for strain xdm
+🌲  Set content root for strain db5d4350c13924ad
+📕  All dicts have been updated.
+🚀  Activated latest version, version 356 is live
+💀  Purged entire cache
+```

@@ -1,0 +1,24 @@
+PUT /service/3l2MjGcHgWw5NUJz7OKYH3/dictionary/4h4r7Z2N5BqnLkYkw25EKj/item/OPENWHISK_AUTH
+accept: application/json
+host: api.fastly.com
+content-type: application/x-www-form-urlencoded
+body: item_value=Basic%20ZmFrZXVzZXI6ZmFrZXRva2Vu
+
+HTTP/1.1 200 OK
+status: 200 OK
+content-type: application/json
+cache-control: no-cache
+fastly-ratelimit-remaining: 985
+fastly-ratelimit-reset: 1531490400
+via: 1.1 varnish, 1.1 varnish
+content-length: 154
+accept-ranges: bytes
+date: Fri, 13 Jul 2018 13:03:51 GMT
+connection: close
+x-served-by: app-slwdc9051-SL, cache-fra19125-FRA
+x-cache: MISS, MISS
+x-cache-hits: 0, 0
+x-timer: S1531487030.788111,VS0,VE1267
+vary: Accept-Encoding
+
+{"dictionary_id":"4h4r7Z2N5BqnLkYkw25EKj","service_id":"3l2MjGcHgWw5NUJz7OKYH3","item_key":"OPENWHISK_AUTH","item_value":"Basic ZmFrZXVzZXI6ZmFrZXRva2Vu"}

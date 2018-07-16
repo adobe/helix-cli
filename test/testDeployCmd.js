@@ -12,9 +12,12 @@
 
 /* eslint-env mocha */
 
+const fs = require('fs-extra');
+const assert = require('assert');
 const CLI = require('../src/cli');
 
 describe('hlx deploy (Integration)', () => {
+  fs.removeSync('.hlx');
   it('Dry-Running works', (done) => {
     new CLI()
       .run(['deploy',
@@ -25,6 +28,37 @@ describe('hlx deploy (Integration)', () => {
         '--dry-run',
         '--target', 'test/integration/.hlx/build',
       ]);
+    assert.ok(fs.existsSync('.hlx/strains.yaml'));
+    const firstrun = fs.readFileSync('.hlx/strains.yaml').toString();
+
+    fs.removeSync('.hlx');
+    new CLI()
+      .run(['deploy',
+        '--wsk-auth', 'secret-key',
+        '--wsk-namespace', 'hlx',
+        '--no-auto',
+        '--dirty',
+        '--dry-run',
+        '--target', 'test/integration/.hlx/build',
+      ]);
+    assert.ok(fs.existsSync('.hlx/strains.yaml'));
+    const secondrun = fs.readFileSync('.hlx/strains.yaml').toString();
+    assert.equal(firstrun, secondrun, 'generated strains.yaml differs between first and second run');
+
+    new CLI()
+      .run(['deploy',
+        '--wsk-auth', 'secret-key',
+        '--wsk-namespace', 'hlx',
+        '--no-auto',
+        '--dirty',
+        '--dry-run',
+        '--content', 'https://github.com/adobe/helix-cli/tree/implement-init',
+        '--target', 'test/integration/.hlx/build',
+      ]);
+    assert.ok(fs.existsSync('.hlx/strains.yaml'));
+    const thirdrun = fs.readFileSync('.hlx/strains.yaml').toString();
+    assert.notEqual(firstrun, thirdrun);
+
     done();
-  });
+  }).timeout(10000);
 });

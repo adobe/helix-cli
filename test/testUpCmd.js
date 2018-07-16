@@ -17,6 +17,9 @@ const path = require('path');
 const shell = require('shelljs');
 const fse = require('fs-extra');
 const http = require('http');
+const Replay = require('replay');
+// disable replay for this test
+Replay.mode = 'bloody';
 
 const UpCommand = require('../src/up.cmd');
 

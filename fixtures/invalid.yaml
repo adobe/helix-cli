@@ -1,0 +1,21 @@
+# these are all the strains that get deployed to production
+- nostrain:
+    name: default
+    content:
+      owner: trieloff
+      repo: soupdemo
+      ref: master
+    code: /trieloff/default/git-github-com-adobe-helix-cli-git--dirty
+
+- strain:
+    name: xdm
+    condition: req.http.host == "xdm.primordialsoup.life"
+    code: /trieloff/default/git-github-com-adobe-helix-cli-git--dirty
+
+- strain:
+    content:
+      owner: trieloff
+      repo: soupdemo
+      ref: master
+      root: moscow
+    code: /trieloff/default/git-github-com-adobe-helix-cli-git--dirty

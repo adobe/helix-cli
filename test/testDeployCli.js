@@ -38,6 +38,7 @@ describe('hlx deploy', () => {
     mockDeploy.withDefault.returnsThis();
     mockDeploy.withEnableDirty.returnsThis();
     mockDeploy.withDryRun.returnsThis();
+    mockDeploy.withContent.returnsThis();
     mockDeploy.run.returnsThis();
 
     // disable static functions as well to avoid shelljs executions.
@@ -56,8 +57,9 @@ describe('hlx deploy', () => {
     new CLI()
       .withCommandExecutor('deploy', mockDeploy)
       .onFail((err) => {
-        assert.equal(err, 'Missing required arguments: wsk-namespace, wsk-auth\n'
-          + 'Authentication is required. You can pass the key via the HLX_WSK_AUTH environment variable, too');
+        assert.equal(err, `Missing required arguments: wsk-namespace, wsk-auth
+OpenWhisk Namespace is required
+Authentication is required. You can pass the key via the HLX_WSK_AUTH environment variable, too`);
         done();
       })
       .run(['deploy']);
@@ -69,8 +71,9 @@ describe('hlx deploy', () => {
     new CLI()
       .withCommandExecutor('deploy', mockDeploy)
       .onFail((err) => {
-        assert.equal(err, 'Missing required arguments: wsk-namespace, wsk-auth\n'
-          + 'Authentication is required. You can pass the key via the HLX_WSK_AUTH environment variable, too');
+        assert.equal(err, `Missing required arguments: wsk-namespace, wsk-auth
+OpenWhisk Namespace is required
+Authentication is required. You can pass the key via the HLX_WSK_AUTH environment variable, too`);
         done();
       })
       .run(['deploy', '--wsk-auth secret-key']);

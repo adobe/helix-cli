@@ -24,6 +24,7 @@ class CLI {
       build: require('./build.js')(),
       deploy: require('./deploy.js')(),
       perf: require('./perf.js')(),
+      strain: require('./strain.js')(),
     };
     this._failFn = null;
   }
