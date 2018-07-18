@@ -96,7 +96,7 @@ Instead of passing `--wsk-auth` as a command line option, you can also set the `
 
 ```bash
 # In <my-cool-project>
-$ hlx hlx strain --fastly-auth <key> --fastly-namespace <serviceid>
+$ hlx strain --fastly-auth <key> --fastly-namespace <serviceid>
 🐑 👾 🚀  hlx is publishing strains
 🐑  Cloned latest version, version 356 is ready
 🗝  Enabled Fastly to call secure OpenWhisk actions
