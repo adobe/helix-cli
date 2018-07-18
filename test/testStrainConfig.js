@@ -77,3 +77,12 @@ describe('Generated names are stable', () => {
     );
   });
 });
+
+describe('Invalid values are rejected or fixed on the fly', () => {
+  const buggy = fs.readFileSync(path.resolve(__dirname, '../fixtures/buggy.yaml'));
+
+  it('action names without a default path get a default path', () => {
+    const mystrains = strainconfig.load(buggy);
+    assert.equal('/trieloff/default/git-github-com-adobe-helix-cli-git--dirty', mystrains[0].code);
+  });
+});
