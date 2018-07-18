@@ -83,12 +83,17 @@ class DeployCommand {
   }
 
   static getRepository() {
-    return $
+    const repo = $
       .exec('git config --get remote.origin.url', {
         silent: true,
       })
       .stdout.replace(/\n/, '')
       .replace(/[\W]/g, '-');
+    if (repo!=='') {
+      return repo;
+    } else {
+      return 'local--' + path.basename(process.cwd());
+    }
   }
 
   static getDefaultContentURL() {
