@@ -91,19 +91,6 @@ async function initGitRepository(dir) {
   }
 }
 
-async function finalizeGitRepository(dir) {
-  const pwd = shell.pwd();
-  try {
-    shell.cd(dir);
-    await execAsync('git add package-lock.json');
-    await execAsync('git commit -q -m"Adding package-lock.json."');
-  } catch (e) {
-    throw Error(`Unable to add generates file to repository: ${e}`);
-  } finally {
-    shell.cd(pwd);
-  }
-}
-
 async function initNpm(dir) {
   const pwd = shell.pwd();
   try {
@@ -183,9 +170,8 @@ class InitCommand {
     });
 
     return Promise.all(jobs)
-      .then(() => initGitRepository(projectDir))
       .then(() => initNpm(projectDir))
-      .then(() => finalizeGitRepository(projectDir))
+      .then(() => initGitRepository(projectDir))
       .then(() => {
         console.log(chalk.green(`Successfully created project in ./${relPath}`));
       })
