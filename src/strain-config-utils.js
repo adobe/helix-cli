@@ -161,9 +161,12 @@ function write(strains) {
  * @param {Strain} strain
  */
 function append(strains, strain) {
-  if (!strain.name) {
-    const olddefault = strains[0];
+  if (strains.length === 0) {
+    // this is the first strain we're adding
+    return [Object.assign({ name: 'default', ...strain })];
+  } else if (!strain.name) {
     const newdefault = Object.assign({ name: 'default', ...strain });
+    const olddefault = strains.length > 0 ? strains[0] : newdefault;
     if (hash.sha1(olddefault) === hash.sha1(newdefault)) {
       // this is a non-substantial update to the default, not appending
       return strains;
@@ -181,10 +184,11 @@ function append(strains, strain) {
  * @returns {Strain[]} the loaded strains
  */
 function load(yml) {
-  return yaml
-    .safeLoad(yml)
-    .map(clean)
-    .filter(validate);
+  const yamlo = yaml.safeLoad(yml);
+  if (Array.isArray(yamlo)) {
+    return yamlo.map(clean).filter(validate);
+  }
+  return [];
 }
 
 module.exports = {
