@@ -49,7 +49,7 @@ class DeployCommand {
       .exec('git status --porcelain', {
         silent: true,
       })
-      .stdout.replace(/\n/, '')
+      .stdout.replace(/\n/g, '')
       .replace(/[\W]/g, '-').length;
   }
 
@@ -58,21 +58,21 @@ class DeployCommand {
       .exec('git rev-parse HEAD', {
         silent: true,
       })
-      .stdout.replace(/\n/, '')
+      .stdout.replace(/\n/g, '')
       .replace(/[\W]/g, '-');
 
     const tag = $
       .exec(`git name-rev --tags --name-only ${rev}`, {
         silent: true,
       })
-      .stdout.replace(/\n/, '')
+      .stdout.replace(/\n/g, '')
       .replace(/[\W]/g, '-');
 
     const branchname = $
       .exec('git rev-parse --abbrev-ref HEAD', {
         silent: true,
       })
-      .stdout.replace(/\n/, '')
+      .stdout.replace(/\n/g, '')
       .replace(/[\W]/g, '-');
 
     return tag !== 'undefined' ? tag : branchname;
@@ -87,7 +87,7 @@ class DeployCommand {
       .exec('git config --get remote.origin.url', {
         silent: true,
       })
-      .stdout.replace(/\n/, '')
+      .stdout.replace(/\n/g, '')
       .replace(/[\W]/g, '-');
   }
 
@@ -100,7 +100,7 @@ class DeployCommand {
     }
     const giturl = $.exec('git config --get remote.origin.url', {
       silent: true,
-    }).stdout.replace(/\n/, '');
+    }).stdout.replace(/\n/g, '');
     return giturl;
   }
 
