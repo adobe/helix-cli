@@ -54,6 +54,7 @@ const LAYOUT_DEFAULT = {
     },
     {
       name: '.gitignore',
+      from: '_gitignore',
     },
   ],
 };
@@ -159,7 +160,7 @@ class InitCommand {
     }
 
     const jobs = LAYOUT_DEFAULT.files.map((f) => {
-      const srcFile = path.resolve(LAYOUT_DEFAULT.dir, f.name);
+      const srcFile = path.resolve(LAYOUT_DEFAULT.dir, f.from || f.name);
       const dstFile = path.resolve(projectDir, f.name);
       return processFile(srcFile, dstFile, f.filter).then(() => {
         if (f.msg) {

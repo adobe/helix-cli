@@ -2,7 +2,7 @@
 
 ## Status
 [![codecov](https://img.shields.io/codecov/c/github/adobe/helix-cli.svg)](https://codecov.io/gh/adobe/helix-cli)
-[![CircleCI](https://img.shields.io/circleci/project/github/adobe/helix-cli.svg)](https://circleci.com/gh/adobe/parcel-plugin-htl)
+[![CircleCI](https://img.shields.io/circleci/project/github/adobe/helix-cli.svg)](https://circleci.com/gh/adobe/helix-cli)
 [![GitHub license](https://img.shields.io/github/license/adobe/helix-cli.svg)](https://github.com/adobe/helix-cli/blob/master/LICENSE.txt)
 [![GitHub issues](https://img.shields.io/github/issues/adobe/helix-cli.svg)](https://github.com/adobe/helix-cli/issues)
 [![Greenkeeper badge](https://badges.greenkeeper.io/adobe/helix-cli.svg)](https://greenkeeper.io/)
@@ -96,7 +96,7 @@ Instead of passing `--wsk-auth` as a command line option, you can also set the `
 
 ```bash
 # In <my-cool-project>
-$ hlx hlx strain --fastly-auth <key> --fastly-namespace <serviceid>
+$ hlx strain --fastly-auth <key> --fastly-namespace <serviceid>
 🐑 👾 🚀  hlx is publishing strains
 🐑  Cloned latest version, version 356 is ready
 🗝  Enabled Fastly to call secure OpenWhisk actions

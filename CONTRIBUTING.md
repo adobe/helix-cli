@@ -58,16 +58,19 @@ Feedback on the pull request will be given in writing, in GitHub.
 
 The project's committers will release to the [Adobe organization on npmjs.org](https://www.npmjs.com/org/adobe).
 Please contact the [Adobe Open Source Advisory Board](https://git.corp.adobe.com/OpenSourceAdvisoryBoard/discuss/issues) to get access to the npmjs organization.
-Then, you can release using:
+
+### Versioning
+
+use `npm version` to set the new package version create the git tag. eg:
+
+```bash
+$ npm version 0.2.1
+$ git push --tags
+```
+
+### Publishing
 
 ```bash
 $ npm login
 $ npm publish --access public
-```
-
-Do not forget to add a `git tag` corresponding to the released version number
-
-```bash
-$ git tag $(npm view @adobe/helix-cli@latest version) 
-$ git push origin $(npm view @adobe/helix-cli@latest version)
 ```
