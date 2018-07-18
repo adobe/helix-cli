@@ -9,7 +9,7 @@
   },
   "license": "Apache-2.0",
   "devDependencies": {
-    "@adobe/helix-cli": "^0.1.0",
+    "@adobe/helix-cli": "^0.2.2",
     "@adobe/parcel-plugin-htl": "^0.3.0-class"
   }
 }
