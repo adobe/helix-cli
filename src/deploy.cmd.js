@@ -89,11 +89,10 @@ class DeployCommand {
       })
       .stdout.replace(/\n/, '')
       .replace(/[\W]/g, '-');
-    if (repo!=='') {
+    if (repo !== '') {
       return repo;
-    } else {
-      return 'local--' + path.basename(process.cwd());
     }
+    return `local--${path.basename(process.cwd())}`;
   }
 
   static getDefaultContentURL() {
