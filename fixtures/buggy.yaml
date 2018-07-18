@@ -1,24 +1,51 @@
 # these are all the strains that get deployed to production
 - strain:
+    name: invalid-code-1
+    content:
+      owner: trieloff
+      repo: soupdemo
+      ref: master
+    code: git-github-com-adobe-helix-cli-git--dirty
+
+- strain:
+    name: invalid-code-2
+    content:
+      owner: trieloff
+      repo: soupdemo
+      ref: master
+    code: \trieloff\default\git-github-com-adobe-helix-cli-git--dirty
+
+- strain:
+    name: invalid-code-3
+    content:
+      owner: trieloff
+      repo: soupdemo
+      ref: master
+    code: /trieloff/default/git-github-com-adobe-helix-cli-git--dirty/foo
+
+- strain:
+    name: bad-owner
+    content:
+      owner: trieloff/adobe
+      repo: soupdemo
+      ref: master
+      root: moscow
+    code: /trieloff/git-github-com-adobe-helix-cli-git--dirty
+
+- strain:
+    name: bad-repo
+    content:
+      owner: adobe
+      repo: trieloff/soupdemo
+      ref: master
+      root: moscow
+    code: /trieloff/git-github-com-adobe-helix-cli-git--dirty
+
+- strain:
+    name: missing-default
     content:
       owner: trieloff
       repo: soupdemo
       ref: master
       root: moscow
     code: /trieloff/git-github-com-adobe-helix-cli-git--dirty
-- strain:
-    name: default
-    content:
-      owner: trieloff
-      repo: soupdemo
-      ref: master
-    code: /trieloff/default/git-github-com-adobe-helix-cli-git--dirty
-
-- strain:
-    name: xdm
-    condition: req.http.host == "xdm.primordialsoup.life"
-    content:
-      owner: adobe
-      repo: xdm
-      ref: master
-    code: /trieloff/default/git-github-com-adobe-helix-cli-git--dirty

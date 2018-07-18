@@ -85,4 +85,9 @@ describe('Invalid values are rejected or fixed on the fly', () => {
     const mystrains = strainconfig.load(buggy);
     assert.equal('/trieloff/default/git-github-com-adobe-helix-cli-git--dirty', mystrains[0].code);
   });
+
+  it('invalid code paths get ignored', () => {
+    const mystrains = strainconfig.load(buggy);
+    assert.equal(1, mystrains.length);
+  });
 });

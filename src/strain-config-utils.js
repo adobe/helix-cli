@@ -60,10 +60,30 @@ function name(strain) {
  * @returns {Strain} the unwrapped strain
  */
 function clean(strain) {
-  if (strain.strain && strain.strain.name && !anon(strain.strain.name)) {
-    return strain.strain;
+  const mystrain = (() => {
+    if (strain.strain && strain.strain.name && !anon(strain.strain.name)) {
+      return strain.strain;
+    }
+    return { name: name(strain.strain), ...strain.strain };
+  })();
+
+  // clean up code
+  if (mystrain.code) {
+    const match = mystrain.code.match(/^\/?([^/]+)\/?([^/]*)\/([^/]+)$/);
+    if (match) {
+      const ns = match[2] === '' ? 'default' : match[2];
+      mystrain.code = `/${match[1]}/${ns}/${match[3]}`;
+    } else {
+      // eslint-disable-next-line no-console
+      console.error(`Strain ${mystrain.name} has invalid code defined`);
+      mystrain.code = undefined;
+    }
+  } else {
+    // eslint-disable-next-line no-console
+    console.error(`Strain ${mystrain.name} has no code defined`);
   }
-  return { name: name(strain.strain), ...strain.strain };
+
+  return mystrain;
 }
 
 /**
@@ -77,7 +97,12 @@ function validate(strain) {
     strain.content &&
     strain.content.owner &&
     strain.content.repo &&
-    strain.code
+    strain.code &&
+    typeof strain.code === 'string' &&
+    typeof strain.content.owner === 'string' &&
+    typeof strain.content.repo === 'string' &&
+    strain.content.owner.match(/^[^/]+$/) &&
+    strain.content.repo.match(/^[^/]+$/)
   );
 }
 
