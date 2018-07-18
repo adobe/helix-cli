@@ -15,6 +15,7 @@
 const StrainCommand = require('../src/strain.cmd');
 // eslint-disable-next-line no-unused-vars
 const Replay = require('replay');
+
 Replay.mode = 'replay';
 
 describe('hlx strain (Integration)', () => {
