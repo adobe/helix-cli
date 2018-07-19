@@ -15,8 +15,6 @@
 const StrainCommand = require('../src/strain.cmd');
 const Replay = require('replay');
 
-Replay.mode = 'record';
-
 const FASTLY_AUTH = 'c8b42af6d9d30d241e6407c34afc3162';
 const WSK_AUTH = 'nope';
 
@@ -39,7 +37,7 @@ describe('hlx strain (Integration)', () => {
     const cmd = new StrainCommand()
       .withDryRun(true)
       .withFastlyAuth(FASTLY_AUTH)
-      .withFastlyNamespace('5mR3sYHyHoFQai8CmNpOvA')
+      .withFastlyNamespace('8Gm4OuoJyuk7yTP429aNy')
       .withWskHost('runtime.adobe.io')
       .withWskAuth(WSK_AUTH)
       .withWskNamespace('trieloff');
