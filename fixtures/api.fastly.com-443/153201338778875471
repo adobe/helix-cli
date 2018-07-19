@@ -1,0 +1,20 @@
+GET /service/5f1f7zaYVhxZQ7FRO8tvle/version/12/dictionary
+accept: application/json
+host: api.fastly.com
+
+HTTP/1.1 200 OK
+status: 200 OK
+content-type: application/json
+cache-control: no-cache
+via: 1.1 varnish, 1.1 varnish
+content-length: 1280
+accept-ranges: bytes
+date: Thu, 19 Jul 2018 15:16:27 GMT
+connection: close
+x-served-by: app-slwdc9051-SL, cache-fra19128-FRA
+x-cache: MISS, MISS
+x-cache-hits: 0, 0
+x-timer: S1532013386.259106,VS0,VE1506
+vary: Accept-Encoding
+
+[{"version":12,"name":"secrets","deleted_at":null,"service_id":"5f1f7zaYVhxZQ7FRO8tvle","created_at":"2018-07-19T14:21:42Z","write_only":true,"updated_at":"2018-07-19T14:21:42Z","id":"RnSEmGBTLAJu0eHnYB0TY"},{"version":12,"name":"strain_action_roots","deleted_at":null,"service_id":"5f1f7zaYVhxZQ7FRO8tvle","created_at":"2018-07-19T14:21:42Z","write_only":true,"updated_at":"2018-07-19T14:21:42Z","id":"RnhkYHgmgUlrWaMfaKtXs"},{"version":12,"name":"strain_owners","deleted_at":null,"service_id":"5f1f7zaYVhxZQ7FRO8tvle","created_at":"2018-07-19T14:21:42Z","write_only":true,"updated_at":"2018-07-19T14:21:42Z","id":"RnbEKOFFOXo13VkuLD48e"},{"version":12,"name":"strain_refs","deleted_at":null,"service_id":"5f1f7zaYVhxZQ7FRO8tvle","created_at":"2018-07-19T14:21:42Z","write_only":true,"updated_at":"2018-07-19T14:21:42Z","id":"RpFUJulgLFNuEwL92vufl"},{"version":12,"name":"strain_repos","deleted_at":null,"service_id":"5f1f7zaYVhxZQ7FRO8tvle","created_at":"2018-07-19T14:21:42Z","write_only":true,"updated_at":"2018-07-19T14:21:42Z","id":"RsIlPxGjLk8eMSxdE6zOY"},{"version":12,"name":"strain_root_paths","deleted_at":null,"service_id":"5f1f7zaYVhxZQ7FRO8tvle","created_at":"2018-07-19T14:21:41Z","write_only":true,"updated_at":"2018-07-19T14:21:41Z","id":"RW1BASBCwz0lVu7gFHc85"}]

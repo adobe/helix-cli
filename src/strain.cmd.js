@@ -21,6 +21,8 @@ const { toBase64 } = require('request/lib/helpers');
 const strainconfig = require('./strain-config-utils');
 
 const STRAIN_FILE = path.resolve(process.cwd(), '.hlx', 'strains.yaml');
+const HELIX_VCL_FILE = path.resolve(process.cwd(), 'helix.vcl');
+const HELIX_VCL_DEFAULT_FILE = path.resolve(__dirname, 'helix.vcl');
 
 
 class StrainCommand {
@@ -50,7 +52,39 @@ class StrainCommand {
       strain_refs: null,
       strain_repos: null,
       strain_root_paths: null,
-      just_for_testing: null,
+    };
+
+    this._backends = {
+      GitHub: {
+        hostname: 'raw.githubusercontent.com',
+        error_threshold: 0,
+        first_byte_timeout: 15000,
+        weight: 100,
+        address: 'raw.githubusercontent.com',
+        connect_timeout: 1000,
+        name: 'GitHub',
+        port: 443,
+        between_bytes_timeout: 10000,
+        shield: 'iad-va-us',
+        ssl_cert_hostname: 'githubusercontent.com',
+        max_conn: 200,
+        use_ssl: true,
+      },
+      'runtime.adobe.io': {
+        hostname: 'runtime.adobe.io',
+        error_threshold: 0,
+        first_byte_timeout: 60000,
+        weight: 100,
+        address: 'runtime.adobe.io',
+        connect_timeout: 1000,
+        name: 'runtime.adobe.io',
+        port: 443,
+        between_bytes_timeout: 10000,
+        shield: 'iad-va-us',
+        ssl_cert_hostname: 'runtime.adobe.io',
+        max_conn: 200,
+        use_ssl: true,
+      },
     };
   }
 
@@ -170,6 +204,26 @@ class StrainCommand {
   }
 
   /**
+   * Refreshes the map of backends defined in the service
+   */
+  async getBackends() {
+    // if there are backends without an created_at record, they haven't
+    // been fetched from the service yet
+    if (Object.values(this._backends).some(e => e.created_at == null)) {
+      const opts = await this.version('/backend');
+      const backs = await request(opts);
+      Object.values(backs).map((back) => {
+        if (!back.deleted_at) {
+          this._backends[back.name] = back;
+        }
+        return back.name;
+      });
+    }
+
+    return this._backends;
+  }
+
+  /**
    * Creates edge dictionaries in the service config
    */
   async initDictionaries() {
@@ -202,17 +256,44 @@ class StrainCommand {
   }
 
   /**
-   * Clones an existing configuration version
-   * @param {function} next continuation
+   * Creates backends in the service config
    */
-  async cloneVersion(next) {
+  async initBackends() {
+    const backends = await this.getBackends();
+    const missingbackends = Object.entries(backends)
+      .filter(([_key, value]) => value.created_at === undefined)
+      .map(([_key, value]) => value);
+    if (missingbackends.length > 0) {
+      const baseopts = await this.version('/backend');
+      missingbackends.map((backend) => {
+        const opts = Object.assign({
+          method: 'POST',
+          form: backend,
+        }, baseopts);
+        return request(opts).then((r) => {
+          console.log(`🔚  Backend ${r.name} has been created`);
+          return r;
+        })
+          .catch((e) => {
+            const message = `Backend ${backend.name} could not be created`;
+            console.error(message);
+            console.error(e.message);
+            throw new Error(message, e);
+          });
+      });
+    }
+  }
+
+
+  /**
+   * Clones an existing configuration version. Returns a promise.
+   */
+  async cloneVersion() {
     const cloneOpts = await this.putVersionOpts('/clone');
     return request(cloneOpts).then((r) => {
       console.log(`🐑  Cloned latest version, version ${r.number} is ready`);
       this._version = r.number;
-      if (next) {
-        next(r);
-      }
+      return Promise.resolve(this);
     })
       .catch((e) => {
         const message = 'Unable to create new service version';
@@ -223,17 +304,14 @@ class StrainCommand {
   }
 
   /**
-   * Publishes the latest (cloned) service version
-   * @param {Function} next continuation
+   * Publishes the latest (cloned) service version. Returns a promise.
    */
-  async publishVersion(next) {
+  async publishVersion() {
     const actOpts = await this.putVersionOpts('/activate');
     return request(actOpts).then((r) => {
       console.log(`🚀  Activated latest version, version ${r.number} is live`);
       this._version = r.number;
-      if (next) {
-        next(r);
-      }
+      return Promise.resolve(this);
     })
       .catch((e) => {
         const message = 'Unable to activate new configuration';
@@ -278,29 +356,53 @@ class StrainCommand {
 }`;
   }
 
+  async vclopts(name, vcl) {
+    const baseopts = await this.version(`/vcl/${name}`);
+    const postopts = await this.version('/vcl');
+    // making a get request to probe if the VCL already exists
+    return request.get(baseopts).then(() =>
+      // overwrite
+      Object.assign({
+        method: 'PUT',
+        form: {
+          name,
+          content: vcl,
+        },
+      }, baseopts)).catch(() =>
+      // create new
+      Object.assign({
+        method: 'POST',
+        form: {
+          name,
+          content: vcl,
+        },
+      }, postopts));
+  }
+
   /**
    * Creates or updates a VCL file in the service with the given VCL code
-   * @param {*} vcl code
-   * @param {*} name name of the file
+   * @param {String} vcl code
+   * @param {String} name name of the file
+   * @param {boolean} make this the main VCL
    */
-  async setVCL(vcl, name) {
-    const baseopts = await this.version(`/vcl/${name}`);
-    const opts = Object.assign({
-      method: 'PUT',
-      form: {
-        name,
-        content: vcl,
-      },
-    }, baseopts);
+  async setVCL(vcl, name, main = false) {
+    const opts = await this.vclopts(name, vcl);
     return request(opts)
-      .then((r) => {
+      .then(async (r) => {
         console.log(`✅  VCL ${r.name} has been updated`);
+        if (main) {
+          const mainbaseopts = await this.version(`/vcl/${name}/main`);
+          const mainopts = Object.assign({ method: 'PUT' }, mainbaseopts);
+          return request(mainopts).then((_s) => {
+            console.log(`✅  VCL ${r.name} has been made main`);
+          });
+        }
         return r;
       })
       .catch((e) => {
         const message = `Unable to update VCL ${name}`;
         console.error(message);
-        console.error(e);
+        console.error(e.message);
         throw new Error(message, e);
       });
   }
@@ -325,15 +427,31 @@ class StrainCommand {
       });
   }
 
+  async initFastly() {
+    console.log('Checking Fastly Setup');
+    await this.initBackends();
+
+    const vclfile = fs.existsSync(HELIX_VCL_FILE) ? HELIX_VCL_FILE : HELIX_VCL_DEFAULT_FILE;
+    fs.readFile(vclfile, (err, content) => {
+      if (err) {
+        console.error(`❌  Unable to read ${vclfile}`);
+      } else {
+        this.setVCL(content, 'helix.vcl', true);
+      }
+    });
+  }
+
   async run() {
     console.log('🐑 👾 🚀  hlx is publishing strains');
 
-    this.cloneVersion((_r) => {
-      this.initDictionaries();
+    return this.cloneVersion().then((_r) => {
+      const initfp = this.initFastly();
+
+      const initdp = this.initDictionaries();
 
 
       const owsecret = `Basic ${toBase64(`${this._wsk_auth}`)}`;
-      this.putDict('secrets', 'OPENWHISK_AUTH', owsecret).then((_s) => {
+      const secretp = this.putDict('secrets', 'OPENWHISK_AUTH', owsecret).then((_s) => {
         console.log('🗝  Enabled Fastly to call secure OpenWhisk actions');
       })
         .catch((e) => {
@@ -343,86 +461,87 @@ class StrainCommand {
           throw new Error(message, e);
         });
 
-      fs.readFile(STRAIN_FILE, (err, content) => {
-        if (!err) {
-          const strains = strainconfig.load(content);
+      const content = fs.readFileSync(STRAIN_FILE);
+      const strains = strainconfig.load(content);
 
-          const strainsVCL = StrainCommand.getVCL(strains);
-          this.setVCL(strainsVCL, 'strains.vcl');
+      const strainsVCL = StrainCommand.getVCL(strains);
+      const strainp = this.setVCL(strainsVCL, 'strains.vcl');
 
 
-          const strainjobs = [];
-          strains.map((strain) => {
-            strainjobs.push(this.putDict('strain_action_roots', strain.name, strain.code).then(() => {
-              console.log(`👾  Set action root for strain  ${strain.name}`);
-            })
-              .catch((e) => {
-                const message = 'Error setting edge dictionary value';
-                console.error(message);
-                console.error(e);
-                throw new Error(message, e);
-              }));
-            strainjobs.push(this.putDict('strain_owners', strain.name, strain.content.owner).then(() => {
-              console.log(`🏢  Set owner for strain        ${strain.name}`);
-            })
-              .catch((e) => {
-                const message = 'Error setting edge dictionary value';
-                console.error(message);
-                console.error(e);
-                throw new Error(message, e);
-              }));
-            strainjobs.push(this.putDict('strain_repos', strain.name, strain.content.repo).then(() => {
-              console.log(`🌳  Set repo for strain         ${strain.name}`);
-            })
-              .catch((e) => {
-                const message = 'Error setting edge dictionary value';
-                console.error(message);
-                console.error(e);
-                throw new Error(message, e);
-              }));
-            if (strain.content.ref) {
-              strainjobs.push(this.putDict('strain_refs', strain.name, strain.content.ref).then(() => {
-                console.log(`🏷  Set ref for strain          ${strain.name}`);
-              })
-                .catch((e) => {
-                  const message = 'Error setting edge dictionary value';
-                  console.error(message);
-                  console.error(e);
-                  throw new Error(message, e);
-                }));
-            }
-            if (strain.content.root) {
-              strainjobs.push(this.putDict('strain_root_paths', strain.name, strain.content.root).then(() => {
-                console.log(`🌲  Set content root for strain ${strain.name}`);
-              })
-                .catch((e) => {
-                  const message = 'Error setting edge dictionary value';
-                  console.error(message);
-                  console.error(e);
-                  throw new Error(message, e);
-                }));
-            }
-            return strain;
-          });
-
-          Promise.all(strainjobs).then(() => {
-            console.log('📕  All dicts have been updated.');
-
-            this.publishVersion(() => {
-              this.purgeAll();
-            });
+      const strainjobs = [];
+      strains.map((strain) => {
+        strainjobs.push(this.putDict('strain_action_roots', strain.name, strain.code).then(() => {
+          console.log(`👾  Set action root for strain  ${strain.name}`);
+        })
+          .catch((e) => {
+            const message = 'Error setting edge dictionary value';
+            console.error(message);
+            console.error(e);
+            throw new Error(message, e);
+          }));
+        strainjobs.push(this.putDict('strain_owners', strain.name, strain.content.owner).then(() => {
+          console.log(`🏢  Set owner for strain        ${strain.name}`);
+        })
+          .catch((e) => {
+            const message = 'Error setting edge dictionary value';
+            console.error(message);
+            console.error(e);
+            throw new Error(message, e);
+          }));
+        strainjobs.push(this.putDict('strain_repos', strain.name, strain.content.repo).then(() => {
+          console.log(`🌳  Set repo for strain         ${strain.name}`);
+        })
+          .catch((e) => {
+            const message = 'Error setting edge dictionary value';
+            console.error(message);
+            console.error(e);
+            throw new Error(message, e);
+          }));
+        if (strain.content.ref) {
+          strainjobs.push(this.putDict('strain_refs', strain.name, strain.content.ref).then(() => {
+            console.log(`🏷  Set ref for strain          ${strain.name}`);
           })
             .catch((e) => {
-              const message = 'Error setting one or more edge dictionary values';
+              const message = 'Error setting edge dictionary value';
               console.error(message);
               console.error(e);
               throw new Error(message, e);
-            });
+            }));
         }
+        if (strain.content.root) {
+          strainjobs.push(this.putDict('strain_root_paths', strain.name, strain.content.root).then(() => {
+            console.log(`🌲  Set content root for strain ${strain.name}`);
+          })
+            .catch((e) => {
+              const message = 'Error setting edge dictionary value';
+              console.error(message);
+              console.error(e);
+              throw new Error(message, e);
+            }));
+        }
+        return strain;
       });
-    });
 
-    return this;
+      // wait for the two initialization jobs to finish, too
+      strainjobs.push(initfp);
+      strainjobs.push(initdp);
+
+      // also wait for the strain.vcl writing to finish
+      strainjobs.push(strainp);
+      strainjobs.push(secretp);
+
+      return Promise.all(strainjobs).then(() => {
+        console.log('📕  All dicts have been updated.');
+
+        return this.publishVersion().then(() => this.purgeAll());
+      })
+        .catch((e) => {
+          const message = 'Error setting one or more edge dictionary values';
+          console.error(message);
+          console.error(e);
+          throw new Error(message, e);
+        });
+    });
   }
 }
 module.exports = StrainCommand;
