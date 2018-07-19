@@ -1,7 +1,7 @@
 Petri Dish
 ==========
 
-his is an early POC to see how local development could work w/o running a runtime container.
+This is an early POC to see how local development could work w/o running a runtime container.
 
 Status
 ------
