@@ -29,7 +29,7 @@
     "@adobe/hypermedia-pipeline": "^0.3.2-SNAPSHOT.74",
     "@adobe/openwhisk-loggly-wrapper": "^0.2.0-SNAPSHOT.35",
     "@adobe/parcel-plugin-htl": "^0.4.0-SNAPSHOT.136",
-    "@adobe/petridish": "^1.0.3-SNAPSHOT.68",
+    "@adobe/petridish": "^1.0.4",
     "chalk": "^2.4.1",
     "fs-extra": "^7.0.0",
     "glob": "^7.1.2",
