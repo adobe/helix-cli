@@ -12,6 +12,7 @@
 
 const express = require('express');
 const NodeESI = require('nodesi');
+const { Module } = require('module');
 const utils = require('./utils.js');
 const logger = require('./logger.js');
 
@@ -19,6 +20,7 @@ const RequestContext = require('./RequestContext.js');
 const { TemplateResolver, Plugins: TemplateResolverPlugins } = require('../src/template_resolver');
 
 const DEFAULT_PORT = 3000;
+
 
 const esi = new NodeESI({
   baseUrl: `http://localhost:${DEFAULT_PORT}`,
@@ -30,9 +32,32 @@ const esi = new NodeESI({
  * @return {Promise} A promise that resolves to generated output.
  */
 function executeTemplate(ctx) {
+  // invalidate script
+  // todo: use watcher to invalidate automatically
   delete require.cache[require.resolve(ctx.templatePath)];
+
+  // the compiled script does not bundle the modules that are required for execution, since it
+  // expects them to be provided by the runtime. We tweak the module loader here in order to
+  // inject our own module paths.
+
+  /* eslint-disable no-underscore-dangle */
+  const nodeModulePathsFn = Module._nodeModulePaths;
+  Module._nodeModulePaths = function nodeModulePaths(from) {
+    let paths = nodeModulePathsFn.call(this, from);
+
+    // only tweak module path for scripts in build dir
+    if (from === ctx.config.buildDir) {
+      paths = paths.concat(module.paths);
+    }
+    return paths;
+  };
+
   // eslint-disable-next-line import/no-dynamic-require,global-require
   const mod = require(ctx.templatePath);
+
+  Module._nodeModulePaths = nodeModulePathsFn;
+  /* eslint-enable no-underscore-dangle */
+
   return Promise.resolve(mod.main({
     owner: ctx.config.contentRepo.owner,
     repo: ctx.config.contentRepo.repo,
