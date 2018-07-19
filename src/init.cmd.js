@@ -170,8 +170,8 @@ class InitCommand {
     });
 
     return Promise.all(jobs)
-      .then(() => initGitRepository(projectDir))
       .then(() => initNpm(projectDir))
+      .then(() => initGitRepository(projectDir))
       .then(() => {
         console.log(chalk.green(`Successfully created project in ./${relPath}`));
       })

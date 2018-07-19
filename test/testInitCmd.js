@@ -15,10 +15,12 @@
 const assert = require('assert');
 const path = require('path');
 const fse = require('fs-extra');
+const $ = require('shelljs');
 
 const InitCommand = require('../src/init.cmd');
 
 const TEST_DIR = path.resolve(__dirname, 'tmp');
+const pwd = process.cwd();
 
 async function assertFile(p) {
   const exists = await fse.pathExists(p);
@@ -30,6 +32,10 @@ async function assertFile(p) {
 describe('Integration test for init command', () => {
   beforeEach(() => {
     fse.removeSync(TEST_DIR);
+  });
+
+  afterEach('Change back to original working dir', () => {
+    process.chdir(pwd);
   });
 
   it('init creates all files', async () => {
@@ -44,5 +50,15 @@ describe('Integration test for init command', () => {
     await assertFile(path.resolve(TEST_DIR, 'project1', 'helix-config.yaml'));
     await assertFile(path.resolve(TEST_DIR, 'project1', 'index.md'));
     await assertFile(path.resolve(TEST_DIR, 'project1', 'package.json'));
+  }).timeout(3000);
+
+  it('init does not leave any files not checked in', async () => {
+    await new InitCommand()
+      .withDirectory(TEST_DIR)
+      .withName('project2')
+      .run();
+    process.chdir(path.resolve(TEST_DIR, 'project2'));
+    const status = $.exec('git status --porcelain', { silent: true });
+    assert.equal('', status.stdout);
   }).timeout(3000);
 });
