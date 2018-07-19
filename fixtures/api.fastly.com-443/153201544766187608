@@ -1,0 +1,24 @@
+PUT /service/8Gm4OuoJyuk7yTP429aNy/dictionary/19Ygica2avdEDFFVOZc0S8/item/0ad0c015f91dfa5e
+accept: application/json
+host: api.fastly.com
+content-type: application/x-www-form-urlencoded
+body: item_value=helix-cli
+
+HTTP/1.1 200 OK
+status: 200 OK
+content-type: application/json
+cache-control: no-cache
+fastly-ratelimit-remaining: 650
+fastly-ratelimit-reset: 1532016000
+via: 1.1 varnish, 1.1 varnish
+content-length: 134
+accept-ranges: bytes
+date: Thu, 19 Jul 2018 15:50:47 GMT
+connection: close
+x-served-by: app-slwdc9051-SL, cache-fra19146-FRA
+x-cache: MISS, MISS
+x-cache-hits: 0, 0
+x-timer: S1532015447.440745,VS0,VE197
+vary: Accept-Encoding
+
+{"dictionary_id":"19Ygica2avdEDFFVOZc0S8","service_id":"8Gm4OuoJyuk7yTP429aNy","item_key":"0ad0c015f91dfa5e","item_value":"helix-cli"}

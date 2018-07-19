@@ -14,6 +14,8 @@
 
 const StrainCommand = require('../src/strain.cmd');
 const Replay = require('replay');
+// disable replay for this test
+Replay.mode = 'replay';
 
 const FASTLY_AUTH = 'c8b42af6d9d30d241e6407c34afc3162';
 const WSK_AUTH = 'nope';
