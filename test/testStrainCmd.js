@@ -15,12 +15,20 @@
 const StrainCommand = require('../src/strain.cmd');
 const Replay = require('replay');
 // disable replay for this test
-Replay.mode = 'replay';
+Replay.mode = 'bloody';
 
-const FASTLY_AUTH = 'c8b42af6d9d30d241e6407c34afc3162';
+const FASTLY_AUTH = '---';
 const WSK_AUTH = 'nope';
 
 describe('hlx strain (Integration)', () => {
+  beforeEach(() => {
+    Replay.mode = 'replay';
+  });
+
+  afterEach(() => {
+    Replay.mode = 'bloody';
+  });
+
   it('Publish Strains on an existing Service Config', (done) => {
     const cmd = new StrainCommand()
       .withDryRun(true)
@@ -39,7 +47,7 @@ describe('hlx strain (Integration)', () => {
     const cmd = new StrainCommand()
       .withDryRun(true)
       .withFastlyAuth(FASTLY_AUTH)
-      .withFastlyNamespace('8Gm4OuoJyuk7yTP429aNy')
+      .withFastlyNamespace('54nWWFJicKgbdVHou26Y6a')
       .withWskHost('runtime.adobe.io')
       .withWskAuth(WSK_AUTH)
       .withWskNamespace('trieloff');

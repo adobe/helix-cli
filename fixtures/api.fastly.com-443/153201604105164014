@@ -1,0 +1,21 @@
+GET /service/54nWWFJicKgbdVHou26Y6a/version/2/dictionary
+accept: application/json
+host: api.fastly.com
+
+HTTP/1.1 200 OK
+status: 200 OK
+content-type: application/json
+cache-control: no-cache
+via: 1.1 varnish, 1.1 varnish
+accept-ranges: bytes, bytes
+content-length: 212
+date: Thu, 19 Jul 2018 16:00:41 GMT
+age: 0
+connection: close
+x-served-by: app-slwdc9051-SL, cache-fra19149-FRA
+x-cache: MISS, MISS
+x-cache-hits: 0, 0
+x-timer: S1532016040.180001,VS0,VE848
+vary: Accept-Encoding
+
+[{"version":2,"name":"strain_refs","deleted_at":null,"service_id":"54nWWFJicKgbdVHou26Y6a","created_at":"2018-07-19T16:00:40Z","write_only":true,"updated_at":"2018-07-19T16:00:40Z","id":"6tS8lvtRx0hWi7PATiYTlg"}]

@@ -1,0 +1,20 @@
+GET /service/54nWWFJicKgbdVHou26Y6a/version/2/dictionary
+accept: application/json
+host: api.fastly.com
+
+HTTP/1.1 200 OK
+status: 200 OK
+content-type: application/json
+cache-control: no-cache
+via: 1.1 varnish, 1.1 varnish
+content-length: 2
+accept-ranges: bytes
+date: Thu, 19 Jul 2018 16:00:40 GMT
+connection: close
+x-served-by: app-slwdc9051-SL, cache-fra19142-FRA
+x-cache: MISS, MISS
+x-cache-hits: 0, 0
+x-timer: S1532016040.175920,VS0,VE553
+vary: Accept-Encoding
+
+[]
