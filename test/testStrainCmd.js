@@ -14,6 +14,7 @@
 
 const StrainCommand = require('../src/strain.cmd');
 const Replay = require('replay');
+const fs = require('fs-extra');
 // disable replay for this test
 Replay.mode = 'bloody';
 
@@ -22,10 +23,13 @@ const WSK_AUTH = 'nope';
 
 describe('hlx strain (Integration)', () => {
   beforeEach(() => {
+    fs.mkdirpSync('.hlx');
+    fs.copyFileSync('fixtures/strains.yaml', '.hlx/strains.yaml');
     Replay.mode = 'replay';
   });
 
   afterEach(() => {
+    fs.removeSync('.hlx');
     Replay.mode = 'bloody';
   });
 
