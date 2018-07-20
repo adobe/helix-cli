@@ -1,0 +1,22 @@
+PUT /service/2120n5jqvwdRW0XEJ1rzfc/version/2/activate
+accept: application/json
+host: api.fastly.com
+
+HTTP/1.1 200 OK
+status: 200 OK
+content-type: application/json
+cache-control: no-cache
+fastly-ratelimit-remaining: 937
+fastly-ratelimit-reset: 1532102400
+via: 1.1 varnish, 1.1 varnish
+content-length: 241
+accept-ranges: bytes
+date: Fri, 20 Jul 2018 15:34:33 GMT
+connection: close
+x-served-by: app-slwdc9051-SL, cache-fra19149-FRA
+x-cache: MISS, MISS
+x-cache-hits: 0, 0
+x-timer: S1532100872.218542,VS0,VE1366
+vary: Accept-Encoding
+
+{"testing":false,"locked":true,"number":2,"active":true,"service_id":"2120n5jqvwdRW0XEJ1rzfc","staging":false,"created_at":"2018-07-20T15:34:28Z","deleted_at":null,"comment":"","updated_at":"2018-07-20T15:34:30Z","deployed":false,"msg":null}

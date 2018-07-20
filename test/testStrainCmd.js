@@ -47,7 +47,7 @@ describe('hlx strain (Integration)', () => {
     const cmd = new StrainCommand()
       .withDryRun(true)
       .withFastlyAuth(FASTLY_AUTH)
-      .withFastlyNamespace('3dNfijlUVUABxiu2x9IMOj')
+      .withFastlyNamespace('2120n5jqvwdRW0XEJ1rzfc')
       .withWskHost('runtime.adobe.io')
       .withWskAuth(WSK_AUTH)
       .withWskNamespace('trieloff');
