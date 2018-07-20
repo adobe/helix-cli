@@ -18,5 +18,5 @@ describe('Integration test for build', () => {
   it('build command succeeds', (done) => {
     const build = new BuildCommand().withFiles(['test/integration/src/*.htl']).withTargetDir('test/integration/.hlx/build');
     build.run().then(() => done()).catch(err => done(err));
-  });
+  }).timeout(5000);
 });
