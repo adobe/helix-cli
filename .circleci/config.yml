@@ -1,6 +1,7 @@
 version: 2
 jobs:
   build:
+    parallelism: 4
     docker:
       # specify the version you desire here
       - image: circleci/node:8
@@ -42,7 +43,7 @@ jobs:
         # test & get code coverage
         - run:
             name: Getting Code Coverage
-            command: npx istanbul cover ./node_modules/mocha/bin/_mocha -- -R mocha-junit-reporter && npx codecov
+            command: circleci tests glob test/*.js | circleci tests split --split-by=timings | xargs npx istanbul cover ./node_modules/mocha/bin/_mocha -- -R mocha-junit-reporter && npx codecov
             environment:
                 MOCHA_FILE: junit/test-results.xml
 
