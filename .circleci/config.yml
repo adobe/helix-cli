@@ -4,7 +4,7 @@ jobs:
     parallelism: 5
     docker:
       # specify the version you desire here
-      - image: circleci/node:8
+      - image: circleci/node:10.6
       
       # Specify service dependencies here if necessary
       # CircleCI maintains a library of pre-built images
@@ -24,7 +24,7 @@ jobs:
 
         - run: 
             name: Installing Dependencies
-            command: npm install --ignore-scripts
+            command: npm ci
 
         - save_cache:
             paths:
