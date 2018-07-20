@@ -1,0 +1,24 @@
+PUT /service/5f1f7zaYVhxZQ7FRO8tvle/dictionary/RnbEKOFFOXo13VkuLD48e/item/default
+accept: application/json
+host: api.fastly.com
+content-type: application/x-www-form-urlencoded
+body: item_value=adobe
+
+HTTP/1.1 200 OK
+status: 200 OK
+content-type: application/json
+cache-control: no-cache
+fastly-ratelimit-remaining: 997
+fastly-ratelimit-reset: 1532084400
+via: 1.1 varnish, 1.1 varnish
+content-length: 121
+accept-ranges: bytes
+date: Fri, 20 Jul 2018 10:21:28 GMT
+connection: close
+x-served-by: app-slwdc9051-SL, cache-fra19137-FRA
+x-cache: MISS, MISS
+x-cache-hits: 0, 0
+x-timer: S1532082088.682395,VS0,VE484
+vary: Accept-Encoding
+
+{"dictionary_id":"RnbEKOFFOXo13VkuLD48e","service_id":"5f1f7zaYVhxZQ7FRO8tvle","item_key":"default","item_value":"adobe"}

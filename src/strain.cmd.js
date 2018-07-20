@@ -19,6 +19,7 @@ const Promise = require('bluebird');
 const path = require('path');
 const { toBase64 } = require('request/lib/helpers');
 const strainconfig = require('./strain-config-utils');
+const include = require('./include-util');
 
 const STRAIN_FILE = path.resolve(process.cwd(), '.hlx', 'strains.yaml');
 const HELIX_VCL_FILE = path.resolve(process.cwd(), '.hlx', 'helix.vcl');
@@ -436,13 +437,13 @@ class StrainCommand {
     await this.initBackends();
 
     const vclfile = fs.existsSync(HELIX_VCL_FILE) ? HELIX_VCL_FILE : HELIX_VCL_DEFAULT_FILE;
-    fs.readFile(vclfile, (err, content) => {
-      if (err) {
-        console.error(`❌  Unable to read ${vclfile}`);
-      } else {
-        this.setVCL(content, 'helix.vcl', true);
-      }
-    });
+    try {
+      const content = include(vclfile);
+      this.setVCL(content, 'helix.vcl', true);
+    } catch (e) {
+      console.error(`❌  Unable to read ${vclfile}`);
+      throw e;
+    }
   }
 
   async run() {
