@@ -21,8 +21,8 @@ const { toBase64 } = require('request/lib/helpers');
 const strainconfig = require('./strain-config-utils');
 
 const STRAIN_FILE = path.resolve(process.cwd(), '.hlx', 'strains.yaml');
-const HELIX_VCL_FILE = path.resolve(process.cwd(), 'helix.vcl');
-const HELIX_VCL_DEFAULT_FILE = path.resolve(__dirname, 'helix.vcl');
+const HELIX_VCL_FILE = path.resolve(process.cwd(), '.hlx', 'helix.vcl');
+const HELIX_VCL_DEFAULT_FILE = path.resolve(__dirname, '../layouts/fastly/helix.vcl');
 
 
 class StrainCommand {
