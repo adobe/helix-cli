@@ -1,7 +1,7 @@
 version: 2
 jobs:
   build:
-    parallelism: 4
+    parallelism: 10
     docker:
       # specify the version you desire here
       - image: circleci/node:8
@@ -49,7 +49,7 @@ jobs:
         # test & get code coverage
         - run:
             name: Getting Code Coverage (For Real)
-            command: circleci tests glob test/*.js | circleci tests split --split-by=timings | xargs ./node_modules/mocha/bin/_mocha -R mocha-junit-reporter
+            command: circleci tests glob test/*.js | circleci tests split --split-by=timings | xargs ./node_modules/mocha/bin/_mocha -R mocha-junit-reporter --exit
             environment:
                 MOCHA_FILE: junit/test-results.xml
 
