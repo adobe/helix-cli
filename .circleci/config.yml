@@ -1,10 +1,10 @@
 version: 2
 jobs:
   build:
-    parallelism: 5
+    parallelism: 10
     docker:
       # specify the version you desire here
-      - image: circleci/node:10.6
+      - image: circleci/node:8
       
       # Specify service dependencies here if necessary
       # CircleCI maintains a library of pre-built images
@@ -20,16 +20,16 @@ jobs:
         # Download and cache dependencies
         - restore_cache:
             keys:
-            - v2-dependencies-{{ checksum "package.json" }}
+            - v1-dependencies-{{ checksum "package.json" }}
 
         - run: 
             name: Installing Dependencies
-            command: npm ci
+            command: npm install --ignore-scripts
 
         - save_cache:
             paths:
-                - ~/.npm
-            key: v2-dependencies-{{ checksum "package.json" }}
+                - node_modules
+            key: v1-dependencies-{{ checksum "package.json" }}
             
             # run tests!
         - run: mkdir junit
