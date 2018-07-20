@@ -77,3 +77,49 @@ describe('Generated names are stable', () => {
     );
   });
 });
+
+describe('Invalid values are rejected or fixed on the fly', () => {
+  const buggy = fs.readFileSync(path.resolve(__dirname, '../fixtures/buggy.yaml'));
+
+  it('action names without a default path get a default path', () => {
+    const mystrains = strainconfig.load(buggy);
+    assert.equal('/trieloff/default/git-github-com-adobe-helix-cli-git--dirty', mystrains[0].code);
+  });
+
+  it('invalid code paths get ignored', () => {
+    const mystrains = strainconfig.load(buggy);
+    assert.equal(1, mystrains.length);
+  });
+});
+
+describe('Appending works without errors', () => {
+  it('Appending to an empty file works', () => {
+    const oldstrains = strainconfig.load('');
+    const strain = {
+      code: '/foobar/default/local--foobar--dirty',
+      content: {
+        repo: 'foo',
+        ref: 'master',
+        owner: 'null',
+      },
+    };
+    const newstrains = strainconfig.append(oldstrains, strain);
+    assert.equal(1, newstrains.length);
+  });
+
+  it('Appending to an existing file works', () => {
+    const config = fs.readFileSync(path.resolve(__dirname, '../fixtures/config.yaml'));
+
+    const oldstrains = strainconfig.load(config);
+    const strain = {
+      code: '/foobar/default/local--foobar--dirty',
+      content: {
+        repo: 'foo',
+        ref: 'master',
+        owner: 'null',
+      },
+    };
+    const newstrains = strainconfig.append(oldstrains, strain);
+    assert.equal(4, newstrains.length);
+  });
+});
