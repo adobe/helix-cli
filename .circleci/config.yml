@@ -24,11 +24,12 @@ jobs:
 
         - run: 
             name: Installing Dependencies
-            command: npm install --ignore-scripts
+            command: npm ci
 
         - save_cache:
             paths:
                 - node_modules
+                - ~/.npm
             key: v1-dependencies-{{ checksum "package.json" }}
             
             # run tests!
