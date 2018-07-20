@@ -46,15 +46,6 @@ jobs:
             environment:
                 MOCHA_FILE: junit/test-results.xml
 
-        - run:
-            name: Install Globally
-            command: mkdir -p ~/.npm-global && npm link
-
-        - run:
-            name: Deploy Snapshot to Adobe I/O Runtime
-            command: ~/.npm-global/bin/hlx build && ~/.npm-global/bin/hlx deploy --dirty --no-auto --wsk-namespace trieloff --wsk-auth $WSK_AUTH --loggly-host trieloff --loggly-auth $LOGGLY_AUTH
-            working_directory: test/integration
-
         - store_test_results:
             path: junit
         - store_artifacts:
@@ -102,10 +93,51 @@ jobs:
       - store_artifacts:
           path: junit 
 
+  publish-examples:
+    docker:
+      # specify the version you desire here
+      - image: circleci/node:8
+
+    working_directory: ~/repo
+
+    steps:
+        - checkout
+
+        # Download and cache dependencies
+        - restore_cache:
+            keys:
+            - v1-dependencies-{{ checksum "package.json" }}
+
+        - run: 
+            name: Install Dependencies
+            command: npm install
+
+        - save_cache:
+            paths:
+            - node_modules
+            key: v1-dependencies-{{ checksum "package.json" }}
+
+
+        - run:
+            name: Install Globally
+            command: mkdir -p ~/.npm-global && npm link
+
+        - run:
+            name: Deploy Snapshot to Adobe I/O Runtime
+            command: ~/.npm-global/bin/hlx build && ~/.npm-global/bin/hlx deploy --dirty --no-auto --wsk-namespace trieloff --wsk-auth $WSK_AUTH --loggly-host trieloff --loggly-auth $LOGGLY_AUTH
+            working_directory: test/integration
+
 workflows:
   version: 2
   build:
     jobs:
+      - publish-examples:
+            requires:
+                - build
+            filters:
+                branches:
+                    only:
+                        - master
       - publish-snapshot:
            requires:
                - build
