@@ -38,17 +38,13 @@ jobs:
         - run:
             name: Lint
             command: npm run lint
-        - run:
-            name: Running Tests
-            command: npx mocha --reporter mocha-junit-reporter
-            environment:
-                MOCHA_FILE: junit/test-results.xml
-            when: always
 
-        # get code coverage
+        # test & get code coverage
         - run:
             name: Getting Code Coverage
-            command: npx istanbul cover ./node_modules/mocha/bin/_mocha -- -R spec && npx codecov
+            command: npx istanbul cover ./node_modules/mocha/bin/_mocha -- -R mocha-junit-reporter && npx codecov
+            environment:
+                MOCHA_FILE: junit/test-results.xml
 
         - run:
             name: Install Globally
