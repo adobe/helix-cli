@@ -113,7 +113,7 @@ describe('Integration test for up command', () => {
       })
       .run()
       .catch(done);
-  });
+  }).timeout(5000);
 
   it('up command delivers correct response.', (done) => {
     initGit();
