@@ -13,23 +13,47 @@
 /* eslint-env mocha */
 
 const StrainCommand = require('../src/strain.cmd');
-// eslint-disable-next-line no-unused-vars
 const Replay = require('replay');
+// disable replay for this test
+Replay.mode = 'bloody';
 
-Replay.mode = 'replay';
+const FASTLY_AUTH = '---';
+const WSK_AUTH = 'nope';
 
 describe('hlx strain (Integration)', () => {
-  it('Dry-Run Strain Publishing', (done) => {
+  beforeEach(() => {
+    Replay.mode = 'replay';
+  });
+
+  afterEach(() => {
+    Replay.mode = 'bloody';
+  });
+
+  it('Publish Strains on an existing Service Config', (done) => {
     const cmd = new StrainCommand()
       .withDryRun(true)
-      .withFastlyAuth('fakefakefakeohsofake')
-      .withFastlyNamespace('3l2MjGcHgWw5NUJz7OKYH3')
+      .withFastlyAuth(FASTLY_AUTH)
+      .withFastlyNamespace('5f1f7zaYVhxZQ7FRO8tvle')
       .withWskHost('runtime.adobe.io')
-      .withWskAuth('fakeuser:faketoken')
+      .withWskAuth(WSK_AUTH)
       .withWskNamespace('trieloff');
 
     cmd.run().then(() => {
       done();
     });
-  });
+  }).timeout(10000);
+
+  it('Publish Strains on a new Service Config', (done) => {
+    const cmd = new StrainCommand()
+      .withDryRun(true)
+      .withFastlyAuth(FASTLY_AUTH)
+      .withFastlyNamespace('3dNfijlUVUABxiu2x9IMOj')
+      .withWskHost('runtime.adobe.io')
+      .withWskAuth(WSK_AUTH)
+      .withWskNamespace('trieloff');
+
+    cmd.run().then(() => {
+      done();
+    });
+  }).timeout(10000);
 });

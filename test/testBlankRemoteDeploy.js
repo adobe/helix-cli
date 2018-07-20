@@ -21,6 +21,10 @@ const TEST_DIR = path.resolve(__dirname, 'tmp');
 const PROJECT_NAME = 'pulvillar-pantograph';
 const pwd = process.cwd();
 
+const Replay = require('replay');
+// disable replay for this test
+Replay.mode = 'bloody';
+
 describe('Test Deployment in Empty Project', () => {
   beforeEach('Initialize test project', function bef(done) {
     this.timeout(5000);
