@@ -368,15 +368,19 @@ class StrainCommand {
           name,
           content: vcl,
         },
-      }, baseopts)).catch(() =>
+      }, baseopts)).catch((e) => {
+      if (e.response.statusCode === 404) {
       // create new
-      Object.assign({
-        method: 'POST',
-        form: {
-          name,
-          content: vcl,
-        },
-      }, postopts));
+        return Object.assign({
+          method: 'POST',
+          form: {
+            name,
+            content: vcl,
+          },
+        }, postopts);
+      }
+      return e;
+    });
   }
 
   /**
