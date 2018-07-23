@@ -84,6 +84,7 @@ describe('Integration test for up command', () => {
 
   it('up command fails outside git repository', (done) => {
     new UpCommand()
+      .withCacheEnabled(false)
       .withFiles([path.join(TEST_DIR, 'src', '*.htl')])
       .withTargetDir(BUILD_DIR)
       .withDirectory(TEST_DIR)
@@ -99,6 +100,7 @@ describe('Integration test for up command', () => {
   it('up command succeeds and can be stopped', (done) => {
     initGit();
     new UpCommand()
+      .withCacheEnabled(false)
       .withFiles([path.join(TEST_DIR, 'src', '*.htl')])
       .withTargetDir(BUILD_DIR)
       .withDirectory(TEST_DIR)
@@ -119,6 +121,7 @@ describe('Integration test for up command', () => {
     initGit();
     let error = null;
     const cmd = new UpCommand()
+      .withCacheEnabled(false)
       .withFiles([path.join(TEST_DIR, 'src', '*.htl')])
       .withTargetDir(BUILD_DIR)
       .withDirectory(TEST_DIR)
@@ -149,6 +152,7 @@ describe('Integration test for up command', () => {
     initGit();
     let error = null;
     const cmd = new UpCommand()
+      .withCacheEnabled(false)
       .withFiles([path.join(TEST_DIR, 'src', '*.htl')])
       .withTargetDir(BUILD_DIR_ALT)
       .withDirectory(TEST_DIR)

@@ -23,8 +23,6 @@ const $ = require('shelljs');
 const GitUrl = require('@adobe/petridish/src/GitUrl');
 const strainconfig = require('./strain-config-utils');
 
-const STRAIN_FILE = path.resolve(process.cwd(), '.hlx', 'strains.yaml');
-
 class DeployCommand {
   constructor() {
     this._enableAuto = true;
@@ -42,6 +40,7 @@ class DeployCommand {
     this._enableDirty = false;
     this._dryRun = false;
     this._content = null;
+    this._strainFile = path.resolve(process.cwd(), '.hlx', 'strains.yaml');
   }
 
   static isDirty() {
@@ -173,6 +172,11 @@ class DeployCommand {
     return this;
   }
 
+  withStrainFile(value) {
+    this._strainFile = value;
+    return this;
+  }
+
   async run() {
     if (this._enableAuto) {
       console.error('Auto-deployment not implemented yet, please try hlx deploy --no-auto');
@@ -234,8 +238,8 @@ class DeployCommand {
     });
 
     const giturl = new GitUrl(this._content);
-    if (fs.existsSync(STRAIN_FILE)) {
-      const oldstrains = strainconfig.load(fs.readFileSync(STRAIN_FILE));
+    if (fs.existsSync(this._strainFile)) {
+      const oldstrains = strainconfig.load(fs.readFileSync(this._strainFile));
       const strain = {
         code: `/${this._wsk_namespace}/default/${this._prefix}`,
         content: {
@@ -248,7 +252,7 @@ class DeployCommand {
       if (newstrains.length > oldstrains.length) {
         console.log(`Updating strain config, adding strain ${strainconfig.name(strain)} as configuration has changed`);
         fs.writeFileSync(
-          STRAIN_FILE,
+          this._strainFile,
           strainconfig.write(newstrains),
         );
       }
@@ -263,8 +267,8 @@ class DeployCommand {
           owner: giturl.owner,
         },
       };
-      fs.mkdirpSync(path.resolve(process.cwd(), '.hlx'));
-      fs.writeFileSync(STRAIN_FILE, strainconfig.write([defaultstrain]));
+      await fs.ensureDir(path.dirname(this._strainFile));
+      fs.writeFileSync(this._strainFile, strainconfig.write([defaultstrain]));
     }
 
     return this;

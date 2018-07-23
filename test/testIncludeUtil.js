@@ -17,8 +17,8 @@ const assert = require('assert');
 const fs = require('fs-extra');
 const include = require('../src/include-util');
 
-const PRE = path.resolve(__dirname, '..', 'fixtures', 'preinclude.vcl');
-const POST = path.resolve(__dirname, '..', 'fixtures', 'postinclude.vcl');
+const PRE = path.resolve(__dirname, 'fixtures', 'preinclude.vcl');
+const POST = path.resolve(__dirname, 'fixtures', 'postinclude.vcl');
 
 describe('Testing include-util', () => {
   it('HTML can be included in VCL', () => {

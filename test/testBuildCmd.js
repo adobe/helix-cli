@@ -12,11 +12,19 @@
 
 /* eslint-env mocha */
 
+const path = require('path');
+
 const BuildCommand = require('../src/build.cmd');
 
+const HLX_DIR = path.resolve(__dirname, 'integration', '.hlx');
+const BUILD_DIR = path.resolve(HLX_DIR, 'build');
+
 describe('Integration test for build', () => {
-  it('build command succeeds', (done) => {
-    const build = new BuildCommand().withFiles(['test/integration/src/*.htl']).withTargetDir('test/integration/.hlx/build');
-    build.run().then(() => done()).catch(err => done(err));
+  it('build command succeeds', async () => {
+    await new BuildCommand()
+      .withFiles(['test/integration/src/*.htl'])
+      .withTargetDir(BUILD_DIR)
+      .withCacheEnabled(false)
+      .run();
   }).timeout(5000);
 });

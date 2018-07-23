@@ -18,13 +18,13 @@ const path = require('path');
 const strainconfig = require('../src/strain-config-utils');
 
 describe('Strain Config', () => {
-  const config = fs.readFileSync(path.resolve(__dirname, '../fixtures/config.yaml'));
+  const config = fs.readFileSync(path.resolve(__dirname, 'fixtures/config.yaml'));
 
-  const invalid = fs.readFileSync(path.resolve(__dirname, '../fixtures/invalid.yaml'));
+  const invalid = fs.readFileSync(path.resolve(__dirname, 'fixtures/invalid.yaml'));
 
-  const unsorted = fs.readFileSync(path.resolve(__dirname, '../fixtures/unsorted.yaml'));
+  const unsorted = fs.readFileSync(path.resolve(__dirname, 'fixtures/unsorted.yaml'));
 
-  const result = fs.readFileSync(path.resolve(__dirname, '../fixtures/result.yaml'));
+  const result = fs.readFileSync(path.resolve(__dirname, 'fixtures/result.yaml'));
 
   it('config can be parsed', () => {
     assert.equal(3, strainconfig.load(config).length);
@@ -79,7 +79,7 @@ describe('Generated names are stable', () => {
 });
 
 describe('Invalid values are rejected or fixed on the fly', () => {
-  const buggy = fs.readFileSync(path.resolve(__dirname, '../fixtures/buggy.yaml'));
+  const buggy = fs.readFileSync(path.resolve(__dirname, 'fixtures/buggy.yaml'));
 
   it('action names without a default path get a default path', () => {
     const mystrains = strainconfig.load(buggy);
@@ -108,7 +108,7 @@ describe('Appending works without errors', () => {
   });
 
   it('Appending to an existing file works', () => {
-    const config = fs.readFileSync(path.resolve(__dirname, '../fixtures/config.yaml'));
+    const config = fs.readFileSync(path.resolve(__dirname, 'fixtures/config.yaml'));
 
     const oldstrains = strainconfig.load(config);
     const strain = {
