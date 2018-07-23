@@ -10,9 +10,8 @@
  * governing permissions and limitations under the License.
  */
 const fs = require('fs-extra');
-const util = require('util');
-
-const stat = util.promisify(fs.stat);
+const request = require('request-promise');
+const path = require('path');
 
 const utils = {
 
@@ -21,14 +20,67 @@ const utils = {
    * @param {String} filename Path to file
    * @returns {Promise} Returns promise that resolves with the filename or rejects if is not a file.
    */
-  isFile(filename) {
-    return stat(filename)
-      .then((stats) => {
-        if (!stats.isFile()) {
-          throw Error(`no regular file: ${filename}`);
+  async isFile(filename) {
+    const stats = await fs.stat(filename);
+    if (!stats.isFile()) {
+      throw Error(`no regular file: ${filename}`);
+    }
+    return filename;
+  },
+
+  /**
+   * Fetches content from the given uri.
+   * @param {String} uri Either filesystem path (starting with '/') or URL
+   * @returns {*} The requested content or NULL if not exists.
+   */
+  async fetch(uri) {
+    if (uri.charAt(0) === '/') {
+      try {
+        return await fs.readFile(uri);
+      } catch (e) {
+        if (e.code === 'ENOENT') {
+          return null;
         }
-        return filename;
+        throw e;
+      }
+    }
+    try {
+      const response = await request({
+        method: 'GET',
+        uri,
+        resolveWithFullResponse: true,
+        encoding: null,
       });
+      return response.body;
+    } catch (e) {
+      if (e.response.statusCode === 404) {
+        return null;
+      }
+      throw new Error(`resource at ${uri} does not exist. got ${e.response.statusCode} from server`);
+    }
+  },
+
+  /**
+   * Fetches static resources and stores it in the context.
+   * @param {RequestContext} ctx Context
+   * @return {Promise} A promise that resolves to the request context.
+   */
+  async fetchStatic(ctx) {
+    let uri;
+    if (ctx.path.startsWith('/dist/')) {
+      uri = path.resolve(ctx.config.distDir, ctx.path.substring(6));
+    } else {
+      uri = ctx.config.contentRepo.raw + ctx.path;
+    }
+    ctx.logger.debug(`fetching static resource from ${uri}`);
+    const data = await utils.fetch(uri);
+    if (data === null) {
+      const error = new Error('Resource not found.');
+      error.code = 404;
+      throw error;
+    }
+    ctx.content = Buffer.from(data, 'utf8');
+    return ctx;
   },
 
 };

@@ -58,6 +58,10 @@ module.exports = class RequestContext {
     return this._path;
   }
 
+  /**
+   * The helix project configuration.
+   * @returns {HelixProject}
+   */
   get config() {
     return this._cfg;
   }

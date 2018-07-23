@@ -86,18 +86,19 @@ class HelixServer {
   }
 
   init() {
-    const boundResolve = this._templateResolver.resolve.bind(this._templateResolver);
+    const boundResolver = this._templateResolver.resolve.bind(this._templateResolver);
     this._app.get('*', (req, res) => {
       const ctx = new RequestContext(req, this._project);
       if (!ctx.valid) {
         res.status(404).send();
         return;
       }
+      ctx.logger = logger;
 
       if (ctx.extension === 'html' || ctx.extension === 'md') {
         // md files to be transformed
         Promise.resolve(ctx)
-          .then(boundResolve)
+          .then(boundResolver)
           .then(executeTemplate)
           .then((result) => {
             if (result instanceof Error) {
@@ -127,17 +128,15 @@ class HelixServer {
           });
       } else {
         // all the other files (css, images...)
-        // for now, fetch code if resource under /dist other, fetch in content.
-        // TODO: revisit completely...
-        const fetch = ctx.path.startsWith('/dist') ? utils.fetchCode : utils.fetchContent;
+        // for now, fetch from dist or content.
         Promise.resolve(ctx)
-          .then(fetch)
+          .then(utils.fetchStatic)
           .then((result) => {
             res.type(ctx.extension);
-            res.send(ctx.path.startsWith('/dist') ? result.code : result.content);
+            res.send(result.content);
           }).catch((err) => {
             logger.error(`Error while delivering resource: ${err.stack || err}`);
-            res.status(404).send();
+            res.status(err.code || 500).send();
           });
       }
     });

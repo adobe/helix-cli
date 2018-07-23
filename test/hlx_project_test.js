@@ -42,10 +42,12 @@ const SPECS_WITH_FAKE_GIT = [
 ];
 
 function initRepository(dir) {
+  const pwd = shell.pwd();
   shell.cd(dir);
   shell.exec('git init');
   shell.exec('git add -A');
   shell.exec('git commit -m"initial commit."');
+  shell.cd(pwd);
 }
 
 function initFakeRepository(dir) {

@@ -33,6 +33,8 @@ const SRC_DIR = 'src';
 
 const DEFAULT_BUILD_DIR = '.hlx/build';
 
+const DEFAULT_DIST_DIR = '.hlx/dist';
+
 const GIT_DIR = '.git';
 
 const GIT_LOCAL_HOST = 'localtest.me';
@@ -97,6 +99,7 @@ class HelixProject {
     this._gitState = null;
     this._needLocalServer = false;
     this._buildDir = DEFAULT_BUILD_DIR;
+    this._distDir = DEFAULT_DIST_DIR;
     this._contentRepo = null;
     this._server = new HelixServer(this);
   }
@@ -116,6 +119,11 @@ class HelixProject {
     return this;
   }
 
+  withDistDir(dir) {
+    this._distDir = dir;
+    return this;
+  }
+
   get gitConfig() {
     return this._gitConfig;
   }
@@ -124,10 +132,18 @@ class HelixProject {
     return this._buildDir;
   }
 
+  get distDir() {
+    return this._distDir;
+  }
+
   get srcDir() {
     return this._srcDir;
   }
 
+  /**
+   * Location of the content repo.
+   * @returns {null|GitUrl}
+   */
   get contentRepo() {
     return this._contentRepo;
   }
@@ -168,6 +184,7 @@ class HelixProject {
     }
 
     this._buildDir = path.resolve(this._cwd, this._buildDir);
+    this._distDir = path.resolve(this._cwd, this._distDir);
 
     const dotGitPath = path.join(this._cwd, GIT_DIR);
     if (await isDirectory(dotGitPath)) {

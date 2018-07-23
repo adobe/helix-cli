@@ -1,0 +1,182 @@
+body {
+    font-family: Roboto, sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+h1 {
+    font-size: 28px;
+    font-weight: 500;
+    padding: 0;
+    margin: 10px;
+}
+
+.header h1 img {
+    height: 1em;
+    padding-left: 20px;
+    padding-right: 20px;
+}
+
+.header {
+    display: flex;
+    align-items: stretch;
+    padding: 10px 10px;
+    border-bottom: 1px solid #ccc;
+}
+
+
+.header .title {
+    flex: 1 1 auto;
+}
+
+.header .search {
+    flex: 0 0 auto;
+    height: 2.5em;
+}
+
+.main {
+    flex: 1;
+    display: flex;
+    align-items: stretch;
+    transition: margin-bottom ease 200ms;
+}
+
+.nav {
+    flex: 0 0 auto;
+    background: #f5f7f9;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    width: calc((100% - 1448px) / 2 + 298px);
+    min-width: 298px;
+    padding-left: calc((100% - 1448px) / 2);
+    border-right: 1px solid #e8eaed;
+}
+
+.nav ul {
+    
+    list-style-image: url('data:image/svg+xml;utf8,<svg preserveAspectRatio="xMidYMid meet" height="1em" width="1em" fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke="currentColor" class="_13gjrqj"><g><polyline points="9 18 15 12 9 6"></polyline></g></svg>');
+    
+    margin: 37px 18px;
+    font-size: 16px;
+    line-height: 1.5em;
+}
+
+.nav ul li ul {
+    padding-left: 10px;
+    margin: 5px 0px;
+    list-style: none;
+    color: #aaa;
+}
+
+.nav ul li ul a {
+    list-style: none;
+    color: #aaa;
+}
+
+.nav a {
+    text-decoration: none;
+    color: inherit;
+}
+
+.nav ul li.open, .nav ul li.open a {
+    list-style-image: url('data:image/svg+xml;utf8,<svg preserveAspectRatio="xMidYMid meet" height="1em" width="1em" fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke="currentColor" class="_13gjrqj"><g><polyline points="6 9 12 15 18 9"></polyline></g></svg>');
+}
+
+.nav ul li.selected, .nav ul li.selected a {
+    color: #e00;
+}
+
+.nav ul li, .nav ul li a {
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+
+.nav ul li p {
+    font-size: 16px;
+    line-height: 1.5em;
+    margin: 0;
+}
+
+.content {
+    flex: 1 1 auto;
+    min-width: 0px;
+    display: flex;
+    position: relative;
+    background-color: aliceblue;
+}
+
+.content-body {
+    display: block;
+    padding: 0px;
+    flex: 1 1 auto;
+    min-width: 0px;
+    max-width: 750px;
+    margin: 30px 88px;
+    line-height: 1.5em;
+}
+
+.content-body .title {
+    display: block;
+    margin: 0px;
+    flex: 1;
+    border-left: 2px solid rgb(236, 33, 0);
+    padding: 0 16px;
+    margin-bottom: 52px;
+}
+
+.author img {
+    max-width: 100%;
+    overflow: hidden;
+    border-radius: 128px;
+    width: 30px;
+    height: 30px;
+    font-size: 12px;
+    line-height: 1.5;
+    font-weight: 500;
+    z-index: 0;
+    box-shadow: 0 0 0 2px #fff;
+}
+
+.author {
+    color: #888;
+    font-size: 12px;
+    line-height: 1.625;
+    font-weight: 400;
+}
+
+.lastModified {
+    display: none;
+}
+
+.lastModified.visible {
+    display: initial;
+}
+
+.search {
+    margin-top: 5px;
+    border-radius: 4px;
+    background: #F5F7F9;
+    border: 1px solid #E6ECF1;
+    background-image: url('data:image/svg+xml;utf8,<svg preserveAspectRatio="xMidYMid meet" height="1em" width="1em" fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke="currentColor" class="_13gjrqj"><g><circle cx="10.5" cy="10.5" r="7.5"></circle><line x1="21" y1="21" x2="15.8" y2="15.8"></line></g></svg>');
+    background-repeat: no-repeat;
+    background-position: 8px center;
+    padding-left: 20px;
+    max-width: 400px;
+}
+
+.searchinput {
+    border: none;
+    outline: none;
+    margin: 0px;
+    color: inherit;
+    background: transparent;
+    font: inherit;
+    text-align: inherit;
+    line-height: inherit;
+    cursor: inherit;
+    border-radius: 3px;
+    box-sizing: border-box;
+    height: 38px;
+    padding: 0px 8px;
+}

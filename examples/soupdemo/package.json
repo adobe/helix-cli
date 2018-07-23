@@ -3,13 +3,9 @@
   "description": "Demo repository for helix",
   "version": "1.0.0",
   "scripts": {
-    "start": "node ../../src/init.js",
+    "start": "node ../../src/run.js",
     "build": "hlx build",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "license": "Apache-2.0",
-  "devDependencies": {
-    "@adobe/helix-cli": "^0.2.2",
-    "@adobe/parcel-plugin-htl": "^0.3.0-class"
-  }
+  "license": "Apache-2.0"
 }

@@ -13,7 +13,7 @@
     "prepare": "npm run snyk-protect"
   },
   "dependencies": {
-    "@adobe/git-server": "0.0.1-SNAPSHOT.13",
+    "@adobe/git-server": "^0.0.2",
     "@adobe/htlengine": "^1.0.2-SNAPSHOT.68",
     "@adobe/hypermedia-pipeline": "^0.3.2-SNAPSHOT.85",
     "@adobe/openwhisk-loggly-wrapper": "^0.2.0-SNAPSHOT.41",
