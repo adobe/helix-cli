@@ -21,10 +21,7 @@ const { toBase64 } = require('request/lib/helpers');
 const strainconfig = require('./strain-config-utils');
 const include = require('./include-util');
 
-const STRAIN_FILE = path.resolve(process.cwd(), '.hlx', 'strains.yaml');
-const HELIX_VCL_FILE = path.resolve(process.cwd(), '.hlx', 'helix.vcl');
 const HELIX_VCL_DEFAULT_FILE = path.resolve(__dirname, '../layouts/fastly/helix.vcl');
-
 
 class StrainCommand {
   constructor() {
@@ -34,6 +31,8 @@ class StrainCommand {
     this._fastly_namespace = null;
     this._fastly_auth = null;
     this._dryRun = false;
+    this._strainFile = path.resolve(process.cwd(), '.hlx', 'strains.yaml');
+    this._vclFile = path.resolve(process.cwd(), '.hlx', 'helix.vcl');
 
     this._service = null;
     this._options = {
@@ -119,6 +118,17 @@ class StrainCommand {
     this._dryRun = value;
     return this;
   }
+
+  withStrainFile(value) {
+    this._strainFile = value;
+    return this;
+  }
+
+  withVclFile(value) {
+    this._vclFile = value;
+    return this;
+  }
+
   /**
    * Prepares a request to the Fastly API for the current service, using a given path extension
    * @param {String} pathext the path extension
@@ -436,7 +446,7 @@ class StrainCommand {
     console.log('Checking Fastly Setup');
     await this.initBackends();
 
-    const vclfile = fs.existsSync(HELIX_VCL_FILE) ? HELIX_VCL_FILE : HELIX_VCL_DEFAULT_FILE;
+    const vclfile = fs.existsSync(this._vclFile) ? this._vclFile : HELIX_VCL_DEFAULT_FILE;
     try {
       const content = include(vclfile);
       this.setVCL(content, 'helix.vcl', true);
@@ -466,7 +476,7 @@ class StrainCommand {
           throw new Error(message, e);
         });
 
-      const content = fs.readFileSync(STRAIN_FILE);
+      const content = fs.readFileSync(this._strainFile);
       const strains = strainconfig.load(content);
 
       const strainsVCL = StrainCommand.getVCL(strains);

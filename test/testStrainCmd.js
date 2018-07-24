@@ -14,23 +14,36 @@
 
 const StrainCommand = require('../src/strain.cmd');
 const Replay = require('replay');
+const fs = require('fs-extra');
+const path = require('path');
+
 // disable replay for this test
 Replay.mode = 'bloody';
+Replay.fixtures = path.resolve(__dirname, 'fixtures');
 
 const FASTLY_AUTH = '---';
 const WSK_AUTH = 'nope';
 
+const HLX_DIR = path.resolve(__dirname, 'integration/.hlx');
+
+const SRC_STRAINS = path.resolve(__dirname, 'fixtures/strains.yaml');
+const DST_STRAINS = path.resolve(HLX_DIR, 'strains.yaml');
+
 describe('hlx strain (Integration)', () => {
-  beforeEach(() => {
+  beforeEach(async () => {
+    await fs.mkdirp(HLX_DIR);
+    await fs.copyFile(SRC_STRAINS, DST_STRAINS);
     Replay.mode = 'replay';
   });
 
-  afterEach(() => {
+  afterEach(async () => {
+    await fs.remove(HLX_DIR);
     Replay.mode = 'bloody';
   });
 
   it('Publish Strains on an existing Service Config', (done) => {
     const cmd = new StrainCommand()
+      .withStrainFile(DST_STRAINS)
       .withDryRun(true)
       .withFastlyAuth(FASTLY_AUTH)
       .withFastlyNamespace('5f1f7zaYVhxZQ7FRO8tvle')
@@ -40,11 +53,12 @@ describe('hlx strain (Integration)', () => {
 
     cmd.run().then(() => {
       done();
-    });
+    }).catch(done);
   }).timeout(10000);
 
   it('Publish Strains on a new Service Config', (done) => {
     const cmd = new StrainCommand()
+      .withStrainFile(DST_STRAINS)
       .withDryRun(true)
       .withFastlyAuth(FASTLY_AUTH)
       .withFastlyNamespace('2120n5jqvwdRW0XEJ1rzfc')
@@ -54,6 +68,6 @@ describe('hlx strain (Integration)', () => {
 
     cmd.run().then(() => {
       done();
-    });
+    }).catch(done);
   }).timeout(10000);
 });
