@@ -20,17 +20,17 @@ jobs:
         # Download and cache dependencies
         - restore_cache:
             keys:
-            - v2-dependencies-{{ arch }}-{{ checksum "yarn.lock" }}
+            - v3-dependencies-{{ arch }}-{{ checksum "yarn.lock" }}
 
         - run: 
             name: Installing Dependencies
-            command: yarn install --ignore-scripts
+            command: yarn install
 
         - save_cache:
             paths:
                 - node_modules
                 - ~/.cache/yarn
-            key: v2-dependencies-{{ arch }}-{{ checksum "yarn.lock" }}
+            key: v3-dependencies-{{ arch }}-{{ checksum "yarn.lock" }}
             
             # run tests!
         - run: mkdir junit
@@ -44,9 +44,9 @@ jobs:
         # test & get code coverage
         - run:
             name: Getting Code Coverage
-            #command: circleci tests glob test/test*.js | circleci tests split --split-by=timings | xargs ./node_modules/.bin/istanbul cover ./node_modules/mocha/bin/_mocha -- -R mocha-junit-reporter --exit && yarn codecov
+            command: circleci tests glob test/test*.js | circleci tests split --split-by=timings | xargs ./node_modules/.bin/istanbul cover ./node_modules/mocha/bin/_mocha -- -R mocha-junit-reporter --exit && yarn codecov
             #command: ./node_modules/.bin/istanbul cover ./node_modules/mocha/bin/_mocha -- -R mocha-junit-reporter && yarn codecov
-            command: yarn cover
+            #command: yarn cover
             environment:
                 MOCHA_FILE: junit/test-results.xml
 
