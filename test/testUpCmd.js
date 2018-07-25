@@ -26,7 +26,6 @@ const UpCommand = require('../src/up.cmd');
 const TEST_DIR = path.resolve('test/integration');
 
 describe('Integration test for up command', () => {
-
   let testDir;
   let buildDir;
 

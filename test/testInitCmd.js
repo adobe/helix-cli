@@ -22,7 +22,6 @@ const InitCommand = require('../src/init.cmd');
 const pwd = process.cwd();
 
 describe('Integration test for init command', () => {
-
   let testDir;
 
   beforeEach(async () => {

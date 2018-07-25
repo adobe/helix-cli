@@ -22,7 +22,6 @@ const BuildCommand = require('../src/build.cmd');
 const TEST_DIR = path.resolve('test/integration');
 
 describe('Integration test for build', () => {
-
   let testDir;
   let buildDir;
   let distDir;
