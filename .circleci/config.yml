@@ -20,24 +20,16 @@ jobs:
         # Download and cache dependencies
         - restore_cache:
             keys:
-            - v2-dependencies-{{ checksum "package.json" }}
+            - v2-dependencies-{{ arch }}-{{ checksum "package-lock.json" }}
 
         - run: 
             name: Installing Dependencies
             command: npm install --ignore-scripts
 
-        - run:
-            name: Installing (nodegit)
-            command: npm install nodegit --ignore-scripts
-
-        - run:
-            name: Installing (openwhisk)
-            command: npm install openwhisk --ignore-scripts
-
         - save_cache:
             paths:
                 - node_modules
-            key: v2-dependencies-{{ checksum "package.json" }}
+            key: v2-dependencies-{{ arch }}-{{ checksum "package-lock.json" }}
             
             # run tests!
         - run: mkdir junit
