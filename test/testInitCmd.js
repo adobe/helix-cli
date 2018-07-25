@@ -10,7 +10,7 @@
  * governing permissions and limitations under the License.
  */
 
-/* eslint-env mocha */
+/* globals describe, beforeEach, afterEach, it */
 
 const assert = require('assert');
 const path = require('path');
