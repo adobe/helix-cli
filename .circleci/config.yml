@@ -20,16 +20,17 @@ jobs:
         # Download and cache dependencies
         - restore_cache:
             keys:
-            - v2-dependencies-{{ arch }}-{{ checksum "package-lock.json" }}
+            - v2-dependencies-{{ arch }}-{{ checksum "yarn.lock" }}
 
         - run: 
             name: Installing Dependencies
-            command: npm install --ignore-scripts
+            command: yarn install --ignore-scripts
 
         - save_cache:
             paths:
                 - node_modules
-            key: v2-dependencies-{{ arch }}-{{ checksum "package-lock.json" }}
+                - ~/.cache/yarn
+            key: v2-dependencies-{{ arch }}-{{ checksum "yarn.lock" }}
             
             # run tests!
         - run: mkdir junit
@@ -38,12 +39,12 @@ jobs:
             command: git config --global user.email "you@example.com" && git config --global user.name "Your Name"
         - run:
             name: Lint
-            command: npm run lint
+            command: yarn run lint
 
         # test & get code coverage
         - run:
             name: Getting Code Coverage
-            command: circleci tests glob test/*.js | circleci tests split --split-by=timings | xargs npx istanbul cover ./node_modules/mocha/bin/_mocha -- -R mocha-junit-reporter --exit && npx codecov
+            command: circleci tests glob test/*.js | circleci tests split --split-by=timings | xargs yarn istanbul cover ./node_modules/mocha/bin/_mocha -- -R mocha-junit-reporter --exit && yarn codecov
             environment:
                 MOCHA_FILE: junit/test-results.xml
 
