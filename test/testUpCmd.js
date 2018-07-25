@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-expressions */
 /*
  * Copyright 2018 Adobe. All rights reserved.
  * This file is licensed to you under the Apache License, Version 2.0 (the "License");
@@ -11,26 +10,17 @@
  * governing permissions and limitations under the License.
  */
 
-/* eslint-env mocha */
-
-const assert = require('assert');
+/* global describe, it, beforeEach, after */
+/* eslint-disable no-unused-expressions */
 const path = require('path');
-const shell = require('shelljs');
 const fse = require('fs-extra');
-const chai = require('chai');
-const chaiHttp = require('chai-http');
-const chaiFiles = require('chai-files');
-
-const Replay = require('replay');
-
-// disable replay for this test
-Replay.mode = 'bloody';
-
-// setup chai
-chai.use(chaiFiles);
-chai.use(chaiHttp);
-const { expect } = chai;
-const { file } = chaiFiles;
+const {
+  assert,
+  expect,
+  file,
+  initGit,
+  assertHttp,
+} = require('./utils.js');
 
 const UpCommand = require('../src/up.cmd');
 
@@ -39,29 +29,6 @@ const TEST_DIR = path.resolve('test/integration');
 const BUILD_DIR = path.resolve(TEST_DIR, '.hlx/build');
 
 const BUILD_DIR_ALT = path.resolve(TEST_DIR, 'tmp/build');
-
-/**
- * init git in integration so that petridish can run
- */
-function initGit() {
-  const pwd = shell.pwd();
-  shell.cd(TEST_DIR);
-  shell.exec('git init');
-  shell.exec('git add -A');
-  shell.exec('git commit -m"initial commit."');
-  shell.cd(pwd);
-}
-
-async function assertHttp(host, pathname, status, spec) {
-  return chai.request(host)
-    .get(pathname)
-    .then((res) => {
-      expect(res).to.have.status(status);
-      if (spec) {
-        expect(res.text).to.equal(file(path.resolve(__dirname, 'specs', spec)));
-      }
-    });
-}
 
 describe('Integration test for up command', () => {
   after(() => {
@@ -89,7 +56,7 @@ describe('Integration test for up command', () => {
   });
 
   it('up command succeeds and can be stopped', (done) => {
-    initGit();
+    initGit(TEST_DIR);
     new UpCommand()
       .withCacheEnabled(false)
       .withFiles([path.join(TEST_DIR, 'src', '*.htl')])
@@ -109,7 +76,7 @@ describe('Integration test for up command', () => {
   }).timeout(5000);
 
   it('up command delivers correct response.', (done) => {
-    initGit();
+    initGit(TEST_DIR);
     let error = null;
     const cmd = new UpCommand()
       .withCacheEnabled(false)
@@ -141,7 +108,7 @@ describe('Integration test for up command', () => {
   }).timeout(5000);
 
   it('up command delivers correct response with different build dir.', (done) => {
-    initGit();
+    initGit(TEST_DIR);
     let error = null;
     const cmd = new UpCommand()
       .withCacheEnabled(false)
