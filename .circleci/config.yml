@@ -28,11 +28,11 @@ jobs:
 
         - run:
             name: Installing (nodegit)
-            command: npm nodegit --ignore-scripts
+            command: npm install nodegit --ignore-scripts
 
-        - run: 
+        - run:
             name: Installing (openwhisk)
-            command: npm openwhisk --ignore-scripts
+            command: npm install openwhisk --ignore-scripts
 
         - save_cache:
             paths:
