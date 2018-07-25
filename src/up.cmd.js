@@ -62,15 +62,16 @@ class UpCommand extends BuildCommand {
     this._bundler = new Bundler(myfiles, myoptions);
     this._bundler.addAssetType('htl', require.resolve('@adobe/parcel-plugin-htl/HTLAsset.js'));
 
+    this.validate();
+
     this._project = new HelixProject()
       .withCwd(this._cwd)
-      .withBuildDir(this._target);
+      .withBuildDir(this._target)
+      .withDistDir(this._distDir);
 
     if (this._httpPort >= 0) {
       this._project.withHttpPort(this._httpPort);
     }
-
-    this.validate();
 
     this._bundler.on('buildEnd', async () => {
       if (this._project.started) {

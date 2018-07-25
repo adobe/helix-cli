@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-expressions */
 /*
  * Copyright 2018 Adobe. All rights reserved.
  * This file is licensed to you under the Apache License, Version 2.0 (the "License");
@@ -16,10 +17,20 @@ const assert = require('assert');
 const path = require('path');
 const shell = require('shelljs');
 const fse = require('fs-extra');
-const http = require('http');
+const chai = require('chai');
+const chaiHttp = require('chai-http');
+const chaiFiles = require('chai-files');
+
 const Replay = require('replay');
+
 // disable replay for this test
 Replay.mode = 'bloody';
+
+// setup chai
+chai.use(chaiFiles);
+chai.use(chaiHttp);
+const { expect } = chai;
+const { file } = chaiFiles;
 
 const UpCommand = require('../src/up.cmd');
 
@@ -41,35 +52,15 @@ function initGit() {
   shell.cd(pwd);
 }
 
-// todo: use polly.js ?
-async function assertHttp(url, status, spec) {
-  return new Promise((resolve, reject) => {
-    const expected = fse.readFileSync(path.resolve(__dirname, 'specs', spec)).toString();
-    let data = '';
-    http.get(url, (res) => {
-      try {
-        assert.equal(res.statusCode, status);
-      } catch (e) {
-        res.resume();
-        reject(e);
+async function assertHttp(host, pathname, status, spec) {
+  return chai.request(host)
+    .get(pathname)
+    .then((res) => {
+      expect(res).to.have.status(status);
+      if (spec) {
+        expect(res.text).to.equal(file(path.resolve(__dirname, 'specs', spec)));
       }
-
-      res
-        .on('data', (chunk) => {
-          data += chunk;
-        })
-        .on('end', () => {
-          try {
-            assert.equal(data, expected);
-            resolve();
-          } catch (e) {
-            reject(e);
-          }
-        });
-    }).on('error', (e) => {
-      reject(e);
     });
-  });
 }
 
 describe('Integration test for up command', () => {
@@ -135,8 +126,8 @@ describe('Integration test for up command', () => {
     cmd
       .on('started', async () => {
         try {
-          await assertHttp(`http://localhost:${cmd.project.server.port}/index.html`, 200, 'simple_response.html');
-          await assertHttp(`http://localhost:${cmd.project.server.port}/dist/welcome.txt`, 200, 'welcome_response.txt');
+          await assertHttp(`http://localhost:${cmd.project.server.port}`, '/index.html', 200, 'simple_response.html');
+          await assertHttp(`http://localhost:${cmd.project.server.port}`, '/dist/welcome.txt', 200, 'welcome_response.txt');
           myDone();
         } catch (e) {
           myDone(e);
@@ -167,9 +158,8 @@ describe('Integration test for up command', () => {
     cmd
       .on('started', async () => {
         try {
-          const exists = await fse.pathExistsSync(path.resolve(BUILD_DIR_ALT, 'html.js'));
-          assert.ok(exists, 'compiled html.js');
-          await assertHttp(`http://localhost:${cmd.project.server.port}/index.html`, 200, 'simple_response.html');
+          expect(file(path.resolve(BUILD_DIR_ALT, 'html.js'))).to.exist;
+          await assertHttp(`http://localhost:${cmd.project.server.port}`, '/index.html', 200, 'simple_response.html');
           myDone();
         } catch (e) {
           myDone(e);
