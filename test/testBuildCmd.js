@@ -15,28 +15,41 @@
 const path = require('path');
 const fs = require('fs-extra');
 const assert = require('assert');
+const { createTestRoot } = require('./utils.js');
 
 const BuildCommand = require('../src/build.cmd');
 
-const HLX_DIR = path.resolve(__dirname, 'integration', '.hlx');
-const BUILD_DIR = path.resolve(HLX_DIR, 'build');
-const DIST_DIR = path.resolve(HLX_DIR, 'dist');
-const SRC_DIR = path.resolve(__dirname, 'integration', 'src');
+const TEST_DIR = path.resolve('test/integration');
 
 describe('Integration test for build', () => {
+
+  let testDir;
+  let buildDir;
+  let distDir;
+  let srcDir;
+
+  beforeEach(async () => {
+    const testRoot = await createTestRoot();
+    testDir = path.resolve(testRoot, 'project');
+    buildDir = path.resolve(testRoot, '.hlx/build');
+    distDir = path.resolve(testRoot, '.hlx/dist');
+    srcDir = path.resolve(testDir, 'src');
+    await fs.copy(TEST_DIR, testDir);
+  });
+
   it('build command succeeds and produces files', async () => {
     await new BuildCommand()
       .withFiles(['test/integration/src/**/*.htl'])
-      .withTargetDir(BUILD_DIR)
-      .withStaticDir(SRC_DIR)
+      .withTargetDir(buildDir)
+      .withStaticDir(srcDir)
       .withCacheEnabled(false)
       .run();
 
-    assert.ok(fs.existsSync(path.resolve(BUILD_DIR, 'html.js')));
-    assert.ok(!fs.existsSync(path.resolve(BUILD_DIR, 'html.pre.js')));
-    assert.ok(fs.existsSync(path.resolve(BUILD_DIR, 'example_html.js')));
-    assert.ok(fs.existsSync(path.resolve(BUILD_DIR, 'component', 'html.js')));
-    assert.ok(fs.existsSync(path.resolve(DIST_DIR, 'welcome.txt')));
-    assert.ok(fs.existsSync(path.resolve(DIST_DIR, 'component', 'foo.txt')));
+    assert.ok(fs.existsSync(path.resolve(buildDir, 'html.js')));
+    assert.ok(!fs.existsSync(path.resolve(buildDir, 'html.pre.js')));
+    assert.ok(fs.existsSync(path.resolve(buildDir, 'example_html.js')));
+    assert.ok(fs.existsSync(path.resolve(buildDir, 'component', 'html.js')));
+    assert.ok(fs.existsSync(path.resolve(distDir, 'welcome.txt')));
+    assert.ok(fs.existsSync(path.resolve(distDir, 'component', 'foo.txt')));
   }).timeout(5000);
 });

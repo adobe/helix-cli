@@ -15,6 +15,7 @@ const shell = require('shelljs');
 const fse = require('fs-extra');
 const http = require('http');
 const Replay = require('replay');
+const uuidv4 = require('uuid/v4');
 
 // disable replay for this test
 Replay.mode = 'bloody';
@@ -70,8 +71,15 @@ async function assertHttp(url, status, spec) {
   });
 }
 
+async function createTestRoot() {
+  const dir = path.resolve(__dirname, 'tmp', uuidv4());
+  await fse.ensureDir(dir);
+  return dir;
+}
+
 module.exports = {
   assertFile,
   assertHttp,
   initGit,
+  createTestRoot,
 };
