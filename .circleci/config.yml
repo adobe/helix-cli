@@ -26,6 +26,14 @@ jobs:
             name: Installing Dependencies
             command: npm install --ignore-scripts
 
+        - run:
+            name: Installing (nodegit)
+            command: npm nodegit --ignore-scripts
+
+        - run: 
+            name: Installing (openwhisk)
+            command: npm openwhisk --ignore-scripts
+
         - save_cache:
             paths:
                 - node_modules
