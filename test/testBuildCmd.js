@@ -13,18 +13,30 @@
 /* eslint-env mocha */
 
 const path = require('path');
+const fs = require('fs-extra');
+const assert = require('assert');
 
 const BuildCommand = require('../src/build.cmd');
 
 const HLX_DIR = path.resolve(__dirname, 'integration', '.hlx');
 const BUILD_DIR = path.resolve(HLX_DIR, 'build');
+const DIST_DIR = path.resolve(HLX_DIR, 'dist');
+const SRC_DIR = path.resolve(__dirname, 'integration', 'src');
 
 describe('Integration test for build', () => {
-  it('build command succeeds', async () => {
+  it('build command succeeds and produces files', async () => {
     await new BuildCommand()
-      .withFiles(['test/integration/src/*.htl'])
+      .withFiles(['test/integration/src/**/*.htl'])
       .withTargetDir(BUILD_DIR)
+      .withStaticDir(SRC_DIR)
       .withCacheEnabled(false)
       .run();
+
+    assert.ok(fs.existsSync(path.resolve(BUILD_DIR, 'html.js')));
+    assert.ok(!fs.existsSync(path.resolve(BUILD_DIR, 'html.pre.js')));
+    assert.ok(fs.existsSync(path.resolve(BUILD_DIR, 'example_html.js')));
+    assert.ok(fs.existsSync(path.resolve(BUILD_DIR, 'component', 'html.js')));
+    assert.ok(fs.existsSync(path.resolve(DIST_DIR, 'welcome.txt')));
+    assert.ok(fs.existsSync(path.resolve(DIST_DIR, 'component', 'foo.txt')));
   }).timeout(5000);
 });

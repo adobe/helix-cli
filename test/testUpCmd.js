@@ -27,7 +27,7 @@ const TEST_DIR = path.resolve('test/integration');
 
 const BUILD_DIR = path.resolve(TEST_DIR, '.hlx/build');
 
-const BUILD_DIR_ALT = path.resolve(TEST_DIR, 'tmp/');
+const BUILD_DIR_ALT = path.resolve(TEST_DIR, 'tmp/build');
 
 /**
  * init git in integration so that petridish can run
@@ -136,6 +136,7 @@ describe('Integration test for up command', () => {
       .on('started', async () => {
         try {
           await assertHttp(`http://localhost:${cmd.project.server.port}/index.html`, 200, 'simple_response.html');
+          await assertHttp(`http://localhost:${cmd.project.server.port}/dist/welcome.txt`, 200, 'welcome_response.txt');
           myDone();
         } catch (e) {
           myDone(e);

@@ -50,6 +50,9 @@ describe('Integration test for init command', () => {
     await assertFile(path.resolve(TEST_DIR, 'project1', 'helix-config.yaml'));
     await assertFile(path.resolve(TEST_DIR, 'project1', 'index.md'));
     await assertFile(path.resolve(TEST_DIR, 'project1', 'package.json'));
+    await assertFile(path.resolve(TEST_DIR, 'project1', 'src/static/bootstrap.min.css'));
+    await assertFile(path.resolve(TEST_DIR, 'project1', 'src/static/favicon.ico'));
+    await assertFile(path.resolve(TEST_DIR, 'project1', 'helix_logo.png'));
   }).timeout(3000);
 
   it('init does not leave any files not checked in', async () => {

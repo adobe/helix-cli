@@ -28,6 +28,9 @@ const LAYOUT_DEFAULT = {
       msg: 'created README.md with welcome message.',
     },
     {
+      name: 'helix_logo.png',
+    },
+    {
       name: 'index.md',
       filter: true,
       msg: 'created index.md with sample content.',
@@ -41,6 +44,13 @@ const LAYOUT_DEFAULT = {
       name: 'src/html.pre.js',
       filter: true,
       msg: 'created src/html.pre.js with minimal example.',
+    },
+    {
+      name: 'src/static/favicon.ico',
+    },
+    {
+      name: 'src/static/bootstrap.min.css',
+      msg: 'created static files.',
     },
     {
       name: 'package.json',
