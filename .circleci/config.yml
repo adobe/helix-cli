@@ -1,7 +1,9 @@
 version: 2
 jobs:
   build:
-    parallelism: 10
+    # Currently this doesn't help much since most of the time is spent in npm install,
+    # which is slow for all parallel processes
+    # parallelism: 10
     docker:
       # specify the version you desire here
       - image: circleci/node:8
@@ -20,16 +22,16 @@ jobs:
         # Download and cache dependencies
         - restore_cache:
             keys:
-            - v1-dependencies-{{ checksum "package.json" }}
+            - v3-dependencies-{{ arch }}-{{ checksum "package-lock.json" }}
 
         - run: 
             name: Installing Dependencies
-            command: npm install --ignore-scripts
+            command: npm install # do not --ignore-scripts, otherwise nodegit will no install properly
 
         - save_cache:
             paths:
                 - node_modules
-            key: v1-dependencies-{{ checksum "package.json" }}
+            key: v3-dependencies-{{ arch }}-{{ checksum "package-lock.json" }}
             
             # run tests!
         - run: mkdir junit
@@ -43,7 +45,7 @@ jobs:
         # test & get code coverage
         - run:
             name: Getting Code Coverage
-            command: circleci tests glob test/*.js | circleci tests split --split-by=timings | xargs npx istanbul cover ./node_modules/mocha/bin/_mocha -- -R mocha-junit-reporter --exit && npx codecov
+            command: circleci tests glob test/test*.js | circleci tests split --split-by=timings | xargs ./node_modules/.bin/istanbul cover ./node_modules/mocha/bin/_mocha -- -R mocha-junit-reporter --exit && npx codecov
             environment:
                 MOCHA_FILE: junit/test-results.xml
 
@@ -65,7 +67,7 @@ jobs:
       # Download and cache dependencies
       - restore_cache:
           keys:
-            - v1-dependencies-{{ checksum "package.json" }}
+            - v3-dependencies-{{ arch }}-{{ checksum "package-lock.json" }}
 
       - run: 
           name: Install Dependencies
@@ -74,7 +76,7 @@ jobs:
       - save_cache:
           paths:
             - node_modules
-          key: v1-dependencies-{{ checksum "package.json" }}
+          key: v3-dependencies-{{ arch }}-{{ checksum "package-lock.json" }}
 
       - run: echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" >> ~/.npmrc
 
@@ -107,7 +109,7 @@ jobs:
         # Download and cache dependencies
         - restore_cache:
             keys:
-            - v1-dependencies-{{ checksum "package.json" }}
+            - v3-dependencies-{{ arch }}-{{ checksum "package-lock.json" }}
 
         - run: 
             name: Install Dependencies
@@ -116,8 +118,7 @@ jobs:
         - save_cache:
             paths:
             - node_modules
-            key: v1-dependencies-{{ checksum "package.json" }}
-
+            key: v3-dependencies-{{ arch }}-{{ checksum "package-lock.json" }}
 
         - run:
             name: Install Globally

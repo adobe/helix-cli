@@ -16,7 +16,7 @@ module.exports.DEFAULT_OPTIONS = {
   detailedReport: true,
 };
 
-const DEFAULT_PATTERNS = ['src/*.htl'];
+const DEFAULT_PATTERNS = ['src/**/*.htl'];
 
 module.exports.defaultArgs = yargs => yargs
   .option('target', {

@@ -11,46 +11,17 @@
  */
 /* eslint no-console: off */
 
-const EventEmitter = require('events');
 const Bundler = require('parcel-bundler');
 const glob = require('glob');
+const chalk = require('chalk');
 const { HelixProject } = require('@adobe/petridish');
+const BuildCommand = require('./build.cmd');
 const { DEFAULT_OPTIONS } = require('./defaults.js');
 
-class UpCommand extends EventEmitter {
+class UpCommand extends BuildCommand {
   constructor() {
     super();
-    this._cache = null;
-    this._minify = false;
-    this._target = null;
-    this._files = null;
     this._httpPort = -1;
-    this._cwd = process.cwd();
-  }
-
-  withCacheEnabled(cache) {
-    this._cache = cache;
-    return this;
-  }
-
-  withMinifyEnabled(target) {
-    this._minify = target;
-    return this;
-  }
-
-  withTargetDir(target) {
-    this._target = target;
-    return this;
-  }
-
-  withFiles(files) {
-    this._files = files;
-    return this;
-  }
-
-  withDirectory(dir) {
-    this._cwd = dir;
-    return this;
   }
 
   withHttpPort(p) {
@@ -91,24 +62,32 @@ class UpCommand extends EventEmitter {
     this._bundler = new Bundler(myfiles, myoptions);
     this._bundler.addAssetType('htl', require.resolve('@adobe/parcel-plugin-htl/HTLAsset.js'));
 
+    this.validate();
+
     this._project = new HelixProject()
       .withCwd(this._cwd)
-      .withBuildDir(this._target);
+      .withBuildDir(this._target)
+      .withDistDir(this._distDir);
 
     if (this._httpPort >= 0) {
       this._project.withHttpPort(this._httpPort);
     }
 
-    this._bundler.on('buildEnd', () => {
+    this._bundler.on('buildEnd', async () => {
       if (this._project.started) {
         this.emit('build', this);
         // todo
         // this._project.invalidateCache();
         return;
       }
-      this._project.start().then(() => {
-        this.emit('started', this);
-      });
+
+      // copy the static files
+      const t0 = Date.now();
+      await this.copyStaticFile();
+      console.log(chalk.greenBright(`✨  Copied static in ${Date.now() - t0}ms.\n`));
+
+      await this._project.start();
+      this.emit('started', this);
     });
 
     return this._project

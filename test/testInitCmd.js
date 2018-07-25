@@ -14,24 +14,18 @@
 
 const assert = require('assert');
 const path = require('path');
-const fse = require('fs-extra');
 const $ = require('shelljs');
+const { assertFile, createTestRoot } = require('./utils.js');
 
 const InitCommand = require('../src/init.cmd');
 
-const TEST_DIR = path.resolve(__dirname, 'tmp');
 const pwd = process.cwd();
 
-async function assertFile(p) {
-  const exists = await fse.pathExists(p);
-  if (!exists) {
-    assert.fail(`Expected file at ${p} to exists`);
-  }
-}
-
 describe('Integration test for init command', () => {
-  beforeEach(() => {
-    fse.removeSync(TEST_DIR);
+  let testDir;
+
+  beforeEach(async () => {
+    testDir = await createTestRoot();
   });
 
   afterEach('Change back to original working dir', () => {
@@ -40,24 +34,27 @@ describe('Integration test for init command', () => {
 
   it('init creates all files', async () => {
     await new InitCommand()
-      .withDirectory(TEST_DIR)
+      .withDirectory(testDir)
       .withName('project1')
       .run();
-    await assertFile(path.resolve(TEST_DIR, 'project1', '.gitignore'));
-    await assertFile(path.resolve(TEST_DIR, 'project1', 'README.md'));
-    await assertFile(path.resolve(TEST_DIR, 'project1', 'src/html.htl'));
-    await assertFile(path.resolve(TEST_DIR, 'project1', 'src/html.pre.js'));
-    await assertFile(path.resolve(TEST_DIR, 'project1', 'helix-config.yaml'));
-    await assertFile(path.resolve(TEST_DIR, 'project1', 'index.md'));
-    await assertFile(path.resolve(TEST_DIR, 'project1', 'package.json'));
+    await assertFile(path.resolve(testDir, 'project1', '.gitignore'));
+    await assertFile(path.resolve(testDir, 'project1', 'README.md'));
+    await assertFile(path.resolve(testDir, 'project1', 'src/html.htl'));
+    await assertFile(path.resolve(testDir, 'project1', 'src/html.pre.js'));
+    await assertFile(path.resolve(testDir, 'project1', 'helix-config.yaml'));
+    await assertFile(path.resolve(testDir, 'project1', 'index.md'));
+    await assertFile(path.resolve(testDir, 'project1', 'package.json'));
+    await assertFile(path.resolve(testDir, 'project1', 'src/static/bootstrap.min.css'));
+    await assertFile(path.resolve(testDir, 'project1', 'src/static/favicon.ico'));
+    await assertFile(path.resolve(testDir, 'project1', 'helix_logo.png'));
   }).timeout(3000);
 
   it('init does not leave any files not checked in', async () => {
     await new InitCommand()
-      .withDirectory(TEST_DIR)
+      .withDirectory(testDir)
       .withName('project2')
       .run();
-    process.chdir(path.resolve(TEST_DIR, 'project2'));
+    process.chdir(path.resolve(testDir, 'project2'));
     const status = $.exec('git status --porcelain', { silent: true });
     assert.equal('', status.stdout);
   }).timeout(3000);

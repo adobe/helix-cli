@@ -15,15 +15,19 @@
 const fs = require('fs-extra');
 const assert = require('assert');
 const path = require('path');
+const { createTestRoot } = require('./utils.js');
 const DeployCommand = require('../src/deploy.cmd.js');
 
-const HLX_DIR = path.resolve(__dirname, 'integration', '.hlx');
-const BUILD_DIR = path.resolve(HLX_DIR, 'build');
-const STRAIN_FILE = path.resolve(HLX_DIR, 'strains.yaml');
-
 describe('hlx deploy (Integration)', () => {
+  let hlxDir;
+  let buildDir;
+  let strainsFile;
+
   beforeEach(async () => {
-    await fs.remove(HLX_DIR);
+    const testRoot = await createTestRoot();
+    hlxDir = path.resolve(testRoot, '.hlx');
+    buildDir = path.resolve(hlxDir, 'build');
+    strainsFile = path.resolve(hlxDir, 'strains.yaml');
   });
 
   it('Dry-Running works', async () => {
@@ -35,14 +39,14 @@ describe('hlx deploy (Integration)', () => {
       .withEnableDirty(true)
       .withDryRun(true)
       .withContent('git@github.com:adobe/helix-cli')
-      .withTarget(BUILD_DIR)
-      .withStrainFile(STRAIN_FILE)
+      .withTarget(buildDir)
+      .withStrainFile(strainsFile)
       .run();
 
-    assert.ok(fs.existsSync(STRAIN_FILE));
-    const firstrun = fs.readFileSync(STRAIN_FILE).toString();
+    assert.ok(fs.existsSync(strainsFile));
+    const firstrun = fs.readFileSync(strainsFile).toString();
 
-    await fs.remove(HLX_DIR);
+    await fs.remove(buildDir);
     await new DeployCommand()
       .withWskHost('runtime.adobe.io')
       .withWskAuth('secret-key')
@@ -51,12 +55,12 @@ describe('hlx deploy (Integration)', () => {
       .withEnableDirty(true)
       .withDryRun(true)
       .withContent('git@github.com:adobe/helix-cli')
-      .withTarget(BUILD_DIR)
-      .withStrainFile(STRAIN_FILE)
+      .withTarget(buildDir)
+      .withStrainFile(strainsFile)
       .run();
 
-    assert.ok(fs.existsSync(STRAIN_FILE));
-    const secondrun = fs.readFileSync(STRAIN_FILE).toString();
+    assert.ok(fs.existsSync(strainsFile));
+    const secondrun = fs.readFileSync(strainsFile).toString();
     assert.equal(firstrun, secondrun, 'generated strains.yaml differs between first and second run');
 
     await new DeployCommand()
@@ -67,12 +71,12 @@ describe('hlx deploy (Integration)', () => {
       .withEnableDirty(true)
       .withDryRun(true)
       .withContent('https://github.com/adobe/helix-cli/tree/implement-init')
-      .withTarget(BUILD_DIR)
-      .withStrainFile(STRAIN_FILE)
+      .withTarget(buildDir)
+      .withStrainFile(strainsFile)
       .run();
 
-    assert.ok(fs.existsSync(STRAIN_FILE));
-    const thirdrun = fs.readFileSync(STRAIN_FILE).toString();
+    assert.ok(fs.existsSync(strainsFile));
+    const thirdrun = fs.readFileSync(strainsFile).toString();
     assert.notEqual(firstrun, thirdrun);
   }).timeout(10000);
 });
