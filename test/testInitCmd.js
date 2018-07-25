@@ -16,18 +16,12 @@ const assert = require('assert');
 const path = require('path');
 const fse = require('fs-extra');
 const $ = require('shelljs');
+const { assertFile } = require('./utils.js');
 
 const InitCommand = require('../src/init.cmd');
 
 const TEST_DIR = path.resolve(__dirname, 'tmp');
 const pwd = process.cwd();
-
-async function assertFile(p) {
-  const exists = await fse.pathExists(p);
-  if (!exists) {
-    assert.fail(`Expected file at ${p} to exists`);
-  }
-}
 
 describe('Integration test for init command', () => {
   beforeEach(() => {

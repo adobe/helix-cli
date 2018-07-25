@@ -12,13 +12,12 @@
 
 /* global describe, it, beforeEach, after */
 /* eslint-disable no-unused-expressions */
+const assert = require('assert');
 const path = require('path');
 const fse = require('fs-extra');
 const {
-  assert,
-  expect,
-  file,
   initGit,
+  assertFile,
   assertHttp,
 } = require('./utils.js');
 
@@ -93,8 +92,8 @@ describe('Integration test for up command', () => {
     cmd
       .on('started', async () => {
         try {
-          await assertHttp(`http://localhost:${cmd.project.server.port}`, '/index.html', 200, 'simple_response.html');
-          await assertHttp(`http://localhost:${cmd.project.server.port}`, '/dist/welcome.txt', 200, 'welcome_response.txt');
+          await assertHttp(`http://localhost:${cmd.project.server.port}/index.html`, 200, 'simple_response.html');
+          await assertHttp(`http://localhost:${cmd.project.server.port}/dist/welcome.txt`, 200, 'welcome_response.txt');
           myDone();
         } catch (e) {
           myDone(e);
@@ -125,8 +124,8 @@ describe('Integration test for up command', () => {
     cmd
       .on('started', async () => {
         try {
-          expect(file(path.resolve(BUILD_DIR_ALT, 'html.js'))).to.exist;
-          await assertHttp(`http://localhost:${cmd.project.server.port}`, '/index.html', 200, 'simple_response.html');
+          await assertFile(path.resolve(BUILD_DIR_ALT, 'html.js'));
+          await assertHttp(`http://localhost:${cmd.project.server.port}/index.html`, 200, 'simple_response.html');
           myDone();
         } catch (e) {
           myDone(e);
