@@ -20,17 +20,16 @@ jobs:
         # Download and cache dependencies
         - restore_cache:
             keys:
-            - v3-dependencies-{{ arch }}-{{ checksum "yarn.lock" }}
+            - v3-dependencies-{{ arch }}-{{ checksum "package-lock.json" }}
 
         - run: 
             name: Installing Dependencies
-            command: yarn install
+            command: npm install # do not ignore scripts, otherwise nodegit will no install properly
 
         - save_cache:
             paths:
                 - node_modules
-                - ~/.cache/yarn
-            key: v3-dependencies-{{ arch }}-{{ checksum "yarn.lock" }}
+            key: v3-dependencies-{{ arch }}-{{ checksum "package-lock.json" }}
             
             # run tests!
         - run: mkdir junit
@@ -39,14 +38,12 @@ jobs:
             command: git config --global user.email "you@example.com" && git config --global user.name "Your Name"
         - run:
             name: Lint
-            command: yarn run lint
+            command: npm run lint
 
         # test & get code coverage
         - run:
             name: Getting Code Coverage
-            command: circleci tests glob test/test*.js | circleci tests split --split-by=timings | xargs ./node_modules/.bin/istanbul cover ./node_modules/mocha/bin/_mocha -- -R mocha-junit-reporter --exit && yarn codecov
-            #command: ./node_modules/.bin/istanbul cover ./node_modules/mocha/bin/_mocha -- -R mocha-junit-reporter && yarn codecov
-            #command: yarn cover
+            command: circleci tests glob test/test*.js | circleci tests split --split-by=timings | xargs ./node_modules/.bin/istanbul cover ./node_modules/mocha/bin/_mocha -- -R mocha-junit-reporter --exit && npx codecov
             environment:
                 MOCHA_FILE: junit/test-results.xml
 

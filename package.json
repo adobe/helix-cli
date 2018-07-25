@@ -8,7 +8,6 @@
   },
   "scripts": {
     "test": "nyc mocha",
-    "cover": "istanbul cover _mocha -- --reporter mocha-junit-reporter && ./node_modules/.bin/codecov",
     "lint": "./node_modules/.bin/eslint .",
     "snyk-protect": "snyk protect",
     "prepare": "npm run snyk-protect"
