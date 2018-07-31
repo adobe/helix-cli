@@ -15,7 +15,7 @@
 const fs = require('fs-extra');
 const assert = require('assert');
 const path = require('path');
-const { createTestRoot } = require('./utils.js');
+const { createTestRoot, assertZipEntry, assertFile } = require('./utils.js');
 const DeployCommand = require('../src/deploy.cmd.js');
 
 describe('hlx deploy (Integration)', () => {
@@ -24,15 +24,20 @@ describe('hlx deploy (Integration)', () => {
   let strainsFile;
   let srcFile;
   let zipFile;
+  let distDir;
+  let staticFile;
 
   beforeEach(async () => {
     const testRoot = await createTestRoot();
     hlxDir = path.resolve(testRoot, '.hlx');
     buildDir = path.resolve(hlxDir, 'build');
+    distDir = path.resolve(hlxDir, 'dist');
     strainsFile = path.resolve(hlxDir, 'strains.yaml');
     srcFile = path.resolve(buildDir, 'html.js');
+    staticFile = path.resolve(distDir, 'style.css');
     zipFile = path.resolve(buildDir, 'my-prefix-html.zip');
     await fs.outputFile(srcFile, 'main(){};');
+    await fs.outputFile(staticFile, 'body { background-color: black; }');
   });
 
   it('Dry-Running works', async () => {
@@ -46,11 +51,12 @@ describe('hlx deploy (Integration)', () => {
       .withDryRun(true)
       .withContent('git@github.com:adobe/helix-cli')
       .withTarget(buildDir)
+      .withStaticContent('none')
       .withStrainFile(strainsFile)
       .run();
 
-    assert.ok(fs.existsSync(strainsFile));
-    assert.ok(fs.existsSync(zipFile));
+    await assertFile(strainsFile);
+    await assertZipEntry(zipFile, 'dist/style.css', false);
     const firstrun = fs.readFileSync(strainsFile).toString();
 
     await fs.remove(buildDir);
@@ -67,7 +73,7 @@ describe('hlx deploy (Integration)', () => {
       .withStrainFile(strainsFile)
       .run();
 
-    assert.ok(fs.existsSync(strainsFile));
+    await assertFile(strainsFile);
     const secondrun = fs.readFileSync(strainsFile).toString();
     assert.equal(firstrun, secondrun, 'generated strains.yaml differs between first and second run');
 
@@ -84,8 +90,26 @@ describe('hlx deploy (Integration)', () => {
       .withStrainFile(strainsFile)
       .run();
 
-    assert.ok(fs.existsSync(strainsFile));
+    await assertFile(strainsFile);
     const thirdrun = fs.readFileSync(strainsFile).toString();
     assert.notEqual(firstrun, thirdrun);
   }).timeout(10000);
+
+  it('includes the static files into the zip for static-content=bundled', async () => {
+    await new DeployCommand()
+      .withWskHost('runtime.adobe.io')
+      .withWskAuth('secret-key')
+      .withWskNamespace('hlx')
+      .withPrefix('my-prefix-')
+      .withEnableAuto(false)
+      .withEnableDirty(true)
+      .withDryRun(true)
+      .withContent('git@github.com:adobe/helix-cli')
+      .withTarget(buildDir)
+      .withStrainFile(strainsFile)
+      .withStaticContent('bundled')
+      .run();
+
+    await assertZipEntry(zipFile, 'dist/style.css');
+  });
 });

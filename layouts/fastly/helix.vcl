@@ -208,17 +208,15 @@ sub vcl_recv {
   # (non-SSL gets redirected) to SSL-equivalent
 
 
-  if (!req.http.Fastly-FF && req.http.Fastly-SSL && req.url.path ~ "\/dist\/([^/]+)\/([^/]+)\/([^/]+)\/([^/]+)\/(.+)") {
-    set var.owner = re.group.1;
-    set var.repo = re.group.2;
-    set var.ref = re.group.3;
-    set var.entry = re.group.4;
-    set var.path = re.group.5;
-
+  # Deliver static content addressed with /dist via default 'html' action.
+  # todo: support for codeload or distinct function?
+  if (!req.http.Fastly-FF && req.http.Fastly-SSL && req.url.path ~ "\/dist\/.*") {
     set req.backend = F_runtime_adobe_io;
 
+    call hlx_action_root;
+
     # Invoke OpenWhisk
-      set req.url = "/api/v1/web/trieloff/default/disty" + "?owner=" + var.owner + "&repo=" + var.repo + "&ref=" + var.ref + "&path=" + var.path + "&entry=" + var.entry;
+    set req.url = "/api/v1/web" + req.http.X-Action-Root + "html" + "?path=" + req.url.path;
 
   # The regular expression captures:
   # group.0 = entire string
