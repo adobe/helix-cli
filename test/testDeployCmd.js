@@ -22,12 +22,17 @@ describe('hlx deploy (Integration)', () => {
   let hlxDir;
   let buildDir;
   let strainsFile;
+  let srcFile;
+  let zipFile;
 
   beforeEach(async () => {
     const testRoot = await createTestRoot();
     hlxDir = path.resolve(testRoot, '.hlx');
     buildDir = path.resolve(hlxDir, 'build');
     strainsFile = path.resolve(hlxDir, 'strains.yaml');
+    srcFile = path.resolve(buildDir, 'html.js');
+    zipFile = path.resolve(buildDir, 'my-prefix-html.zip');
+    await fs.outputFile(srcFile, 'main(){};');
   });
 
   it('Dry-Running works', async () => {
@@ -35,6 +40,7 @@ describe('hlx deploy (Integration)', () => {
       .withWskHost('runtime.adobe.io')
       .withWskAuth('secret-key')
       .withWskNamespace('hlx')
+      .withPrefix('my-prefix-')
       .withEnableAuto(false)
       .withEnableDirty(true)
       .withDryRun(true)
@@ -44,6 +50,7 @@ describe('hlx deploy (Integration)', () => {
       .run();
 
     assert.ok(fs.existsSync(strainsFile));
+    assert.ok(fs.existsSync(zipFile));
     const firstrun = fs.readFileSync(strainsFile).toString();
 
     await fs.remove(buildDir);
@@ -51,6 +58,7 @@ describe('hlx deploy (Integration)', () => {
       .withWskHost('runtime.adobe.io')
       .withWskAuth('secret-key')
       .withWskNamespace('hlx')
+      .withPrefix('my-prefix-')
       .withEnableAuto(false)
       .withEnableDirty(true)
       .withDryRun(true)
@@ -67,6 +75,7 @@ describe('hlx deploy (Integration)', () => {
       .withWskHost('runtime.adobe.io')
       .withWskAuth('secret-key')
       .withWskNamespace('hlx')
+      .withPrefix('my-prefix-')
       .withEnableAuto(false)
       .withEnableDirty(true)
       .withDryRun(true)
