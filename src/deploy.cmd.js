@@ -42,6 +42,8 @@ class DeployCommand {
     this._enableDirty = false;
     this._dryRun = false;
     this._content = null;
+    this._distDir = null;
+    this._staticContent = null;
     this._strainFile = path.resolve(process.cwd(), '.hlx', 'strains.yaml');
   }
 
@@ -174,6 +176,11 @@ class DeployCommand {
     return this;
   }
 
+  withStaticContent(value) {
+    this._staticContent = value;
+    return this;
+  }
+
   withStrainFile(value) {
     this._strainFile = value;
     return this;
@@ -187,7 +194,8 @@ class DeployCommand {
    */
   async createPackage(script) {
     return new Promise((resolve, reject) => {
-      const name = this._prefix + path.basename(script, '.js');
+      const baseName = path.basename(script, '.js');
+      const name = this._prefix + baseName;
       const zipFile = path.resolve(this._target, `${name}.zip`);
       let hadErrors = false;
 
@@ -225,11 +233,17 @@ class DeployCommand {
         description: `Lambda function of ${name}`,
         main: 'main.js',
         license: 'Apache-2.0',
-        // dependencies: pkg.dependencies,
       };
+
       archive.pipe(output);
-      archive.append(JSON.stringify(packageJson, null, '  '), { name: 'package.json' });
       archive.file(script, { name: 'main.js' });
+      if (this._staticContent === 'bundled' && baseName === 'html') {
+        archive.directory(this._distDir, 'dist');
+        archive.file(path.resolve(__dirname, 'openwhisk/server.js'), { name: 'server.js' });
+        packageJson.main = 'server.js';
+      }
+
+      archive.append(JSON.stringify(packageJson, null, '  '), { name: 'package.json' });
       archive.finalize();
     });
   }
@@ -264,6 +278,12 @@ class DeployCommand {
     if (!this._prefix) {
       this._prefix = `${DeployCommand.getRepository()}--${DeployCommand.getBranchFlag()}--`;
     }
+
+    if (!this._distDir) {
+      this._distDir = path.resolve(path.dirname(this._target), 'dist');
+    }
+
+    // todo: how to handle different "components" ?
     const scripts = glob.sync(`${this._target}/*.js`);
     await Promise.all(scripts.map(async (script) => {
       const info = await this.createPackage(script);
