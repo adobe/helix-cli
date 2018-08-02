@@ -24,6 +24,7 @@ const $ = require('shelljs');
 const archiver = require('archiver');
 const GitUrl = require('@adobe/petridish/src/GitUrl');
 const strainconfig = require('./strain-config-utils');
+const GithubDistributor = require('./distributor/github');
 
 class DeployCommand {
   constructor() {
@@ -310,6 +311,15 @@ class DeployCommand {
         });
       }
     }));
+
+    if (this._staticContent === 'github') {
+      const ref = await new GithubDistributor()
+        .withHelixDir(path.dirname(this._target))
+        .withDistDir(this._distDir)
+        .withPrefix(this._prefix)
+        .run();
+      // todo: use ref in strain
+    }
 
     if (fs.existsSync(this._strainFile)) {
       const oldstrains = strainconfig.load(fs.readFileSync(this._strainFile));
