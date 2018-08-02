@@ -210,13 +210,21 @@ sub vcl_recv {
 
   # Deliver static content addressed with /dist via default 'html' action.
   # todo: support for codeload or distinct function?
-  if (!req.http.Fastly-FF && req.http.Fastly-SSL && req.url.path ~ "\/dist\/.*") {
-    set req.backend = F_runtime_adobe_io;
+  if (!req.http.Fastly-FF && req.http.Fastly-SSL && req.url.path ~ "\/dist\/(.*)") {
+    call hlx_owner;
+    set var.owner = req.http.X-Owner;
 
-    call hlx_action_root;
+    call hlx_repo;
+    set var.repo = req.http.X-Repo;
+
+    set req.backend = F_GitHub;
+    set req.url = "/" + var.owner + "/" + var.repo + "/b92979a26d426b5f63f76100af3767377bb0f590/" + re.group.1;
+
+    #set req.backend = F_runtime_adobe_io;
+    #call hlx_action_root;
 
     # Invoke OpenWhisk
-    set req.url = "/api/v1/web" + req.http.X-Action-Root + "html" + "?path=" + req.url.path;
+    #set req.url = "/api/v1/web" + req.http.X-Action-Root + "html" + "?path=" + req.url.path;
 
   # The regular expression captures:
   # group.0 = entire string
