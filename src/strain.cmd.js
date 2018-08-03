@@ -164,6 +164,26 @@ class StrainCommand {
   }
 
   /**
+   * Prepares a DELETE request to the Fastly API, removing a given value for a given path extension
+   */
+  deleteOpts(pathext) {
+    const ver = this.options(pathext);
+    return Object.assign({
+      method: 'DELETE',
+    }, ver);
+  }
+
+  /**
+   * Prepares a GET request to the Fastly API, removing a given value for a given path extension
+   */
+  getOpts(pathext) {
+    const ver = this.options(pathext);
+    return Object.assign({
+      method: 'GET',
+    }, ver);
+  }
+
+  /**
    * Prepares a PUT request to the Fastly API at the latest service version
    */
   async putVersionOpts(pathext) {
@@ -348,8 +368,17 @@ class StrainCommand {
       console.error(`${dict}  does not exist`);
       return null;
     }
-    const opts = await this.putOpts(`/dictionary/${mydict}/item/${key}`, value);
-    return request(opts);
+    if (value) {
+      const opts = await this.putOpts(`/dictionary/${mydict}/item/${key}`, value);
+      return request(opts);
+    }
+    try {
+      const opts = await this.deleteOpts(`/dictionary/${mydict}/item/${key}`);
+      await request(opts);
+    } catch (e) {
+      // ignore
+    }
+    return Promise.resolve();
   }
 
   /**
@@ -530,6 +559,11 @@ class StrainCommand {
           .catch(dictError));
         strainjobs.push(this.putDict('strain_github_static_refs', strain.name, strain.githubStatic.ref).then(() => {
           console.log(`🏷  Set static ref for strain   ${strain.name}`);
+        })
+          .catch(dictError));
+      } else {
+        strainjobs.push(this.putDict('strain_github_static_refs', strain.name, '').then(() => {
+          console.log(`🏷  Clearing static ref for strain   ${strain.name}`);
         })
           .catch(dictError));
       }
