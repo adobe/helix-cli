@@ -13,6 +13,8 @@
 const fs = require('fs-extra');
 const path = require('path');
 const shell = require('shelljs');
+const GitUrl = require('@adobe/petridish/src/GitUrl');
+const DefaultDistributor = require('./default.js');
 
 async function exec(cmd) {
   // todo: promisify
@@ -23,15 +25,13 @@ async function exec(cmd) {
   return proc.stdout.trim();
 }
 
-class GithubDistributor {
+class GithubDistributor extends DefaultDistributor {
   constructor() {
-    this._helixDir = null;
-    this._distDir = null;
-    this._prefix = null;
+    super();
     this._tmpDir = null;
     this._branch = 'helix-static';
     this._repo = null;
-    this._commitId = null;
+    this._ref = null;
   }
 
   withHelixDir(value) {
@@ -49,29 +49,19 @@ class GithubDistributor {
     return this;
   }
 
-  withRepo(value) {
-    this._repo = value;
-    return this;
-  }
-
   async init() {
-    if (!this._helixDir) {
-      this._helixDir = path.resolve(process.cwd(), '.hlx');
-    }
-    if (!this._distDir) {
-      this._distDir = path.resolve(this._helixDir, 'dist');
-    }
+    await super.init();
+
     this._tmpDir = path.resolve(this._helixDir, 'tmp', 'gh-static', this._prefix);
     await fs.ensureDir(this._tmpDir);
 
     if (!this._repo) {
       this._repo = await exec('git remote get-url origin');
     }
+    return this;
   }
 
-  async run() {
-    await this.init();
-
+  async _prepareGit() {
     // check if branch is already checked out
     if (await fs.pathExists(path.resolve(this._tmpDir, '.git'))) {
       await exec(`git -C ${this._tmpDir} pull`);
@@ -87,13 +77,9 @@ class GithubDistributor {
         await exec(`git -C ${this._tmpDir} push --set-upstream origin ${this._branch}`);
       }
     }
+  }
 
-    await fs.copy(this._distDir, this._tmpDir, {
-      preserveTimestamps: true,
-      dereference: true,
-    });
-
-    // todo: remove files no longer needed
+  async _commit() {
     await exec(`git -C ${this._tmpDir} add -A`);
 
     const st = await exec(`git -C ${this._tmpDir} status --porcelain`);
@@ -103,10 +89,41 @@ class GithubDistributor {
     }
     await exec(`git -C ${this._tmpDir} push --set-upstream origin ${this._branch}`);
 
-    const head = await exec(`git -C ${this._tmpDir} rev-parse origin/${this._branch}`);
+    this._ref = await exec(`git -C ${this._tmpDir} rev-parse origin/${this._branch}`);
+  }
+
+  async run() {
+    if (!this._dryRun) {
+      await this._prepareGit();
+    }
+
+    await fs.copy(this._distDir, this._tmpDir, {
+      preserveTimestamps: true,
+      dereference: true,
+    });
+
+    if (!this._dryRun) {
+      await this._commit();
+    } else {
+      this._ref = '0000000000000000000000000000';
+    }
     // eslint-disable-next-line no-console
-    console.log(`Deployed static files to ${this._repo}/${head}`);
-    return head;
+    console.log(`Deployed static files to ${this._repo}/${this._ref}`);
+  }
+
+  async processStrain(strain) {
+    if (!this._ref) {
+      throw Error('Git reference missing.');
+    }
+    const giturl = new GitUrl(this._repo);
+
+    // eslint-disable-next-line no-param-reassign
+    strain.githubStatic = {
+      repo: giturl.repo,
+      owner: giturl.owner,
+      ref: this._ref,
+    };
+    return this;
   }
 }
 

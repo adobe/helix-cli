@@ -80,6 +80,30 @@ sub hlx_action_root {
   #set req.http.X-Action-Root = "/trieloff/default/git-github-com-adobe-helix-cli-git--dirty--";
 }
 
+# Gets the github static repo
+sub hlx_github_static_repo {
+  set req.http.X-Github-Static-Repo = table.lookup(strain_github_static_repos, req.http.X-Strain);
+  if (!req.http.X-Github-Static-Repo) {
+    set req.http.X-Github-Static-Repo = table.lookup(strain_github_static_repos, "default");
+  }
+}
+
+# Gets the github static owner
+sub hlx_github_static_owner {
+  set req.http.X-Github-Static-Owner = table.lookup(strain_github_static_owners, req.http.X-Strain);
+  if (!req.http.X-Github-Static-Owner) {
+    set req.http.X-Github-Static-Owner = table.lookup(strain_github_static_owners, "default");
+  }
+}
+
+# Gets the github static ref
+sub hlx_github_static_ref {
+  set req.http.X-Github-Static-Ref = table.lookup(strain_github_static_refs, req.http.X-Strain);
+  if (!req.http.X-Github-Static-Ref) {
+    set req.http.X-Github-Static-Ref = table.lookup(strain_github_static_refs, "default");
+  }
+}
+
 # rewrite required headers (called from recv)
 sub hlx_headers_recv {
   # default conditions
@@ -211,20 +235,27 @@ sub vcl_recv {
   # Deliver static content addressed with /dist via default 'html' action.
   # todo: support for codeload or distinct function?
   if (!req.http.Fastly-FF && req.http.Fastly-SSL && req.url.path ~ "\/dist\/(.*)") {
-    call hlx_owner;
-    set var.owner = req.http.X-Owner;
+    call hlx_github_static_ref;
+    set var.ref = req.http.X-Github-Static-Ref;
 
-    call hlx_repo;
-    set var.repo = req.http.X-Repo;
+    if (!var.ref) {
+      # use 'bundled' static content in openwhisk action
+      call hlx_action_root;
+      set req.backend = F_runtime_adobe_io;
+      set req.url = "/api/v1/web" + req.http.X-Action-Root + "html" + "?path=" + req.url.path;
 
-    set req.backend = F_GitHub;
-    set req.url = "/" + var.owner + "/" + var.repo + "/b92979a26d426b5f63f76100af3767377bb0f590/" + re.group.1;
+    } else {
+      # use github as static files provider
+      call hlx_github_static_owner;
+      set var.owner = req.http.X-Github-Static-Owner;
 
-    #set req.backend = F_runtime_adobe_io;
-    #call hlx_action_root;
+      call hlx_github_static_repo;
+      set var.repo = req.http.X-Github-Static-Repo;
 
-    # Invoke OpenWhisk
-    #set req.url = "/api/v1/web" + req.http.X-Action-Root + "html" + "?path=" + req.url.path;
+      set req.backend = F_GitHub;
+      set req.url = "/" + var.owner + "/" + var.repo + "/" + var.ref + "/" + re.group.1;
+    }
+
 
   # The regular expression captures:
   # group.0 = entire string
