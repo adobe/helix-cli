@@ -60,7 +60,7 @@ class UpCommand extends BuildCommand {
     const myfiles = this._files.reduce((a, f) => [...a, ...glob.sync(f)], []);
 
     this._bundler = new Bundler(myfiles, myoptions);
-    this._bundler.addAssetType('htl', require.resolve('@adobe/parcel-plugin-htl/HTLAsset.js'));
+    this._bundler.addAssetType('htl', require.resolve('@adobe/parcel-plugin-htl/src/HTLAsset.js'));
 
     this.validate();
 
