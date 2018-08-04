@@ -124,7 +124,7 @@ class BuildCommand extends EventEmitter {
     console.log(chalk.greenBright(`✨  Copied static in ${Date.now() - t0}ms.\n`));
 
     const bundler = new Bundler(myfiles, myoptions);
-    bundler.addAssetType('htl', require.resolve('@adobe/parcel-plugin-htl/HTLAsset.js'));
+    bundler.addAssetType('htl', require.resolve('@adobe/parcel-plugin-htl/src/HTLAsset.js'));
     await bundler.bundle();
   }
 }
