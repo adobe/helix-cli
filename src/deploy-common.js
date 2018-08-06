@@ -12,6 +12,7 @@
 
 module.exports = function commonArgs(yargs) {
   return yargs
+    .env('HLX')
     .option('wsk-auth', {
       describe: 'Adobe I/O Runtime Authentication key',
       type: 'string',
