@@ -52,6 +52,9 @@ class StrainCommand {
       strain_refs: null,
       strain_repos: null,
       strain_root_paths: null,
+      strain_github_static_repos: null,
+      strain_github_static_owners: null,
+      strain_github_static_refs: null,
     };
 
     this._backends = {
@@ -157,6 +160,26 @@ class StrainCommand {
       form: {
         item_value: value,
       },
+    }, ver);
+  }
+
+  /**
+   * Prepares a DELETE request to the Fastly API, removing a given value for a given path extension
+   */
+  deleteOpts(pathext) {
+    const ver = this.options(pathext);
+    return Object.assign({
+      method: 'DELETE',
+    }, ver);
+  }
+
+  /**
+   * Prepares a GET request to the Fastly API, removing a given value for a given path extension
+   */
+  getOpts(pathext) {
+    const ver = this.options(pathext);
+    return Object.assign({
+      method: 'GET',
     }, ver);
   }
 
@@ -345,8 +368,17 @@ class StrainCommand {
       console.error(`${dict}  does not exist`);
       return null;
     }
-    const opts = await this.putOpts(`/dictionary/${mydict}/item/${key}`, value);
-    return request(opts);
+    if (value) {
+      const opts = await this.putOpts(`/dictionary/${mydict}/item/${key}`, value);
+      return request(opts);
+    }
+    try {
+      const opts = await this.deleteOpts(`/dictionary/${mydict}/item/${key}`);
+      await request(opts);
+    } catch (e) {
+      // ignore
+    }
+    return Promise.resolve();
   }
 
   /**
@@ -398,14 +430,14 @@ class StrainCommand {
    * Creates or updates a VCL file in the service with the given VCL code
    * @param {String} vcl code
    * @param {String} name name of the file
-   * @param {boolean} make this the main VCL
+   * @param {boolean} isMain this the main VCL
    */
-  async setVCL(vcl, name, main = false) {
+  async setVCL(vcl, name, isMain = false) {
     const opts = await this.vclopts(name, vcl);
     return request(opts)
       .then(async (r) => {
         console.log(`✅  VCL ${r.name} has been updated`);
-        if (main) {
+        if (isMain) {
           const mainbaseopts = await this.version(`/vcl/${name}/main`);
           const mainopts = Object.assign({ method: 'PUT' }, mainbaseopts);
           return request(mainopts).then((_s) => {
@@ -456,107 +488,108 @@ class StrainCommand {
     }
   }
 
-  async run() {
+  async _updateFastly() {
     console.log('🐑 👾 🚀  hlx is publishing strains');
 
-    return this.cloneVersion().then((_r) => {
-      const initfp = this.initFastly();
+    await this.cloneVersion();
+    await this.initFastly();
+    await this.initDictionaries();
 
-      const initdp = this.initDictionaries();
-
-
-      const owsecret = `Basic ${toBase64(`${this._wsk_auth}`)}`;
-      const secretp = this.putDict('secrets', 'OPENWHISK_AUTH', owsecret).then((_s) => {
-        console.log('🗝  Enabled Fastly to call secure OpenWhisk actions');
-      })
-        .catch((e) => {
-          const message = 'OpenWhisk authentication could not be passed on';
-          console.error(message);
-          console.error(e);
-          throw new Error(message, e);
-        });
-
-      const content = fs.readFileSync(this._strainFile);
-      const strains = strainconfig.load(content);
-
-      const strainsVCL = StrainCommand.getVCL(strains);
-      const strainp = this.setVCL(strainsVCL, 'strains.vcl');
-
-
-      const strainjobs = [];
-      strains.map((strain) => {
-        strainjobs.push(this.putDict('strain_action_roots', strain.name, strain.code).then(() => {
-          console.log(`👾  Set action root for strain  ${strain.name}`);
-        })
-          .catch((e) => {
-            const message = 'Error setting edge dictionary value';
-            console.error(message);
-            console.error(e);
-            throw new Error(message, e);
-          }));
-        strainjobs.push(this.putDict('strain_owners', strain.name, strain.content.owner).then(() => {
-          console.log(`🏢  Set owner for strain        ${strain.name}`);
-        })
-          .catch((e) => {
-            const message = 'Error setting edge dictionary value';
-            console.error(message);
-            console.error(e);
-            throw new Error(message, e);
-          }));
-        strainjobs.push(this.putDict('strain_repos', strain.name, strain.content.repo).then(() => {
-          console.log(`🌳  Set repo for strain         ${strain.name}`);
-        })
-          .catch((e) => {
-            const message = 'Error setting edge dictionary value';
-            console.error(message);
-            console.error(e);
-            throw new Error(message, e);
-          }));
-        if (strain.content.ref) {
-          strainjobs.push(this.putDict('strain_refs', strain.name, strain.content.ref).then(() => {
-            console.log(`🏷  Set ref for strain          ${strain.name}`);
-          })
-            .catch((e) => {
-              const message = 'Error setting edge dictionary value';
-              console.error(message);
-              console.error(e);
-              throw new Error(message, e);
-            }));
-        }
-        if (strain.content.root) {
-          strainjobs.push(this.putDict('strain_root_paths', strain.name, strain.content.root).then(() => {
-            console.log(`🌲  Set content root for strain ${strain.name}`);
-          })
-            .catch((e) => {
-              const message = 'Error setting edge dictionary value';
-              console.error(message);
-              console.error(e);
-              throw new Error(message, e);
-            }));
-        }
-        return strain;
+    const owsecret = `Basic ${toBase64(`${this._wsk_auth}`)}`;
+    const secretp = this.putDict('secrets', 'OPENWHISK_AUTH', owsecret).then((_s) => {
+      console.log('🗝  Enabled Fastly to call secure OpenWhisk actions');
+    })
+      .catch((e) => {
+        const message = 'OpenWhisk authentication could not be passed on';
+        console.error(message);
+        console.error(e);
+        throw new Error(message, e);
       });
 
-      // wait for the two initialization jobs to finish, too
-      strainjobs.push(initfp);
-      strainjobs.push(initdp);
+    const content = fs.readFileSync(this._strainFile);
+    const strains = strainconfig.load(content);
 
-      // also wait for the strain.vcl writing to finish
-      strainjobs.push(strainp);
-      strainjobs.push(secretp);
+    const strainsVCL = StrainCommand.getVCL(strains);
+    const strainp = this.setVCL(strainsVCL, 'strains.vcl');
 
-      return Promise.all(strainjobs).then(() => {
-        console.log('📕  All dicts have been updated.');
+    const strainjobs = [];
+    strains.map((strain) => {
+      function dictError(e) {
+        const message = 'Error setting edge dictionary value';
+        console.error(message);
+        console.error(e);
+        throw new Error(message, e);
+      }
 
-        return this.publishVersion().then(() => this.purgeAll());
+      strainjobs.push(this.putDict('strain_action_roots', strain.name, strain.code).then(() => {
+        console.log(`👾  Set action root for strain  ${strain.name}`);
       })
-        .catch((e) => {
-          const message = 'Error setting one or more edge dictionary values';
-          console.error(message);
-          console.error(e);
-          throw new Error(message, e);
-        });
+        .catch(dictError));
+
+      strainjobs.push(this.putDict('strain_owners', strain.name, strain.content.owner).then(() => {
+        console.log(`🏢  Set owner for strain        ${strain.name}`);
+      })
+        .catch(dictError));
+
+      strainjobs.push(this.putDict('strain_repos', strain.name, strain.content.repo).then(() => {
+        console.log(`🌳  Set repo for strain         ${strain.name}`);
+      })
+        .catch(dictError));
+
+      if (strain.content.ref) {
+        strainjobs.push(this.putDict('strain_refs', strain.name, strain.content.ref).then(() => {
+          console.log(`🏷  Set ref for strain          ${strain.name}`);
+        })
+          .catch(dictError));
+      }
+      if (strain.content.root) {
+        strainjobs.push(this.putDict('strain_root_paths', strain.name, strain.content.root).then(() => {
+          console.log(`🌲  Set content root for strain ${strain.name}`);
+        })
+          .catch(dictError));
+      }
+      if (strain.githubStatic) {
+        strainjobs.push(this.putDict('strain_github_static_repos', strain.name, strain.githubStatic.repo).then(() => {
+          console.log(`🌳  Set static repo for strain  ${strain.name}`);
+        })
+          .catch(dictError));
+        strainjobs.push(this.putDict('strain_github_static_owners', strain.name, strain.githubStatic.owner).then(() => {
+          console.log(`🏢  Set static owner for strain ${strain.name}`);
+        })
+          .catch(dictError));
+        strainjobs.push(this.putDict('strain_github_static_refs', strain.name, strain.githubStatic.ref).then(() => {
+          console.log(`🏷  Set static ref for strain   ${strain.name}`);
+        })
+          .catch(dictError));
+      } else {
+        strainjobs.push(this.putDict('strain_github_static_refs', strain.name, '').then(() => {
+          console.log(`🏷  Clearing static ref for strain   ${strain.name}`);
+        })
+          .catch(dictError));
+      }
+      return strain;
     });
+
+    // wait for all dict updates to complete
+    await Promise.all(strainjobs);
+
+    // also wait for the strain.vcl writing to finish
+    await strainp;
+    await secretp;
+  }
+
+  async run() {
+    try {
+      await this._updateFastly();
+      console.log('📕  All dicts have been updated.');
+      await this.publishVersion();
+      await this.purgeAll();
+    } catch (e) {
+      const message = 'Error setting one or more edge dictionary values';
+      console.error(message);
+      console.error(e);
+      throw new Error(message, e);
+    }
   }
 }
 module.exports = StrainCommand;

@@ -24,6 +24,14 @@ const $ = require('shelljs');
 const archiver = require('archiver');
 const GitUrl = require('@adobe/petridish/src/GitUrl');
 const strainconfig = require('./strain-config-utils');
+const GithubDistributor = require('./distributor/github');
+const DefaultDistributor = require('./distributor/default');
+
+const DISTRIBUTORS = {
+  none: DefaultDistributor,
+  bundled: DefaultDistributor,
+  github: GithubDistributor,
+};
 
 class DeployCommand {
   constructor() {
@@ -283,6 +291,17 @@ class DeployCommand {
       this._distDir = path.resolve(path.dirname(this._target), 'dist');
     }
 
+    const Disty = DISTRIBUTORS[this._staticContent];
+    if (!Disty) {
+      throw Error(`Static content distribution "${this._staticContent}" not implemented yet.`);
+    }
+    this._distributor = await new Disty()
+      .withHelixDir(path.dirname(this._target))
+      .withDistDir(this._distDir)
+      .withPrefix(this._prefix)
+      .withDryRun(this._dryRun)
+      .init();
+
     // todo: how to handle different "components" ?
     const scripts = glob.sync(`${this._target}/*.js`);
     await Promise.all(scripts.map(async (script) => {
@@ -311,6 +330,9 @@ class DeployCommand {
       }
     }));
 
+    // run distributor
+    await this._distributor.run();
+
     if (fs.existsSync(this._strainFile)) {
       const oldstrains = strainconfig.load(fs.readFileSync(this._strainFile));
       const strain = {
@@ -321,6 +343,7 @@ class DeployCommand {
           owner: giturl.owner,
         },
       };
+      this._distributor.processStrain(strain);
       const newstrains = strainconfig.append(oldstrains, strain);
       if (newstrains.length > oldstrains.length) {
         console.log(`Updating strain config, adding strain ${strainconfig.name(strain)} as configuration has changed`);
@@ -340,6 +363,7 @@ class DeployCommand {
           owner: giturl.owner,
         },
       };
+      this._distributor.processStrain(defaultstrain);
       await fs.ensureDir(path.dirname(this._strainFile));
       fs.writeFileSync(this._strainFile, strainconfig.write([defaultstrain]));
     }

@@ -6,7 +6,7 @@ jobs:
     # parallelism: 10
     docker:
       # specify the version you desire here
-      - image: circleci/node:8
+      - image: circleci/node:8-stretch
       
       # Specify service dependencies here if necessary
       # CircleCI maintains a library of pre-built images

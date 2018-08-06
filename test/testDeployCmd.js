@@ -17,6 +17,7 @@ const assert = require('assert');
 const path = require('path');
 const { createTestRoot, assertZipEntry, assertFile } = require('./utils.js');
 const DeployCommand = require('../src/deploy.cmd.js');
+const strainconfig = require('../src/strain-config-utils');
 
 describe('hlx deploy (Integration)', () => {
   let hlxDir;
@@ -70,6 +71,7 @@ describe('hlx deploy (Integration)', () => {
       .withDryRun(true)
       .withContent('git@github.com:adobe/helix-cli')
       .withTarget(buildDir)
+      .withStaticContent('none')
       .withStrainFile(strainsFile)
       .run();
 
@@ -87,6 +89,7 @@ describe('hlx deploy (Integration)', () => {
       .withDryRun(true)
       .withContent('https://github.com/adobe/helix-cli/tree/implement-init')
       .withTarget(buildDir)
+      .withStaticContent('none')
       .withStrainFile(strainsFile)
       .run();
 
@@ -111,5 +114,30 @@ describe('hlx deploy (Integration)', () => {
       .run();
 
     await assertZipEntry(zipFile, 'dist/style.css');
+  });
+
+  it('prepares the static content for github distribution', async () => {
+    await new DeployCommand()
+      .withWskHost('runtime.adobe.io')
+      .withWskAuth('secret-key')
+      .withWskNamespace('hlx')
+      .withPrefix('my-prefix-')
+      .withEnableAuto(false)
+      .withEnableDirty(true)
+      .withDryRun(true)
+      .withContent('git@github.com:adobe/helix-cli')
+      .withTarget(buildDir)
+      .withStrainFile(strainsFile)
+      .withStaticContent('github')
+      .run();
+
+    const gitDir = path.resolve(hlxDir, 'tmp/gh-static/my-prefix-');
+    await assertFile(path.resolve(gitDir, 'style.css'));
+
+    const strains = strainconfig.load(fs.readFileSync(strainsFile).toString());
+    assert.equal(strains[0].githubStatic.repo, 'helix-cli');
+    assert.equal(strains[0].githubStatic.ref, '0000000000000000000000000000');
+    // todo: this will probably fail on a fork
+    assert.equal(strains[0].githubStatic.owner, 'adobe');
   });
 });

@@ -10,11 +10,13 @@
  * governing permissions and limitations under the License.
  */
 
-/* eslint-disable global-require */
+/* eslint-disable global-require, no-console */
 
 'use strict';
 
 const yargs = require('yargs');
+
+const MIN_MSG = 'You need at least one command.';
 
 class CLI {
   constructor() {
@@ -26,7 +28,16 @@ class CLI {
       perf: require('./perf.js')(),
       strain: require('./strain.js')(),
     };
-    this._failFn = null;
+    this._failFn = (msg, err, argv) => {
+      if (err) {
+        throw err;
+      }
+      console.error(msg);
+      if (msg === MIN_MSG) {
+        console.error('\nUsage: %s', argv.help());
+      }
+      process.exit(1);
+    };
   }
 
   withCommandExecutor(name, exec) {
@@ -44,13 +55,10 @@ class CLI {
       .env('HLX');
     Object.values(this._commands).forEach(cmd => argv.command(cmd));
 
-    if (this._failFn) {
-      argv.exitProcess(false);
-      argv.fail(this._failFn);
-    }
-
     return argv
-      .demandCommand()
+      .fail(this._failFn)
+      .exitProcess(false)
+      .demandCommand(1, MIN_MSG)
       .help()
       .parse(args);
   }

@@ -1,0 +1,24 @@
+PUT /service/54nWWFJicKgbdVHou26Y6a/dictionary/6tmAIs0aCfNXF6zsmtNScQ/item/default
+accept: application/json
+host: api.fastly.com
+content-type: application/x-www-form-urlencoded
+body: item_value=%2Fhlx%2Fdefault%2Fgit-github-com-adobe-helix-cli-git--dirty--
+
+HTTP/1.1 200 OK
+status: 200 OK
+content-type: application/json
+cache-control: no-cache
+fastly-ratelimit-remaining: 998
+fastly-ratelimit-reset: 1533553200
+via: 1.1 varnish, 1.1 varnish
+content-length: 173
+accept-ranges: bytes
+date: Mon, 06 Aug 2018 10:04:55 GMT
+connection: close
+x-served-by: app-slwdc9051-SL, cache-lcy19251-LCY
+x-cache: MISS, MISS
+x-cache-hits: 0, 0
+x-timer: S1533549894.220918,VS0,VE1671
+vary: Accept-Encoding
+
+{"dictionary_id":"6tmAIs0aCfNXF6zsmtNScQ","service_id":"54nWWFJicKgbdVHou26Y6a","item_key":"default","item_value":"/hlx/default/git-github-com-adobe-helix-cli-git--dirty--"}
