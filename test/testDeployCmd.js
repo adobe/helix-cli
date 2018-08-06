@@ -71,6 +71,7 @@ describe('hlx deploy (Integration)', () => {
       .withDryRun(true)
       .withContent('git@github.com:adobe/helix-cli')
       .withTarget(buildDir)
+      .withStaticContent('none')
       .withStrainFile(strainsFile)
       .run();
 
@@ -88,6 +89,7 @@ describe('hlx deploy (Integration)', () => {
       .withDryRun(true)
       .withContent('https://github.com/adobe/helix-cli/tree/implement-init')
       .withTarget(buildDir)
+      .withStaticContent('none')
       .withStrainFile(strainsFile)
       .run();
 
