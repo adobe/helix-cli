@@ -33,7 +33,7 @@ class CLI {
         throw err;
       }
       console.error(msg);
-      if (msg === MIN_MSG) {
+      if (msg === MIN_MSG || /.*Unknown argument.*/.test(msg)) {
         console.error('\nUsage: %s', argv.help());
       }
       process.exit(1);
@@ -51,14 +51,15 @@ class CLI {
   }
 
   run(args) {
-    const argv = yargs()
-      .env('HLX');
+    const argv = yargs();
     Object.values(this._commands).forEach(cmd => argv.command(cmd));
 
     return argv
       .fail(this._failFn)
       .exitProcess(false)
       .demandCommand(1, MIN_MSG)
+      .strict()
+      .epilogue('for more information, find our manual at https://github.com/adobe/helix-cli')
       .help()
       .parse(args);
   }

@@ -34,7 +34,8 @@ module.exports = function init() {
           type: 'string',
           describe: 'Parent directory of new project',
           default: '.',
-        });
+        })
+        .strict();
     },
     handler: async (argv) => {
       if (!executor) {
