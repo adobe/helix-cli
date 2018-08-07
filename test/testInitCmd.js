@@ -38,13 +38,10 @@ describe('Integration test for init command', () => {
       .withName('project1')
       .run();
     await assertFile(path.resolve(testDir, 'project1', '.gitignore'));
-    await assertFile(path.resolve(testDir, 'project1', 'README.md'));
     await assertFile(path.resolve(testDir, 'project1', 'src/html.htl'));
     await assertFile(path.resolve(testDir, 'project1', 'src/html.pre.js'));
-    await assertFile(path.resolve(testDir, 'project1', 'helix-config.yaml'));
     await assertFile(path.resolve(testDir, 'project1', 'index.md'));
-    await assertFile(path.resolve(testDir, 'project1', 'package.json'));
-    await assertFile(path.resolve(testDir, 'project1', 'src/static/bootstrap.min.css'));
+    await assertFile(path.resolve(testDir, 'project1', 'src/static/style.css'));
     await assertFile(path.resolve(testDir, 'project1', 'src/static/favicon.ico'));
     await assertFile(path.resolve(testDir, 'project1', 'helix_logo.png'));
   }).timeout(3000);

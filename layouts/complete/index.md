@@ -1,4 +1,3 @@
-<!DOCTYPE html>
 <!--
   ~ Licensed to the Apache Software Foundation (ASF) under one or more
   ~ contributor license agreements.  See the NOTICE file distributed with
@@ -15,22 +14,10 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<html>
-<head>
-    <meta charset="utf-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1"/>
-    <link rel="shortcut icon" type="image/x-icon" href="/dist/favicon.ico">
-    <title>${it.resource.title}</title>
-    <link rel="stylesheet" href="/dist/style.css"/>
-</head>
-<body>
+![helix-logo](./helix_logo.png)
 
-<div data-sly-list="${it.resource.children}">
-    <div class="container">${item}</div>
-</div>
+Helix - {{project.name}}
+=======================
 
-<hr>
-<em>generated at ${it.resource.time}</em>
-
-</body>
-</html>
+It works!
+---------
