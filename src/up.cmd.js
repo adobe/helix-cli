@@ -13,6 +13,7 @@
 
 const Bundler = require('parcel-bundler');
 const glob = require('glob');
+const fs = require('fs');
 const chalk = require('chalk');
 const { HelixProject } = require('@adobe/petridish');
 const BuildCommand = require('./build.cmd');
@@ -42,8 +43,35 @@ class UpCommand extends BuildCommand {
       await this._project.stop();
       this._project = null;
     }
+    if (this._watcher) {
+      await this._watcher.close();
+      this._watcher = null;
+    }
     console.log('Helix project stopped.');
     this.emit('stopped', this);
+  }
+
+  _watchStaticDir(fn) {
+    let timer = null;
+    this._watcher = fs.watch(this._staticDir, {
+      recursive: true,
+    }, (eventType, filename) => {
+      // ignore non static, and .swp and ~ files
+      if (/(.*\.swx|.*\.swp|.*~)/.test(filename)) {
+        return;
+      }
+      if (!/.*static\/.*/.test(filename)) {
+        return;
+      }
+      if (timer) {
+        clearTimeout(timer);
+      }
+      // debounce a bit in case several files are changed at once
+      timer = setTimeout(async () => {
+        timer = null;
+        await fn();
+      }, 250);
+    });
   }
 
   async run() {
@@ -73,7 +101,12 @@ class UpCommand extends BuildCommand {
       this._project.withHttpPort(this._httpPort);
     }
 
-    this._bundler.on('buildEnd', async () => {
+    const buildEnd = async () => {
+      // copy the static files
+      const t0 = Date.now();
+      await this.copyStaticFile();
+      console.log(chalk.greenBright(`✨  Copied static in ${Date.now() - t0}ms.\n`));
+
       if (this._project.started) {
         this.emit('build', this);
         // todo
@@ -81,14 +114,12 @@ class UpCommand extends BuildCommand {
         return;
       }
 
-      // copy the static files
-      const t0 = Date.now();
-      await this.copyStaticFile();
-      console.log(chalk.greenBright(`✨  Copied static in ${Date.now() - t0}ms.\n`));
-
       await this._project.start();
       this.emit('started', this);
-    });
+    };
+
+    this._watchStaticDir(buildEnd);
+    this._bundler.on('buildEnd', buildEnd);
 
     return this._project
       .init()
