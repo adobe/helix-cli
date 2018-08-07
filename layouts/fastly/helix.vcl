@@ -150,6 +150,8 @@ sub hlx_headers_deliver {
     set resp.http.X-Branch = req.http.X-Branch;
     # Header rewrite Strain : 10
     set resp.http.X-Strain = req.http.X-Strain;
+    # Header rewrite Strain : 10
+    set resp.http.X-Github-Static-Ref = "@" + req.http.X-Github-Static-Ref;
   }
 
   call hlx_deliver_errors;
@@ -238,7 +240,7 @@ sub vcl_recv {
     call hlx_github_static_ref;
     set var.ref = req.http.X-Github-Static-Ref;
 
-    if (!var.ref) {
+    if (var.ref == "") {
       # use 'bundled' static content in openwhisk action
       call hlx_action_root;
       set req.backend = F_runtime_adobe_io;
