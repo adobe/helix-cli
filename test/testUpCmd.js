@@ -25,12 +25,6 @@ const UpCommand = require('../src/up.cmd');
 
 const TEST_DIR = path.resolve('test/integration');
 
-function wait(time) {
-  return new Promise((resolve) => {
-    setTimeout(resolve, time);
-  });
-}
-
 describe('Integration test for up command', () => {
   let testDir;
   let buildDir;
