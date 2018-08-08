@@ -103,5 +103,91 @@ describe('Integration test for up command', () => {
       .catch(done);
   }).timeout(5000);
 
-  it('up command detected modified sources and delivers correct response.');
+  it.skip('up command delivers modified sources and delivers correct response.', (done) => {
+    // somehow doesn't work. when executing together with other tests, the bundler doesn't detect
+    // changes to the source files.
+    const srcFile = path.resolve(testDir, 'src/html2.htl');
+    const dstFile = path.resolve(testDir, 'src/html.htl');
+
+    initGit(testDir);
+    let error = null;
+    const cmd = new UpCommand()
+      .withCacheEnabled(false)
+      .withFiles([path.join(testDir, 'src', '*.htl')])
+      .withTargetDir(buildDir)
+      .withDirectory(testDir)
+      .withHttpPort(0);
+
+    const myDone = (err) => {
+      error = err;
+      return cmd.stop();
+    };
+
+    cmd
+      .on('started', async () => {
+        try {
+          await assertHttp(`http://localhost:${cmd.project.server.port}/index.html`, 200, 'simple_response.html');
+          await assertHttp(`http://localhost:${cmd.project.server.port}/dist/welcome.txt`, 200, 'welcome_response.txt');
+          await fse.copy(srcFile, dstFile);
+        } catch (e) {
+          myDone(e);
+        }
+      })
+      .on('stopped', () => {
+        done(error);
+      })
+      .on('build', async () => {
+        try {
+          await assertHttp(`http://localhost:${cmd.project.server.port}/index.html`, 200, 'simple_response2.html');
+          myDone();
+        } catch (e) {
+          myDone(e);
+        }
+      })
+      .run()
+      .catch(done);
+  }).timeout(10000);
+
+  it.skip('up command delivers modified static files and delivers correct response.', (done) => {
+    const srcFile = path.resolve(testDir, 'src/static/welcome2.txt');
+    const dstFile = path.resolve(testDir, 'src/static/welcome.txt');
+
+    initGit(testDir);
+    let error = null;
+    const cmd = new UpCommand()
+      .withCacheEnabled(false)
+      .withFiles([path.join(testDir, 'src', '*.htl')])
+      .withTargetDir(buildDir)
+      .withDirectory(testDir)
+      .withHttpPort(0);
+
+    const myDone = (err) => {
+      error = err;
+      return cmd.stop();
+    };
+
+    cmd
+      .on('started', async () => {
+        try {
+          await assertHttp(`http://localhost:${cmd.project.server.port}/index.html`, 200, 'simple_response.html');
+          await assertHttp(`http://localhost:${cmd.project.server.port}/dist/welcome.txt`, 200, 'welcome_response.txt');
+          await fse.copy(srcFile, dstFile);
+        } catch (e) {
+          myDone(e);
+        }
+      })
+      .on('stopped', () => {
+        done(error);
+      })
+      .on('build', async () => {
+        try {
+          await assertHttp(`http://localhost:${cmd.project.server.port}/dist/welcome.txt`, 200, 'welcome_response2.txt');
+          myDone();
+        } catch (e) {
+          myDone(e);
+        }
+      })
+      .run()
+      .catch(done);
+  }).timeout(10000);
 });
