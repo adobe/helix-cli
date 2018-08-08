@@ -148,7 +148,7 @@ describe('Integration test for up command', () => {
       .catch(done);
   }).timeout(10000);
 
-  it('up command delivers modified static files and delivers correct response.', (done) => {
+  it.skip('up command delivers modified static files and delivers correct response.', (done) => {
     const srcFile = path.resolve(testDir, 'src/static/welcome2.txt');
     const dstFile = path.resolve(testDir, 'src/static/welcome.txt');
 
