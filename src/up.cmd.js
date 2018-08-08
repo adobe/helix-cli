@@ -118,16 +118,16 @@ class UpCommand extends BuildCommand {
       this.emit('started', this);
     };
 
+
+    try {
+      await this._project.init();
+    } catch (e) {
+      throw Error(`Unable to start helix: ${e.message}`);
+    }
+
     this._watchStaticDir(buildEnd);
     this._bundler.on('buildEnd', buildEnd);
-
-    return this._project
-      .init()
-      .then(() => {
-        this._bundler.bundle();
-      }).catch((e) => {
-        throw Error(`Unable to start helix: ${e.message}`);
-      });
+    this._bundler.bundle();
   }
 }
 
