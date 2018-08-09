@@ -106,20 +106,6 @@ class InitCommand {
     }
   }
 
-  async initNpm(dir) {
-    const pwd = shell.pwd();
-    try {
-      console.log(`${chalk.yellow('+')} running npm install...`);
-      shell.cd(dir);
-      await execAsync('npm install');
-      this.msg('setup all npm dependencies.');
-    } catch (e) {
-      throw Error(`Unable to initialize nmp: ${e}`);
-    } finally {
-      shell.cd(pwd);
-    }
-  }
-
   async run() {
     if (!this._name) {
       throw new Error('init needs name.');
@@ -168,7 +154,6 @@ class InitCommand {
     });
 
     await Promise.all(jobs);
-    // await this.initNpm(projectDir);
     await this.initGitRepository(projectDir);
 
     console.log(chalk`
