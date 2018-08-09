@@ -21,16 +21,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <link rel="shortcut icon" type="image/x-icon" href="/dist/favicon.ico">
     <title>${it.resource.title}</title>
-    <link rel="stylesheet" href="/dist/style.css"/>
+    <link rel="stylesheet" href="/dist/bootstrap.min.css"/>
 </head>
 <body>
 
 <div data-sly-list="${it.resource.children}">
-    <div class="container">${item}</div>
+    <div class="container-fluid">${item}</div>
 </div>
 
-<hr>
-<em>generated at ${it.resource.time}</em>
+<div class="container-fluid">
+    <em>generated at ${it.resource.time}</em>
+</div>
 
 </body>
 </html>
