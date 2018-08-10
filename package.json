@@ -27,7 +27,7 @@
     "@adobe/htlengine": "^1.0.2-SNAPSHOT.68",
     "@adobe/hypermedia-pipeline": "^0.3.2-SNAPSHOT.74",
     "@adobe/openwhisk-loggly-wrapper": "^0.2.0-SNAPSHOT.35",
-    "@adobe/parcel-plugin-htl": "0.5.0",
+    "@adobe/parcel-plugin-htl": "0.5.1",
     "@adobe/petridish": "^1.0.5",
     "archiver": "^2.1.1",
     "bluebird": "^3.5.1",
