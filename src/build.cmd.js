@@ -125,6 +125,7 @@ class BuildCommand extends EventEmitter {
 
     const bundler = new Bundler(myfiles, myoptions);
     bundler.addAssetType('htl', require.resolve('@adobe/parcel-plugin-htl/src/HTLAsset.js'));
+    bundler.addAssetType('helix-js', require.resolve('./parcel/HelixAsset.js'));
     await bundler.bundle();
   }
 }

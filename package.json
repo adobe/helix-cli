@@ -27,7 +27,7 @@
     "@adobe/htlengine": "^1.0.2-SNAPSHOT.68",
     "@adobe/hypermedia-pipeline": "^0.3.2-SNAPSHOT.74",
     "@adobe/openwhisk-loggly-wrapper": "^0.2.0-SNAPSHOT.35",
-    "@adobe/parcel-plugin-htl": "0.5.1",
+    "@adobe/parcel-plugin-htl": "0.6.1",
     "@adobe/petridish": "^1.0.5",
     "archiver": "^2.1.1",
     "bluebird": "^3.5.1",
@@ -53,6 +53,7 @@
     "eslint-plugin-jsx-a11y": "^6.0.3",
     "eslint-plugin-react": "^7.9.1",
     "istanbul": "^1.1.0-alpha.1",
+    "lodash": "^4.17.10",
     "mocha": "^5.2.0",
     "mocha-junit-reporter": "^1.17.0",
     "mocha-parallel-tests": "^2.0.3",
@@ -61,7 +62,8 @@
     "replay": "^2.3.0",
     "sinon": "^6.1.0",
     "unzip": "^0.1.11",
-    "uuid": "^3.3.2"
+    "uuid": "^3.3.2",
+    "winston": "^3.0.0"
   },
   "snyk": true
 }
