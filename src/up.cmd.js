@@ -89,6 +89,7 @@ class UpCommand extends BuildCommand {
 
     this._bundler = new Bundler(myfiles, myoptions);
     this._bundler.addAssetType('htl', require.resolve('@adobe/parcel-plugin-htl/src/HTLAsset.js'));
+    this._bundler.addAssetType('helix-js', require.resolve('./parcel/HelixAsset.js'));
 
     this.validate();
 
