@@ -12,11 +12,11 @@
 
 /* eslint-env mocha */
 
-const StrainCommand = require('../src/strain.cmd');
 const Replay = require('replay');
 const fs = require('fs-extra');
 const path = require('path');
 const { createTestRoot } = require('./utils.js');
+const StrainCommand = require('../src/strain.cmd');
 
 // disable replay for this test
 Replay.mode = 'bloody';

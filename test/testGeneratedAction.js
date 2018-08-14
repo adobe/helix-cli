@@ -12,10 +12,10 @@
 /* eslint-env mocha */
 const assert = require('assert');
 const fs = require('fs-extra');
-const { processSource, createLogger } = require('./utils');
 const sinon = require('sinon');
 const path = require('path');
 const Replay = require('replay');
+const { processSource, createLogger } = require('./utils');
 
 Replay.mode = 'replay';
 Replay.fixtures = path.resolve(__dirname, 'fixtures');
