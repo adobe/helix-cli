@@ -15,13 +15,13 @@
 const assert = require('assert');
 const path = require('path');
 const fse = require('fs-extra');
+const Replay = require('replay');
 const InitCommand = require('../src/init.cmd');
 
 const TEST_DIR = path.resolve(__dirname, 'tmp');
 const PROJECT_NAME = 'pulvillar-pantograph';
 const pwd = process.cwd();
 
-const Replay = require('replay');
 // disable replay for this test
 Replay.mode = 'bloody';
 

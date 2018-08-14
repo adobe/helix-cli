@@ -92,17 +92,17 @@ function clean(strain) {
  */
 function validate(strain) {
   return (
-    !!strain &&
-    strain.name &&
-    strain.content &&
-    strain.content.owner &&
-    strain.content.repo &&
-    strain.code &&
-    typeof strain.code === 'string' &&
-    typeof strain.content.owner === 'string' &&
-    typeof strain.content.repo === 'string' &&
-    strain.content.owner.match(/^[^/]+$/) &&
-    strain.content.repo.match(/^[^/]+$/)
+    !!strain
+    && strain.name
+    && strain.content
+    && strain.content.owner
+    && strain.content.repo
+    && strain.code
+    && typeof strain.code === 'string'
+    && typeof strain.content.owner === 'string'
+    && typeof strain.content.repo === 'string'
+    && strain.content.owner.match(/^[^/]+$/)
+    && strain.content.repo.match(/^[^/]+$/)
   );
 }
 
@@ -128,7 +128,8 @@ function compare(straina, strainb) {
   // default strain always comes first
   if (straina.strain.name === 'default') {
     return -1;
-  } else if (strainb.strain.name === 'default') {
+  }
+  if (strainb.strain.name === 'default') {
     return 1;
   }
   // named strains come next
@@ -136,7 +137,8 @@ function compare(straina, strainb) {
   const anonb = anon(strainb.strain.name);
   if (anonb && !anona) {
     return -1;
-  } else if (anona && !anonb) {
+  }
+  if (anona && !anonb) {
     return 1;
   }
   return straina.strain.name.localeCompare(strainb.strain.name);
@@ -164,7 +166,8 @@ function append(strains, strain) {
   if (strains.length === 0) {
     // this is the first strain we're adding
     return [Object.assign({ name: 'default', ...strain })];
-  } else if (!strain.name) {
+  }
+  if (!strain.name) {
     const newdefault = Object.assign({ name: 'default', ...strain });
     const olddefault = strains.length > 0 ? strains[0] : newdefault;
     if (hash.sha1(olddefault) === hash.sha1(newdefault)) {

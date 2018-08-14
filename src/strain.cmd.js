@@ -385,6 +385,8 @@ class StrainCommand {
    * Generates VCL for strain resolution from a list of strains
    */
   static getVCL(strains) {
+    /* eslint-disable implicit-arrow-linebreak, comma-style */
+    // todo: remove nested template string. very hard to read.
     return `${strains
       .filter(strain => strain.condition)
       .reduce(
@@ -397,6 +399,7 @@ class StrainCommand {
       )} {
   set req.http.X-Strain = "default";
 }`;
+    /* eslint-enable implicit-arrow-linebreak, comma-style */
   }
 
   async vclopts(name, vcl) {
@@ -404,7 +407,7 @@ class StrainCommand {
     const postopts = await this.version('/vcl');
     // making a get request to probe if the VCL already exists
     return request.get(baseopts).then(() =>
-      // overwrite
+      // eslint-disable-next-line implicit-arrow-linebreak
       Object.assign({
         method: 'PUT',
         form: {
