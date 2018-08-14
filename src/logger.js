@@ -14,6 +14,7 @@
 
 const path = require('path');
 const winston = require('winston');
+const fs = require('fs-extra');
 
 function getLogger(config) {
   let categ;
@@ -30,6 +31,8 @@ function getLogger(config) {
   const level = (config && config.level) || 'info';
   const logsDir = path.normalize((config && config.logsDir) || 'logs');
   const logsFile = path.join(logsDir, `${categ}-server.log`);
+
+  fs.ensureDirSync(logsDir);
 
   return winston.loggers.add(categ, {
     transports: [
