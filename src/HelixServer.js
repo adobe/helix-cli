@@ -162,8 +162,7 @@ class HelixServer {
           reject(new Error(`Error while starting http server: ${err}`));
         }
         this._port = this._server.address().port;
-        logger.info(`Petridish server listening on port ${this._port}.`);
-        logger.info(`Open soupdemo at http://localhost:${this._port}/index.html`);
+        logger.info(`Local Helix Dev server up and running: http://localhost:${this._port}/`);
         resolve(this._port);
       });
     });
@@ -178,7 +177,7 @@ class HelixServer {
         if (err) {
           reject(new Error(`Error while stopping http server: ${err}`));
         }
-        logger.info('Petridish server stopped.');
+        logger.info('Local Helix Dev server stopped.');
         this._server = null;
         resolve();
       });

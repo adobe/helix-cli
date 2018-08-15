@@ -14,23 +14,33 @@
 
 const path = require('path');
 const winston = require('winston');
+const fs = require('fs-extra');
 
-// module-global winston logger instance
-const logger = winston.createLogger();
+function getLogger(config) {
+  let categ;
+  if (typeof config === 'string') {
+    categ = config;
+  } else {
+    categ = (config && config.category) || 'hlx';
+  }
 
-function configure(config) {
-  const level = (config && config.level) || 'debug';
+  if (winston.loggers.has(categ)) {
+    return winston.loggers.get(categ);
+  }
 
+  const level = (config && config.level) || 'info';
   const logsDir = path.normalize((config && config.logsDir) || 'logs');
-  const logsFile = path.join(logsDir, 'hlx-server.log');
+  const logsFile = path.join(logsDir, `${categ}-server.log`);
 
-  logger.configure({
+  fs.ensureDirSync(logsDir);
+
+  return winston.loggers.add(categ, {
     transports: [
       new winston.transports.Console({
         level,
         format: winston.format.combine(
           winston.format.colorize(),
-          winston.format.printf(info => `[hlx] ${info.level}: ${info.message}`),
+          winston.format.printf(info => `[${categ}] ${info.level}: ${info.message}`),
         ),
       }),
 
@@ -47,10 +57,11 @@ function configure(config) {
 }
 
 // configure with defaults
-configure();
+const logger = getLogger();
+
 
 module.exports = {
-  configure,
+  getLogger,
   log: (...args) => logger.log(...args),
   debug: (...args) => logger.debug(...args),
   info: (...args) => logger.info(...args),
