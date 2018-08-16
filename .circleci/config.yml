@@ -3,7 +3,7 @@ jobs:
   build:
     # Currently this doesn't help much since most of the time is spent in npm install,
     # which is slow for all parallel processes
-    parallelism: 10
+    # parallelism: 10
     docker:
       # specify the version you desire here
       - image: circleci/node:8-stretch
