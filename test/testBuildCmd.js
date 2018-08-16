@@ -27,13 +27,17 @@ describe('Integration test for build', () => {
   let distDir;
   let srcDir;
 
-  beforeEach(async () => {
+  beforeEach(async function before() {
+    // copying 300 MB can take a while
+    this.timeout(20000);
+
     const testRoot = await createTestRoot();
     testDir = path.resolve(testRoot, 'project');
     buildDir = path.resolve(testRoot, '.hlx/build');
     distDir = path.resolve(testRoot, '.hlx/dist');
     srcDir = path.resolve(testDir, 'src');
     await fs.copy(TEST_DIR, testDir);
+    return true;
   });
 
   it('build command succeeds and produces files', async () => {
