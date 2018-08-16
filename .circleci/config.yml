@@ -57,7 +57,7 @@ jobs:
   publish-snapshot:
     docker:
       # specify the version you desire here
-      - image: circleci/node:8
+      - image: circleci/node:8-stretch
 
     working_directory: ~/repo
 
@@ -89,7 +89,7 @@ jobs:
 
       - run:
           name: Tag Release in Git
-          command: git tag $(npm view @adobe/helix-cli@next version) && git push origin $(npm view @adobe/helix-cli@next version)
+          command: echo $BUILD_TAG && git tag $(npm view @adobe/helix-cli@next version) && git push origin $(npm view @adobe/helix-cli@next version)
 
       - store_test_results:
           path: junit
@@ -99,7 +99,9 @@ jobs:
   publish-examples:
     docker:
       # specify the version you desire here
-      - image: circleci/node:8
+      - image: circleci/node:8-stretch
+    environment:
+            NPM_CONFIG_PREFIX: ~/.npm-global
 
     working_directory: ~/repo
 
