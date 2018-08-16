@@ -57,7 +57,7 @@ jobs:
   publish-snapshot:
     docker:
       # specify the version you desire here
-      - image: circleci/node:8
+      - image: circleci/node:8-stretch
 
     working_directory: ~/repo
 
@@ -99,7 +99,7 @@ jobs:
   publish-examples:
     docker:
       # specify the version you desire here
-      - image: circleci/node:8
+      - image: circleci/node:8-stretch
     environment:
             NPM_CONFIG_PREFIX: ~/.npm-global
 
