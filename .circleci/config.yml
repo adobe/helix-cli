@@ -100,6 +100,8 @@ jobs:
     docker:
       # specify the version you desire here
       - image: circleci/node:8
+    environment:
+            NPM_CONFIG_PREFIX: ~/.npm-global
 
     working_directory: ~/repo
 
