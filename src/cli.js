@@ -58,7 +58,6 @@ class CLI {
       .fail(this._failFn)
       .exitProcess(false)
       .demandCommand(1, MIN_MSG)
-      .strict()
       .epilogue('for more information, find our manual at https://github.com/adobe/helix-cli')
       .help()
       .parse(args);
