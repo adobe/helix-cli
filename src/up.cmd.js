@@ -15,6 +15,7 @@ const Bundler = require('parcel-bundler');
 const glob = require('glob');
 const fs = require('fs');
 const chalk = require('chalk');
+const opn = require('opn');
 const { HelixProject } = require('@adobe/petridish');
 const BuildCommand = require('./build.cmd');
 const { DEFAULT_OPTIONS } = require('./defaults.js');
@@ -23,10 +24,16 @@ class UpCommand extends BuildCommand {
   constructor() {
     super();
     this._httpPort = -1;
+    this._open = false;
   }
 
   withHttpPort(p) {
     this._httpPort = p;
+    return this;
+  }
+
+  withOpen(o) {
+    this._open = !!o;
     return this;
   }
 
@@ -117,6 +124,9 @@ class UpCommand extends BuildCommand {
 
       await this._project.start();
       this.emit('started', this);
+      if (this._open) {
+        opn(`http://localhost:${this._project.server.port}/index.html`);
+      }
     };
 
 

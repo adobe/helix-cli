@@ -28,6 +28,7 @@ describe('hlx up', () => {
     mockUp.withMinifyEnabled.returnsThis();
     mockUp.withTargetDir.returnsThis();
     mockUp.withFiles.returnsThis();
+    mockUp.withOpen.returnsThis();
     mockUp.run.returnsThis();
   });
 
@@ -79,6 +80,14 @@ describe('hlx up', () => {
       .withCommandExecutor('up', mockUp)
       .run(['up', '-o', 'tmp/build']);
     sinon.assert.calledWith(mockUp.withTargetDir, 'tmp/build');
+    sinon.assert.calledOnce(mockUp.run);
+  });
+
+  it('hlx up can open browser with --open option', () => {
+    new CLI()
+      .withCommandExecutor('up', mockUp)
+      .run(['up', '--no-open', 'tmp/build']);
+    sinon.assert.calledWith(mockUp.withOpen, null);
     sinon.assert.calledOnce(mockUp.run);
   });
 
