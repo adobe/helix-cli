@@ -49,7 +49,7 @@ describe('Test Deployment in Empty Project', () => {
     assert.equal('local--pulvillar-pantograph', DeployCommand.getRepository());
   });
 
-  afterEach('Reset working directory', function() {
+  afterEach('Reset working directory', function after() {
     this.timeout(5000);
     process.chdir(pwd);
     fse.removeSync(TEST_DIR);
