@@ -22,8 +22,17 @@ const StrainCommand = require('../src/strain.cmd');
 describe('hlx strain', () => {
   // mocked command instance
   let mockStrain;
+  let processenv = {};
 
   beforeEach(() => {
+    // save environment
+    processenv = Object.assign({}, process.env);
+    // clear environment
+    Object.keys(process.env).filter(key => key.match(/^HLX_.*/)).map((key) => {
+      delete process.env[key];
+      return true;
+    });
+
     mockStrain = sinon.createStubInstance(StrainCommand);
     mockStrain.withWskHost.returnsThis();
     mockStrain.withWskAuth.returnsThis();
@@ -32,6 +41,14 @@ describe('hlx strain', () => {
     mockStrain.withFastlyAuth.returnsThis();
     mockStrain.withDryRun.returnsThis();
     mockStrain.run.returnsThis();
+  });
+
+  afterEach(() => {
+    // restore environment
+    Object.keys(processenv).filter(key => key.match(/^HLX_.*/)).map((key) => {
+      process.env[key] = processenv[key];
+      return true;
+    });
   });
 
   it('hlx strain requires auth', (done) => {
