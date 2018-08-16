@@ -64,11 +64,11 @@ class CLI {
 
     const commands = argv.getCommandInstance().getCommands();
     if (hlxargs._[0] && commands.indexOf(hlxargs._[0]) === -1) {
-      console.error("Unknown argument: " + hlxargs._[0] + '\n');
+      console.error(`Unknown argument: ${hlxargs._[0]}\n`);
       argv.showHelp();
       process.exit(1);
     }
-    
+
     return hlxargs;
   }
 }
