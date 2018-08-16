@@ -89,7 +89,7 @@ jobs:
 
       - run:
           name: Tag Release in Git
-          command: git tag $(npm view @adobe/helix-cli@next version) && git push origin $(npm view @adobe/helix-cli@next version)
+          command: echo $BUILD_TAG && git tag $(npm view @adobe/helix-cli@next version) && git push origin $(npm view @adobe/helix-cli@next version)
 
       - store_test_results:
           path: junit
