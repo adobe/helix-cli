@@ -127,6 +127,16 @@ Authentication is required. You can pass the key via the HLX_WSK_AUTH environmen
     sinon.assert.calledOnce(mockDeploy.run);
   });
 
+  it('hlx deploy tolerates unknown env parameters', () => {
+    process.env.HLX_FOOBAR = '1234';
+    new CLI()
+      .withCommandExecutor('deploy', mockDeploy)
+      .run(['deploy',
+        '--wsk-auth', 'secret-key',
+        '--wsk-namespace', 'hlx',
+      ]);
+  });
+
   it('hlx deploy can disable auto', () => {
     new CLI()
       .withCommandExecutor('deploy', mockDeploy)
