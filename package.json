@@ -1,6 +1,6 @@
 {
   "name": "@adobe/petridish",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Helix Testing Environment",
   "repository": "https://github.com/adobe/petridish",
   "main": "src/index.js",
