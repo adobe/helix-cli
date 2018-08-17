@@ -19,6 +19,7 @@ const opn = require('opn');
 const { HelixProject } = require('@adobe/petridish');
 const BuildCommand = require('./build.cmd');
 const { DEFAULT_OPTIONS } = require('./defaults.js');
+const pkgJson = require('../package.json');
 
 class UpCommand extends BuildCommand {
   constructor() {
@@ -103,7 +104,8 @@ class UpCommand extends BuildCommand {
     this._project = new HelixProject()
       .withCwd(this._cwd)
       .withBuildDir(this._target)
-      .withDistDir(this._distDir);
+      .withDistDir(this._distDir)
+      .withDisplayVersion(pkgJson.version);
 
     if (this._httpPort >= 0) {
       this._project.withHttpPort(this._httpPort);
