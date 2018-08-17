@@ -29,7 +29,8 @@ describe('Integration test for up command', () => {
   let testDir;
   let buildDir;
 
-  beforeEach(async () => {
+  beforeEach(async function before() {
+    this.timeout(20000);
     const testRoot = await createTestRoot();
     testDir = path.resolve(testRoot, 'project');
     buildDir = path.resolve(testRoot, '.hlx/build');
@@ -45,7 +46,7 @@ describe('Integration test for up command', () => {
       .run()
       .then(() => assert.fail('hlx up without .git should fail.'))
       .catch((err) => {
-        assert.equal(err.message, 'Unable to start helix: Local README.md or index.md must be inside a valid git repository.');
+        assert.equal(true, /Unable to start helix/.test(err.message));
         done();
       })
       .catch(done);

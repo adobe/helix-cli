@@ -101,11 +101,20 @@ class UpCommand extends BuildCommand {
 
     this.validate();
 
-    this._project = new HelixProject()
-      .withCwd(this._cwd)
-      .withBuildDir(this._target)
-      .withDistDir(this._distDir)
-      .withDisplayVersion(pkgJson.version);
+
+    try {
+      this._project = new HelixProject()
+        .withCwd(this._cwd)
+        .withBuildDir(this._target)
+        .withDistDir(this._distDir)
+        .withDisplayVersion(pkgJson.version);
+    } catch (e) {
+      console.error('Unable to initialize petridish server outside of a git repository');
+      console.error('\nYou can create a valid working directory with:');
+      console.error(chalk.grey('$ hlx init'));
+
+      throw Error(`Unable to start helix: ${e.message}`);
+    }
 
     if (this._httpPort >= 0) {
       this._project.withHttpPort(this._httpPort);
@@ -130,7 +139,6 @@ class UpCommand extends BuildCommand {
         opn(`http://localhost:${this._project.server.port}/index.html`);
       }
     };
-
 
     try {
       await this._project.init();
