@@ -42,4 +42,10 @@ describe('hlx command line', () => {
     assert.notEqual(cmd.code, 0);
     assert.ok(/.*Unknown argument: foo*/.test(cmd.stderr.toString()));
   });
+
+  it('hlx build with unknown argument shows help and exists with != 0', () => {
+    const cmd = runCLI('build', '--foo=bar');
+    assert.notEqual(cmd.code, 0);
+    assert.ok(/.*Unknown argument: foo*/.test(cmd.stderr.toString()));
+  });
 });

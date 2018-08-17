@@ -13,14 +13,17 @@
 module.exports = function commonArgs(yargs) {
   return yargs
     .env('HLX')
+    .strict(false)
     .option('wsk-auth', {
       describe: 'Adobe I/O Runtime Authentication key',
       type: 'string',
+      env: 'HLX_WSK_AUTH',
     })
     .option('wsk-namespace', {
       describe: 'Adobe I/O Runtime Namespace',
       type: 'string',
       demandOption: true,
+      env: 'HLX_WSK_NAMESPACE',
     })
     .option('wsk-host', {
       describe: 'Adobe I/O Runtime API Host',

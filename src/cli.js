@@ -54,22 +54,14 @@ class CLI {
     const argv = yargs();
     Object.values(this._commands).forEach(cmd => argv.command(cmd));
 
-    const hlxargs = argv
+    return argv
       .fail(this._failFn)
       .exitProcess(false)
+      .strict()
       .demandCommand(1, MIN_MSG)
       .epilogue('for more information, find our manual at https://github.com/adobe/helix-cli')
       .help()
       .parse(args);
-
-    const commands = argv.getCommandInstance().getCommands();
-    if (hlxargs._[0] && commands.indexOf(hlxargs._[0]) === -1) {
-      console.error(`Unknown argument: ${hlxargs._[0]}\n`);
-      argv.showHelp();
-      process.exit(1);
-    }
-
-    return hlxargs;
   }
 }
 
