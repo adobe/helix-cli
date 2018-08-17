@@ -13,6 +13,7 @@
 /* eslint no-console: off */
 /* eslint global-require: off */
 
+const path = require('path');
 const { defaultArgs } = require('./defaults.js');
 
 module.exports = function up() {
@@ -47,7 +48,7 @@ module.exports = function up() {
         .withFiles(argv.files)
         // only open browser window when executable is `hlx`
         // this prevents the window to be opened during integration tests
-        .withOpen(argv.$0.match(/.*\/hlx$/) && argv.open)
+        .withOpen(argv.open && path.basename(argv.$0) === 'hlx')
         .run();
     },
   };
