@@ -87,7 +87,7 @@ describe('hlx up', () => {
     new CLI()
       .withCommandExecutor('up', mockUp)
       .run(['up', '--no-open', 'tmp/build']);
-    sinon.assert.calledWith(mockUp.withOpen, null);
+    sinon.assert.calledWith(mockUp.withOpen, false);
     sinon.assert.calledOnce(mockUp.run);
   });
 

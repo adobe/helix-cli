@@ -82,7 +82,9 @@ describe('Generated Action Tests', () => {
     let distJS;
     let distHtl;
 
-    describe(`Testing ${testScript.name}`, () => {
+    describe(`Testing ${testScript.name}`, function testSuite() {
+      this.timeout(10000);
+
       before(`Run Parcel programmatically on ${testScript.name}.htl`, async () => {
         ({ distHtmlJS: distJS, distHtmlHtl: distHtl } = await processSource(testScript.name));
       });
@@ -120,6 +122,6 @@ describe('Generated Action Tests', () => {
           assert(spy.calledWith('pre was here!'));
         }
       });
-    }).timeout(10000);
+    });
   });
 });
