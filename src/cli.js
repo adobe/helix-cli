@@ -33,7 +33,7 @@ class CLI {
         throw err;
       }
       console.error(msg);
-      if (msg === MIN_MSG || /.*Unknown argument.*/.test(msg)) {
+      if (msg === MIN_MSG || /.*Unknown argument.*/.test(msg) || /.*Not enough non-option arguments:.*/.test(msg)) {
         console.error('\nUsage: %s', argv.help());
       }
       process.exit(1);
