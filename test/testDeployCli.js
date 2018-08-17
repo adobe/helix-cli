@@ -23,8 +23,19 @@ describe('hlx deploy', () => {
   // mocked command instance
   let mockDeploy;
   let stubs;
+  let processenv = {};
+
 
   beforeEach(() => {
+    // save environment
+    processenv = Object.assign({}, process.env);
+    // clear environment
+    Object.keys(process.env).filter(key => key.match(/^HLX_.*/)).map((key) => {
+      delete process.env[key];
+      return true;
+    });
+
+
     mockDeploy = sinon.createStubInstance(DeployCommand);
     mockDeploy.withEnableAuto.returnsThis();
     mockDeploy.withWskHost.returnsThis();
@@ -51,6 +62,12 @@ describe('hlx deploy', () => {
   });
 
   afterEach(() => {
+    // restore environment
+    Object.keys(processenv).filter(key => key.match(/^HLX_.*/)).map((key) => {
+      process.env[key] = processenv[key];
+      return true;
+    });
+
     stubs.forEach((s) => { s.restore(); });
   });
 
