@@ -24,7 +24,13 @@ module.exports = function up() {
     command: 'up [files...]',
     description: 'Run a Helix development server',
     builder: (yargs) => {
-      defaultArgs(yargs).help();
+      defaultArgs(yargs)
+        .option('open', {
+          describe: 'Open a browser window',
+          boolean: true,
+          type: 'boolean',
+          default: true,
+        }).help();
     },
     handler: async (argv) => {
       if (!executor) {
@@ -33,11 +39,15 @@ module.exports = function up() {
         executor = new UpCommand();
       }
 
+
       await executor
         .withCacheEnabled(argv.cache)
         .withMinifyEnabled(argv.minify)
         .withTargetDir(argv.target)
         .withFiles(argv.files)
+        // only open browser window when executable is `hlx`
+        // this prevents the window to be opened during integration tests
+        .withOpen(argv.$0.match(/.*\/hlx$/) && argv.open)
         .run();
     },
   };
