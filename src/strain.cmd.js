@@ -385,21 +385,22 @@ class StrainCommand {
    * Generates VCL for strain resolution from a list of strains
    */
   static getVCL(strains) {
-    /* eslint-disable implicit-arrow-linebreak, comma-style */
-    // todo: remove nested template string. very hard to read.
-    return `${strains
+    let vcl = '# This file handles the strain resolution\n';
+    const conditions = strains
       .filter(strain => strain.condition)
-      .reduce(
-        (vcl, { name, condition }) =>
-        // the following is in VCL (Varnish Configuration Language) syntax
-          `${vcl}if (${condition}) {
+      .map(({ condition, name }) => `if (${condition}) {
   set req.http.X-Strain = "${name}";
-} else `
-        , '# This file handles the strain resolution\n',
-      )} {
+} else `);
+    if (conditions.length) {
+      console.log(conditions);
+      vcl += conditions.join('');
+      vcl += `{
   set req.http.X-Strain = "default";
 }`;
-    /* eslint-enable implicit-arrow-linebreak, comma-style */
+    } else {
+      vcl += 'set req.http.X-Strain = "default";\n';
+    }
+    return vcl;
   }
 
   async vclopts(name, vcl) {

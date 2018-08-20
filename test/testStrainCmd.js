@@ -32,20 +32,19 @@ const SRC_STRAINS = path.resolve(__dirname, 'fixtures/strains.yaml');
 describe('hlx strain (VCL) generation', () => {
   it('getVCL generates VLC for empty strains', () => {
     const strainfile = strainconfig.load(fs.readFileSync(path.resolve(__dirname, 'fixtures/empty.yaml')));
-    const vclfile = fs.readFileSync(path.resolve(__dirname, 'fixtures/empty.vcl')).toString();;
+    const vclfile = fs.readFileSync(path.resolve(__dirname, 'fixtures/empty.vcl')).toString();
     assert.equal(vclfile, StrainCommand.getVCL(strainfile));
   });
 
   it('getVCL generates VLC for non-existing conditions strains', () => {
     const strainfile = strainconfig.load(fs.readFileSync(path.resolve(__dirname, 'fixtures/default.yaml')));
-    const vclfile = fs.readFileSync(path.resolve(__dirname, 'fixtures/default.vcl')).toString();;
+    const vclfile = fs.readFileSync(path.resolve(__dirname, 'fixtures/default.vcl')).toString();
     assert.equal(vclfile, StrainCommand.getVCL(strainfile));
   });
 
   it('getVCL generates VLC for simple conditions strains', () => {
     const strainfile = strainconfig.load(fs.readFileSync(path.resolve(__dirname, 'fixtures/simple-condition.yaml')));
     const vclfile = fs.readFileSync(path.resolve(__dirname, 'fixtures/simple-condition.vcl')).toString();
-    //console.log(StrainCommand.getVCL(strainfile));
     assert.equal(vclfile, StrainCommand.getVCL(strainfile));
   });
 });
