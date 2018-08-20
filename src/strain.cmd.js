@@ -386,11 +386,11 @@ class StrainCommand {
     if (strain.url) {
       const uri = URI.parse(strain.url);
       if (uri.path && uri.path !== '/') {
-        const path = uri.path.replace(/\/$/,'');
+        const pathname = uri.path.replace(/\/$/, '');
         return Object.assign({
           condition: `req.http.Host == "${uri.host}" && req.url.dirname ~ "^${uri.path}"`,
           vcl: `
-  set req.http.X-Dirname = regsub(req.url.dirname, "^${path}", "/");`,
+  set req.http.X-Dirname = regsub(req.url.dirname, "^${pathname}", "/");`,
         }, strain);
       }
       return Object.assign({
