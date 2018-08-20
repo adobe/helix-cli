@@ -385,9 +385,17 @@ class StrainCommand {
   static vclConditions(strain) {
     if (strain.url) {
       const uri = URI.parse(strain.url);
-      return Object.assign({
-        condition: `req.http.Host == "${uri.host}"`
-      }, strain);
+      if (uri.path && uri.path != '/') {
+        return Object.assign({
+          condition: `req.http.Host == "${uri.host}" && req.url.dirname ~ "^${uri.path}"`,
+          vcl: `
+  set req.http.X-Dirname = regsub(req.url.dirname, "^${uri.path}", "");`
+        }, strain);
+      } else {
+        return Object.assign({
+          condition: `req.http.Host == "${uri.host}"`
+        }, strain);
+      }
     } else {
       return strain;
     }
@@ -401,8 +409,8 @@ class StrainCommand {
     const conditions = strains
       .map(StrainCommand.vclConditions)
       .filter(strain => strain.condition)
-      .map(({ condition, name }) => `if (${condition}) {
-  set req.http.X-Strain = "${name}";
+      .map(({ condition, name, vcl = ''}) => `if (${condition}) {
+  set req.http.X-Strain = "${name}";${vcl}
 } else `);
     if (conditions.length) {
       vcl += conditions.join('');

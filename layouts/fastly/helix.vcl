@@ -282,7 +282,12 @@ sub vcl_recv {
     set var.ref = req.http.X-Ref;
 
     call hlx_root_path;
-    set var.dir = req.http.X-Root-Path + req.url.dirname;
+    if (req.http.X-Dirname) {
+      # set root path based on strain-specific dirname (strips away strain root)
+      set var.dir = req.http.X-Root-Path + req.http.X-Dirname;
+    } else {
+      set var.dir = req.http.X-Root-Path + req.url.dirname;
+    }
 
     set var.name = re.group.1;
     set var.selector = re.group.3;
