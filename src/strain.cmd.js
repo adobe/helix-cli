@@ -385,42 +385,41 @@ class StrainCommand {
   static vclConditions(strain) {
     if (strain.url) {
       const uri = URI.parse(strain.url);
-      if (uri.path && uri.path != '/') {
+      if (uri.path && uri.path !== '/') {
+        const path = uri.path.replace(/\/$/,'');
         return Object.assign({
           condition: `req.http.Host == "${uri.host}" && req.url.dirname ~ "^${uri.path}"`,
           vcl: `
-  set req.http.X-Dirname = regsub(req.url.dirname, "^${uri.path}", "");`
-        }, strain);
-      } else {
-        return Object.assign({
-          condition: `req.http.Host == "${uri.host}"`
+  set req.http.X-Dirname = regsub(req.url.dirname, "^${path}", "/");`,
         }, strain);
       }
-    } else {
-      return strain;
+      return Object.assign({
+        condition: `req.http.Host == "${uri.host}"`,
+      }, strain);
     }
+    return strain;
   }
 
   /**
    * Generates VCL for strain resolution from a list of strains
    */
   static getVCL(strains) {
-    let vcl = '# This file handles the strain resolution\n';
+    let retvcl = '# This file handles the strain resolution\n';
     const conditions = strains
       .map(StrainCommand.vclConditions)
       .filter(strain => strain.condition)
-      .map(({ condition, name, vcl = ''}) => `if (${condition}) {
+      .map(({ condition, name, vcl = '' }) => `if (${condition}) {
   set req.http.X-Strain = "${name}";${vcl}
 } else `);
     if (conditions.length) {
-      vcl += conditions.join('');
-      vcl += `{
+      retvcl += conditions.join('');
+      retvcl += `{
   set req.http.X-Strain = "default";
 }`;
     } else {
-      vcl += 'set req.http.X-Strain = "default";\n';
+      retvcl += 'set req.http.X-Strain = "default";\n';
     }
-    return vcl;
+    return retvcl;
   }
 
   async vclopts(name, vcl) {

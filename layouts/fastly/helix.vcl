@@ -152,6 +152,8 @@ sub hlx_headers_deliver {
     set resp.http.X-Strain = req.http.X-Strain;
     # Header rewrite Strain : 10
     set resp.http.X-Github-Static-Ref = "@" + req.http.X-Github-Static-Ref;
+
+    set resp.http.X-Dirname = req.http.X-Dirname;
   }
 
   call hlx_deliver_errors;
@@ -289,8 +291,11 @@ sub vcl_recv {
       set var.dir = req.http.X-Root-Path + req.url.dirname;
     }
 
-    set var.name = re.group.1;
-    set var.selector = re.group.3;
+    # repeat the regex in case another re-function has been called in the meantime
+    if (req.url.basename ~ "(^[^\.]+)(\.?(.+))?(\.[^\.]*$)") {
+      set var.name = re.group.1;
+      set var.selector = re.group.3;
+    }
 
     call hlx_action_root;
 
