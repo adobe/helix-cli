@@ -17,6 +17,7 @@ const fs = require('fs-extra');
 const request = require('request-promise');
 const Promise = require('bluebird');
 const path = require('path');
+const URI = require('uri-js');
 const { toBase64 } = require('request/lib/helpers');
 const strainconfig = require('./strain-config-utils');
 const include = require('./include-util');
@@ -381,18 +382,29 @@ class StrainCommand {
     return Promise.resolve();
   }
 
+  static vclConditions(strain) {
+    if (strain.url) {
+      const uri = URI.parse(strain.url);
+      return Object.assign({
+        condition: `req.http.Host == "${uri.host}"`
+      }, strain);
+    } else {
+      return strain;
+    }
+  }
+
   /**
    * Generates VCL for strain resolution from a list of strains
    */
   static getVCL(strains) {
     let vcl = '# This file handles the strain resolution\n';
     const conditions = strains
+      .map(StrainCommand.vclConditions)
       .filter(strain => strain.condition)
       .map(({ condition, name }) => `if (${condition}) {
   set req.http.X-Strain = "${name}";
 } else `);
     if (conditions.length) {
-      console.log(conditions);
       vcl += conditions.join('');
       vcl += `{
   set req.http.X-Strain = "default";

@@ -47,6 +47,12 @@ describe('hlx strain (VCL) generation', () => {
     const vclfile = fs.readFileSync(path.resolve(__dirname, 'fixtures/simple-condition.vcl')).toString();
     assert.equal(vclfile, StrainCommand.getVCL(strainfile));
   });
+
+  it('getVCL generates VLC for URL-based conditions', () => {
+    const strainfile = strainconfig.load(fs.readFileSync(path.resolve(__dirname, 'fixtures/urls.yaml')));
+    const vclfile = fs.readFileSync(path.resolve(__dirname, 'fixtures/urls.vcl')).toString();
+    assert.equal(vclfile, StrainCommand.getVCL(strainfile));
+  });
 });
 
 describe('hlx strain (Integration)', () => {
