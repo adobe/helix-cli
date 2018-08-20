@@ -15,6 +15,7 @@
 const Replay = require('replay');
 const fs = require('fs-extra');
 const path = require('path');
+const assert = require('assert');
 const { createTestRoot } = require('./utils.js');
 const StrainCommand = require('../src/strain.cmd');
 
@@ -26,6 +27,14 @@ const FASTLY_AUTH = '---';
 const WSK_AUTH = 'nope';
 
 const SRC_STRAINS = path.resolve(__dirname, 'fixtures/strains.yaml');
+
+describe('hlx strain (VCL) generation', () => {
+  it('getVCL generates VLC for empty strains', () => {
+    const strainfile = fs.readFileSync(path.resolve(__dirname, 'fixtures/empty.yaml'));
+    const vclfile = fs.readFileSync(path.resolve(__dirname, 'fixtures/empty.vcl'));
+    assert.equal(vclfile, StrainCommand.getVCL(strainfile));
+  });
+});
 
 describe('hlx strain (Integration)', () => {
   let hlxDir;
