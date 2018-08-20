@@ -132,6 +132,23 @@ $ hlx strain --fastly-auth <key> --fastly-namespace <serviceid>
 💀  Purged entire cache
 ```
 
+### Directory Index
+
+The default behavior for directory indexes is to load `index.html` when requesting a path ending with `/`,
+so that `/foo/bar/` becomes `/foo/bar/index.html`. This setting can be overwritten in `.hlx/strains.yaml`
+by adding an `index` property:
+
+```yaml
+- strain:
+    name: default
+    code: /hlx/default/git-github-com-adobe-helix-cli-git--dirty--
+    index: README.html
+    content:
+      repo: helix-cli
+      ref: master
+      owner: adobe
+```
+
 ### Static Content Handling
 
 During `hlx build`, the static files are copied into `.hlx/dist`. The static files originate either
