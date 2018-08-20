@@ -235,3 +235,30 @@ _TODO_: https://github.com/adobe/helix-cli/issues/54
 
 _TODO_: https://github.com/adobe/helix-cli/issues/57
 
+## Matching Strains to URLs
+
+You can define a `url` for each `strain`. This property will make sure that only requests made
+to this base URL will be mapped to the following URL, enabling patterns like having a production
+instance on `www.*` and a development instance on `dev.*`.
+
+An example configuration could look like this:
+
+```yaml
+- strain:
+    name: default
+    code: /trieloff/default/https---github-com-adobe-helix-helpx-git--master--
+    url: https://www.primordialsoup.life
+    content:
+      repo: reactor-user-docs
+      ref: master
+      owner: Adobe-Marketing-Cloud
+      root: /
+- strain:
+    name: cd629c5a74d6d60f
+    url: https://dev.primordialsoup.life/develop/
+    code: /trieloff/default/https---github-com-adobe-helix-helpx-git--develop--
+    content:
+      repo: reactor-user-docs
+      ref: master
+      owner: Adobe-Marketing-Cloud
+```
