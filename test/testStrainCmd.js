@@ -68,6 +68,9 @@ describe('hlx strain (Integration)', () => {
 
     await fs.mkdirp(hlxDir);
     await fs.copyFile(SRC_STRAINS, dstStrains);
+    // if you need to re-record the test, change the mode in the next line to
+    // `record` and update the FASTLY_AUTH and FastlyNamespace parameters
+    // don't forget to change it back afterwards, so that no credentials leak
     Replay.mode = 'replay';
   });
 
