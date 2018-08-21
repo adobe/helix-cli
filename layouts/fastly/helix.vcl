@@ -40,6 +40,14 @@ sub hlx_owner {
   }
 }
 
+# Gets the directory index for the current strain
+sub hlx_index {
+  set req.http.X-Index = table.lookup(strain_index_files, req.http.X-Strain);
+  if (!req.http.X-Index) {
+    set req.http.X-Index = table.lookup(strain_index_files, "default");
+  }
+}
+
 # Gets the content repo
 sub hlx_repo {
   set req.http.X-Repo = table.lookup(strain_repos, req.http.X-Strain);
@@ -152,8 +160,9 @@ sub hlx_headers_deliver {
     set resp.http.X-Strain = req.http.X-Strain;
     # Header rewrite Strain : 10
     set resp.http.X-Github-Static-Ref = "@" + req.http.X-Github-Static-Ref;
-
+    
     set resp.http.X-Dirname = req.http.X-Dirname;
+    set resp.http.X-Index = req.http.X-Index;
   }
 
   call hlx_deliver_errors;
@@ -259,16 +268,7 @@ sub vcl_recv {
       set req.backend = F_GitHub;
       set req.url = "/" + var.owner + "/" + var.repo + "/" + var.ref + "/" + re.group.1;
     }
-
-
-  # The regular expression captures:
-  # group.0 = entire string
-  # group.1 = name, without selector or extension
-  # group.2 = selector, including leading dot
-  # group.3 = selector, without leading dot
-  # group.4 = extension, with leading dot
-  # group.0, group.2, and group.4 won't be processed
-  } elsif (!req.http.Fastly-FF && req.http.Fastly-SSL && req.url.basename ~ "(^[^\.]+)(\.?(.+))?(\.[^\.]*$)") {
+  } elsif (!req.http.Fastly-FF && req.http.Fastly-SSL && (req.url.basename ~ "(^[^\.]+)(\.?(.+))?(\.[^\.]*$)" || req.url.basename == "")) {
     # Parse the URL
 
     call hlx_strain;
@@ -295,11 +295,26 @@ sub vcl_recv {
     if (req.url.basename ~ "(^[^\.]+)(\.?(.+))?(\.[^\.]*$)") {
       set var.name = re.group.1;
       set var.selector = re.group.3;
+      set var.extension = regsub(req.url.ext, "^\.", "");
+    } else {
+      call hlx_index;
+      if (req.http.X-Index ~ "(^[^\.]+)\.?(.*)\.([^\.]+$)") {
+        # determine directory index from strain config
+        set var.name = re.group.1;
+        set var.selector = re.group.2;
+        set var.extension = re.group.3;
+      } else {
+        # force default directory index
+        set req.http.X-Index = "default";
+        set var.name = "index";
+        set var.selector = "";
+        set var.extension = "html";
+      }
     }
 
     call hlx_action_root;
 
-    set var.extension = regsub(req.url.ext, "^\.", "");
+    
     
     if (var.selector ~ ".+") {
       set var.action = req.http.X-Action-Root + var.selector + "_" + var.extension;

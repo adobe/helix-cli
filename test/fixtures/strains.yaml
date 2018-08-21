@@ -1,6 +1,7 @@
 - strain:
     name: default
     code: /hlx/default/git-github-com-adobe-helix-cli-git--dirty--
+    index: README.html
     content:
       repo: helix-cli
       ref: master
@@ -8,6 +9,7 @@
 - strain:
     name: e7fab6e2b493b75a
     code: /hlx/default/git-github-com-adobe-helix-cli-git--dirty--
+    index: index.html
     content:
       repo: helix-cli
       ref: implement-init
