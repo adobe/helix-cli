@@ -55,6 +55,7 @@ class StrainCommand {
       strain_github_static_repos: null,
       strain_github_static_owners: null,
       strain_github_static_refs: null,
+      strain_index_files: null,
     };
 
     this._backends = {
@@ -544,6 +545,11 @@ class StrainCommand {
           console.log(`🏷  Set ref for strain          ${strain.name}`);
         })
           .catch(dictError));
+      }
+      if (strain.index) {
+        strainjobs.push(this.putDict('strain_index_files', strain.name, strain.index).then(() => {
+          console.log(`🗂  Set directory index for strain ${strain.name}`);
+        }).catch(dictError));
       }
       if (strain.content.root) {
         strainjobs.push(this.putDict('strain_root_paths', strain.name, strain.content.root).then(() => {
