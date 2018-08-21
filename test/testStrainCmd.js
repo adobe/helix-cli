@@ -69,8 +69,9 @@ describe('hlx strain (Integration)', () => {
     await fs.mkdirp(hlxDir);
     await fs.copyFile(SRC_STRAINS, dstStrains);
     // if you need to re-record the test, change the mode in the next line to
-    // `record` and update the FASTLY_AUTH and FastlyNamespace parameters
+    // `record` and update the FASTLY_AUTH, WSK_AUTH, and FastlyNamespace parameters
     // don't forget to change it back afterwards, so that no credentials leak
+    // you might also want to delete the previous test recordings in /test/fixtures
     Replay.mode = 'replay';
   });
 
@@ -83,7 +84,7 @@ describe('hlx strain (Integration)', () => {
       .withStrainFile(dstStrains)
       .withDryRun(true)
       .withFastlyAuth(FASTLY_AUTH)
-      .withFastlyNamespace('54nWWFJicKgbdVHou26Y6a')
+      .withFastlyNamespace('1hmICxJdPU6lDhlHgOAmrl')
       .withWskHost('runtime.adobe.io')
       .withWskAuth(WSK_AUTH)
       .withWskNamespace('trieloff');
@@ -98,7 +99,7 @@ describe('hlx strain (Integration)', () => {
       .withStrainFile(dstStrains)
       .withDryRun(true)
       .withFastlyAuth(FASTLY_AUTH)
-      .withFastlyNamespace('54nWWFJicKgbdVHou26Y6a')
+      .withFastlyNamespace('1hmICxJdPU6lDhlHgOAmrl')
       .withWskHost('runtime.adobe.io')
       .withWskAuth(WSK_AUTH)
       .withWskNamespace('trieloff');
