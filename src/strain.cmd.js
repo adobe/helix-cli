@@ -517,9 +517,9 @@ class StrainCommand {
     const content = fs.readFileSync(this._strainFile);
     const strains = strainconfig.load(content);
 
-    const urls = strains.filter(strain => strain.url).map(strain => strain.url); 
+    const urls = strains.filter(strain => strain.url).map(strain => strain.url);
 
-    console.log(`✅  All strains have been published and are online.`);
+    console.log('✅  All strains have been published and are online.');
     if (urls.length) {
       console.log('\nYou now access your site using:');
       console.log(chalk.grey(`$ curl ${urls[0]}`));
