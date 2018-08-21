@@ -84,7 +84,7 @@ describe('hlx strain (Integration)', () => {
       .withStrainFile(dstStrains)
       .withDryRun(true)
       .withFastlyAuth(FASTLY_AUTH)
-      .withFastlyNamespace('1hmICxJdPU6lDhlHgOAmrl')
+      .withFastlyNamespace('GM98lH4M9g5l4LvdWlqK0')
       .withWskHost('runtime.adobe.io')
       .withWskAuth(WSK_AUTH)
       .withWskNamespace('trieloff');
@@ -99,7 +99,7 @@ describe('hlx strain (Integration)', () => {
       .withStrainFile(dstStrains)
       .withDryRun(true)
       .withFastlyAuth(FASTLY_AUTH)
-      .withFastlyNamespace('1hmICxJdPU6lDhlHgOAmrl')
+      .withFastlyNamespace('GM98lH4M9g5l4LvdWlqK0')
       .withWskHost('runtime.adobe.io')
       .withWskAuth(WSK_AUTH)
       .withWskNamespace('trieloff');

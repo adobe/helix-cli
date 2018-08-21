@@ -2,6 +2,7 @@
     name: default
     code: /hlx/default/git-github-com-adobe-helix-cli-git--dirty--
     index: README.html
+    url: https://www.example.com/
     content:
       repo: helix-cli
       ref: master

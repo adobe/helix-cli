@@ -16,6 +16,7 @@
 const fs = require('fs-extra');
 const request = require('request-promise');
 const Promise = require('bluebird');
+const chalk = require('chalk');
 const path = require('path');
 const URI = require('uri-js');
 const { toBase64 } = require('request/lib/helpers');
@@ -512,6 +513,19 @@ class StrainCommand {
     }
   }
 
+  showNextStep() {
+    const content = fs.readFileSync(this._strainFile);
+    const strains = strainconfig.load(content);
+
+    const urls = strains.filter(strain => strain.url).map(strain => strain.url);
+
+    console.log('✅  All strains have been published and are online.');
+    if (urls.length) {
+      console.log('\nYou now access your site using:');
+      console.log(chalk.grey(`$ curl ${urls[0]}`));
+    }
+  }
+
   async _updateFastly() {
     console.log('🐑 👾 🚀  hlx is publishing strains');
 
@@ -538,63 +552,40 @@ class StrainCommand {
 
     const strainjobs = [];
     strains.map((strain) => {
-      function dictError(e) {
-        const message = 'Error setting edge dictionary value';
-        console.error(message);
-        console.error(e);
-        throw new Error(message, e);
-      }
+      const makeStrainjob = (dictname, strainname, strainvalue, message) => {
+        if (strainvalue) {
+          const job = this.putDict(dictname, strainname, strainvalue)
+            .then(() => {
+              console.log(`${message} for strain ${strainname}`);
+            })
+            .catch((e) => {
+              const msg = 'Error setting edge dictionary value';
+              console.error(msg);
+              console.error(e);
+              throw new Error(msg, e);
+            });
 
-      strainjobs.push(this.putDict('strain_action_roots', strain.name, strain.code).then(() => {
-        console.log(`👾  Set action root for strain  ${strain.name}`);
-      })
-        .catch(dictError));
+          strainjobs.push(job);
+        }
+      };
 
-      strainjobs.push(this.putDict('strain_owners', strain.name, strain.content.owner).then(() => {
-        console.log(`🏢  Set owner for strain        ${strain.name}`);
-      })
-        .catch(dictError));
+      // required
+      makeStrainjob('strain_action_roots', strain.name, strain.code, '👾  Set action root');
+      makeStrainjob('strain_owners', strain.name, strain.content.owner, '🏢  Set content owner');
+      makeStrainjob('strain_repos', strain.name, strain.content.repo, '🌳  Set content repo');
+      makeStrainjob('strain_refs', strain.name, strain.content.ref, '🏷  Set content ref');
 
-      strainjobs.push(this.putDict('strain_repos', strain.name, strain.content.repo).then(() => {
-        console.log(`🌳  Set repo for strain         ${strain.name}`);
-      })
-        .catch(dictError));
+      // optional
+      makeStrainjob('strain_index_files', strain.name, strain.index, '🗂  Set directory index');
+      makeStrainjob('strain_root_paths', strain.name, strain.content.root, '🌲  Set content root');
 
-      if (strain.content.ref) {
-        strainjobs.push(this.putDict('strain_refs', strain.name, strain.content.ref).then(() => {
-          console.log(`🏷  Set ref for strain          ${strain.name}`);
-        })
-          .catch(dictError));
-      }
-      if (strain.index) {
-        strainjobs.push(this.putDict('strain_index_files', strain.name, strain.index).then(() => {
-          console.log(`🗂  Set directory index for strain ${strain.name}`);
-        }).catch(dictError));
-      }
-      if (strain.content.root) {
-        strainjobs.push(this.putDict('strain_root_paths', strain.name, strain.content.root).then(() => {
-          console.log(`🌲  Set content root for strain ${strain.name}`);
-        })
-          .catch(dictError));
-      }
+      // static
       if (strain.githubStatic) {
-        strainjobs.push(this.putDict('strain_github_static_repos', strain.name, strain.githubStatic.repo).then(() => {
-          console.log(`🌳  Set static repo for strain  ${strain.name}`);
-        })
-          .catch(dictError));
-        strainjobs.push(this.putDict('strain_github_static_owners', strain.name, strain.githubStatic.owner).then(() => {
-          console.log(`🏢  Set static owner for strain ${strain.name}`);
-        })
-          .catch(dictError));
-        strainjobs.push(this.putDict('strain_github_static_refs', strain.name, strain.githubStatic.ref).then(() => {
-          console.log(`🏷  Set static ref for strain   ${strain.name}`);
-        })
-          .catch(dictError));
+        makeStrainjob('github_static_repos', strain.name, strain.githubStatic.repo, '🌳  Set static repo');
+        makeStrainjob('github_static_owners', strain.name, strain.githubStatic.owner, '🏢  Set static owner');
+        makeStrainjob('github_static_refs', strain.name, strain.githubStatic.ref, '🏷  Set static ref');
       } else {
-        strainjobs.push(this.putDict('strain_github_static_refs', strain.name, '').then(() => {
-          console.log(`🏷  Clearing static ref for strain   ${strain.name}`);
-        })
-          .catch(dictError));
+        makeStrainjob('github_static_refs', strain.name, '', '🏷  Clearing static ref');
       }
       return strain;
     });
@@ -613,6 +604,8 @@ class StrainCommand {
       console.log('📕  All dicts have been updated.');
       await this.publishVersion();
       await this.purgeAll();
+
+      this.showNextStep();
     } catch (e) {
       const message = 'Error setting one or more edge dictionary values';
       console.error(message);
