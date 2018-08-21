@@ -16,6 +16,7 @@
 const fs = require('fs-extra');
 const request = require('request-promise');
 const Promise = require('bluebird');
+const chalk = require('chalk');
 const path = require('path');
 const URI = require('uri-js');
 const { toBase64 } = require('request/lib/helpers');
@@ -512,6 +513,19 @@ class StrainCommand {
     }
   }
 
+  showNextStep() {
+    const content = fs.readFileSync(this._strainFile);
+    const strains = strainconfig.load(content);
+
+    const urls = strains.filter(strain => strain.url).map(strain => strain.url); 
+
+    console.log(`✅  All strains have been published and are online.`);
+    if (urls.length) {
+      console.log('\nYou now access your site using:');
+      console.log(chalk.grey(`$ curl ${urls[0]}`));
+    }
+  }
+
   async _updateFastly() {
     console.log('🐑 👾 🚀  hlx is publishing strains');
 
@@ -590,6 +604,8 @@ class StrainCommand {
       console.log('📕  All dicts have been updated.');
       await this.publishVersion();
       await this.purgeAll();
+
+      this.showNextStep();
     } catch (e) {
       const message = 'Error setting one or more edge dictionary values';
       console.error(message);
