@@ -15,8 +15,10 @@
 const Replay = require('replay');
 const fs = require('fs-extra');
 const path = require('path');
+const assert = require('assert');
 const { createTestRoot } = require('./utils.js');
 const StrainCommand = require('../src/strain.cmd');
+const strainconfig = require('../src/strain-config-utils');
 
 // disable replay for this test
 Replay.mode = 'bloody';
@@ -26,6 +28,34 @@ const FASTLY_AUTH = '---';
 const WSK_AUTH = 'nope';
 
 const SRC_STRAINS = path.resolve(__dirname, 'fixtures/strains.yaml');
+
+describe('hlx strain (VCL) generation', () => {
+  it('getVCL generates VLC for empty strains', () => {
+    const strainfile = strainconfig.load(fs.readFileSync(path.resolve(__dirname, 'fixtures/empty.yaml')));
+    const vclfile = fs.readFileSync(path.resolve(__dirname, 'fixtures/empty.vcl')).toString();
+    assert.equal(vclfile, StrainCommand.getVCL(strainfile));
+  });
+
+  it('getVCL generates VLC for non-existing conditions strains', () => {
+    const strainfile = strainconfig.load(fs.readFileSync(path.resolve(__dirname, 'fixtures/default.yaml')));
+    const vclfile = fs.readFileSync(path.resolve(__dirname, 'fixtures/default.vcl')).toString();
+    assert.equal(vclfile, StrainCommand.getVCL(strainfile));
+  });
+
+  it('getVCL generates VLC for simple conditions strains', () => {
+    const strainfile = strainconfig.load(fs.readFileSync(path.resolve(__dirname, 'fixtures/simple-condition.yaml')));
+    const vclfile = fs.readFileSync(path.resolve(__dirname, 'fixtures/simple-condition.vcl')).toString();
+    // console.log(StrainCommand.getVCL(strainfile));
+    assert.equal(vclfile, StrainCommand.getVCL(strainfile));
+  });
+
+  it('getVCL generates VLC for URL-based conditions', () => {
+    const strainfile = strainconfig.load(fs.readFileSync(path.resolve(__dirname, 'fixtures/urls.yaml')));
+    const vclfile = fs.readFileSync(path.resolve(__dirname, 'fixtures/urls.vcl')).toString();
+    // console.log(StrainCommand.getVCL(strainfile));
+    assert.equal(vclfile, StrainCommand.getVCL(strainfile));
+  });
+});
 
 describe('hlx strain (Integration)', () => {
   let hlxDir;
@@ -38,6 +68,10 @@ describe('hlx strain (Integration)', () => {
 
     await fs.mkdirp(hlxDir);
     await fs.copyFile(SRC_STRAINS, dstStrains);
+    // if you need to re-record the test, change the mode in the next line to
+    // `record` and update the FASTLY_AUTH, WSK_AUTH, and FastlyNamespace parameters
+    // don't forget to change it back afterwards, so that no credentials leak
+    // you might also want to delete the previous test recordings in /test/fixtures
     Replay.mode = 'replay';
   });
 
@@ -50,7 +84,7 @@ describe('hlx strain (Integration)', () => {
       .withStrainFile(dstStrains)
       .withDryRun(true)
       .withFastlyAuth(FASTLY_AUTH)
-      .withFastlyNamespace('54nWWFJicKgbdVHou26Y6a')
+      .withFastlyNamespace('1hmICxJdPU6lDhlHgOAmrl')
       .withWskHost('runtime.adobe.io')
       .withWskAuth(WSK_AUTH)
       .withWskNamespace('trieloff');
@@ -65,7 +99,7 @@ describe('hlx strain (Integration)', () => {
       .withStrainFile(dstStrains)
       .withDryRun(true)
       .withFastlyAuth(FASTLY_AUTH)
-      .withFastlyNamespace('54nWWFJicKgbdVHou26Y6a')
+      .withFastlyNamespace('1hmICxJdPU6lDhlHgOAmrl')
       .withWskHost('runtime.adobe.io')
       .withWskAuth(WSK_AUTH)
       .withWskNamespace('trieloff');
