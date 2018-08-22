@@ -28,10 +28,8 @@ class CLI {
       perf: require('./perf.js')(),
       strain: require('./strain.js')(),
     };
-    this._failFn = (msg, err, argv) => {
-      if (err) {
-        throw err;
-      }
+    this._failFn = (message, err, argv) => {
+      const msg = err ? err.message : message;
       console.error(msg);
       if (msg === MIN_MSG || /.*Unknown argument.*/.test(msg) || /.*Not enough non-option arguments:.*/.test(msg)) {
         console.error('\nUsage: %s', argv.help());
