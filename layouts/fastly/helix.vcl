@@ -131,7 +131,7 @@ sub hlx_headers_recv {
   }
 }
 
-# rewrite required hedaers (called from fetch)
+# rewrite required headers (called from fetch)
 sub hlx_headers_fetch {
   if ( req.http.X-Debug ) {
     # Header rewrite Backend Name : 10
@@ -163,7 +163,8 @@ sub hlx_headers_deliver {
     
     set resp.http.X-Dirname = req.http.X-Dirname;
     set resp.http.X-Index = req.http.X-Index;
-  }
+    set resp.http.X-Action-Root = req.http.X-Action-Root;
+ }
 
   call hlx_deliver_errors;
 }
@@ -240,6 +241,8 @@ sub vcl_recv {
   set req.http.X-Branch = var.branch;
 
 
+  call hlx_strain;
+  set var.strain = req.http.X-Strain;
 
   # Parse the Request URL, if this is a proper SSL-request 
   # (non-SSL gets redirected) to SSL-equivalent
@@ -270,9 +273,6 @@ sub vcl_recv {
     }
   } elsif (!req.http.Fastly-FF && req.http.Fastly-SSL && (req.url.basename ~ "(^[^\.]+)(\.?(.+))?(\.[^\.]*$)" || req.url.basename == "")) {
     # Parse the URL
-
-    call hlx_strain;
-    set var.strain = req.http.X-Strain;
 
     call hlx_owner;
     set var.owner = req.http.X-Owner;
