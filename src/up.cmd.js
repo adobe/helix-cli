@@ -101,15 +101,11 @@ class UpCommand extends BuildCommand {
 
     this.validate();
 
-    try {
-      this._project = new HelixProject()
-        .withCwd(this._cwd)
-        .withBuildDir(this._target)
-        .withDistDir(this._distDir)
-        .withDisplayVersion(pkgJson.version);
-    } catch (e) {
-      console.log(e);
-    }
+    this._project = new HelixProject()
+      .withCwd(this._cwd)
+      .withBuildDir(this._target)
+      .withDistDir(this._distDir)
+      .withDisplayVersion(pkgJson.version);
 
     if (this._httpPort >= 0) {
       this._project.withHttpPort(this._httpPort);
