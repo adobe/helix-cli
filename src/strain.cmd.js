@@ -15,7 +15,6 @@
 
 const fs = require('fs-extra');
 const request = require('request-promise');
-const Promise = require('bluebird');
 const chalk = require('chalk');
 const path = require('path');
 const URI = require('uri-js');
