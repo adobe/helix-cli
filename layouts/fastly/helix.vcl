@@ -164,6 +164,7 @@ sub hlx_headers_deliver {
     set resp.http.X-Dirname = req.http.X-Dirname;
     set resp.http.X-Index = req.http.X-Index;
     set resp.http.X-Action-Root = req.http.X-Action-Root;
+    set resp.http.X-URL = req.http.X-URL;
  }
 
   call hlx_deliver_errors;
@@ -236,6 +237,7 @@ sub vcl_recv {
   }
 
   set req.http.X-Orig-Host = req.http.Fastly-Orig-Host;
+  set req.http.X-URL = req.url;
   set req.http.X-Host = req.http.Host;
 
   set req.http.X-Branch = var.branch;
@@ -512,6 +514,8 @@ sub vcl_deliver {
     unset resp.http.X-Branch;
     unset resp.http.X-Strain;
     unset resp.http.X-GW-Cache;
+    unset resp.http.X-Static;
+    unset resp.http.X-URL;
   }
   return(deliver);
 }
