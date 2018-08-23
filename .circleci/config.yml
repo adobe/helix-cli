@@ -83,6 +83,10 @@ jobs:
           - "c3:cc:4e:ec:21:9b:64:b5:61:fb:ba:61:62:cf:62:96"
 
       - run:
+          name: Fix npm version
+          command: sudo npm -g install npm@6.4.0
+
+      - run:
           name: Install Dependencies
           command: npm install
 
@@ -94,7 +98,7 @@ jobs:
 
       - run:
           name: Version pre-release
-          command: npm version prerelease --preid=pre --no-git-tag-version
+          command: npm version prerelease --preid=pre
 
       - run:
           name: Publish pre-release
