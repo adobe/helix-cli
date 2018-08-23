@@ -2,8 +2,6 @@ version: 2
 jobs:
   build:
     docker:
-    # specify the version you desire here
-    # using the clojurescript image because it has node, java, antlr and the openwhisk tools
     - image: circleci/node:8
       environment:
         NPM_CONFIG_PREFIX: "~/.npm-global"
@@ -140,7 +138,7 @@ jobs:
 
     - run:
         name: Version pre-release
-        command: npm version prerelease --preid=pre -m"Release %s\n[ci skip]"
+        command: npm version prerelease --preid=pre -m "Release %s [ci skip]"
 
     - run:
         name: Publish pre-release
@@ -151,17 +149,12 @@ workflows:
   build:
     jobs:
     # run build on any branch
-    - build:
-        filters:
-          tags:
-            ignore: /.*/
+    - build
 
     # publish pre-releases on master
     - publish-pre-release:
         requires:
         - build
         filters:
-          tags:
-            ignore: /.*/
           branches:
             only: master
