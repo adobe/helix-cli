@@ -70,13 +70,17 @@ jobs:
     steps:
       - checkout
 
-      - run:
-          name: Fetch latest npm
-          command: npm install -g npm
+      - restore_cache:
+          keys:
+          - v2-dependencies-{{ checksum "package-lock.json" }}
 
       - run:
           name: Install Dependencies
-          command: npm ci
+          command: npm install
+
+      - run:
+          name: revert changes to package-lock.json
+          command: git checkout -- package-lock.json
 
       - run: echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" >> ~/.npmrc
 
