@@ -78,6 +78,10 @@ jobs:
           name: prepare test git user
           command: git config --global user.email "circleci@example.com" && git config --global user.name "Circleci Build"
 
+      - add_ssh_keys:
+          fingerprints:
+          - "c3:cc:4e:ec:21:9b:64:b5:61:fb:ba:61:62:cf:62:96"
+
       - run:
           name: Install Dependencies
           command: npm install
