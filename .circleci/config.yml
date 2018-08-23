@@ -7,11 +7,6 @@ jobs:
     docker:
     # specify the version you desire here
     - image: circleci/node:8-stretch
-
-    # Specify service dependencies here if necessary
-    # CircleCI maintains a library of pre-built images
-    # documented at https://circleci.com/docs/2.0/circleci-images/
-    # - image: circleci/mongo:3.4.4
     working_directory: ~/repo
     environment:
       NPM_CONFIG_PREFIX: ~/.npm-global
@@ -25,8 +20,12 @@ jobs:
         - v3-dependencies-{{ arch }}-{{ checksum "package-lock.json" }}
 
     - run:
+        name: install npm 6.4.0
+        command: sudo npm -g install npm@6.4.0
+
+    - run:
         name: Installing Dependencies
-        command: npm install # do not --ignore-scripts, otherwise nodegit will no install properly
+        command: npm install
 
     - save_cache:
         paths:
@@ -51,10 +50,11 @@ jobs:
 
     - store_test_results:
         path: junit
+
     - store_artifacts:
         path: junit
 
-  publish-snapshot:
+  publish-pre-release:
     docker:
     # specify the version you desire here
     - image: circleci/node:8-stretch
@@ -64,37 +64,42 @@ jobs:
     steps:
     - checkout
 
-    # Download and cache dependencies
     - restore_cache:
         keys:
         - v3-dependencies-{{ arch }}-{{ checksum "package-lock.json" }}
 
     - run:
-        name: Install Dependencies
+        name: prepare test git user
+        command: git config --global user.email "circleci@example.com" && git config --global user.name "CircleCi Build"
+
+    - run:
+        name: install npm 6.4.0
+        command: sudo npm -g install npm@6.4.0
+
+    - run:
+        name: install
         command: npm install
 
-    - save_cache:
-        paths:
-        - node_modules
-        key: v3-dependencies-{{ arch }}-{{ checksum "package-lock.json" }}
-
-    - run: echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" >> ~/.npmrc
+    - run:
+        name: revert changes to package-lock.json
+        command: git checkout -- package-lock.json
 
     - run:
-        command: BUILD_TAG=$(./node_modules/.bin/npm-snapshot $CIRCLE_BUILD_NUM) echo 'export BUILD_TAG=$BUILD_TAG' >> $BASH_ENV
+        name: configure npm registry
+        command: echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" >> ~/.npmrc
 
     - run:
-        name: Publish Snapshot
-        command: npm publish --access public --tag next
+        name: version pre-release
+        command: npm version prerelease --preid=pre -m "Release %s [ci skip]"
+
+    # unfortunately we cannot create a release commit with no tag with `npm version`, so we need to delete it here again
+    - run:
+        name: delete pre-release tag
+        command: npm run delete-git-tag
 
     - run:
-        name: Tag Release in Git
-        command: echo $BUILD_TAG && git tag $(npm view @adobe/helix-cli@next version) && git push origin $(npm view @adobe/helix-cli@next version)
-
-    - store_test_results:
-        path: junit
-    - store_artifacts:
-        path: junit
+        name: publish pre-release
+        command: npm publish --tag next --access public
 
   publish-examples:
     docker:
@@ -112,6 +117,10 @@ jobs:
     - restore_cache:
         keys:
         - v3-dependencies-{{ arch }}-{{ checksum "package-lock.json" }}
+
+    - run:
+        name: install npm 6.4.0
+        command: sudo npm -g install npm@6.4.0
 
     - run:
         name: Install Dependencies
@@ -142,11 +151,11 @@ workflows:
           branches:
             only:
             - master
-    - publish-snapshot:
+    # publish pre-releases on master
+    - publish-pre-release:
         requires:
         - build
         filters:
           branches:
-            only:
-            - master
+            only: master
     - build
