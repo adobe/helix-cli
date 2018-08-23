@@ -14,8 +14,7 @@
 /* eslint no-unused-vars: ["error", { "argsIgnorePattern": "^_" }] */
 
 const fs = require('fs-extra');
-const request = require('request-promise');
-const Promise = require('bluebird');
+const request = require('request-promise-native');
 const chalk = require('chalk');
 const path = require('path');
 const URI = require('uri-js');
