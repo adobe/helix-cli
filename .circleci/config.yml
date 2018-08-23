@@ -22,6 +22,10 @@ jobs:
           command: mkdir ~/.npm-global
 
       - run:
+          name: Fix npm version
+          command: sudo npm -g install npm@6.4.0
+
+      - run:
           name: Install Dependencies
           command: npm install
 
@@ -60,7 +64,7 @@ jobs:
       - store_artifacts:
           path: junit
 
-  publish-snapshot:
+  tag-pre-release:
     docker:
       # specify the version you desire here
       - image: circleci/node:8
@@ -94,11 +98,37 @@ jobs:
           name: revert changes to package-lock.json
           command: git checkout -- package-lock.json
 
-      - run: echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" >> ~/.npmrc
-
       - run:
           name: Version pre-release
           command: npm version prerelease --preid=pre
+
+  publish-pre-release:
+    docker:
+      # specify the version you desire here
+      - image: circleci/node:8
+
+    working_directory: ~/repo
+
+    steps:
+      - checkout
+
+      - restore_cache:
+          keys:
+          - v2-dependencies-{{ checksum "package-lock.json" }}
+
+      - run:
+          name: prepare test git user
+          command: git config --global user.email "circleci@example.com" && git config --global user.name "Circleci Build"
+
+      - run:
+          name: Fix npm version
+          command: sudo npm -g install npm@6.4.0
+
+      - run:
+          name: install and test
+          command: npm install-ci-test
+
+      - run: echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" >> ~/.npmrc
 
       - run:
           name: Publish pre-release
@@ -108,11 +138,18 @@ workflows:
   version: 2
   build:
     jobs:
-      - publish-snapshot:
+      - build
+      - tag-pre-release:
+          requires:
+          - build
+          filters:
+            branches:
+              only:
+              - master
+      - publish-pre-release:
            requires:
                - build
            filters:
-              branches:
+              tags:
                 only:
-                  - master
-      - build
+                  - /^v.*-pre\..*/
