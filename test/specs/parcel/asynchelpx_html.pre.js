@@ -13,7 +13,7 @@
 /* eslint-disable no-param-reassign */
 
 const _ = require('lodash/fp');
-const request = require('request-promise');
+const request = require('request-promise-native');
 
 /**
  * Fetches the git metadata
