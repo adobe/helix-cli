@@ -322,11 +322,10 @@ class DeployCommand {
       if (this._dryRun) {
         console.log(`❎  Action ${info.name} has been skipped (dry-run).`);
       } else {
-        const auth = Buffer.from(this._wsk_auth).toString('base64');
         openwhisk.actions.update(actionoptions).then((result) => {
           console.log(`✅  Action ${result.name} has been created.`);
           console.log('\nYou can verify the action with:');
-          console.log(chalk.grey(`$ curl -H "Authorization: Basic ${auth}" "https://${this._wsk_host}/api/v1/web/${this._wsk_namespace}/default/${info.name}?path=index.md&owner=${giturl.owner}&repo=${giturl.repo}&ref=${giturl.ref}"`));
+          console.log(chalk.grey(`$ curl "https://${this._wsk_host}/api/v1/web/${this._wsk_namespace}/default/${info.name}?path=index.md&owner=${giturl.owner}&repo=${giturl.repo}&ref=${giturl.ref}"`));
         });
       }
     }));
