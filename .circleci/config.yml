@@ -75,6 +75,10 @@ jobs:
           - v2-dependencies-{{ checksum "package-lock.json" }}
 
       - run:
+          name: prepare test git user
+          command: git config --global user.email "circleci@example.com" && git config --global user.name "Circleci Build"
+
+      - run:
           name: Install Dependencies
           command: npm install
 
@@ -85,8 +89,12 @@ jobs:
       - run: echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" >> ~/.npmrc
 
       - run:
-          name: Publish Snapshot
-          command: npm version prerelease --preid=pre && npm publish --tag next --access public
+          name: Version pre-release
+          command: npm version prerelease --preid=pre --no-git-tag-version
+
+      - run:
+          name: Publish pre-release
+          command: npm publish --tag next --access public
 
 workflows:
   version: 2
