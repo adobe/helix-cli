@@ -105,6 +105,20 @@ describe('Helix Server', () => {
     }
   });
 
+  it('deliver request headers', async () => {
+    const cwd = path.join(SPEC_ROOT, 'local');
+    const project = new HelixProject()
+      .withCwd(cwd)
+      .withHttpPort(0);
+    await project.init();
+    try {
+      await project.start();
+      await assertHttp(`http://localhost:${project.server.port}/index.dump.html`, 200, 'expected_dump.html');
+    } finally {
+      await project.stop();
+    }
+  });
+
   it('deliver static content resource', async () => {
     const cwd = path.join(SPEC_ROOT, 'local');
     const project = new HelixProject()

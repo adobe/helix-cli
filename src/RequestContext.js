@@ -22,6 +22,8 @@ module.exports = class RequestContext {
     this._path = url || '/';
     this._selector = '';
     this._extension = '';
+    this._headers = req.headers;
+    this._method = req.method;
 
     let relPath = this._path;
     const lastSlash = relPath.lastIndexOf('/');
@@ -76,5 +78,13 @@ module.exports = class RequestContext {
 
   get selector() {
     return this._selector;
+  }
+
+  get headers() {
+    return this._headers;
+  }
+
+  get method() {
+    return this._method;
   }
 };

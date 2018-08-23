@@ -57,8 +57,9 @@ function executeTemplate(ctx) {
 
   Module._nodeModulePaths = nodeModulePathsFn;
   /* eslint-enable no-underscore-dangle */
-
   return Promise.resolve(mod.main({
+    __ow_headers: ctx.headers,
+    __ow_method: ctx.method,
     owner: ctx.config.contentRepo.owner,
     repo: ctx.config.contentRepo.repo,
     ref: ctx.config.contentRepo.ref,
@@ -106,14 +107,15 @@ class HelixServer {
               throw result;
             }
 
-            if (result.response
+            if (result
+              && result.response
               && result.response.error
               && result.response.error instanceof Error) {
               // response contains an error: processing error
               throw result.response.error;
             }
 
-            if (!result.response.body) {
+            if (!result || !result.response || !result.response.body) {
               // empty body: nothing to render
               throw new Error('Response has no body, don\'t know what to do');
             }
