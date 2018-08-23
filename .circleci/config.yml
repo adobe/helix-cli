@@ -70,19 +70,9 @@ jobs:
     steps:
       - checkout
 
-      # Download and cache dependencies
-      - restore_cache:
-          keys:
-            - v2-dependencies-{{ checksum "package.json" }}
-
       - run:
           name: Install Dependencies
-          command: npm install
-
-      - save_cache:
-          paths:
-            - node_modules
-          key: v2-dependencies-{{ checksum "package.json" }}
+          command: npm ci
 
       - run: echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" >> ~/.npmrc
 
@@ -92,6 +82,7 @@ jobs:
 
       - store_test_results:
           path: junit
+
       - store_artifacts:
           path: junit
 
