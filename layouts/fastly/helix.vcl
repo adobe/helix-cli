@@ -271,6 +271,21 @@ sub vcl_recv {
       set req.backend = F_GitHub;
       set req.url = "/" + var.owner + "/" + var.repo + "/" + var.ref + "/" + re.group.1;
     }
+  } elseif (!req.http.Fastly-FF && req.http.Fastly-SSL && req.url.path ~ "__HLX\/([^\/]+)\/([^\/]+)\/([^\/]+)\/([^\/]+)\/(.*)\/DIST__\/(.*)") {
+    # This is the GitHub/OpenWhisk bundler. In this branch of the if statment the __HLX…DIST__ indicates that
+    # we are trying to get a static resource as is.
+    set var.owner = re.group.1;
+    set var.repo = re.group.2;
+    set var.strain = re.group.3;
+    set var.ref = re.group.4;
+    set var.entry = re.group.5;
+    set var.path = re.group.6;
+
+    
+    # get it from OpenWhisk
+    set req.backend = F_runtime_adobe_io;
+    set req.url = "/api/v1/web/trieloff/default/disty?owner=" + var.owner + "&repo=" + var.repo + "&strain=" + var.strain + "&ref=" + var.ref + "&entry=" + var.entry + "&path=" + var.path;
+
   } elsif (!req.http.Fastly-FF && req.http.Fastly-SSL && (req.url.basename ~ "(^[^\.]+)(\.?(.+))?(\.[^\.]*$)" || req.url.basename == "")) {
     # Parse the URL
 
