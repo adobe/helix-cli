@@ -2,160 +2,162 @@ version: 2
 jobs:
   build:
     docker:
-      # specify the version you desire here
-      # using the clojurescript image because it has node, java, antlr and the openwhisk tools
-      - image: circleci/node:8
-        environment:
-            NPM_CONFIG_PREFIX: "~/.npm-global"
+    # specify the version you desire here
+    # using the clojurescript image because it has node, java, antlr and the openwhisk tools
+    - image: circleci/node:8
+      environment:
+        NPM_CONFIG_PREFIX: "~/.npm-global"
 
     working_directory: ~/repo
 
     steps:
-      - checkout
+    - checkout
 
-      # Download and cache dependencies
-      - restore_cache:
-          keys:
-            - v2-dependencies-{{ checksum "package-lock.json" }}
-      - run:
-          name: Set up global NPM
-          command: mkdir ~/.npm-global
+    # Download and cache dependencies
+    - restore_cache:
+        keys:
+        - v2-dependencies-{{ checksum "package-lock.json" }}
+    - run:
+        name: Set up global NPM
+        command: mkdir ~/.npm-global
 
-      - run:
-          name: Fix npm version
-          command: sudo npm -g install npm@6.4.0
+    - run:
+        name: Fix npm version
+        command: sudo npm -g install npm@6.4.0
 
-      - run:
-          name: Install Dependencies
-          command: npm install
+    - run:
+        name: Install Dependencies
+        command: npm install
 
-      - save_cache:
-          paths:
-            - node_modules
-          key: v2-dependencies-{{ checksum "package-lock.json" }}
+    - save_cache:
+        paths:
+        - node_modules
+        key: v2-dependencies-{{ checksum "package-lock.json" }}
 
-      - run:
-          name: Lint
-          command: npm run lint
+    - run:
+        name: Lint
+        command: npm run lint
 
-      # run tests!
-      - run: mkdir junit
-      - run:
-          name: prepare test git user
-          command: git config --global user.email "you@example.com" && git config --global user.name "CircleCi Build"
-      - run:
-          name: Running Tests
-          command: npx mocha --reporter mocha-junit-reporter
-          environment:
-            MOCHA_FILE: junit/test-results.xml
-          when: always
+    # run tests!
+    - run: mkdir junit
+    - run:
+        name: prepare test git user
+        command: git config --global user.email "you@example.com" && git config --global user.name "CircleCi Build"
+    - run:
+        name: Running Tests
+        command: npx mocha --reporter mocha-junit-reporter
+        environment:
+          MOCHA_FILE: junit/test-results.xml
+        when: always
 
 
-      # get code coverage
-      - run:
-          name: Getting Code Coverage
-          command: npx istanbul cover ./node_modules/mocha/bin/_mocha -- -R spec && npx codecov
-          environment:
-            MOCHA_FILE: junit/test-results.xml
-          when: always
+    # get code coverage
+    - run:
+        name: Getting Code Coverage
+        command: npx istanbul cover ./node_modules/mocha/bin/_mocha -- -R spec && npx codecov
+        environment:
+          MOCHA_FILE: junit/test-results.xml
+        when: always
 
-      - store_test_results:
-          path: junit
-      - store_artifacts:
-          path: junit
+    - store_test_results:
+        path: junit
+    - store_artifacts:
+        path: junit
 
   tag-pre-release:
     docker:
-      # specify the version you desire here
-      - image: circleci/node:8
+    # specify the version you desire here
+    - image: circleci/node:8
 
     working_directory: ~/repo
 
     steps:
-      - checkout
+    - checkout
 
-      - restore_cache:
-          keys:
-          - v2-dependencies-{{ checksum "package-lock.json" }}
+    - restore_cache:
+        keys:
+        - v2-dependencies-{{ checksum "package-lock.json" }}
 
-      - run:
-          name: prepare test git user
-          command: git config --global user.email "circleci@example.com" && git config --global user.name "CircleCi Build"
+    - run:
+        name: prepare test git user
+        command: git config --global user.email "circleci@example.com" && git config --global user.name "CircleCi Build"
 
-      - add_ssh_keys:
-          fingerprints:
-          - "c3:cc:4e:ec:21:9b:64:b5:61:fb:ba:61:62:cf:62:96"
+    - add_ssh_keys:
+        fingerprints:
+        - "c3:cc:4e:ec:21:9b:64:b5:61:fb:ba:61:62:cf:62:96"
 
-      - run:
-          name: Fix npm version
-          command: sudo npm -g install npm@6.4.0
+    - run:
+        name: Fix npm version
+        command: sudo npm -g install npm@6.4.0
 
-      - run:
-          name: Install Dependencies
-          command: npm install
+    - run:
+        name: Install Dependencies
+        command: npm install
 
-      - run:
-          name: revert changes to package-lock.json
-          command: git checkout -- package-lock.json
+    - run:
+        name: revert changes to package-lock.json
+        command: git checkout -- package-lock.json
 
-      - run:
-          name: Version pre-release
-          command: npm version prerelease --preid=pre
+    - run:
+        name: Version pre-release
+        command: npm version prerelease --preid=pre
 
   publish-pre-release:
     docker:
-      # specify the version you desire here
-      - image: circleci/node:8
+    # specify the version you desire here
+    - image: circleci/node:8
 
     working_directory: ~/repo
 
     steps:
-      - checkout
+    - checkout
 
-      - restore_cache:
-          keys:
-          - v2-dependencies-{{ checksum "package-lock.json" }}
+    - restore_cache:
+        keys:
+        - v2-dependencies-{{ checksum "package-lock.json" }}
 
-      - run:
-          name: prepare test git user
-          command: git config --global user.email "circleci@example.com" && git config --global user.name "CircleCi Build"
+    - run:
+        name: prepare test git user
+        command: git config --global user.email "circleci@example.com" && git config --global user.name "CircleCi Build"
 
-      - run:
-          name: Fix npm version
-          command: sudo npm -g install npm@6.4.0
 
-      - run:
-          name: install and test
-          command: npm cit
 
-      - run: echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" >> ~/.npmrc
+    - run:
+        name: Fix npm version
+        command: sudo npm -g install npm@6.4.0
 
-      - run:
-          name: Publish pre-release
-          command: npm publish --tag next --access public
+    - run:
+        name: install and test
+        command: npm cit
+
+    - run: echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" >> ~/.npmrc
+
+    - run:
+        name: Publish pre-release
+        command: npm publish --tag next --access public
 
 workflows:
   version: 2
   build:
     jobs:
-      # run build on any branch
-      - build:
-          filters:
-            tags:
-              ignore: /.*/
+    # run build on any branch
+    - build:
+        filters:
+          tags:
+            ignore: /.*/
 
-      # create a new tag for commits to master
-      - tag-pre-release:
-          filters:
-            branches:
-              only: master
-            tags:
-              ignore: /.*/
-              
-      # publish pre-releases when tag is created
-      - publish-pre-release:
-           filters:
-              tags:
-                only: /^v.*-pre.*/
-              branches:
-                ignore: /.*/
+    # create a new tag for commits to master
+    - tag-pre-release:
+        filters:
+          branches:
+            only: master
+          tags:
+            ignore: /.*/
+
+    # publish pre-releases when tag is created
+    - publish-pre-release:
+        filters:
+          tags:
+            only: /^v.*-pre.*/
+          branches:
+            ignore: /.*/
