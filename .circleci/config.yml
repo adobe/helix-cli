@@ -21,7 +21,7 @@ jobs:
           name: Set up global NPM
           command: mkdir ~/.npm-global
 
-      - run: 
+      - run:
           name: Install Dependencies
           command: npm install
 
@@ -58,7 +58,7 @@ jobs:
       - store_test_results:
           path: junit
       - store_artifacts:
-          path: junit 
+          path: junit
 
   publish-snapshot:
     docker:
@@ -75,7 +75,7 @@ jobs:
           keys:
             - v2-dependencies-{{ checksum "package.json" }}
 
-      - run: 
+      - run:
           name: Install Dependencies
           command: npm install
 
@@ -84,28 +84,16 @@ jobs:
             - node_modules
           key: v2-dependencies-{{ checksum "package.json" }}
 
-#      # run tests!
-#      - run: mkdir junit
-#      - run:
-#          name: Running Tests
-#          command: ./node_modules/.bin/mocha test --reporter mocha-junit-reporter
-#          environment:
-#            MOCHA_FILE: junit/test-results.xml
-#          when: always
-
       - run: echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" >> ~/.npmrc
 
-      - run: 
-          command: BUILD_TAG=$(./node_modules/.bin/npm-snapshot $CIRCLE_BUILD_NUM) echo 'export BUILD_TAG=$BUILD_TAG' >> $BASH_ENV
-
-      - run: 
+      - run:
           name: Publish Snapshot
-          command: npm publish --access public
+          command: npm version prerelease --preid=pre && npm publish --tag next --access public
 
       - store_test_results:
           path: junit
       - store_artifacts:
-          path: junit 
+          path: junit
 
 workflows:
   version: 2

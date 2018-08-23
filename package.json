@@ -10,7 +10,9 @@
     "test": "nyc mocha",
     "lint": "./node_modules/.bin/eslint .",
     "snyk-protect": "snyk protect",
-    "prepare": "npm run snyk-protect"
+    "prepare": "npm run snyk-protect",
+    "preversion": "npm test",
+    "postversion": "git push --follow-tags"
   },
   "dependencies": {
     "@adobe/git-server": "^0.9.0",
@@ -42,7 +44,6 @@
     "mocha": "^5.0.5",
     "mocha-junit-reporter": "^1.17.0",
     "nodemon": "^1.17.2",
-    "npm-snapshot": "^1.0.3",
     "nyc": "^12.0.2",
     "shelljs": "^0.8.2"
   },
