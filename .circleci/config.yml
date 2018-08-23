@@ -71,6 +71,10 @@ jobs:
       - checkout
 
       - run:
+          name: Fetch latest npm
+          command: npm install -g npm
+
+      - run:
           name: Install Dependencies
           command: npm ci
 
@@ -79,12 +83,6 @@ jobs:
       - run:
           name: Publish Snapshot
           command: npm version prerelease --preid=pre && npm publish --tag next --access public
-
-      - store_test_results:
-          path: junit
-
-      - store_artifacts:
-          path: junit
 
 workflows:
   version: 2
