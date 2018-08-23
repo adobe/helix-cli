@@ -126,7 +126,7 @@ jobs:
 
       - run:
           name: install and test
-          command: npm install-ci-test
+          command: npm cit
 
       - run: echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" >> ~/.npmrc
 
@@ -138,18 +138,24 @@ workflows:
   version: 2
   build:
     jobs:
+      # run build on any tag / branch
       - build
+
+      # create a new tag for commits to master
       - tag-pre-release:
           requires:
           - build
           filters:
             branches:
-              only:
-              - master
+              only: master
+            tags:
+              ignore: /.*/
+      # publish pre-releases when tag is created
       - publish-pre-release:
            requires:
                - build
            filters:
               tags:
-                only:
-                  - /^v.*-pre\..*/
+                only: /^v.*-pre\..*/
+              branches:
+                ignore: /.*/
