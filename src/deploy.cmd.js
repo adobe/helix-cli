@@ -325,7 +325,7 @@ class DeployCommand {
         openwhisk.actions.update(actionoptions).then((result) => {
           console.log(`✅  Action ${result.name} has been created.`);
           console.log('\nYou can verify the action with:');
-          console.log(chalk.grey(`$ wsk action invoke -r --blocking ${info.name} -p owner ${giturl.owner} -p repo ${giturl.repo} -p ref ${giturl.ref} -p path /index.md`));
+          console.log(chalk.grey(`$ curl "https://${this._wsk_host}/api/v1/web/${this._wsk_namespace}/default/${info.name}?path=index.md&owner=${giturl.owner}&repo=${giturl.repo}&ref=${giturl.ref}"`));
         });
       }
     }));
