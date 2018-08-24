@@ -369,7 +369,7 @@ class StrainCommand {
     await this.getDictionaries();
     const mydict = this._dictionaries[dict];
     if (!mydict) {
-      console.error(`${dict}  does not exist`);
+      console.error(`${dict} does not exist`);
       return null;
     }
     if (value) {
@@ -583,20 +583,18 @@ class StrainCommand {
       // static
       if (strain.static) {
         // if there is a static configuration in the strain, take it
-        makeStrainjob('github_static_repos', strain.name, strain.static.repo, '🌳  Set static repo');
-        makeStrainjob('github_static_owners', strain.name, strain.static.owner, '🏢  Set static owner');
-        makeStrainjob('github_static_refs', strain.name, strain.static.ref, '🏷  Set static ref');
-        makeStrainjob('github_static_magic', strain.name, strain.static.magic ? 'true' : 'false', strain.name, strain.static.magic ? '🔮  Enable magic' : '⚽️  Disable magic');
+        makeStrainjob('strain_github_static_repos', strain.name, strain.static.repo, '🌳  Set static repo');
+        makeStrainjob('strain_github_static_owners', strain.name, strain.static.owner, '🏢  Set static owner');
+        makeStrainjob('strain_github_static_refs', strain.name, strain.static.ref, '🏷  Set static ref');
+        makeStrainjob('strain_github_static_magic', strain.name, strain.static.magic ? 'true' : 'false', strain.static.magic ? '🔮  Enable magic' : '⚽️  Disable magic');
       } else {
         // otherwise just use the current repo
         const origin = GitUtils.getOriginURL();
-        console.log('=========STATIC=========');
-        console.log(origin);
-        makeStrainjob('github_static_repos', strain.name, origin.repo, '🌳  Set static repo');
-        makeStrainjob('github_static_owners', strain.name, origin.owner, '🏢  Set static owner');
+        makeStrainjob('strain_github_static_repos', strain.name, origin.repo, '🌳  Set static repo to current repo');
+        makeStrainjob('strain_github_static_owners', strain.name, origin.owner, '🏢  Set static owner to current owner');
         // TODO: replace ref with sha for better performance and lower risk of hitting rate limits
-        makeStrainjob('github_static_refs', strain.name, origin.ref, '🏷  Set static ref');
-        makeStrainjob('github_static_magic', 'false', strain.name, '⚽️  Disable magic');
+        makeStrainjob('strain_github_static_refs', strain.name, origin.ref, '🏷  Set static ref to current ref');
+        makeStrainjob('strain_github_static_magic', strain.name, 'false', '⚽️  Disable magic');
       }
       return strain;
     });
