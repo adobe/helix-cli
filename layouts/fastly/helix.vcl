@@ -288,9 +288,25 @@ sub vcl_recv {
     set req.backend = F_runtime_adobe_io;
     set req.url = "/api/v1/web/trieloff/default/disty?owner=" + var.owner + "&repo=" + var.repo + "&strain=" + var.strain + "&ref=" + var.ref + "&entry=" + var.entry + "&path=" + var.path;
 
-  } elsif (!req.http.Fastly-FF && req.http.Fastly-SSL && (req.url.basename ~ "(^[^\.]+)(\.?(.+))?(\.[^\.]*$)" || req.url.basename == "")) {
-    # Parse the URL
+  } elseif (!req.http.Fastly-FF && req.http.Fastly-SSL && (req.http.X-Static == "Static")) {
+    # This is a static request.
 
+    # Load important information from edge dicts
+    call hlx_owner;
+    set var.owner = req.http.X-Owner;
+
+    call hlx_repo;
+    set var.repo = req.http.X-Repo;
+
+    call hlx_ref;
+    set var.ref = req.http.X-Ref;
+
+    # TODO: load magic flag
+
+  } elsif (!req.http.Fastly-FF && req.http.Fastly-SSL && (req.url.basename ~ "(^[^\.]+)(\.?(.+))?(\.[^\.]*$)" || req.url.basename == "")) {
+    # This is a dynamic request.
+
+    # Load important information from edge dicts
     call hlx_owner;
     set var.owner = req.http.X-Owner;
 
@@ -384,9 +400,10 @@ sub hlx_fetch_errors {
       # ResponseObject: Unknown Extension
       error 953 "Can't Call Action";
   }
-} 
+}
 
 sub hlx_deliver_errors {
+
   # Cache Condition: OpenWhisk Error Prio: 10    
   if (resp.status == 951 ) {
      set resp.status = 404;
@@ -454,6 +471,21 @@ sub vcl_fetch {
   if ( req.http.x-esi ) {
     esi;
   }
+
+  if ( beresp.status == 404 && req.restarts == 0) {
+    # That was a miss. Let's try to restart.
+    set beresp.http.X-Status = "404";
+    set req.http.X-Status = "404";
+
+    if (req.http.X-Static == "Static") {
+      set req.http.X-Static = "Dynamic";
+    } else {
+      set req.http.X-Static = "Static";
+    }
+    set req.url = req.http.X-URL;
+    restart;
+  }
+
  
   return(deliver);
 }
