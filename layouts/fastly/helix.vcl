@@ -172,6 +172,8 @@ sub hlx_headers_deliver {
 
 # set backend (called from recv)
 sub hlx_backend_recv {
+  set req.backend = F_runtime_adobe_io;
+
   # Request Condition: Binaries only Prio: 10
   if( req.url ~ ".(jpg|png|gif)($|\?)" ) {
     set req.backend = F_GitHub;
@@ -194,6 +196,10 @@ sub vcl_recv {
   # If request is on Fastly-FF, we shouldn't override it.
   if (!req.http.Fastly-FF) {
     set req.http.X-Orig-URL = req.url;
+    
+    if (!req.http.X-URL) {
+      set req.http.X-URL = req.url;
+    }
   }
 
   if (req.request != "HEAD" && req.request != "GET" && req.request != "FASTLYPURGE") {
@@ -237,7 +243,7 @@ sub vcl_recv {
   }
 
   set req.http.X-Orig-Host = req.http.Fastly-Orig-Host;
-  set req.http.X-URL = req.url;
+  # set req.http.X-URL = req.url;
   set req.http.X-Host = req.http.Host;
 
   set req.http.X-Branch = var.branch;
@@ -250,30 +256,7 @@ sub vcl_recv {
   # (non-SSL gets redirected) to SSL-equivalent
 
 
-  # Deliver static content addressed with /dist via default 'html' action.
-  # todo: support for codeload or distinct function?
-  if (!req.http.Fastly-FF && req.http.Fastly-SSL && req.url.path ~ "\/dist\/(.*)") {
-    call hlx_github_static_ref;
-    set var.ref = req.http.X-Github-Static-Ref;
-
-    if (var.ref == "") {
-      # use 'bundled' static content in openwhisk action
-      call hlx_action_root;
-      set req.backend = F_runtime_adobe_io;
-      set req.url = "/api/v1/web" + req.http.X-Action-Root + "html" + "?path=" + req.url.path;
-
-    } else {
-      # use github as static files provider
-      call hlx_github_static_owner;
-      set var.owner = req.http.X-Github-Static-Owner;
-
-      call hlx_github_static_repo;
-      set var.repo = req.http.X-Github-Static-Repo;
-
-      set req.backend = F_GitHub;
-      set req.url = "/" + var.owner + "/" + var.repo + "/" + var.ref + "/" + re.group.1;
-    }
-  } elseif (!req.http.Fastly-FF && req.http.Fastly-SSL && req.url.path ~ "__HLX\/([^\/]+)\/([^\/]+)\/([^\/]+)\/([^\/]+)\/(.*)\/DIST__\/(.*)") {
+  if (!req.http.Fastly-FF && req.http.Fastly-SSL && req.url.path ~ "__HLX\/([^\/]+)\/([^\/]+)\/([^\/]+)\/([^\/]+)\/(.*)\/DIST__\/(.*)") {
     # This is the GitHub/OpenWhisk bundler. In this branch of the if statment the __HLX…DIST__ indicates that
     # we are trying to get a static resource as is.
 
@@ -290,7 +273,7 @@ sub vcl_recv {
     set req.backend = F_runtime_adobe_io;
     set req.url = "/api/v1/web/trieloff/default/disty?owner=" + var.owner + "&repo=" + var.repo + "&strain=" + var.strain + "&ref=" + var.ref + "&entry=" + var.entry + "&path=" + var.path;
 
-  } elseif (!req.http.Fastly-FF && req.http.Fastly-SSL && (req.http.X-Static == "Static")) {
+  } elseif (req.http.Fastly-SSL && (req.http.X-Static == "Static")) {
     # This is a static request.
 
     # Load important information from edge dicts
@@ -304,8 +287,8 @@ sub vcl_recv {
     set var.ref = req.http.X-Github-Static-Ref;
 
     # TODO: check for URL ending with `/` and look up index file
-    set var.path = req.url;
-    set var.entry = req.url;
+    set var.path = req.http.X-URL;
+    set var.entry = req.http.X-URL;
 
     # TODO: load magic flag
     set req.http.X-Plain = "true";
@@ -313,11 +296,7 @@ sub vcl_recv {
     # get it from OpenWhisk
     set req.backend = F_runtime_adobe_io;
     
-    if (req.http.X-Plain == "false") {
-      set req.url = "/api/v1/web/trieloff/default/disty?owner=" + var.owner + "&repo=" + var.repo + "&strain=" + var.strain + "&ref=" + var.ref + "&entry=" + var.entry + "&path=" + var.path;
-    } else {
-      set req.url = "/api/v1/web/trieloff/default/disty?owner=" + var.owner + "&repo=" + var.repo + "&strain=" + var.strain + "&ref=" + var.ref + "&entry=" + var.entry + "&path=" + var.path + "&plain=true";
-    }
+    set req.url = "/api/v1/web/trieloff/default/disty?owner=" + var.owner + "&repo=" + var.repo + "&strain=" + var.strain + "&ref=" + var.ref + "&entry=" + var.entry + "&path=" + var.path + "&plain=true";
 
 
   } elsif (!req.http.Fastly-FF && req.http.Fastly-SSL && (req.url.basename ~ "(^[^\.]+)(\.?(.+))?(\.[^\.]*$)" || req.url.basename == "")) {
@@ -489,15 +468,17 @@ sub vcl_fetch {
     esi;
   }
 
-  if ( beresp.status == 404 && req.restarts == 0) {
+  if (beresp.status == 404 || beresp.status == 204) {
     # That was a miss. Let's try to restart.
-    set beresp.http.X-Status = "404";
-    set req.http.X-Status = "404";
+    set beresp.http.X-Status = beresp.status + "-Restart " + req.restarts;
+    set beresp.status = 404;
 
     if (req.http.X-Static == "Static") {
       set req.http.X-Static = "Dynamic";
+      set beresp.http.X-Static = "Dynamic";
     } else {
       set req.http.X-Static = "Static";
+      set beresp.http.X-Static = "Static";
     }
     set req.url = req.http.X-URL;
     restart;
