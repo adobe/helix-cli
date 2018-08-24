@@ -276,6 +276,8 @@ sub vcl_recv {
   } elseif (!req.http.Fastly-FF && req.http.Fastly-SSL && req.url.path ~ "__HLX\/([^\/]+)\/([^\/]+)\/([^\/]+)\/([^\/]+)\/(.*)\/DIST__\/(.*)") {
     # This is the GitHub/OpenWhisk bundler. In this branch of the if statment the __HLX…DIST__ indicates that
     # we are trying to get a static resource as is.
+
+    # TODO: shorten this URL
     set var.owner = re.group.1;
     set var.repo = re.group.2;
     set var.strain = re.group.3;
@@ -292,16 +294,31 @@ sub vcl_recv {
     # This is a static request.
 
     # Load important information from edge dicts
-    call hlx_owner;
-    set var.owner = req.http.X-Owner;
+    call hlx_github_static_owner;
+    set var.owner = req.http.X-Github-Static-Owner;
 
-    call hlx_repo;
-    set var.repo = req.http.X-Repo;
+    call hlx_github_static_repo;
+    set var.repo = req.http.X-Github-Static-Repo;
 
-    call hlx_ref;
-    set var.ref = req.http.X-Ref;
+    call hlx_github_static_ref;
+    set var.ref = req.http.X-Github-Static-Ref;
+
+    # TODO: check for URL ending with `/` and look up index file
+    set var.path = req.url;
+    set var.entry = req.url;
 
     # TODO: load magic flag
+    set req.http.X-Plain = "true";
+
+    # get it from OpenWhisk
+    set req.backend = F_runtime_adobe_io;
+    
+    if (req.http.X-Plain == "false") {
+      set req.url = "/api/v1/web/trieloff/default/disty?owner=" + var.owner + "&repo=" + var.repo + "&strain=" + var.strain + "&ref=" + var.ref + "&entry=" + var.entry + "&path=" + var.path;
+    } else {
+      set req.url = "/api/v1/web/trieloff/default/disty?owner=" + var.owner + "&repo=" + var.repo + "&strain=" + var.strain + "&ref=" + var.ref + "&entry=" + var.entry + "&path=" + var.path + "&plain=true";
+    }
+
 
   } elsif (!req.http.Fastly-FF && req.http.Fastly-SSL && (req.url.basename ~ "(^[^\.]+)(\.?(.+))?(\.[^\.]*$)" || req.url.basename == "")) {
     # This is a dynamic request.
