@@ -16,6 +16,7 @@ const path = require('path');
 const fse = require('fs-extra');
 const chalk = require('chalk');
 const shell = require('shelljs');
+const glob = require('glob');
 
 const ANSI_REGEXP = RegExp([
   '[\\u001B\\u009B][[\\]()#;?]*(?:(?:(?:[a-zA-Z\\d]*(?:;[a-zA-Z\\d]*)*)?\\u0007)',
@@ -23,37 +24,6 @@ const ANSI_REGEXP = RegExp([
 ].join('|'), 'g');
 
 /* eslint-disable no-console */
-
-const LAYOUT_DEFAULT = {
-  dir: path.resolve(__dirname, '../layouts/default'),
-  files: [
-    {
-      name: 'helix_logo.png',
-    },
-    {
-      name: 'index.md',
-      filter: true,
-    },
-    {
-      name: 'src/html.htl',
-      filter: true,
-    },
-    {
-      name: 'src/html.pre.js',
-      filter: true,
-    },
-    {
-      name: 'src/static/favicon.ico',
-    },
-    {
-      name: 'src/static/style.css',
-    },
-    {
-      name: '.gitignore',
-      from: '_gitignore',
-    },
-  ],
-};
 
 function execAsync(cmd) {
   return new Promise((resolve, reject) => {
@@ -72,6 +42,7 @@ class InitCommand {
     this._name = '';
     this._dir = process.cwd();
     this._padding = 50;
+    this._type = 'simple';
   }
 
   withName(name) {
@@ -83,6 +54,11 @@ class InitCommand {
     if (dir) {
       this._dir = dir;
     }
+    return this;
+  }
+
+  withType(type) {
+    this._type = type;
     return this;
   }
 
@@ -145,11 +121,18 @@ class InitCommand {
       return fse.copy(srcFile, dstFile);
     }
 
-    const jobs = LAYOUT_DEFAULT.files.map((f) => {
-      const srcFile = path.resolve(LAYOUT_DEFAULT.dir, f.from || f.name);
-      const dstFile = path.resolve(projectDir, f.name);
-      return processFile(srcFile, dstFile, f.filter).then(() => {
-        this.msg(`${msgCreating} ${msgRelPath}/${chalk.cyan(f.name)}`);
+    const root = path.resolve(__dirname, '..', 'demos', this._type);
+    const jobs = glob.sync('**', {
+      cwd: root,
+      absolute: false,
+      dot: true,
+      nodir: true,
+    }).map((f) => {
+      const srcFile = path.resolve(root, f);
+      const dstFile = path.resolve(projectDir, f);
+      const filter = f === 'index.md' || f === 'README.md' || f === 'helix-config.yaml';
+      return processFile(srcFile, dstFile, filter).then(() => {
+        this.msg(`${msgCreating} ${msgRelPath}/${chalk.cyan(f)}`);
       });
     });
 

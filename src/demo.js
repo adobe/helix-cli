@@ -12,25 +12,28 @@
 
 'use strict';
 
-const NAME_PARAM = 'name';
-const DIR_PARAM = 'dir';
-
-module.exports = function init() {
+module.exports = function demo() {
   let executor;
 
   return {
     set executor(value) {
       executor = value;
     },
-    command: `init <${NAME_PARAM}> [${DIR_PARAM}]`,
-    desc: 'Initialize the project structure',
+    command: 'demo <name> [dir]',
+    desc: 'Create example helix project.',
     builder: (yargs) => {
       yargs
-        .positional(NAME_PARAM, {
+        .option('type', {
+          describe: 'Demo source type',
+          type: 'string',
+          choices: ['simple', 'full'],
+          default: 'simple',
+        })
+        .positional('name', {
           type: 'string',
           describe: 'Name of the project to initialize',
         })
-        .positional(DIR_PARAM, {
+        .positional('dir', {
           type: 'string',
           describe: 'Parent directory of new project',
           default: '.',
@@ -40,13 +43,14 @@ module.exports = function init() {
     handler: async (argv) => {
       if (!executor) {
         // eslint-disable-next-line global-require
-        const InitCommand = require('./init.cmd'); // lazy load the handler to speed up execution time
+        const InitCommand = require('./demo.cmd'); // lazy load the handler to speed up execution time
         executor = new InitCommand();
       }
 
       await executor
         .withDirectory(argv.dir)
         .withName(argv.name)
+        .withType(argv.type)
         .run();
     },
   };

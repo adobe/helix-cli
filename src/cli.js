@@ -21,7 +21,7 @@ const MIN_MSG = 'You need at least one command.';
 class CLI {
   constructor() {
     this._commands = {
-      init: require('./init.js')(),
+      demo: require('./demo.js')(),
       up: require('./up.js')(),
       build: require('./build.js')(),
       deploy: require('./deploy.js')(),
