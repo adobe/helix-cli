@@ -18,6 +18,7 @@ const assert = require('assert');
 const sinon = require('sinon');
 const CLI = require('../src/cli.js');
 const DeployCommand = require('../src/deploy.cmd');
+const GitUtils = require('../src/gitutils');
 
 describe('hlx deploy', () => {
   // mocked command instance
@@ -55,9 +56,9 @@ describe('hlx deploy', () => {
 
     // disable static functions as well to avoid shelljs executions.
     stubs = [
-      sinon.stub(DeployCommand, 'isDirty').returns(false),
-      sinon.stub(DeployCommand, 'getRepository').returns('git-github-com-example-project-helix'),
-      sinon.stub(DeployCommand, 'getBranchFlag').returns('master'),
+      sinon.stub(GitUtils, 'isDirty').returns(false),
+      sinon.stub(GitUtils, 'getRepository').returns('git-github-com-example-project-helix'),
+      sinon.stub(GitUtils, 'getBranchFlag').returns('master'),
     ];
   });
 

@@ -26,6 +26,9 @@ module.exports = function deploy() {
     builder: (yargs) => {
       // eslint-disable-next-line global-require
       const DeployCommand = require('./deploy.cmd'); // lazy load the handler to speed up execution time
+      // eslint-disable-next-line global-require
+      const GitUtils = require('./gitutils'); // lazy load the handler to speed up execution time
+
       deployCommon(yargs)
         .option('auto', {
           describe: 'Enable auto-deployment',
@@ -65,7 +68,7 @@ module.exports = function deploy() {
         .option('prefix', {
           alias: 'p',
           describe: 'Prefix for the deployed action name.',
-          default: `${DeployCommand.getRepository()}--${DeployCommand.getBranchFlag()}--`,
+          default: `${GitUtils.getRepository()}--${GitUtils.getBranchFlag()}--`,
         })
         .option('default', {
           describe: 'Adds a default parameter to the function',

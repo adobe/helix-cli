@@ -20,9 +20,9 @@ const path = require('path');
 const fs = require('fs-extra');
 const chalk = require('chalk');
 const yaml = require('js-yaml');
-const $ = require('shelljs');
 const archiver = require('archiver');
 const GitUrl = require('@adobe/petridish/src/GitUrl');
+const GitUtils = require('./gitutils');
 const strainconfig = require('./strain-config-utils');
 const GithubDistributor = require('./distributor/github');
 const DefaultDistributor = require('./distributor/default');
@@ -55,56 +55,6 @@ class DeployCommand {
     this._strainFile = path.resolve(process.cwd(), '.hlx', 'strains.yaml');
   }
 
-  static isDirty() {
-    return $
-      .exec('git status --porcelain', {
-        silent: true,
-      })
-      .stdout.replace(/\n/g, '')
-      .replace(/[\W]/g, '-').length;
-  }
-
-  static getBranch() {
-    const rev = $
-      .exec('git rev-parse HEAD', {
-        silent: true,
-      })
-      .stdout.replace(/\n/g, '')
-      .replace(/[\W]/g, '-');
-
-    const tag = $
-      .exec(`git name-rev --tags --name-only ${rev}`, {
-        silent: true,
-      })
-      .stdout.replace(/\n/g, '')
-      .replace(/[\W]/g, '-');
-
-    const branchname = $
-      .exec('git rev-parse --abbrev-ref HEAD', {
-        silent: true,
-      })
-      .stdout.replace(/\n/g, '')
-      .replace(/[\W]/g, '-');
-
-    return tag !== 'undefined' ? tag : branchname;
-  }
-
-  static getBranchFlag() {
-    return DeployCommand.isDirty() ? 'dirty' : DeployCommand.getBranch();
-  }
-
-  static getRepository() {
-    const repo = $
-      .exec('git config --get remote.origin.url', {
-        silent: true,
-      })
-      .stdout.replace(/\n/g, '')
-      .replace(/[\W]/g, '-');
-    if (repo !== '') {
-      return repo;
-    }
-    return `local--${path.basename(process.cwd())}`;
-  }
 
   static getDefaultContentURL() {
     if (fs.existsSync('helix-config.yaml')) {
@@ -113,10 +63,7 @@ class DeployCommand {
         return conf.contentRepo;
       }
     }
-    const giturl = $.exec('git config --get remote.origin.url', {
-      silent: true,
-    }).stdout.replace(/\n/g, '');
-    return giturl;
+    return GitUtils.getOrigin();
   }
 
   withEnableAuto(value) {
@@ -262,7 +209,7 @@ class DeployCommand {
       process.exit(1);
     }
 
-    const dirty = DeployCommand.isDirty();
+    const dirty = GitUtils.isDirty();
     if (dirty && !this._enableDirty) {
       console.error('hlx will not deploy a working copy that has uncommitted changes. Re-run with flag --dirty to force.');
       process.exit(dirty);
@@ -284,7 +231,7 @@ class DeployCommand {
     };
 
     if (!this._prefix) {
-      this._prefix = `${DeployCommand.getRepository()}--${DeployCommand.getBranchFlag()}--`;
+      this._prefix = `${GitUtils.getRepository()}--${GitUtils.getBranchFlag()}--`;
     }
 
     if (!this._distDir) {

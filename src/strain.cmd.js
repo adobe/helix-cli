@@ -21,6 +21,7 @@ const URI = require('uri-js');
 const { toBase64 } = require('request/lib/helpers');
 const strainconfig = require('./strain-config-utils');
 const include = require('./include-util');
+const GitUtils = require('./gitutils');
 
 const HELIX_VCL_DEFAULT_FILE = path.resolve(__dirname, '../layouts/fastly/helix.vcl');
 
@@ -56,6 +57,7 @@ class StrainCommand {
       strain_github_static_repos: null,
       strain_github_static_owners: null,
       strain_github_static_refs: null,
+      strain_github_static_magic: null,
       strain_index_files: null,
     };
 
@@ -579,12 +581,22 @@ class StrainCommand {
       makeStrainjob('strain_root_paths', strain.name, strain.content.root, '🌲  Set content root');
 
       // static
-      if (strain.githubStatic) {
-        makeStrainjob('github_static_repos', strain.name, strain.githubStatic.repo, '🌳  Set static repo');
-        makeStrainjob('github_static_owners', strain.name, strain.githubStatic.owner, '🏢  Set static owner');
-        makeStrainjob('github_static_refs', strain.name, strain.githubStatic.ref, '🏷  Set static ref');
+      if (strain.static) {
+        // if there is a static configuration in the strain, take it
+        makeStrainjob('github_static_repos', strain.name, strain.static.repo, '🌳  Set static repo');
+        makeStrainjob('github_static_owners', strain.name, strain.static.owner, '🏢  Set static owner');
+        makeStrainjob('github_static_refs', strain.name, strain.static.ref, '🏷  Set static ref');
+        makeStrainjob('github_static_magic', strain.name, strain.static.magic ? 'true' : 'false', strain.name, strain.static.magic ? '🔮  Enable magic' : '⚽️  Disable magic');
       } else {
-        makeStrainjob('github_static_refs', strain.name, '', '🏷  Clearing static ref');
+        // otherwise just use the current repo
+        const origin = GitUtils.getOriginURL();
+        console.log('=========STATIC=========');
+        console.log(origin);
+        makeStrainjob('github_static_repos', strain.name, origin.repo, '🌳  Set static repo');
+        makeStrainjob('github_static_owners', strain.name, origin.owner, '🏢  Set static owner');
+        // TODO: replace ref with sha for better performance and lower risk of hitting rate limits
+        makeStrainjob('github_static_refs', strain.name, origin.ref, '🏷  Set static ref');
+        makeStrainjob('github_static_magic', 'false', strain.name, '⚽️  Disable magic');
       }
       return strain;
     });
