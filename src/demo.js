@@ -31,7 +31,7 @@ module.exports = function demo() {
         })
         .positional('name', {
           type: 'string',
-          describe: 'Name of the project to initialize',
+          describe: 'Name of the project to create',
         })
         .positional('dir', {
           type: 'string',
