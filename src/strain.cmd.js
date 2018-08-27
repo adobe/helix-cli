@@ -18,6 +18,7 @@ const request = require('request-promise-native');
 const chalk = require('chalk');
 const path = require('path');
 const URI = require('uri-js');
+const glob = require('glob-to-regexp');
 const { toBase64 } = require('request/lib/helpers');
 const strainconfig = require('./strain-config-utils');
 const include = require('./include-util');
@@ -59,6 +60,8 @@ class StrainCommand {
       strain_github_static_refs: null,
       strain_github_static_magic: null,
       strain_index_files: null,
+      strain_allow: null,
+      strain_deny: null,
     };
 
     this._backends = {
@@ -527,6 +530,14 @@ class StrainCommand {
     }
   }
 
+  /**
+   * Turns a list of globs into a regular expression string.
+   * @param {Array(String)} globs a list of globs
+   */
+  static makeRegexp(globs) {
+    return globs.map(glob).map(re => re.toString().replace(/^\/|\/$/g, '')).join('|');
+  }
+
   async _updateFastly() {
     console.log('🐑 👾 🚀  hlx is publishing strains');
 
@@ -587,6 +598,15 @@ class StrainCommand {
         makeStrainjob('strain_github_static_owners', strain.name, strain.static.owner, '🏢  Set static owner');
         makeStrainjob('strain_github_static_refs', strain.name, strain.static.ref, '🏷  Set static ref');
         makeStrainjob('strain_github_static_magic', strain.name, strain.static.magic ? 'true' : 'false', strain.static.magic ? '🔮  Enable magic' : '⚽️  Disable magic');
+
+        if (strain.static.allow) {
+          const allow = StrainCommand.makeRegexp(strain.static.allow);
+          makeStrainjob('strain_allow', strain.name, allow, '⚪️  Set whitelist');
+        }
+        if (strain.static.deny) {
+          const deny = StrainCommand.makeRegexp(strain.static.deny);
+          makeStrainjob('strain_deny', strain.name, deny, '⚫️  Set blacklist');
+        }
       } else {
         // otherwise just use the current repo
         const origin = GitUtils.getOriginURL();

@@ -29,6 +29,16 @@ const WSK_AUTH = 'nope';
 
 const SRC_STRAINS = path.resolve(__dirname, 'fixtures/strains.yaml');
 
+describe('hlx strain #unit', () => {
+  it('makeRegexp() #unit', () => {
+    const globs1 = ['*.htl', '*.js'];
+    assert.equal(StrainCommand.makeRegexp(globs1), '^.*\\.htl$|^.*\\.js$');
+
+    const globs2 = ['test/**', 'test*.js'];
+    assert.equal(StrainCommand.makeRegexp(globs2), '^test\\/.*$|^test.*\\.js$');
+  });
+});
+
 describe('hlx strain (VCL) generation', () => {
   it('getVCL generates VLC for empty strains', () => {
     const strainfile = strainconfig.load(fs.readFileSync(path.resolve(__dirname, 'fixtures/empty.yaml')));
