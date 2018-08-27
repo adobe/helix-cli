@@ -5,148 +5,157 @@ jobs:
     # which is slow for all parallel processes
     # parallelism: 10
     docker:
-      # specify the version you desire here
-      - image: circleci/node:8-stretch
-      
-      # Specify service dependencies here if necessary
-      # CircleCI maintains a library of pre-built images
-      # documented at https://circleci.com/docs/2.0/circleci-images/
-      # - image: circleci/mongo:3.4.4
+    # specify the version you desire here
+    - image: circleci/node:8-stretch
     working_directory: ~/repo
     environment:
-        NPM_CONFIG_PREFIX: ~/.npm-global
+      NPM_CONFIG_PREFIX: ~/.npm-global
 
     steps:
-        - checkout
+    - checkout
 
-        # Download and cache dependencies
-        - restore_cache:
-            keys:
-            - v3-dependencies-{{ arch }}-{{ checksum "package-lock.json" }}
+    # Download and cache dependencies
+    - restore_cache:
+        keys:
+        - v3-dependencies-{{ arch }}-{{ checksum "package-lock.json" }}
 
-        - run: 
-            name: Installing Dependencies
-            command: npm install # do not --ignore-scripts, otherwise nodegit will no install properly
+    - run:
+        name: install npm 6.4.0
+        command: sudo npm -g install npm@6.4.0
 
-        - save_cache:
-            paths:
-                - node_modules
-            key: v3-dependencies-{{ arch }}-{{ checksum "package-lock.json" }}
-            
-            # run tests!
-        - run: mkdir junit
-        - run:
-            name: prepare test git user
-            command: git config --global user.email "you@example.com" && git config --global user.name "Your Name"
-        - run:
-            name: Lint
-            command: npm run lint
+    - run:
+        name: Installing Dependencies
+        command: npm install
 
-        # test & get code coverage
-        - run:
-            name: Getting Code Coverage
-            command: circleci tests glob test/test*.js | circleci tests split --split-by=timings | xargs ./node_modules/.bin/istanbul cover ./node_modules/mocha/bin/_mocha -- -R mocha-junit-reporter --exit && npx codecov
-            environment:
-                MOCHA_FILE: junit/test-results.xml
+    - save_cache:
+        paths:
+        - node_modules
+        key: v3-dependencies-{{ arch }}-{{ checksum "package-lock.json" }}
 
-        - store_test_results:
-            path: junit
-        - store_artifacts:
-            path: junit 
+        # run tests!
+    - run: mkdir junit
+    - run:
+        name: prepare test git user
+        command: git config --global user.email "you@example.com" && git config --global user.name "Your Name"
+    - run:
+        name: Lint
+        command: npm run lint
 
-  publish-snapshot:
+    # test & get code coverage
+    - run:
+        name: Getting Code Coverage
+        command: circleci tests glob test/test*.js | circleci tests split --split-by=timings | xargs ./node_modules/.bin/istanbul cover ./node_modules/mocha/bin/_mocha -- -R mocha-junit-reporter --exit && npx codecov
+        environment:
+          MOCHA_FILE: junit/test-results.xml
+
+    - store_test_results:
+        path: junit
+
+    - store_artifacts:
+        path: junit
+
+  publish-pre-release:
     docker:
-      # specify the version you desire here
-      - image: circleci/node:8-stretch
+    # specify the version you desire here
+    - image: circleci/node:8-stretch
 
     working_directory: ~/repo
 
     steps:
-      - checkout
+    - checkout
 
-      # Download and cache dependencies
-      - restore_cache:
-          keys:
-            - v3-dependencies-{{ arch }}-{{ checksum "package-lock.json" }}
+    - restore_cache:
+        keys:
+        - v3-dependencies-{{ arch }}-{{ checksum "package-lock.json" }}
 
-      - run: 
-          name: Install Dependencies
-          command: npm install
+    - run:
+        name: prepare test git user
+        command: git config --global user.email "circleci@example.com" && git config --global user.name "CircleCi Build"
 
-      - save_cache:
-          paths:
-            - node_modules
-          key: v3-dependencies-{{ arch }}-{{ checksum "package-lock.json" }}
+    - run:
+        name: install npm 6.4.0
+        command: sudo npm -g install npm@6.4.0
 
-      - run: echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" >> ~/.npmrc
+    - run:
+        name: install
+        command: npm install
 
-      - run: 
-          command: BUILD_TAG=$(./node_modules/.bin/npm-snapshot $CIRCLE_BUILD_NUM) echo 'export BUILD_TAG=$BUILD_TAG' >> $BASH_ENV
+    - run:
+        name: revert changes to package-lock.json
+        command: git checkout -- package-lock.json
 
-      - run: 
-          name: Publish Snapshot
-          command: npm publish --access public --tag next
+    - run:
+        name: configure npm registry
+        command: echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" >> ~/.npmrc
 
-      - run:
-          name: Tag Release in Git
-          command: echo $BUILD_TAG && git tag $(npm view @adobe/helix-cli@next version) && git push origin $(npm view @adobe/helix-cli@next version)
+    - run:
+        name: version pre-release
+        command: npm version prerelease --preid=pre -m "Release %s [ci skip]"
 
-      - store_test_results:
-          path: junit
-      - store_artifacts:
-          path: junit 
+    # unfortunately we cannot create a release commit with no tag with `npm version`, so we need to delete it here again
+    - run:
+        name: delete pre-release tag
+        command: npm run delete-git-tag
+
+    - run:
+        name: publish pre-release
+        command: npm publish --tag next --access public
 
   publish-examples:
     docker:
-      # specify the version you desire here
-      - image: circleci/node:8-stretch
+    # specify the version you desire here
+    - image: circleci/node:8-stretch
     environment:
-            NPM_CONFIG_PREFIX: ~/.npm-global
+      NPM_CONFIG_PREFIX: ~/.npm-global
 
     working_directory: ~/repo
 
     steps:
-        - checkout
+    - checkout
 
-        # Download and cache dependencies
-        - restore_cache:
-            keys:
-            - v3-dependencies-{{ arch }}-{{ checksum "package-lock.json" }}
+    # Download and cache dependencies
+    - restore_cache:
+        keys:
+        - v3-dependencies-{{ arch }}-{{ checksum "package-lock.json" }}
 
-        - run: 
-            name: Install Dependencies
-            command: npm install
+    - run:
+        name: install npm 6.4.0
+        command: sudo npm -g install npm@6.4.0
 
-        - save_cache:
-            paths:
-            - node_modules
-            key: v3-dependencies-{{ arch }}-{{ checksum "package-lock.json" }}
+    - run:
+        name: Install Dependencies
+        command: npm install
 
-        - run:
-            name: Install Globally
-            command: mkdir -p ~/.npm-global && npm link
+    - save_cache:
+        paths:
+        - node_modules
+        key: v3-dependencies-{{ arch }}-{{ checksum "package-lock.json" }}
 
-        - run:
-            name: Deploy Snapshot to Adobe I/O Runtime
-            command: ~/.npm-global/bin/hlx build && ~/.npm-global/bin/hlx deploy --dirty --no-auto --wsk-namespace trieloff --wsk-auth $WSK_AUTH --loggly-host trieloff --loggly-auth $LOGGLY_AUTH
-            working_directory: test/integration
+    - run:
+        name: Install Globally
+        command: mkdir -p ~/.npm-global && npm link
+
+    - run:
+        name: Deploy Snapshot to Adobe I/O Runtime
+        command: ~/.npm-global/bin/hlx build && ~/.npm-global/bin/hlx deploy --dirty --no-auto --wsk-namespace trieloff --wsk-auth $WSK_AUTH --loggly-host trieloff --loggly-auth $LOGGLY_AUTH
+        working_directory: test/integration
 
 workflows:
   version: 2
   build:
     jobs:
-      - publish-examples:
-            requires:
-                - build
-            filters:
-                branches:
-                    only:
-                        - master
-      - publish-snapshot:
-           requires:
-               - build
-           filters:
-              branches:
-                only:
-                  - master
-      - build
+    - publish-examples:
+        requires:
+        - build
+        filters:
+          branches:
+            only:
+            - master
+    # publish pre-releases on master
+    - publish-pre-release:
+        requires:
+        - build
+        filters:
+          branches:
+            only: master
+    - build
