@@ -1,7 +1,6 @@
 .vscode/*
 logs/*
-layouts/complete/src/html.pre.js
-layouts/default/src/html.pre.js
+demos/*
 test/integration
 test/tmp/*
 tmp/*

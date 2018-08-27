@@ -18,47 +18,31 @@ Install `hlx` as a global command. You need Node 8 or newer.
 $ npm install -g @adobe/helix-cli
 ```
 
-## Example Projects
-
-There is one example project in `/prototypes/petridish/examples/soupdemo`
-
-```bash
-$ cd ../petridish/examples/soupdemo
-$ ./setup.sh
-$ hlx up
-```
-
-And another one right here:
-
-```bash
-$ cd test/integration
-$ git init &&  git add -A && git commit -m "inital commit"
-$ hlx up
-```
-
 ## Quick Start
 
 ```bash
 $ hlx --help
-hlx <cmd> [args]
+hlx <command>
 
 Commands:
-  hlx init <name> [dir]  Initialize the project structure           [aliases: i]
-  hlx build              Compile the template functions and build package
-                                                                    [aliases: b]
+  hlx demo <name> [dir]  Create example helix project.
+  hlx up [files...]      Run a Helix development server
+  hlx build [files..]    Compile the template functions and build package
   hlx deploy             Deploy packaged functions to Adobe I/O runtime
-                                                                    [aliases: d]
-  hlx perf               Test performance                           [aliases: p]
+  hlx perf               Test performance
+  hlx strain             Activate strains in the Fastly CDN
 
 Options:
   --version  Show version number                                       [boolean]
   --help     Show help                                                 [boolean]
+
+for more information, find our manual at https://github.com/adobe/helix-cli
 ```
 
 ## Setting up a project
 
 ```bash
-$ hlx init <my-cool-project>
+$ hlx demo <my-cool-project>
 ```
 
 ## Starting development

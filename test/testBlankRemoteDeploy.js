@@ -16,7 +16,7 @@ const assert = require('assert');
 const path = require('path');
 const fse = require('fs-extra');
 const Replay = require('replay');
-const InitCommand = require('../src/init.cmd');
+const DemoCommand = require('../src/demo.cmd');
 
 const TEST_DIR = path.resolve(__dirname, 'tmp');
 const PROJECT_NAME = 'pulvillar-pantograph';
@@ -29,7 +29,7 @@ describe('Test Deployment in Empty Project', () => {
   beforeEach('Initialize test project', function bef(done) {
     this.timeout(5000);
 
-    new InitCommand()
+    new DemoCommand()
       .withDirectory(TEST_DIR)
       .withName(PROJECT_NAME)
       .run()

@@ -17,11 +17,11 @@ const path = require('path');
 const $ = require('shelljs');
 const { assertFile, createTestRoot } = require('./utils.js');
 
-const InitCommand = require('../src/init.cmd');
+const DemoCommand = require('../src/demo.cmd');
 
 const pwd = process.cwd();
 
-describe('Integration test for init command', () => {
+describe('Integration test for demo command', () => {
   let testDir;
 
   beforeEach(async () => {
@@ -32,8 +32,8 @@ describe('Integration test for init command', () => {
     process.chdir(pwd);
   });
 
-  it('init creates all files', async () => {
-    await new InitCommand()
+  it('demo type simple creates all files', async () => {
+    await new DemoCommand()
       .withDirectory(testDir)
       .withName('project1')
       .run();
@@ -46,8 +46,24 @@ describe('Integration test for init command', () => {
     await assertFile(path.resolve(testDir, 'project1', 'helix_logo.png'));
   }).timeout(3000);
 
-  it('init does not leave any files not checked in', async () => {
-    await new InitCommand()
+  it('demo type full creates all files', async () => {
+    await new DemoCommand()
+      .withDirectory(testDir)
+      .withName('project1')
+      .withType('full')
+      .run();
+    await assertFile(path.resolve(testDir, 'project1', '.gitignore'));
+    await assertFile(path.resolve(testDir, 'project1', 'src/html.htl'));
+    await assertFile(path.resolve(testDir, 'project1', 'src/html.pre.js'));
+    await assertFile(path.resolve(testDir, 'project1', 'index.md'));
+    await assertFile(path.resolve(testDir, 'project1', 'README.md'));
+    await assertFile(path.resolve(testDir, 'project1', 'src/static/bootstrap.min.css'));
+    await assertFile(path.resolve(testDir, 'project1', 'src/static/favicon.ico'));
+    await assertFile(path.resolve(testDir, 'project1', 'helix_logo.png'));
+  }).timeout(3000);
+
+  it('demo does not leave any files not checked in', async () => {
+    await new DemoCommand()
       .withDirectory(testDir)
       .withName('project2')
       .run();
