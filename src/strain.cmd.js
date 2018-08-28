@@ -592,29 +592,41 @@ class StrainCommand {
       makeStrainjob('strain_root_paths', strain.name, strain.content.root, '🌲  Set content root');
 
       // static
-      if (strain.static) {
-        // if there is a static configuration in the strain, take it
-        makeStrainjob('strain_github_static_repos', strain.name, strain.static.repo, '🌳  Set static repo');
-        makeStrainjob('strain_github_static_owners', strain.name, strain.static.owner, '🏢  Set static owner');
-        makeStrainjob('strain_github_static_refs', strain.name, strain.static.ref, '🏷  Set static ref');
-        makeStrainjob('strain_github_static_magic', strain.name, strain.static.magic ? 'true' : 'false', strain.static.magic ? '🔮  Enable magic' : '⚽️  Disable magic');
+      const origin = GitUtils.getOriginURL();
 
-        if (strain.static.allow) {
-          const allow = StrainCommand.makeRegexp(strain.static.allow);
-          makeStrainjob('strain_allow', strain.name, allow, '⚪️  Set whitelist');
-        }
-        if (strain.static.deny) {
-          const deny = StrainCommand.makeRegexp(strain.static.deny);
-          makeStrainjob('strain_deny', strain.name, deny, '⚫️  Set blacklist');
-        }
+      if (strain.static && strain.static.repo) {
+        makeStrainjob('strain_github_static_repos', strain.name, strain.static.repo, '🌳  Set static repo');
       } else {
-        // otherwise just use the current repo
-        const origin = GitUtils.getOriginURL();
         makeStrainjob('strain_github_static_repos', strain.name, origin.repo, '🌳  Set static repo to current repo');
+      }
+
+      if (strain.static && strain.static.owner) {
+        makeStrainjob('strain_github_static_owners', strain.name, strain.static.owner, '🏢  Set static owner');
+      } else {
         makeStrainjob('strain_github_static_owners', strain.name, origin.owner, '🏢  Set static owner to current owner');
+      }
+
+      if (strain.static && strain.static.ref) {
+        makeStrainjob('strain_github_static_refs', strain.name, strain.static.ref, '🏷  Set static ref');
+      } else {
         // TODO: replace ref with sha for better performance and lower risk of hitting rate limits
         makeStrainjob('strain_github_static_refs', strain.name, origin.ref, '🏷  Set static ref to current ref');
+      }
+
+      if (strain.static && strain.static.magic) {
+        makeStrainjob('strain_github_static_magic', strain.name, strain.static.magic ? 'true' : 'false', strain.static.magic ? '🔮  Enable magic' : '⚽️  Disable magic');
+      } else {
         makeStrainjob('strain_github_static_magic', strain.name, 'false', '⚽️  Disable magic');
+      }
+
+      if (strain.static && strain.static.allow) {
+        const allow = StrainCommand.makeRegexp(strain.static.allow);
+        makeStrainjob('strain_allow', strain.name, allow, '⚪️  Set whitelist');
+      }
+
+      if (strain.static && strain.static.deny) {
+        const deny = StrainCommand.makeRegexp(strain.static.deny);
+        makeStrainjob('strain_deny', strain.name, deny, '⚫️  Set blacklist');
       }
       return strain;
     });

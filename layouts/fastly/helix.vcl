@@ -32,6 +32,31 @@ sub hlx_strain {
   }
 }
 
+# Gets the content whitelist for the current strain and sets the X-Allow header
+sub hlx_allow {
+  # starting permissive – change this for a more restrictive default
+  set req.http.X-Allow = ".*";
+  set req.http.X-Allow = table.lookup(strain_allow, req.http.X-Strain);
+  if (!req.http.X-Allow) {
+    set req.http.X-Allow = table.lookup(strain_allow, "default");
+  }
+}
+
+# Gets the content blacklist for the current strain and sets the X-Deny header
+sub hlx_deny {
+  set req.http.X-Deny = "^.hlx$";
+  set req.http.X-Deny = table.lookup(strain_deny, req.http.X-Strain);
+  if (!req.http.X-Deny) {
+    set req.http.X-Deny = table.lookup(strain_deny, "default");
+  }
+}
+
+# Implements the content block list (to be called from vcl_recv)
+sub hlx_block_recv {
+  call hlx_deny;
+  call hlx_allow;
+}
+
 # Gets the content owner for the current strain and sets the X-Owner header
 sub hlx_owner {
   set req.http.X-Owner = table.lookup(strain_owners, req.http.X-Strain);
@@ -227,11 +252,6 @@ sub vcl_recv {
        set req.http.x-esi = "1";
   }
 
-  # Determine the Current Branch using the Host header
-  # TODO: use Edge Side Dictinoaries to allow for more flexible configuration
-  # NOTE: I'm doing this outside the following IF statement, because the re variable 
-  # would be reset by running repeated regexps
-
   set var.branch = "www";
 
   if (req.http.Host ~ "^([^\.]+)\..+$") {
@@ -252,6 +272,9 @@ sub vcl_recv {
   call hlx_strain;
   set var.strain = req.http.X-Strain;
 
+  # block bad requests – needs current strain and unchanged req.url
+  call hlx_block_recv;
+
   # Parse the Request URL, if this is a proper SSL-request 
   # (non-SSL gets redirected) to SSL-equivalent
 
@@ -271,7 +294,7 @@ sub vcl_recv {
     
     # get it from OpenWhisk
     set req.backend = F_runtime_adobe_io;
-    set req.url = "/api/v1/web/trieloff/default/disty?owner=" + var.owner + "&repo=" + var.repo + "&strain=" + var.strain + "&ref=" + var.ref + "&entry=" + var.entry + "&path=" + var.path;
+    set req.url = "/api/v1/web/trieloff/default/disty?owner=" + var.owner + "&repo=" + var.repo + "&strain=" + var.strain + "&ref=" + var.ref + "&entry=" + var.entry + "&path=" + var.path + "&allow=" urlencode(req.http.X-Allow) + "&deny=" urlencode(req.http.X-Deny);
 
   } elseif (req.http.Fastly-SSL && (req.http.X-Static == "Static")) {
     # This is a static request.
@@ -296,7 +319,7 @@ sub vcl_recv {
     # get it from OpenWhisk
     set req.backend = F_runtime_adobe_io;
     
-    set req.url = "/api/v1/web/trieloff/default/disty?owner=" + var.owner + "&repo=" + var.repo + "&strain=" + var.strain + "&ref=" + var.ref + "&entry=" + var.entry + "&path=" + var.path + "&plain=true";
+    set req.url = "/api/v1/web/trieloff/default/disty?owner=" + var.owner + "&repo=" + var.repo + "&strain=" + var.strain + "&ref=" + var.ref + "&entry=" + var.entry + "&path=" + var.path + "&plain=true"  + "&allow=" urlencode(req.http.X-Allow) + "&deny=" urlencode(req.http.X-Deny);
 
 
   } elsif (!req.http.Fastly-FF && req.http.Fastly-SSL && (req.url.basename ~ "(^[^\.]+)(\.?(.+))?(\.[^\.]*$)" || req.url.basename == "")) {
@@ -429,7 +452,7 @@ sub hlx_error_errors {
   }
   if (obj.status == 953 ) {
     set obj.http.Content-Type = "text/html";
-    synthetic {"includde:953.html"};
+    synthetic {"include:953.html"};
     return(deliver);
   }
 }
