@@ -17,6 +17,7 @@ const path = require('path');
 const fse = require('fs-extra');
 const Replay = require('replay');
 const DemoCommand = require('../src/demo.cmd');
+const GitUtils = require('../src/gitutils');
 
 const TEST_DIR = path.resolve(__dirname, 'tmp');
 const PROJECT_NAME = 'pulvillar-pantograph';
@@ -45,8 +46,8 @@ describe('Test Deployment in Empty Project', () => {
   it('Get function name', () => {
     // eslint-disable-next-line global-require
     const DeployCommand = require('../src/deploy.cmd');
-    assert.notEqual('', DeployCommand.getRepository());
-    assert.equal('local--pulvillar-pantograph', DeployCommand.getRepository());
+    assert.notEqual('', GitUtils.getRepository());
+    assert.equal('local--pulvillar-pantograph', GitUtils.getRepository());
   });
 
   afterEach('Reset working directory', function after() {
