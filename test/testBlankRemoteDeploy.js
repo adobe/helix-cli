@@ -51,7 +51,7 @@ describe('Test Deployment in Empty Project', () => {
   });
 
   afterEach('Reset working directory', function after() {
-    this.timeout(5000);
+    this.timeout(15000);
     process.chdir(pwd);
     fse.removeSync(TEST_DIR);
   });
