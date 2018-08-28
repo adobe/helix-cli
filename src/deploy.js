@@ -84,12 +84,6 @@ module.exports = function deploy() {
           type: 'string',
           default: DeployCommand.getDefaultContentURL(),
         })
-        .option('static-content', {
-          describe: 'Defines the type of deployment for static content.',
-          type: 'string',
-          choices: ['bundled', 'none', 'S3', 'codeload', 'github', 'azure'],
-          default: 'bundled',
-        })
         .array('default')
         .nargs('default', 2)
         .coerce('default', arg => arg.reduce((result, value, index, array) => {
@@ -124,7 +118,6 @@ module.exports = function deploy() {
         .withDefault(argv.default)
         .withDryRun(argv.dryRun)
         .withContent(argv.content)
-        .withStaticContent(argv.staticContent)
         .run();
     },
 
