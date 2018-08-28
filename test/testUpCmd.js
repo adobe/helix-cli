@@ -29,7 +29,7 @@ describe('Integration test for up command', () => {
   let testDir;
   let buildDir;
 
-  beforeEach(async function() {
+  beforeEach(async function before() {
     this.timeout(20000);
     const testRoot = await createTestRoot();
     testDir = path.resolve(testRoot, 'project');
