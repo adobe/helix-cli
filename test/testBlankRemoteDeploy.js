@@ -45,7 +45,6 @@ describe('Test Deployment in Empty Project', () => {
 
   it('Get function name', () => {
     // eslint-disable-next-line global-require
-    const DeployCommand = require('../src/deploy.cmd');
     assert.notEqual('', GitUtils.getRepository());
     assert.equal('local--pulvillar-pantograph', GitUtils.getRepository());
   });
