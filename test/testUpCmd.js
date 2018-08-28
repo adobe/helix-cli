@@ -29,7 +29,8 @@ describe('Integration test for up command', () => {
   let testDir;
   let buildDir;
 
-  beforeEach(async () => {
+  beforeEach(async function() {
+    this.timeout(20000);
     const testRoot = await createTestRoot();
     testDir = path.resolve(testRoot, 'project');
     buildDir = path.resolve(testRoot, '.hlx/build');
