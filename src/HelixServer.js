@@ -125,7 +125,7 @@ class HelixServer {
             });
           })
           .catch((err) => {
-            logger.error(`Error while delivering resource: ${err.stack || err}`);
+            logger.error(`Error while delivering resource ${ctx.path} - ${err.stack || err}`);
             res.status(500).send();
           });
       } else {
@@ -137,7 +137,7 @@ class HelixServer {
             res.type(ctx.extension);
             res.send(result.content);
           }).catch((err) => {
-            logger.error(`Error while delivering resource: ${err.stack || err}`);
+            logger.error(`Error while delivering resource ${ctx.path} - ${err.stack || err}`);
             res.status(err.code || 500).send();
           });
       }
