@@ -19,8 +19,14 @@ const GitUrlParse = require('git-url-parse');
 const RAW_TYPE = 'raw';
 const API_TYPE = 'api';
 const DEFAULT_BRANCH = 'master';
+const MATCH_IP = /^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/;
 
-const constructUrl = (urlParse, type) => `${urlParse.protocols[0]}://${type}.${urlParse.resource}${urlParse.port ? `:${urlParse.port}` : ''}`;
+const constructUrl = (urlParse, type) => {
+  if (MATCH_IP.test(urlParse.resource)) {
+    return `${urlParse.protocols[0]}://${urlParse.resource}${urlParse.port ? `:${urlParse.port}` : ''}/${type}`;
+  }
+  return `${urlParse.protocols[0]}://${type}.${urlParse.resource}${urlParse.port ? `:${urlParse.port}` : ''}`;
+};
 
 module.exports = class GitUrl {
   constructor(url) {

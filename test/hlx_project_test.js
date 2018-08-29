@@ -242,7 +242,7 @@ describe('Helix Project', () => {
       .then(cfg => cfg.start())
       .then((cfg) => {
         assert.equal(true, cfg.started);
-        assert.ok(/http:\/\/raw.localtest.me:\d+\/helix\/content\/master/.test(cfg.contentRepo.raw));
+        assert.ok(/http:\/\/127.0.0.1:\d+\/raw\/helix\/content\/master/.test(cfg.contentRepo.raw));
         return cfg.stop();
       })
       .then((cfg) => {

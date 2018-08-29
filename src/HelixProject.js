@@ -38,7 +38,7 @@ const DEFAULT_DIST_DIR = '.hlx/dist';
 
 const GIT_DIR = '.git';
 
-const GIT_LOCAL_HOST = 'localtest.me';
+const GIT_LOCAL_HOST = '127.0.0.1';
 
 const GIT_LOCAL_OWNER = 'helix';
 
