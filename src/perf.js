@@ -26,7 +26,7 @@ module.exports = function perf() {
     command: 'perf',
     desc: 'Test performance',
     builder: (yargs) => {
-      // TODO: define parameters
+      yargs.help();
     },
     handler: async (argv) => {
       if (!executor) {
