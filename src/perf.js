@@ -26,7 +26,13 @@ module.exports = function perf() {
     command: 'perf',
     desc: 'Test performance',
     builder: (yargs) => {
-      yargs.help();
+      yargs
+        .option('calibre-auth', {
+          describe: 'API token from https://calibreapp.com/',
+          type: 'string',
+          demandOption: true,
+        })
+        .help();
     },
     handler: async (argv) => {
       if (!executor) {
@@ -36,6 +42,7 @@ module.exports = function perf() {
       }
 
       await executor
+        .withCalibreAuth(argv.calibreAuth)
         .run();
     },
   };
