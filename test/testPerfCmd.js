@@ -127,6 +127,7 @@ const example = {
   location: { name: 'London, United Kingdom', emoji: '🇬🇧' },
 };
 
+
 describe('hlx perf #unittest', () => {
   it('formatScore() #unittest', () => {
     assert.equal(PerfCommand.formatScore(49, 50), '\u001b[31m\u001b[1m49\u001b[22m\u001b[39m\u001b[31m (failed)\u001b[39m');
@@ -147,5 +148,14 @@ describe('hlx perf #unittest', () => {
     assert.deepEqual(PerfCommand.getURLs({ url: 'http://example.com' }), ['http://example.com']);
     assert.deepEqual(PerfCommand.getURLs({ urls: ['https://www.adobe.com'] }), ['https://www.adobe.com']);
     assert.deepEqual(PerfCommand.getURLs({ url: 'http://example.com', urls: ['https://www.adobe.com'] }), ['http://example.com', 'https://www.adobe.com']);
+  });
+
+  it('format() #unittest', () => {
+    assert.equal(PerfCommand.format(example.metrics, 'unknown-metric', 100), undefined);
+    assert.equal(PerfCommand.format(example.metrics, 'lighthouse-seo-score', 100), false);
+    assert.equal(PerfCommand.format(example.metrics, 'lighthouse-seo-score', 0), true);
+
+    assert.equal(PerfCommand.format(example.metrics, 'visually_complete', 1000), false);
+    assert.equal(PerfCommand.format(example.metrics, 'visually_complete', 2000), true);
   });
 });
