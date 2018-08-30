@@ -20,11 +20,7 @@ module.exports = {
   'root': true,
   'parserOptions': {
     'sourceType': 'script',
-    // async/await support
-    'ecmaVersion': 8,
-    'ecmaFeatures': {
-      'experimentalObjectRestSpread': true
-    }
+    'ecmaVersion': 10,
   },
   'plugins': [
     'header',
