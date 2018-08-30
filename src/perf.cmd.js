@@ -119,7 +119,7 @@ class PerfCommand {
     return undefined;
   }
 
-  static formatResponse(response, params) {
+  static formatResponse(response, params = {}) {
     console.log(`\nTesting ${response.url} on ${response.device.title} (${response.connection.title}) from ${response.location.emoji}  ${response.location.name}\n`);
     const strainresults = Object.keys(params).map((key) => {
       const value = params[key];

@@ -160,6 +160,9 @@ describe('hlx perf #unittest', () => {
   });
 
   it('formatResponse()', () => {
+    // default
+    assert.equal(PerfCommand.formatResponse(example), false);
+
     // all failed
     assert.equal(PerfCommand.formatResponse(example, {
       'lighthouse-seo-score': 100,
