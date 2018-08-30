@@ -13,6 +13,7 @@
 /* eslint-env mocha */
 
 const assert = require('assert');
+const path = require('path');
 const PerfCommand = require('../src/perf.cmd.js');
 
 
@@ -159,7 +160,7 @@ describe('hlx perf #unittest', () => {
     assert.equal(PerfCommand.format(example.metrics, 'visually_complete', 2000), true);
   });
 
-  it('formatResponse()', () => {
+  it('formatResponse() #unittest', () => {
     // default
     assert.equal(PerfCommand.formatResponse(example), false);
 
@@ -180,5 +181,13 @@ describe('hlx perf #unittest', () => {
       'lighthouse-seo-score': 0,
       visually_complete: 1000,
     }), false);
+  });
+
+  it('getDefaultParams() #unittest', () => {
+    const defcmd = new PerfCommand().withStrainFile(path.resolve(__dirname, 'fixtures/default.yaml'));
+    const perfcmd = new PerfCommand().withStrainFile(path.resolve(__dirname, 'fixtures/perf.yaml'));
+
+    assert.equal(defcmd.getDefaultParams().device, 'MotorolaMotoG4');
+    assert.equal(perfcmd.getDefaultParams().device, 'iPhone8');
   });
 });
