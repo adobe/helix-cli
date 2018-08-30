@@ -196,4 +196,9 @@ describe('hlx perf #unittest', () => {
     assert.equal(defcmd.getStrainParams({}).device, 'MotorolaMotoG4');
     assert.equal(defcmd.getStrainParams({ perf: { device: 'iPad' } }).device, 'iPad');
   });
+
+  it('withCalibreAuth() #unittest', () => {
+    new PerfCommand().withCalibreAuth('foobar');
+    assert.equal(process.env.CALIBRE_API_TOKEN, 'foobar');
+  });
 });
