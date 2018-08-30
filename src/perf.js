@@ -26,7 +26,64 @@ module.exports = function perf() {
     command: 'perf',
     desc: 'Test performance',
     builder: (yargs) => {
-      // TODO: define parameters
+      yargs
+        .option('calibre-auth', {
+          describe: 'API token from https://calibreapp.com/',
+          type: 'string',
+          demandOption: true,
+        })
+        .option('device', {
+          describe: 'Device to test from',
+          type: 'string',
+          default: 'MotorolaMotoG4',
+          choices: ['MotorolaMotoG4',
+            'iPhone5',
+            'iPhone6',
+            'iPhone6Plus',
+            'iPhone7',
+            'iPhone8',
+            'Nexus5X',
+            'Nexus6P',
+            'GalaxyS5',
+            'iPad',
+            'iPadPro'],
+        })
+        .option('connection', {
+          describe: 'Throttle connection speed to',
+          default: 'regular3G',
+          type: 'string',
+          choices: ['regular2G',
+            'good2G',
+            'slow3G',
+            'regular3G',
+            'good3G',
+            'emergingMarkets',
+            'regular4G',
+            'LTE',
+            'dsl',
+            'wifi',
+            'cable'],
+        })
+        .option('location', {
+          describe: 'Run the test from this location',
+          type: 'string',
+          default: 'London',
+          choices: ['NorthVirginia',
+            'Frankfurt',
+            'Sydney',
+            'Ohio',
+            'California',
+            'Oregon',
+            'Canada',
+            'Ireland',
+            'Tokyo',
+            'Seoul',
+            'Singapore',
+            'Mumbai',
+            'SaoPaulo',
+            'London'],
+        })
+        .help();
     },
     handler: async (argv) => {
       if (!executor) {
@@ -36,6 +93,10 @@ module.exports = function perf() {
       }
 
       await executor
+        .withCalibreAuth(argv.calibreAuth)
+        .withDevice(argv.device)
+        .withConnection(argv.connection)
+        .withLocation(argv.location)
         .run();
     },
   };
