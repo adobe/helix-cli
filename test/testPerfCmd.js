@@ -158,4 +158,24 @@ describe('hlx perf #unittest', () => {
     assert.equal(PerfCommand.format(example.metrics, 'visually_complete', 1000), false);
     assert.equal(PerfCommand.format(example.metrics, 'visually_complete', 2000), true);
   });
+
+  it('formatResponse()', () => {
+    // all failed
+    assert.equal(PerfCommand.formatResponse(example, {
+      'lighthouse-seo-score': 100,
+      visually_complete: 1000,
+    }), false);
+
+    // all succeeded
+    assert.equal(PerfCommand.formatResponse(example, {
+      'lighthouse-seo-score': 0,
+      visually_complete: 2000,
+    }), true);
+
+    // some failed
+    assert.equal(PerfCommand.formatResponse(example, {
+      'lighthouse-seo-score': 0,
+      visually_complete: 1000,
+    }), false);
+  });
 });
