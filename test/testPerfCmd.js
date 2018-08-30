@@ -191,6 +191,18 @@ describe('hlx perf #unittest', () => {
     assert.equal(perfcmd.getDefaultParams().device, 'iPhone8');
   });
 
+  it('getDefaultParams() override #unittest', () => {
+    const defcmd = new PerfCommand()
+      .withStrainFile(path.resolve(__dirname, 'fixtures/default.yaml'))
+      .withDevice('Nexus5X')
+      .withLocation('Oregon')
+      .withConnection('slow2G');
+
+    assert.equal(defcmd.getDefaultParams().connection, 'slow2G');
+    assert.equal(defcmd.getDefaultParams().device, 'Nexus5X');
+    assert.equal(defcmd.getDefaultParams().location, 'Oregon');
+  });
+
   it('getStrainParams() #unittest', () => {
     const defcmd = new PerfCommand().withStrainFile(path.resolve(__dirname, 'fixtures/default.yaml'));
     assert.equal(defcmd.getStrainParams({}).device, 'MotorolaMotoG4');

@@ -26,6 +26,9 @@ class PerfCommand {
     this._strains = null;
     this._auth = null;
     this._calibre = null;
+    this._location = 'London';
+    this._device = 'MotorolaMotoG4';
+    this._connection = 'regular3G';
   }
 
   withStrainFile(value) {
@@ -42,6 +45,21 @@ class PerfCommand {
     return this;
   }
 
+  withLocation(value) {
+    this._location = value;
+    return this;
+  }
+
+  withDevice(value) {
+    this._device = value;
+    return this;
+  }
+
+  withConnection(value) {
+    this._connection = value;
+    return this;
+  }
+
   loadStrains() {
     if (this._strains) {
       return this._strains;
@@ -53,9 +71,9 @@ class PerfCommand {
 
   getDefaultParams() {
     const defaultparams = {
-      device: 'MotorolaMotoG4',
-      location: 'London',
-      connection: 'regular3G',
+      device: this._device,
+      location: this._location,
+      connection: this._connection,
     };
 
     const defaults = this.loadStrains().filter(
