@@ -134,4 +134,11 @@ describe('hlx perf #unit', () => {
     assert.equal(PerfCommand.formatScore(50, 50), '\u001b[32m\u001b[1m50\u001b[22m\u001b[39m');
     assert.equal(PerfCommand.formatScore(100, 50), '\u001b[32m\u001b[1m100\u001b[22m\u001b[39m');
   });
+
+  it('formatMeasure()', () => {
+    assert.equal(PerfCommand.formatMeasure(49, 50), '\u001b[32m\u001b[1m49\u001b[22m\u001b[39m');
+    assert.equal(PerfCommand.formatMeasure(0, 50), '\u001b[32m\u001b[1m0\u001b[22m\u001b[39m');
+    assert.equal(PerfCommand.formatMeasure(50, 50), '\u001b[32m\u001b[1m50\u001b[22m\u001b[39m');
+    assert.equal(PerfCommand.formatMeasure(100, 50), '\u001b[31m\u001b[1m100\u001b[22m\u001b[39m\u001b[31m (failed)\u001b[39m');
+  });
 });
