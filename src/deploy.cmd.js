@@ -145,7 +145,7 @@ class DeployCommand {
     };
     const openwhisk = ow(owoptions);
 
-    const scripts = glob.sync(`${this._target}/*.js`);
+    const scripts = [path.resolve(__dirname, 'openwhisk', 'static.js'), ...glob.sync(`${this._target}/*.js`)];
 
     const params = {
       ...this._default,
