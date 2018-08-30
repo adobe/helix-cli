@@ -19,7 +19,7 @@ const assert = require('assert');
 const CLI = require('../src/cli.js');
 const PerfCommand = require('../src/perf.cmd');
 
-describe('hlx perf', () => {
+describe('hlx perf (CLI)', () => {
   // mocked command instance
   let mockPerf;
   let processenv = {};
