@@ -10,27 +10,51 @@
  * governing permissions and limitations under the License.
  */
 
-/* global describe, it, beforeEach */
+/* eslint-env mocha */
 
 'use strict';
 
 const sinon = require('sinon');
+const assert = require('assert');
 const CLI = require('../src/cli.js');
 const PerfCommand = require('../src/perf.cmd');
 
 describe('hlx perf', () => {
   // mocked command instance
-  let mockUp;
+  let mockPerf;
+  let processenv = {};
 
   beforeEach(() => {
-    mockUp = sinon.createStubInstance(PerfCommand);
-    mockUp.run.returnsThis();
+    // save environment
+    processenv = Object.assign({}, process.env);
+    // clear environment
+    Object.keys(process.env).filter(key => key.match(/^HLX_.*/)).map((key) => {
+      delete process.env[key];
+      return true;
+    });
+
+    mockPerf = sinon.createStubInstance(PerfCommand);
+    mockPerf.run.returnsThis();
+    mockPerf.withStrainFile.returnsThis();
+    mockPerf.withCalibreAuth.returnsThis();
   });
 
-  it('hlx perf runs w/o arguments', () => {
+
+  afterEach(() => {
+    // restore environment
+    Object.keys(processenv).filter(key => key.match(/^HLX_.*/)).map((key) => {
+      process.env[key] = processenv[key];
+      return true;
+    });
+  });
+
+  it('hlx perf required auth', (done) => {
     new CLI()
-      .withCommandExecutor('perf', mockUp)
+      .withCommandExecutor('perf', mockPerf)
+      .onFail((err) => {
+        assert.equal(err, 'Missing required argument: calibre-auth');
+        done();
+      })
       .run(['perf']);
-    sinon.assert.calledOnce(mockUp.run);
   });
 });
