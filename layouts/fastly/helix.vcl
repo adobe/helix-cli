@@ -294,7 +294,8 @@ sub vcl_recv {
     
     # get it from OpenWhisk
     set req.backend = F_runtime_adobe_io;
-    set req.url = "/api/v1/web/trieloff/default/disty?owner=" + var.owner + "&repo=" + var.repo + "&strain=" + var.strain + "&ref=" + var.ref + "&entry=" + var.entry + "&path=" + var.path + "&allow=" urlencode(req.http.X-Allow) + "&deny=" urlencode(req.http.X-Deny);
+    set req.http.X-Action-Root = "/api/v1/web/" + table.lookup(secrets, "OPENWHISK_NAMESPACE") + "/default/hlx--static";
+    set req.url = req.http.X-Action-Root + "?owner=" + var.owner + "&repo=" + var.repo + "&strain=" + var.strain + "&ref=" + var.ref + "&entry=" + var.entry + "&path=" + var.path + "&allow=" urlencode(req.http.X-Allow) + "&deny=" urlencode(req.http.X-Deny);
 
   } elseif (req.http.Fastly-SSL && (req.http.X-Static == "Static")) {
     # This is a static request.
@@ -319,7 +320,8 @@ sub vcl_recv {
     # get it from OpenWhisk
     set req.backend = F_runtime_adobe_io;
     
-    set req.url = "/api/v1/web/trieloff/default/disty?owner=" + var.owner + "&repo=" + var.repo + "&strain=" + var.strain + "&ref=" + var.ref + "&entry=" + var.entry + "&path=" + var.path + "&plain=true"  + "&allow=" urlencode(req.http.X-Allow) + "&deny=" urlencode(req.http.X-Deny);
+    set req.http.X-Action-Root = "/api/v1/web/" + table.lookup(secrets, "OPENWHISK_NAMESPACE") + "/default/hlx--static";
+    set req.url = req.http.X-Action-Root + "?owner=" + var.owner + "&repo=" + var.repo + "&strain=" + var.strain + "&ref=" + var.ref + "&entry=" + var.entry + "&path=" + var.path + "&plain=true"  + "&allow=" urlencode(req.http.X-Allow) + "&deny=" urlencode(req.http.X-Deny);
 
 
   } elsif (!req.http.Fastly-FF && req.http.Fastly-SSL && (req.url.basename ~ "(^[^\.]+)(\.?(.+))?(\.[^\.]*$)" || req.url.basename == "")) {

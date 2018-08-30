@@ -124,6 +124,13 @@ class DeployCommand {
     return this;
   }
 
+  actionName(script) {
+    if (script.indexOf(path.resolve(__dirname, 'openwhisk')) === 0) {
+      return `hlx--${path.basename(script, '.js')}`;
+    }
+    return this._prefix + path.basename(script, '.js');
+  }
+
   async run() {
     if (this._enableAuto) {
       console.error('Auto-deployment not implemented yet, please try hlx deploy --no-auto');
@@ -158,7 +165,7 @@ class DeployCommand {
     }
 
     scripts.map((script) => {
-      const name = this._prefix + path.basename(script, '.js');
+      const name = this.actionName(script);
       console.log(`⏳  Deploying ${script} as ${name}`);
 
       fs.readFile(script, { encoding: 'utf8' }, (err, action) => {

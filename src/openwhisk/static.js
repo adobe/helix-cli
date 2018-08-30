@@ -9,7 +9,8 @@
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-const request = require('request-promise-native');
+// eslint-disable-next-line import/no-extraneous-dependencies
+const request = require('request-promise');
 const decompress = require('decompress');
 const crypto = require('crypto');
 const $ = require('shelljs');

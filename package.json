@@ -66,6 +66,7 @@
     "mocha-parallel-tests": "^2.0.3",
     "nyc": "^12.0.2",
     "replay": "^2.3.0",
+    "request-promise": "^4.2.2",
     "sinon": "^6.1.0",
     "unzip": "^0.1.11",
     "uuid": "^3.3.2",

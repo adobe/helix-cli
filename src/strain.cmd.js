@@ -556,6 +556,16 @@ class StrainCommand {
         throw new Error(message, e);
       });
 
+    const ownsp = this.putDict('secrets', 'OPENWHISK_NAMESPACE', this._wsk_namespace).then((_s) => {
+      console.log('🗝  Enabled Fastly to call OpenWhisk static action');
+    })
+      .catch((e) => {
+        const message = 'OpenWhisk namespace could not be passed on';
+        console.error(message);
+        console.error(e);
+        throw new Error(message, e);
+      });
+
     const content = fs.readFileSync(this._strainFile);
     const strains = strainconfig.load(content);
 
@@ -637,6 +647,8 @@ class StrainCommand {
     // also wait for the strain.vcl writing to finish
     await strainp;
     await secretp;
+    // also wait for the openwhisk namespace
+    await ownsp;
   }
 
   async run() {
