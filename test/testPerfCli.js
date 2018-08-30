@@ -57,4 +57,11 @@ describe('hlx perf', () => {
       })
       .run(['perf']);
   });
+
+  it('hlx perf works with minimal arguments', () => {
+    new CLI()
+      .withCommandExecutor('perf', mockPerf)
+      .run(['perf', '--calibre-auth', 'nope-nope-nope']);
+    sinon.assert.calledOnce(mockPerf.run);
+  })
 });
