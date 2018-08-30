@@ -190,4 +190,10 @@ describe('hlx perf #unittest', () => {
     assert.equal(defcmd.getDefaultParams().device, 'MotorolaMotoG4');
     assert.equal(perfcmd.getDefaultParams().device, 'iPhone8');
   });
+
+  it('getStrainParams() #unittest', () => {
+    const defcmd = new PerfCommand().withStrainFile(path.resolve(__dirname, 'fixtures/default.yaml'));
+    assert.equal(defcmd.getStrainParams({}).device, 'MotorolaMotoG4');
+    assert.equal(defcmd.getStrainParams({ perf: { device: 'iPad' } }).device, 'iPad');
+  });
 });
