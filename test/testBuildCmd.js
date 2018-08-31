@@ -15,6 +15,7 @@
 const path = require('path');
 const fs = require('fs-extra');
 const assert = require('assert');
+const md5 = require('parcel-bundler/src/utils/md5');
 const { createTestRoot } = require('./utils.js');
 
 const BuildCommand = require('../src/build.cmd');
@@ -40,7 +41,9 @@ describe('Integration test for build', () => {
     return true;
   });
 
-  it('build command succeeds and produces files', async () => {
+  it('build command succeeds and produces files', async function test() {
+    this.timeout(5000);
+    const stylesCssName = `styles.${md5(path.resolve(TEST_DIR, 'src/component/styles.css')).slice(-8)}.css`;
     await new BuildCommand()
       .withFiles(['test/integration/src/**/*.htl'])
       .withTargetDir(buildDir)
@@ -54,5 +57,6 @@ describe('Integration test for build', () => {
     assert.ok(fs.existsSync(path.resolve(buildDir, 'component', 'html.js')));
     assert.ok(fs.existsSync(path.resolve(distDir, 'welcome.txt')));
     assert.ok(fs.existsSync(path.resolve(distDir, 'component', 'foo.txt')));
-  }).timeout(5000);
+    assert.ok(fs.existsSync(path.resolve(distDir, stylesCssName)));
+  });
 });

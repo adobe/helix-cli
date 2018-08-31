@@ -11,7 +11,6 @@
  */
 /* eslint no-console: off */
 
-const Bundler = require('parcel-bundler');
 const glob = require('glob');
 const fs = require('fs');
 const chalk = require('chalk');
@@ -95,9 +94,7 @@ class UpCommand extends BuildCommand {
     // expand patterns from command line arguments
     const myfiles = this._files.reduce((a, f) => [...a, ...glob.sync(f)], []);
 
-    this._bundler = new Bundler(myfiles, myoptions);
-    this._bundler.addAssetType('htl', require.resolve('@adobe/parcel-plugin-htl/src/HTLAsset.js'));
-    this._bundler.addAssetType('helix-js', require.resolve('./parcel/HelixAsset.js'));
+    this._bundler = this.createBundler(myfiles, myoptions);
 
     this.validate();
 
@@ -112,11 +109,6 @@ class UpCommand extends BuildCommand {
     }
 
     const buildEnd = async () => {
-      // copy the static files
-      const t0 = Date.now();
-      await this.copyStaticFile();
-      console.log(chalk.greenBright(`✨  Copied static in ${Date.now() - t0}ms.\n`));
-
       if (this._project.started) {
         this.emit('build', this);
         // todo
@@ -131,6 +123,15 @@ class UpCommand extends BuildCommand {
       }
     };
 
+    const bundled = async (bundle) => {
+      // copy the static files
+      const t0 = Date.now();
+      await this.copyStaticFile();
+      console.log(chalk.greenBright(`✨  Copied static in ${Date.now() - t0}ms.\n`));
+
+      // get the static files processed by parcel.
+      await this.extractStaticFiles(bundle);
+    };
 
     try {
       await this._project.init();
@@ -140,6 +141,7 @@ class UpCommand extends BuildCommand {
 
     this._watchStaticDir(buildEnd);
     this._bundler.on('buildEnd', buildEnd);
+    this._bundler.on('bundled', bundled);
     this._bundler.bundle();
   }
 }
