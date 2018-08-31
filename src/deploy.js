@@ -55,6 +55,11 @@ module.exports = function deploy() {
           type: 'string',
           default: '',
         })
+        .option('circleci-auth', {
+          describe: 'API Key for CircleCI API ($HLX_CIRCLECI_AUTH)',
+          type: 'string',
+          default: '',
+        })
         .option('target', {
           alias: 'o',
           default: '.hlx/build',
@@ -101,6 +106,7 @@ module.exports = function deploy() {
         }, {}))
         .group(['auto', 'wsk-auth', 'wsk-namespace', 'default', 'dirty'], 'Deployment Options')
         .group(['wsk-host', 'loggly-host', 'loggly-auth', 'target', 'docker', 'prefix', 'content'], 'Advanced Options')
+        .check(args => (args.auto <= !!args.circleciAuth ? true : new Error('auto-deployment requires --circleci-auth')))
         .help();
     },
     handler: async (argv) => {
@@ -125,6 +131,7 @@ module.exports = function deploy() {
         .withDryRun(argv.dryRun)
         .withContent(argv.content)
         .withStaticContent(argv.staticContent)
+        .withCircleciAuth(argv.circleciAuth)
         .run();
     },
 

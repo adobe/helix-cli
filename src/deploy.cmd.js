@@ -36,6 +36,7 @@ const DISTRIBUTORS = {
 class DeployCommand {
   constructor() {
     this._enableAuto = true;
+    this._circleciAuth = null;
     this._wsk_auth = null;
     this._wsk_namespace = null;
     this._wsk_host = null;
@@ -68,6 +69,11 @@ class DeployCommand {
 
   withEnableAuto(value) {
     this._enableAuto = value;
+    return this;
+  }
+
+  withCircleciAuth(value) {
+    this._circleciAuth = value;
     return this;
   }
 
