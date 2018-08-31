@@ -7,7 +7,7 @@
     "hlx": "./index.js"
   },
   "scripts": {
-    "test": "nyc mocha",
+    "test": "nyc mocha --exit",
     "lint": "./node_modules/.bin/eslint .",
     "snyk-protect": "snyk protect",
     "prepare": "npm run snyk-protect",
@@ -30,7 +30,7 @@
     "@adobe/htlengine": "^1.0.2-SNAPSHOT.68",
     "@adobe/hypermedia-pipeline": "^0.3.2-SNAPSHOT.74",
     "@adobe/openwhisk-loggly-wrapper": "^0.2.0-SNAPSHOT.35",
-    "@adobe/parcel-plugin-htl": "0.6.2",
+    "@adobe/parcel-plugin-htl": "0.7.0",
     "@adobe/petridish": "^1.1.0",
     "chalk": "^2.4.1",
     "decompress": "^4.2.0",
@@ -60,6 +60,7 @@
     "eslint-plugin-jsx-a11y": "^6.1.1",
     "eslint-plugin-react": "^7.11.0",
     "istanbul": "^1.1.0-alpha.1",
+    "less": "^3.8.1",
     "lodash": "^4.17.10",
     "mocha": "^5.2.0",
     "mocha-junit-reporter": "^1.17.0",
