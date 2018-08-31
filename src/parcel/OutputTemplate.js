@@ -22,22 +22,22 @@ function wrap(main) {
   const _isFunction = (fn) => !!(fn && fn.constructor && fn.call && fn.apply);
 
   // this gets called by openwhisk
-  return function wrapped(params, secrets = {}, logger) {
-    const runthis = (p, s, l) => {
-      const next = (p, s, l) => {
+  return function wrapped(payload, action = {}, logger) {
+    const runthis = (p, a, l) => {
+      const next = (p, a, l) => {
         function cont(next) {
-          const config  = Object.assign({}, s, { logger: l });
+          const config  = Object.assign({}, a, { logger: l });
           const ret = pre(p, config);
           if (ret && _isFunction(ret.then)) {
-            return ret.then((pp) => next(pp || p, s, l));
+            return ret.then((pp) => next(pp || p, a, l));
           }
-          return next(ret || p, s, l);
+          return next(ret || p, a, l);
         }
         return cont(main).then(resobj => ({ response: resobj }));
       };
-      return pipe(next, p, s, l);
+      return pipe(next, p, a, l);
     };
-    return owwrapper(runthis, params, secrets, logger);
+    return owwrapper(runthis, payload, action, logger);
   };
 }
 
