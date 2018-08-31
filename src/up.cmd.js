@@ -11,7 +11,6 @@
  */
 /* eslint no-console: off */
 
-const Bundler = require('parcel-bundler');
 const glob = require('glob');
 const fs = require('fs');
 const chalk = require('chalk');
