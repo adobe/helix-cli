@@ -1,13 +1,13 @@
 {
   "name": "@adobe/helix-cli",
-  "version": "0.3.2-pre.1",
+  "version": "0.3.3-pre.0",
   "description": "Project Helix CLI",
   "main": "index.js",
   "bin": {
     "hlx": "./index.js"
   },
   "scripts": {
-    "test": "nyc mocha",
+    "test": "nyc mocha --exit",
     "lint": "./node_modules/.bin/eslint .",
     "snyk-protect": "snyk protect",
     "prepare": "npm run snyk-protect",
