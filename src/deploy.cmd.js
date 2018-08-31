@@ -14,6 +14,8 @@
 
 'use strict';
 
+const request = require('request-promise-native');
+const chalk = require('chalk');
 const ow = require('openwhisk');
 const glob = require('glob');
 const path = require('path');
@@ -209,16 +211,42 @@ class DeployCommand {
     });
   }
 
-  async run() {
-    if (this._enableAuto) {
-      console.error('Auto-deployment not implemented yet, please try hlx deploy --no-auto');
-      process.exit(1);
-    }
+  async autoDeploy() {
+    const { owner, repo } = GitUtils.getOriginURL();
 
+    const auth = {
+      username: this._circleciAuth,
+      password: '',
+    };
+
+    const followoptions = {
+      method: 'POST',
+      json: true,
+      auth,
+      uri: `https://circleci.com/api/v1.1/project/github/${owner}/${repo}/follow`,
+    };
+
+    console.log(`Automating deployment with ${followoptions.uri}`);
+    const follow = await request(followoptions);
+
+    if (follow.first_build) {
+      console.log('Auto-deployment started. Configuring: ');
+    } else {
+      console.log('\nAuto-deployment already set up. Go to');
+      console.log(`${chalk.grey(`https://circleci.com/gh/${owner}/${repo}`)} for build status or`);
+      console.log(`${chalk.grey(`https://circleci.com/gh/${owner}/${repo}/edit`)} for build settings`);
+    }
+  }
+
+  async run() {
     const dirty = GitUtils.isDirty();
     if (dirty && !this._enableDirty) {
       console.error('hlx will not deploy a working copy that has uncommitted changes. Re-run with flag --dirty to force.');
       process.exit(dirty);
+    }
+
+    if (this._enableAuto) {
+      return this.autoDeploy();
     }
 
     const giturl = new GitUrl(this._content);
