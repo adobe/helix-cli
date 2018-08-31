@@ -124,9 +124,21 @@ class BuildCommand extends EventEmitter {
     console.log(chalk.greenBright(`✨  Copied static in ${Date.now() - t0}ms.\n`));
 
     const bundler = new Bundler(myfiles, myoptions);
-    bundler.addAssetType('htl', require.resolve('@adobe/parcel-plugin-htl/src/HTLAsset.js'));
+    const HTLPreAsset = require.resolve('@adobe/parcel-plugin-htl/src/HTLPreAsset.js');
+    bundler.addAssetType('htl', HTLPreAsset);
+    bundler.addAssetType('htl-preprocessed', require.resolve('@adobe/parcel-plugin-htl/src/HTLAsset.js'));
     bundler.addAssetType('helix-js', require.resolve('./parcel/HelixAsset.js'));
-    await bundler.bundle();
+    const b = await bundler.bundle();
+
+    console.log(b);
+    function dump(bnd) {
+      const htl = bnd.entryAsset instanceof HTLPreAsset;
+      console.log(`type: ${bnd.type} htl:${htl} name: ${bnd.name}`);
+      bnd.childBundles.forEach(function(value) {
+        dump(value);
+      });
+    }
+    dump(b);
   }
 }
 
