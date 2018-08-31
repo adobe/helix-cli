@@ -106,7 +106,36 @@ module.exports = function deploy() {
         }, {}))
         .group(['auto', 'wsk-auth', 'wsk-namespace', 'default', 'dirty'], 'Deployment Options')
         .group(['wsk-host', 'loggly-host', 'loggly-auth', 'target', 'docker', 'prefix', 'content'], 'Advanced Options')
-        .check(args => (args.auto <= !!args.circleciAuth ? true : new Error('auto-deployment requires --circleci-auth')))
+        .check((args) => {
+          if (!args.auto) {
+            // single-shot deployment is easy
+            return true;
+          }
+          const message = 'Auto-deployment requires: ';
+          const missing = [];
+          if (!args.circleciAuth) {
+            missing.push('--circleci-auth');
+          }
+          if (!args.fastlyAuth) {
+            missing.push('--fastly-auth');
+          }
+          if (!args.fastlyAuth) {
+            missing.push('--fastly-namespace');
+          }
+          if (!args.wskAuth) {
+            missing.push('--wsk-auth');
+          }
+          if (!args.wskNamespace) {
+            missing.push('--wsk-namespace');
+          }
+          if (!args.wskHost) {
+            missing.push('--wsk-host');
+          }
+          if (missing.length === 0) {
+            return true;
+          }
+          return new Error(message + missing.join(', '));
+        })
         .help();
     },
     handler: async (argv) => {
