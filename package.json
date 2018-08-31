@@ -7,7 +7,7 @@
     "hlx": "./index.js"
   },
   "scripts": {
-    "test": "nyc mocha",
+    "test": "nyc mocha --exit",
     "lint": "./node_modules/.bin/eslint .",
     "snyk-protect": "snyk protect",
     "prepare": "npm run snyk-protect",
