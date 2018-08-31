@@ -104,7 +104,7 @@ Authentication is required. You can pass the key via the HLX_WSK_AUTH environmen
     new CLI()
       .withCommandExecutor('deploy', mockDeploy)
       .onFail((err) => {
-        assert.equal(err, 'Error: auto-deployment requires --circleci-auth');
+        assert.equal(err, 'Error: Auto-deployment requires: --circleci-auth, --fastly-auth, --fastly-namespace');
         done();
       })
       .run(['deploy',
