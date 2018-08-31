@@ -16,11 +16,36 @@
 
 const EventEmitter = require('events');
 const Bundler = require('parcel-bundler');
+const HTLPreAsset = require('@adobe/parcel-plugin-htl/src/HTLPreAsset.js');
 const glob = require('glob');
 const path = require('path');
 const chalk = require('chalk');
 const fse = require('fs-extra');
 const { DEFAULT_OPTIONS } = require('./defaults.js');
+
+/**
+ * Finds the non-htl files from the generated bundle
+ * @param bnd the parcel bundle
+ * @returns {Array} array of files.
+ */
+function findStaticFiles(bnd) {
+  const statics = [];
+  if (bnd.type) {
+    // eslint-disable-next-line no-param-reassign
+    bnd.htl = bnd.entryAsset instanceof HTLPreAsset;
+    if (bnd.type === 'map' && bnd.parentBundle.htl) {
+      // eslint-disable-next-line no-param-reassign
+      bnd.htl = true;
+    }
+    if (!bnd.htl) {
+      statics.push(bnd.name);
+    }
+  }
+  bnd.childBundles.forEach((child) => {
+    statics.push(...findStaticFiles(child));
+  });
+  return statics;
+}
 
 class BuildCommand extends EventEmitter {
   constructor() {
@@ -70,6 +95,24 @@ class BuildCommand extends EventEmitter {
     return this;
   }
 
+  async moveStaticFiles(files, report) {
+    const jobs = files.map((src) => {
+      const rel = path.relative(this._target, src);
+      const dst = path.resolve(this._distDir, rel);
+      return new Promise((resolve, reject) => {
+        fse.move(src, dst).then(() => {
+          if (report) {
+            const relDest = path.relative(this._distDir, dst);
+            const relDist = path.relative(this._cwd, this._distDir);
+            console.log(chalk.gray(relDist + path.sep) + chalk.cyanBright(relDest));
+          }
+          resolve();
+        }).catch(reject);
+      });
+    });
+    return Promise.all(jobs);
+  }
+
   async copyStaticFile(report) {
     const myfiles = this._staticFiles.reduce((a, f) => [...a, ...glob.sync(f, {
       cwd: this._staticDir,
@@ -103,6 +146,33 @@ class BuildCommand extends EventEmitter {
     }
   }
 
+  /**
+   * Initializes the parcel bundler.
+   * @param files entry files
+   * @param options bundler options
+   * @return {Bundler} the bundler
+   */
+  // eslint-disable-next-line class-methods-use-this
+  createBundler(files, options) {
+    const bundler = new Bundler(files, options);
+    bundler.addAssetType('htl', require.resolve('@adobe/parcel-plugin-htl/src/HTLPreAsset.js'));
+    bundler.addAssetType('htl-preprocessed', require.resolve('@adobe/parcel-plugin-htl/src/HTLAsset.js'));
+    bundler.addAssetType('helix-js', require.resolve('./parcel/HelixAsset.js'));
+    return bundler;
+  }
+
+  async extractStaticFiles(bundle, report) {
+    // get the static files processed by parcel.
+    const staticFiles = findStaticFiles(bundle);
+
+    if (staticFiles.length > 0) {
+      if (report) {
+        console.log(chalk.greenBright('\n✨  Moving static files in place:'));
+      }
+      await this.moveStaticFiles(staticFiles, report);
+    }
+  }
+
   async run() {
     // override default options with command line arguments
     const myoptions = {
@@ -123,22 +193,11 @@ class BuildCommand extends EventEmitter {
     await this.copyStaticFile(true);
     console.log(chalk.greenBright(`✨  Copied static in ${Date.now() - t0}ms.\n`));
 
-    const bundler = new Bundler(myfiles, myoptions);
-    const HTLPreAsset = require.resolve('@adobe/parcel-plugin-htl/src/HTLPreAsset.js');
-    bundler.addAssetType('htl', HTLPreAsset);
-    bundler.addAssetType('htl-preprocessed', require.resolve('@adobe/parcel-plugin-htl/src/HTLAsset.js'));
-    bundler.addAssetType('helix-js', require.resolve('./parcel/HelixAsset.js'));
-    const b = await bundler.bundle();
-
-    console.log(b);
-    function dump(bnd) {
-      const htl = bnd.entryAsset instanceof HTLPreAsset;
-      console.log(`type: ${bnd.type} htl:${htl} name: ${bnd.name}`);
-      bnd.childBundles.forEach(function(value) {
-        dump(value);
-      });
+    const bundler = this.createBundler(myfiles, myoptions);
+    const bundle = await bundler.bundle();
+    if (bundle) {
+      await this.extractStaticFiles(bundle, true);
     }
-    dump(b);
   }
 }
 
