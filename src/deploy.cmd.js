@@ -211,6 +211,25 @@ class DeployCommand {
     });
   }
 
+  static setDeployVarOptions(name, value, owner, repo, auth) {
+    const body = JSON.stringify({
+      name,
+      value,
+    });
+    const options = {
+      method: 'POST',
+      auth,
+      uri: `https://circleci.com/api/v1.1/project/github/${owner}/${repo}/envvar`,
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+        'User-Agent': 'helix-cli',
+      },
+      body,
+    };
+    return request(options);
+  }
+
   async autoDeploy() {
     const { owner, repo } = GitUtils.getOriginURL();
 
@@ -223,14 +242,55 @@ class DeployCommand {
       method: 'POST',
       json: true,
       auth,
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+        'User-Agent': 'helix-cli',
+      },
       uri: `https://circleci.com/api/v1.1/project/github/${owner}/${repo}/follow`,
     };
 
     console.log(`Automating deployment with ${followoptions.uri}`);
+
     const follow = await request(followoptions);
 
-    if (follow.first_build) {
-      console.log('Auto-deployment started. Configuring: ');
+    if (!follow.first_build) {
+      console.log('\nAuto-deployment started.');
+      const envars = [];
+
+      if (this._fastly_namespace) {
+        envars.push(DeployCommand.setDeployVarOptions('HLX_FASTLY_NAMESPACE', this._fastly_namespace, owner, repo, auth));
+      }
+      if (this._fastly_auth) {
+        envars.push(DeployCommand.setDeployVarOptions('HLX_FASTLY_AUTH', this._fastly_auth, owner, repo, auth));
+      }
+
+      if (this._wsk_auth) {
+        envars.push(DeployCommand.setDeployVarOptions('HLX_WSK_AUTH', this._wsk_auth, owner, repo, auth));
+      }
+
+      if (this._wsk_host) {
+        envars.push(DeployCommand.setDeployVarOptions('HLX_WSK_HOST', this._wsk_host, owner, repo, auth));
+      }
+      if (this._wsk_namespace) {
+        envars.push(DeployCommand.setDeployVarOptions('HLX_WSK_NAMESPACE', this._wsk_namespace, owner, repo, auth));
+      }
+      if (this._loggly_auth) {
+        envars.push(DeployCommand.setDeployVarOptions('HLX_LOGGLY_AUTH', this._wsk_auth, owner, repo, auth));
+      }
+      if (this._loggly_host) {
+        envars.push(DeployCommand.setDeployVarOptions('HLX_LOGGLY_HOST', this._loggly_host, owner, repo, auth));
+      }
+
+      try {
+        await Promise.all(envars);
+        console.log('Configuration finished. Go to');
+        console.log(`${chalk.grey(`https://circleci.com/gh/${owner}/${repo}/edit`)} for build settings or`);
+        console.log(`${chalk.grey(`https://circleci.com/gh/${owner}/${repo}`)} for build status.`);
+      } catch (e) {
+        console.error('Error setting build environment variables');
+        throw e;
+      }
     } else {
       console.log('\nAuto-deployment already set up. Go to');
       console.log(`${chalk.grey(`https://circleci.com/gh/${owner}/${repo}`)} for build status or`);
