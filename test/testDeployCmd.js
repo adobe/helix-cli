@@ -39,6 +39,8 @@ describe('hlx deploy (Integration)', () => {
   let distDir;
   let staticFile;
   let testRoot;
+  let headers;
+  let cwd;
 
   beforeEach(async () => {
     testRoot = await createTestRoot();
@@ -52,14 +54,19 @@ describe('hlx deploy (Integration)', () => {
     await fs.outputFile(srcFile, 'main(){};');
     await fs.outputFile(staticFile, 'body { background-color: black; }');
 
+    cwd = process.cwd();
+
     Replay.mode = 'replay';
     // don't record the authorization header
+    headers = Replay.headers;
     Replay.headers = Replay.headers.filter(e => e !== /^authorization/);
   });
 
   afterEach(() => {
     fs.remove(testRoot);
     Replay.mode = 'bloody';
+    Replay.headers = headers;
+    $.cd(cwd);
   });
 
   it('Auto-Deploy works', (done) => {
