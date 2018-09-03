@@ -263,3 +263,108 @@ An example configuration could look like this:
       ref: master
       owner: Adobe-Marketing-Cloud
 ```
+
+## (Recommended) Performance Testing
+
+You can (and should) test the performance of your deployed site by running `hlx perf`.
+
+The default test will test the entry page of every strain (using the `url`) property, if defined. Additional known URLs can be configured for each strain using the key `urls` (expects an array of URLs).
+
+The default test will run from a mid-range mobile phone (Motorola Moto G4), using a regular 3G connection from London, UK. It makes sure that the Lighthouse Accessibility Score and the Lighthouse Performance Score of your site is at least 80.
+
+You can set custom performance budgets and change the performance condition for each strain using the `perf` property. If a strain has no `perf` measurement configured, the `perf` configuration of the default strain will be used.
+
+An example performance configuration might look like this:
+
+```yaml
+- strain:
+    name: default
+    code: /trieloff/default/https---github-com-adobe-helix-helpx-git--master--
+    index: README.html
+    static:
+      deny:
+        - "*.md"
+    url: https://www.primordialsoup.life
+    urls:
+      - https://www.primordialsoup.life/README.html
+    perf:
+      device: iPhone8
+      connection: good3G
+      location: Sydney
+      visually_complete_85: 1500
+      lighthouse-best-practices-score: 80
+```
+
+If the site does not meet all performance criteria you have defined, `hlx perf` will exit with a non-null exit code (the exit code equals the number of failed tests). This allows you to use `hlx perf` as a gating condition in a CI/CD workflow.
+
+### Testing Environment
+
+* Possible `device` values are:
+  * `MotorolaMotoG4`
+  * `iPhone5`
+  * `iPhone6`
+  * `iPhone6Plus`
+  * `iPhone7`
+  * `iPhone8`
+  * `Nexus5X`
+  * `Nexus6P`
+  * `GalaxyS5`
+  * `iPad`
+  * `iPadPro`
+* Possible `connection` values are: 
+  * `regular2G`
+  * `good2G`
+  * `slow3G`
+  * `regular3G`
+  * `good3G`
+  * `emergingMarkets`
+  * `regular4G`
+  * `LTE`
+  * `dsl`
+  * `wifi`
+  * `cable`
+* Possible `location` values are:
+  * `NorthVirginia`
+  * `Frankfurt`
+  * `Sydney`
+  * `Ohio`
+  * `California`
+  * `Oregon`
+  * `Canada`
+  * `Ireland`
+  * `Tokyo`
+  * `Seoul`
+  * `Singapore`
+  * `Mumbai`
+  * `SaoPaulo`
+  * `London`
+
+### Performance Metrics
+
+You can set performance budgets against following scores (more is better) and metrics (less is better):
+
+* `speed_index`: Speed Index
+* `visually_complete`: Visually Complete
+* `visually_complete_85`: 85% Visually Complete
+* `lighthouse-seo-score`: Lighthouse SEO Score
+* `lighthouse-best-practices-score`: Lighthouse Best Practices Score
+* `lighthouse-accessibility-score`: Lighthouse Accessibility Score
+* `lighthouse-performance-score`: Lighthouse Performance Score
+* `lighthouse-pwa-score`: Lighthouse Progressive Web App Score
+* `js-parse-compile`: JS Parse & Compile
+* `time-to-first-byte`: Time to First Byte
+* `first-contentful-paint`: First Contentful Paint
+* `first-meaningful-paint`: First Meaningful Paint
+* `firstRender`: First Paint
+* `dom-size`: DOM Element Count
+* `estimated-input-latency`: Estimated input latency
+* `consistently-interactive`: Time to Interactive
+* `first-interactive`: First CPU Idle
+* `html_body_size_in_bytes`: Total HTML size in bytes
+* `html_size_in_bytes`: Total HTML transferred
+* `page_wait_timing`: Response time
+* `page_size_in_bytes`: Total Page transferred
+* `page_body_size_in_bytes`: Total Page size in bytes
+* `asset_count`: Number of requests
+* `onload`: onLoad
+* `oncontentload`: onContentLoad
