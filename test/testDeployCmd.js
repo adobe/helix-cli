@@ -79,4 +79,11 @@ describe('hlx deploy (Integration)', () => {
     const thirdrun = fs.readFileSync(strainsFile).toString();
     assert.notEqual(firstrun, thirdrun);
   }).timeout(10000);
+
+  it('setDeployOptions() #unittest', () => {
+    const options = DeployCommand.getBuildVarOptions('FOO', 'BAR', 'adobe', 'helix-cli', {});
+    assert.equal(options.method, 'POST');
+    assert.equal(JSON.parse(options.body).name, 'FOO');
+    assert.equal(JSON.parse(options.body).value, 'BAR');
+  });
 });
