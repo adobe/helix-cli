@@ -159,6 +159,10 @@ class DeployCommand {
   }
 
   async autoDeploy() {
+    if (!(fs.existsSync(path.resolve(process.cwd(), '.circleci', 'config.yaml')) || fs.existsSync(path.resolve(process.cwd(), '.circleci', 'config.yml')))) {
+      throw new Error('Cannot automate deployment without .circleci/config.yaml');
+    }
+
     const { owner, repo } = GitUtils.getOriginURL();
 
     const auth = {
