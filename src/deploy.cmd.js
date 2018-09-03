@@ -302,11 +302,10 @@ class DeployCommand {
     await Promise.all(envars);
 
     if (follow.first_build) {
-      console.log('\nAuto-deployment started.');    
+      console.log('\nAuto-deployment started.');
       console.log('Configuration finished. Go to');
       console.log(`${chalk.grey(`https://circleci.com/gh/${owner}/${repo}/edit`)} for build settings or`);
       console.log(`${chalk.grey(`https://circleci.com/gh/${owner}/${repo}`)} for build status.`);
-  
     } else {
       console.log('\nAuto-deployment already set up. Triggering a new build.');
 

@@ -28,7 +28,7 @@ const strainconfig = require('../src/strain-config-utils');
 const CI_TOKEN = 'nope';
 
 Replay.mode = 'bloody';
-Replay.fixtures = __dirname + '/fixtures/';
+Replay.fixtures = `${__dirname}/fixtures/`;
 
 describe('hlx deploy (Integration)', () => {
   let hlxDir;
@@ -54,21 +54,21 @@ describe('hlx deploy (Integration)', () => {
 
     Replay.mode = 'replay';
     // don't record the authorization header
-    Replay.headers = Replay.headers.filter(e => e == /^authorization/);
+    Replay.headers = Replay.headers.filter(e => e !== /^authorization/);
   });
 
   afterEach(() => {
     fs.remove(testRoot);
     Replay.mode = 'bloody';
-  })
+  });
 
-  it('Auto-Deploy works', done => {
+  it('Auto-Deploy works', (done) => {
     try {
       $.cd(testRoot);
       $.exec('git clone https://github.com/trieloff/helix-helpx.git');
       $.cd(path.resolve(testRoot, 'helix-helpx'));
 
-      const result = new DeployCommand()
+      new DeployCommand()
         .withWskHost('runtime.adobe.io')
         .withWskAuth('secret-key')
         .withWskNamespace('hlx')
@@ -79,7 +79,8 @@ describe('hlx deploy (Integration)', () => {
         .withTarget(buildDir)
         .withStrainFile(strainsFile)
         .withCircleciAuth(CI_TOKEN)
-        .run().then(() => {console.log('done');done();});
+        .run()
+        .then(() => { done(); });
     } catch (e) {
       done(e);
     }
