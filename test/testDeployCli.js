@@ -53,6 +53,8 @@ describe('hlx deploy', () => {
     mockDeploy.withDryRun.returnsThis();
     mockDeploy.withContent.returnsThis();
     mockDeploy.withStaticContent.returnsThis();
+    mockDeploy.withFastlyAuth.returnsThis();
+    mockDeploy.withFastlyNamespace.returnsThis();
     mockDeploy.run.returnsThis();
 
     // disable static functions as well to avoid shelljs executions.
