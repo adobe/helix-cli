@@ -67,6 +67,16 @@ class DeployCommand {
     return this;
   }
 
+  withFastlyAuth(value) {
+    this._fastly_auth = value;
+    return this;
+  }
+
+  withFastlyNamespace(value) {
+    this._fastly_namespace = value;
+    return this;
+  }
+
   withWskHost(value) {
     this._wsk_host = value;
     return this;
@@ -163,7 +173,7 @@ class DeployCommand {
       throw new Error('Cannot automate deployment without .circleci/config.yaml');
     }
 
-    const { owner, repo } = GitUtils.getOriginURL();
+    const { owner, repo, ref } = GitUtils.getOriginURL();
 
     const auth = {
       username: this._circleciAuth,
@@ -186,7 +196,9 @@ class DeployCommand {
 
     const follow = await request(followoptions);
 
-    if (!follow.first_build) {
+    console.log(this._fastly_auth, this._fastly_namespace);
+
+    if (follow.first_build) {
       console.log('\nAuto-deployment started.');
       const envars = [];
 
@@ -224,9 +236,25 @@ class DeployCommand {
         throw e;
       }
     } else {
-      console.log('\nAuto-deployment already set up. Go to');
-      console.log(`${chalk.grey(`https://circleci.com/gh/${owner}/${repo}`)} for build status or`);
-      console.log(`${chalk.grey(`https://circleci.com/gh/${owner}/${repo}/edit`)} for build settings`);
+      console.log('\nAuto-deployment already set up. Triggering a new build.');
+
+      const triggeroptions = {
+        method: 'POST',
+        json: true,
+        auth,
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+          'User-Agent': 'helix-cli',
+        },
+        uri: `https://circleci.com/api/v1.1/project/github/${owner}/${repo}/tree/${ref}`,
+      };
+
+      const triggered = await request(triggeroptions);
+
+
+
+      console.log(`Go to ${chalk.grey(`${triggered.build_url}`)} for build status.`);
     }
   }
 

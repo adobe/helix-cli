@@ -113,7 +113,7 @@ module.exports = function deploy() {
           if (!args.fastlyAuth) {
             missing.push('--fastly-auth');
           }
-          if (!args.fastlyAuth) {
+          if (!args.fastlyNamespace) {
             missing.push('--fastly-namespace');
           }
           if (!args.wskAuth) {
@@ -154,6 +154,8 @@ module.exports = function deploy() {
         .withDryRun(argv.dryRun)
         .withContent(argv.content)
         .withCircleciAuth(argv.circleciAuth)
+        .withFastlyAuth(argv.fastlyAuth)
+        .withFastlyNamespace(argv.fastlyNamespace)
         .run();
     },
 
