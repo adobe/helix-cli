@@ -39,7 +39,7 @@ describe('hlx deploy (Integration)', () => {
   let distDir;
   let staticFile;
   let testRoot;
-  let headers;
+  let replayheaders;
   let cwd;
 
   beforeEach(async () => {
@@ -58,14 +58,14 @@ describe('hlx deploy (Integration)', () => {
 
     Replay.mode = 'replay';
     // don't record the authorization header
-    headers = Replay.headers;
+    replayheaders = Replay.headers;
     Replay.headers = Replay.headers.filter(e => e !== /^authorization/);
   });
 
   afterEach(() => {
     fs.remove(testRoot);
     Replay.mode = 'bloody';
-    Replay.headers = headers;
+    Replay.headers = replayheaders;
     $.cd(cwd);
   });
 
