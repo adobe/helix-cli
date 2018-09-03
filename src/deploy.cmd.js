@@ -175,7 +175,7 @@ class DeployCommand {
 
   async autoDeploy() {
     if (!(fs.existsSync(path.resolve(process.cwd(), '.circleci', 'config.yaml')) || fs.existsSync(path.resolve(process.cwd(), '.circleci', 'config.yml')))) {
-      throw new Error('Cannot automate deployment without .circleci/config.yaml');
+      throw new Error(`Cannot automate deployment without ${path.resolve(process.cwd(), '.circleci', 'config.yaml')}`);
     }
 
     const { owner, repo, ref } = GitUtils.getOriginURL();
@@ -201,43 +201,40 @@ class DeployCommand {
 
     const follow = await request(followoptions);
 
+    const envars = [];
+
+    if (this._fastly_namespace) {
+      envars.push(DeployCommand.setBuildVar('HLX_FASTLY_NAMESPACE', this._fastly_namespace, owner, repo, auth));
+    }
+    if (this._fastly_auth) {
+      envars.push(DeployCommand.setBuildVar('HLX_FASTLY_AUTH', this._fastly_auth, owner, repo, auth));
+    }
+
+    if (this._wsk_auth) {
+      envars.push(DeployCommand.setBuildVar('HLX_WSK_AUTH', this._wsk_auth, owner, repo, auth));
+    }
+
+    if (this._wsk_host) {
+      envars.push(DeployCommand.setBuildVar('HLX_WSK_HOST', this._wsk_host, owner, repo, auth));
+    }
+    if (this._wsk_namespace) {
+      envars.push(DeployCommand.setBuildVar('HLX_WSK_NAMESPACE', this._wsk_namespace, owner, repo, auth));
+    }
+    if (this._loggly_auth) {
+      envars.push(DeployCommand.setBuildVar('HLX_LOGGLY_AUTH', this._wsk_auth, owner, repo, auth));
+    }
+    if (this._loggly_host) {
+      envars.push(DeployCommand.setBuildVar('HLX_LOGGLY_HOST', this._loggly_host, owner, repo, auth));
+    }
+
+    await Promise.all(envars);
+
     if (follow.first_build) {
-      console.log('\nAuto-deployment started.');
-      const envars = [];
-
-      if (this._fastly_namespace) {
-        envars.push(DeployCommand.setBuildVar('HLX_FASTLY_NAMESPACE', this._fastly_namespace, owner, repo, auth));
-      }
-      if (this._fastly_auth) {
-        envars.push(DeployCommand.setBuildVar('HLX_FASTLY_AUTH', this._fastly_auth, owner, repo, auth));
-      }
-
-      if (this._wsk_auth) {
-        envars.push(DeployCommand.setBuildVar('HLX_WSK_AUTH', this._wsk_auth, owner, repo, auth));
-      }
-
-      if (this._wsk_host) {
-        envars.push(DeployCommand.setBuildVar('HLX_WSK_HOST', this._wsk_host, owner, repo, auth));
-      }
-      if (this._wsk_namespace) {
-        envars.push(DeployCommand.setBuildVar('HLX_WSK_NAMESPACE', this._wsk_namespace, owner, repo, auth));
-      }
-      if (this._loggly_auth) {
-        envars.push(DeployCommand.setBuildVar('HLX_LOGGLY_AUTH', this._wsk_auth, owner, repo, auth));
-      }
-      if (this._loggly_host) {
-        envars.push(DeployCommand.setBuildVar('HLX_LOGGLY_HOST', this._loggly_host, owner, repo, auth));
-      }
-
-      try {
-        await Promise.all(envars);
-        console.log('Configuration finished. Go to');
-        console.log(`${chalk.grey(`https://circleci.com/gh/${owner}/${repo}/edit`)} for build settings or`);
-        console.log(`${chalk.grey(`https://circleci.com/gh/${owner}/${repo}`)} for build status.`);
-      } catch (e) {
-        console.error('Error setting build environment variables');
-        throw e;
-      }
+      console.log('\nAuto-deployment started.');    
+      console.log('Configuration finished. Go to');
+      console.log(`${chalk.grey(`https://circleci.com/gh/${owner}/${repo}/edit`)} for build settings or`);
+      console.log(`${chalk.grey(`https://circleci.com/gh/${owner}/${repo}`)} for build status.`);
+  
     } else {
       console.log('\nAuto-deployment already set up. Triggering a new build.');
 

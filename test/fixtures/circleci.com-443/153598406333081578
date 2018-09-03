@@ -1,0 +1,18 @@
+POST /api/v1.1/project/github/trieloff/helix-helpx/follow
+
+HTTP/1.1 200 OK
+content-type: application/json; charset=utf-8
+date: Mon, 03 Sep 2018 14:14:23 GMT
+server: nginx
+set-cookie: ring-session=hJR6A99f2wjTByx3oQaJMdYa8WIAYp01vHmifhXbcJ26wEhzz8uplwHcERjVW5snrUqDIYrXKkXUMIakAPIWsCrIlPueldYKDtEQRVjNzNijtlOIcIm3faKLWE909IhCIh5xwsrMmP5aw1%2FWU1HH9xlApnYcH4R%2FZfhkE9kUreQ5X29fFK5DRPzvXjeG2xsM22do%2FdD9MCNkQiQxqmYxBi%2FEUxPz4L7cCbPS3QJHTow%3D--nOaLk%2BUrlrfmP%2FFeK1AKKQpzvNmdJwEDH3C2SEdxfLM%3D;Path=/;HttpOnly;Expires=Tue, 03 Sep 2019 11:10:07 +0000;Max-Age=1209600;Secure
+strict-transport-security: max-age=15724800
+x-circleci-identity: circle-www-api-v1-59d9c6d85b-nzv57
+x-circleci-scopes: :write-settings, :view-builds, :read-settings, :trigger-builds, :all, :status, :none
+x-client-trace-id: 
+x-frame-options: DENY
+x-request-id: 8febfdfc-a64e-4209-99ef-34bcc151500c
+x-route: /follow
+content-length: 54
+connection: Close
+
+{"following":true,"workflow":false,"first_build":null}
