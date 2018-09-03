@@ -12,12 +12,23 @@
 
 /* eslint-env mocha */
 
+const Replay = require('replay');
 const fs = require('fs-extra');
 const assert = require('assert');
 const path = require('path');
+<<<<<<< HEAD
 const { createTestRoot, assertZipEntry, assertFile } = require('./utils.js');
+=======
+const $ = require('shelljs');
+const { createTestRoot, assertFile } = require('./utils.js');
+>>>>>>> 6ba8f85... added integration test (with fixtures) for auto-deploy
 const DeployCommand = require('../src/deploy.cmd.js');
 const strainconfig = require('../src/strain-config-utils');
+
+const CI_TOKEN = 'nope';
+
+Replay.mode = 'bloody';
+Replay.fixtures = __dirname + '/fixtures/';
 
 describe('hlx deploy (Integration)', () => {
   let hlxDir;
@@ -27,9 +38,10 @@ describe('hlx deploy (Integration)', () => {
   let zipFile;
   let distDir;
   let staticFile;
+  let testRoot;
 
   beforeEach(async () => {
-    const testRoot = await createTestRoot();
+    testRoot = await createTestRoot();
     hlxDir = path.resolve(testRoot, '.hlx');
     buildDir = path.resolve(hlxDir, 'build');
     distDir = path.resolve(hlxDir, 'dist');
@@ -39,7 +51,39 @@ describe('hlx deploy (Integration)', () => {
     zipFile = path.resolve(buildDir, 'my-prefix-html.zip');
     await fs.outputFile(srcFile, 'main(){};');
     await fs.outputFile(staticFile, 'body { background-color: black; }');
+
+    Replay.mode = 'replay';
+    // don't record the authorization header
+    Replay.headers = Replay.headers.filter(e => e == /^authorization/);
   });
+
+  afterEach(() => {
+    fs.remove(testRoot);
+    Replay.mode = 'bloody';
+  })
+
+  it('Auto-Deploy works', done => {
+    try {
+      $.cd(testRoot);
+      $.exec('git clone https://github.com/trieloff/helix-helpx.git');
+      $.cd(path.resolve(testRoot, 'helix-helpx'));
+
+      const result = new DeployCommand()
+        .withWskHost('runtime.adobe.io')
+        .withWskAuth('secret-key')
+        .withWskNamespace('hlx')
+        .withEnableAuto(true)
+        .withEnableDirty(true)
+        .withDryRun(true)
+        .withContent('git@github.com:adobe/helix-cli')
+        .withTarget(buildDir)
+        .withStrainFile(strainsFile)
+        .withCircleciAuth(CI_TOKEN)
+        .run().then(() => {console.log('done');done();});
+    } catch (e) {
+      done(e);
+    }
+  }).timeout(15000);
 
   it('Dry-Running works', async () => {
     await new DeployCommand()
@@ -97,6 +141,7 @@ describe('hlx deploy (Integration)', () => {
     const thirdrun = fs.readFileSync(strainsFile).toString();
     assert.notEqual(firstrun, thirdrun);
   }).timeout(10000);
+});
 
   it('includes the static files into the zip for static-content=bundled', async () => {
     await new DeployCommand()
@@ -141,6 +186,7 @@ describe('hlx deploy (Integration)', () => {
     assert.equal(strains[0].githubStatic.owner, 'adobe');
   });
   
+describe('DeployCommand #unittest', () => {
   it('setDeployOptions() #unittest', () => {
     const options = DeployCommand.getBuildVarOptions('FOO', 'BAR', 'adobe', 'helix-cli', {});
     assert.equal(options.method, 'POST');
