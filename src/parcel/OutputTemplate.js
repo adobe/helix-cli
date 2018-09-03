@@ -14,10 +14,17 @@
 
 // CONTENTS
 
+const owwrapper = (() => {
+  const module = {};
+
+  // OW_WRAPPER
+
+  return module.exports;
+})();
+
 function wrap(main) {
   const { pipe } = require('MOD_PIPE');
   const { pre } = require('MOD_PRE');
-  const owwrapper = require('@adobe/openwhisk-loggly-wrapper');
 
   const _isFunction = (fn) => !!(fn && fn.constructor && fn.call && fn.apply);
 
