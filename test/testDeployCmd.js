@@ -44,7 +44,7 @@ describe('hlx deploy (Integration)', () => {
     Replay.mode = 'replay';
     // don't record the authorization header
     replayheaders = Replay.headers;
-    Replay.headers = Replay.headers.filter(e => e !== /^authorization/);
+    Replay.headers = Replay.headers.filter(e => new RegExp(e).toString() !== new RegExp(/^authorization/).toString());
   });
 
   afterEach(() => {
@@ -70,6 +70,8 @@ describe('hlx deploy (Integration)', () => {
         .withContent('git@github.com:adobe/helix-cli')
         .withTarget(buildDir)
         .withStrainFile(strainsFile)
+        .withFastlyAuth('nope')
+        .withFastlyNamespace('justtesting')
         .withCircleciAuth(CI_TOKEN)
         .run()
         .then(() => { done(); });
