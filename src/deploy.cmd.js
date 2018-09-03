@@ -273,8 +273,6 @@ class DeployCommand {
 
     const follow = await request(followoptions);
 
-    console.log(this._fastly_auth, this._fastly_namespace);
-
     if (follow.first_build) {
       console.log('\nAuto-deployment started.');
       const envars = [];
