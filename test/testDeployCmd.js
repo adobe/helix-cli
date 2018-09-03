@@ -140,4 +140,11 @@ describe('hlx deploy (Integration)', () => {
     // todo: this will probably fail on a fork
     assert.equal(strains[0].githubStatic.owner, 'adobe');
   });
+  
+  it('setDeployOptions() #unittest', () => {
+    const options = DeployCommand.getBuildVarOptions('FOO', 'BAR', 'adobe', 'helix-cli', {});
+    assert.equal(options.method, 'POST');
+    assert.equal(JSON.parse(options.body).name, 'FOO');
+    assert.equal(JSON.parse(options.body).value, 'BAR');
+  });
 });

@@ -221,7 +221,7 @@ class DeployCommand {
     });
   }
 
-  static setDeployVarOptions(name, value, owner, repo, auth) {
+  static getBuildVarOptions(name, value, auth, owner, repo) {
     const body = JSON.stringify({
       name,
       value,
@@ -237,6 +237,11 @@ class DeployCommand {
       },
       body,
     };
+    return options;
+  }
+
+  static setBuildVar(name, value, owner, repo, auth) {
+    const options = DeployCommand.getBuildVarOptions(name, value, auth, owner, repo);
     return request(options);
   }
 
@@ -275,27 +280,27 @@ class DeployCommand {
       const envars = [];
 
       if (this._fastly_namespace) {
-        envars.push(DeployCommand.setDeployVarOptions('HLX_FASTLY_NAMESPACE', this._fastly_namespace, owner, repo, auth));
+        envars.push(DeployCommand.setBuildVar('HLX_FASTLY_NAMESPACE', this._fastly_namespace, owner, repo, auth));
       }
       if (this._fastly_auth) {
-        envars.push(DeployCommand.setDeployVarOptions('HLX_FASTLY_AUTH', this._fastly_auth, owner, repo, auth));
+        envars.push(DeployCommand.setBuildVar('HLX_FASTLY_AUTH', this._fastly_auth, owner, repo, auth));
       }
 
       if (this._wsk_auth) {
-        envars.push(DeployCommand.setDeployVarOptions('HLX_WSK_AUTH', this._wsk_auth, owner, repo, auth));
+        envars.push(DeployCommand.setBuildVar('HLX_WSK_AUTH', this._wsk_auth, owner, repo, auth));
       }
 
       if (this._wsk_host) {
-        envars.push(DeployCommand.setDeployVarOptions('HLX_WSK_HOST', this._wsk_host, owner, repo, auth));
+        envars.push(DeployCommand.setBuildVar('HLX_WSK_HOST', this._wsk_host, owner, repo, auth));
       }
       if (this._wsk_namespace) {
-        envars.push(DeployCommand.setDeployVarOptions('HLX_WSK_NAMESPACE', this._wsk_namespace, owner, repo, auth));
+        envars.push(DeployCommand.setBuildVar('HLX_WSK_NAMESPACE', this._wsk_namespace, owner, repo, auth));
       }
       if (this._loggly_auth) {
-        envars.push(DeployCommand.setDeployVarOptions('HLX_LOGGLY_AUTH', this._wsk_auth, owner, repo, auth));
+        envars.push(DeployCommand.setBuildVar('HLX_LOGGLY_AUTH', this._wsk_auth, owner, repo, auth));
       }
       if (this._loggly_host) {
-        envars.push(DeployCommand.setDeployVarOptions('HLX_LOGGLY_HOST', this._loggly_host, owner, repo, auth));
+        envars.push(DeployCommand.setBuildVar('HLX_LOGGLY_HOST', this._loggly_host, owner, repo, auth));
       }
 
       try {
@@ -323,7 +328,6 @@ class DeployCommand {
       };
 
       const triggered = await request(triggeroptions);
-
 
 
       console.log(`Go to ${chalk.grey(`${triggered.build_url}`)} for build status.`);
