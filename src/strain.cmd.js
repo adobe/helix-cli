@@ -59,6 +59,7 @@ class StrainCommand {
       strain_github_static_owners: null,
       strain_github_static_refs: null,
       strain_github_static_magic: null,
+      strain_github_static_root: null,
       strain_index_files: null,
       strain_allow: null,
       strain_deny: null,
@@ -621,6 +622,10 @@ class StrainCommand {
       } else {
         // TODO: replace ref with sha for better performance and lower risk of hitting rate limits
         makeStrainjob('strain_github_static_refs', strain.name, origin.ref, '🏷  Set static ref to current ref');
+      }
+
+      if (strain.static && strain.static.root) {
+        makeStrainjob('strain_github_static_root', strain.name, strain.static.root, '🌲  Set static root');
       }
 
       if (strain.static && strain.static.magic) {
