@@ -151,7 +151,25 @@ Static content is served from the code repository of the Helix project. By defau
       owner: Adobe-Marketing-Cloud
 ```
 
-The same core configuration options (`repo`, `ref`, and `owner`) are supported for `static` as for `content`. 
+The same core configuration options (`repo`, `ref`, `root`, and `owner`) are supported for `static` as for `content`. 
+
+#### Keeping Your Repository Clean
+
+Although you can just put static content, e.g. an `index.html` loader for your SPA into the root of your repository, this tends to litter the repository with many small files.
+
+To keep things clean, create a directory `docroot` in the repository and move your static files there. Then add the configuration `static.root = docroot` to your `strains.yaml` so that it looks like this:
+
+```yaml
+- strain:
+    name: default
+    static:
+      repo: reactor-user-docs
+      ref: master
+      owner: Adobe-Marketing-Cloud
+      root: docroot
+```
+
+After your next deployment with `hlx strain`, all static content will be served out of the directory `docroot`. None of this will be visible in the URL, so that no visitor will ever see "docroot" in the URL. `https://example.com/index.html` would be served from `$REPO/docroot/index.html`.
 
 #### Securing Static Content
 

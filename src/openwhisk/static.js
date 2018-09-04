@@ -246,7 +246,7 @@ function redirectToRef(owner, repo, ref, entry, path, strain, clientid, clientse
 }
 
 function deliverPlain(owner, repo, ref, entry, root) {
-  const cleanentry = (root + entry).replace(/^\//, '').replace(/[/]+/g, '');
+  const cleanentry = (root + '/' + entry).replace(/^\//, '').replace(/[/]+/g, '');
   console.log('deliverPlain()', owner, repo, ref, cleanentry);
   const rawopts = {
     url: `https://raw.githubusercontent.com/${owner}/${repo}/${ref}/${cleanentry}`,
