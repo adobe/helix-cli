@@ -44,6 +44,7 @@ describe('Integration test for build', () => {
   it('build command succeeds and produces files', async function test() {
     this.timeout(5000);
     const stylesCssName = `styles.${md5(path.resolve(TEST_DIR, 'src/component/styles.css')).slice(-8)}.css`;
+    const welcomeTxtName = `welcome.${md5(path.resolve(TEST_DIR, 'src/welcome.txt')).slice(-8)}.txt`;
     await new BuildCommand()
       .withFiles(['test/integration/src/**/*.htl'])
       .withTargetDir(buildDir)
@@ -56,8 +57,7 @@ describe('Integration test for build', () => {
     assert.ok(!fs.existsSync(path.resolve(buildDir, 'html.pre.js')));
     assert.ok(fs.existsSync(path.resolve(buildDir, 'example_html.js')));
     assert.ok(fs.existsSync(path.resolve(buildDir, 'component', 'html.js')));
-    assert.ok(fs.existsSync(path.resolve(distDir, 'welcome.txt')));
-    assert.ok(fs.existsSync(path.resolve(distDir, 'component', 'foo.txt')));
+    assert.ok(fs.existsSync(path.resolve(distDir, welcomeTxtName)));
     assert.ok(fs.existsSync(path.resolve(distDir, stylesCssName)));
   });
 });
