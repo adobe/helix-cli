@@ -245,9 +245,9 @@ function redirectToRef(owner, repo, ref, entry, path, strain, clientid, clientse
   })).catch(error);
 }
 
-function deliverPlain(owner, repo, ref, entry) {
-  const cleanentry = entry.replace(/^\//, '');
-  console.log('deliverPlain()', owner, repo, ref, entry);
+function deliverPlain(owner, repo, ref, entry, root) {
+  const cleanentry = (root + entry).replace(/^\//, '').replace(/[/]+/g, '');
+  console.log('deliverPlain()', owner, repo, ref, cleanentry);
   const rawopts = {
     url: `https://raw.githubusercontent.com/${owner}/${repo}/${ref}/${cleanentry}`,
     headers: {
@@ -297,7 +297,21 @@ function blacklisted(path, allow, deny) {
   }
   return false;
 }
-
+/**
+ *
+ * @param {Object} params The OpenWhisk payload
+ * @param {string} params.owner Repository owner on GitHub
+ * @param {string} params.repo Repository name on GitHub
+ * @param {string} params.ref SHA of a commit or name of a branch or tag on GitHub
+ * @param {string} params.path path to the requested file (if used with `entry`)
+ * @param {string} params.entry path to the file requested by the browser
+ * @param {boolean} params.plain disable asset pre-processing with Parcel
+ * @param {string} params.clientid client id of a GitHub app
+ * @param {string} params.clientsecret client secret of a GitHub app
+ * @param {string} params.allow regular expression pattern that all delivered files must follow
+ * @param {string} params.deny regular expression pattern that all delivered files may not follow
+ * @param {string} params.root document root for all static files in the repository
+ */
 async function main({
   owner,
   repo,
@@ -310,8 +324,9 @@ async function main({
   clientsecret,
   allow,
   deny,
+  root = '',
 }) {
-  console.log('main()', owner, repo, ref, path, entry, strain, plain, allow, deny);
+  console.log('main()', owner, repo, ref, path, entry, strain, plain, allow, deny, root);
 
   if (blacklisted(path, allow, deny) || blacklisted(entry, allow, deny)) {
     return forbidden();
@@ -323,7 +338,7 @@ async function main({
   let file = path;
 
   if (plain) {
-    return deliverPlain(owner, repo, ref, entry);
+    return deliverPlain(owner, repo, ref, entry, root);
   }
 
   if (!path) {
