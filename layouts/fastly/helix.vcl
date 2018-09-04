@@ -129,6 +129,14 @@ sub hlx_github_static_owner {
   }
 }
 
+# Gets the github static root
+sub hlx_github_static_root {
+  set req.http.X-Github-Static-Root = table.lookup(strain_github_static_root, req.http.X-Strain);
+  if (!req.http.X-Github-Static-Root) {
+    set req.http.X-Github-Static-Root = table.lookup(strain_github_static_root, "default");
+  }
+}
+
 # Gets the github static ref
 sub hlx_github_static_ref {
   set req.http.X-Github-Static-Ref = table.lookup(strain_github_static_refs, req.http.X-Strain);
@@ -310,6 +318,8 @@ sub vcl_recv {
     call hlx_github_static_ref;
     set var.ref = req.http.X-Github-Static-Ref;
 
+    call hlx_github_static_root;
+
     # TODO: check for URL ending with `/` and look up index file
     set var.path = req.http.X-URL;
     set var.entry = req.http.X-URL;
@@ -321,7 +331,7 @@ sub vcl_recv {
     set req.backend = F_runtime_adobe_io;
     
     set req.http.X-Action-Root = "/api/v1/web/" + table.lookup(secrets, "OPENWHISK_NAMESPACE") + "/default/hlx--static";
-    set req.url = req.http.X-Action-Root + "?owner=" + var.owner + "&repo=" + var.repo + "&strain=" + var.strain + "&ref=" + var.ref + "&entry=" + var.entry + "&path=" + var.path + "&plain=true"  + "&allow=" urlencode(req.http.X-Allow) + "&deny=" urlencode(req.http.X-Deny);
+    set req.url = req.http.X-Action-Root + "?owner=" + var.owner + "&repo=" + var.repo + "&strain=" + var.strain + "&ref=" + var.ref + "&entry=" + var.entry + "&path=" + var.path + "&plain=true"  + "&allow=" urlencode(req.http.X-Allow) + "&deny=" urlencode(req.http.X-Deny) + "&root=" + req.http.X-Github-Static-Root;
 
 
   } elsif (!req.http.Fastly-FF && req.http.Fastly-SSL && (req.url.basename ~ "(^[^\.]+)(\.?(.+))?(\.[^\.]*$)" || req.url.basename == "")) {
