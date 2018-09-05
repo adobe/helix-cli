@@ -1,0 +1,20 @@
+POST /api/v1.1/project/github/trieloff/helix-helpx/envvar
+body: {\"name\":\"HLX_WSK_AUTH\",\"value\":\"secret-key\"}
+
+HTTP/1.1 201 Created
+content-type: application/json; charset=utf-8
+date: Mon, 03 Sep 2018 14:14:23 GMT
+location: https://circleci.com/api/v1.1/project/github/trieloff/helix-helpx/envvar/HLX_WSK_AUTH
+server: nginx
+set-cookie: ring-session=61tRQd05T1dEJJurK15YwPMdoGbAB6GN%2Fb5ZLgf1DzhzJv27y8wYdqD6yJFgAna2t4zTxwhB7fEov%2FY6sQGpgLs6HsWYaJqVRwn1eNml72sheHEMA26Wydm%2B4hd8Bsn3dnbya1BeQfrN7q4KM%2Bw4nVmBq3aYKoYmbBDWUS256Y9IW2QCPHppoTtE1hGFsW%2F5kwKcL37gRQqzc8UkmZe3VLpi9vRbHMzPm0KuodTIGL4%3D--%2BD1lpOdVeCMMCVkXbin0U6VhZNUFZaiP4IIY1Zx9UBo%3D;Path=/;HttpOnly;Expires=Tue, 03 Sep 2019 11:10:00 +0000;Max-Age=1209600;Secure
+strict-transport-security: max-age=15724800
+x-circleci-identity: circle-www-api-v1-59d9c6d85b-pj5lt
+x-circleci-scopes: :write-settings, :view-builds, :read-settings, :trigger-builds, :all, :status, :none
+x-client-trace-id: 
+x-frame-options: DENY
+x-request-id: 105ab6d9-0148-4dfe-82b1-1ad14b4b1076
+x-route: /envvar
+content-length: 42
+connection: Close
+
+{"name":"HLX_WSK_AUTH","value":"xxxx-key"}

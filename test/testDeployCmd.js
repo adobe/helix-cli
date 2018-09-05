@@ -12,12 +12,19 @@
 
 /* eslint-env mocha */
 
+const Replay = require('replay');
 const fs = require('fs-extra');
 const assert = require('assert');
 const path = require('path');
+const $ = require('shelljs');
 const { createTestRoot, assertZipEntry, assertFile } = require('./utils.js');
 const DeployCommand = require('../src/deploy.cmd.js');
 const strainconfig = require('../src/strain-config-utils');
+
+const CI_TOKEN = 'nope';
+
+Replay.mode = 'bloody';
+Replay.fixtures = `${__dirname}/fixtures/`;
 
 describe('hlx deploy (Integration)', () => {
   let testRoot;
@@ -28,6 +35,8 @@ describe('hlx deploy (Integration)', () => {
   let zipFile;
   let distDir;
   let staticFile;
+  let replayheaders;
+  let cwd;
 
   beforeEach(async () => {
     testRoot = await createTestRoot();
@@ -40,7 +49,47 @@ describe('hlx deploy (Integration)', () => {
     zipFile = path.resolve(buildDir, 'my-prefix-html.zip');
     await fs.outputFile(srcFile, 'main(){};');
     await fs.outputFile(staticFile, 'body { background-color: black; }');
+
+    cwd = process.cwd();
+
+    Replay.mode = 'replay';
+    // don't record the authorization header
+    replayheaders = Replay.headers;
+    Replay.headers = Replay.headers.filter(e => new RegExp(e).toString() !== new RegExp(/^authorization/).toString());
   });
+
+  afterEach(() => {
+    fs.remove(testRoot);
+    Replay.mode = 'bloody';
+    Replay.headers = replayheaders;
+    $.cd(cwd);
+  });
+
+  it('Auto-Deploy works', (done) => {
+    try {
+      $.cd(testRoot);
+      $.exec('git clone https://github.com/trieloff/helix-helpx.git');
+      $.cd(path.resolve(testRoot, 'helix-helpx'));
+
+      new DeployCommand()
+        .withWskHost('runtime.adobe.io')
+        .withWskAuth('secret-key')
+        .withWskNamespace('hlx')
+        .withEnableAuto(true)
+        .withEnableDirty(true)
+        .withDryRun(true)
+        .withContent('git@github.com:adobe/helix-cli')
+        .withTarget(buildDir)
+        .withStrainFile(strainsFile)
+        .withFastlyAuth('nope')
+        .withFastlyNamespace('justtesting')
+        .withCircleciAuth(CI_TOKEN)
+        .run()
+        .then(() => { done(); });
+    } catch (e) {
+      done(e);
+    }
+  }).timeout(15000);
 
   it('Dry-Running works', async () => {
     await new DeployCommand()
@@ -102,6 +151,7 @@ describe('hlx deploy (Integration)', () => {
     assert.notEqual(firstrun, thirdrun);
   }).timeout(10000);
 
+
   it('includes the static files into the zip for static-content=bundled', async () => {
     await new DeployCommand()
       .withDirectory(testRoot)
@@ -147,5 +197,14 @@ describe('hlx deploy (Integration)', () => {
     assert.equal(strains[0].githubStatic.ref, '0000000000000000000000000000');
     // todo: this will probably fail on a fork
     assert.equal(strains[0].githubStatic.owner, 'adobe');
+  });
+});
+
+describe('DeployCommand #unittest', () => {
+  it('setDeployOptions() #unittest', () => {
+    const options = DeployCommand.getBuildVarOptions('FOO', 'BAR', 'adobe', 'helix-cli', {});
+    assert.equal(options.method, 'POST');
+    assert.equal(JSON.parse(options.body).name, 'FOO');
+    assert.equal(JSON.parse(options.body).value, 'BAR');
   });
 });

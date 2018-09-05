@@ -1,0 +1,44 @@
+version: 2
+jobs:
+  build:
+    docker:
+      # specify the version you desire here
+      - image: circleci/node:8-stretch
+    steps:
+        - checkout
+
+        # Download and cache dependencies
+        - restore_cache:
+            keys:
+            - v1-dependencies-{{ checksum "package.json" }}
+
+        - run: 
+            name: Installing Dependencies
+            command: npm install 
+
+        - run:
+            name: Installing Helix CLI
+            command: npm install @adobe/helix-cli
+
+        - save_cache:
+            paths:
+                - node_modules
+            key: v1-dependencies-{{ checksum "package.json" }}
+
+        - run:
+            name: Building Templates
+            command: npx hlx build
+
+        - run: git diff
+
+        - run:
+            name: Deploying to Adobe I/O Runtime
+            command: npx hlx deploy --no-auto
+
+        - run:
+            name: Activate CDN
+            command: npx hlx strain
+
+        - run:
+            name: Test Performance
+            command: npx hlx perf

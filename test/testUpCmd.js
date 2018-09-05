@@ -31,7 +31,8 @@ describe('Integration test for up command', () => {
   let buildDir;
   let welcomeTxtName;
 
-  beforeEach(async () => {
+  beforeEach(async function before() {
+    this.timeout(20000);
     const testRoot = await createTestRoot();
     testDir = path.resolve(testRoot, 'project');
     buildDir = path.resolve(testRoot, '.hlx/build');

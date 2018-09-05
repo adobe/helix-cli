@@ -14,15 +14,16 @@
 
 'use strict';
 
+const request = require('request-promise-native');
+const chalk = require('chalk');
 const ow = require('openwhisk');
 const glob = require('glob');
 const path = require('path');
 const fs = require('fs-extra');
-const chalk = require('chalk');
 const yaml = require('js-yaml');
-const $ = require('shelljs');
 const archiver = require('archiver');
 const GitUrl = require('@adobe/petridish/src/GitUrl');
+const GitUtils = require('./gitutils');
 const strainconfig = require('./strain-config-utils');
 const GithubDistributor = require('./distributor/github');
 const DefaultDistributor = require('./distributor/default');
@@ -36,6 +37,7 @@ const DISTRIBUTORS = {
 class DeployCommand {
   constructor() {
     this._enableAuto = true;
+    this._circleciAuth = null;
     this._wsk_auth = null;
     this._wsk_namespace = null;
     this._wsk_host = null;
@@ -56,56 +58,6 @@ class DeployCommand {
     this._strainFile = path.resolve(process.cwd(), '.hlx', 'strains.yaml');
   }
 
-  static isDirty() {
-    return $
-      .exec('git status --porcelain', {
-        silent: true,
-      })
-      .stdout.replace(/\n/g, '')
-      .replace(/[\W]/g, '-').length;
-  }
-
-  static getBranch() {
-    const rev = $
-      .exec('git rev-parse HEAD', {
-        silent: true,
-      })
-      .stdout.replace(/\n/g, '')
-      .replace(/[\W]/g, '-');
-
-    const tag = $
-      .exec(`git name-rev --tags --name-only ${rev}`, {
-        silent: true,
-      })
-      .stdout.replace(/\n/g, '')
-      .replace(/[\W]/g, '-');
-
-    const branchname = $
-      .exec('git rev-parse --abbrev-ref HEAD', {
-        silent: true,
-      })
-      .stdout.replace(/\n/g, '')
-      .replace(/[\W]/g, '-');
-
-    return tag !== 'undefined' ? tag : branchname;
-  }
-
-  static getBranchFlag() {
-    return DeployCommand.isDirty() ? 'dirty' : DeployCommand.getBranch();
-  }
-
-  static getRepository() {
-    const repo = $
-      .exec('git config --get remote.origin.url', {
-        silent: true,
-      })
-      .stdout.replace(/\n/g, '')
-      .replace(/[\W]/g, '-');
-    if (repo !== '') {
-      return repo;
-    }
-    return `local--${path.basename(process.cwd())}`;
-  }
 
   static getDefaultContentURL() {
     if (fs.existsSync('helix-config.yaml')) {
@@ -114,14 +66,26 @@ class DeployCommand {
         return conf.contentRepo;
       }
     }
-    const giturl = $.exec('git config --get remote.origin.url', {
-      silent: true,
-    }).stdout.replace(/\n/g, '');
-    return giturl;
+    return GitUtils.getOrigin();
   }
 
   withEnableAuto(value) {
     this._enableAuto = value;
+    return this;
+  }
+
+  withCircleciAuth(value) {
+    this._circleciAuth = value;
+    return this;
+  }
+
+  withFastlyAuth(value) {
+    this._fastly_auth = value;
+    return this;
+  }
+
+  withFastlyNamespace(value) {
+    this._fastly_namespace = value;
     return this;
   }
 
@@ -267,16 +231,122 @@ class DeployCommand {
     });
   }
 
-  async run() {
-    if (this._enableAuto) {
-      console.error('Auto-deployment not implemented yet, please try hlx deploy --no-auto');
-      process.exit(1);
+  static getBuildVarOptions(name, value, auth, owner, repo) {
+    const body = JSON.stringify({
+      name,
+      value,
+    });
+    const options = {
+      method: 'POST',
+      auth,
+      uri: `https://circleci.com/api/v1.1/project/github/${owner}/${repo}/envvar`,
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+        'User-Agent': 'helix-cli',
+      },
+      body,
+    };
+    return options;
+  }
+
+  static setBuildVar(name, value, owner, repo, auth) {
+    const options = DeployCommand.getBuildVarOptions(name, value, auth, owner, repo);
+    return request(options);
+  }
+
+  async autoDeploy() {
+    if (!(fs.existsSync(path.resolve(process.cwd(), '.circleci', 'config.yaml')) || fs.existsSync(path.resolve(process.cwd(), '.circleci', 'config.yml')))) {
+      throw new Error(`Cannot automate deployment without ${path.resolve(process.cwd(), '.circleci', 'config.yaml')}`);
     }
 
-    const dirty = DeployCommand.isDirty();
+    const { owner, repo, ref } = GitUtils.getOriginURL();
+
+    const auth = {
+      username: this._circleciAuth,
+      password: '',
+    };
+
+    const followoptions = {
+      method: 'POST',
+      json: true,
+      auth,
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+        'User-Agent': 'helix-cli',
+      },
+      uri: `https://circleci.com/api/v1.1/project/github/${owner}/${repo}/follow`,
+    };
+
+    console.log(`Automating deployment with ${followoptions.uri}`);
+
+    const follow = await request(followoptions);
+
+    const envars = [];
+
+    if (this._fastly_namespace) {
+      envars.push(DeployCommand.setBuildVar('HLX_FASTLY_NAMESPACE', this._fastly_namespace, owner, repo, auth));
+    }
+    if (this._fastly_auth) {
+      envars.push(DeployCommand.setBuildVar('HLX_FASTLY_AUTH', this._fastly_auth, owner, repo, auth));
+    }
+
+    if (this._wsk_auth) {
+      envars.push(DeployCommand.setBuildVar('HLX_WSK_AUTH', this._wsk_auth, owner, repo, auth));
+    }
+
+    if (this._wsk_host) {
+      envars.push(DeployCommand.setBuildVar('HLX_WSK_HOST', this._wsk_host, owner, repo, auth));
+    }
+    if (this._wsk_namespace) {
+      envars.push(DeployCommand.setBuildVar('HLX_WSK_NAMESPACE', this._wsk_namespace, owner, repo, auth));
+    }
+    if (this._loggly_auth) {
+      envars.push(DeployCommand.setBuildVar('HLX_LOGGLY_AUTH', this._wsk_auth, owner, repo, auth));
+    }
+    if (this._loggly_host) {
+      envars.push(DeployCommand.setBuildVar('HLX_LOGGLY_HOST', this._loggly_host, owner, repo, auth));
+    }
+
+    await Promise.all(envars);
+
+    if (follow.first_build) {
+      console.log('\nAuto-deployment started.');
+      console.log('Configuration finished. Go to');
+      console.log(`${chalk.grey(`https://circleci.com/gh/${owner}/${repo}/edit`)} for build settings or`);
+      console.log(`${chalk.grey(`https://circleci.com/gh/${owner}/${repo}`)} for build status.`);
+    } else {
+      console.log('\nAuto-deployment already set up. Triggering a new build.');
+
+      const triggeroptions = {
+        method: 'POST',
+        json: true,
+        auth,
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+          'User-Agent': 'helix-cli',
+        },
+        uri: `https://circleci.com/api/v1.1/project/github/${owner}/${repo}/tree/${ref}`,
+      };
+
+      const triggered = await request(triggeroptions);
+
+
+      console.log(`Go to ${chalk.grey(`${triggered.build_url}`)} for build status.`);
+    }
+  }
+
+  async run() {
+    const dirty = GitUtils.isDirty();
     if (dirty && !this._enableDirty) {
       console.error('hlx will not deploy a working copy that has uncommitted changes. Re-run with flag --dirty to force.');
       process.exit(dirty);
+    }
+
+    if (this._enableAuto) {
+      return this.autoDeploy();
     }
 
     const giturl = new GitUrl(this._content);
@@ -295,7 +365,7 @@ class DeployCommand {
     };
 
     if (!this._prefix) {
-      this._prefix = `${DeployCommand.getRepository()}--${DeployCommand.getBranchFlag()}--`;
+      this._prefix = `${GitUtils.getRepository()}--${GitUtils.getBranchFlag()}--`;
     }
 
     if (!this._distDir) {
