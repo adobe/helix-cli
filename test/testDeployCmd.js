@@ -16,8 +16,8 @@ const Replay = require('replay');
 const fs = require('fs-extra');
 const assert = require('assert');
 const path = require('path');
-const { createTestRoot, assertZipEntry, assertFile } = require('./utils.js');
 const $ = require('shelljs');
+const { createTestRoot, assertZipEntry, assertFile } = require('./utils.js');
 const DeployCommand = require('../src/deploy.cmd.js');
 const strainconfig = require('../src/strain-config-utils');
 
@@ -147,7 +147,7 @@ describe('hlx deploy (Integration)', () => {
     const thirdrun = fs.readFileSync(strainsFile).toString();
     assert.notEqual(firstrun, thirdrun);
   }).timeout(10000);
-});
+
 
   it('includes the static files into the zip for static-content=bundled', async () => {
     await new DeployCommand()
@@ -191,7 +191,8 @@ describe('hlx deploy (Integration)', () => {
     // todo: this will probably fail on a fork
     assert.equal(strains[0].githubStatic.owner, 'adobe');
   });
-  
+});
+
 describe('DeployCommand #unittest', () => {
   it('setDeployOptions() #unittest', () => {
     const options = DeployCommand.getBuildVarOptions('FOO', 'BAR', 'adobe', 'helix-cli', {});
