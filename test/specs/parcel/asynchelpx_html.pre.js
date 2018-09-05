@@ -69,7 +69,7 @@ async function extractLastModifiedFromMetadata(meta = [], logger) {
 // that returns a function (with payload, secrets, logger as arguments)
 // that calls next (after modifying the payload a bit)
 async function pre(payload, action) {
-  const { logger, req } = action;
+  const { logger, request: req } = action;
   const { params } = req;
   try {
     const myPayload = Object.assign({}, payload);
