@@ -73,8 +73,8 @@ function extractLastModifiedFromMetadata(meta = [], logger) {
 // that returns a function (with payload, secrets, logger as arguments)
 // that calls next (after modifying the payload a bit)
 module.exports.pre = (payload, action) => {
-  const { logger, request } = action;
-  const { params } = request
+  const { logger, req } = action;
+  const { params } = req;
 
   logger.debug('setting context path');
   payload.resource.contextPath = 'myinjectedcontextpath';

@@ -69,8 +69,8 @@ async function extractLastModifiedFromMetadata(meta = [], logger) {
 // that returns a function (with payload, secrets, logger as arguments)
 // that calls next (after modifying the payload a bit)
 async function pre(payload, action) {
-  const { logger, request } = action;
-  const { params } = request;
+  const { logger, req } = action;
+  const { params } = req;
   try {
     const myPayload = Object.assign({}, payload);
 
@@ -78,7 +78,9 @@ async function pre(payload, action) {
     myPayload.resource.contextPath = 'myinjectedcontextpath';
 
     logger.debug('collecting metadata');
-    const gitmeta = await collectMetadata(params.owner, params.repo, params.ref, params.path, logger);
+    const gitmeta = await collectMetadata(
+      params.owner, params.repo, params.ref, params.path, logger,
+    );
 
     logger.debug('Metadata has arrived');
     payload.resource.gitmetadata = gitmeta;
