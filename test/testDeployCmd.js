@@ -20,6 +20,7 @@ const DeployCommand = require('../src/deploy.cmd.js');
 const strainconfig = require('../src/strain-config-utils');
 
 describe('hlx deploy (Integration)', () => {
+  let testRoot;
   let hlxDir;
   let buildDir;
   let strainsFile;
@@ -29,7 +30,7 @@ describe('hlx deploy (Integration)', () => {
   let staticFile;
 
   beforeEach(async () => {
-    const testRoot = await createTestRoot();
+    testRoot = await createTestRoot();
     hlxDir = path.resolve(testRoot, '.hlx');
     buildDir = path.resolve(hlxDir, 'build');
     distDir = path.resolve(hlxDir, 'dist');
@@ -37,12 +38,15 @@ describe('hlx deploy (Integration)', () => {
     srcFile = path.resolve(buildDir, 'html.js');
     staticFile = path.resolve(distDir, 'style.css');
     zipFile = path.resolve(buildDir, 'my-prefix-html.zip');
+    const manifestFile = path.resolve(buildDir, 'manifest.json');
     await fs.outputFile(srcFile, 'main(){};');
     await fs.outputFile(staticFile, 'body { background-color: black; }');
+    await fs.outputFile(manifestFile, '{}');
   });
 
   it('Dry-Running works', async () => {
     await new DeployCommand()
+      .withDirectory(testRoot)
       .withWskHost('runtime.adobe.io')
       .withWskAuth('secret-key')
       .withWskNamespace('hlx')
@@ -62,6 +66,7 @@ describe('hlx deploy (Integration)', () => {
 
     await fs.remove(buildDir);
     await new DeployCommand()
+      .withDirectory(testRoot)
       .withWskHost('runtime.adobe.io')
       .withWskAuth('secret-key')
       .withWskNamespace('hlx')
@@ -80,6 +85,7 @@ describe('hlx deploy (Integration)', () => {
     assert.equal(firstrun, secondrun, 'generated strains.yaml differs between first and second run');
 
     await new DeployCommand()
+      .withDirectory(testRoot)
       .withWskHost('runtime.adobe.io')
       .withWskAuth('secret-key')
       .withWskNamespace('hlx')
@@ -100,6 +106,7 @@ describe('hlx deploy (Integration)', () => {
 
   it('includes the static files into the zip for static-content=bundled', async () => {
     await new DeployCommand()
+      .withDirectory(testRoot)
       .withWskHost('runtime.adobe.io')
       .withWskAuth('secret-key')
       .withWskNamespace('hlx')
@@ -111,13 +118,16 @@ describe('hlx deploy (Integration)', () => {
       .withTarget(buildDir)
       .withStrainFile(strainsFile)
       .withStaticContent('bundled')
+      .withDistDir(distDir)
       .run();
 
     await assertZipEntry(zipFile, 'dist/style.css');
+    await assertZipEntry(zipFile, 'manifest.json');
   });
 
   it('prepares the static content for github distribution', async () => {
     await new DeployCommand()
+      .withDirectory(testRoot)
       .withWskHost('runtime.adobe.io')
       .withWskAuth('secret-key')
       .withWskNamespace('hlx')
@@ -129,6 +139,7 @@ describe('hlx deploy (Integration)', () => {
       .withTarget(buildDir)
       .withStrainFile(strainsFile)
       .withStaticContent('github')
+      .withDistDir(distDir)
       .run();
 
     const gitDir = path.resolve(hlxDir, 'tmp/gh-static/my-prefix-');
