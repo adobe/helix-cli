@@ -80,6 +80,11 @@ class BuildCommand extends EventEmitter {
     return this;
   }
 
+  withDistDir(dist) {
+    this._distDir = dist;
+    return this;
+  }
+
   withFiles(files) {
     this._files = files;
     return this;
@@ -100,7 +105,7 @@ class BuildCommand extends EventEmitter {
       const rel = path.relative(this._target, src);
       const dst = path.resolve(this._distDir, rel);
       return new Promise((resolve, reject) => {
-        fse.move(src, dst).then(() => {
+        fse.move(src, dst, { overwrite: true }).then(() => {
           if (report) {
             const relDest = path.relative(this._distDir, dst);
             const relDist = path.relative(this._cwd, this._distDir);
@@ -139,7 +144,7 @@ class BuildCommand extends EventEmitter {
 
   async validate() {
     if (!this._distDir) {
-      this._distDir = path.resolve(path.dirname(this._target), 'dist');
+      this._distDir = path.resolve(this._cwd, 'dist');
     }
     if (!this._staticDir) {
       this._staticDir = path.resolve(this._cwd, 'src');
