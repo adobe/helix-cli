@@ -20,7 +20,6 @@ const ow = require('openwhisk');
 const glob = require('glob');
 const path = require('path');
 const fs = require('fs-extra');
-const chalk = require('chalk');
 const yaml = require('js-yaml');
 const archiver = require('archiver');
 const GitUrl = require('@adobe/petridish/src/GitUrl');

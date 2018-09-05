@@ -16,12 +16,8 @@ const Replay = require('replay');
 const fs = require('fs-extra');
 const assert = require('assert');
 const path = require('path');
-<<<<<<< HEAD
 const { createTestRoot, assertZipEntry, assertFile } = require('./utils.js');
-=======
 const $ = require('shelljs');
-const { createTestRoot, assertFile } = require('./utils.js');
->>>>>>> 6ba8f85... added integration test (with fixtures) for auto-deploy
 const DeployCommand = require('../src/deploy.cmd.js');
 const strainconfig = require('../src/strain-config-utils');
 
