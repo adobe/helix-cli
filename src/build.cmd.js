@@ -54,7 +54,6 @@ class BuildCommand extends EventEmitter {
     this._minify = false;
     this._target = null;
     this._files = null;
-    this._staticDir = null;
     this._distDir = null;
     this._cwd = process.cwd();
   }
@@ -89,11 +88,6 @@ class BuildCommand extends EventEmitter {
     return this;
   }
 
-  withStaticDir(value) {
-    this._staticDir = value;
-    return this;
-  }
-
   async moveStaticFiles(files, report) {
     const jobs = files.map((src) => {
       const rel = path.relative(this._target, src);
@@ -115,9 +109,6 @@ class BuildCommand extends EventEmitter {
   async validate() {
     if (!this._distDir) {
       this._distDir = path.resolve(this._cwd, 'dist');
-    }
-    if (!this._staticDir) {
-      this._staticDir = path.resolve(this._cwd, 'src');
     }
   }
 

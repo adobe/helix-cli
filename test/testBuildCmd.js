@@ -26,7 +26,6 @@ describe('Integration test for build', () => {
   let testDir;
   let buildDir;
   let distDir;
-  let srcDir;
 
   beforeEach(async function before() {
     // copying 300 MB can take a while
@@ -36,7 +35,6 @@ describe('Integration test for build', () => {
     testDir = path.resolve(testRoot, 'project');
     buildDir = path.resolve(testRoot, '.hlx/build');
     distDir = path.resolve(testRoot, 'dist');
-    srcDir = path.resolve(testDir, 'src');
     await fs.copy(TEST_DIR, testDir);
     return true;
   });
@@ -48,7 +46,6 @@ describe('Integration test for build', () => {
     await new BuildCommand()
       .withFiles(['test/integration/src/**/*.htl'])
       .withTargetDir(buildDir)
-      .withStaticDir(srcDir)
       .withDistDir(distDir)
       .withCacheEnabled(false)
       .run();
