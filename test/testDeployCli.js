@@ -39,6 +39,7 @@ describe('hlx deploy', () => {
 
     mockDeploy = sinon.createStubInstance(DeployCommand);
     mockDeploy.withEnableAuto.returnsThis();
+    mockDeploy.withCircleciAuth.returnsThis();
     mockDeploy.withWskHost.returnsThis();
     mockDeploy.withWskAuth.returnsThis();
     mockDeploy.withWskNamespace.returnsThis();
@@ -51,6 +52,8 @@ describe('hlx deploy', () => {
     mockDeploy.withEnableDirty.returnsThis();
     mockDeploy.withDryRun.returnsThis();
     mockDeploy.withContent.returnsThis();
+    mockDeploy.withFastlyAuth.returnsThis();
+    mockDeploy.withFastlyNamespace.returnsThis();
     mockDeploy.run.returnsThis();
 
     // disable static functions as well to avoid shelljs executions.
@@ -99,15 +102,30 @@ Authentication is required. You can pass the key via the HLX_WSK_AUTH environmen
     assert.fail('deploy w/o arguments should fail.');
   });
 
+  it('hlx deploy requires circleci auth', (done) => {
+    new CLI()
+      .withCommandExecutor('deploy', mockDeploy)
+      .onFail((err) => {
+        assert.equal(err, 'Error: Auto-deployment requires: --circleci-auth, --fastly-auth, --fastly-namespace');
+        done();
+      })
+      .run(['deploy',
+        '--wsk-auth', 'secret-key',
+        '--wsk-namespace', 'hlx']);
+
+    assert.fail('deploy w/o arguments should fail.');
+  });
+
   it('hlx deploy works with minimal arguments', () => {
     new CLI()
       .withCommandExecutor('deploy', mockDeploy)
-      .run(['deploy',
+      .run(['deploy', '--no-auto',
         '--wsk-auth', 'secret-key',
         '--wsk-namespace', 'hlx',
       ]);
 
-    sinon.assert.calledWith(mockDeploy.withEnableAuto, true);
+
+    sinon.assert.calledWith(mockDeploy.withEnableAuto, false);
     sinon.assert.calledWith(mockDeploy.withEnableDirty, false);
     sinon.assert.calledWith(mockDeploy.withWskHost, 'runtime.adobe.io');
     sinon.assert.calledWith(mockDeploy.withWskAuth, 'secret-key');
@@ -125,11 +143,11 @@ Authentication is required. You can pass the key via the HLX_WSK_AUTH environmen
     process.env.HLX_WSK_AUTH = 'sekret-key';
     new CLI()
       .withCommandExecutor('deploy', mockDeploy)
-      .run(['deploy',
+      .run(['deploy', '--no-auto',
         '--wsk-namespace', 'hlx',
       ]);
 
-    sinon.assert.calledWith(mockDeploy.withEnableAuto, true);
+    sinon.assert.calledWith(mockDeploy.withEnableAuto, false);
     sinon.assert.calledWith(mockDeploy.withEnableDirty, false);
     sinon.assert.calledWith(mockDeploy.withWskHost, 'runtime.adobe.io');
     sinon.assert.calledWith(mockDeploy.withWskAuth, 'sekret-key');
@@ -147,7 +165,7 @@ Authentication is required. You can pass the key via the HLX_WSK_AUTH environmen
     process.env.HLX_FOOBAR = '1234';
     new CLI()
       .withCommandExecutor('deploy', mockDeploy)
-      .run(['deploy',
+      .run(['deploy', '--no-auto',
         '--wsk-auth', 'secret-key',
         '--wsk-namespace', 'hlx',
       ]);
@@ -169,7 +187,7 @@ Authentication is required. You can pass the key via the HLX_WSK_AUTH environmen
   it('hlx deploy works can enable dirty', () => {
     new CLI()
       .withCommandExecutor('deploy', mockDeploy)
-      .run(['deploy',
+      .run(['deploy', '--no-auto',
         '--wsk-auth', 'secret-key',
         '--wsk-namespace', 'hlx',
         '--dirty',
@@ -182,7 +200,7 @@ Authentication is required. You can pass the key via the HLX_WSK_AUTH environmen
   it('hlx deploy can set api host', () => {
     new CLI()
       .withCommandExecutor('deploy', mockDeploy)
-      .run(['deploy',
+      .run(['deploy', '--no-auto',
         '--wsk-auth', 'secret-key',
         '--wsk-namespace', 'hlx',
         '--wsk-host', 'stage.runtime.adobe.io',
@@ -195,7 +213,7 @@ Authentication is required. You can pass the key via the HLX_WSK_AUTH environmen
   it('hlx deploy can set log host and key', () => {
     new CLI()
       .withCommandExecutor('deploy', mockDeploy)
-      .run(['deploy',
+      .run(['deploy', '--no-auto',
         '--wsk-auth', 'secret-key',
         '--wsk-namespace', 'hlx',
         '--loggly-host', 'example.logly.com',
@@ -210,7 +228,7 @@ Authentication is required. You can pass the key via the HLX_WSK_AUTH environmen
   it('hlx deploy can set set target', () => {
     new CLI()
       .withCommandExecutor('deploy', mockDeploy)
-      .run(['deploy',
+      .run(['deploy', '--no-auto',
         '--wsk-auth', 'secret-key',
         '--wsk-namespace', 'hlx',
         '--target', 'tmp/build',
@@ -223,7 +241,7 @@ Authentication is required. You can pass the key via the HLX_WSK_AUTH environmen
   it('hlx deploy can set set target with -o', () => {
     new CLI()
       .withCommandExecutor('deploy', mockDeploy)
-      .run(['deploy',
+      .run(['deploy', '--no-auto',
         '--wsk-auth', 'secret-key',
         '--wsk-namespace', 'hlx',
         '-o', 'tmp/build',
@@ -236,7 +254,7 @@ Authentication is required. You can pass the key via the HLX_WSK_AUTH environmen
   it('hlx deploy can set set docker', () => {
     new CLI()
       .withCommandExecutor('deploy', mockDeploy)
-      .run(['deploy',
+      .run(['deploy', '--no-auto',
         '--wsk-auth', 'secret-key',
         '--wsk-namespace', 'hlx',
         '--docker', 'example/node8:latest',
@@ -249,7 +267,7 @@ Authentication is required. You can pass the key via the HLX_WSK_AUTH environmen
   it('hlx deploy can set prefix', () => {
     new CLI()
       .withCommandExecutor('deploy', mockDeploy)
-      .run(['deploy',
+      .run(['deploy', '--no-auto',
         '--wsk-auth', 'secret-key',
         '--wsk-namespace', 'hlx',
         '--prefix', '_hlx_',
@@ -262,7 +280,7 @@ Authentication is required. You can pass the key via the HLX_WSK_AUTH environmen
   it('hlx deploy can set default', () => {
     new CLI()
       .withCommandExecutor('deploy', mockDeploy)
-      .run(['deploy',
+      .run(['deploy', '--no-auto',
         '--wsk-auth', 'secret-key',
         '--wsk-namespace', 'hlx',
         '--default', 'FEATURE', 'red, green',

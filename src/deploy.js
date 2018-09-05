@@ -55,6 +55,11 @@ module.exports = function deploy() {
           type: 'string',
           default: '',
         })
+        .option('circleci-auth', {
+          describe: 'API Key for CircleCI API ($HLX_CIRCLECI_AUTH)',
+          type: 'string',
+          default: '',
+        })
         .option('target', {
           alias: 'o',
           default: '.hlx/build',
@@ -95,6 +100,36 @@ module.exports = function deploy() {
         }, {}))
         .group(['auto', 'wsk-auth', 'wsk-namespace', 'default', 'dirty'], 'Deployment Options')
         .group(['wsk-host', 'loggly-host', 'loggly-auth', 'target', 'docker', 'prefix', 'content'], 'Advanced Options')
+        .check((args) => {
+          if (!args.auto) {
+            // single-shot deployment is easy
+            return true;
+          }
+          const message = 'Auto-deployment requires: ';
+          const missing = [];
+          if (!args.circleciAuth) {
+            missing.push('--circleci-auth');
+          }
+          if (!args.fastlyAuth) {
+            missing.push('--fastly-auth');
+          }
+          if (!args.fastlyNamespace) {
+            missing.push('--fastly-namespace');
+          }
+          if (!args.wskAuth) {
+            missing.push('--wsk-auth');
+          }
+          if (!args.wskNamespace) {
+            missing.push('--wsk-namespace');
+          }
+          if (!args.wskHost) {
+            missing.push('--wsk-host');
+          }
+          if (missing.length === 0) {
+            return true;
+          }
+          return new Error(message + missing.join(', '));
+        })
         .help();
     },
     handler: async (argv) => {
@@ -118,6 +153,9 @@ module.exports = function deploy() {
         .withDefault(argv.default)
         .withDryRun(argv.dryRun)
         .withContent(argv.content)
+        .withCircleciAuth(argv.circleciAuth)
+        .withFastlyAuth(argv.fastlyAuth)
+        .withFastlyNamespace(argv.fastlyNamespace)
         .run();
     },
 

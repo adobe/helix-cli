@@ -65,7 +65,7 @@ async function assertZipEntry(zipFile, name, exists = true) {
   });
 }
 
-async function assertHttp(url, status, spec) {
+async function assertHttp(url, status, spec, replacements = []) {
   return new Promise((resolve, reject) => {
     let data = '';
     http.get(url, (res) => {
@@ -83,7 +83,10 @@ async function assertHttp(url, status, spec) {
         .on('end', () => {
           try {
             if (spec) {
-              const expected = fse.readFileSync(path.resolve(__dirname, 'specs', spec)).toString();
+              let expected = fse.readFileSync(path.resolve(__dirname, 'specs', spec)).toString();
+              replacements.forEach((r) => {
+                expected = expected.replace(r.pattern, r.with);
+              });
               assert.equal(data, expected);
             }
             resolve();

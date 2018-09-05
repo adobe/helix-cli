@@ -54,8 +54,6 @@ class BuildCommand extends EventEmitter {
     this._minify = false;
     this._target = null;
     this._files = null;
-    this._staticFiles = ['**/static/*'];
-    this._staticDir = null;
     this._distDir = null;
     this._cwd = process.cwd();
   }
@@ -80,18 +78,13 @@ class BuildCommand extends EventEmitter {
     return this;
   }
 
+  withDistDir(dist) {
+    this._distDir = dist;
+    return this;
+  }
+
   withFiles(files) {
     this._files = files;
-    return this;
-  }
-
-  withStaticFiles(files) {
-    this._files = files;
-    return this;
-  }
-
-  withStaticDir(value) {
-    this._staticDir = value;
     return this;
   }
 
@@ -100,7 +93,7 @@ class BuildCommand extends EventEmitter {
       const rel = path.relative(this._target, src);
       const dst = path.resolve(this._distDir, rel);
       return new Promise((resolve, reject) => {
-        fse.move(src, dst).then(() => {
+        fse.move(src, dst, { overwrite: true }).then(() => {
           if (report) {
             const relDest = path.relative(this._distDir, dst);
             const relDist = path.relative(this._cwd, this._distDir);
@@ -113,36 +106,9 @@ class BuildCommand extends EventEmitter {
     return Promise.all(jobs);
   }
 
-  async copyStaticFile(report) {
-    const myfiles = this._staticFiles.reduce((a, f) => [...a, ...glob.sync(f, {
-      cwd: this._staticDir,
-      absolute: false,
-    })], []);
-    const jobs = myfiles.map((f) => {
-      const segs = f.split(path.sep).filter(s => s !== 'static');
-      const dst = path.resolve(this._distDir, ...segs);
-      const src = path.resolve(this._staticDir, f);
-      return new Promise((resolve, reject) => {
-        fse.copy(src, dst).then(() => {
-          if (report) {
-            const relDest = path.relative(this._distDir, dst);
-            const relDist = path.relative(this._cwd, this._distDir);
-            console.log(chalk.yellow('cp ') + chalk.gray(relDist + path.sep) + chalk.cyanBright(relDest));
-          }
-          resolve();
-        }).catch(reject);
-      });
-    });
-
-    return Promise.all(jobs);
-  }
-
   async validate() {
     if (!this._distDir) {
-      this._distDir = path.resolve(path.dirname(this._target), 'dist');
-    }
-    if (!this._staticDir) {
-      this._staticDir = path.resolve(this._cwd, 'src');
+      this._distDir = path.resolve(this._cwd, 'dist');
     }
   }
 
@@ -187,11 +153,6 @@ class BuildCommand extends EventEmitter {
 
     // expand patterns from command line arguments
     const myfiles = this._files.reduce((a, f) => [...a, ...glob.sync(f)], []);
-
-    // copy the static files
-    const t0 = Date.now();
-    await this.copyStaticFile(true);
-    console.log(chalk.greenBright(`✨  Copied static in ${Date.now() - t0}ms.\n`));
 
     const bundler = this.createBundler(myfiles, myoptions);
     const bundle = await bundler.bundle();
