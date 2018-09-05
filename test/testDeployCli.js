@@ -313,7 +313,7 @@ Authentication is required. You can pass the key via the HLX_WSK_AUTH environmen
       .onFail(() => {
         done();
       })
-      .run(['deploy',
+      .run(['deploy', '--no-auto',
         '--wsk-auth', 'secret-key',
         '--wsk-namespace', 'hlx',
         '--static-content', 'foobar',
