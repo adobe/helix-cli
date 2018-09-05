@@ -15,11 +15,11 @@
 const _ = require('lodash/fp');
 const request = require('request-promise-native');
 
-function collectMetadata(req, logger) {
+function collectMetadata(owner, repo, ref, path, logger) {
   const options = {
-    uri: `https://api.github.com/repos/${req.params.owner}/${
-      req.params.repo
-    }/commits?path=${req.params.path}&sha=${req.params.ref}`,
+    uri: `https://api.github.com/repos/${owner}/${
+      repo
+    }/commits?path=${path}&sha=${ref}`,
     headers: {
       'User-Agent': 'Request-Promise',
     },
@@ -72,8 +72,9 @@ function extractLastModifiedFromMetadata(meta = [], logger) {
 // module.exports.pre is a function (taking next as an argument)
 // that returns a function (with payload, secrets, logger as arguments)
 // that calls next (after modifying the payload a bit)
-module.exports.pre = (payload, config) => {
-  const { logger } = config;
+module.exports.pre = (payload, action) => {
+  const { logger, request } = action;
+  const { params } = request
 
   logger.debug('setting context path');
   payload.resource.contextPath = 'myinjectedcontextpath';
@@ -81,7 +82,7 @@ module.exports.pre = (payload, config) => {
   logger.debug('collecting metadata');
 
   try {
-    return collectMetadata(payload.request, logger)
+    return collectMetadata(params.owner, params.repo, params.ref, params.path, logger)
       .then((gitmeta) => {
         logger.debug('Metadata has arrived');
         payload.resource.gitmetadata = gitmeta;
