@@ -26,6 +26,9 @@ module.exports = function deploy() {
     builder: (yargs) => {
       // eslint-disable-next-line global-require
       const DeployCommand = require('./deploy.cmd'); // lazy load the handler to speed up execution time
+      // eslint-disable-next-line global-require
+      const GitUtils = require('./gitutils'); // lazy load the handler to speed up execution time
+
       deployCommon(yargs)
         .option('auto', {
           describe: 'Enable auto-deployment',
@@ -52,6 +55,11 @@ module.exports = function deploy() {
           type: 'string',
           default: '',
         })
+        .option('circleci-auth', {
+          describe: 'API Key for CircleCI API ($HLX_CIRCLECI_AUTH)',
+          type: 'string',
+          default: '',
+        })
         .option('target', {
           alias: 'o',
           default: '.hlx/build',
@@ -65,7 +73,7 @@ module.exports = function deploy() {
         .option('prefix', {
           alias: 'p',
           describe: 'Prefix for the deployed action name.',
-          default: `${DeployCommand.getRepository()}--${DeployCommand.getBranchFlag()}--`,
+          default: `${GitUtils.getRepository()}--${GitUtils.getBranchFlag()}--`,
         })
         .option('default', {
           describe: 'Adds a default parameter to the function',
@@ -81,12 +89,6 @@ module.exports = function deploy() {
           type: 'string',
           default: DeployCommand.getDefaultContentURL(),
         })
-        .option('static-content', {
-          describe: 'Defines the type of deployment for static content.',
-          type: 'string',
-          choices: ['bundled', 'none', 'S3', 'codeload', 'github', 'azure'],
-          default: 'bundled',
-        })
         .array('default')
         .nargs('default', 2)
         .coerce('default', arg => arg.reduce((result, value, index, array) => {
@@ -98,6 +100,36 @@ module.exports = function deploy() {
         }, {}))
         .group(['auto', 'wsk-auth', 'wsk-namespace', 'default', 'dirty'], 'Deployment Options')
         .group(['wsk-host', 'loggly-host', 'loggly-auth', 'target', 'docker', 'prefix', 'content'], 'Advanced Options')
+        .check((args) => {
+          if (!args.auto) {
+            // single-shot deployment is easy
+            return true;
+          }
+          const message = 'Auto-deployment requires: ';
+          const missing = [];
+          if (!args.circleciAuth) {
+            missing.push('--circleci-auth');
+          }
+          if (!args.fastlyAuth) {
+            missing.push('--fastly-auth');
+          }
+          if (!args.fastlyNamespace) {
+            missing.push('--fastly-namespace');
+          }
+          if (!args.wskAuth) {
+            missing.push('--wsk-auth');
+          }
+          if (!args.wskNamespace) {
+            missing.push('--wsk-namespace');
+          }
+          if (!args.wskHost) {
+            missing.push('--wsk-host');
+          }
+          if (missing.length === 0) {
+            return true;
+          }
+          return new Error(message + missing.join(', '));
+        })
         .help();
     },
     handler: async (argv) => {
@@ -121,7 +153,9 @@ module.exports = function deploy() {
         .withDefault(argv.default)
         .withDryRun(argv.dryRun)
         .withContent(argv.content)
-        .withStaticContent(argv.staticContent)
+        .withCircleciAuth(argv.circleciAuth)
+        .withFastlyAuth(argv.fastlyAuth)
+        .withFastlyNamespace(argv.fastlyNamespace)
         .run();
     },
 

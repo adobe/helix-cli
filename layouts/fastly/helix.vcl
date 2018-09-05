@@ -32,6 +32,31 @@ sub hlx_strain {
   }
 }
 
+# Gets the content whitelist for the current strain and sets the X-Allow header
+sub hlx_allow {
+  # starting permissive – change this for a more restrictive default
+  set req.http.X-Allow = ".*";
+  set req.http.X-Allow = table.lookup(strain_allow, req.http.X-Strain);
+  if (!req.http.X-Allow) {
+    set req.http.X-Allow = table.lookup(strain_allow, "default");
+  }
+}
+
+# Gets the content blacklist for the current strain and sets the X-Deny header
+sub hlx_deny {
+  set req.http.X-Deny = "^.hlx$";
+  set req.http.X-Deny = table.lookup(strain_deny, req.http.X-Strain);
+  if (!req.http.X-Deny) {
+    set req.http.X-Deny = table.lookup(strain_deny, "default");
+  }
+}
+
+# Implements the content block list (to be called from vcl_recv)
+sub hlx_block_recv {
+  call hlx_deny;
+  call hlx_allow;
+}
+
 # Gets the content owner for the current strain and sets the X-Owner header
 sub hlx_owner {
   set req.http.X-Owner = table.lookup(strain_owners, req.http.X-Strain);
@@ -164,6 +189,7 @@ sub hlx_headers_deliver {
     set resp.http.X-Dirname = req.http.X-Dirname;
     set resp.http.X-Index = req.http.X-Index;
     set resp.http.X-Action-Root = req.http.X-Action-Root;
+    set resp.http.X-URL = req.http.X-URL;
  }
 
   call hlx_deliver_errors;
@@ -171,6 +197,8 @@ sub hlx_headers_deliver {
 
 # set backend (called from recv)
 sub hlx_backend_recv {
+  set req.backend = F_runtime_adobe_io;
+
   # Request Condition: Binaries only Prio: 10
   if( req.url ~ ".(jpg|png|gif)($|\?)" ) {
     set req.backend = F_GitHub;
@@ -193,6 +221,10 @@ sub vcl_recv {
   # If request is on Fastly-FF, we shouldn't override it.
   if (!req.http.Fastly-FF) {
     set req.http.X-Orig-URL = req.url;
+    
+    if (!req.http.X-URL) {
+      set req.http.X-URL = req.url;
+    }
   }
 
   if (req.request != "HEAD" && req.request != "GET" && req.request != "FASTLYPURGE") {
@@ -220,11 +252,6 @@ sub vcl_recv {
        set req.http.x-esi = "1";
   }
 
-  # Determine the Current Branch using the Host header
-  # TODO: use Edge Side Dictinoaries to allow for more flexible configuration
-  # NOTE: I'm doing this outside the following IF statement, because the re variable 
-  # would be reset by running repeated regexps
-
   set var.branch = "www";
 
   if (req.http.Host ~ "^([^\.]+)\..+$") {
@@ -236,6 +263,7 @@ sub vcl_recv {
   }
 
   set req.http.X-Orig-Host = req.http.Fastly-Orig-Host;
+  # set req.http.X-URL = req.url;
   set req.http.X-Host = req.http.Host;
 
   set req.http.X-Branch = var.branch;
@@ -244,36 +272,62 @@ sub vcl_recv {
   call hlx_strain;
   set var.strain = req.http.X-Strain;
 
+  # block bad requests – needs current strain and unchanged req.url
+  call hlx_block_recv;
+
   # Parse the Request URL, if this is a proper SSL-request 
   # (non-SSL gets redirected) to SSL-equivalent
 
 
-  # Deliver static content addressed with /dist via default 'html' action.
-  # todo: support for codeload or distinct function?
-  if (!req.http.Fastly-FF && req.http.Fastly-SSL && req.url.path ~ "\/dist\/(.*)") {
+  if (!req.http.Fastly-FF && req.http.Fastly-SSL && req.url.path ~ "__HLX\/([^\/]+)\/([^\/]+)\/([^\/]+)\/([^\/]+)\/(.*)\/DIST__\/(.*)") {
+    # This is the GitHub/OpenWhisk bundler. In this branch of the if statment the __HLX…DIST__ indicates that
+    # we are trying to get a static resource as is.
+
+    # TODO: shorten this URL
+    set var.owner = re.group.1;
+    set var.repo = re.group.2;
+    set var.strain = re.group.3;
+    set var.ref = re.group.4;
+    set var.entry = re.group.5;
+    set var.path = re.group.6;
+
+    
+    # get it from OpenWhisk
+    set req.backend = F_runtime_adobe_io;
+    set req.http.X-Action-Root = "/api/v1/web/" + table.lookup(secrets, "OPENWHISK_NAMESPACE") + "/default/hlx--static";
+    set req.url = req.http.X-Action-Root + "?owner=" + var.owner + "&repo=" + var.repo + "&strain=" + var.strain + "&ref=" + var.ref + "&entry=" + var.entry + "&path=" + var.path + "&allow=" urlencode(req.http.X-Allow) + "&deny=" urlencode(req.http.X-Deny);
+
+  } elseif (req.http.Fastly-SSL && (req.http.X-Static == "Static")) {
+    # This is a static request.
+
+    # Load important information from edge dicts
+    call hlx_github_static_owner;
+    set var.owner = req.http.X-Github-Static-Owner;
+
+    call hlx_github_static_repo;
+    set var.repo = req.http.X-Github-Static-Repo;
+
     call hlx_github_static_ref;
     set var.ref = req.http.X-Github-Static-Ref;
 
-    if (var.ref == "") {
-      # use 'bundled' static content in openwhisk action
-      call hlx_action_root;
-      set req.backend = F_runtime_adobe_io;
-      set req.url = "/api/v1/web" + req.http.X-Action-Root + "html" + "?path=" + req.url.path;
+    # TODO: check for URL ending with `/` and look up index file
+    set var.path = req.http.X-URL;
+    set var.entry = req.http.X-URL;
 
-    } else {
-      # use github as static files provider
-      call hlx_github_static_owner;
-      set var.owner = req.http.X-Github-Static-Owner;
+    # TODO: load magic flag
+    set req.http.X-Plain = "true";
 
-      call hlx_github_static_repo;
-      set var.repo = req.http.X-Github-Static-Repo;
+    # get it from OpenWhisk
+    set req.backend = F_runtime_adobe_io;
+    
+    set req.http.X-Action-Root = "/api/v1/web/" + table.lookup(secrets, "OPENWHISK_NAMESPACE") + "/default/hlx--static";
+    set req.url = req.http.X-Action-Root + "?owner=" + var.owner + "&repo=" + var.repo + "&strain=" + var.strain + "&ref=" + var.ref + "&entry=" + var.entry + "&path=" + var.path + "&plain=true"  + "&allow=" urlencode(req.http.X-Allow) + "&deny=" urlencode(req.http.X-Deny);
 
-      set req.backend = F_GitHub;
-      set req.url = "/" + var.owner + "/" + var.repo + "/" + var.ref + "/" + re.group.1;
-    }
+
   } elsif (!req.http.Fastly-FF && req.http.Fastly-SSL && (req.url.basename ~ "(^[^\.]+)(\.?(.+))?(\.[^\.]*$)" || req.url.basename == "")) {
-    # Parse the URL
+    # This is a dynamic request.
 
+    # Load important information from edge dicts
     call hlx_owner;
     set var.owner = req.http.X-Owner;
 
@@ -367,9 +421,10 @@ sub hlx_fetch_errors {
       # ResponseObject: Unknown Extension
       error 953 "Can't Call Action";
   }
-} 
+}
 
 sub hlx_deliver_errors {
+
   # Cache Condition: OpenWhisk Error Prio: 10    
   if (resp.status == 951 ) {
      set resp.status = 404;
@@ -399,7 +454,7 @@ sub hlx_error_errors {
   }
   if (obj.status == 953 ) {
     set obj.http.Content-Type = "text/html";
-    synthetic {"includde:953.html"};
+    synthetic {"include:953.html"};
     return(deliver);
   }
 }
@@ -437,6 +492,23 @@ sub vcl_fetch {
   if ( req.http.x-esi ) {
     esi;
   }
+
+  if (beresp.status == 404 || beresp.status == 204) {
+    # That was a miss. Let's try to restart.
+    set beresp.http.X-Status = beresp.status + "-Restart " + req.restarts;
+    set beresp.status = 404;
+
+    if (req.http.X-Static == "Static") {
+      set req.http.X-Static = "Dynamic";
+      set beresp.http.X-Static = "Dynamic";
+    } else {
+      set req.http.X-Static = "Static";
+      set beresp.http.X-Static = "Static";
+    }
+    set req.url = req.http.X-URL;
+    restart;
+  }
+
  
   return(deliver);
 }
@@ -497,6 +569,8 @@ sub vcl_deliver {
     unset resp.http.X-Branch;
     unset resp.http.X-Strain;
     unset resp.http.X-GW-Cache;
+    unset resp.http.X-Static;
+    unset resp.http.X-URL;
   }
   return(deliver);
 }
