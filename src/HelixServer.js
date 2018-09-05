@@ -64,6 +64,7 @@ function executeTemplate(ctx) {
     repo: ctx.config.contentRepo.repo,
     ref: ctx.config.contentRepo.ref,
     path: `${ctx.resourcePath}.md`,
+    req: JSON.stringify(ctx.json),
   }, {
     REPO_RAW_ROOT: `${ctx.config.contentRepo.rawRoot}/`, // the pipeline needs the final slash here
     REPO_API_ROOT: `${ctx.config.contentRepo.apiRoot}/`,

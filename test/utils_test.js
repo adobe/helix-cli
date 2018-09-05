@@ -30,12 +30,44 @@ describe('Utils Test', () => {
       {
         url: '/content/index.foo.html', valid: true, path: '/content/index.foo.html', resourcePath: '/content/index', selector: 'foo', extension: 'html',
       },
+      {
+        url: '/content/index.foo.html',
+        valid: true,
+        path: '/content/index.foo.html',
+        resourcePath: '/content/index',
+        selector: 'foo',
+        extension: 'html',
+        query: {
+          p1: '1',
+          p2: true,
+        },
+        headers: {
+          h1: '1',
+        },
+        expectedJson: {
+          extension: 'html',
+          headers: {
+            h1: '1',
+          },
+          method: 'GET',
+          params: {
+            p1: '1',
+            p2: true,
+          },
+          path: '/content/index.foo.html',
+          resourcePath: '/content/index',
+          selector: 'foo',
+          url: '/content/index.foo.html',
+        },
+      },
     ];
 
     TESTS.forEach((t) => {
       it(`parses ${t.url} correctly`, () => {
         const mockReq = {
           url: t.url,
+          query: t.query,
+          headers: t.headers,
         };
         const p = new RequestContext(mockReq);
         assert.equal(p.valid, t.valid, 'valid');
@@ -45,6 +77,12 @@ describe('Utils Test', () => {
           assert.equal(p.resourcePath, t.resourcePath, 'resourcePath');
           assert.equal(p.selector, t.selector, 'selector');
           assert.equal(p.extension, t.extension, 'extension');
+          assert.deepEqual(p.params, t.query || {}, 'params');
+          assert.deepEqual(p.headers, t.headers || {}, 'headers');
+
+          if (t.expectedJson) {
+            assert.deepEqual(p.json, t.expectedJson, 'json');
+          }
         }
       });
     });

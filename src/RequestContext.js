@@ -22,8 +22,9 @@ module.exports = class RequestContext {
     this._path = url || '/';
     this._selector = '';
     this._extension = '';
-    this._headers = req.headers;
-    this._method = req.method;
+    this._headers = req.headers || {};
+    this._method = req.method || 'GET';
+    this._params = req.query || {};
 
     let relPath = this._path;
     const lastSlash = relPath.lastIndexOf('/');
@@ -86,5 +87,23 @@ module.exports = class RequestContext {
 
   get method() {
     return this._method;
+  }
+
+  get params() {
+    return this._params;
+  }
+
+  get json() {
+    const o = {
+      url: this.url,
+      resourcePath: this.resourcePath,
+      path: this.path,
+      selector: this.selector,
+      extension: this.extension,
+      method: this.method,
+      headers: this.headers,
+      params: this.params,
+    };
+    return o;
   }
 };
