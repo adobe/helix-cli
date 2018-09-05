@@ -56,5 +56,12 @@ describe('Integration test for build', () => {
     assert.ok(fs.existsSync(path.resolve(buildDir, 'component', 'html.js')));
     assert.ok(fs.existsSync(path.resolve(distDir, welcomeTxtName)));
     assert.ok(fs.existsSync(path.resolve(distDir, stylesCssName)));
+
+    // test if manifest contains correct entries
+    const manifest = fs.readJsonSync(path.resolve(buildDir, 'manifest.json'));
+    assert.deepStrictEqual({
+      [welcomeTxtName]: true,
+      [stylesCssName]: true,
+    }, manifest);
   });
 });

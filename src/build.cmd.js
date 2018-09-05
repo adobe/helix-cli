@@ -21,6 +21,7 @@ const glob = require('glob');
 const path = require('path');
 const chalk = require('chalk');
 const fse = require('fs-extra');
+const klawSync = require('klaw-sync');
 const { DEFAULT_OPTIONS } = require('./defaults.js');
 
 /**
@@ -127,6 +128,20 @@ class BuildCommand extends EventEmitter {
     return bundler;
   }
 
+  async writeManifest() {
+    const mf = {};
+    if (await fse.pathExists(this._distDir)) {
+      klawSync(this._distDir).forEach((f) => {
+        const basename = path.basename(f.path);
+        if (basename === '.' || basename === '...') {
+          return;
+        }
+        mf[path.relative(this._distDir, f.path)] = true;
+      });
+    }
+    return fse.writeFile(path.resolve(this._target, 'manifest.json'), JSON.stringify(mf, null, '  '));
+  }
+
   async extractStaticFiles(bundle, report) {
     // get the static files processed by parcel.
     const staticFiles = findStaticFiles(bundle);
@@ -158,6 +173,7 @@ class BuildCommand extends EventEmitter {
     const bundle = await bundler.bundle();
     if (bundle) {
       await this.extractStaticFiles(bundle, true);
+      await this.writeManifest();
     }
   }
 }

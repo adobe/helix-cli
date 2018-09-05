@@ -52,6 +52,7 @@ class DeployCommand {
     this._content = null;
     this._distDir = null;
     this._staticContent = null;
+    this._cwd = process.cwd();
     this._strainFile = path.resolve(process.cwd(), '.hlx', 'strains.yaml');
   }
 
@@ -194,6 +195,16 @@ class DeployCommand {
     return this;
   }
 
+  withDistDir(dist) {
+    this._distDir = dist;
+    return this;
+  }
+
+  withDirectory(dir) {
+    this._cwd = dir;
+    return this;
+  }
+
   /**
    * Creates a .zip package that contains the contents to be deployed to openwhisk.
    * @param script Filename of the main script file.
@@ -248,6 +259,7 @@ class DeployCommand {
       if (this._staticContent === 'bundled' && baseName === 'html') {
         archive.directory(this._distDir, 'dist');
         archive.file(path.resolve(__dirname, 'openwhisk/server.js'), { name: 'server.js' });
+        archive.file(path.resolve(this._target, 'manifest.json'), { name: 'manifest.json' });
         packageJson.main = 'server.js';
       }
 
@@ -288,7 +300,7 @@ class DeployCommand {
     }
 
     if (!this._distDir) {
-      this._distDir = path.resolve(path.dirname(this._target), 'dist');
+      this._distDir = path.resolve(this._cwd, 'dist');
     }
 
     const Disty = DISTRIBUTORS[this._staticContent];
