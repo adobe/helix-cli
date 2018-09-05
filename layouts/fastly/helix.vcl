@@ -287,25 +287,7 @@ sub vcl_recv {
   # (non-SSL gets redirected) to SSL-equivalent
 
 
-  if (!req.http.Fastly-FF && req.http.Fastly-SSL && req.url.path ~ "__HLX\/([^\/]+)\/([^\/]+)\/([^\/]+)\/([^\/]+)\/(.*)\/DIST__\/(.*)") {
-    # This is the GitHub/OpenWhisk bundler. In this branch of the if statment the __HLX…DIST__ indicates that
-    # we are trying to get a static resource as is.
-
-    # TODO: shorten this URL
-    set var.owner = re.group.1;
-    set var.repo = re.group.2;
-    set var.strain = re.group.3;
-    set var.ref = re.group.4;
-    set var.entry = re.group.5;
-    set var.path = re.group.6;
-
-    
-    # get it from OpenWhisk
-    set req.backend = F_runtime_adobe_io;
-    set req.http.X-Action-Root = "/api/v1/web/" + table.lookup(secrets, "OPENWHISK_NAMESPACE") + "/default/hlx--static";
-    set req.url = req.http.X-Action-Root + "?owner=" + var.owner + "&repo=" + var.repo + "&strain=" + var.strain + "&ref=" + var.ref + "&entry=" + var.entry + "&path=" + var.path + "&allow=" urlencode(req.http.X-Allow) + "&deny=" urlencode(req.http.X-Deny);
-
-  } elseif (req.http.Fastly-SSL && (req.http.X-Static == "Static")) {
+  if (req.http.Fastly-SSL && (req.http.X-Static == "Static")) {
     # This is a static request.
 
     # Load important information from edge dicts
