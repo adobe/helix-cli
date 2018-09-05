@@ -296,7 +296,7 @@ Authentication is required. You can pass the key via the HLX_WSK_AUTH environmen
     it(`hlx deploy can set static content: ${mode}`, () => {
       new CLI()
         .withCommandExecutor('deploy', mockDeploy)
-        .run(['deploy',
+        .run(['deploy', '--no-auto',
           '--wsk-auth', 'secret-key',
           '--wsk-namespace', 'hlx',
           '--static-content', mode,
