@@ -1,0 +1,20 @@
+POST /api/v1.1/project/github/trieloff/helix-helpx/envvar
+body: {\"name\":\"HLX_WSK_HOST\",\"value\":\"runtime.adobe.io\"}
+
+HTTP/1.1 201 Created
+content-type: application/json; charset=utf-8
+date: Mon, 03 Sep 2018 14:14:23 GMT
+location: https://circleci.com/api/v1.1/project/github/trieloff/helix-helpx/envvar/HLX_WSK_HOST
+server: nginx
+set-cookie: ring-session=F92fhtUyPqwZMcQzDYwq32SAW4nEWV%2BHzaetSgpVOqClbtCore7dP2opMO%2BbH9SP1rO0lklQObYs3POfP9upZ5KM86eW8fmvKqgZY0MFgL9YYQ1jslPopE5jEk1kb%2B2BAqeStb7hmYLDyiE5Rf9K4Wf32FgzAt7mL4wX2JktWe24SUTY3KA%2FWj7UdxWAGSGXcT2k5gSVJREsIiyN7rbx%2BQj3%2BNxntEGdBM8tkMHUazA%3D--rMHWlLp0KR1sBD04YWd9nqbacQ9tebcg3U0iYRHtPRw%3D;Path=/;HttpOnly;Expires=Tue, 03 Sep 2019 11:13:07 +0000;Max-Age=1209600;Secure
+strict-transport-security: max-age=15724800
+x-circleci-identity: circle-www-api-v1-59d9c6d85b-5pst4
+x-circleci-scopes: :write-settings, :view-builds, :read-settings, :trigger-builds, :all, :status, :none
+x-client-trace-id: 
+x-frame-options: DENY
+x-request-id: f630342f-00b5-4cce-a3e6-35bf1e4d4bff
+x-route: /envvar
+content-length: 42
+connection: Close
+
+{"name":"HLX_WSK_HOST","value":"xxxxe.io"}

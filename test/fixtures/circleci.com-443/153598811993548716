@@ -1,0 +1,23 @@
+POST /api/v1.1/project/github/trieloff/helix-helpx/envvar
+content-type: application/json
+accept: application/json
+host: circleci.com
+body: {\"name\":\"HLX_FASTLY_AUTH\",\"value\":\"nope\"}
+
+HTTP/1.1 201 Created
+content-type: application/json; charset=utf-8
+date: Mon, 03 Sep 2018 15:21:59 GMT
+location: https://circleci.com/api/v1.1/project/github/trieloff/helix-helpx/envvar/HLX_FASTLY_AUTH
+server: nginx
+set-cookie: ring-session=h8A2VC3kXvEkMstogMWkq3mRizVjp1Z1DBWsZ21WGTmc%2BEiYudyyRm9lNFutLdSkHgo3x8H1XvJXhZU1dwfen6cNoNkc6bBgNt58cz4XlyVJsex0Z9X2tggdzUYRMVdSYf4lL8dZENuNxxRJGcNjVrnKqr9LEffk8s%2Fja523g5WJa44GW62BTvmIn9kxOkO8KJsGMXeP%2FrFkY0NKw%2Bhoge2NL1Wgo8rPI%2FlNEz1%2Bz8U%3D--Tyhy%2Bpv2MDIVaqRuIsoL87ICK2ucjXhrzKc%2BRGvwD6s%3D;Path=/;HttpOnly;Expires=Tue, 03 Sep 2019 11:09:50 +0000;Max-Age=1209600;Secure
+strict-transport-security: max-age=15724800
+x-circleci-identity: circle-www-api-v1-59d9c6d85b-sn8pr
+x-circleci-scopes: :write-settings, :view-builds, :read-settings, :trigger-builds, :all, :status, :none
+x-client-trace-id: 
+x-frame-options: DENY
+x-request-id: f72f037f-3c21-4bed-8a6e-10c193e1e993
+x-route: /envvar
+content-length: 43
+connection: Close
+
+{"name":"HLX_FASTLY_AUTH","value":"xxxxpe"}

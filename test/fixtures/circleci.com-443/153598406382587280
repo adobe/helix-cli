@@ -1,0 +1,20 @@
+POST /api/v1.1/project/github/trieloff/helix-helpx/envvar
+body: {\"name\":\"HLX_WSK_NAMESPACE\",\"value\":\"hlx\"}
+
+HTTP/1.1 201 Created
+content-type: application/json; charset=utf-8
+date: Mon, 03 Sep 2018 14:14:23 GMT
+location: https://circleci.com/api/v1.1/project/github/trieloff/helix-helpx/envvar/HLX_WSK_NAMESPACE
+server: nginx
+set-cookie: ring-session=cVvNFzDEwwc%2F2en1yoaQRe2X7F6%2BcycD%2FSNracq%2B1TUe5X21I2BOzS3XaRIheZEbzTrg8rQtw1wk2DkRI2FW4Mmt2Ks9tQyoUiYy76DEcL1qX%2BDUpHkSJT2V2knJMh1YYU7aKjJqHic7wbFdr7bd7jvorT1%2BPuxDGrvEEY%2FryuycMkxWQIq9r7N126cF8kCrbVhExF%2FYtAWemwWhaLdaNauC5rqFE7cw6Rl4sWCfgW0%3D--PdA%2BkWwiesAuWmKDIj2BkKFSkx2iP7yx%2BM12zE8xBpI%3D;Path=/;HttpOnly;Expires=Tue, 03 Sep 2019 11:03:37 +0000;Max-Age=1209600;Secure
+strict-transport-security: max-age=15724800
+x-circleci-identity: circle-www-api-v1-59d9c6d85b-t88hr
+x-circleci-scopes: :write-settings, :view-builds, :read-settings, :trigger-builds, :all, :status, :none
+x-client-trace-id: 
+x-frame-options: DENY
+x-request-id: 8d2beb6d-f4e1-476d-9472-5d34588993a1
+x-route: /envvar
+content-length: 44
+connection: Close
+
+{"name":"HLX_WSK_NAMESPACE","value":"xxxxx"}
