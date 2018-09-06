@@ -118,4 +118,22 @@ describe('hlx strain (Integration)', () => {
       done();
     }).catch(done);
   }).timeout(10000);
+
+  it('Invalid strains.yaml gets rejected', () => {
+    const brokenstrains = path.resolve(__dirname, 'fixtures/broken.yaml');
+
+    try {
+      new StrainCommand()
+        .withStrainFile(brokenstrains)
+        .withDryRun(true)
+        .withFastlyAuth(FASTLY_AUTH)
+        .withFastlyNamespace('GM98lH4M9g5l4LvdWlqK0')
+        .withWskHost('runtime.adobe.io')
+        .withWskAuth(WSK_AUTH)
+        .withWskNamespace('trieloff');
+      assert.fail('Broken strains should be rejected.');
+    } catch (e) {
+      assert.ok(e.message);
+    }
+  });
 });
