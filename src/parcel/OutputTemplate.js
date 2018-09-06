@@ -22,22 +22,49 @@ function wrap(main) {
   const _isFunction = (fn) => !!(fn && fn.constructor && fn.call && fn.apply);
 
   // this gets called by openwhisk
-  return function wrapped(params, secrets = {}, logger) {
-    const runthis = (p, s, l) => {
-      const next = (p, s, l) => {
+  return function wrapped(params) {
+    const runthis = (params) => {
+      // create payload and action objects
+      const secrets = {};
+      const { __ow_headers, __ow_method, __ow_logger } = params;
+      const disclosed = Object.assign({}, params);
+      delete disclosed.__ow_headers; // todo: switch to test operator once parcel supports it
+      delete disclosed.__ow_method;
+      delete disclosed.__ow_logger;
+
+      Object.keys(disclosed).forEach((key) => {
+        if (key.match(/^[A-Z0-9_]+$/)) {
+          secrets[key] = disclosed[key];
+          delete disclosed[key];
+        }
+      });
+
+      const action = {
+        secrets,
+        request: {
+          params: disclosed,
+          headers: __ow_headers,
+          method: __ow_method,
+        },
+        logger: __ow_logger,
+      };
+      const payload = {
+      };
+      const next = (payload, action) => {
         function cont(next) {
-          const config  = Object.assign({}, s, { logger: l });
-          const ret = pre(p, config);
+          const ret = pre(payload, action);
           if (ret && _isFunction(ret.then)) {
-            return ret.then((pp) => next(pp || p, s, l));
+            return ret.then((pp) => next(pp || payload, action));
           }
-          return next(ret || p, s, l);
+          return next(ret || payload, action);
         }
         return cont(main).then(resobj => ({ response: resobj }));
       };
-      return pipe(next, p, s, l);
+      return pipe(next, payload, action);
     };
-    return owwrapper(runthis, params, secrets, logger);
+
+    // the owrapper adds logging to the params
+    return owwrapper(runthis, params);
   };
 }
 

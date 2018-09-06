@@ -81,7 +81,7 @@ module.exports.pre = (payload, config) => {
   logger.debug('collecting metadata');
 
   try {
-    return collectMetadata(payload.request, logger)
+    return collectMetadata(config.request, logger)
       .then((gitmeta) => {
         logger.debug('Metadata has arrived');
         payload.resource.gitmetadata = gitmeta;

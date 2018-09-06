@@ -112,7 +112,11 @@ describe('Generated Action Tests', () => {
         const script = require(distJS);
         const logger = createLogger();
         const spy = sinon.spy(logger, 'debug');
-        const res = await script.main(params, { PSSST: 'secret' }, logger);
+        const testParams = Object.assign({}, params, {
+          __ow_logger: logger,
+          PSSST: 'secret',
+        });
+        const res = await script.main(testParams);
         assert.ok(res, 'no response received');
         assert.ok(res.body, 'response has no body');
         testScript.matches.forEach((m) => {
