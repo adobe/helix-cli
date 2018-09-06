@@ -89,13 +89,13 @@ parcelRequire = (function (modules, cache, entry, globalName) {
     if (typeof exports === "object" && typeof module !== "undefined") {
       module.exports = mainExports;
 
-    // RequireJS
+      // RequireJS
     } else if (typeof define === "function" && define.amd) {
-     define(function () {
-       return mainExports;
-     });
+      define(function () {
+        return mainExports;
+      });
 
-    // <script>
+      // <script>
     } else if (globalName) {
       this[globalName] = mainExports;
     }
@@ -103,97 +103,166 @@ parcelRequire = (function (modules, cache, entry, globalName) {
 
   // Override the current require with this new one
   return newRequire;
-})({htl1:[function(require,module,exports) {
+})({"html.pre.js":[function(require,module,exports) {
+    /*
+     * Licensed to the Apache Software Foundation (ASF) under one or more
+     * contributor license agreements.  See the NOTICE file distributed with
+     * this work for additional information regarding copyright ownership.
+     * The ASF licenses this file to You under the Apache License, Version 2.0
+     * (the "License"); you may not use this file except in compliance with
+     * the License.  You may obtain a copy of the License at
+     *
+     *      http://www.apache.org/licenses/LICENSE-2.0
+     *
+     * Unless required by applicable law or agreed to in writing, software
+     * distributed under the License is distributed on an "AS IS" BASIS,
+     * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     * See the License for the specific language governing permissions and
+     * limitations under the License.
+     *
+     */
 
-/*
-* Copyright 2018 Adobe. All rights reserved.
-* This file is licensed to you under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License. You may obtain a copy
-* of the License at http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software distributed under
-* the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR REPRESENTATIONS
-* OF ANY KIND, either express or implied. See the License for the specific language
-* governing permissions and limitations under the License.
-*/
-
-/* eslint-disable */
-
-const Runtime = require('@adobe/htlengine/src/runtime/Runtime');
-
-function run(runtime) {
-  const lengthOf = function (c) {
-    return Array.isArray(c) ? c.length : Object.keys(c).length;
-  };
-
-  const out = runtime.out.bind(runtime);
-  const exec = runtime.exec.bind(runtime);
-  const xss = runtime.xss.bind(runtime);
-  const listInfo = runtime.listInfo.bind(runtime);
-  const use = runtime.use.bind(runtime);
-  const slyResource = runtime.resource.bind(runtime);
-  const call = runtime.call.bind(runtime);
-  const template = runtime.template.bind(runtime);
-
-  return runtime.run(function* () {
-    const it = runtime.globals;
-    out("<!DOCTYPE html>\n<html>\n  <head>\n    <meta charset=\"utf-8\"/>\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"/>\n    <title>");
-    const var_0 = it["resource"]["title"];
-    out(var_0);
-    out("</title>\n    <link rel=\"stylesheet\" href=\"https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css\"/>\n    <link rel=\"stylesheet\" href=\"https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css\"/>\n  </head>\n  <body>\n    ");
-    const var_collectionVar1 = it["resource"]["children"];
-    const var_size2 = lengthOf(var_collectionVar1);
-    if (var_size2) {
-      out("<div>");
-      for (const var_index3 of Object.keys(var_collectionVar1)) {
-        const item = Array.isArray(var_collectionVar1) ? var_collectionVar1[var_index3] : var_index3;
-        const itemList = listInfo(var_index3, var_size2);
-        out("<div class=\"container-fluid\">");
-        const var_4 = item;
-        out(var_4);
-        out("</div>");
-      }
-      out("</div>");
+    /**
+     * The 'pre' function that is executed before the HTML is rendered
+     * @param payload The current payload of processing pipeline
+     * @param payload.resource The content resource
+     */
+    function pre(payload) {
+      payload.resource.time = 'Thu Sep 06 2018 17:12:11 GMT+0900 (JST)';
     }
-    out("\n\n    <!-- Including Bootstrap JS (with its jQuery dependency) so that dynamic components work -->\n    <script src=\"https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js\"></script>\n    <script src=\"https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js\"></script>\n  </body>\n</html>");
-  });
-}
 
-module.exports.main = function main(resource) {
-  const runtime = new Runtime();
-  runtime.setGlobal(resource);
-  return run(runtime).then(() => ({ body: runtime.stream }));
-};
+    module.exports.pre = pre;
+  },{}],"html.htl":[function(require,module,exports) {
+    /*
+     * Copyright 2018 Adobe. All rights reserved.
+     * This file is licensed to you under the Apache License, Version 2.0 (the "License");
+     * you may not use this file except in compliance with the License. You may obtain a copy
+     * of the License at http://www.apache.org/licenses/LICENSE-2.0
+     *
+     * Unless required by applicable law or agreed to in writing, software distributed under
+     * the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR REPRESENTATIONS
+     * OF ANY KIND, either express or implied. See the License for the specific language
+     * governing permissions and limitations under the License.
+     */
 
-const { pipe } = require('@adobe/hypermedia-pipeline/src/defaults/html.pipe.js');
-const main = module.exports.main;
-const { pre } = require('@adobe/hypermedia-pipeline/src/defaults/html.pre.js');
-const wrap = require('@adobe/openwhisk-loggly-wrapper');
-//this gets called by openwhisk
+    /* eslint-disable */
 
-function wrapped(params, secrets = {}, logger) {
-  const runthis = (p, s, l) => {
-    const next = (p, s, l) => {
-      if (s.PSSST) {
-        console.log("You managed to smuggle in a secret message: " + s.PSSST);
-      }
-      const myres = pre(main)(p, s, l).then(resobj => {
-        return { response: resobj };
+    /*
+     * Copyright 2018 Adobe. All rights reserved.
+     * This file is licensed to you under the Apache License, Version 2.0 (the "License");
+     * you may not use this file except in compliance with the License. You may obtain a copy
+     * of the License at http://www.apache.org/licenses/LICENSE-2.0
+     *
+     * Unless required by applicable law or agreed to in writing, software distributed under
+     * the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR REPRESENTATIONS
+     * OF ANY KIND, either express or implied. See the License for the specific language
+     * governing permissions and limitations under the License.
+     */
+
+    /* eslint-disable */
+
+    const Runtime = require('@adobe/htlengine/src/runtime/Runtime');
+
+    function run(runtime) {
+      const lengthOf = function (c) {
+        return Array.isArray(c) ? c.length : Object.keys(c).length;
+      };
+
+      const out = runtime.out.bind(runtime);
+      const exec = runtime.exec.bind(runtime);
+      const xss = runtime.xss.bind(runtime);
+      const listInfo = runtime.listInfo.bind(runtime);
+      const use = runtime.use.bind(runtime);
+      const slyResource = runtime.resource.bind(runtime);
+      const call = runtime.call.bind(runtime);
+      const template = runtime.template.bind(runtime);
+
+      return runtime.run(function* () {
+        const it = runtime.globals;
+        out("<!DOCTYPE html>\n<!--\n  ~ Licensed to the Apache Software Foundation (ASF) under one or more\n  ~ contributor license agreements.  See the NOTICE file distributed with\n  ~ this work for additional information regarding copyright ownership.\n  ~ The ASF licenses this file to You under the Apache License, Version 2.0\n  ~ (the \"License\"); you may not use this file except in compliance with\n  ~ the License.  You may obtain a copy of the License at\n  ~\n  ~      http://www.apache.org/licenses/LICENSE-2.0\n  ~\n  ~ Unless required by applicable law or agreed to in writing, software\n  ~ distributed under the License is distributed on an \"AS IS\" BASIS,\n  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n  ~ See the License for the specific language governing permissions and\n  ~ limitations under the License.\n  -->\n<html>\n<head>\n    <meta charset=\"utf-8\"></meta>\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"></meta>\n    <link rel=\"shortcut icon\" type=\"image/x-icon\" href=\"/dist/favicon.ico\"></link>\n    <title>");
+        const var_0 = it["resource"]["title"];
+        out(var_0);
+        out("</title>\n    <link rel=\"stylesheet\" href=\"/dist/style.css\"></link>\n</head>\n<body>\n\n");
+        const var_collectionVar1 = it["resource"]["children"];
+        const var_size2 = lengthOf(var_collectionVar1);
+        if (var_size2) {
+          out("<div>");
+          for (const var_index3 of Object.keys(var_collectionVar1)) {
+            const item = Array.isArray(var_collectionVar1) ? var_collectionVar1[var_index3] : var_index3;
+            const itemList = listInfo(var_index3, var_size2);
+            out("\n    <div class=\"container\">");
+            const var_4 = item;
+            out(var_4);
+            out("</div>\n");
+          }
+          out("</div>");
+        }
+        out("\n\n<hr></hr>\n<em>");
+        const var_5 = "generated at " + it["resource"]["time"];
+        out(var_5);
+        out("</em>\n\n</body>\n</html>\n");
       });
+    }
 
-      return myres;
+    module.exports.main = function main(resource) {
+      const runtime = new Runtime();
+      runtime.setGlobal(resource);
+      return run(runtime).then(() => ({ body: runtime.stream }));
     };
 
-    const mypipe = pipe(next, p, s, l);
+    function wrap(main) {
+      const { pipe } = require('@adobe/hypermedia-pipeline/src/defaults/html.pipe.js');
+      const { pre } = require('./html.pre.js');
+      const owwrapper = require('@adobe/openwhisk-loggly-wrapper');
 
-    return mypipe;
-  };
+      const _isFunction = fn => !!(fn && fn.constructor && fn.call && fn.apply);
 
-  const owwrapped = wrap(runthis, params, secrets, logger);
+      // this gets called by openwhisk
+      return function wrapped(params) {
+        const runthis = params => {
+          // create payload and action objects
+          const secrets = {};
+          const { __ow_headers, __ow_method, __ow_logger } = params;
+          const disclosed = Object.assign({}, params);
+          delete disclosed.__ow_headers; // todo: switch to test operator once parcel supports it
+          delete disclosed.__ow_method;
+          delete disclosed.__ow_logger;
 
-  return owwrapped;
-}
+          Object.keys(disclosed).forEach(key => {
+            if (key.match(/^[A-Z0-9_]+$/)) {
+              secrets[key] = disclosed[key];
+              delete disclosed[key];
+            }
+          });
 
-module.exports.main = wrapped;
-},{}]},{},["htl1"], null)
+          const action = {
+            secrets,
+            request: {
+              params: disclosed,
+              headers: __ow_headers,
+              method: __ow_method
+            },
+            logger: __ow_logger
+          };
+          const payload = {};
+          const next = (payload, action) => {
+            function cont(next) {
+              const ret = pre(payload, action);
+              if (ret && _isFunction(ret.then)) {
+                return ret.then(pp => next(pp || payload, action));
+              }
+              return next(ret || payload, action);
+            }
+            return cont(main).then(resobj => ({ response: resobj }));
+          };
+          return pipe(next, payload, action);
+        };
+
+        // the owrapper adds logging to the params
+        return owwrapper(runthis, params);
+      };
+    }
+
+    module.exports.main = wrap(module.exports.main);
+  },{"./html.pre.js":"html.pre.js"}]},{},["html.htl"], null)
 //# sourceMappingURL=/html.map
