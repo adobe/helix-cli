@@ -15,6 +15,7 @@
 const assert = require('assert');
 const path = require('path');
 const fse = require('fs-extra');
+const md5 = require('../src/md5.js');
 const {
   initGit,
   assertHttp,
@@ -28,11 +29,14 @@ const TEST_DIR = path.resolve('test/integration');
 describe('Integration test for up command', () => {
   let testDir;
   let buildDir;
+  let welcomeTxtName;
 
-  beforeEach(async () => {
+  beforeEach(async function before() {
+    this.timeout(20000);
     const testRoot = await createTestRoot();
     testDir = path.resolve(testRoot, 'project');
     buildDir = path.resolve(testRoot, '.hlx/build');
+    welcomeTxtName = `welcome.${md5(path.resolve(testDir, 'src/welcome.txt')).slice(-8)}.txt`;
     await fse.copy(TEST_DIR, testDir);
   });
 
@@ -89,8 +93,11 @@ describe('Integration test for up command', () => {
     cmd
       .on('started', async () => {
         try {
-          await assertHttp(`http://localhost:${cmd.project.server.port}/index.html`, 200, 'simple_response.html');
-          await assertHttp(`http://localhost:${cmd.project.server.port}/dist/welcome.txt`, 200, 'welcome_response.txt');
+          const replacements = [
+            { pattern: 'welcome.txt', with: welcomeTxtName },
+          ];
+          await assertHttp(`http://localhost:${cmd.project.server.port}/index.html`, 200, 'simple_response.html', replacements);
+          await assertHttp(`http://localhost:${cmd.project.server.port}/dist/${welcomeTxtName}`, 200, 'welcome_response.txt');
           myDone();
         } catch (e) {
           myDone(e);
@@ -126,8 +133,11 @@ describe('Integration test for up command', () => {
     cmd
       .on('started', async () => {
         try {
-          await assertHttp(`http://localhost:${cmd.project.server.port}/index.html`, 200, 'simple_response.html');
-          await assertHttp(`http://localhost:${cmd.project.server.port}/dist/welcome.txt`, 200, 'welcome_response.txt');
+          const replacements = [
+            { pattern: 'welcome.txt', with: welcomeTxtName },
+          ];
+          await assertHttp(`http://localhost:${cmd.project.server.port}/index.html`, 200, 'simple_response.html', replacements);
+          await assertHttp(`http://localhost:${cmd.project.server.port}/dist/${welcomeTxtName}`, 200, 'welcome_response.txt');
           await fse.copy(srcFile, dstFile);
         } catch (e) {
           myDone(e);
@@ -149,8 +159,8 @@ describe('Integration test for up command', () => {
   }).timeout(10000);
 
   it.skip('up command delivers modified static files and delivers correct response.', (done) => {
-    const srcFile = path.resolve(testDir, 'src/static/welcome2.txt');
-    const dstFile = path.resolve(testDir, 'src/static/welcome.txt');
+    const srcFile = path.resolve(testDir, 'src/welcome2.txt');
+    const dstFile = path.resolve(testDir, 'src/welcome.txt');
 
     initGit(testDir);
     let error = null;
@@ -169,8 +179,11 @@ describe('Integration test for up command', () => {
     cmd
       .on('started', async () => {
         try {
-          await assertHttp(`http://localhost:${cmd.project.server.port}/index.html`, 200, 'simple_response.html');
-          await assertHttp(`http://localhost:${cmd.project.server.port}/dist/welcome.txt`, 200, 'welcome_response.txt');
+          const replacements = [
+            { pattern: 'welcome.txt', with: welcomeTxtName },
+          ];
+          await assertHttp(`http://localhost:${cmd.project.server.port}/index.html`, 200, 'simple_response.html', replacements);
+          await assertHttp(`http://localhost:${cmd.project.server.port}/dist/${welcomeTxtName}`, 200, 'welcome_response.txt');
           await fse.copy(srcFile, dstFile);
         } catch (e) {
           myDone(e);
@@ -181,7 +194,7 @@ describe('Integration test for up command', () => {
       })
       .on('build', async () => {
         try {
-          await assertHttp(`http://localhost:${cmd.project.server.port}/dist/welcome.txt`, 200, 'welcome_response2.txt');
+          await assertHttp(`http://localhost:${cmd.project.server.port}/dist/${welcomeTxtName}`, 200, 'welcome_response2.txt');
           myDone();
         } catch (e) {
           myDone(e);

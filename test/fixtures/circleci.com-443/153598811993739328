@@ -1,0 +1,23 @@
+POST /api/v1.1/project/github/trieloff/helix-helpx/envvar
+content-type: application/json
+accept: application/json
+host: circleci.com
+body: {\"name\":\"HLX_FASTLY_NAMESPACE\",\"value\":\"justtesting\"}
+
+HTTP/1.1 201 Created
+content-type: application/json; charset=utf-8
+date: Mon, 03 Sep 2018 15:21:59 GMT
+location: https://circleci.com/api/v1.1/project/github/trieloff/helix-helpx/envvar/HLX_FASTLY_NAMESPACE
+server: nginx
+set-cookie: ring-session=%2F6bv4Pa3bNpcO4K01dyzAanFpw1BCpDzfYL2gKOmHl49wlfYD8m5il5JStirYKull35IPNF3gjnV3hWfuK0m8Dr%2FWFWxKvPFl6krNJgGJYgAMEre0NV1MELA%2Bj9Us1D40HDOcj3slFsfpj8WESJesGZEzAvlUR4qGyi1SlP2r0p5odtMbFbfre%2F69ObXxm9wmrxrN31PYUCsdUxTGzRR8rd%2F019cDpzxLKyTVT3GRTk%3D--7XPYVhK3xFp5mmDc8TkDeb%2F1U%2FJCkIeWyaRSaSLxC6o%3D;Path=/;HttpOnly;Expires=Tue, 03 Sep 2019 11:10:14 +0000;Max-Age=1209600;Secure
+strict-transport-security: max-age=15724800
+x-circleci-identity: circle-www-api-v1-59d9c6d85b-vcrmc
+x-circleci-scopes: :write-settings, :view-builds, :read-settings, :trigger-builds, :all, :status, :none
+x-client-trace-id: 
+x-frame-options: DENY
+x-request-id: 8a9982f0-226a-4781-8346-19db886e90ec
+x-route: /envvar
+content-length: 50
+connection: Close
+
+{"name":"HLX_FASTLY_NAMESPACE","value":"xxxxting"}

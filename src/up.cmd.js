@@ -12,8 +12,6 @@
 /* eslint no-console: off */
 
 const glob = require('glob');
-const fs = require('fs');
-const chalk = require('chalk');
 const opn = require('opn');
 const { HelixProject } = require('@adobe/petridish');
 const BuildCommand = require('./build.cmd');
@@ -56,29 +54,6 @@ class UpCommand extends BuildCommand {
     }
     console.log('Helix project stopped.');
     this.emit('stopped', this);
-  }
-
-  _watchStaticDir(fn) {
-    let timer = null;
-    this._watcher = fs.watch(this._staticDir, {
-      recursive: true,
-    }, (eventType, filename) => {
-      // ignore non static, and .swp and ~ files
-      if (/(.*\.swx|.*\.swp|.*~)/.test(filename)) {
-        return;
-      }
-      if (!/.*static\/.*/.test(filename)) {
-        return;
-      }
-      if (timer) {
-        clearTimeout(timer);
-      }
-      // debounce a bit in case several files are changed at once
-      timer = setTimeout(async () => {
-        timer = null;
-        await fn();
-      }, 250);
-    });
   }
 
   async run() {
@@ -124,13 +99,9 @@ class UpCommand extends BuildCommand {
     };
 
     const bundled = async (bundle) => {
-      // copy the static files
-      const t0 = Date.now();
-      await this.copyStaticFile();
-      console.log(chalk.greenBright(`✨  Copied static in ${Date.now() - t0}ms.\n`));
-
       // get the static files processed by parcel.
       await this.extractStaticFiles(bundle);
+      await this.writeManifest();
     };
 
     try {
@@ -139,7 +110,6 @@ class UpCommand extends BuildCommand {
       throw Error(`Unable to start helix: ${e.message}`);
     }
 
-    this._watchStaticDir(buildEnd);
     this._bundler.on('buildEnd', buildEnd);
     this._bundler.on('bundled', bundled);
     this._bundler.bundle();
