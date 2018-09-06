@@ -62,7 +62,7 @@
     "mocha": "^5.2.0",
     "mocha-junit-reporter": "^1.17.0",
     "mocha-parallel-tests": "^2.0.3",
-    "nyc": "^12.0.2",
+    "nyc": "^13.0.1",
     "replay": "^2.3.0",
     "sinon": "^6.1.0",
     "unzip": "^0.1.11",
