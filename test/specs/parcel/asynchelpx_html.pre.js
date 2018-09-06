@@ -77,7 +77,7 @@ async function pre(payload, config) {
     myPayload.resource.contextPath = 'myinjectedcontextpath';
 
     logger.debug('collecting metadata');
-    const gitmeta = await collectMetadata(payload.request, logger);
+    const gitmeta = await collectMetadata(config.request, logger);
 
     logger.debug('Metadata has arrived');
     payload.resource.gitmetadata = gitmeta;
