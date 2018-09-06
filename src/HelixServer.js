@@ -60,17 +60,16 @@ function executeTemplate(ctx) {
   return Promise.resolve(mod.main({
     __ow_headers: ctx.headers,
     __ow_method: ctx.method,
+    __ow_logger: logger, // this causes ow-wrapper to use this logger
     owner: ctx.config.contentRepo.owner,
     repo: ctx.config.contentRepo.repo,
     ref: ctx.config.contentRepo.ref,
     path: `${ctx.resourcePath}.md`,
     req: JSON.stringify(ctx.json),
-  }, {
     REPO_RAW_ROOT: `${ctx.config.contentRepo.rawRoot}/`, // the pipeline needs the final slash here
     REPO_API_ROOT: `${ctx.config.contentRepo.apiRoot}/`,
-  }, logger));
+  }));
 }
-
 
 class HelixServer {
   /**
