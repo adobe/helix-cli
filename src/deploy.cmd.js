@@ -54,6 +54,7 @@ class DeployCommand {
     this._content = null;
     this._distDir = null;
     this._staticContent = null;
+    this._cwd = process.cwd();
     this._strainFile = path.resolve(process.cwd(), '.hlx', 'strains.yaml');
   }
 
@@ -155,6 +156,16 @@ class DeployCommand {
 
   withStrainFile(value) {
     this._strainFile = value;
+    return this;
+  }
+
+  withDistDir(dist) {
+    this._distDir = dist;
+    return this;
+  }
+
+  withDirectory(dir) {
+    this._cwd = dir;
     return this;
   }
 
@@ -358,7 +369,7 @@ class DeployCommand {
     }
 
     if (!this._distDir) {
-      this._distDir = path.resolve(path.dirname(this._target), 'dist');
+      this._distDir = path.resolve(this._cwd, 'dist');
     }
 
     const Disty = DISTRIBUTORS[this._staticContent];

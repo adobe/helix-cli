@@ -101,6 +101,7 @@ class UpCommand extends BuildCommand {
     const bundled = async (bundle) => {
       // get the static files processed by parcel.
       await this.extractStaticFiles(bundle);
+      await this.writeManifest();
     };
 
     try {

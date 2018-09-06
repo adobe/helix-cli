@@ -21,7 +21,9 @@ const glob = require('glob');
 const path = require('path');
 const chalk = require('chalk');
 const fse = require('fs-extra');
+const klawSync = require('klaw-sync');
 const { DEFAULT_OPTIONS } = require('./defaults.js');
+const md5 = require('./md5.js');
 
 /**
  * Finds the non-htl files from the generated bundle
@@ -127,6 +129,29 @@ class BuildCommand extends EventEmitter {
     return bundler;
   }
 
+  async writeManifest() {
+    const mf = {};
+    const jobs = [];
+    if (await fse.pathExists(this._distDir)) {
+      // todo: consider using async klaw
+      klawSync(this._distDir).forEach(async (f) => {
+        const info = {
+          size: f.stats.size,
+          hash: '',
+        };
+        jobs.push(new Promise((resolve, reject) => {
+          md5.file(f.path).then((hash) => {
+            info.hash = hash;
+            resolve();
+          }).catch(reject);
+        }));
+        mf[path.relative(this._distDir, f.path)] = info;
+      });
+    }
+    await Promise.all(jobs);
+    return fse.writeFile(path.resolve(this._target, 'manifest.json'), JSON.stringify(mf, null, '  '));
+  }
+
   async extractStaticFiles(bundle, report) {
     // get the static files processed by parcel.
     const staticFiles = findStaticFiles(bundle);
@@ -158,6 +183,7 @@ class BuildCommand extends EventEmitter {
     const bundle = await bundler.bundle();
     if (bundle) {
       await this.extractStaticFiles(bundle, true);
+      await this.writeManifest();
     }
   }
 }
