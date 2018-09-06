@@ -46,7 +46,6 @@ class DeployCommand {
     this._strainFile = path.resolve(process.cwd(), '.hlx', 'strains.yaml');
   }
 
-
   static getDefaultContentURL() {
     if (fs.existsSync('helix-config.yaml')) {
       const conf = yaml.safeLoad(fs.readFileSync('helix-config.yaml'));
@@ -139,6 +138,16 @@ class DeployCommand {
 
   withStrainFile(value) {
     this._strainFile = value;
+    return this;
+  }
+
+  withDistDir(dist) {
+    this._distDir = dist;
+    return this;
+  }
+
+  withDirectory(dir) {
+    this._cwd = dir;
     return this;
   }
 
@@ -286,6 +295,10 @@ class DeployCommand {
 
     if (!this._prefix) {
       this._prefix = `${GitUtils.getRepository()}--${GitUtils.getBranchFlag()}--`;
+    }
+
+    if (!this._distDir) {
+      this._distDir = path.resolve(this._cwd, 'dist');
     }
 
     scripts.map((script) => {

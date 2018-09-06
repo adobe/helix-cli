@@ -26,10 +26,10 @@ Replay.mode = 'bloody';
 Replay.fixtures = `${__dirname}/fixtures/`;
 
 describe('hlx deploy (Integration)', () => {
+  let testRoot;
   let hlxDir;
   let buildDir;
   let strainsFile;
-  let testRoot;
   let replayheaders;
   let cwd;
 
@@ -82,6 +82,7 @@ describe('hlx deploy (Integration)', () => {
 
   it('Dry-Running works', async () => {
     await new DeployCommand()
+      .withDirectory(testRoot)
       .withWskHost('runtime.adobe.io')
       .withWskAuth('secret-key')
       .withWskNamespace('hlx')
@@ -98,6 +99,7 @@ describe('hlx deploy (Integration)', () => {
 
     await fs.remove(buildDir);
     await new DeployCommand()
+      .withDirectory(testRoot)
       .withWskHost('runtime.adobe.io')
       .withWskAuth('secret-key')
       .withWskNamespace('hlx')
@@ -114,6 +116,7 @@ describe('hlx deploy (Integration)', () => {
     assert.equal(firstrun, secondrun, 'generated strains.yaml differs between first and second run');
 
     await new DeployCommand()
+      .withDirectory(testRoot)
       .withWskHost('runtime.adobe.io')
       .withWskAuth('secret-key')
       .withWskNamespace('hlx')
