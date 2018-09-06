@@ -18,9 +18,11 @@ const request = require('request-promise-native');
 const chalk = require('chalk');
 const path = require('path');
 const URI = require('uri-js');
+const glob = require('glob-to-regexp');
 const { toBase64 } = require('request/lib/helpers');
 const strainconfig = require('./strain-config-utils');
 const include = require('./include-util');
+const GitUtils = require('./gitutils');
 
 const HELIX_VCL_DEFAULT_FILE = path.resolve(__dirname, '../layouts/fastly/helix.vcl');
 
@@ -56,7 +58,11 @@ class StrainCommand {
       strain_github_static_repos: null,
       strain_github_static_owners: null,
       strain_github_static_refs: null,
+      strain_github_static_magic: null,
+      strain_github_static_root: null,
       strain_index_files: null,
+      strain_allow: null,
+      strain_deny: null,
     };
 
     this._backends = {
@@ -367,7 +373,7 @@ class StrainCommand {
     await this.getDictionaries();
     const mydict = this._dictionaries[dict];
     if (!mydict) {
-      console.error(`${dict}  does not exist`);
+      console.error(`${dict} does not exist`);
       return null;
     }
     if (value) {
@@ -525,6 +531,14 @@ class StrainCommand {
     }
   }
 
+  /**
+   * Turns a list of globs into a regular expression string.
+   * @param {Array(String)} globs a list of globs
+   */
+  static makeRegexp(globs) {
+    return globs.map(glob).map(re => re.toString().replace(/^\/|\/$/g, '')).join('|');
+  }
+
   async _updateFastly() {
     console.log('🐑 👾 🚀  hlx is publishing strains');
 
@@ -538,6 +552,16 @@ class StrainCommand {
     })
       .catch((e) => {
         const message = 'OpenWhisk authentication could not be passed on';
+        console.error(message);
+        console.error(e);
+        throw new Error(message, e);
+      });
+
+    const ownsp = this.putDict('secrets', 'OPENWHISK_NAMESPACE', this._wsk_namespace).then((_s) => {
+      console.log('🗝  Enabled Fastly to call OpenWhisk static action');
+    })
+      .catch((e) => {
+        const message = 'OpenWhisk namespace could not be passed on';
         console.error(message);
         console.error(e);
         throw new Error(message, e);
@@ -579,12 +603,45 @@ class StrainCommand {
       makeStrainjob('strain_root_paths', strain.name, strain.content.root, '🌲  Set content root');
 
       // static
-      if (strain.githubStatic) {
-        makeStrainjob('github_static_repos', strain.name, strain.githubStatic.repo, '🌳  Set static repo');
-        makeStrainjob('github_static_owners', strain.name, strain.githubStatic.owner, '🏢  Set static owner');
-        makeStrainjob('github_static_refs', strain.name, strain.githubStatic.ref, '🏷  Set static ref');
+      const origin = GitUtils.getOriginURL();
+
+      if (strain.static && strain.static.repo) {
+        makeStrainjob('strain_github_static_repos', strain.name, strain.static.repo, '🌳  Set static repo');
       } else {
-        makeStrainjob('github_static_refs', strain.name, '', '🏷  Clearing static ref');
+        makeStrainjob('strain_github_static_repos', strain.name, origin.repo, '🌳  Set static repo to current repo');
+      }
+
+      if (strain.static && strain.static.owner) {
+        makeStrainjob('strain_github_static_owners', strain.name, strain.static.owner, '🏢  Set static owner');
+      } else {
+        makeStrainjob('strain_github_static_owners', strain.name, origin.owner, '🏢  Set static owner to current owner');
+      }
+
+      if (strain.static && strain.static.ref) {
+        makeStrainjob('strain_github_static_refs', strain.name, strain.static.ref, '🏷  Set static ref');
+      } else {
+        // TODO: replace ref with sha for better performance and lower risk of hitting rate limits
+        makeStrainjob('strain_github_static_refs', strain.name, origin.ref, '🏷  Set static ref to current ref');
+      }
+
+      if (strain.static && strain.static.root) {
+        makeStrainjob('strain_github_static_root', strain.name, strain.static.root, '🌲  Set static root');
+      }
+
+      if (strain.static && strain.static.magic) {
+        makeStrainjob('strain_github_static_magic', strain.name, strain.static.magic ? 'true' : 'false', strain.static.magic ? '🔮  Enable magic' : '⚽️  Disable magic');
+      } else {
+        makeStrainjob('strain_github_static_magic', strain.name, 'false', '⚽️  Disable magic');
+      }
+
+      if (strain.static && strain.static.allow) {
+        const allow = StrainCommand.makeRegexp(strain.static.allow);
+        makeStrainjob('strain_allow', strain.name, allow, '⚪️  Set whitelist');
+      }
+
+      if (strain.static && strain.static.deny) {
+        const deny = StrainCommand.makeRegexp(strain.static.deny);
+        makeStrainjob('strain_deny', strain.name, deny, '⚫️  Set blacklist');
       }
       return strain;
     });
@@ -595,6 +652,8 @@ class StrainCommand {
     // also wait for the strain.vcl writing to finish
     await strainp;
     await secretp;
+    // also wait for the openwhisk namespace
+    await ownsp;
   }
 
   async run() {

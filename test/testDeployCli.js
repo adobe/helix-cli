@@ -52,7 +52,6 @@ describe('hlx deploy', () => {
     mockDeploy.withEnableDirty.returnsThis();
     mockDeploy.withDryRun.returnsThis();
     mockDeploy.withContent.returnsThis();
-    mockDeploy.withStaticContent.returnsThis();
     mockDeploy.withFastlyAuth.returnsThis();
     mockDeploy.withFastlyNamespace.returnsThis();
     mockDeploy.run.returnsThis();
@@ -137,7 +136,6 @@ Authentication is required. You can pass the key via the HLX_WSK_AUTH environmen
     sinon.assert.calledWith(mockDeploy.withDocker, 'trieloff/custom-ow-nodejs8:latest');
     sinon.assert.calledWith(mockDeploy.withPrefix, 'git-github-com-example-project-helix--master--');
     sinon.assert.calledWith(mockDeploy.withDefault, undefined);
-    sinon.assert.calledWith(mockDeploy.withStaticContent, 'bundled');
     sinon.assert.calledOnce(mockDeploy.run);
   });
 
@@ -290,34 +288,5 @@ Authentication is required. You can pass the key via the HLX_WSK_AUTH environmen
 
     sinon.assert.calledWith(mockDeploy.withDefault, { FEATURE: 'red, green' });
     sinon.assert.calledOnce(mockDeploy.run);
-  });
-
-  ['none', 'S3', 'azure', 'bundled', 'codeload', 'github'].forEach((mode) => {
-    it(`hlx deploy can set static content: ${mode}`, () => {
-      new CLI()
-        .withCommandExecutor('deploy', mockDeploy)
-        .run(['deploy', '--no-auto',
-          '--wsk-auth', 'secret-key',
-          '--wsk-namespace', 'hlx',
-          '--static-content', mode,
-        ]);
-
-      sinon.assert.calledWith(mockDeploy.withStaticContent, mode);
-      sinon.assert.calledOnce(mockDeploy.run);
-    });
-  });
-
-  it('hlx deploy rejects unsupported static content', (done) => {
-    new CLI()
-      .withCommandExecutor('deploy', mockDeploy)
-      .onFail(() => {
-        done();
-      })
-      .run(['deploy', '--no-auto',
-        '--wsk-auth', 'secret-key',
-        '--wsk-namespace', 'hlx',
-        '--static-content', 'foobar',
-      ]);
-    assert.fail('hlx deploy with unsupported static content should fail');
   });
 });

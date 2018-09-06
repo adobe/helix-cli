@@ -21,18 +21,9 @@ const glob = require('glob');
 const path = require('path');
 const fs = require('fs-extra');
 const yaml = require('js-yaml');
-const archiver = require('archiver');
 const GitUrl = require('@adobe/petridish/src/GitUrl');
 const GitUtils = require('./gitutils');
 const strainconfig = require('./strain-config-utils');
-const GithubDistributor = require('./distributor/github');
-const DefaultDistributor = require('./distributor/default');
-
-const DISTRIBUTORS = {
-  none: DefaultDistributor,
-  bundled: DefaultDistributor,
-  github: GithubDistributor,
-};
 
 class DeployCommand {
   constructor() {
@@ -52,12 +43,8 @@ class DeployCommand {
     this._enableDirty = false;
     this._dryRun = false;
     this._content = null;
-    this._distDir = null;
-    this._staticContent = null;
-    this._cwd = process.cwd();
     this._strainFile = path.resolve(process.cwd(), '.hlx', 'strains.yaml');
   }
-
 
   static getDefaultContentURL() {
     if (fs.existsSync('helix-config.yaml')) {
@@ -149,11 +136,6 @@ class DeployCommand {
     return this;
   }
 
-  withStaticContent(value) {
-    this._staticContent = value;
-    return this;
-  }
-
   withStrainFile(value) {
     this._strainFile = value;
     return this;
@@ -169,66 +151,11 @@ class DeployCommand {
     return this;
   }
 
-  /**
-   * Creates a .zip package that contains the contents to be deployed to openwhisk.
-   * @param script Filename of the main script file.
-   * @returns {Promise<any>} an object containing the action {@code name} and package file
-   *                         {@code path}.
-   */
-  async createPackage(script) {
-    return new Promise((resolve, reject) => {
-      const baseName = path.basename(script, '.js');
-      const name = this._prefix + baseName;
-      const zipFile = path.resolve(this._target, `${name}.zip`);
-      let hadErrors = false;
-
-      // create zip file for package
-      const output = fs.createWriteStream(zipFile);
-      const archive = archiver('zip');
-
-      console.log('⏳  preparing package %s: ', zipFile);
-      output.on('close', () => {
-        if (!hadErrors) {
-          console.log('    %d total bytes', archive.pointer());
-          resolve({
-            name,
-            path: zipFile,
-          });
-        }
-      });
-      archive.on('entry', (data) => {
-        console.log('    - %s', data.name);
-      });
-      archive.on('warning', (err) => {
-        console.log(`${chalk.redBright('[error] ')}File ${script} could not be read. ${err.message}`);
-        hadErrors = true;
-        reject(err);
-      });
-      archive.on('error', (err) => {
-        console.log(`${chalk.redBright('[error] ')}File ${script} could not be read. ${err.message}`);
-        hadErrors = true;
-        reject(err);
-      });
-
-      const packageJson = {
-        name,
-        version: '1.0',
-        description: `Lambda function of ${name}`,
-        main: 'main.js',
-        license: 'Apache-2.0',
-      };
-
-      archive.pipe(output);
-      archive.file(script, { name: 'main.js' });
-      if (this._staticContent === 'bundled' && baseName === 'html') {
-        archive.directory(this._distDir, 'dist');
-        archive.file(path.resolve(__dirname, 'openwhisk/server.js'), { name: 'server.js' });
-        packageJson.main = 'server.js';
-      }
-
-      archive.append(JSON.stringify(packageJson, null, '  '), { name: 'package.json' });
-      archive.finalize();
-    });
+  actionName(script) {
+    if (script.indexOf(path.resolve(__dirname, 'openwhisk')) === 0) {
+      return `hlx--${path.basename(script, '.js')}`;
+    }
+    return this._prefix + path.basename(script, '.js');
   }
 
   static getBuildVarOptions(name, value, auth, owner, repo) {
@@ -358,6 +285,8 @@ class DeployCommand {
     };
     const openwhisk = ow(owoptions);
 
+    const scripts = [path.resolve(__dirname, 'openwhisk', 'static.js'), ...glob.sync(`${this._target}/*.js`)];
+
     const params = {
       ...this._default,
       LOGGLY_HOST: this._loggly_host,
@@ -372,47 +301,34 @@ class DeployCommand {
       this._distDir = path.resolve(this._cwd, 'dist');
     }
 
-    const Disty = DISTRIBUTORS[this._staticContent];
-    if (!Disty) {
-      throw Error(`Static content distribution "${this._staticContent}" not implemented yet.`);
-    }
-    this._distributor = await new Disty()
-      .withHelixDir(path.dirname(this._target))
-      .withDistDir(this._distDir)
-      .withPrefix(this._prefix)
-      .withDryRun(this._dryRun)
-      .init();
+    scripts.map((script) => {
+      const name = this.actionName(script);
+      console.log(`⏳  Deploying ${script} as ${name}`);
 
-    // todo: how to handle different "components" ?
-    const scripts = glob.sync(`${this._target}/*.js`);
-    await Promise.all(scripts.map(async (script) => {
-      const info = await this.createPackage(script);
+      fs.readFile(script, { encoding: 'utf8' }, (err, action) => {
+        if (!err) {
+          const actionoptions = {
+            name,
+            action,
+            params,
+            kind: 'blackbox',
+            exec: { image: this._docker, main: 'module.exports.main' },
+            annotations: { 'web-export': true },
+          };
+          if (this._dryRun) {
+            console.log(`❎  Action ${name} has been skipped.`);
+          } else {
+            openwhisk.actions.update(actionoptions).then((result) => {
+              console.log(`✅  Action ${result.name} has been created.`);
+            });
+          }
+        } else {
+          console.err(`❌  File ${script} could not be read. ${err.message}`);
+        }
+      });
 
-      console.log(`⏳  Deploying ${path.basename(info.path)} as ${info.name}`);
-      const action = await fs.readFile(info.path);
-      const actionoptions = {
-        name: info.name,
-        action,
-        params,
-        kind: 'blackbox',
-        exec: {
-          image: this._docker,
-        },
-        annotations: { 'web-export': true },
-      };
-      if (this._dryRun) {
-        console.log(`❎  Action ${info.name} has been skipped (dry-run).`);
-      } else {
-        openwhisk.actions.update(actionoptions).then((result) => {
-          console.log(`✅  Action ${result.name} has been created.`);
-          console.log('\nYou can verify the action with:');
-          console.log(chalk.grey(`$ curl "https://${this._wsk_host}/api/v1/web/${this._wsk_namespace}/default/${info.name}?path=index.md&owner=${giturl.owner}&repo=${giturl.repo}&ref=${giturl.ref}"`));
-        });
-      }
-    }));
-
-    // run distributor
-    await this._distributor.run();
+      return name;
+    });
 
     if (fs.existsSync(this._strainFile)) {
       const oldstrains = strainconfig.load(fs.readFileSync(this._strainFile));
@@ -424,7 +340,6 @@ class DeployCommand {
           owner: giturl.owner,
         },
       };
-      this._distributor.processStrain(strain);
       const newstrains = strainconfig.append(oldstrains, strain);
       if (newstrains.length > oldstrains.length) {
         console.log(`Updating strain config, adding strain ${strainconfig.name(strain)} as configuration has changed`);
@@ -444,7 +359,6 @@ class DeployCommand {
           owner: giturl.owner,
         },
       };
-      this._distributor.processStrain(defaultstrain);
       await fs.ensureDir(path.dirname(this._strainFile));
       fs.writeFileSync(this._strainFile, strainconfig.write([defaultstrain]));
     }
