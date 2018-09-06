@@ -25,9 +25,9 @@
   "homepage": "https://github.com/adobe/project-helix#readme",
   "dependencies": {
     "@adobe/git-server": "^0.9.0",
-    "@adobe/htlengine": "^1.0.2-SNAPSHOT.68",
-    "@adobe/hypermedia-pipeline": "^0.3.2-SNAPSHOT.74",
-    "@adobe/openwhisk-loggly-wrapper": "^0.2.0-SNAPSHOT.35",
+    "@adobe/htlengine": "^1.0.3",
+    "@adobe/hypermedia-pipeline": "^0.3.3",
+    "@adobe/openwhisk-loggly-wrapper": "^0.2.1",
     "@adobe/parcel-plugin-htl": "0.7.0",
     "@adobe/petridish": "^1.1.0",
     "archiver": "^3.0.0",
