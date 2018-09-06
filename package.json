@@ -26,10 +26,10 @@
   "dependencies": {
     "@adobe/git-server": "^0.9.0",
     "@adobe/htlengine": "^1.0.3",
-    "@adobe/hypermedia-pipeline": "^0.3.3",
-    "@adobe/openwhisk-loggly-wrapper": "^0.2.1",
+    "@adobe/hypermedia-pipeline": "^0.4.0-pre.2",
+    "@adobe/openwhisk-loggly-wrapper": "^0.3.0-pre.0",
     "@adobe/parcel-plugin-htl": "0.7.0",
-    "@adobe/petridish": "^1.1.0",
+    "@adobe/petridish": "^1.2.0",
     "archiver": "^3.0.0",
     "calibre": "^1.1.1",
     "chalk": "^2.4.1",

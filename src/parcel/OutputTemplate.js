@@ -26,25 +26,30 @@ function wrap(main) {
     const runthis = (params) => {
       // create payload and action objects
       const secrets = {};
-      const disclosed = {};
-      Object.keys(params).forEach((key) => {
+      const { __ow_headers, __ow_method, __ow_logger } = params;
+      const disclosed = Object.assign({}, params);
+      delete disclosed.__ow_headers; // todo: switch to test operator once parcel supports it
+      delete disclosed.__ow_method;
+      delete disclosed.__ow_logger;
+
+      Object.keys(disclosed).forEach((key) => {
         if (key.match(/^[A-Z0-9_]+$/)) {
-          secrets[key] = params[key];
-        } else {
-          disclosed[key] = params[key];
+          secrets[key] = disclosed[key];
+          delete disclosed[key];
         }
       });
-      const payload = {
-        params: disclosed,
-      };
+
       const action = {
         secrets,
+        request: {
+          params: disclosed,
+          headers: __ow_headers,
+          method: __ow_method,
+        },
+        logger: __ow_logger,
       };
-      if (disclosed.__ow_logger) {
-        action.logger = disclosed.__ow_logger;
-        delete disclosed.__ow_logger;
-      }
-
+      const payload = {
+      };
       const next = (payload, action) => {
         function cont(next) {
           const ret = pre(payload, action);
