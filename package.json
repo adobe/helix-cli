@@ -17,7 +17,7 @@
   },
   "dependencies": {
     "@adobe/git-server": "^0.9.0",
-    "@adobe/htlengine": "^1.0.2-SNAPSHOT.68",
+    "@adobe/htlengine": "^1.0.3",
     "@adobe/hypermedia-pipeline": "^0.4.0",
     "@adobe/openwhisk-loggly-wrapper": "^0.3.0",
     "colors": "^1.3.0",
