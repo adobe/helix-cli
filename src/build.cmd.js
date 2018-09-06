@@ -23,6 +23,7 @@ const chalk = require('chalk');
 const fse = require('fs-extra');
 const klawSync = require('klaw-sync');
 const { DEFAULT_OPTIONS } = require('./defaults.js');
+const md5 = require('./md5.js');
 
 /**
  * Finds the non-htl files from the generated bundle
@@ -130,15 +131,28 @@ class BuildCommand extends EventEmitter {
 
   async writeManifest() {
     const mf = {};
+    const jobs = [];
     if (await fse.pathExists(this._distDir)) {
-      klawSync(this._distDir).forEach((f) => {
+      // todo: consider using async klaw
+      klawSync(this._distDir).forEach(async (f) => {
         const basename = path.basename(f.path);
         if (basename === '.' || basename === '...') {
           return;
         }
-        mf[path.relative(this._distDir, f.path)] = true;
+        const info = {
+          size: f.stats.size,
+          hash: '',
+        };
+        jobs.push(new Promise((resolve, reject) => {
+          md5.file(f.path).then((hash) => {
+            info.hash = hash;
+            resolve();
+          }).catch(reject);
+        }));
+        mf[path.relative(this._distDir, f.path)] = info;
       });
     }
+    await Promise.all(jobs);
     return fse.writeFile(path.resolve(this._target, 'manifest.json'), JSON.stringify(mf, null, '  '));
   }
 

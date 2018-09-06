@@ -38,10 +38,8 @@ describe('hlx deploy (Integration)', () => {
     srcFile = path.resolve(buildDir, 'html.js');
     staticFile = path.resolve(distDir, 'style.css');
     zipFile = path.resolve(buildDir, 'my-prefix-html.zip');
-    const manifestFile = path.resolve(buildDir, 'manifest.json');
     await fs.outputFile(srcFile, 'main(){};');
     await fs.outputFile(staticFile, 'body { background-color: black; }');
-    await fs.outputFile(manifestFile, '{}');
   });
 
   it('Dry-Running works', async () => {
@@ -122,7 +120,6 @@ describe('hlx deploy (Integration)', () => {
       .run();
 
     await assertZipEntry(zipFile, 'dist/style.css');
-    await assertZipEntry(zipFile, 'manifest.json');
   });
 
   it('prepares the static content for github distribution', async () => {

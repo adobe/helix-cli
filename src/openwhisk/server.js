@@ -15,20 +15,18 @@ const path = require('path');
 const mime = require('mime-types');
 // eslint-disable-next-line import/no-unresolved
 const pipeline = require('./main.js').main;
-// eslint-disable-next-line import/no-unresolved
-const manifest = require('./manifest.json');
 
 const DIST_DIR = path.resolve(__dirname, 'dist');
 
 async function main(params, ...args) {
-  const urlPath = params.path.substring(1);
+  const urlPath = params.path;
 
   // normal pipeline request
-  if (!(urlPath in manifest)) {
+  if (!urlPath.startsWith('/dist/')) {
     return pipeline(params, ...args);
   }
 
-  const filePath = path.resolve(DIST_DIR, urlPath);
+  const filePath = path.resolve(DIST_DIR, urlPath.substring(6));
   if (!filePath.startsWith(DIST_DIR)) {
     // outside dist dir...reject
     return {

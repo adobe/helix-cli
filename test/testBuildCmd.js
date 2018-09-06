@@ -15,7 +15,7 @@
 const path = require('path');
 const fs = require('fs-extra');
 const assert = require('assert');
-const md5 = require('parcel-bundler/src/utils/md5');
+const md5 = require('../src/md5.js');
 const { createTestRoot } = require('./utils.js');
 
 const BuildCommand = require('../src/build.cmd');
@@ -60,8 +60,14 @@ describe('Integration test for build', () => {
     // test if manifest contains correct entries
     const manifest = fs.readJsonSync(path.resolve(buildDir, 'manifest.json'));
     assert.deepStrictEqual({
-      [welcomeTxtName]: true,
-      [stylesCssName]: true,
+      'styles.883d41e8.css': {
+        hash: '52a3333296aaf35a6761cf3f5309528e',
+        size: 656,
+      },
+      'welcome.a5237e30.txt': {
+        hash: '80d24efec2dacccf1330a8a0f2b656c1',
+        size: 27,
+      },
     }, manifest);
   });
 });

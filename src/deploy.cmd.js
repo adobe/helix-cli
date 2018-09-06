@@ -259,7 +259,6 @@ class DeployCommand {
       if (this._staticContent === 'bundled' && baseName === 'html') {
         archive.directory(this._distDir, 'dist');
         archive.file(path.resolve(__dirname, 'openwhisk/server.js'), { name: 'server.js' });
-        archive.file(path.resolve(this._target, 'manifest.json'), { name: 'manifest.json' });
         packageJson.main = 'server.js';
       }
 

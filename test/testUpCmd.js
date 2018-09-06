@@ -15,7 +15,7 @@
 const assert = require('assert');
 const path = require('path');
 const fse = require('fs-extra');
-const md5 = require('parcel-bundler/src/utils/md5');
+const md5 = require('../src/md5.js');
 const {
   initGit,
   assertHttp,
