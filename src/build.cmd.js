@@ -135,10 +135,6 @@ class BuildCommand extends EventEmitter {
     if (await fse.pathExists(this._distDir)) {
       // todo: consider using async klaw
       klawSync(this._distDir).forEach(async (f) => {
-        const basename = path.basename(f.path);
-        if (basename === '.' || basename === '...') {
-          return;
-        }
         const info = {
           size: f.stats.size,
           hash: '',
