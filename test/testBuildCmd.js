@@ -60,11 +60,11 @@ describe('Integration test for build', () => {
     // test if manifest contains correct entries
     const manifest = fs.readJsonSync(path.resolve(buildDir, 'manifest.json'));
     assert.deepStrictEqual({
-      'styles.883d41e8.css': {
+      [stylesCssName]: {
         hash: '52a3333296aaf35a6761cf3f5309528e',
         size: 656,
       },
-      'welcome.a5237e30.txt': {
+      [welcomeTxtName]: {
         hash: '80d24efec2dacccf1330a8a0f2b656c1',
         size: 27,
       },
