@@ -144,13 +144,6 @@ workflows:
   version: 2
   build:
     jobs:
-    - publish-examples:
-        requires:
-        - build
-        filters:
-          branches:
-            only:
-            - master
     # publish pre-releases on master
     - publish-pre-release:
         requires:
