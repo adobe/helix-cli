@@ -21,8 +21,8 @@ module.exports = function strain() {
     set executor(value) {
       executor = value;
     },
-    command: 'strain',
-    desc: 'Activate strains in the Fastly CDN',
+    command: ['publish', 'strain'],
+    desc: 'Activate strains in the Fastly CDN and publish the site',
     builder: (yargs) => {
       deployCommon(yargs)
         .option('fastly-namespace', {
