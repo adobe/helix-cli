@@ -16,11 +16,38 @@
 
 const EventEmitter = require('events');
 const Bundler = require('parcel-bundler');
+const HTLPreAsset = require('@adobe/parcel-plugin-htl/src/HTLPreAsset.js');
 const glob = require('glob');
 const path = require('path');
 const chalk = require('chalk');
 const fse = require('fs-extra');
+const klawSync = require('klaw-sync');
 const { DEFAULT_OPTIONS } = require('./defaults.js');
+const md5 = require('./md5.js');
+
+/**
+ * Finds the non-htl files from the generated bundle
+ * @param bnd the parcel bundle
+ * @returns {Array} array of files.
+ */
+function findStaticFiles(bnd) {
+  const statics = [];
+  if (bnd.type) {
+    // eslint-disable-next-line no-param-reassign
+    bnd.htl = bnd.entryAsset instanceof HTLPreAsset;
+    if (bnd.type === 'map' && bnd.parentBundle.htl) {
+      // eslint-disable-next-line no-param-reassign
+      bnd.htl = true;
+    }
+    if (!bnd.htl) {
+      statics.push(bnd.name);
+    }
+  }
+  bnd.childBundles.forEach((child) => {
+    statics.push(...findStaticFiles(child));
+  });
+  return statics;
+}
 
 class BuildCommand extends EventEmitter {
   constructor() {
@@ -29,8 +56,6 @@ class BuildCommand extends EventEmitter {
     this._minify = false;
     this._target = null;
     this._files = null;
-    this._staticFiles = ['**/static/*'];
-    this._staticDir = null;
     this._distDir = null;
     this._cwd = process.cwd();
   }
@@ -55,51 +80,87 @@ class BuildCommand extends EventEmitter {
     return this;
   }
 
+  withDistDir(dist) {
+    this._distDir = dist;
+    return this;
+  }
+
   withFiles(files) {
     this._files = files;
     return this;
   }
 
-  withStaticFiles(files) {
-    this._files = files;
-    return this;
-  }
-
-  withStaticDir(value) {
-    this._staticDir = value;
-    return this;
-  }
-
-  async copyStaticFile(report) {
-    const myfiles = this._staticFiles.reduce((a, f) => [...a, ...glob.sync(f, {
-      cwd: this._staticDir,
-      absolute: false,
-    })], []);
-    const jobs = myfiles.map((f) => {
-      const segs = f.split(path.sep).filter(s => s !== 'static');
-      const dst = path.resolve(this._distDir, ...segs);
-      const src = path.resolve(this._staticDir, f);
+  async moveStaticFiles(files, report) {
+    const jobs = files.map((src) => {
+      const rel = path.relative(this._target, src);
+      const dst = path.resolve(this._distDir, rel);
       return new Promise((resolve, reject) => {
-        fse.copy(src, dst).then(() => {
+        fse.move(src, dst, { overwrite: true }).then(() => {
           if (report) {
             const relDest = path.relative(this._distDir, dst);
             const relDist = path.relative(this._cwd, this._distDir);
-            console.log(chalk.yellow('cp ') + chalk.gray(relDist + path.sep) + chalk.cyanBright(relDest));
+            console.log(chalk.gray(relDist + path.sep) + chalk.cyanBright(relDest));
           }
           resolve();
         }).catch(reject);
       });
     });
-
     return Promise.all(jobs);
   }
 
   async validate() {
     if (!this._distDir) {
-      this._distDir = path.resolve(path.dirname(this._target), 'dist');
+      this._distDir = path.resolve(this._cwd, 'dist');
     }
-    if (!this._staticDir) {
-      this._staticDir = path.resolve(this._cwd, 'src');
+  }
+
+  /**
+   * Initializes the parcel bundler.
+   * @param files entry files
+   * @param options bundler options
+   * @return {Bundler} the bundler
+   */
+  // eslint-disable-next-line class-methods-use-this
+  createBundler(files, options) {
+    const bundler = new Bundler(files, options);
+    bundler.addAssetType('htl', require.resolve('@adobe/parcel-plugin-htl/src/HTLPreAsset.js'));
+    bundler.addAssetType('htl-preprocessed', require.resolve('@adobe/parcel-plugin-htl/src/HTLAsset.js'));
+    bundler.addAssetType('helix-js', require.resolve('./parcel/HelixAsset.js'));
+    return bundler;
+  }
+
+  async writeManifest() {
+    const mf = {};
+    const jobs = [];
+    if (await fse.pathExists(this._distDir)) {
+      // todo: consider using async klaw
+      klawSync(this._distDir).forEach(async (f) => {
+        const info = {
+          size: f.stats.size,
+          hash: '',
+        };
+        jobs.push(new Promise((resolve, reject) => {
+          md5.file(f.path).then((hash) => {
+            info.hash = hash;
+            resolve();
+          }).catch(reject);
+        }));
+        mf[path.relative(this._distDir, f.path)] = info;
+      });
+    }
+    await Promise.all(jobs);
+    return fse.writeFile(path.resolve(this._target, 'manifest.json'), JSON.stringify(mf, null, '  '));
+  }
+
+  async extractStaticFiles(bundle, report) {
+    // get the static files processed by parcel.
+    const staticFiles = findStaticFiles(bundle);
+
+    if (staticFiles.length > 0) {
+      if (report) {
+        console.log(chalk.greenBright('\n✨  Moving static files in place:'));
+      }
+      await this.moveStaticFiles(staticFiles, report);
     }
   }
 
@@ -118,15 +179,12 @@ class BuildCommand extends EventEmitter {
     // expand patterns from command line arguments
     const myfiles = this._files.reduce((a, f) => [...a, ...glob.sync(f)], []);
 
-    // copy the static files
-    const t0 = Date.now();
-    await this.copyStaticFile(true);
-    console.log(chalk.greenBright(`✨  Copied static in ${Date.now() - t0}ms.\n`));
-
-    const bundler = new Bundler(myfiles, myoptions);
-    bundler.addAssetType('htl', require.resolve('@adobe/parcel-plugin-htl/src/HTLAsset.js'));
-    bundler.addAssetType('helix-js', require.resolve('./parcel/HelixAsset.js'));
-    await bundler.bundle();
+    const bundler = this.createBundler(myfiles, myoptions);
+    const bundle = await bundler.bundle();
+    if (bundle) {
+      await this.extractStaticFiles(bundle, true);
+      await this.writeManifest();
+    }
   }
 }
 

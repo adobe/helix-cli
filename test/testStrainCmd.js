@@ -29,6 +29,16 @@ const WSK_AUTH = 'nope';
 
 const SRC_STRAINS = path.resolve(__dirname, 'fixtures/strains.yaml');
 
+describe('hlx strain #unit', () => {
+  it('makeRegexp() #unit', () => {
+    const globs1 = ['*.htl', '*.js'];
+    assert.equal(StrainCommand.makeRegexp(globs1), '^.*\\.htl$|^.*\\.js$');
+
+    const globs2 = ['test/**', 'test*.js'];
+    assert.equal(StrainCommand.makeRegexp(globs2), '^test\\/.*$|^test.*\\.js$');
+  });
+});
+
 describe('hlx strain (VCL) generation', () => {
   it('getVCL generates VLC for empty strains', () => {
     const strainfile = strainconfig.load(fs.readFileSync(path.resolve(__dirname, 'fixtures/empty.yaml')));
@@ -108,4 +118,22 @@ describe('hlx strain (Integration)', () => {
       done();
     }).catch(done);
   }).timeout(10000);
+
+  it('Invalid strains.yaml gets rejected', () => {
+    const brokenstrains = path.resolve(__dirname, 'fixtures/broken.yaml');
+
+    try {
+      new StrainCommand()
+        .withStrainFile(brokenstrains)
+        .withDryRun(true)
+        .withFastlyAuth(FASTLY_AUTH)
+        .withFastlyNamespace('GM98lH4M9g5l4LvdWlqK0')
+        .withWskHost('runtime.adobe.io')
+        .withWskAuth(WSK_AUTH)
+        .withWskNamespace('trieloff');
+      assert.fail('Broken strains should be rejected.');
+    } catch (e) {
+      assert.ok(e.message);
+    }
+  });
 });

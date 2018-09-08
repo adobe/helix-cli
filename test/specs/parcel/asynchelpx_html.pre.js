@@ -18,11 +18,11 @@ const request = require('request-promise-native');
 /**
  * Fetches the git metadata
  */
-async function collectMetadata(owner, repo, ref, path, logger) {
+async function collectMetadata(req, logger) {
   const options = {
-    uri: `https://api.github.com/repos/${owner}/${
-      repo
-    }/commits?path=${path}&sha=${ref}`,
+    uri: `https://api.github.com/repos/${req.params.owner}/${
+      req.params.repo
+    }/commits?path=${req.params.path}&sha=${req.params.ref}`,
     headers: {
       'User-Agent': 'Request-Promise',
     },
@@ -68,9 +68,8 @@ async function extractLastModifiedFromMetadata(meta = [], logger) {
 // module.exports.pre is a function (taking next as an argument)
 // that returns a function (with payload, secrets, logger as arguments)
 // that calls next (after modifying the payload a bit)
-async function pre(payload, action) {
-  const { logger, request: req } = action;
-  const { params } = req;
+async function pre(payload, config) {
+  const { logger } = config;
   try {
     const myPayload = Object.assign({}, payload);
 
@@ -78,9 +77,7 @@ async function pre(payload, action) {
     myPayload.resource.contextPath = 'myinjectedcontextpath';
 
     logger.debug('collecting metadata');
-    const gitmeta = await collectMetadata(
-      params.owner, params.repo, params.ref, params.path, logger,
-    );
+    const gitmeta = await collectMetadata(config.request, logger);
 
     logger.debug('Metadata has arrived');
     payload.resource.gitmetadata = gitmeta;

@@ -14,28 +14,21 @@
 
 'use strict';
 
+const request = require('request-promise-native');
+const chalk = require('chalk');
 const ow = require('openwhisk');
 const glob = require('glob');
 const path = require('path');
 const fs = require('fs-extra');
-const chalk = require('chalk');
 const yaml = require('js-yaml');
-const $ = require('shelljs');
-const archiver = require('archiver');
 const GitUrl = require('@adobe/petridish/src/GitUrl');
+const GitUtils = require('./gitutils');
 const strainconfig = require('./strain-config-utils');
-const GithubDistributor = require('./distributor/github');
-const DefaultDistributor = require('./distributor/default');
-
-const DISTRIBUTORS = {
-  none: DefaultDistributor,
-  bundled: DefaultDistributor,
-  github: GithubDistributor,
-};
 
 class DeployCommand {
   constructor() {
     this._enableAuto = true;
+    this._circleciAuth = null;
     this._wsk_auth = null;
     this._wsk_namespace = null;
     this._wsk_host = null;
@@ -50,60 +43,7 @@ class DeployCommand {
     this._enableDirty = false;
     this._dryRun = false;
     this._content = null;
-    this._distDir = null;
-    this._staticContent = null;
     this._strainFile = path.resolve(process.cwd(), '.hlx', 'strains.yaml');
-  }
-
-  static isDirty() {
-    return $
-      .exec('git status --porcelain', {
-        silent: true,
-      })
-      .stdout.replace(/\n/g, '')
-      .replace(/[\W]/g, '-').length;
-  }
-
-  static getBranch() {
-    const rev = $
-      .exec('git rev-parse HEAD', {
-        silent: true,
-      })
-      .stdout.replace(/\n/g, '')
-      .replace(/[\W]/g, '-');
-
-    const tag = $
-      .exec(`git name-rev --tags --name-only ${rev}`, {
-        silent: true,
-      })
-      .stdout.replace(/\n/g, '')
-      .replace(/[\W]/g, '-');
-
-    const branchname = $
-      .exec('git rev-parse --abbrev-ref HEAD', {
-        silent: true,
-      })
-      .stdout.replace(/\n/g, '')
-      .replace(/[\W]/g, '-');
-
-    return tag !== 'undefined' ? tag : branchname;
-  }
-
-  static getBranchFlag() {
-    return DeployCommand.isDirty() ? 'dirty' : DeployCommand.getBranch();
-  }
-
-  static getRepository() {
-    const repo = $
-      .exec('git config --get remote.origin.url', {
-        silent: true,
-      })
-      .stdout.replace(/\n/g, '')
-      .replace(/[\W]/g, '-');
-    if (repo !== '') {
-      return repo;
-    }
-    return `local--${path.basename(process.cwd())}`;
   }
 
   static getDefaultContentURL() {
@@ -113,14 +53,26 @@ class DeployCommand {
         return conf.contentRepo;
       }
     }
-    const giturl = $.exec('git config --get remote.origin.url', {
-      silent: true,
-    }).stdout.replace(/\n/g, '');
-    return giturl;
+    return GitUtils.getOrigin();
   }
 
   withEnableAuto(value) {
     this._enableAuto = value;
+    return this;
+  }
+
+  withCircleciAuth(value) {
+    this._circleciAuth = value;
+    return this;
+  }
+
+  withFastlyAuth(value) {
+    this._fastly_auth = value;
+    return this;
+  }
+
+  withFastlyNamespace(value) {
+    this._fastly_namespace = value;
     return this;
   }
 
@@ -184,88 +136,144 @@ class DeployCommand {
     return this;
   }
 
-  withStaticContent(value) {
-    this._staticContent = value;
-    return this;
-  }
-
   withStrainFile(value) {
     this._strainFile = value;
     return this;
   }
 
-  /**
-   * Creates a .zip package that contains the contents to be deployed to openwhisk.
-   * @param script Filename of the main script file.
-   * @returns {Promise<any>} an object containing the action {@code name} and package file
-   *                         {@code path}.
-   */
-  async createPackage(script) {
-    return new Promise((resolve, reject) => {
-      const baseName = path.basename(script, '.js');
-      const name = this._prefix + baseName;
-      const zipFile = path.resolve(this._target, `${name}.zip`);
-      let hadErrors = false;
+  withDistDir(dist) {
+    this._distDir = dist;
+    return this;
+  }
 
-      // create zip file for package
-      const output = fs.createWriteStream(zipFile);
-      const archive = archiver('zip');
+  withDirectory(dir) {
+    this._cwd = dir;
+    return this;
+  }
 
-      console.log('⏳  preparing package %s: ', zipFile);
-      output.on('close', () => {
-        if (!hadErrors) {
-          console.log('    %d total bytes', archive.pointer());
-          resolve({
-            name,
-            path: zipFile,
-          });
-        }
-      });
-      archive.on('entry', (data) => {
-        console.log('    - %s', data.name);
-      });
-      archive.on('warning', (err) => {
-        console.log(`${chalk.redBright('[error] ')}File ${script} could not be read. ${err.message}`);
-        hadErrors = true;
-        reject(err);
-      });
-      archive.on('error', (err) => {
-        console.log(`${chalk.redBright('[error] ')}File ${script} could not be read. ${err.message}`);
-        hadErrors = true;
-        reject(err);
-      });
+  actionName(script) {
+    if (script.indexOf(path.resolve(__dirname, 'openwhisk')) === 0) {
+      return `hlx--${path.basename(script, '.js')}`;
+    }
+    return this._prefix + path.basename(script, '.js');
+  }
 
-      const packageJson = {
-        name,
-        version: '1.0',
-        description: `Lambda function of ${name}`,
-        main: 'main.js',
-        license: 'Apache-2.0',
+  static getBuildVarOptions(name, value, auth, owner, repo) {
+    const body = JSON.stringify({
+      name,
+      value,
+    });
+    const options = {
+      method: 'POST',
+      auth,
+      uri: `https://circleci.com/api/v1.1/project/github/${owner}/${repo}/envvar`,
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+        'User-Agent': 'helix-cli',
+      },
+      body,
+    };
+    return options;
+  }
+
+  static setBuildVar(name, value, owner, repo, auth) {
+    const options = DeployCommand.getBuildVarOptions(name, value, auth, owner, repo);
+    return request(options);
+  }
+
+  async autoDeploy() {
+    if (!(fs.existsSync(path.resolve(process.cwd(), '.circleci', 'config.yaml')) || fs.existsSync(path.resolve(process.cwd(), '.circleci', 'config.yml')))) {
+      throw new Error(`Cannot automate deployment without ${path.resolve(process.cwd(), '.circleci', 'config.yaml')}`);
+    }
+
+    const { owner, repo, ref } = GitUtils.getOriginURL();
+
+    const auth = {
+      username: this._circleciAuth,
+      password: '',
+    };
+
+    const followoptions = {
+      method: 'POST',
+      json: true,
+      auth,
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+        'User-Agent': 'helix-cli',
+      },
+      uri: `https://circleci.com/api/v1.1/project/github/${owner}/${repo}/follow`,
+    };
+
+    console.log(`Automating deployment with ${followoptions.uri}`);
+
+    const follow = await request(followoptions);
+
+    const envars = [];
+
+    if (this._fastly_namespace) {
+      envars.push(DeployCommand.setBuildVar('HLX_FASTLY_NAMESPACE', this._fastly_namespace, owner, repo, auth));
+    }
+    if (this._fastly_auth) {
+      envars.push(DeployCommand.setBuildVar('HLX_FASTLY_AUTH', this._fastly_auth, owner, repo, auth));
+    }
+
+    if (this._wsk_auth) {
+      envars.push(DeployCommand.setBuildVar('HLX_WSK_AUTH', this._wsk_auth, owner, repo, auth));
+    }
+
+    if (this._wsk_host) {
+      envars.push(DeployCommand.setBuildVar('HLX_WSK_HOST', this._wsk_host, owner, repo, auth));
+    }
+    if (this._wsk_namespace) {
+      envars.push(DeployCommand.setBuildVar('HLX_WSK_NAMESPACE', this._wsk_namespace, owner, repo, auth));
+    }
+    if (this._loggly_auth) {
+      envars.push(DeployCommand.setBuildVar('HLX_LOGGLY_AUTH', this._wsk_auth, owner, repo, auth));
+    }
+    if (this._loggly_host) {
+      envars.push(DeployCommand.setBuildVar('HLX_LOGGLY_HOST', this._loggly_host, owner, repo, auth));
+    }
+
+    await Promise.all(envars);
+
+    if (follow.first_build) {
+      console.log('\nAuto-deployment started.');
+      console.log('Configuration finished. Go to');
+      console.log(`${chalk.grey(`https://circleci.com/gh/${owner}/${repo}/edit`)} for build settings or`);
+      console.log(`${chalk.grey(`https://circleci.com/gh/${owner}/${repo}`)} for build status.`);
+    } else {
+      console.log('\nAuto-deployment already set up. Triggering a new build.');
+
+      const triggeroptions = {
+        method: 'POST',
+        json: true,
+        auth,
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+          'User-Agent': 'helix-cli',
+        },
+        uri: `https://circleci.com/api/v1.1/project/github/${owner}/${repo}/tree/${ref}`,
       };
 
-      archive.pipe(output);
-      archive.file(script, { name: 'main.js' });
-      if (this._staticContent === 'bundled' && baseName === 'html') {
-        archive.directory(this._distDir, 'dist');
-        archive.file(path.resolve(__dirname, 'openwhisk/server.js'), { name: 'server.js' });
-        packageJson.main = 'server.js';
-      }
+      const triggered = await request(triggeroptions);
 
-      archive.append(JSON.stringify(packageJson, null, '  '), { name: 'package.json' });
-      archive.finalize();
-    });
+
+      console.log(`Go to ${chalk.grey(`${triggered.build_url}`)} for build status.`);
+    }
   }
 
   async run() {
-    if (this._enableAuto) {
-      console.error('Auto-deployment not implemented yet, please try hlx deploy --no-auto');
-      process.exit(1);
-    }
-
-    const dirty = DeployCommand.isDirty();
+    const dirty = GitUtils.isDirty();
     if (dirty && !this._enableDirty) {
       console.error('hlx will not deploy a working copy that has uncommitted changes. Re-run with flag --dirty to force.');
       process.exit(dirty);
+    }
+
+    if (this._enableAuto) {
+      return this.autoDeploy();
     }
 
     const giturl = new GitUrl(this._content);
@@ -277,6 +285,8 @@ class DeployCommand {
     };
     const openwhisk = ow(owoptions);
 
+    const scripts = [path.resolve(__dirname, 'openwhisk', 'static.js'), ...glob.sync(`${this._target}/*.js`)];
+
     const params = {
       ...this._default,
       LOGGLY_HOST: this._loggly_host,
@@ -284,54 +294,41 @@ class DeployCommand {
     };
 
     if (!this._prefix) {
-      this._prefix = `${DeployCommand.getRepository()}--${DeployCommand.getBranchFlag()}--`;
+      this._prefix = `${GitUtils.getRepository()}--${GitUtils.getBranchFlag()}--`;
     }
 
     if (!this._distDir) {
-      this._distDir = path.resolve(path.dirname(this._target), 'dist');
+      this._distDir = path.resolve(this._cwd, 'dist');
     }
 
-    const Disty = DISTRIBUTORS[this._staticContent];
-    if (!Disty) {
-      throw Error(`Static content distribution "${this._staticContent}" not implemented yet.`);
-    }
-    this._distributor = await new Disty()
-      .withHelixDir(path.dirname(this._target))
-      .withDistDir(this._distDir)
-      .withPrefix(this._prefix)
-      .withDryRun(this._dryRun)
-      .init();
+    scripts.map((script) => {
+      const name = this.actionName(script);
+      console.log(`⏳  Deploying ${script} as ${name}`);
 
-    // todo: how to handle different "components" ?
-    const scripts = glob.sync(`${this._target}/*.js`);
-    await Promise.all(scripts.map(async (script) => {
-      const info = await this.createPackage(script);
+      fs.readFile(script, { encoding: 'utf8' }, (err, action) => {
+        if (!err) {
+          const actionoptions = {
+            name,
+            action,
+            params,
+            kind: 'blackbox',
+            exec: { image: this._docker, main: 'module.exports.main' },
+            annotations: { 'web-export': true },
+          };
+          if (this._dryRun) {
+            console.log(`❎  Action ${name} has been skipped.`);
+          } else {
+            openwhisk.actions.update(actionoptions).then((result) => {
+              console.log(`✅  Action ${result.name} has been created.`);
+            });
+          }
+        } else {
+          console.err(`❌  File ${script} could not be read. ${err.message}`);
+        }
+      });
 
-      console.log(`⏳  Deploying ${path.basename(info.path)} as ${info.name}`);
-      const action = await fs.readFile(info.path);
-      const actionoptions = {
-        name: info.name,
-        action,
-        params,
-        kind: 'blackbox',
-        exec: {
-          image: this._docker,
-        },
-        annotations: { 'web-export': true },
-      };
-      if (this._dryRun) {
-        console.log(`❎  Action ${info.name} has been skipped (dry-run).`);
-      } else {
-        openwhisk.actions.update(actionoptions).then((result) => {
-          console.log(`✅  Action ${result.name} has been created.`);
-          console.log('\nYou can verify the action with:');
-          console.log(chalk.grey(`$ curl "https://${this._wsk_host}/api/v1/web/${this._wsk_namespace}/default/${info.name}?path=index.md&owner=${giturl.owner}&repo=${giturl.repo}&ref=${giturl.ref}"`));
-        });
-      }
-    }));
-
-    // run distributor
-    await this._distributor.run();
+      return name;
+    });
 
     if (fs.existsSync(this._strainFile)) {
       const oldstrains = strainconfig.load(fs.readFileSync(this._strainFile));
@@ -343,7 +340,6 @@ class DeployCommand {
           owner: giturl.owner,
         },
       };
-      this._distributor.processStrain(strain);
       const newstrains = strainconfig.append(oldstrains, strain);
       if (newstrains.length > oldstrains.length) {
         console.log(`Updating strain config, adding strain ${strainconfig.name(strain)} as configuration has changed`);
@@ -363,7 +359,6 @@ class DeployCommand {
           owner: giturl.owner,
         },
       };
-      this._distributor.processStrain(defaultstrain);
       await fs.ensureDir(path.dirname(this._strainFile));
       fs.writeFileSync(this._strainFile, strainconfig.write([defaultstrain]));
     }

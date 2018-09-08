@@ -15,6 +15,7 @@
 const path = require('path');
 const fs = require('fs-extra');
 const assert = require('assert');
+const md5 = require('../src/md5.js');
 const { createTestRoot } = require('./utils.js');
 
 const BuildCommand = require('../src/build.cmd');
@@ -25,7 +26,6 @@ describe('Integration test for build', () => {
   let testDir;
   let buildDir;
   let distDir;
-  let srcDir;
 
   beforeEach(async function before() {
     // copying 300 MB can take a while
@@ -34,17 +34,19 @@ describe('Integration test for build', () => {
     const testRoot = await createTestRoot();
     testDir = path.resolve(testRoot, 'project');
     buildDir = path.resolve(testRoot, '.hlx/build');
-    distDir = path.resolve(testRoot, '.hlx/dist');
-    srcDir = path.resolve(testDir, 'src');
+    distDir = path.resolve(testRoot, 'dist');
     await fs.copy(TEST_DIR, testDir);
     return true;
   });
 
-  it('build command succeeds and produces files', async () => {
+  it('build command succeeds and produces files', async function test() {
+    this.timeout(5000);
+    const stylesCssName = `styles.${md5(path.resolve(TEST_DIR, 'src/component/styles.css')).slice(-8)}.css`;
+    const welcomeTxtName = `welcome.${md5(path.resolve(TEST_DIR, 'src/welcome.txt')).slice(-8)}.txt`;
     await new BuildCommand()
       .withFiles(['test/integration/src/**/*.htl'])
       .withTargetDir(buildDir)
-      .withStaticDir(srcDir)
+      .withDistDir(distDir)
       .withCacheEnabled(false)
       .run();
 
@@ -52,7 +54,20 @@ describe('Integration test for build', () => {
     assert.ok(!fs.existsSync(path.resolve(buildDir, 'html.pre.js')));
     assert.ok(fs.existsSync(path.resolve(buildDir, 'example_html.js')));
     assert.ok(fs.existsSync(path.resolve(buildDir, 'component', 'html.js')));
-    assert.ok(fs.existsSync(path.resolve(distDir, 'welcome.txt')));
-    assert.ok(fs.existsSync(path.resolve(distDir, 'component', 'foo.txt')));
-  }).timeout(5000);
+    assert.ok(fs.existsSync(path.resolve(distDir, welcomeTxtName)));
+    assert.ok(fs.existsSync(path.resolve(distDir, stylesCssName)));
+
+    // test if manifest contains correct entries
+    const manifest = fs.readJsonSync(path.resolve(buildDir, 'manifest.json'));
+    assert.deepStrictEqual({
+      [stylesCssName]: {
+        hash: '52a3333296aaf35a6761cf3f5309528e',
+        size: 656,
+      },
+      [welcomeTxtName]: {
+        hash: '80d24efec2dacccf1330a8a0f2b656c1',
+        size: 27,
+      },
+    }, manifest);
+  });
 });
