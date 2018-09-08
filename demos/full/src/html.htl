@@ -19,9 +19,9 @@
 <head>
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
-    <link rel="shortcut icon" type="image/x-icon" href="/dist/favicon.ico">
+    <link rel="shortcut icon" type="image/x-icon" href="favicon.ico">
     <title>${it.resource.title}</title>
-    <link rel="stylesheet" href="/dist/bootstrap.min.css"/>
+    <link rel="stylesheet" href="bootstrap.min.css"/>
 </head>
 <body>
 
