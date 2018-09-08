@@ -41,8 +41,8 @@ describe('Integration test for demo command', () => {
     await assertFile(path.resolve(testDir, 'project1', 'src/html.htl'));
     await assertFile(path.resolve(testDir, 'project1', 'src/html.pre.js'));
     await assertFile(path.resolve(testDir, 'project1', 'index.md'));
-    await assertFile(path.resolve(testDir, 'project1', 'src/static/style.css'));
-    await assertFile(path.resolve(testDir, 'project1', 'src/static/favicon.ico'));
+    await assertFile(path.resolve(testDir, 'project1', 'src/style.css'));
+    await assertFile(path.resolve(testDir, 'project1', 'src/favicon.ico'));
     await assertFile(path.resolve(testDir, 'project1', 'helix_logo.png'));
   }).timeout(3000);
 
@@ -57,8 +57,8 @@ describe('Integration test for demo command', () => {
     await assertFile(path.resolve(testDir, 'project1', 'src/html.pre.js'));
     await assertFile(path.resolve(testDir, 'project1', 'index.md'));
     await assertFile(path.resolve(testDir, 'project1', 'README.md'));
-    await assertFile(path.resolve(testDir, 'project1', 'src/static/bootstrap.min.css'));
-    await assertFile(path.resolve(testDir, 'project1', 'src/static/favicon.ico'));
+    await assertFile(path.resolve(testDir, 'project1', 'src/bootstrap.min.css'));
+    await assertFile(path.resolve(testDir, 'project1', 'src/favicon.ico'));
     await assertFile(path.resolve(testDir, 'project1', 'helix_logo.png'));
   }).timeout(3000);
 
