@@ -16,9 +16,9 @@
  * @param payload The current payload of processing pipeline
  * @param payload.resource The content resource
  */
-function pre(payload, config) {
+function pre(payload, action) {
 
-  config.logger.debug('pre was here!');
+  action.logger.debug('pre was here!');
   payload.resource.foo = 'bar';
 
 }
