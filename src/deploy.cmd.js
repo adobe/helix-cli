@@ -141,11 +141,6 @@ class DeployCommand {
     return this;
   }
 
-  withDistDir(dist) {
-    this._distDir = dist;
-    return this;
-  }
-
   withDirectory(dir) {
     this._cwd = dir;
     return this;
@@ -295,10 +290,6 @@ class DeployCommand {
 
     if (!this._prefix) {
       this._prefix = `${GitUtils.getRepository()}--${GitUtils.getBranchFlag()}--`;
-    }
-
-    if (!this._distDir) {
-      this._distDir = path.resolve(this._cwd, 'dist');
     }
 
     scripts.map((script) => {
