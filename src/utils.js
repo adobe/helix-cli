@@ -66,21 +66,23 @@ const utils = {
    * @return {Promise} A promise that resolves to the request context.
    */
   async fetchStatic(ctx) {
-    let uri;
-    if (ctx.path.startsWith('/dist/')) {
-      uri = path.resolve(ctx.config.distDir, ctx.path.substring(6));
-    } else {
-      uri = ctx.config.contentRepo.raw + ctx.path;
+    const uris = [
+      ctx.config.contentRepo.raw + ctx.path,
+      path.resolve(ctx.config.distDir, ctx.path.substring(1)),
+    ];
+    for (let i = 0; i < uris.length; i += 1) {
+      const uri = uris[i];
+      ctx.logger.debug(`fetching static resource from ${uri}`);
+      // eslint-disable-next-line no-await-in-loop
+      const data = await utils.fetch(uri);
+      if (data != null) {
+        ctx.content = Buffer.from(data, 'utf8');
+        return ctx;
+      }
     }
-    ctx.logger.debug(`fetching static resource from ${uri}`);
-    const data = await utils.fetch(uri);
-    if (data === null) {
-      const error = new Error('Resource not found.');
-      error.code = 404;
-      throw error;
-    }
-    ctx.content = Buffer.from(data, 'utf8');
-    return ctx;
+    const error = new Error('Resource not found.');
+    error.code = 404;
+    throw error;
   },
 
 };
