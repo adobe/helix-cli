@@ -61,7 +61,7 @@ describe('hlx deploy (Integration)', () => {
       $.cd(path.resolve(testRoot, 'helix-helpx'));
 
       new DeployCommand()
-        .withWskHost('runtime.adobe.io')
+        .withWskHost('adobeioruntime.net')
         .withWskAuth('secret-key')
         .withWskNamespace('hlx')
         .withEnableAuto(true)
@@ -78,12 +78,12 @@ describe('hlx deploy (Integration)', () => {
     } catch (e) {
       done(e);
     }
-  }).timeout(15000);
+  });//.timeout(15000);
 
   it('Dry-Running works', async () => {
     await new DeployCommand()
       .withDirectory(testRoot)
-      .withWskHost('runtime.adobe.io')
+      .withWskHost('adobeioruntime.net')
       .withWskAuth('secret-key')
       .withWskNamespace('hlx')
       .withEnableAuto(false)
@@ -100,7 +100,7 @@ describe('hlx deploy (Integration)', () => {
     await fs.remove(buildDir);
     await new DeployCommand()
       .withDirectory(testRoot)
-      .withWskHost('runtime.adobe.io')
+      .withWskHost('adobeioruntime.net')
       .withWskAuth('secret-key')
       .withWskNamespace('hlx')
       .withEnableAuto(false)
@@ -117,7 +117,7 @@ describe('hlx deploy (Integration)', () => {
 
     await new DeployCommand()
       .withDirectory(testRoot)
-      .withWskHost('runtime.adobe.io')
+      .withWskHost('adobeioruntime.net')
       .withWskAuth('secret-key')
       .withWskNamespace('hlx')
       .withEnableAuto(false)
