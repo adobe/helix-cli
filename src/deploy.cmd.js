@@ -181,7 +181,7 @@ class DeployCommand {
     if (!(fs.existsSync(path.resolve(process.cwd(), '.circleci', 'config.yaml')) || fs.existsSync(path.resolve(process.cwd(), '.circleci', 'config.yml')))) {
       throw new Error(`Cannot automate deployment without ${path.resolve(process.cwd(), '.circleci', 'config.yaml')}`);
     }
-console.log('1');
+
     const { owner, repo, ref } = GitUtils.getOriginURL();
 
     const auth = {
@@ -202,10 +202,8 @@ console.log('1');
     };
 
     console.log(`Automating deployment with ${followoptions.uri}`);
-    console.log('2', followoptions);
 
     const follow = await request(followoptions);
-    console.log('3');
 
     const envars = [];
 
@@ -234,7 +232,6 @@ console.log('1');
     }
 
     await Promise.all(envars);
-    console.log('4');
 
     if (follow.first_build) {
       console.log('\nAuto-deployment started.');
@@ -255,11 +252,9 @@ console.log('1');
         },
         uri: `https://circleci.com/api/v1.1/project/github/${owner}/${repo}/tree/${ref}`,
       };
-      console.log('5');
 
       const triggered = await request(triggeroptions);
 
-      console.log('6');
 
       console.log(`Go to ${chalk.grey(`${triggered.build_url}`)} for build status.`);
     }
