@@ -5,11 +5,12 @@ Installer for the [Helix Command Line Interface (`hlx`)](https://github.com/adob
 ## Build the installer
 
 Basically:
+
 * `nvm use 8` (required by current `nodec`)
 * use [`nodec`](https://github.com/pmq20/node-packer) to build a single binary executable of the [Helix CLI](https://github.com/adobe/helix-cli).
 * use [makeself](https://github.com/megastep/makeself) to build a self-extractable installer shell script.
 
-For details see [`build.sh`](build/build.sh).
+For details see [`build.sh`](build.sh).
 
 See also [this article](https://www.armedia.com/blog/create-a-self-extracting-installer-in-linux/).
   
@@ -17,13 +18,13 @@ See also [this article](https://www.armedia.com/blog/create-a-self-extracting-in
 
 ```bash
 # download installer script
-curl -OL https://github.com/adobe/helix-cli/releases/download/v0.3.2/hlx_install.sh
+curl -OL https://github.com/adobe/helix-cli/releases/download/v0.5.2/hlx_install.sh
 chmod +x hlx_install.sh
 # run installer
 ./hlx_install.sh
 # verify install
 ls -al /usr/local/bin/hlx
 hlx --help
-# cleanup 
+# cleanup
 rm hlx_install.sh
 ```
