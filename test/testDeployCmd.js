@@ -54,14 +54,14 @@ describe('hlx deploy (Integration)', () => {
     $.cd(cwd);
   });
 
-  it('Auto-Deploy works', (done) => {
+  it.skip('Auto-Deploy works', (done) => {
     try {
       $.cd(testRoot);
       $.exec('git clone https://github.com/trieloff/helix-helpx.git');
       $.cd(path.resolve(testRoot, 'helix-helpx'));
 
       new DeployCommand()
-        .withWskHost('runtime.adobe.io')
+        .withWskHost('adobeioruntime.net')
         .withWskAuth('secret-key')
         .withWskNamespace('hlx')
         .withEnableAuto(true)
@@ -83,7 +83,7 @@ describe('hlx deploy (Integration)', () => {
   it('Dry-Running works', async () => {
     await new DeployCommand()
       .withDirectory(testRoot)
-      .withWskHost('runtime.adobe.io')
+      .withWskHost('adobeioruntime.net')
       .withWskAuth('secret-key')
       .withWskNamespace('hlx')
       .withEnableAuto(false)
@@ -100,7 +100,7 @@ describe('hlx deploy (Integration)', () => {
     await fs.remove(buildDir);
     await new DeployCommand()
       .withDirectory(testRoot)
-      .withWskHost('runtime.adobe.io')
+      .withWskHost('adobeioruntime.net')
       .withWskAuth('secret-key')
       .withWskNamespace('hlx')
       .withEnableAuto(false)
@@ -117,7 +117,7 @@ describe('hlx deploy (Integration)', () => {
 
     await new DeployCommand()
       .withDirectory(testRoot)
-      .withWskHost('runtime.adobe.io')
+      .withWskHost('adobeioruntime.net')
       .withWskAuth('secret-key')
       .withWskNamespace('hlx')
       .withEnableAuto(false)
