@@ -4,7 +4,11 @@ Installer for the [Helix Command Line Interface (`hlx`)](https://github.com/adob
 
 ## Build the installer
 
-Basically:
+```bash
+./build.sh [<tag, branch or commit>]
+```
+
+What it basically does:
 
 * `nvm use 8` (required by current `nodec`)
 * use [`nodec`](https://github.com/pmq20/node-packer) to build a single binary executable of the [Helix CLI](https://github.com/adobe/helix-cli).
