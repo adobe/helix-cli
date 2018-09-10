@@ -10,12 +10,12 @@
  * governing permissions and limitations under the License.
  */
 
-const path = require("path");
+const path = require('path');
 const builder = require('junit-report-builder');
 
 class JunitPerformanceReport {
   constructor() {
-    this._outfile = path.resolve(process.cwd(), "test-results.xml");
+    this._outfile = path.resolve(process.cwd(), 'test-results.xml');
     this._suite = builder.testSuite().name('Performance Tests');
   }
 
