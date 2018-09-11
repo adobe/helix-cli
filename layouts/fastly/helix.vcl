@@ -527,7 +527,7 @@ sub vcl_miss {
   }
 
   # set backend authentication
-  if (req.backend == F_runtime_adobe_io) {
+  if (req.backend == F_AdobeRuntime) {
     set bereq.http.Authorization = table.lookup(secrets, "OPENWHISK_AUTH");
   }
 
