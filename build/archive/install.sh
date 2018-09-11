@@ -44,14 +44,19 @@ ask() {
     done
 }
 
-if [ -f $dest ]; then
-    old_version=$($dest --version)
-    if ! ask "hlx version $old_version ($dest) exists, overwrite?" Y; then
-      exit 1
+if [ -L $dest -o -f $dest ]; then
+    if [ -x $dest ]; then 
+        old_version=$($dest --version)
+        if ! ask "hlx version $old_version ($dest) exists, overwrite?" Y; then
+            exit 1
+        fi
+    else
+        rm $dest
     fi
 fi
 
 if cp a.out $dest; then
+  chmod 755 $dest   # TODO: respect umask
   version=$($dest --version)
   echo "hlx version $version successfully installed: $dest"
 else
