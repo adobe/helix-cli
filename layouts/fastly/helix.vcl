@@ -488,7 +488,13 @@ sub vcl_fetch {
     esi;
   }
 
-  if (beresp.status == 404 || beresp.status == 204) {
+  if (beresp.http.X-Static == "Raw/Static") {
+    if (beresp.status == 307) {
+      //restart
+    } else {
+      return(deliver);
+    }
+  } elseif (beresp.status == 404 || beresp.status == 204) {
     # That was a miss. Let's try to restart.
     set beresp.http.X-Status = beresp.status + "-Restart " + req.restarts;
     set beresp.status = 404;
