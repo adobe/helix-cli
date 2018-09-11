@@ -8,8 +8,9 @@
   },
   "scripts": {
     "test": "nyc mocha --exit",
+    "junit": "mocha --exit -R mocha-junit-reporter",
     "lint": "./node_modules/.bin/eslint .",
-    "preversion": "npm test",
+    "preversion": "npm junit",
     "postversion": "git push origin master --follow-tags",
     "delete-git-tag": "git tag -d v$npm_package_version && git push origin :v$npm_package_version"
   },
