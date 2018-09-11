@@ -156,7 +156,7 @@ jobs:
         command: ./build.sh
         working_directory: build
     - store_artifacts:
-        path: hlx_install.sh
+        path: build/hlx_install.sh
             
 workflows:
   version: 2
