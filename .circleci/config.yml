@@ -91,7 +91,12 @@ jobs:
     - run:
         name: version pre-release
         command: npm version prerelease --preid=pre -m "Release %s [ci skip]"
+        environment:
+          MOCHA_FILE: junit/test-results.xml
 
+    - store_test_results:
+        path: junit
+        
     # unfortunately we cannot create a release commit with no tag with `npm version`, so we need to delete it here again
     - run:
         name: delete pre-release tag
