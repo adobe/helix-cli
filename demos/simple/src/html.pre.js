@@ -19,10 +19,10 @@
 /**
  * The 'pre' function that is executed before the HTML is rendered
  * @param payload The current payload of processing pipeline
- * @param payload.resource The content resource
+ * @param payload.content The content
  */
 function pre(payload) {
-  payload.resource.time = `${new Date()}`;
+  payload.content.time = `${new Date()}`;
 }
 
 module.exports.pre = pre;

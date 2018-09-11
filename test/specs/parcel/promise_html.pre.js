@@ -28,7 +28,7 @@ function requestSomething() {
  */
 function pre(payload) {
   return requestSomething().then((value) => {
-    payload.resource.foo = value;
+    payload.content.foo = value;
   });
 }
 

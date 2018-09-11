@@ -65,8 +65,8 @@ describe('Integration test for build', () => {
         size: 656,
       },
       [welcomeTxtName]: {
-        hash: '80d24efec2dacccf1330a8a0f2b656c1',
-        size: 27,
+        hash: 'd6fc0d7dfc73e69219b8a3d110b69cb0',
+        size: 24,
       },
     }, manifest);
   });

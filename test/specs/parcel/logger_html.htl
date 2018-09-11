@@ -11,6 +11,6 @@
     <link rel="stylesheet" src="bla.css"/>
 </head>
 <body>
-    Hello, world! this is a ${it.resource.foo}. 
+    Hello, world! this is a ${content.foo}.
 </body>
 </html>
