@@ -147,9 +147,10 @@ jobs:
 
   installer:
     macos:
-        xcode: "9.0"
+      xcode: "9.0"
     steps:
-        - run: xcodebuild -version
+    - checkout
+    - run: xcodebuild -version
             
 workflows:
   version: 2
