@@ -8,8 +8,11 @@
         {
             "type": "node",
             "request": "launch",
-            "name": "Launch Program",
-            "program": "${workspaceFolder}/cli.js"
+            "name": "Launch 'hlx up'",
+            "program": "${workspaceFolder}/index.js",
+            "args":[
+                "up"
+            ]
         }
     ]
 }

@@ -73,6 +73,10 @@ class UpCommand extends BuildCommand {
 
     this.validate();
 
+    // start debugger (#178)
+    // https://nodejs.org/en/docs/guides/debugging-getting-started/#enable-inspector
+    process.kill(process.pid, 'SIGUSR1');
+
     this._project = new HelixProject()
       .withCwd(this._cwd)
       .withBuildDir(this._target)
