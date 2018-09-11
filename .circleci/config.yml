@@ -151,6 +151,10 @@ jobs:
     steps:
     - checkout
     - run: xcodebuild -version
+    - run:
+        name: Build Installer
+        command: ./build.sh
+        working_directory: build
             
 workflows:
   version: 2
