@@ -64,10 +64,10 @@ function isJSON(type) {
 }
 
 function getBody(type, responsebody) {
-  const binary = isBinary(type);
-  if (binary) {
-    return responsebody.toString('base64');
-  } if (isJSON(type)) {
+  if (isBinary(type)) {
+    return Buffer.from(responsebody).toString('base64');
+  }
+  if (isJSON(type)) {
     return JSON.parse(responsebody);
   }
   return responsebody.toString();
@@ -89,24 +89,26 @@ function staticBase(owner, repo, entry, ref, strain = 'default') {
 }
 
 function deliverPlain(owner, repo, ref, entry, root) {
-  const cleanentry = (`${root}/${entry}`).replace(/^\//, '').replace(/[/]+/g, '');
+  const cleanentry = (`${root}/${entry}`).replace(/^\//, '').replace(/[/]+/g, '/');
   console.log('deliverPlain()', owner, repo, ref, cleanentry);
   const rawopts = {
     url: `https://raw.githubusercontent.com/${owner}/${repo}/${ref}/${cleanentry}`,
     headers: {
       'User-Agent': 'Project Helix Static',
     },
+    resolveWithFullResponse: true,
+    encoding: null,
   };
 
-  return request.get(rawopts).then((responsebody) => {
-    const type = mime.contentType(cleanentry) || 'application/octet-stream';
-    const body = getBody(type, responsebody);
-    console.log(`delivering file ${cleanentry} type ${type}`);
+  return request.get(rawopts).then((response) => {
+    const type = mime.lookup(cleanentry) || 'application/octet-stream';
+    const body = getBody(type, response.body);
+    console.log(`delivering file ${cleanentry} type ${type} binary: ${isBinary(type)}`);
     return {
       headers: addHeaders({
         'Content-Type': type,
         'X-Static': 'Raw/Static',
-      }, ref, responsebody),
+      }, ref, response.body),
       body,
     };
   }).catch(error);

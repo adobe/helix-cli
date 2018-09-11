@@ -127,7 +127,7 @@ Authentication is required. You can pass the key via the HLX_WSK_AUTH environmen
 
     sinon.assert.calledWith(mockDeploy.withEnableAuto, false);
     sinon.assert.calledWith(mockDeploy.withEnableDirty, false);
-    sinon.assert.calledWith(mockDeploy.withWskHost, 'runtime.adobe.io');
+    sinon.assert.calledWith(mockDeploy.withWskHost, 'adobeioruntime.net');
     sinon.assert.calledWith(mockDeploy.withWskAuth, 'secret-key');
     sinon.assert.calledWith(mockDeploy.withWskNamespace, 'hlx');
     sinon.assert.calledWith(mockDeploy.withLogglyHost, 'trieloff.loggly.com'); // TODO !!
@@ -149,7 +149,7 @@ Authentication is required. You can pass the key via the HLX_WSK_AUTH environmen
 
     sinon.assert.calledWith(mockDeploy.withEnableAuto, false);
     sinon.assert.calledWith(mockDeploy.withEnableDirty, false);
-    sinon.assert.calledWith(mockDeploy.withWskHost, 'runtime.adobe.io');
+    sinon.assert.calledWith(mockDeploy.withWskHost, 'adobeioruntime.net');
     sinon.assert.calledWith(mockDeploy.withWskAuth, 'sekret-key');
     sinon.assert.calledWith(mockDeploy.withWskNamespace, 'hlx');
     sinon.assert.calledWith(mockDeploy.withLogglyHost, 'trieloff.loggly.com'); // TODO !!
@@ -203,10 +203,10 @@ Authentication is required. You can pass the key via the HLX_WSK_AUTH environmen
       .run(['deploy', '--no-auto',
         '--wsk-auth', 'secret-key',
         '--wsk-namespace', 'hlx',
-        '--wsk-host', 'stage.runtime.adobe.io',
+        '--wsk-host', 'stage.adobeioruntime.net',
       ]);
 
-    sinon.assert.calledWith(mockDeploy.withWskHost, 'stage.runtime.adobe.io');
+    sinon.assert.calledWith(mockDeploy.withWskHost, 'stage.adobeioruntime.net');
     sinon.assert.calledOnce(mockDeploy.run);
   });
 
