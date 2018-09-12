@@ -395,7 +395,8 @@ sub vcl_recv {
   }
 
   # enable IO for image file-types
-  if (req.url.ext ~ "(?i)(?:gif|png|jpe?g|webp)")  {
+  # but not for static images or redirected images
+  if (req.url.ext ~ "(?i)(?:gif|png|jpe?g|webp)" && (req.http.X-Static != "Static") && (req.http.X-Static == "Redirect"))  {
     set req.http.X-Fastly-Imageopto-Api = "fastly";
   }
 
