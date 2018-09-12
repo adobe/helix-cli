@@ -25,11 +25,6 @@ const klawSync = require('klaw-sync');
 const { DEFAULT_OPTIONS } = require('./defaults.js');
 const md5 = require('./md5.js');
 
-// #190 sourceMappingURL annotation is incorrect
-// => override default publicURL
-// see: https://github.com/parcel-bundler/parcel/issues/1028#issuecomment-374537098
-DEFAULT_OPTIONS.publicURL = '.';
-
 /**
  * Finds the non-htl files from the generated bundle
  * @param bnd the parcel bundle
@@ -43,9 +38,6 @@ function findStaticFiles(bnd) {
     if (bnd.type === 'map' && bnd.parentBundle.htl) {
       // eslint-disable-next-line no-param-reassign
       bnd.htl = true;
-    }
-    if (bnd.htl && bnd.type === 'js') {
-      // strip leading / from sourceMappingURL
     }
     if (!bnd.htl) {
       statics.push(bnd.name);
