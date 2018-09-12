@@ -28,9 +28,9 @@ function requestSomething() {
  */
 async function pre(payload) {
   const myPayload = JSON.parse(JSON.stringify(payload));
-  payload.resource.foo = 'testing - should be ignored';
+  payload.content.foo = 'testing - should be ignored';
 
-  myPayload.resource.foo = await requestSomething();
+  myPayload.content.foo = await requestSomething();
   return myPayload;
 }
 
