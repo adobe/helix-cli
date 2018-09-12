@@ -15,7 +15,6 @@ const glob = require('glob');
 const opn = require('opn');
 const { HelixProject } = require('@adobe/petridish');
 const BuildCommand = require('./build.cmd');
-const { DEFAULT_OPTIONS } = require('./defaults.js');
 const pkgJson = require('../package.json');
 
 class UpCommand extends BuildCommand {
