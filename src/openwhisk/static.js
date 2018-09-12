@@ -15,6 +15,9 @@ const crypto = require('crypto');
 const mime = require('mime-types');
 /* eslint-disable no-console */
 
+// one megabyte openwhisk limit + 20% Base64 inflation + safety padding
+const REDIRECT_LIMIT = 750000;
+
 function error(message, code = 500) {
   console.error('delivering error', message, code);
   return {
@@ -106,7 +109,7 @@ function deliverPlain(owner, repo, ref, entry, root) {
     const type = mime.lookup(cleanentry) || 'application/octet-stream';
     const size = parseInt(response.headers['content-length'], 10);
     console.log('size', size);
-    if (size < 3000) {
+    if (size < REDIRECT_LIMIT) {
       const body = getBody(type, response.body);
       console.log(`delivering file ${cleanentry} type ${type} binary: ${isBinary(type)}`);
       return {
