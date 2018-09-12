@@ -318,6 +318,11 @@ sub vcl_recv {
     set req.http.X-Action-Root = "/api/v1/web/" + table.lookup(secrets, "OPENWHISK_NAMESPACE") + "/default/hlx--static";
     set req.url = req.http.X-Action-Root + "?owner=" + var.owner + "&repo=" + var.repo + "&strain=" + var.strain + "&ref=" + var.ref + "&entry=" + var.entry + "&path=" + var.path + "&plain=true"  + "&allow=" urlencode(req.http.X-Allow) + "&deny=" urlencode(req.http.X-Deny) + "&root=" + req.http.X-Github-Static-Root;
 
+  } elseif (req.http.Fastly-SSL && (req.http.X-Static == "Redirect")) {
+    # Handle a redirect from static.js by
+    # - fetching the resource from GitHub
+    # - don't forget to override the Content-Type header
+    set req.backend = F_GitHub;
 
   } elsif (!req.http.Fastly-FF && req.http.Fastly-SSL && (req.url.basename ~ "(^[^\.]+)(\.?(.+))?(\.[^\.]*$)" || req.url.basename == "")) {
     # This is a dynamic request.
@@ -490,10 +495,28 @@ sub vcl_fetch {
 
   if (beresp.http.X-Static == "Raw/Static") {
     if (beresp.status == 307) {
-      //restart
+      // static.js returns a 307 if the response is greater than OpenWhisk's
+      // delivery limit. We restart the request and deliver directly from
+      // GitHub instead, carring over the Content-Type header that static.js guessed
+      set req.http.X-Static = "Redirect";
+      set req.url = beresp.http.Location;
+      set req.http.X-Content-Type = beresp.http.X-Content-Type;
+      restart;
     } else {
       return(deliver);
     }
+  } elseif (req.http.X-Static == "Redirect") {
+    // and this is where we fix the headers of the GitHub static response
+    // so that they become digestible by a browser.
+    // - recover Content-Type from X-Content-Type
+    // - filter out GitHub-headers
+
+    set beresp.http.Content-Type = req.http.X-Content-Type;
+    unset beresp.http.X-Content-Type-Options;
+    unset beresp.http.X-Frame-Options;
+    unset beresp.http.X-XSS-Protection;
+    unset beresp.http.Content-Security-Policy;
+
   } elseif (beresp.status == 404 || beresp.status == 204) {
     # That was a miss. Let's try to restart.
     set beresp.http.X-Status = beresp.status + "-Restart " + req.restarts;
@@ -572,6 +595,10 @@ sub vcl_deliver {
     unset resp.http.X-GW-Cache;
     unset resp.http.X-Static;
     unset resp.http.X-URL;
+    unset resp.http.X-Content-Type;
+    unset resp.http.X-GitHub-Request-Id;
+    unset resp.http.X-Fastly-Request-ID;
+    unset resp.http.X-Geo-Block-List;
   }
   return(deliver);
 }
