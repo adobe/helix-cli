@@ -23,6 +23,7 @@ const BuildCommand = require('../src/build.cmd');
 const TEST_DIR = path.resolve('test/integration');
 
 describe('Integration test for build', () => {
+  let testRoot;
   let testDir;
   let buildDir;
   let distDir;
@@ -31,7 +32,7 @@ describe('Integration test for build', () => {
     // copying 300 MB can take a while
     this.timeout(20000);
 
-    const testRoot = await createTestRoot();
+    testRoot = await createTestRoot();
     testDir = path.resolve(testRoot, 'project');
     buildDir = path.resolve(testRoot, '.hlx/build');
     distDir = path.resolve(testRoot, 'dist');
@@ -50,6 +51,41 @@ describe('Integration test for build', () => {
       .withCacheEnabled(false)
       .run();
 
+    assert.ok(fs.existsSync(path.resolve(buildDir, 'html.js')));
+    assert.ok(!fs.existsSync(path.resolve(buildDir, 'html.pre.js')));
+    assert.ok(fs.existsSync(path.resolve(buildDir, 'example_html.js')));
+    assert.ok(fs.existsSync(path.resolve(buildDir, 'component', 'html.js')));
+    assert.ok(fs.existsSync(path.resolve(distDir, welcomeTxtName)));
+    assert.ok(fs.existsSync(path.resolve(distDir, stylesCssName)));
+
+    // test if manifest contains correct entries
+    const manifest = fs.readJsonSync(path.resolve(buildDir, 'manifest.json'));
+    assert.deepStrictEqual({
+      [stylesCssName]: {
+        hash: '52a3333296aaf35a6761cf3f5309528e',
+        size: 656,
+      },
+      [welcomeTxtName]: {
+        hash: 'd6fc0d7dfc73e69219b8a3d110b69cb0',
+        size: 24,
+      },
+    }, manifest);
+  });
+
+  it('build command with webroot puts files to correct place', async function test() {
+    this.timeout(5000);
+    const stylesCssName = `styles.${md5(path.resolve(TEST_DIR, 'src/component/styles.css')).slice(-8)}.css`;
+    const welcomeTxtName = `welcome.${md5(path.resolve(TEST_DIR, 'src/welcome.txt')).slice(-8)}.txt`;
+
+    await new BuildCommand()
+      .withFiles(['test/integration/src/**/*.htl'])
+      .withTargetDir(buildDir)
+      .withCacheEnabled(false)
+      .withDirectory(testRoot)
+      .withStrainFile('test/fixtures/alt_webroot.yaml')
+      .run();
+
+    distDir = path.resolve(testRoot, 'webroot/dist');
     assert.ok(fs.existsSync(path.resolve(buildDir, 'html.js')));
     assert.ok(!fs.existsSync(path.resolve(buildDir, 'html.pre.js')));
     assert.ok(fs.existsSync(path.resolve(buildDir, 'example_html.js')));

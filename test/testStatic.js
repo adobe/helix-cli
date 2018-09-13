@@ -17,7 +17,8 @@ describe('Static Delivery Action #unittest', () => {
   it('error() #unittest', () => {
     const error = index.error('Test');
     assert.equal(error.statusCode, '500');
-    assert.ok(error.body.match('Internal Server Error'));
+    assert.ok(error.body.match('500'));
+    assert.ok(!error.body.match('404'));
   });
 
   it('addHeaders() #unittest', () => {

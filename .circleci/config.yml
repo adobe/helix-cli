@@ -157,7 +157,7 @@ jobs:
         working_directory: build
     - store_artifacts:
         path: build/hlx_install.sh
-            
+
 workflows:
   version: 2
   build:
@@ -170,4 +170,7 @@ workflows:
           branches:
             only: master
     - build
-    - installer
+    - installer:
+        filters:
+          branches:
+            only: master
