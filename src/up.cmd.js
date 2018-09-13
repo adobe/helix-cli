@@ -57,7 +57,7 @@ class UpCommand extends BuildCommand {
 
 
   async getBundlerOptions() {
-    const opts = super.getBundlerOptions();
+    const opts = await super.getBundlerOptions();
     opts.watch = true;
     return opts;
   }
