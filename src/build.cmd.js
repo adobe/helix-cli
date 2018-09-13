@@ -44,7 +44,7 @@ function findStaticFiles(bnd) {
       // #190 sourceMappingURL annotation is incorrect
       // see: https://github.com/parcel-bundler/parcel/issues/1028#issuecomment-374537098
       const contents = fse.readFileSync(bnd.name, 'utf8');
-      fse.writeFileSync(bnd.name, contents.replace(/\/\/# sourceMappingURL=\//, '//# sourceMappingURL='));
+      fse.writeFileSync(bnd.name, contents.replace(/\/\/# sourceMappingURL=\/dist\//, '//# sourceMappingURL='));
     }
     if (!bnd.htl) {
       statics.push(bnd.name);
