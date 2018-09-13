@@ -129,11 +129,9 @@ class BuildCommand extends EventEmitter {
       const exists = await fse.pathExists(this._strainFile);
       if (exists) {
         const strains = strainconfig.load(await fse.readFile(this._strainFile, 'utf8'));
-        // for now just take the first defined static.root.
-        // todo: move this to the helix-config.yaml
-        const rootStrain = strains.find(v => v.static && 'root' in v.static);
-        if (rootStrain) {
-          const root = rootStrain.static.root.replace(/^\/+/, '');
+        const defaultStrain = strains.find(v => v.name === 'default');
+        if (defaultStrain && defaultStrain.static && defaultStrain.static.root) {
+          const root = defaultStrain.static.root.replace(/^\/+/, '');
           this._webroot = path.resolve(this._cwd, root);
         }
       }
