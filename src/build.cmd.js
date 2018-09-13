@@ -30,7 +30,7 @@ const md5 = require('./md5.js');
  * @param bnd the parcel bundle
  * @returns {Array} array of files.
  */
-function findStaticFiles(bnd) {
+async function findStaticFiles(bnd) {
   const statics = [];
   if (bnd.type) {
     // eslint-disable-next-line no-param-reassign
@@ -39,12 +39,19 @@ function findStaticFiles(bnd) {
       // eslint-disable-next-line no-param-reassign
       bnd.htl = true;
     }
+    if (bnd.htl && bnd.type === 'js') {
+      // strip leading / from sourceMappingURL
+      // #190 sourceMappingURL annotation is incorrect
+      // see: https://github.com/parcel-bundler/parcel/issues/1028#issuecomment-374537098
+      const contents = await fse.readFile(bnd.name, 'utf8');
+      await fse.writeFile(bnd.name, contents.replace(/\/\/# sourceMappingURL=\//, '//# sourceMappingURL='));
+    }
     if (!bnd.htl) {
       statics.push(bnd.name);
     }
   }
-  bnd.childBundles.forEach((child) => {
-    statics.push(...findStaticFiles(child));
+  bnd.childBundles.forEach(async (child) => {
+    statics.push(...await findStaticFiles(child));
   });
   return statics;
 }
@@ -154,7 +161,7 @@ class BuildCommand extends EventEmitter {
 
   async extractStaticFiles(bundle, report) {
     // get the static files processed by parcel.
-    const staticFiles = findStaticFiles(bundle);
+    const staticFiles = await findStaticFiles(bundle);
 
     if (staticFiles.length > 0) {
       if (report) {
