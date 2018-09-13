@@ -89,13 +89,13 @@ parcelRequire = (function (modules, cache, entry, globalName) {
     if (typeof exports === "object" && typeof module !== "undefined") {
       module.exports = mainExports;
 
-      // RequireJS
+    // RequireJS
     } else if (typeof define === "function" && define.amd) {
-      define(function () {
-        return mainExports;
-      });
+     define(function () {
+       return mainExports;
+     });
 
-      // <script>
+    // <script>
     } else if (globalName) {
       this[globalName] = mainExports;
     }
@@ -104,145 +104,147 @@ parcelRequire = (function (modules, cache, entry, globalName) {
   // Override the current require with this new one
   return newRequire;
 })({"dump_html.pre.js":[function(require,module,exports) {
-    /*
-     * Licensed to the Apache Software Foundation (ASF) under one or more
-     * contributor license agreements.  See the NOTICE file distributed with
-     * this work for additional information regarding copyright ownership.
-     * The ASF licenses this file to You under the Apache License, Version 2.0
-     * (the "License"); you may not use this file except in compliance with
-     * the License.  You may obtain a copy of the License at
-     *
-     *      http://www.apache.org/licenses/LICENSE-2.0
-     *
-     * Unless required by applicable law or agreed to in writing, software
-     * distributed under the License is distributed on an "AS IS" BASIS,
-     * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-     * See the License for the specific language governing permissions and
-     * limitations under the License.
-     *
-     */
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+/* eslint-disable  */
+module.exports.pre = (payload, config) => {
+  payload.dump = JSON.stringify(payload.request, null, "  ");
+  if (config) {
+    payload.dump += 'config:' + JSON.stringify(Object.keys(config), null, "  ");
+  } else {
+    payload.dump += 'no config';
+  }
+};
+},{}],"dump_html.htl":[function(require,module,exports) {
+/*
+ * Copyright 2018 Adobe. All rights reserved.
+ * This file is licensed to you under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License. You may obtain a copy
+ * of the License at http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under
+ * the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR REPRESENTATIONS
+ * OF ANY KIND, either express or implied. See the License for the specific language
+ * governing permissions and limitations under the License.
+ */
 
-    module.exports.pre = (payload, config) => {
-      payload.dump = JSON.stringify(payload.request, null, "  ");
-      if (config) {
-        payload.dump += 'config:' + JSON.stringify(Object.keys(config), null, "  ");
-      } else {
-        payload.dump += 'no config';
-      }
-    };
-  },{}],"dump_html.htl":[function(require,module,exports) {
-    /*
-     * Copyright 2018 Adobe. All rights reserved.
-     * This file is licensed to you under the Apache License, Version 2.0 (the "License");
-     * you may not use this file except in compliance with the License. You may obtain a copy
-     * of the License at http://www.apache.org/licenses/LICENSE-2.0
-     *
-     * Unless required by applicable law or agreed to in writing, software distributed under
-     * the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR REPRESENTATIONS
-     * OF ANY KIND, either express or implied. See the License for the specific language
-     * governing permissions and limitations under the License.
-     */
+/* eslint-disable */
 
-    /* eslint-disable */
+/*
+ * Copyright 2018 Adobe. All rights reserved.
+ * This file is licensed to you under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License. You may obtain a copy
+ * of the License at http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under
+ * the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR REPRESENTATIONS
+ * OF ANY KIND, either express or implied. See the License for the specific language
+ * governing permissions and limitations under the License.
+ */
 
-    /*
-     * Copyright 2018 Adobe. All rights reserved.
-     * This file is licensed to you under the Apache License, Version 2.0 (the "License");
-     * you may not use this file except in compliance with the License. You may obtain a copy
-     * of the License at http://www.apache.org/licenses/LICENSE-2.0
-     *
-     * Unless required by applicable law or agreed to in writing, software distributed under
-     * the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR REPRESENTATIONS
-     * OF ANY KIND, either express or implied. See the License for the specific language
-     * governing permissions and limitations under the License.
-     */
+/* eslint-disable */
 
-    /* eslint-disable */
+const Runtime = require('@adobe/htlengine/src/runtime/Runtime');
 
-    const Runtime = require('@adobe/htlengine/src/runtime/Runtime');
+function run(runtime) {
+  const lengthOf = function (c) {
+    return Array.isArray(c) ? c.length : Object.keys(c).length;
+  };
 
-    function run(runtime) {
-      const lengthOf = function (c) {
-        return Array.isArray(c) ? c.length : Object.keys(c).length;
-      };
+  const out = runtime.out.bind(runtime);
+  const exec = runtime.exec.bind(runtime);
+  const xss = runtime.xss.bind(runtime);
+  const listInfo = runtime.listInfo.bind(runtime);
+  const use = runtime.use.bind(runtime);
+  const slyResource = runtime.resource.bind(runtime);
+  const call = runtime.call.bind(runtime);
+  const template = runtime.template.bind(runtime);
 
-      const out = runtime.out.bind(runtime);
-      const exec = runtime.exec.bind(runtime);
-      const xss = runtime.xss.bind(runtime);
-      const listInfo = runtime.listInfo.bind(runtime);
-      const use = runtime.use.bind(runtime);
-      const slyResource = runtime.resource.bind(runtime);
-      const call = runtime.call.bind(runtime);
-      const template = runtime.template.bind(runtime);
+  return runtime.run(function* () {
+    let content = runtime.globals.content;
+    let request = runtime.globals.request;
+    const payload = runtime.globals;
+    out("<pre>");
+    const var_0 = payload["dump"];
+    out(var_0);
+    out("</pre>\n");
+  });
+}
 
-      return runtime.run(function* () {
-        const it = runtime.globals;
-        out("<pre>");
-        const var_0 = it["dump"];
-        out(var_0);
-        out("</pre>\n");
+module.exports.main = function main(resource) {
+  const runtime = new Runtime();
+  runtime.setGlobal(resource);
+  return run(runtime).then(() => ({ body: runtime.stream }));
+};
+
+function wrap(main) {
+  const { pipe } = require('@adobe/hypermedia-pipeline/src/defaults/html.pipe.js');
+  const { pre } = require('./dump_html.pre.js');
+  const owwrapper = require('@adobe/openwhisk-loggly-wrapper');
+
+  const _isFunction = fn => !!(fn && fn.constructor && fn.call && fn.apply);
+
+  // this gets called by openwhisk
+  return function wrapped(params) {
+    const runthis = params => {
+      // create payload and action objects
+      const secrets = {};
+      const { __ow_headers, __ow_method, __ow_logger } = params;
+      const disclosed = Object.assign({}, params);
+      delete disclosed.__ow_headers; // todo: switch to test operator once parcel supports it
+      delete disclosed.__ow_method;
+      delete disclosed.__ow_logger;
+
+      Object.keys(disclosed).forEach(key => {
+        if (key.match(/^[A-Z0-9_]+$/)) {
+          secrets[key] = disclosed[key];
+          delete disclosed[key];
+        }
       });
-    }
 
-    module.exports.main = function main(resource) {
-      const runtime = new Runtime();
-      runtime.setGlobal(resource);
-      return run(runtime).then(() => ({ body: runtime.stream }));
+      const action = {
+        secrets,
+        request: {
+          params: disclosed,
+          headers: __ow_headers,
+          method: __ow_method
+        },
+        logger: __ow_logger
+      };
+      const payload = {};
+      const next = (payload, action) => {
+        function cont(next) {
+          const ret = pre(payload, action);
+          if (ret && _isFunction(ret.then)) {
+            return ret.then(pp => next(pp || payload, action));
+          }
+          return next(ret || payload, action);
+        }
+        return cont(main).then(resobj => ({ response: resobj }));
+      };
+      return pipe(next, payload, action);
     };
 
-    function wrap(main) {
-      const { pipe } = require('@adobe/hypermedia-pipeline/src/defaults/html.pipe.js');
-      const { pre } = require('./dump_html.pre.js');
-      const owwrapper = require('@adobe/openwhisk-loggly-wrapper');
+    // the owrapper adds logging to the params
+    return owwrapper(runthis, params);
+  };
+}
 
-      const _isFunction = fn => !!(fn && fn.constructor && fn.call && fn.apply);
-
-      // this gets called by openwhisk
-      return function wrapped(params) {
-        const runthis = params => {
-          // create payload and action objects
-          const secrets = {};
-          const { __ow_headers, __ow_method, __ow_logger } = params;
-          const disclosed = Object.assign({}, params);
-          delete disclosed.__ow_headers; // todo: switch to test operator once parcel supports it
-          delete disclosed.__ow_method;
-          delete disclosed.__ow_logger;
-
-          Object.keys(disclosed).forEach(key => {
-            if (key.match(/^[A-Z0-9_]+$/)) {
-              secrets[key] = disclosed[key];
-              delete disclosed[key];
-            }
-          });
-
-          const action = {
-            secrets,
-            request: {
-              params: disclosed,
-              headers: __ow_headers,
-              method: __ow_method
-            },
-            logger: __ow_logger
-          };
-          const payload = {};
-          const next = (payload, action) => {
-            function cont(next) {
-              const ret = pre(payload, action);
-              if (ret && _isFunction(ret.then)) {
-                return ret.then(pp => next(pp || payload, action));
-              }
-              return next(ret || payload, action);
-            }
-            return cont(main).then(resobj => ({ response: resobj }));
-          };
-          return pipe(next, payload, action);
-        };
-
-        // the owrapper adds logging to the params
-        return owwrapper(runthis, params);
-      };
-    }
-
-    module.exports.main = wrap(module.exports.main);
-  },{"./dump_html.pre.js":"dump_html.pre.js"}]},{},["dump_html.htl"], null)
-//# sourceMappingURL=/dump_html.map
+module.exports.main = wrap(module.exports.main);
+},{"./dump_html.pre.js":"dump_html.pre.js"}]},{},["dump_html.htl"], null)
+//# sourceMappingURL=/dist/dump_html.map
