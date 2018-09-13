@@ -22,8 +22,8 @@ const path = require('path');
 const chalk = require('chalk');
 const fse = require('fs-extra');
 const klawSync = require('klaw-sync');
-const { DEFAULT_OPTIONS } = require('./defaults.js');
 const md5 = require('./md5.js');
+const strainconfig = require('./strain-config-utils');
 
 /**
  * Finds the non-htl files from the generated bundle
@@ -64,7 +64,9 @@ class BuildCommand extends EventEmitter {
     this._target = null;
     this._files = null;
     this._distDir = null;
+    this._webroot = null;
     this._cwd = process.cwd();
+    this._strainFile = null;
   }
 
   withDirectory(dir) {
@@ -97,6 +99,16 @@ class BuildCommand extends EventEmitter {
     return this;
   }
 
+  withStrainFile(file) {
+    this._strainFile = file;
+    return this;
+  }
+
+  withWebRoot(root) {
+    this._webroot = root;
+    return this;
+  }
+
   async moveStaticFiles(files, report) {
     const jobs = files.map((src) => {
       const rel = path.relative(this._target, src);
@@ -116,19 +128,54 @@ class BuildCommand extends EventEmitter {
   }
 
   async validate() {
-    if (!this._distDir) {
-      this._distDir = path.resolve(this._cwd, 'dist');
+    if (!this._strainFile) {
+      this._strainFile = path.resolve(this._cwd, '.hlx', 'strains.yaml');
     }
+
+    if (!this._webroot) {
+      const exists = await fse.pathExists(this._strainFile);
+      if (exists) {
+        const strains = strainconfig.load(await fse.readFile(this._strainFile, 'utf8'));
+        const defaultStrain = strains.find(v => v.name === 'default');
+        if (defaultStrain && defaultStrain.static && defaultStrain.static.root) {
+          const root = defaultStrain.static.root.replace(/^\/+/, '');
+          this._webroot = path.resolve(this._cwd, root);
+        }
+      }
+    }
+    if (!this._webroot) {
+      this._webroot = this._cwd;
+    }
+    if (!this._distDir) {
+      this._distDir = path.resolve(this._webroot, 'dist');
+    }
+  }
+
+  async getBundlerOptions() {
+    const opts = {
+      cacheDir: path.resolve(this._cwd, '.hlx', 'cache'),
+      target: 'node',
+      logLevel: 3,
+      detailedReport: true,
+      watch: false,
+      cache: this._cache,
+      minify: this._minify,
+      outDir: this._target,
+    };
+    const relRoot = path.relative(this._webroot, this._distDir);
+    if (relRoot) {
+      opts.publicUrl = `/${relRoot}`;
+    }
+    return opts;
   }
 
   /**
    * Initializes the parcel bundler.
    * @param files entry files
-   * @param options bundler options
    * @return {Bundler} the bundler
    */
-  // eslint-disable-next-line class-methods-use-this
-  createBundler(files, options) {
+  async createBundler(files) {
+    const options = await this.getBundlerOptions();
     const bundler = new Bundler(files, options);
     bundler.addAssetType('htl', require.resolve('@adobe/parcel-plugin-htl/src/HTLPreAsset.js'));
     bundler.addAssetType('htl-preprocessed', require.resolve('@adobe/parcel-plugin-htl/src/HTLAsset.js'));
@@ -172,21 +219,12 @@ class BuildCommand extends EventEmitter {
   }
 
   async run() {
-    // override default options with command line arguments
-    const myoptions = {
-      ...DEFAULT_OPTIONS,
-      watch: false,
-      cache: this._cache,
-      minify: this._minify,
-      outDir: this._target,
-    };
-
-    this.validate();
+    await this.validate();
 
     // expand patterns from command line arguments
     const myfiles = this._files.reduce((a, f) => [...a, ...glob.sync(f)], []);
 
-    const bundler = this.createBundler(myfiles, myoptions);
+    const bundler = await this.createBundler(myfiles);
     const bundle = await bundler.bundle();
     if (bundle) {
       await this.extractStaticFiles(bundle, true);
