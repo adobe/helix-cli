@@ -17,6 +17,7 @@ const path = require('path');
 const fs = require('fs-extra');
 const _ = require('lodash/fp');
 const strainconfig = require('./strain-config-utils');
+const JunitPerformanceReport = require('./junit-utils');
 
 /* eslint-disable no-console */
 
@@ -34,7 +35,7 @@ class PerfCommand {
 
   withJunit(value) {
     if (value && value !== '') {
-      this._junit = path.resolve(process.cwd(), value);
+      this._junit = new JunitPerformanceReport().withOutfile(path.resolve(process.cwd(), value));
     }
     return this;
   }
@@ -181,7 +182,12 @@ class PerfCommand {
           }],
         })
           .then(({ uuid }) => this._calibre.Test.waitForTest(uuid))
-          .then(result => PerfCommand.formatResponse(result, params, strain.name))
+          .then((result) => {
+            if (this._junit) {
+              this._junit.appendResults(result, params, strain.name);
+            }
+            return PerfCommand.formatResponse(result, params, strain.name);
+          })
           .catch((err) => {
             console.error(err);
             return null;
@@ -190,6 +196,9 @@ class PerfCommand {
 
     const flattests = _.flatten(tests);
     Promise.all(flattests).then((results) => {
+      if (this._junit) {
+        this._junit.writeResults();
+      }
       console.log('');
       const fail = results.filter(result => result === false).length;
       const succeed = results.filter(result => result === true).length;
