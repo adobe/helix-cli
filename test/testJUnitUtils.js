@@ -25,7 +25,7 @@ describe('Test Junit Report Builder', () => {
   });
 
   afterEach(() => {
-    fs.removeSync(root);
+    // fs.removeSync(root);
   });
 
   it('Responses can be appended', () => {
@@ -35,6 +35,18 @@ describe('Test Junit Report Builder', () => {
     report.writeResults();
 
     assert.equal(fs.readFileSync(outfile).toString(), fs.readFileSync(path.resolve(__dirname, 'fixtures', 'simple.xml')).toString());
+  });
+
+  it('Custom performance budgets are respected', () => {
+    const outfile = path.resolve(root, 'custom.xml');
+    const report = new JunitPerformanceReport().withOutfile(outfile);
+    report.appendResults(perfExample, {
+      visually_complete: 1500,
+      visually_complete_85: 1000,
+    });
+    report.writeResults();
+
+    assert.equal(fs.readFileSync(outfile).toString(), fs.readFileSync(path.resolve(__dirname, 'fixtures', 'custom.xml')).toString());
   });
 
   it('Multiple Test Suites are possible', () => {

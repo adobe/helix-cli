@@ -16,6 +16,7 @@ const builder = require('junit-report-builder');
 class JunitPerformanceReport {
   constructor() {
     this._outfile = path.resolve(process.cwd(), 'test-results.xml');
+    this._builder = builder.newBuilder();
   }
 
   withOutfile(value) {
@@ -24,7 +25,7 @@ class JunitPerformanceReport {
   }
 
   appendResults(result, params = {}, strainname = 'default') {
-    this._suite = builder.testSuite().name(`Performance Tests on ${result.device.title} (${result.connection.title}) from ${result.location.name} using ${strainname} strain.`);
+    this._suite = this._builder.testSuite().name(`Performance Tests on ${result.device.title} (${result.connection.title}) from ${result.location.name} using ${strainname} strain.`);
     this._suite.timestamp(result.updatedAt);
 
     result.metrics.map((metric) => {
@@ -77,7 +78,7 @@ class JunitPerformanceReport {
   }
 
   writeResults() {
-    builder.writeTo(this._outfile);
+    this._builder.writeTo(this._outfile);
   }
 }
 
