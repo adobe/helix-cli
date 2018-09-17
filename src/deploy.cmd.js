@@ -24,6 +24,7 @@ const yaml = require('js-yaml');
 const GitUrl = require('@adobe/petridish/src/GitUrl');
 const GitUtils = require('./gitutils');
 const strainconfig = require('./strain-config-utils');
+const useragent = require('./user-agent-util');
 
 class DeployCommand {
   constructor() {
@@ -165,7 +166,7 @@ class DeployCommand {
       headers: {
         'Content-Type': 'application/json',
         Accept: 'application/json',
-        'User-Agent': 'helix-cli',
+        'User-Agent': useragent,
       },
       body,
     };
@@ -196,7 +197,7 @@ class DeployCommand {
       headers: {
         'Content-Type': 'application/json',
         Accept: 'application/json',
-        'User-Agent': 'helix-cli',
+        'User-Agent': useragent,
       },
       uri: `https://circleci.com/api/v1.1/project/github/${owner}/${repo}/follow`,
     };
@@ -248,7 +249,7 @@ class DeployCommand {
         headers: {
           'Content-Type': 'application/json',
           Accept: 'application/json',
-          'User-Agent': 'helix-cli',
+          'User-Agent': useragent,
         },
         uri: `https://circleci.com/api/v1.1/project/github/${owner}/${repo}/tree/${ref}`,
       };
@@ -300,6 +301,7 @@ class DeployCommand {
         if (!err) {
           const actionoptions = {
             name,
+            'User-Agent': useragent,
             action,
             params,
             kind: 'blackbox',

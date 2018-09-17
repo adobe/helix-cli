@@ -23,6 +23,7 @@ const { toBase64 } = require('request/lib/helpers');
 const strainconfig = require('./strain-config-utils');
 const include = require('./include-util');
 const GitUtils = require('./gitutils');
+const useragent = require('./user-agent-util');
 
 const HELIX_VCL_DEFAULT_FILE = path.resolve(__dirname, '../layouts/fastly/helix.vcl');
 
@@ -41,7 +42,7 @@ class StrainCommand {
     this._service = null;
     this._options = {
       headers: {
-        'User-Agent': 'Project Helix CLI',
+        'User-Agent': useragent,
         Accept: 'application/json',
       },
       json: true,
