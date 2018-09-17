@@ -32,6 +32,11 @@ module.exports = function perf() {
           type: 'string',
           demandOption: true,
         })
+        .option('junit', {
+          describe: 'Create JUnit report in this file',
+          type: 'string',
+          default: '',
+        })
         .option('device', {
           describe: 'Device to test from',
           type: 'string',
@@ -97,6 +102,7 @@ module.exports = function perf() {
         .withDevice(argv.device)
         .withConnection(argv.connection)
         .withLocation(argv.location)
+        .withJunit(argv.junit)
         .run();
     },
   };

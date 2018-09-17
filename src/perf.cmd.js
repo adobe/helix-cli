@@ -29,6 +29,14 @@ class PerfCommand {
     this._location = 'London';
     this._device = 'MotorolaMotoG4';
     this._connection = 'regular3G';
+    this._junit = null;
+  }
+
+  withJunit(value) {
+    if (value && value !== '') {
+      this._junit = path.resolve(process.cwd(), value);
+    }
+    return this;
   }
 
   withStrainFile(value) {
