@@ -73,7 +73,7 @@ describe('hlx strain', () => {
         '--fastly-namespace', 'hlx',
       ]);
 
-    sinon.assert.calledWith(mockStrain.withWskHost, 'runtime.adobe.io');
+    sinon.assert.calledWith(mockStrain.withWskHost, 'adobeioruntime.net');
     sinon.assert.calledWith(mockStrain.withWskAuth, 'secret-key');
     sinon.assert.calledWith(mockStrain.withWskNamespace, 'hlx');
     sinon.assert.calledWith(mockStrain.withFastlyNamespace, 'hlx'); // TODO !!

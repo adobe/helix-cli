@@ -9,13 +9,6 @@
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-module.exports.DEFAULT_OPTIONS = {
-  cacheDir: '.hlx/cache',
-  target: 'node',
-  logLevel: 3,
-  detailedReport: true,
-};
-
 const DEFAULT_PATTERNS = ['src/**/*.htl'];
 
 module.exports.defaultArgs = yargs => yargs

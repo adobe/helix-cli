@@ -15,7 +15,6 @@ const glob = require('glob');
 const opn = require('opn');
 const { HelixProject } = require('@adobe/petridish');
 const BuildCommand = require('./build.cmd');
-const { DEFAULT_OPTIONS } = require('./defaults.js');
 const pkgJson = require('../package.json');
 
 class UpCommand extends BuildCommand {
@@ -56,22 +55,24 @@ class UpCommand extends BuildCommand {
     this.emit('stopped', this);
   }
 
+
+  async getBundlerOptions() {
+    const opts = await super.getBundlerOptions();
+    opts.watch = true;
+    return opts;
+  }
+
   async run() {
-    // override default options with command line arguments
-    const myoptions = {
-      ...DEFAULT_OPTIONS,
-      watch: true,
-      cache: this._cache,
-      minify: this._minify,
-      outDir: this._target,
-    };
+    await this.validate();
 
     // expand patterns from command line arguments
     const myfiles = this._files.reduce((a, f) => [...a, ...glob.sync(f)], []);
 
-    this._bundler = this.createBundler(myfiles, myoptions);
+    this._bundler = await this.createBundler(myfiles);
 
-    this.validate();
+    // start debugger (#178)
+    // https://nodejs.org/en/docs/guides/debugging-getting-started/#enable-inspector
+    process.kill(process.pid, 'SIGUSR1');
 
     this._project = new HelixProject()
       .withCwd(this._cwd)

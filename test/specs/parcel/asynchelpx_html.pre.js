@@ -74,15 +74,15 @@ async function pre(payload, config) {
     const myPayload = Object.assign({}, payload);
 
     logger.debug('setting context path');
-    myPayload.resource.contextPath = 'myinjectedcontextpath';
+    myPayload.content.contextPath = 'myinjectedcontextpath';
 
     logger.debug('collecting metadata');
     const gitmeta = await collectMetadata(config.request, logger);
 
     logger.debug('Metadata has arrived');
-    payload.resource.gitmetadata = gitmeta;
-    payload.resource.committers = await extractCommittersFromMetadata(gitmeta, logger);
-    payload.resource.lastModified = await extractLastModifiedFromMetadata(gitmeta, logger);
+    payload.content.gitmetadata = gitmeta;
+    payload.content.committers = await extractCommittersFromMetadata(gitmeta, logger);
+    payload.content.lastModified = await extractLastModifiedFromMetadata(gitmeta, logger);
   } catch (e) {
     logger.error(e);
     throw e;

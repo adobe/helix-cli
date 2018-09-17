@@ -29,7 +29,7 @@ const params = {
     'X-Forwarded-Port': '443',
     'X-CDN-Request-Id': '2a208a89-e071-44cf-aee9-220880da4c1e',
     'Fastly-Client': '1',
-    'X-Forwarded-Host': 'runtime.adobe.io',
+    'X-Forwarded-Host': 'adobeioruntime.net',
     'Upgrade-Insecure-Requests': '1',
     Host: 'controller-a',
     Connection: 'close',

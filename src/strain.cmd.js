@@ -35,6 +35,7 @@ class StrainCommand {
     this._fastly_auth = null;
     this._dryRun = false;
     this._strainFile = path.resolve(process.cwd(), '.hlx', 'strains.yaml');
+    this._strains = null;
     this._vclFile = path.resolve(process.cwd(), '.hlx', 'helix.vcl');
 
     this._service = null;
@@ -81,22 +82,31 @@ class StrainCommand {
         max_conn: 200,
         use_ssl: true,
       },
-      'runtime.adobe.io': {
-        hostname: 'runtime.adobe.io',
+      AdobeRuntime: {
+        hostname: 'adobeioruntime.net',
         error_threshold: 0,
         first_byte_timeout: 60000,
         weight: 100,
-        address: 'runtime.adobe.io',
+        address: 'adobeioruntime.net',
         connect_timeout: 1000,
-        name: 'runtime.adobe.io',
+        name: 'AdobeRuntime',
         port: 443,
         between_bytes_timeout: 10000,
         shield: 'iad-va-us',
-        ssl_cert_hostname: 'runtime.adobe.io',
+        ssl_cert_hostname: 'adobeioruntime.net',
         max_conn: 200,
         use_ssl: true,
       },
     };
+  }
+
+  loadStrains() {
+    const content = fs.readFileSync(this._strainFile);
+    this._strains = strainconfig.load(content);
+    if (this._strains.filter(strain => strain.name === 'default').length !== 1) {
+      throw new Error(`${this._strainFile} must include one strain 'default'`);
+    }
+    return this._strains;
   }
 
   withWskHost(value) {
@@ -132,6 +142,7 @@ class StrainCommand {
 
   withStrainFile(value) {
     this._strainFile = value;
+    this.loadStrains();
     return this;
   }
 
@@ -519,8 +530,7 @@ class StrainCommand {
   }
 
   showNextStep() {
-    const content = fs.readFileSync(this._strainFile);
-    const strains = strainconfig.load(content);
+    const strains = this._strains;
 
     const urls = strains.filter(strain => strain.url).map(strain => strain.url);
 
@@ -567,8 +577,7 @@ class StrainCommand {
         throw new Error(message, e);
       });
 
-    const content = fs.readFileSync(this._strainFile);
-    const strains = strainconfig.load(content);
+    const strains = this._strains;
 
     const strainsVCL = StrainCommand.getVCL(strains);
     const strainp = this.setVCL(strainsVCL, 'strains.vcl');
@@ -657,6 +666,7 @@ class StrainCommand {
   }
 
   async run() {
+    this.loadStrains();
     try {
       await this._updateFastly();
       console.log('📕  All dicts have been updated.');

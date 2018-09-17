@@ -135,6 +135,9 @@ sub hlx_github_static_root {
   if (!req.http.X-Github-Static-Root) {
     set req.http.X-Github-Static-Root = table.lookup(strain_github_static_root, "default");
   }
+  if (!req.http.X-Github-Static-Root) {
+    set req.http.X-Github-Static-Root = "/";
+  }
 }
 
 # Gets the github static ref
@@ -193,7 +196,7 @@ sub hlx_headers_deliver {
     set resp.http.X-Strain = req.http.X-Strain;
     # Header rewrite Strain : 10
     set resp.http.X-Github-Static-Ref = "@" + req.http.X-Github-Static-Ref;
-    
+
     set resp.http.X-Dirname = req.http.X-Dirname;
     set resp.http.X-Index = req.http.X-Index;
     set resp.http.X-Action-Root = req.http.X-Action-Root;
@@ -205,16 +208,16 @@ sub hlx_headers_deliver {
 
 # set backend (called from recv)
 sub hlx_backend_recv {
-  set req.backend = F_runtime_adobe_io;
+  set req.backend = F_AdobeRuntime;
 
   # Request Condition: Binaries only Prio: 10
   if( req.url ~ ".(jpg|png|gif)($|\?)" ) {
     set req.backend = F_GitHub;
   }
-  
+
   # Request Condition: HTML Only Prio: 10
   if( req.url ~ ".(html)($|\?)" ) {
-    set req.backend = F_runtime_adobe_io;
+    set req.backend = F_AdobeRuntime;
   }
   #end condition
 }
@@ -229,7 +232,7 @@ sub vcl_recv {
   # If request is on Fastly-FF, we shouldn't override it.
   if (!req.http.Fastly-FF) {
     set req.http.X-Orig-URL = req.url;
-    
+
     if (!req.http.X-URL) {
       set req.http.X-URL = req.url;
     }
@@ -240,7 +243,7 @@ sub vcl_recv {
   }
 
   # shorten URL
-  declare local var.owner STRING; # the GitHub user or org, e.g. adobe 
+  declare local var.owner STRING; # the GitHub user or org, e.g. adobe
   declare local var.repo STRING; # the GitHub repo, e.g. project-helix
   declare local var.ref STRING; # the GitHub branch or revision, e.g. master
   declare local var.dir STRING; # the directory of the content
@@ -283,7 +286,7 @@ sub vcl_recv {
   # block bad requests – needs current strain and unchanged req.url
   call hlx_block_recv;
 
-  # Parse the Request URL, if this is a proper SSL-request 
+  # Parse the Request URL, if this is a proper SSL-request
   # (non-SSL gets redirected) to SSL-equivalent
 
 
@@ -310,11 +313,16 @@ sub vcl_recv {
     set req.http.X-Plain = "true";
 
     # get it from OpenWhisk
-    set req.backend = F_runtime_adobe_io;
-    
+    set req.backend = F_AdobeRuntime;
+
     set req.http.X-Action-Root = "/api/v1/web/" + table.lookup(secrets, "OPENWHISK_NAMESPACE") + "/default/hlx--static";
     set req.url = req.http.X-Action-Root + "?owner=" + var.owner + "&repo=" + var.repo + "&strain=" + var.strain + "&ref=" + var.ref + "&entry=" + var.entry + "&path=" + var.path + "&plain=true"  + "&allow=" urlencode(req.http.X-Allow) + "&deny=" urlencode(req.http.X-Deny) + "&root=" + req.http.X-Github-Static-Root;
 
+  } elseif (req.http.Fastly-SSL && (req.http.X-Static == "Redirect")) {
+    # Handle a redirect from static.js by
+    # - fetching the resource from GitHub
+    # - don't forget to override the Content-Type header
+    set req.backend = F_GitHub;
 
   } elsif (!req.http.Fastly-FF && req.http.Fastly-SSL && (req.url.basename ~ "(^[^\.]+)(\.?(.+))?(\.[^\.]*$)" || req.url.basename == "")) {
     # This is a dynamic request.
@@ -360,8 +368,8 @@ sub vcl_recv {
 
     call hlx_action_root;
 
-    
-    
+
+
     if (var.selector ~ ".+") {
       set var.action = req.http.X-Action-Root + var.selector + "_" + var.extension;
     } else {
@@ -387,10 +395,11 @@ sub vcl_recv {
   }
 
   # enable IO for image file-types
-  if (req.url.ext ~ "(?i)(?:gif|png|jpe?g|webp)")  {
+  # but not for static images or redirected images
+  if (req.url.ext ~ "(?i)(?:gif|png|jpe?g|webp)" && (req.http.X-Static != "Static") && (req.http.X-Static == "Redirect"))  {
     set req.http.X-Fastly-Imageopto-Api = "fastly";
   }
- 
+
   return(lookup);
 }
 
@@ -417,7 +426,7 @@ sub hlx_fetch_errors {
 
 sub hlx_deliver_errors {
 
-  # Cache Condition: OpenWhisk Error Prio: 10    
+  # Cache Condition: OpenWhisk Error Prio: 10
   if (resp.status == 951 ) {
      set resp.status = 404;
      set resp.response = "Not Found";
@@ -433,7 +442,7 @@ sub hlx_deliver_errors {
 }
 
 sub hlx_error_errors {
-  # Cache Condition: OpenWhisk Error Prio: 10  
+  # Cache Condition: OpenWhisk Error Prio: 10
   if (obj.status == 951 ) {
     set obj.http.Content-Type = "text/html";
     synthetic {"include:951.html"};
@@ -456,13 +465,13 @@ sub vcl_fetch {
 
   call hlx_fetch_errors;
   call hlx_headers_fetch;
- 
+
   unset beresp.http.Set-Cookie;
   unset beresp.http.Vary;
   unset beresp.http.Expires;
 
   set beresp.http.Vary = "X-Debug, X-Strain";
- 
+
   if (beresp.http.Expires || beresp.http.Surrogate-Control ~ "max-age" || beresp.http.Cache-Control ~ "(s-maxage|max-age)") {
     # override ttl
     } else {
@@ -470,12 +479,12 @@ sub vcl_fetch {
     if (beresp.status == 200) {
       set beresp.ttl = 604800s;
       set beresp.http.Cache-Control = "max-age=604800, public";
- 
+
       # apply a longer ttl for images
       if (req.url.ext ~ "(?i)(?:gif|png|jpe?g|webp)") {
         set beresp.ttl = 2592000s;
       }
- 
+
     } else {
       set beresp.ttl = 60s;
     }
@@ -485,7 +494,31 @@ sub vcl_fetch {
     esi;
   }
 
-  if (beresp.status == 404 || beresp.status == 204) {
+  if (beresp.http.X-Static == "Raw/Static") {
+    if (beresp.status == 307) {
+      // static.js returns a 307 if the response is greater than OpenWhisk's
+      // delivery limit. We restart the request and deliver directly from
+      // GitHub instead, carring over the Content-Type header that static.js guessed
+      set req.http.X-Static = "Redirect";
+      set req.url = beresp.http.Location;
+      set req.http.X-Content-Type = beresp.http.X-Content-Type;
+      restart;
+    } else {
+      return(deliver);
+    }
+  } elseif (req.http.X-Static == "Redirect") {
+    // and this is where we fix the headers of the GitHub static response
+    // so that they become digestible by a browser.
+    // - recover Content-Type from X-Content-Type
+    // - filter out GitHub-headers
+
+    set beresp.http.Content-Type = req.http.X-Content-Type;
+    unset beresp.http.X-Content-Type-Options;
+    unset beresp.http.X-Frame-Options;
+    unset beresp.http.X-XSS-Protection;
+    unset beresp.http.Content-Security-Policy;
+
+  } elseif (beresp.status == 404 || beresp.status == 204) {
     # That was a miss. Let's try to restart.
     set beresp.http.X-Status = beresp.status + "-Restart " + req.restarts;
     set beresp.status = 404;
@@ -501,30 +534,30 @@ sub vcl_fetch {
     restart;
   }
 
- 
+
   return(deliver);
 }
- 
+
 sub vcl_hit {
 #FASTLY hit
- 
+
   if (!obj.cacheable) {
     return(pass);
   }
   return(deliver);
 }
- 
+
 sub vcl_miss {
 #FASTLY miss
   # set backend host
-  if (req.backend == F_runtime_adobe_io) {
-    set bereq.http.host = "runtime.adobe.io";
+  if (req.backend == F_AdobeRuntime) {
+    set bereq.http.host = "adobeioruntime.net";
   } elsif (req.backend == F_GitHub) {
     set bereq.http.host = "raw.githubusercontent.com";
   }
 
   # set backend authentication
-  if (req.backend == F_runtime_adobe_io) {
+  if (req.backend == F_AdobeRuntime) {
     set bereq.http.Authorization = table.lookup(secrets, "OPENWHISK_AUTH");
   }
 
@@ -535,7 +568,7 @@ sub vcl_miss {
 
   return(fetch);
 }
- 
+
 sub vcl_deliver {
 #FASTLY deliver
   call hlx_headers_deliver;
@@ -563,20 +596,24 @@ sub vcl_deliver {
     unset resp.http.X-GW-Cache;
     unset resp.http.X-Static;
     unset resp.http.X-URL;
+    unset resp.http.X-Content-Type;
+    unset resp.http.X-GitHub-Request-Id;
+    unset resp.http.X-Fastly-Request-ID;
+    unset resp.http.X-Geo-Block-List;
   }
   return(deliver);
 }
- 
+
 sub vcl_error {
 #FASTLY error
   call hlx_error_errors;
 }
- 
+
 sub vcl_pass {
 #FASTLY pass
   # set backend host
-  if (req.backend == F_runtime_adobe_io) {
-    set bereq.http.host = "runtime.adobe.io";
+  if (req.backend == F_AdobeRuntime) {
+    set bereq.http.host = "adobeioruntime.net";
   } elsif (req.backend == F_GitHub) {
     set bereq.http.host = "raw.githubusercontent.com";
   }
@@ -587,7 +624,7 @@ sub vcl_pass {
   }
 
 }
- 
+
 sub vcl_log {
 #FASTLY log
 }
