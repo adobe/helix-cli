@@ -137,8 +137,8 @@ class PerfCommand {
     return undefined;
   }
 
-  static formatResponse(response, params = {}) {
-    console.log(`\nTesting ${response.url} on ${response.device.title} (${response.connection.title}) from ${response.location.emoji}  ${response.location.name}\n`);
+  static formatResponse(response, params = {}, strainname = 'default') {
+    console.log(`\nTesting ${response.url} on ${response.device.title} (${response.connection.title}) from ${response.location.emoji}  ${response.location.name} using ${strainname} strain.\n`);
     const strainresults = Object.keys(params).map((key) => {
       const value = params[key];
       if (Number.isInteger(value)) {
@@ -168,9 +168,12 @@ class PerfCommand {
           location: params.location,
           device: params.device,
           connection: params.connection,
+          cookies: [{
+            name: 'X-Strain', value: strain.name, secure: true, httpOnly: true,
+          }],
         })
           .then(({ uuid }) => this._calibre.Test.waitForTest(uuid))
-          .then(result => PerfCommand.formatResponse(result, params))
+          .then(result => PerfCommand.formatResponse(result, params, strain.name))
           .catch((err) => {
             console.error(err);
             return null;

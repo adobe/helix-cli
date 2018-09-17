@@ -1,0 +1,240 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites>
+  <testsuite name="Performance Tests on Motorola Moto G4 (Regular 3G) from London, United Kingdom using default strain." timestamp="2018-08-29T13:00:08Z" tests="25" failures="1" errors="0" skipped="23">
+    <testcase classname="https://debug.primordialsoup.life/develop/" name="Speed Index">
+      <skipped/>
+    </testcase>
+    <testcase classname="https://debug.primordialsoup.life/develop/" name="Visually Complete" time="1.233">
+      <skipped/>
+    </testcase>
+    <testcase classname="https://debug.primordialsoup.life/develop/" name="85% Visually Complete" time="1.233">
+      <skipped/>
+    </testcase>
+    <testcase classname="https://debug.primordialsoup.life/develop/" name="Lighthouse SEO Score">
+      <skipped/>
+    </testcase>
+    <testcase classname="https://debug.primordialsoup.life/develop/" name="Lighthouse Best Practices Score">
+      <skipped/>
+    </testcase>
+    <testcase classname="https://debug.primordialsoup.life/develop/" name="Lighthouse Accessibility Score">
+      <failure message="Score lighthouse-accessibility-score of 50 below lower bound of 80"/>
+    </testcase>
+    <testcase classname="https://debug.primordialsoup.life/develop/" name="Lighthouse Performance Score">
+      <system-out>
+        <![CDATA[Score lighthouse-performance-score of 99 meets lower bound of 80]]>
+      </system-out>
+    </testcase>
+    <testcase classname="https://debug.primordialsoup.life/develop/" name="Lighthouse Progressive Web App Score">
+      <skipped/>
+    </testcase>
+    <testcase classname="https://debug.primordialsoup.life/develop/" name="JS Parse &amp; Compile" time="0">
+      <skipped/>
+    </testcase>
+    <testcase classname="https://debug.primordialsoup.life/develop/" name="Time to First Byte" time="1.064">
+      <skipped/>
+    </testcase>
+    <testcase classname="https://debug.primordialsoup.life/develop/" name="First Contentful Paint" time="1.218">
+      <skipped/>
+    </testcase>
+    <testcase classname="https://debug.primordialsoup.life/develop/" name="First Meaningful Paint" time="1.218">
+      <skipped/>
+    </testcase>
+    <testcase classname="https://debug.primordialsoup.life/develop/" name="First Paint" time="1.218">
+      <skipped/>
+    </testcase>
+    <testcase classname="https://debug.primordialsoup.life/develop/" name="DOM Element Count">
+      <skipped/>
+    </testcase>
+    <testcase classname="https://debug.primordialsoup.life/develop/" name="Estimated input latency" time="0.016">
+      <skipped/>
+    </testcase>
+    <testcase classname="https://debug.primordialsoup.life/develop/" name="Time to Interactive" time="1.218">
+      <skipped/>
+    </testcase>
+    <testcase classname="https://debug.primordialsoup.life/develop/" name="First CPU Idle" time="1.218">
+      <skipped/>
+    </testcase>
+    <testcase classname="https://debug.primordialsoup.life/develop/" name="Total HTML size in bytes">
+      <skipped/>
+    </testcase>
+    <testcase classname="https://debug.primordialsoup.life/develop/" name="Total HTML transferred">
+      <skipped/>
+    </testcase>
+    <testcase classname="https://debug.primordialsoup.life/develop/" name="Response time" time="1.236">
+      <skipped/>
+    </testcase>
+    <testcase classname="https://debug.primordialsoup.life/develop/" name="Total Page transferred">
+      <skipped/>
+    </testcase>
+    <testcase classname="https://debug.primordialsoup.life/develop/" name="Total Page size in bytes">
+      <skipped/>
+    </testcase>
+    <testcase classname="https://debug.primordialsoup.life/develop/" name="Number of requests">
+      <skipped/>
+    </testcase>
+    <testcase classname="https://debug.primordialsoup.life/develop/" name="onLoad" time="1.196">
+      <skipped/>
+    </testcase>
+    <testcase classname="https://debug.primordialsoup.life/develop/" name="onContentLoad" time="1.198">
+      <skipped/>
+    </testcase>
+  </testsuite>
+  <testsuite name="Performance Tests on Motorola Moto G4 (Regular 3G) from London, United Kingdom using default strain." timestamp="2018-08-29T13:00:08Z" tests="25" failures="1" errors="0" skipped="23">
+    <testcase classname="https://debug.primordialsoup.life/develop/" name="Speed Index">
+      <skipped/>
+    </testcase>
+    <testcase classname="https://debug.primordialsoup.life/develop/" name="Visually Complete" time="1.233">
+      <skipped/>
+    </testcase>
+    <testcase classname="https://debug.primordialsoup.life/develop/" name="85% Visually Complete" time="1.233">
+      <skipped/>
+    </testcase>
+    <testcase classname="https://debug.primordialsoup.life/develop/" name="Lighthouse SEO Score">
+      <skipped/>
+    </testcase>
+    <testcase classname="https://debug.primordialsoup.life/develop/" name="Lighthouse Best Practices Score">
+      <skipped/>
+    </testcase>
+    <testcase classname="https://debug.primordialsoup.life/develop/" name="Lighthouse Accessibility Score">
+      <failure message="Score lighthouse-accessibility-score of 50 below lower bound of 80"/>
+    </testcase>
+    <testcase classname="https://debug.primordialsoup.life/develop/" name="Lighthouse Performance Score">
+      <system-out>
+        <![CDATA[Score lighthouse-performance-score of 99 meets lower bound of 80]]>
+      </system-out>
+    </testcase>
+    <testcase classname="https://debug.primordialsoup.life/develop/" name="Lighthouse Progressive Web App Score">
+      <skipped/>
+    </testcase>
+    <testcase classname="https://debug.primordialsoup.life/develop/" name="JS Parse &amp; Compile" time="0">
+      <skipped/>
+    </testcase>
+    <testcase classname="https://debug.primordialsoup.life/develop/" name="Time to First Byte" time="1.064">
+      <skipped/>
+    </testcase>
+    <testcase classname="https://debug.primordialsoup.life/develop/" name="First Contentful Paint" time="1.218">
+      <skipped/>
+    </testcase>
+    <testcase classname="https://debug.primordialsoup.life/develop/" name="First Meaningful Paint" time="1.218">
+      <skipped/>
+    </testcase>
+    <testcase classname="https://debug.primordialsoup.life/develop/" name="First Paint" time="1.218">
+      <skipped/>
+    </testcase>
+    <testcase classname="https://debug.primordialsoup.life/develop/" name="DOM Element Count">
+      <skipped/>
+    </testcase>
+    <testcase classname="https://debug.primordialsoup.life/develop/" name="Estimated input latency" time="0.016">
+      <skipped/>
+    </testcase>
+    <testcase classname="https://debug.primordialsoup.life/develop/" name="Time to Interactive" time="1.218">
+      <skipped/>
+    </testcase>
+    <testcase classname="https://debug.primordialsoup.life/develop/" name="First CPU Idle" time="1.218">
+      <skipped/>
+    </testcase>
+    <testcase classname="https://debug.primordialsoup.life/develop/" name="Total HTML size in bytes">
+      <skipped/>
+    </testcase>
+    <testcase classname="https://debug.primordialsoup.life/develop/" name="Total HTML transferred">
+      <skipped/>
+    </testcase>
+    <testcase classname="https://debug.primordialsoup.life/develop/" name="Response time" time="1.236">
+      <skipped/>
+    </testcase>
+    <testcase classname="https://debug.primordialsoup.life/develop/" name="Total Page transferred">
+      <skipped/>
+    </testcase>
+    <testcase classname="https://debug.primordialsoup.life/develop/" name="Total Page size in bytes">
+      <skipped/>
+    </testcase>
+    <testcase classname="https://debug.primordialsoup.life/develop/" name="Number of requests">
+      <skipped/>
+    </testcase>
+    <testcase classname="https://debug.primordialsoup.life/develop/" name="onLoad" time="1.196">
+      <skipped/>
+    </testcase>
+    <testcase classname="https://debug.primordialsoup.life/develop/" name="onContentLoad" time="1.198">
+      <skipped/>
+    </testcase>
+  </testsuite>
+  <testsuite name="Performance Tests on Motorola Moto G4 (Regular 3G) from London, United Kingdom using default strain." timestamp="2018-08-29T13:00:08Z" tests="25" failures="1" errors="0" skipped="23">
+    <testcase classname="https://debug.primordialsoup.life/develop/" name="Speed Index">
+      <skipped/>
+    </testcase>
+    <testcase classname="https://debug.primordialsoup.life/develop/" name="Visually Complete" time="1.233">
+      <skipped/>
+    </testcase>
+    <testcase classname="https://debug.primordialsoup.life/develop/" name="85% Visually Complete" time="1.233">
+      <skipped/>
+    </testcase>
+    <testcase classname="https://debug.primordialsoup.life/develop/" name="Lighthouse SEO Score">
+      <skipped/>
+    </testcase>
+    <testcase classname="https://debug.primordialsoup.life/develop/" name="Lighthouse Best Practices Score">
+      <skipped/>
+    </testcase>
+    <testcase classname="https://debug.primordialsoup.life/develop/" name="Lighthouse Accessibility Score">
+      <failure message="Score lighthouse-accessibility-score of 50 below lower bound of 80"/>
+    </testcase>
+    <testcase classname="https://debug.primordialsoup.life/develop/" name="Lighthouse Performance Score">
+      <system-out>
+        <![CDATA[Score lighthouse-performance-score of 99 meets lower bound of 80]]>
+      </system-out>
+    </testcase>
+    <testcase classname="https://debug.primordialsoup.life/develop/" name="Lighthouse Progressive Web App Score">
+      <skipped/>
+    </testcase>
+    <testcase classname="https://debug.primordialsoup.life/develop/" name="JS Parse &amp; Compile" time="0">
+      <skipped/>
+    </testcase>
+    <testcase classname="https://debug.primordialsoup.life/develop/" name="Time to First Byte" time="1.064">
+      <skipped/>
+    </testcase>
+    <testcase classname="https://debug.primordialsoup.life/develop/" name="First Contentful Paint" time="1.218">
+      <skipped/>
+    </testcase>
+    <testcase classname="https://debug.primordialsoup.life/develop/" name="First Meaningful Paint" time="1.218">
+      <skipped/>
+    </testcase>
+    <testcase classname="https://debug.primordialsoup.life/develop/" name="First Paint" time="1.218">
+      <skipped/>
+    </testcase>
+    <testcase classname="https://debug.primordialsoup.life/develop/" name="DOM Element Count">
+      <skipped/>
+    </testcase>
+    <testcase classname="https://debug.primordialsoup.life/develop/" name="Estimated input latency" time="0.016">
+      <skipped/>
+    </testcase>
+    <testcase classname="https://debug.primordialsoup.life/develop/" name="Time to Interactive" time="1.218">
+      <skipped/>
+    </testcase>
+    <testcase classname="https://debug.primordialsoup.life/develop/" name="First CPU Idle" time="1.218">
+      <skipped/>
+    </testcase>
+    <testcase classname="https://debug.primordialsoup.life/develop/" name="Total HTML size in bytes">
+      <skipped/>
+    </testcase>
+    <testcase classname="https://debug.primordialsoup.life/develop/" name="Total HTML transferred">
+      <skipped/>
+    </testcase>
+    <testcase classname="https://debug.primordialsoup.life/develop/" name="Response time" time="1.236">
+      <skipped/>
+    </testcase>
+    <testcase classname="https://debug.primordialsoup.life/develop/" name="Total Page transferred">
+      <skipped/>
+    </testcase>
+    <testcase classname="https://debug.primordialsoup.life/develop/" name="Total Page size in bytes">
+      <skipped/>
+    </testcase>
+    <testcase classname="https://debug.primordialsoup.life/develop/" name="Number of requests">
+      <skipped/>
+    </testcase>
+    <testcase classname="https://debug.primordialsoup.life/develop/" name="onLoad" time="1.196">
+      <skipped/>
+    </testcase>
+    <testcase classname="https://debug.primordialsoup.life/develop/" name="onContentLoad" time="1.198">
+      <skipped/>
+    </testcase>
+  </testsuite>
+</testsuites>
