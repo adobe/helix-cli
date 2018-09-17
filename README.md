@@ -329,3 +329,13 @@ You can set performance budgets against following scores (more is better) and me
 * `asset_count`: Number of requests
 * `onload`: onLoad
 * `oncontentload`: onContentLoad
+
+#### Structured (JUnit) Performance Reporting
+
+By calling `hlx perf` with the option `--junit <file>`, the performance test 
+results will be reported in JUnit-format, which makes it possible to integrate
+performance result reporting with the CI system performing an automated deployment.
+
+For `hlx demo full`, a full CI configuration is created that will run a performance
+test after a completed deployment, report the per-metric results and mark the build
+as failed in case metrics are not met.
