@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <testsuites>
-  <testsuite name="Performance Tests on Motorola Moto G4 (Regular 3G) from London, United Kingdom using default strain." timestamp="2018-08-29T13:00:08Z" tests="25" failures="1" errors="0" skipped="22">
+  <testsuite name="Performance Tests on Motorola Moto G4 (Regular 3G) from London, United Kingdom using default strain." timestamp="2018-08-29T13:00:08Z" tests="25" failures="1" errors="0" skipped="23">
     <testcase classname="https://debug.primordialsoup.life/develop/" name="Speed Index">
       <skipped/>
     </testcase>

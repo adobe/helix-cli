@@ -49,13 +49,17 @@ class JunitPerformanceReport {
     });
   }
 
+  static hasCustomLimits(params = {}) {
+    return Object.values(params).some(v => Number.isInteger(v));
+  }
+
   static getLimit(params = {}, name) {
     const value = params[name];
     if (Number.isInteger(value)) {
       return value;
-    } if (name === 'lighthouse-performance-score') {
+    } if (name === 'lighthouse-performance-score' && !JunitPerformanceReport.hasCustomLimits(params)) {
       return 80;
-    } if (name === 'lighthouse-accessibility-score') {
+    } if (name === 'lighthouse-accessibility-score' && !JunitPerformanceReport.hasCustomLimits(params)) {
       return 80;
     }
     return undefined;
