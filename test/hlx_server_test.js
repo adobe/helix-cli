@@ -144,7 +144,7 @@ describe('Helix Server', () => {
     await project.init();
     try {
       await project.start();
-      await assertHttp(`http://localhost:${project.server.port}/styles.css`, 200, 'expected_styles.css');
+      await assertHttp(`http://localhost:${project.server.port}/dist/styles.css`, 200, 'expected_styles.css');
     } finally {
       await project.stop();
     }

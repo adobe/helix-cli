@@ -68,7 +68,7 @@ const utils = {
   async fetchStatic(ctx) {
     const uris = [
       ctx.config.contentRepo.raw + ctx.path,
-      path.resolve(ctx.config.distDir, ctx.path.substring(1)),
+      path.resolve(ctx.config.webRootDir, ctx.path.substring(1)),
     ];
     for (let i = 0; i < uris.length; i += 1) {
       const uri = uris[i];

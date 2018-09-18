@@ -137,7 +137,11 @@ class HelixServer {
             res.type(ctx.extension);
             res.send(result.content);
           }).catch((err) => {
-            logger.error(`Error while delivering resource ${ctx.path} - ${err.stack || err}`);
+            if (err.code === 404) {
+              logger.error(`Resource not found: ${ctx.path}`);
+            } else {
+              logger.error(`Error while delivering resource ${ctx.path} - ${err.stack || err}`);
+            }
             res.status(err.code || 500).send();
           });
       }
