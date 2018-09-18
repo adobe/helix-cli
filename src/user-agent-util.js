@@ -13,4 +13,4 @@
 const os = require('os');
 const packagejson = require('../package.json');
 
-module.exports = `${packagejson.name} (Project Helix) ${packagejson.version} - ${os.platform()} ${os.release} https://github.com/adobe/project-helix`;
+module.exports = `${packagejson.name} (Project Helix) ${packagejson.version} - ${os.platform()} ${os.release} +${packagejson.homepage}`;
