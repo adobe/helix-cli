@@ -77,7 +77,7 @@ class UpCommand extends BuildCommand {
     this._project = new HelixProject()
       .withCwd(this._cwd)
       .withBuildDir(this._target)
-      .withDistDir(this._distDir)
+      .withWebRootDir(this._webroot)
       .withDisplayVersion(pkgJson.version);
 
     if (this._httpPort >= 0) {
