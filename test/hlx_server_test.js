@@ -98,6 +98,7 @@ describe('Helix Server', () => {
     const cwd = path.join(SPEC_ROOT, 'local');
     const project = new HelixProject()
       .withCwd(cwd)
+      .withBuildDir('./build')
       .withHttpPort(0);
     await project.init();
     try {
@@ -112,6 +113,7 @@ describe('Helix Server', () => {
     const cwd = path.join(SPEC_ROOT, 'local');
     const project = new HelixProject()
       .withCwd(cwd)
+      .withBuildDir('./build')
       .withHttpPort(0);
     await project.init();
     try {
@@ -126,6 +128,7 @@ describe('Helix Server', () => {
     const cwd = path.join(SPEC_ROOT, 'local');
     const project = new HelixProject()
       .withCwd(cwd)
+      .withBuildDir('./build')
       .withHttpPort(0);
     await project.init();
     try {
@@ -140,6 +143,7 @@ describe('Helix Server', () => {
     const cwd = path.join(SPEC_ROOT, 'local');
     const project = new HelixProject()
       .withCwd(cwd)
+      .withBuildDir('./build')
       .withHttpPort(0);
     await project.init();
     try {
@@ -154,6 +158,7 @@ describe('Helix Server', () => {
     const cwd = path.join(SPEC_ROOT, 'local');
     const project = new HelixProject()
       .withCwd(cwd)
+      .withBuildDir('./build')
       .withHttpPort(0);
     await project.init();
     try {
@@ -168,6 +173,7 @@ describe('Helix Server', () => {
     const cwd = path.join(SPEC_ROOT, 'local');
     const project = new HelixProject()
       .withCwd(cwd)
+      .withBuildDir('./build')
       .withHttpPort(0);
     await project.init();
     try {
