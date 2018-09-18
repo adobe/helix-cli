@@ -51,6 +51,7 @@ class StrainCommand {
 
     this._dictionaries = {
       secrets: null,
+      strain_params: null,
       strain_action_roots: null,
       strain_owners: null,
       strain_refs: null,
@@ -149,6 +150,14 @@ class StrainCommand {
   withVclFile(value) {
     this._vclFile = value;
     return this;
+  }
+
+  /**
+   * Turns a list of parameter names into a regular expression string.
+   * @param {Array(String)} params a list of parameter names
+   */
+  static makeFilter(params) {
+    return `^${params.join('|')}$`;
   }
 
   /**
@@ -610,6 +619,10 @@ class StrainCommand {
       // optional
       makeStrainjob('strain_index_files', strain.name, strain.index, '🗂  Set directory index');
       makeStrainjob('strain_root_paths', strain.name, strain.content.root, '🌲  Set content root');
+
+      if (strain.params) {
+        makeStrainjob('strain_params', strain.name, StrainCommand.makeFilters(strain.params), '🗃  Set parameter filter');
+      }
 
       // static
       const origin = GitUtils.getOriginURL();

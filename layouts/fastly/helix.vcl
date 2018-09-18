@@ -73,6 +73,23 @@ sub hlx_index {
   }
 }
 
+# Gets the white-listed params for the current strain
+sub hlx_params {
+  set req.http.X-Params = "";
+  set req.http.X-Encoded-Params = "";
+
+  # first load the params from the strain
+  set req.http.X-Params = table.lookup(strain_params, req.http.X-Strain);
+  if (!req.http.X-Params) {
+    set req.http.X-Params = table.lookup(strain_params, "default");
+  }
+  if (req.http.X-Params) {
+    set req.http.X-Old-Url = req.url;
+    set req.url = querystring.regfilter(req.url, req.http.X-Params);
+    set req.http.X-Encoded-Params = urlencode(req.url.qs);
+  }
+}
+
 # Gets the content repo
 sub hlx_repo {
   set req.http.X-Repo = table.lookup(strain_repos, req.http.X-Strain);
@@ -389,8 +406,9 @@ sub vcl_recv {
       }
       set req.url = "/" + var.owner + "/" + var.repo + "/" + var.ref + "/" + var.dir + "/" + req.url.basename + "?" + req.url.qs;
     } else {
+      call hlx_params;
       # Invoke OpenWhisk
-      set req.url = "/api/v1/web" + var.action + "?owner=" + var.owner + "&repo=" + var.repo + "&ref=" + var.ref + "&path=" + var.dir + "/" + var.name + ".md" + "&selector=" + var.selector + "&extension=" + req.url.ext + "&branch=" + var.branch + "&strain=" + var.strain + "&GITHUB_KEY=" + table.lookup(secrets, "GITHUB_TOKEN");
+      set req.url = "/api/v1/web" + var.action + "?owner=" + var.owner + "&repo=" + var.repo + "&ref=" + var.ref + "&path=" + var.dir + "/" + var.name + ".md" + "&selector=" + var.selector + "&extension=" + req.url.ext + "&branch=" + var.branch + "&strain=" + var.strain + "&GITHUB_KEY=" + table.lookup(secrets, "GITHUB_TOKEN") + "&params=" + req.http.X-Encoded-Params;
     }
   }
 
