@@ -94,7 +94,7 @@ describe('Integration test for up command', () => {
             { pattern: 'welcome.txt', with: 'welcome.bc53b44e.txt' },
           ];
           await assertHttp(`http://localhost:${cmd.project.server.port}/index.html`, 200, 'simple_response.html', replacements);
-          await assertHttp(`http://localhost:${cmd.project.server.port}/welcome.bc53b44e.txt`, 200, 'welcome_response.txt');
+          await assertHttp(`http://localhost:${cmd.project.server.port}/dist/welcome.bc53b44e.txt`, 200, 'welcome_response.txt');
           myDone();
         } catch (e) {
           myDone(e);
