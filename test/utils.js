@@ -35,10 +35,13 @@ function initGit(dir) {
   shell.cd(pwd);
 }
 
-async function assertFile(p) {
-  const exists = await fse.pathExists(p);
-  if (!exists) {
+function assertFile(p, expectMissing) {
+  const exists = fse.pathExistsSync(p);
+  if (!exists && !expectMissing) {
     assert.fail(`Expected file at ${p} to exists`);
+  }
+  if (exists && expectMissing) {
+    assert.fail(`Unexpected file at ${p} exists`);
   }
 }
 

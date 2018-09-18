@@ -94,7 +94,7 @@ describe('hlx deploy (Integration)', () => {
       .withStrainFile(strainsFile)
       .run();
 
-    await assertFile(strainsFile);
+    assertFile(strainsFile);
     const firstrun = fs.readFileSync(strainsFile).toString();
 
     await fs.remove(buildDir);
@@ -111,7 +111,7 @@ describe('hlx deploy (Integration)', () => {
       .withStrainFile(strainsFile)
       .run();
 
-    await assertFile(strainsFile);
+    assertFile(strainsFile);
     const secondrun = fs.readFileSync(strainsFile).toString();
     assert.equal(firstrun, secondrun, 'generated strains.yaml differs between first and second run');
 
@@ -128,7 +128,7 @@ describe('hlx deploy (Integration)', () => {
       .withStrainFile(strainsFile)
       .run();
 
-    await assertFile(strainsFile);
+    assertFile(strainsFile);
     const thirdrun = fs.readFileSync(strainsFile).toString();
     assert.notEqual(firstrun, thirdrun);
   }).timeout(10000);
