@@ -116,31 +116,6 @@ $ hlx strain --fastly-auth <key> --fastly-namespace <serviceid>
 💀  Purged entire cache
 ```
 
-### Passing Request Parameters
-
-Every request parameter is a potential cache-buster and given that modern web application practices liberally append request parameters for tracking purposes or to manage state for client-side applications, **Helix filters out all request parameters by default**.
-
-This means, the client side of your application will still be able to access request parameters, but your server(less)-side scripts and templates will not see any parameters.
-
-If you need to pass request parameters, you can whitelist the parameters you need using the `strain.params` configuration. The value of `params` is an array of whitelisted parameter names.
-
-```yaml
-- strain:
-    name: default
-    code: /hlx/default/git-github-com-adobe-helix-cli-git--dirty--
-    params:
-      - foo
-      - bar
-    content:
-      repo: helix-cli
-      ref: master
-      owner: adobe
-```
-
-In the example above, the parameters `foo` and `bar` have been enabled. A request made to `https://www.example.com/index.html?foo=here&bar=there&baz=everywhere` will enable your application to read the `foo` and `bar` parameters. The `baz` parameter and all other parameters will be filtered out.
-
-Every allowed parameter value will affect the caching of your site in the CDN.
-
 ### Directory Index
 
 The default behavior for directory indexes is to load `index.html` when requesting a path ending with `/`,
