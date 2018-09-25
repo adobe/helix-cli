@@ -155,6 +155,10 @@ jobs:
         name: Build Installer
         command: ./build.sh
         working_directory: build
+    - run:
+        name: Verify Installer
+        command: sh hlx_install.sh -- --overwrite && hlx --version
+        working_directory: build
     - store_artifacts:
         path: build/hlx_install.sh
 

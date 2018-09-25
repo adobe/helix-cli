@@ -15,7 +15,7 @@
 const path = require('path');
 const fs = require('fs-extra');
 const assert = require('assert');
-const { createTestRoot, assertFile } = require('./utils.js');
+const { createTestRoot, assertFile, assertFileMissing } = require('./utils.js');
 
 const BuildCommand = require('../src/build.cmd');
 
@@ -23,7 +23,6 @@ const TEST_DIR = path.resolve('test/integration');
 
 describe('Integration test for build', () => {
   let testRoot;
-  let testDir;
   let buildDir;
   let distDir;
 
@@ -32,10 +31,9 @@ describe('Integration test for build', () => {
     this.timeout(20000);
 
     testRoot = await createTestRoot();
-    testDir = path.resolve(testRoot, 'project');
     buildDir = path.resolve(testRoot, '.hlx/build');
     distDir = path.resolve(testRoot, 'dist');
-    await fs.copy(TEST_DIR, testDir);
+    await fs.copy(TEST_DIR, testRoot);
     return true;
   });
 
@@ -48,12 +46,13 @@ describe('Integration test for build', () => {
       .withCacheEnabled(false)
       .run();
 
-    assertFile(path.resolve(buildDir, 'html.js'));
-    assertFile(!path.resolve(buildDir, 'html.pre.js'), true);
-    assertFile(path.resolve(buildDir, 'example_html.js'));
-    assertFile(path.resolve(buildDir, 'component', 'html.js'));
-    assertFile(path.resolve(distDir, 'welcome.bc53b44e.txt'));
-    assertFile(path.resolve(distDir, 'styles.28756636.css'));
+    await assertFile(path.resolve(buildDir, 'html.js'));
+    await assertFileMissing(path.resolve(buildDir, 'html.pre.js'));
+    await assertFile(path.resolve(buildDir, 'example_html.js'));
+    await assertFile(path.resolve(buildDir, 'component', 'html.js'));
+    await assertFile(path.resolve(distDir, 'welcome.bc53b44e.txt'));
+    await assertFile(path.resolve(distDir, 'styles.28756636.css'));
+    await assertFile(path.resolve(testRoot, 'webroot', 'img', 'banner.png'));
 
     // test if manifest contains correct entries
     const manifest = fs.readJsonSync(path.resolve(buildDir, 'manifest.json'));
@@ -80,12 +79,13 @@ describe('Integration test for build', () => {
       .run();
 
     distDir = path.resolve(testRoot, 'webroot/dist');
-    assertFile(path.resolve(buildDir, 'html.js'));
-    assertFile(!path.resolve(buildDir, 'html.pre.js'), true);
-    assertFile(path.resolve(buildDir, 'example_html.js'));
-    assertFile(path.resolve(buildDir, 'component', 'html.js'));
-    assertFile(path.resolve(distDir, 'welcome.bc53b44e.txt'));
-    assertFile(path.resolve(distDir, 'styles.28756636.css'));
+    await assertFile(path.resolve(buildDir, 'html.js'));
+    await assertFileMissing(path.resolve(buildDir, 'html.pre.js'));
+    await assertFile(path.resolve(buildDir, 'example_html.js'));
+    await assertFile(path.resolve(buildDir, 'component', 'html.js'));
+    await assertFile(path.resolve(distDir, 'welcome.bc53b44e.txt'));
+    await assertFile(path.resolve(distDir, 'styles.28756636.css'));
+    await assertFile(path.resolve(testRoot, 'webroot', 'img', 'banner.png'));
 
     // test if manifest contains correct entries
     const manifest = fs.readJsonSync(path.resolve(buildDir, 'manifest.json'));
@@ -93,6 +93,10 @@ describe('Integration test for build', () => {
       'styles.28756636.css': {
         hash: '52a3333296aaf35a6761cf3f5309528e',
         size: 656,
+      },
+      'vendor/example.css': {
+        hash: 'f9806776872f8ff4940b806f94923c4d',
+        size: 658,
       },
       'welcome.bc53b44e.txt': {
         hash: 'd6fc0d7dfc73e69219b8a3d110b69cb0',
