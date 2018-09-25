@@ -329,3 +329,14 @@ You can set performance budgets against following scores (more is better) and me
 * `asset_count`: Number of requests
 * `onload`: onLoad
 * `oncontentload`: onContentLoad
+
+# Developing Helix CLI
+
+## Building on macOS Mojave
+
+Before running `npm install`, make sure that `nodegit` can find all dependencies:
+
+```bash
+$ export LDFLAGS="-L/usr/local/opt/openssl/lib"
+$ export CPPFLAGS="-I/usr/local/opt/openssl/include"
+```
