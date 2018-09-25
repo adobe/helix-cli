@@ -339,3 +339,14 @@ performance result reporting with the CI system performing an automated deployme
 For `hlx demo full`, a full CI configuration is created that will run a performance
 test after a completed deployment, report the per-metric results and mark the build
 as failed in case metrics are not met.
+
+# Developing Helix CLI
+
+## Building on macOS Mojave
+
+Before running `npm install`, make sure that `nodegit` can find all dependencies:
+
+```bash
+$ export LDFLAGS="-L/usr/local/opt/openssl/lib"
+$ export CPPFLAGS="-I/usr/local/opt/openssl/include"
+```
