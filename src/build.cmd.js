@@ -188,7 +188,9 @@ class BuildCommand extends EventEmitter {
     const jobs = [];
     if (await fse.pathExists(this._distDir)) {
       // todo: consider using async klaw
-      klawSync(this._distDir).forEach(async (f) => {
+      klawSync(this._distDir, {
+        nodir: true,
+      }).forEach(async (f) => {
         const info = {
           size: f.stats.size,
           hash: '',

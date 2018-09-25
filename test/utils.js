@@ -42,6 +42,13 @@ async function assertFile(p) {
   }
 }
 
+async function assertFileMissing(p) {
+  const exists = await fse.pathExists(p);
+  if (exists) {
+    assert.fail(`Expected file at ${p} to be missing`);
+  }
+}
+
 async function assertZipEntry(zipFile, name, exists = true) {
   return new Promise((resolve, reject) => {
     let doesExist = false;
@@ -245,6 +252,7 @@ const perfExample = {
 
 module.exports = {
   assertFile,
+  assertFileMissing,
   assertHttp,
   assertZipEntry,
   initGit,
