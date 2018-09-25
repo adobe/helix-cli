@@ -90,15 +90,6 @@ class InitCommand {
       throw new Error('init needs directory.');
     }
 
-    // #181 cover edge case: make sure git is properly configured
-    if (!await fse.pathExists('~/.gitconfig')) {
-      throw new Error(`
-It seems like Git has not yet been setup on this system. 
-
-See https://git-scm.com/book/en/v2/Getting-Started-First-Time-Git-Setup for more information.  
-`);
-    }
-
     this._padding = this._name.length + 45;
     const projectDir = path.resolve(path.join(this._dir, this._name));
     const relPath = path.relative(process.cwd(), projectDir);
