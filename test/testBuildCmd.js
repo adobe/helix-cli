@@ -15,7 +15,7 @@
 const path = require('path');
 const fs = require('fs-extra');
 const assert = require('assert');
-const { createTestRoot, assertFile, assertFileMissing } = require('./utils.js');
+const { createTestRoot, assertFile } = require('./utils.js');
 
 const BuildCommand = require('../src/build.cmd');
 
@@ -46,13 +46,13 @@ describe('Integration test for build', () => {
       .withCacheEnabled(false)
       .run();
 
-    await assertFile(path.resolve(buildDir, 'html.js'));
-    await assertFileMissing(path.resolve(buildDir, 'html.pre.js'));
-    await assertFile(path.resolve(buildDir, 'example_html.js'));
-    await assertFile(path.resolve(buildDir, 'component', 'html.js'));
-    await assertFile(path.resolve(distDir, 'welcome.bc53b44e.txt'));
-    await assertFile(path.resolve(distDir, 'styles.28756636.css'));
-    await assertFile(path.resolve(testRoot, 'webroot', 'img', 'banner.png'));
+    assertFile(path.resolve(buildDir, 'html.js'));
+    assertFile(path.resolve(buildDir, 'html.pre.js'), true);
+    assertFile(path.resolve(buildDir, 'example_html.js'));
+    assertFile(path.resolve(buildDir, 'component', 'html.js'));
+    assertFile(path.resolve(distDir, 'welcome.bc53b44e.txt'));
+    assertFile(path.resolve(distDir, 'styles.28756636.css'));
+    assertFile(path.resolve(testRoot, 'webroot', 'img', 'banner.png'));
 
     // test if manifest contains correct entries
     const manifest = fs.readJsonSync(path.resolve(buildDir, 'manifest.json'));
@@ -79,13 +79,13 @@ describe('Integration test for build', () => {
       .run();
 
     distDir = path.resolve(testRoot, 'webroot/dist');
-    await assertFile(path.resolve(buildDir, 'html.js'));
-    await assertFileMissing(path.resolve(buildDir, 'html.pre.js'));
-    await assertFile(path.resolve(buildDir, 'example_html.js'));
-    await assertFile(path.resolve(buildDir, 'component', 'html.js'));
-    await assertFile(path.resolve(distDir, 'welcome.bc53b44e.txt'));
-    await assertFile(path.resolve(distDir, 'styles.28756636.css'));
-    await assertFile(path.resolve(testRoot, 'webroot', 'img', 'banner.png'));
+    assertFile(path.resolve(buildDir, 'html.js'));
+    assertFile(path.resolve(buildDir, 'html.pre.js'), true);
+    assertFile(path.resolve(buildDir, 'example_html.js'));
+    assertFile(path.resolve(buildDir, 'component', 'html.js'));
+    assertFile(path.resolve(distDir, 'welcome.bc53b44e.txt'));
+    assertFile(path.resolve(distDir, 'styles.28756636.css'));
+    assertFile(path.resolve(testRoot, 'webroot', 'img', 'banner.png'));
 
     // test if manifest contains correct entries
     const manifest = fs.readJsonSync(path.resolve(buildDir, 'manifest.json'));
