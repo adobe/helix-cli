@@ -35,17 +35,13 @@ function initGit(dir) {
   shell.cd(pwd);
 }
 
-async function assertFile(p) {
-  const exists = await fse.pathExists(p);
-  if (!exists) {
+function assertFile(p, expectMissing) {
+  const exists = fse.pathExistsSync(p);
+  if (!exists && !expectMissing) {
     assert.fail(`Expected file at ${p} to exists`);
   }
-}
-
-async function assertFileMissing(p) {
-  const exists = await fse.pathExists(p);
-  if (exists) {
-    assert.fail(`Expected file at ${p} to be missing`);
+  if (exists && expectMissing) {
+    assert.fail(`Unexpected file at ${p} exists`);
   }
 }
 
@@ -252,7 +248,6 @@ const perfExample = {
 
 module.exports = {
   assertFile,
-  assertFileMissing,
   assertHttp,
   assertZipEntry,
   initGit,

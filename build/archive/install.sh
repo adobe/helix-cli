@@ -1,5 +1,5 @@
 #!/bin/sh
-
+echo $@
 dest=/usr/local/bin/hlx
 
 error_exit() {
@@ -47,7 +47,9 @@ ask() {
 if [ -L $dest -o -f $dest ]; then
     if [ -x $dest ]; then 
         old_version=$($dest --version)
-        if ! ask "hlx version $old_version ($dest) exists, overwrite?" Y; then
+        if [ "$@" == "--overwrite" ]; then
+            rm $dest
+        elif ! ask "hlx version $old_version ($dest) exists, overwrite?" Y; then
             exit 1
         fi
     else
