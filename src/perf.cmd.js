@@ -17,6 +17,7 @@ const path = require('path');
 const fs = require('fs-extra');
 const _ = require('lodash/fp');
 const strainconfig = require('./strain-config-utils');
+const JunitPerformanceReport = require('./junit-utils');
 
 /* eslint-disable no-console */
 
@@ -29,6 +30,14 @@ class PerfCommand {
     this._location = 'London';
     this._device = 'MotorolaMotoG4';
     this._connection = 'regular3G';
+    this._junit = null;
+  }
+
+  withJunit(value) {
+    if (value && value !== '') {
+      this._junit = new JunitPerformanceReport().withOutfile(path.resolve(process.cwd(), value));
+    }
+    return this;
   }
 
   withStrainFile(value) {
@@ -137,8 +146,8 @@ class PerfCommand {
     return undefined;
   }
 
-  static formatResponse(response, params = {}) {
-    console.log(`\nTesting ${response.url} on ${response.device.title} (${response.connection.title}) from ${response.location.emoji}  ${response.location.name}\n`);
+  static formatResponse(response, params = {}, strainname = 'default') {
+    console.log(`\nTesting ${response.url} on ${response.device.title} (${response.connection.title}) from ${response.location.emoji}  ${response.location.name} using ${strainname} strain.\n`);
     const strainresults = Object.keys(params).map((key) => {
       const value = params[key];
       if (Number.isInteger(value)) {
@@ -168,9 +177,17 @@ class PerfCommand {
           location: params.location,
           device: params.device,
           connection: params.connection,
+          cookies: [{
+            name: 'X-Strain', value: strain.name, secure: true, httpOnly: true,
+          }],
         })
           .then(({ uuid }) => this._calibre.Test.waitForTest(uuid))
-          .then(result => PerfCommand.formatResponse(result, params))
+          .then((result) => {
+            if (this._junit) {
+              this._junit.appendResults(result, params, strain.name);
+            }
+            return PerfCommand.formatResponse(result, params, strain.name);
+          })
           .catch((err) => {
             console.error(err);
             return null;
@@ -179,6 +196,9 @@ class PerfCommand {
 
     const flattests = _.flatten(tests);
     Promise.all(flattests).then((results) => {
+      if (this._junit) {
+        this._junit.writeResults();
+      }
       console.log('');
       const fail = results.filter(result => result === false).length;
       const succeed = results.filter(result => result === true).length;

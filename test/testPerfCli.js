@@ -40,6 +40,7 @@ describe('hlx perf (CLI)', () => {
     mockPerf.withConnection.returnsThis();
     mockPerf.withLocation.returnsThis();
     mockPerf.withDevice.returnsThis();
+    mockPerf.withJunit.returnsThis();
   });
 
 
@@ -66,6 +67,7 @@ describe('hlx perf (CLI)', () => {
       .withCommandExecutor('perf', mockPerf)
       .run(['perf', '--calibre-auth', 'nope-nope-nope']);
     sinon.assert.calledOnce(mockPerf.run);
+    sinon.assert.calledWith(mockPerf.withJunit, '');
   });
 
   it('hlx perf works with all arguments', () => {
@@ -75,10 +77,12 @@ describe('hlx perf (CLI)', () => {
         '--calibre-auth', 'nope-nope-nope',
         '--location', 'California',
         '--device', 'iPad',
-        '--connection', 'cable']);
+        '--connection', 'cable',
+        '--junit', 'test-results.xml']);
     sinon.assert.calledWith(mockPerf.withDevice, 'iPad');
     sinon.assert.calledWith(mockPerf.withLocation, 'California');
     sinon.assert.calledWith(mockPerf.withConnection, 'cable');
+    sinon.assert.calledWith(mockPerf.withJunit, 'test-results.xml');
 
     sinon.assert.calledOnce(mockPerf.run);
   });

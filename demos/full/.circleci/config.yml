@@ -29,8 +29,6 @@ jobs:
             name: Building Templates
             command: npx hlx build
 
-        - run: git diff
-
         - run:
             name: Deploying to Adobe I/O Runtime
             command: npx hlx deploy --no-auto
@@ -41,4 +39,7 @@ jobs:
 
         - run:
             name: Test Performance
-            command: npx hlx perf
+            command: mkdir -p junit && npx hlx perf --junit junit/test-results.xml
+
+        - store_test_results:
+            path: junit
