@@ -244,7 +244,12 @@ class HelixProject {
   async start() {
     if (this._needLocalServer) {
       await this.startGitServer();
-      this._contentRepo = new GitUrl(`http://${GIT_LOCAL_HOST}:${this._gitState.httpPort}/${GIT_LOCAL_OWNER}/${GIT_LOCAL_CONTENT_REPO}`);
+      // #65 consider currently checked out branch
+      const { currentBranch } = await gitServer.getRepoInfo(
+        this._gitConfig, GIT_LOCAL_OWNER, GIT_LOCAL_CONTENT_REPO,
+      );
+      // FIXME: what's the canonical way of specifying a branch in a git url?
+      this._contentRepo = new GitUrl(`http://${GIT_LOCAL_HOST}:${this._gitState.httpPort}/${GIT_LOCAL_OWNER}/${GIT_LOCAL_CONTENT_REPO}/tree/${currentBranch}`);
     }
 
     logger.debug('Launching petridish server for development...');
