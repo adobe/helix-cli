@@ -70,6 +70,26 @@ $ hlx test
 
 ## (Optional) Deploy to Adobe I/O Runtime
 
+### Automatic Deployment
+
+By default, Helix will set up automated deployment that deploys whenever a new commit has been pushed to your GitHub code repository. In order to do so, you need a [CircleCI](https://circleci.com) account and generate a [personal API Token](https://circleci.com/account/api).
+
+```bash
+# In <my-cool-project>
+$ hlx deploy \
+  --circleci-auth <personal-api-token> \
+  --wsk-namespace <your-namespace> \
+  --wsk-auth <your-key> \
+  --fastly-auth <key> \
+  --fastly-namespace <serviceid>
+```
+
+As always, you can keep all parameters in `HLX_CIRCLECI_AUTH`, `HLX_WSK_AUTH`, and `HLX_FASTLY_AUTH` environment variables if you don't want them in your `.bash_history`.
+
+### One-Shot Deployment
+
+Alternatively, you can also perfom a one-shot deployment like this:
+
 ```bash
 # In <my-cool-project>
 $ hlx deploy --no-auto --wsk-namespace <your-namespace> --wsk-auth <your-key>
