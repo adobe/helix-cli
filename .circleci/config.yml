@@ -44,7 +44,8 @@ jobs:
     # test & get code coverage
     - run:
         name: Getting Code Coverage
-        command: circleci tests glob test/test*.js | circleci tests split --split-by=timings | xargs ./node_modules/.bin/istanbul cover ./node_modules/mocha/bin/_mocha -- -R mocha-junit-reporter --exit && npx codecov
+        command: npx istanbul cover ./node_modules/mocha/bin/_mocha -- -R spec && npx codecov
+        # command: circleci tests glob test/test*.js | circleci tests split --split-by=timings | xargs ./node_modules/.bin/istanbul cover ./node_modules/mocha/bin/_mocha -- -R mocha-junit-reporter --exit && npx codecov
         environment:
           MOCHA_FILE: junit/test-results.xml
 
