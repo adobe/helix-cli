@@ -35,6 +35,7 @@ class CLI {
       deploy: require('./deploy.js')(),
       perf: require('./perf.js')(),
       strain: require('./strain.js')(),
+      clean: require('./clean.js')(),
     };
     this._failFn = (message, err, argv) => {
       const msg = err ? err.message : message;
