@@ -107,7 +107,7 @@ describe('Integration test for up command', () => {
       .catch(done);
   }).timeout(5000);
 
-  it.skip('up command delivers modified sources and delivers correct response.', (done) => {
+  it('up command delivers modified sources and delivers correct response.', (done) => {
     // somehow doesn't work. when executing together with other tests, the bundler doesn't detect
     // changes to the source files.
     const srcFile = path.resolve(testDir, 'src/html2.htl');
@@ -155,7 +155,7 @@ describe('Integration test for up command', () => {
       .catch(done);
   }).timeout(10000);
 
-  it.skip('up command delivers modified static files and delivers correct response.', (done) => {
+  it('up command delivers modified static files and delivers correct response.', (done) => {
     const srcFile = path.resolve(testDir, 'src/welcome2.txt');
     const dstFile = path.resolve(testDir, 'src/welcome.txt');
 
