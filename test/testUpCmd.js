@@ -153,7 +153,7 @@ describe('Integration test for up command', () => {
       })
       .run()
       .catch(done);
-  }).timeout(10000);
+  }).timeout(15000);
 
   it('up command delivers modified static files and delivers correct response.', (done) => {
     const srcFile = path.resolve(testDir, 'src/welcome2.txt');
@@ -199,5 +199,5 @@ describe('Integration test for up command', () => {
       })
       .run()
       .catch(done);
-  }).timeout(10000);
+  }).timeout(15000);
 });
