@@ -18,10 +18,9 @@ module.exports.defaultArgs = yargs => yargs
     describe: 'Target directory for compiled JS',
   })
   .option('cache', {
-    alias: 'no-cache', // make it show up in the help
     describe: 'Enable or disable compile cache',
     boolean: true,
-    default: true,
+    default: false,
   })
   .option('minify', {
     describe: 'Minify JS',
