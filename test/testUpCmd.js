@@ -122,7 +122,7 @@ describe('Integration test for up command', () => {
       .withDirectory(testDir)
       .withHttpPort(0);
 
-    const myDone = (err) => {
+    const myDone = async (err) => {
       error = err;
       return cmd.stop();
     };
@@ -137,7 +137,7 @@ describe('Integration test for up command', () => {
           await assertHttp(`http://localhost:${cmd.project.server.port}/dist/welcome.bc53b44e.txt`, 200, 'welcome_response.txt');
           await fse.copy(srcFile, dstFile);
         } catch (e) {
-          myDone(e);
+          await myDone(e);
         }
       })
       .on('stopped', () => {
@@ -146,14 +146,14 @@ describe('Integration test for up command', () => {
       .on('build', async () => {
         try {
           await assertHttp(`http://localhost:${cmd.project.server.port}/index.html`, 200, 'simple_response2.html');
-          myDone();
+          await myDone();
         } catch (e) {
-          myDone(e);
+          await myDone(e);
         }
       })
       .run()
       .catch(done);
-  }).timeout(15000);
+  }).timeout(10000);
 
   it('up command delivers modified static files and delivers correct response.', (done) => {
     const srcFile = path.resolve(testDir, 'src/welcome2.txt');
@@ -168,7 +168,7 @@ describe('Integration test for up command', () => {
       .withDirectory(testDir)
       .withHttpPort(0);
 
-    const myDone = (err) => {
+    const myDone = async (err) => {
       error = err;
       return cmd.stop();
     };
@@ -183,7 +183,7 @@ describe('Integration test for up command', () => {
           await assertHttp(`http://localhost:${cmd.project.server.port}/dist/welcome.bc53b44e.txt`, 200, 'welcome_response.txt');
           await fse.copy(srcFile, dstFile);
         } catch (e) {
-          myDone(e);
+          await myDone(e);
         }
       })
       .on('stopped', () => {
@@ -192,12 +192,12 @@ describe('Integration test for up command', () => {
       .on('build', async () => {
         try {
           await assertHttp(`http://localhost:${cmd.project.server.port}/dist/welcome.bc53b44e.txt`, 200, 'welcome_response2.txt');
-          myDone();
+          await myDone();
         } catch (e) {
-          myDone(e);
+          await myDone(e);
         }
       })
       .run()
       .catch(done);
-  }).timeout(15000);
+  }).timeout(10000);
 });
