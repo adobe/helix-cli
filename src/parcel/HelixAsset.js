@@ -14,6 +14,7 @@ const Asset = require('parcel-bundler/src/Asset');
 const fs = require('fs');
 const path = require('path');
 const logger = require('parcel-bundler/src/Logger');
+const { SourceMapConsumer, SourceMapGenerator } = require('source-map');
 const resolver = require('./resolver');
 
 const DEFAULT_PIPELINE = '@adobe/hypermedia-pipeline/src/defaults/default.js';
@@ -28,6 +29,9 @@ class HelixAsset extends Asset {
   constructor(name, options) {
     super(name, options);
     this.type = 'js';
+
+    this.rendition = options.rendition;
+    this.sourceMap = this.rendition ? this.rendition.sourceMap : null;
   }
 
   async generate() {
@@ -44,12 +48,19 @@ class HelixAsset extends Asset {
     );
 
     let body = fs.readFileSync(OUTPUT_TEMPLATE, 'utf-8');
+    if (this.sourceMap) {
+      const index = body.search(/^\s*\/\/\s*CONTENTS\s*$/m);
+      const lineOffset = index !== -1 ? body.substring(0, index).match(/\n/g).length + 1 : 0;
+
+      this.sourceMap = await this.shiftSourceMap(this.sourceMap, lineOffset);
+    }
     body = body.replace(/^\s*\/\/\s*CONTENTS\s*$/m, `\n${this.contents}`);
     body = body.replace(/MOD_PIPE/, pipe);
     body = body.replace(/MOD_PRE/, pre);
     return [{
       type: 'js',
       value: body,
+      sourceMap: this.sourceMap,
     }];
   }
 
@@ -67,6 +78,33 @@ class HelixAsset extends Asset {
     }
 
     return DEFAULT_PIPELINE;
+  }
+
+  /**
+   * Shift the lines in a source map by some offset.
+   *
+   * @param {Object} sourceMap source map
+   * @param {Number} lineOffset line offset
+   * @returns shifted source map
+   */
+  async shiftSourceMap(sourceMap, lineOffset) {
+    const generator = new SourceMapGenerator({
+      file: this.sourceMap.file,
+      sourceRoot: this.sourceMap.sourceRoot,
+    });
+    await SourceMapConsumer.with(this.sourceMap, null, (consumer) => {
+      consumer.eachMapping((m) => {
+        generator.addMapping({
+          source: m.source,
+          name: m.name,
+          original: { line: m.originalLine, column: m.originalColumn },
+          generated: { line: m.generatedLine + lineOffset, column: m.generatedColumn },
+        });
+      });
+    });
+    const shiftedSourceMap = generator.toJSON();
+    shiftedSourceMap.sourcesContent = this.sourceMap.sourcesContent;
+    return shiftedSourceMap;
   }
 }
 
