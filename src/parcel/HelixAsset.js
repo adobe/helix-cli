@@ -52,7 +52,7 @@ class HelixAsset extends Asset {
       const index = body.search(/^\s*\/\/\s*CONTENTS\s*$/m);
       const lineOffset = index !== -1 ? body.substring(0, index).match(/\n/g).length + 1 : 0;
 
-      this.sourceMap = await this.shiftSourceMap(this.sourceMap, lineOffset);
+      this.sourceMap = await HelixAsset.shiftSourceMap(this.sourceMap, lineOffset);
     }
     body = body.replace(/^\s*\/\/\s*CONTENTS\s*$/m, `\n${this.contents}`);
     body = body.replace(/MOD_PIPE/, pipe);
@@ -87,12 +87,12 @@ class HelixAsset extends Asset {
    * @param {Number} lineOffset line offset
    * @returns shifted source map
    */
-  async shiftSourceMap(sourceMap, lineOffset) {
+  static async shiftSourceMap(sourceMap, lineOffset) {
     const generator = new SourceMapGenerator({
-      file: this.sourceMap.file,
-      sourceRoot: this.sourceMap.sourceRoot,
+      file: sourceMap.file,
+      sourceRoot: sourceMap.sourceRoot,
     });
-    await SourceMapConsumer.with(this.sourceMap, null, (consumer) => {
+    await SourceMapConsumer.with(sourceMap, null, (consumer) => {
       consumer.eachMapping((m) => {
         generator.addMapping({
           source: m.source,
@@ -103,7 +103,7 @@ class HelixAsset extends Asset {
       });
     });
     const shiftedSourceMap = generator.toJSON();
-    shiftedSourceMap.sourcesContent = this.sourceMap.sourcesContent;
+    shiftedSourceMap.sourcesContent = sourceMap.sourcesContent;
     return shiftedSourceMap;
   }
 }
