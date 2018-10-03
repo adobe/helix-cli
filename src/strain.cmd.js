@@ -23,6 +23,7 @@ const { toBase64 } = require('request/lib/helpers');
 const strainconfig = require('./strain-config-utils');
 const include = require('./include-util');
 const GitUtils = require('./gitutils');
+const useragent = require('./user-agent-util');
 
 const HELIX_VCL_DEFAULT_FILE = path.resolve(__dirname, '../layouts/fastly/helix.vcl');
 
@@ -41,7 +42,7 @@ class StrainCommand {
     this._service = null;
     this._options = {
       headers: {
-        'User-Agent': 'Project Helix CLI',
+        'User-Agent': useragent,
         Accept: 'application/json',
       },
       json: true,
@@ -82,18 +83,18 @@ class StrainCommand {
         max_conn: 200,
         use_ssl: true,
       },
-      'runtime.adobe.io': {
-        hostname: 'runtime.adobe.io',
+      AdobeRuntime: {
+        hostname: 'adobeioruntime.net',
         error_threshold: 0,
         first_byte_timeout: 60000,
         weight: 100,
-        address: 'runtime.adobe.io',
+        address: 'adobeioruntime.net',
         connect_timeout: 1000,
-        name: 'runtime.adobe.io',
+        name: 'AdobeRuntime',
         port: 443,
         between_bytes_timeout: 10000,
         shield: 'iad-va-us',
-        ssl_cert_hostname: 'runtime.adobe.io',
+        ssl_cert_hostname: 'adobeioruntime.net',
         max_conn: 200,
         use_ssl: true,
       },

@@ -15,15 +15,14 @@
 const path = require('path');
 const fs = require('fs-extra');
 const assert = require('assert');
-const md5 = require('../src/md5.js');
-const { createTestRoot } = require('./utils.js');
+const { createTestRoot, assertFile } = require('./utils.js');
 
 const BuildCommand = require('../src/build.cmd');
 
 const TEST_DIR = path.resolve('test/integration');
 
 describe('Integration test for build', () => {
-  let testDir;
+  let testRoot;
   let buildDir;
   let distDir;
 
@@ -31,18 +30,15 @@ describe('Integration test for build', () => {
     // copying 300 MB can take a while
     this.timeout(20000);
 
-    const testRoot = await createTestRoot();
-    testDir = path.resolve(testRoot, 'project');
+    testRoot = await createTestRoot();
     buildDir = path.resolve(testRoot, '.hlx/build');
     distDir = path.resolve(testRoot, 'dist');
-    await fs.copy(TEST_DIR, testDir);
+    await fs.copy(TEST_DIR, testRoot);
     return true;
   });
 
   it('build command succeeds and produces files', async function test() {
     this.timeout(5000);
-    const stylesCssName = `styles.${md5(path.resolve(TEST_DIR, 'src/component/styles.css')).slice(-8)}.css`;
-    const welcomeTxtName = `welcome.${md5(path.resolve(TEST_DIR, 'src/welcome.txt')).slice(-8)}.txt`;
     await new BuildCommand()
       .withFiles(['test/integration/src/**/*.htl'])
       .withTargetDir(buildDir)
@@ -50,23 +46,61 @@ describe('Integration test for build', () => {
       .withCacheEnabled(false)
       .run();
 
-    assert.ok(fs.existsSync(path.resolve(buildDir, 'html.js')));
-    assert.ok(!fs.existsSync(path.resolve(buildDir, 'html.pre.js')));
-    assert.ok(fs.existsSync(path.resolve(buildDir, 'example_html.js')));
-    assert.ok(fs.existsSync(path.resolve(buildDir, 'component', 'html.js')));
-    assert.ok(fs.existsSync(path.resolve(distDir, welcomeTxtName)));
-    assert.ok(fs.existsSync(path.resolve(distDir, stylesCssName)));
+    assertFile(path.resolve(buildDir, 'html.js'));
+    assertFile(path.resolve(buildDir, 'html.pre.js'), true);
+    assertFile(path.resolve(buildDir, 'example_html.js'));
+    assertFile(path.resolve(buildDir, 'component', 'html.js'));
+    assertFile(path.resolve(distDir, 'welcome.bc53b44e.txt'));
+    assertFile(path.resolve(distDir, 'styles.28756636.css'));
+    assertFile(path.resolve(testRoot, 'webroot', 'img', 'banner.png'));
 
     // test if manifest contains correct entries
     const manifest = fs.readJsonSync(path.resolve(buildDir, 'manifest.json'));
     assert.deepStrictEqual({
-      [stylesCssName]: {
+      'styles.28756636.css': {
         hash: '52a3333296aaf35a6761cf3f5309528e',
         size: 656,
       },
-      [welcomeTxtName]: {
-        hash: '80d24efec2dacccf1330a8a0f2b656c1',
-        size: 27,
+      'welcome.bc53b44e.txt': {
+        hash: 'd6fc0d7dfc73e69219b8a3d110b69cb0',
+        size: 24,
+      },
+    }, manifest);
+  });
+
+  it('build command with webroot puts files to correct place', async function test() {
+    this.timeout(5000);
+    await new BuildCommand()
+      .withFiles(['test/integration/src/**/*.htl'])
+      .withTargetDir(buildDir)
+      .withCacheEnabled(false)
+      .withDirectory(testRoot)
+      .withStrainFile('test/fixtures/alt_webroot.yaml')
+      .run();
+
+    distDir = path.resolve(testRoot, 'webroot/dist');
+    assertFile(path.resolve(buildDir, 'html.js'));
+    assertFile(path.resolve(buildDir, 'html.pre.js'), true);
+    assertFile(path.resolve(buildDir, 'example_html.js'));
+    assertFile(path.resolve(buildDir, 'component', 'html.js'));
+    assertFile(path.resolve(distDir, 'welcome.bc53b44e.txt'));
+    assertFile(path.resolve(distDir, 'styles.28756636.css'));
+    assertFile(path.resolve(testRoot, 'webroot', 'img', 'banner.png'));
+
+    // test if manifest contains correct entries
+    const manifest = fs.readJsonSync(path.resolve(buildDir, 'manifest.json'));
+    assert.deepStrictEqual({
+      'styles.28756636.css': {
+        hash: '52a3333296aaf35a6761cf3f5309528e',
+        size: 656,
+      },
+      'vendor/example.css': {
+        hash: 'f9806776872f8ff4940b806f94923c4d',
+        size: 658,
+      },
+      'welcome.bc53b44e.txt': {
+        hash: 'd6fc0d7dfc73e69219b8a3d110b69cb0',
+        size: 24,
       },
     }, manifest);
   });

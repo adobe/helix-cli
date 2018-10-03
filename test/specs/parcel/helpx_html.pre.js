@@ -40,7 +40,7 @@ function collectMetadata(req, logger) {
 }
 
 /**
- * Extracts some committers data from the list of commits and appends the list to the resource
+ * Extracts some committers data from the list of commits and appends the list to the content
  * @param {RequestContext} ctx Context
  */
 function extractCommittersFromMetadata(meta) {
@@ -76,7 +76,7 @@ module.exports.pre = (payload, config) => {
   const { logger } = config;
 
   logger.debug('setting context path');
-  payload.resource.contextPath = 'myinjectedcontextpath';
+  payload.content.contextPath = 'myinjectedcontextpath';
 
   logger.debug('collecting metadata');
 
@@ -84,17 +84,17 @@ module.exports.pre = (payload, config) => {
     return collectMetadata(config.request, logger)
       .then((gitmeta) => {
         logger.debug('Metadata has arrived');
-        payload.resource.gitmetadata = gitmeta;
+        payload.content.gitmetadata = gitmeta;
         return gitmeta;
       })
       .then((gitmeta) => {
         const committers = extractCommittersFromMetadata(gitmeta, logger);
-        payload.resource.committers = committers;
+        payload.content.committers = committers;
         return gitmeta;
       })
       .then((gitmeta) => {
         const lastMod = extractLastModifiedFromMetadata(gitmeta, logger);
-        payload.resource.lastModified = lastMod;
+        payload.content.lastModified = lastMod;
       })
       .catch((e) => {
         logger.error(e);

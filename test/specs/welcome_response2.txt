@@ -1,1 +1,1 @@
-This is another static resource.
+This is another static content.

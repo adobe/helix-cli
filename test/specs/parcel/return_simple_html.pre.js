@@ -14,14 +14,14 @@
 /**
  * The 'pre' function that is executed before the HTML is rendered
  * @param payload The current payload of processing pipeline
- * @param payload.resource The content resource
+ * @param payload.content The content
  * @return the new payload
  */
 function pre(payload) {
   const myPayload = JSON.parse(JSON.stringify(payload));
-  payload.resource.foo = 'testing - should be ignored';
+  payload.content.foo = 'testing - should be ignored';
 
-  myPayload.resource.foo = 'bar';
+  myPayload.content.foo = 'bar';
   return myPayload;
 }
 

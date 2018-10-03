@@ -15,14 +15,18 @@ const crypto = require('crypto');
 const mime = require('mime-types');
 /* eslint-disable no-console */
 
-function error(message) {
-  console.error(message);
+// one megabyte openwhisk limit + 20% Base64 inflation + safety padding
+const REDIRECT_LIMIT = 750000;
+
+function error(message, code = 500) {
+  console.error('delivering error', message, code);
   return {
-    statusCode: 500,
+    statusCode: code,
     headers: {
       'Content-Type': 'text/html',
+      'X-Static': 'Raw/Static',
     },
-    body: `Error 500: Internal Server Error\n${message}`,
+    body: `Error ${code}: ${message}`,
   };
 }
 
@@ -64,10 +68,10 @@ function isJSON(type) {
 }
 
 function getBody(type, responsebody) {
-  const binary = isBinary(type);
-  if (binary) {
-    return responsebody.toString('base64');
-  } if (isJSON(type)) {
+  if (isBinary(type)) {
+    return Buffer.from(responsebody).toString('base64');
+  }
+  if (isJSON(type)) {
     return JSON.parse(responsebody);
   }
   return responsebody.toString();
@@ -89,27 +93,49 @@ function staticBase(owner, repo, entry, ref, strain = 'default') {
 }
 
 function deliverPlain(owner, repo, ref, entry, root) {
-  const cleanentry = (`${root}/${entry}`).replace(/^\//, '').replace(/[/]+/g, '');
+  const cleanentry = (`${root}/${entry}`).replace(/^\//, '').replace(/[/]+/g, '/');
   console.log('deliverPlain()', owner, repo, ref, cleanentry);
+  const url = `https://raw.githubusercontent.com/${owner}/${repo}/${ref}/${cleanentry}`;
   const rawopts = {
-    url: `https://raw.githubusercontent.com/${owner}/${repo}/${ref}/${cleanentry}`,
+    url,
     headers: {
       'User-Agent': 'Project Helix Static',
     },
+    resolveWithFullResponse: true,
+    encoding: null,
   };
 
-  return request.get(rawopts).then((responsebody) => {
-    const type = mime.contentType(cleanentry) || 'application/octet-stream';
-    const body = getBody(type, responsebody);
-    console.log(`delivering file ${cleanentry} type ${type}`);
+  return request.get(rawopts).then((response) => {
+    const type = mime.lookup(cleanentry) || 'application/octet-stream';
+    const size = parseInt(response.headers['content-length'], 10);
+    console.log('size', size);
+    if (size < REDIRECT_LIMIT) {
+      const body = getBody(type, response.body);
+      console.log(`delivering file ${cleanentry} type ${type} binary: ${isBinary(type)}`);
+      return {
+        headers: addHeaders({
+          'Content-Type': type,
+          'X-Static': 'Raw/Static',
+        }, ref, response.body),
+        body,
+      };
+    }
+    console.log('Redirecting to GitHub');
     return {
-      headers: addHeaders({
-        'Content-Type': type,
+      statusCode: 307,
+      headers: {
+        Location: url,
+        'X-Content-Type': type,
         'X-Static': 'Raw/Static',
-      }, ref, responsebody),
-      body,
+      },
     };
-  }).catch(error);
+  }).catch((rqerror) => {
+    console.error('REQUEST FAILED', rqerror.response.body.toString());
+    if (rqerror.statusCode === 404) {
+      return error(rqerror.response.body.toString(), 404);
+    }
+    return error(rqerror.message, rqerror.statusCode);
+  });
 }
 
 /**
@@ -175,7 +201,7 @@ async function main({
     return deliverPlain(owner, repo, ref, entry, root);
   }
 
-  return forbidden;
+  return forbidden();
 }
 
 module.exports = {

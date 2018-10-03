@@ -1,0 +1,6 @@
+{
+  "debug.allowBreakpointsEverywhere": true,
+  "files.associations": {
+    "*.htl": "html"
+  }
+}

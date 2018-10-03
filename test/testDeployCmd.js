@@ -54,14 +54,14 @@ describe('hlx deploy (Integration)', () => {
     $.cd(cwd);
   });
 
-  it('Auto-Deploy works', (done) => {
+  it.skip('Auto-Deploy works', (done) => {
     try {
       $.cd(testRoot);
       $.exec('git clone https://github.com/trieloff/helix-helpx.git');
       $.cd(path.resolve(testRoot, 'helix-helpx'));
 
       new DeployCommand()
-        .withWskHost('runtime.adobe.io')
+        .withWskHost('adobeioruntime.net')
         .withWskAuth('secret-key')
         .withWskNamespace('hlx')
         .withEnableAuto(true)
@@ -83,7 +83,7 @@ describe('hlx deploy (Integration)', () => {
   it('Dry-Running works', async () => {
     await new DeployCommand()
       .withDirectory(testRoot)
-      .withWskHost('runtime.adobe.io')
+      .withWskHost('adobeioruntime.net')
       .withWskAuth('secret-key')
       .withWskNamespace('hlx')
       .withEnableAuto(false)
@@ -94,13 +94,13 @@ describe('hlx deploy (Integration)', () => {
       .withStrainFile(strainsFile)
       .run();
 
-    await assertFile(strainsFile);
+    assertFile(strainsFile);
     const firstrun = fs.readFileSync(strainsFile).toString();
 
     await fs.remove(buildDir);
     await new DeployCommand()
       .withDirectory(testRoot)
-      .withWskHost('runtime.adobe.io')
+      .withWskHost('adobeioruntime.net')
       .withWskAuth('secret-key')
       .withWskNamespace('hlx')
       .withEnableAuto(false)
@@ -111,13 +111,13 @@ describe('hlx deploy (Integration)', () => {
       .withStrainFile(strainsFile)
       .run();
 
-    await assertFile(strainsFile);
+    assertFile(strainsFile);
     const secondrun = fs.readFileSync(strainsFile).toString();
     assert.equal(firstrun, secondrun, 'generated strains.yaml differs between first and second run');
 
     await new DeployCommand()
       .withDirectory(testRoot)
-      .withWskHost('runtime.adobe.io')
+      .withWskHost('adobeioruntime.net')
       .withWskAuth('secret-key')
       .withWskNamespace('hlx')
       .withEnableAuto(false)
@@ -128,7 +128,7 @@ describe('hlx deploy (Integration)', () => {
       .withStrainFile(strainsFile)
       .run();
 
-    await assertFile(strainsFile);
+    assertFile(strainsFile);
     const thirdrun = fs.readFileSync(strainsFile).toString();
     assert.notEqual(firstrun, thirdrun);
   }).timeout(10000);

@@ -26,7 +26,7 @@ function requestSomething() {
  * @param payload The current payload of processing pipeline
  */
 async function pre(payload) {
-  payload.resource.foo = await requestSomething();
+  payload.content.foo = await requestSomething();
 }
 
 module.exports.pre = pre;

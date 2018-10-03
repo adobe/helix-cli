@@ -15,7 +15,6 @@
 const assert = require('assert');
 const path = require('path');
 const fse = require('fs-extra');
-const md5 = require('../src/md5.js');
 const {
   initGit,
   assertHttp,
@@ -29,14 +28,12 @@ const TEST_DIR = path.resolve('test/integration');
 describe('Integration test for up command', () => {
   let testDir;
   let buildDir;
-  let welcomeTxtName;
 
   beforeEach(async function before() {
     this.timeout(20000);
     const testRoot = await createTestRoot();
     testDir = path.resolve(testRoot, 'project');
     buildDir = path.resolve(testRoot, '.hlx/build');
-    welcomeTxtName = `welcome.${md5(path.resolve(testDir, 'src/welcome.txt')).slice(-8)}.txt`;
     await fse.copy(TEST_DIR, testDir);
   });
 
@@ -94,10 +91,10 @@ describe('Integration test for up command', () => {
       .on('started', async () => {
         try {
           const replacements = [
-            { pattern: 'welcome.txt', with: welcomeTxtName },
+            { pattern: 'welcome.txt', with: 'welcome.bc53b44e.txt' },
           ];
           await assertHttp(`http://localhost:${cmd.project.server.port}/index.html`, 200, 'simple_response.html', replacements);
-          await assertHttp(`http://localhost:${cmd.project.server.port}/dist/${welcomeTxtName}`, 200, 'welcome_response.txt');
+          await assertHttp(`http://localhost:${cmd.project.server.port}/dist/welcome.bc53b44e.txt`, 200, 'welcome_response.txt');
           myDone();
         } catch (e) {
           myDone(e);
@@ -110,9 +107,12 @@ describe('Integration test for up command', () => {
       .catch(done);
   }).timeout(5000);
 
-  it.skip('up command delivers modified sources and delivers correct response.', (done) => {
-    // somehow doesn't work. when executing together with other tests, the bundler doesn't detect
-    // changes to the source files.
+  it('up command delivers modified sources and delivers correct response.', function test(done) {
+    // this test always hangs on the CI, probably due to the parcel workers. ignoring for now.
+    if (process.env.CI) {
+      this.skip();
+      return;
+    }
     const srcFile = path.resolve(testDir, 'src/html2.htl');
     const dstFile = path.resolve(testDir, 'src/html.htl');
 
@@ -125,7 +125,7 @@ describe('Integration test for up command', () => {
       .withDirectory(testDir)
       .withHttpPort(0);
 
-    const myDone = (err) => {
+    const myDone = async (err) => {
       error = err;
       return cmd.stop();
     };
@@ -134,13 +134,13 @@ describe('Integration test for up command', () => {
       .on('started', async () => {
         try {
           const replacements = [
-            { pattern: 'welcome.txt', with: welcomeTxtName },
+            { pattern: 'welcome.txt', with: 'welcome.bc53b44e.txt' },
           ];
           await assertHttp(`http://localhost:${cmd.project.server.port}/index.html`, 200, 'simple_response.html', replacements);
-          await assertHttp(`http://localhost:${cmd.project.server.port}/dist/${welcomeTxtName}`, 200, 'welcome_response.txt');
+          await assertHttp(`http://localhost:${cmd.project.server.port}/dist/welcome.bc53b44e.txt`, 200, 'welcome_response.txt');
           await fse.copy(srcFile, dstFile);
         } catch (e) {
-          myDone(e);
+          await myDone(e);
         }
       })
       .on('stopped', () => {
@@ -149,16 +149,21 @@ describe('Integration test for up command', () => {
       .on('build', async () => {
         try {
           await assertHttp(`http://localhost:${cmd.project.server.port}/index.html`, 200, 'simple_response2.html');
-          myDone();
+          await myDone();
         } catch (e) {
-          myDone(e);
+          await myDone(e);
         }
       })
       .run()
       .catch(done);
   }).timeout(10000);
 
-  it.skip('up command delivers modified static files and delivers correct response.', (done) => {
+  it('up command delivers modified static files and delivers correct response.', function test(done) {
+    // this test always hangs on the CI, probably due to the parcel workers. ignoring for now.
+    if (process.env.CI) {
+      this.skip();
+      return;
+    }
     const srcFile = path.resolve(testDir, 'src/welcome2.txt');
     const dstFile = path.resolve(testDir, 'src/welcome.txt');
 
@@ -171,7 +176,7 @@ describe('Integration test for up command', () => {
       .withDirectory(testDir)
       .withHttpPort(0);
 
-    const myDone = (err) => {
+    const myDone = async (err) => {
       error = err;
       return cmd.stop();
     };
@@ -180,13 +185,13 @@ describe('Integration test for up command', () => {
       .on('started', async () => {
         try {
           const replacements = [
-            { pattern: 'welcome.txt', with: welcomeTxtName },
+            { pattern: 'welcome.txt', with: 'welcome.bc53b44e.txt' },
           ];
           await assertHttp(`http://localhost:${cmd.project.server.port}/index.html`, 200, 'simple_response.html', replacements);
-          await assertHttp(`http://localhost:${cmd.project.server.port}/dist/${welcomeTxtName}`, 200, 'welcome_response.txt');
+          await assertHttp(`http://localhost:${cmd.project.server.port}/dist/welcome.bc53b44e.txt`, 200, 'welcome_response.txt');
           await fse.copy(srcFile, dstFile);
         } catch (e) {
-          myDone(e);
+          await myDone(e);
         }
       })
       .on('stopped', () => {
@@ -194,10 +199,10 @@ describe('Integration test for up command', () => {
       })
       .on('build', async () => {
         try {
-          await assertHttp(`http://localhost:${cmd.project.server.port}/dist/${welcomeTxtName}`, 200, 'welcome_response2.txt');
-          myDone();
+          await assertHttp(`http://localhost:${cmd.project.server.port}/dist/welcome.bc53b44e.txt`, 200, 'welcome_response2.txt');
+          await myDone();
         } catch (e) {
-          myDone(e);
+          await myDone(e);
         }
       })
       .run()

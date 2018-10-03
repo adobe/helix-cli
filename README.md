@@ -71,6 +71,26 @@ $ hlx test
 
 ## (Optional) Deploy to Adobe I/O Runtime
 
+### Automatic Deployment
+
+By default, Helix will set up automated deployment that deploys whenever a new commit has been pushed to your GitHub code repository. In order to do so, you need a [CircleCI](https://circleci.com) account and generate a [personal API Token](https://circleci.com/account/api).
+
+```bash
+# In <my-cool-project>
+$ hlx deploy \
+  --circleci-auth <personal-api-token> \
+  --wsk-namespace <your-namespace> \
+  --wsk-auth <your-key> \
+  --fastly-auth <key> \
+  --fastly-namespace <serviceid>
+```
+
+As always, you can keep all parameters in `HLX_CIRCLECI_AUTH`, `HLX_WSK_AUTH`, and `HLX_FASTLY_AUTH` environment variables if you don't want them in your `.bash_history`.
+
+### One-Shot Deployment
+
+Alternatively, you can also perfom a one-shot deployment like this:
+
 ```bash
 # In <my-cool-project>
 $ hlx deploy --no-auto --wsk-namespace <your-namespace> --wsk-auth <your-key>
@@ -330,3 +350,24 @@ You can set performance budgets against following scores (more is better) and me
 * `asset_count`: Number of requests
 * `onload`: onLoad
 * `oncontentload`: onContentLoad
+
+#### Structured (JUnit) Performance Reporting
+
+By calling `hlx perf` with the option `--junit <file>`, the performance test 
+results will be reported in JUnit-format, which makes it possible to integrate
+performance result reporting with the CI system performing an automated deployment.
+
+For `hlx demo full`, a full CI configuration is created that will run a performance
+test after a completed deployment, report the per-metric results and mark the build
+as failed in case metrics are not met.
+
+# Developing Helix CLI
+
+## Building on macOS Mojave
+
+Before running `npm install`, make sure that `nodegit` can find all dependencies:
+
+```bash
+$ export LDFLAGS="-L/usr/local/opt/openssl/lib"
+$ export CPPFLAGS="-I/usr/local/opt/openssl/include"
+```

@@ -91,6 +91,11 @@ jobs:
     - run:
         name: version pre-release
         command: npm version prerelease --preid=pre -m "Release %s [ci skip]"
+        environment:
+          MOCHA_FILE: junit/test-results.xml
+
+    - store_test_results:
+        path: junit
 
     # unfortunately we cannot create a release commit with no tag with `npm version`, so we need to delete it here again
     - run:
@@ -140,6 +145,23 @@ jobs:
         command: ~/.npm-global/bin/hlx build && ~/.npm-global/bin/hlx deploy --dirty --no-auto --wsk-namespace trieloff --wsk-auth $WSK_AUTH --loggly-host trieloff --loggly-auth $LOGGLY_AUTH
         working_directory: test/integration
 
+  installer:
+    macos:
+      xcode: "9.0"
+    steps:
+    - checkout
+    - run: xcodebuild -version
+    - run:
+        name: Build Installer
+        command: ./build.sh
+        working_directory: build
+    - run:
+        name: Verify Installer
+        command: sh hlx_install.sh -- --overwrite && hlx --version
+        working_directory: build
+    - store_artifacts:
+        path: build/hlx_install.sh
+
 workflows:
   version: 2
   build:
@@ -152,3 +174,7 @@ workflows:
           branches:
             only: master
     - build
+    - installer:
+        filters:
+          branches:
+            only: master

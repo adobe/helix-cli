@@ -28,10 +28,10 @@ function requestSomething() {
  */
 function pre(payload) {
   const myPayload = JSON.parse(JSON.stringify(payload));
-  payload.resource.foo = 'testing - should be ignored';
+  payload.content.foo = 'testing - should be ignored';
 
   return requestSomething().then((value) => {
-    myPayload.resource.foo = value;
+    myPayload.content.foo = value;
     return myPayload;
   });
 }

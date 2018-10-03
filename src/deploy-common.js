@@ -26,7 +26,7 @@ module.exports = function commonArgs(yargs) {
     .option('wsk-host', {
       describe: 'Adobe I/O Runtime API Host',
       type: 'string',
-      default: 'runtime.adobe.io',
+      default: 'adobeioruntime.net',
     })
     .option('dry-run', {
       describe: 'List the actions that would be created, but do not actually deploy',

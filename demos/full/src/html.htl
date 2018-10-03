@@ -19,18 +19,18 @@
 <head>
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
-    <link rel="shortcut icon" type="image/x-icon" href="/dist/favicon.ico">
-    <title>${it.resource.title}</title>
-    <link rel="stylesheet" href="/dist/bootstrap.min.css"/>
+    <link rel="shortcut icon" type="image/x-icon" href="favicon.ico">
+    <title>${content.title}</title>
+    <link rel="stylesheet" href="bootstrap.min.css"/>
 </head>
 <body>
 
-<div data-sly-list="${it.resource.children}">
+<div data-sly-list="${content.children}">
     <div class="container-fluid">${item}</div>
 </div>
 
 <div class="container-fluid">
-    <em>generated at ${it.resource.time}</em>
+    <em>generated at ${content.time}</em>
 </div>
 
 </body>

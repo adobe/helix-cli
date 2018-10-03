@@ -9,13 +9,6 @@
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-module.exports.DEFAULT_OPTIONS = {
-  cacheDir: '.hlx/cache',
-  target: 'node',
-  logLevel: 3,
-  detailedReport: true,
-};
-
 const DEFAULT_PATTERNS = ['src/**/*.htl'];
 
 module.exports.defaultArgs = yargs => yargs
@@ -25,10 +18,9 @@ module.exports.defaultArgs = yargs => yargs
     describe: 'Target directory for compiled JS',
   })
   .option('cache', {
-    alias: 'no-cache', // make it show up in the help
     describe: 'Enable or disable compile cache',
     boolean: true,
-    default: true,
+    default: false,
   })
   .option('minify', {
     describe: 'Minify JS',

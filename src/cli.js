@@ -18,6 +18,14 @@ const yargs = require('yargs');
 
 const MIN_MSG = 'You need at least one command.';
 
+// fix for #189: strip debug options from NODE_OPTIONS env variable
+if (process.env.NODE_OPTIONS) {
+  process.env.NODE_OPTIONS = process.env.NODE_OPTIONS
+    .split(' ')
+    .filter(opt => opt.indexOf('--inspect') === -1)
+    .join(' ');
+}
+
 class CLI {
   constructor() {
     this._commands = {
@@ -27,6 +35,7 @@ class CLI {
       deploy: require('./deploy.js')(),
       perf: require('./perf.js')(),
       strain: require('./strain.js')(),
+      clean: require('./clean.js')(),
     };
     this._failFn = (message, err, argv) => {
       const msg = err ? err.message : message;

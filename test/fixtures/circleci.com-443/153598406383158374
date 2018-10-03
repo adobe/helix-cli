@@ -1,5 +1,5 @@
 POST /api/v1.1/project/github/trieloff/helix-helpx/envvar
-body: {\"name\":\"HLX_WSK_HOST\",\"value\":\"runtime.adobe.io\"}
+body: {\"name\":\"HLX_WSK_HOST\",\"value\":\"adobeioruntime.net\"}
 
 HTTP/1.1 201 Created
 content-type: application/json; charset=utf-8
@@ -10,7 +10,7 @@ set-cookie: ring-session=F92fhtUyPqwZMcQzDYwq32SAW4nEWV%2BHzaetSgpVOqClbtCore7dP
 strict-transport-security: max-age=15724800
 x-circleci-identity: circle-www-api-v1-59d9c6d85b-5pst4
 x-circleci-scopes: :write-settings, :view-builds, :read-settings, :trigger-builds, :all, :status, :none
-x-client-trace-id: 
+x-client-trace-id:
 x-frame-options: DENY
 x-request-id: f630342f-00b5-4cce-a3e6-35bf1e4d4bff
 x-route: /envvar

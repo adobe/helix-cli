@@ -12,7 +12,9 @@
 
 'use strict';
 
+const os = require('os');
 const path = require('path');
+
 const fse = require('fs-extra');
 const chalk = require('chalk');
 const shell = require('shelljs');
@@ -88,6 +90,15 @@ class InitCommand {
     }
     if (!this._dir) {
       throw new Error('init needs directory.');
+    }
+
+    // #181 cover edge case: make sure git is properly configured
+    if (!await fse.pathExists(`${os.homedir()}/.gitconfig`)) {
+      throw new Error(`
+It seems like Git has not yet been setup on this system. 
+
+See https://git-scm.com/book/en/v2/Getting-Started-First-Time-Git-Setup for more information.  
+`);
     }
 
     this._padding = this._name.length + 45;

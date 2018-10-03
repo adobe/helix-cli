@@ -24,6 +24,7 @@ const yaml = require('js-yaml');
 const GitUrl = require('@adobe/petridish/src/GitUrl');
 const GitUtils = require('./gitutils');
 const strainconfig = require('./strain-config-utils');
+const useragent = require('./user-agent-util');
 
 class DeployCommand {
   constructor() {
@@ -141,11 +142,6 @@ class DeployCommand {
     return this;
   }
 
-  withDistDir(dist) {
-    this._distDir = dist;
-    return this;
-  }
-
   withDirectory(dir) {
     this._cwd = dir;
     return this;
@@ -170,7 +166,7 @@ class DeployCommand {
       headers: {
         'Content-Type': 'application/json',
         Accept: 'application/json',
-        'User-Agent': 'helix-cli',
+        'User-Agent': useragent,
       },
       body,
     };
@@ -201,7 +197,7 @@ class DeployCommand {
       headers: {
         'Content-Type': 'application/json',
         Accept: 'application/json',
-        'User-Agent': 'helix-cli',
+        'User-Agent': useragent,
       },
       uri: `https://circleci.com/api/v1.1/project/github/${owner}/${repo}/follow`,
     };
@@ -253,7 +249,7 @@ class DeployCommand {
         headers: {
           'Content-Type': 'application/json',
           Accept: 'application/json',
-          'User-Agent': 'helix-cli',
+          'User-Agent': useragent,
         },
         uri: `https://circleci.com/api/v1.1/project/github/${owner}/${repo}/tree/${ref}`,
       };
@@ -297,10 +293,6 @@ class DeployCommand {
       this._prefix = `${GitUtils.getRepository()}--${GitUtils.getBranchFlag()}--`;
     }
 
-    if (!this._distDir) {
-      this._distDir = path.resolve(this._cwd, 'dist');
-    }
-
     scripts.map((script) => {
       const name = this.actionName(script);
       console.log(`⏳  Deploying ${script} as ${name}`);
@@ -309,6 +301,7 @@ class DeployCommand {
         if (!err) {
           const actionoptions = {
             name,
+            'User-Agent': useragent,
             action,
             params,
             kind: 'blackbox',

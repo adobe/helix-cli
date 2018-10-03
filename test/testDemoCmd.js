@@ -37,13 +37,13 @@ describe('Integration test for demo command', () => {
       .withDirectory(testDir)
       .withName('project1')
       .run();
-    await assertFile(path.resolve(testDir, 'project1', '.gitignore'));
-    await assertFile(path.resolve(testDir, 'project1', 'src/html.htl'));
-    await assertFile(path.resolve(testDir, 'project1', 'src/html.pre.js'));
-    await assertFile(path.resolve(testDir, 'project1', 'index.md'));
-    await assertFile(path.resolve(testDir, 'project1', 'src/static/style.css'));
-    await assertFile(path.resolve(testDir, 'project1', 'src/static/favicon.ico'));
-    await assertFile(path.resolve(testDir, 'project1', 'helix_logo.png'));
+    assertFile(path.resolve(testDir, 'project1', '.gitignore'));
+    assertFile(path.resolve(testDir, 'project1', 'src/html.htl'));
+    assertFile(path.resolve(testDir, 'project1', 'src/html.pre.js'));
+    assertFile(path.resolve(testDir, 'project1', 'index.md'));
+    assertFile(path.resolve(testDir, 'project1', 'src/style.css'));
+    assertFile(path.resolve(testDir, 'project1', 'src/favicon.ico'));
+    assertFile(path.resolve(testDir, 'project1', 'helix_logo.png'));
   }).timeout(3000);
 
   it('demo type full creates all files', async () => {
@@ -52,14 +52,14 @@ describe('Integration test for demo command', () => {
       .withName('project1')
       .withType('full')
       .run();
-    await assertFile(path.resolve(testDir, 'project1', '.gitignore'));
-    await assertFile(path.resolve(testDir, 'project1', 'src/html.htl'));
-    await assertFile(path.resolve(testDir, 'project1', 'src/html.pre.js'));
-    await assertFile(path.resolve(testDir, 'project1', 'index.md'));
-    await assertFile(path.resolve(testDir, 'project1', 'README.md'));
-    await assertFile(path.resolve(testDir, 'project1', 'src/static/bootstrap.min.css'));
-    await assertFile(path.resolve(testDir, 'project1', 'src/static/favicon.ico'));
-    await assertFile(path.resolve(testDir, 'project1', 'helix_logo.png'));
+    assertFile(path.resolve(testDir, 'project1', '.gitignore'));
+    assertFile(path.resolve(testDir, 'project1', 'src/html.htl'));
+    assertFile(path.resolve(testDir, 'project1', 'src/html.pre.js'));
+    assertFile(path.resolve(testDir, 'project1', 'index.md'));
+    assertFile(path.resolve(testDir, 'project1', 'README.md'));
+    assertFile(path.resolve(testDir, 'project1', 'src/bootstrap.min.css'));
+    assertFile(path.resolve(testDir, 'project1', 'src/favicon.ico'));
+    assertFile(path.resolve(testDir, 'project1', 'helix_logo.png'));
   }).timeout(3000);
 
   it('demo does not leave any files not checked in', async () => {

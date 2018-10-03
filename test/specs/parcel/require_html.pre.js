@@ -19,11 +19,11 @@ const { foo } = require('./helpers');
 /**
  * The 'pre' function that is executed before the HTML is rendered.
  * @param payload The current payload of processing pipeline
- * @param payload.resource The content resource
+ * @param payload.content The content content
  */
 function pre(payload) {
 
-  payload.resource.foo = foo();
+  payload.content.foo = foo();
 
 }
 
