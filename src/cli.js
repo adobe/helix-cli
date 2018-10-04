@@ -34,7 +34,7 @@ class CLI {
       build: require('./build.js')(),
       deploy: require('./deploy.js')(),
       perf: require('./perf.js')(),
-      strain: require('./strain.js')(),
+      publish: require('./publish.js')(),
       clean: require('./clean.js')(),
     };
     this._failFn = (message, err, argv) => {

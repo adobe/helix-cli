@@ -21,8 +21,8 @@ module.exports = function strain() {
     set executor(value) {
       executor = value;
     },
-    command: 'strain',
-    desc: 'Activate strains in the Fastly CDN',
+    command: ['publish', 'strain'],
+    desc: 'Activate strains in the Fastly CDN and publish the site',
     builder: (yargs) => {
       deployCommon(yargs)
         .option('fastly-namespace', {
@@ -53,7 +53,7 @@ module.exports = function strain() {
     handler: async (argv) => {
       if (!executor) {
         // eslint-disable-next-line global-require
-        const StrainCommand = require('./strain.cmd'); // lazy load the handler to speed up execution time
+        const StrainCommand = require('./publish.cmd'); // lazy load the handler to speed up execution time
         executor = new StrainCommand();
       }
 

@@ -17,11 +17,11 @@
 const assert = require('assert');
 const sinon = require('sinon');
 const CLI = require('../src/cli.js');
-const StrainCommand = require('../src/strain.cmd');
+const StrainCommand = require('../src/publish.cmd');
 
 describe('hlx strain', () => {
   // mocked command instance
-  let mockStrain;
+  let mockPublish;
   let processenv = {};
 
   beforeEach(() => {
@@ -33,14 +33,14 @@ describe('hlx strain', () => {
       return true;
     });
 
-    mockStrain = sinon.createStubInstance(StrainCommand);
-    mockStrain.withWskHost.returnsThis();
-    mockStrain.withWskAuth.returnsThis();
-    mockStrain.withWskNamespace.returnsThis();
-    mockStrain.withFastlyNamespace.returnsThis();
-    mockStrain.withFastlyAuth.returnsThis();
-    mockStrain.withDryRun.returnsThis();
-    mockStrain.run.returnsThis();
+    mockPublish = sinon.createStubInstance(StrainCommand);
+    mockPublish.withWskHost.returnsThis();
+    mockPublish.withWskAuth.returnsThis();
+    mockPublish.withWskNamespace.returnsThis();
+    mockPublish.withFastlyNamespace.returnsThis();
+    mockPublish.withFastlyAuth.returnsThis();
+    mockPublish.withDryRun.returnsThis();
+    mockPublish.run.returnsThis();
   });
 
   afterEach(() => {
@@ -53,7 +53,7 @@ describe('hlx strain', () => {
 
   it('hlx strain requires auth', (done) => {
     new CLI()
-      .withCommandExecutor('strain', mockStrain)
+      .withCommandExecutor('publish', mockPublish)
       .onFail((err) => {
         assert.ok(err.indexOf('required'));
         done();
@@ -65,7 +65,7 @@ describe('hlx strain', () => {
 
   it('hlx strain works with minimal arguments', () => {
     new CLI()
-      .withCommandExecutor('strain', mockStrain)
+      .withCommandExecutor('publish', mockPublish)
       .run(['strain',
         '--wsk-auth', 'secret-key',
         '--wsk-namespace', 'hlx',
@@ -73,11 +73,11 @@ describe('hlx strain', () => {
         '--fastly-namespace', 'hlx',
       ]);
 
-    sinon.assert.calledWith(mockStrain.withWskHost, 'adobeioruntime.net');
-    sinon.assert.calledWith(mockStrain.withWskAuth, 'secret-key');
-    sinon.assert.calledWith(mockStrain.withWskNamespace, 'hlx');
-    sinon.assert.calledWith(mockStrain.withFastlyNamespace, 'hlx'); // TODO !!
-    sinon.assert.calledWith(mockStrain.withFastlyAuth, 'secret-key');
-    sinon.assert.calledOnce(mockStrain.run);
+    sinon.assert.calledWith(mockPublish.withWskHost, 'adobeioruntime.net');
+    sinon.assert.calledWith(mockPublish.withWskAuth, 'secret-key');
+    sinon.assert.calledWith(mockPublish.withWskNamespace, 'hlx');
+    sinon.assert.calledWith(mockPublish.withFastlyNamespace, 'hlx'); // TODO !!
+    sinon.assert.calledWith(mockPublish.withFastlyAuth, 'secret-key');
+    sinon.assert.calledOnce(mockPublish.run);
   });
 });

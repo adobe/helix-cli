@@ -27,7 +27,7 @@ const useragent = require('./user-agent-util');
 
 const HELIX_VCL_DEFAULT_FILE = path.resolve(__dirname, '../layouts/fastly/helix.vcl');
 
-class StrainCommand {
+class PublishCommand {
   constructor() {
     this._wsk_auth = null;
     this._wsk_namespace = null;
@@ -425,7 +425,7 @@ class StrainCommand {
   static getVCL(strains) {
     let retvcl = '# This file handles the strain resolution\n';
     const conditions = strains
-      .map(StrainCommand.vclConditions)
+      .map(PublishCommand.vclConditions)
       .filter(strain => strain.condition)
       .map(({ condition, name, vcl = '' }) => `if (${condition}) {
   set req.http.X-Strain = "${name}";${vcl}
@@ -580,7 +580,7 @@ class StrainCommand {
 
     const strains = this._strains;
 
-    const strainsVCL = StrainCommand.getVCL(strains);
+    const strainsVCL = PublishCommand.getVCL(strains);
     const strainp = this.setVCL(strainsVCL, 'strains.vcl');
 
     const strainjobs = [];
@@ -645,12 +645,12 @@ class StrainCommand {
       }
 
       if (strain.static && strain.static.allow) {
-        const allow = StrainCommand.makeRegexp(strain.static.allow);
+        const allow = PublishCommand.makeRegexp(strain.static.allow);
         makeStrainjob('strain_allow', strain.name, allow, '⚪️  Set whitelist');
       }
 
       if (strain.static && strain.static.deny) {
-        const deny = StrainCommand.makeRegexp(strain.static.deny);
+        const deny = PublishCommand.makeRegexp(strain.static.deny);
         makeStrainjob('strain_deny', strain.name, deny, '⚫️  Set blacklist');
       }
       return strain;
@@ -683,4 +683,4 @@ class StrainCommand {
     }
   }
 }
-module.exports = StrainCommand;
+module.exports = PublishCommand;
