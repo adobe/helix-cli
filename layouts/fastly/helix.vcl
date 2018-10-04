@@ -201,7 +201,6 @@ sub hlx_headers_deliver {
     set resp.http.X-Index = req.http.X-Index;
     set resp.http.X-Action-Root = req.http.X-Action-Root;
     set resp.http.X-URL = req.http.X-URL;
-    set resp.http.X-ALEX = req.http.X-ALEX;
  }
 
   call hlx_deliver_errors;
@@ -410,13 +409,6 @@ sub vcl_recv {
       set req.url = "/api/v1/web" + var.action + "?owner=" + var.owner + "&repo=" + var.repo + "&ref=" + var.ref + "&path=" + var.path + "&selector=" + var.selector + "&extension=" + req.url.ext + "&branch=" + var.branch + "&strain=" + var.strain + "&GITHUB_KEY=" + table.lookup(secrets, "GITHUB_TOKEN");
     }
   }
-
-  set req.http.X-ALEX = "";
-  set req.http.X-ALEX = req.http.X-ALEX + " | " + var.dir;
-  set req.http.X-ALEX = req.http.X-ALEX + " | " + req.url.basename;
-  set req.http.X-ALEX = req.http.X-ALEX + " | " + var.name;
-  set req.http.X-ALEX = req.http.X-ALEX + " | " + var.path;
-  set req.http.X-ALEX = req.http.X-ALEX + " | " + var.entry;
 
   # enable IO for image file-types
   # but not for static images or redirected images
