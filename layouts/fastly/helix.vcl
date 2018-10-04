@@ -201,6 +201,7 @@ sub hlx_headers_deliver {
     set resp.http.X-Index = req.http.X-Index;
     set resp.http.X-Action-Root = req.http.X-Action-Root;
     set resp.http.X-URL = req.http.X-URL;
+    set resp.http.X-Root-Path = req.http.X-Root-Path;
  }
 
   call hlx_deliver_errors;
@@ -518,7 +519,7 @@ sub vcl_fetch {
     unset beresp.http.X-XSS-Protection;
     unset beresp.http.Content-Security-Policy;
 
-  } elseif (beresp.status == 404 || beresp.status == 204) {
+  } elseif ((beresp.status == 404 || beresp.status == 204) && !req.http.X-Disable-Static) {
     # That was a miss. Let's try to restart.
     set beresp.http.X-Status = beresp.status + "-Restart " + req.restarts;
     set beresp.status = 404;
