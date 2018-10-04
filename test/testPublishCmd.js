@@ -17,7 +17,7 @@ const fs = require('fs-extra');
 const path = require('path');
 const assert = require('assert');
 const { createTestRoot } = require('./utils.js');
-const StrainCommand = require('../src/strain.cmd');
+const StrainCommand = require('../src/publish.cmd');
 const strainconfig = require('../src/strain-config-utils');
 
 // disable replay for this test

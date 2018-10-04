@@ -12,9 +12,9 @@ jobs:
             keys:
             - v1-dependencies-{{ checksum "package.json" }}
 
-        - run: 
+        - run:
             name: Installing Dependencies
-            command: npm install 
+            command: npm install
 
         - run:
             name: Installing Helix CLI
@@ -35,7 +35,7 @@ jobs:
 
         - run:
             name: Activate CDN
-            command: npx hlx strain
+            command: npx hlx publish
 
         - run:
             name: Test Performance
