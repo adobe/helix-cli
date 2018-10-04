@@ -50,7 +50,7 @@ class DeployCommand {
   static getDefaultContentURL() {
     if (fs.existsSync('helix-config.yaml')) {
       const conf = yaml.safeLoad(fs.readFileSync('helix-config.yaml'));
-      if (conf.contentRepo) {
+      if (conf && conf.contentRepo) {
         return conf.contentRepo;
       }
     }
