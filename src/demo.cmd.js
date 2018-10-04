@@ -140,7 +140,8 @@ See https://git-scm.com/book/en/v2/Getting-Started-First-Time-Git-Setup for more
       nodir: true,
     }).map((f) => {
       const srcFile = path.resolve(root, f);
-      const dstFile = path.resolve(projectDir, f);
+      const dstName = f === '_gitignore' ? '.gitignore' : f;
+      const dstFile = path.resolve(projectDir, dstName);
       const filter = f === 'index.md' || f === 'README.md' || f === 'helix-config.yaml';
       return processFile(srcFile, dstFile, filter).then(() => {
         this.msg(`${msgCreating} ${msgRelPath}/${chalk.cyan(f)}`);
