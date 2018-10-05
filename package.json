@@ -27,7 +27,6 @@
   "dependencies": {
     "@adobe/htlengine": "^1.0.5",
     "@adobe/hypermedia-pipeline": "^0.5.0",
-    "@adobe/openwhisk-loggly-wrapper": "^0.3.0",
     "@adobe/parcel-plugin-htl": "^0.9.3",
     "@adobe/petridish": "^1.4.7",
     "archiver": "^3.0.0",
