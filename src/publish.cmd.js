@@ -407,9 +407,9 @@ class PublishCommand {
       if (uri.path && uri.path !== '/') {
         const pathname = uri.path.replace(/\/$/, '');
         return Object.assign({
-          condition: `req.http.Host == "${uri.host}" && req.url.dirname ~ "^${uri.path}"`,
+          condition: `req.http.Host == "${uri.host}" && (req.url.dirname ~ "^${pathname}$" || req.url.dirname ~ "^${pathname}/")`,
           vcl: `
-  set req.http.X-Dirname = regsub(req.url.dirname, "^${pathname}", "/");`,
+  set req.http.X-Dirname = regsub(req.url.dirname, "^${pathname}", "");`,
         }, strain);
       }
       return Object.assign({

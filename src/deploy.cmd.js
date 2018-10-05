@@ -313,10 +313,12 @@ class DeployCommand {
           } else {
             openwhisk.actions.update(actionoptions).then((result) => {
               console.log(`✅  Action ${result.name} has been created.`);
+            }).catch((e) => {
+              console.error(`❌  Unable to deploy the action ${name}:  ${e.message}`);
             });
           }
         } else {
-          console.err(`❌  File ${script} could not be read. ${err.message}`);
+          console.error(`❌  File ${script} could not be read. ${err.message}`);
         }
       });
 

@@ -47,7 +47,7 @@ ask() {
 if [ -L $dest -o -f $dest ]; then
     if [ -x $dest ]; then 
         old_version=$($dest --version)
-        if [ "$@" == "--overwrite" ]; then
+        if [ x"$@" == x"--overwrite" ]; then
             rm $dest
         elif ! ask "hlx version $old_version ($dest) exists, overwrite?" Y; then
             exit 1
