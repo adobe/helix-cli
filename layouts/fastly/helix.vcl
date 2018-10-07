@@ -388,27 +388,16 @@ sub vcl_recv {
         }
       }
 
-      // compute full resource path with appropriate number of "/"
-      if (var.dir == "/") {
-        set var.path = "/" + req.url.basename;
-      } else {
-        set var.path = var.dir + "/" + req.url.basename;
-      }
-
+      set var.path = var.dir + "/" + req.url.basename;
       set req.url = "/" + var.owner + "/" + var.repo + "/" + var.ref + var.path + "?" + req.url.qs;
     } else {
-
-      // compute full resource path with appropriate number of "/"
-      if (var.dir == "/") {
-        set var.path = "/" + var.name + ".md";
-      } else {
-        set var.path = var.dir + "/" + var.name + ".md";
-      }
-
+      set var.path = var.dir + "/" + var.name + ".md";
       # Invoke OpenWhisk
       set req.url = "/api/v1/web" + var.action + "?owner=" + var.owner + "&repo=" + var.repo + "&ref=" + var.ref + "&path=" + var.path + "&selector=" + var.selector + "&extension=" + req.url.ext + "&branch=" + var.branch + "&strain=" + var.strain + "&GITHUB_KEY=" + table.lookup(secrets, "GITHUB_TOKEN");
     }
   }
+
+  set req.url = regsuball(req.url, "/+", "/");
 
   # enable IO for image file-types
   # but not for static images or redirected images
