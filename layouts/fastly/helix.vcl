@@ -344,6 +344,7 @@ sub vcl_recv {
     } else {
       set var.dir = req.http.X-Root-Path + req.url.dirname;
     }
+    set var.dir = regsuball(var.dir, "/+", "/");
 
     # repeat the regex in case another re-function has been called in the meantime
     if (req.url.basename ~ "(^[^\.]+)(\.?(.+))?(\.[^\.]*$)") {
@@ -389,15 +390,15 @@ sub vcl_recv {
       }
 
       set var.path = var.dir + "/" + req.url.basename;
+      set var.path = regsuball(var.path, "/+", "/");
       set req.url = "/" + var.owner + "/" + var.repo + "/" + var.ref + var.path + "?" + req.url.qs;
     } else {
       set var.path = var.dir + "/" + var.name + ".md";
+      set var.path = regsuball(var.path, "/+", "/");
       # Invoke OpenWhisk
       set req.url = "/api/v1/web" + var.action + "?owner=" + var.owner + "&repo=" + var.repo + "&ref=" + var.ref + "&path=" + var.path + "&selector=" + var.selector + "&extension=" + req.url.ext + "&branch=" + var.branch + "&strain=" + var.strain + "&GITHUB_KEY=" + table.lookup(secrets, "GITHUB_TOKEN");
     }
   }
-
-  set req.url = regsuball(req.url, "/+", "/");
 
   # enable IO for image file-types
   # but not for static images or redirected images
