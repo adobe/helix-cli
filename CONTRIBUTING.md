@@ -34,7 +34,7 @@ In your pull request, outline:
 * If (and what) they breaks
 * Start the pull request with the GitHub issue ID, e.g. #123
 
-Lastly, please follow the [pull request template](PULL_REQUEST_TEMPLATE.md) when submitting a pull request!
+Lastly, please follow the [pull request template](https://github.com/adobe/helix-cli/blob/master/.github/pull_request_template.md) when submitting a pull request!
 
 Each commit message that is not part of a pull request:
 
