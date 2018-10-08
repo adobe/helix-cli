@@ -202,6 +202,7 @@ sub hlx_headers_deliver {
     set resp.http.X-Action-Root = req.http.X-Action-Root;
     set resp.http.X-URL = req.http.X-URL;
     set resp.http.X-Root-Path = req.http.X-Root-Path;
+    set resp.http.X-Version = req.http.X-Version;
  }
 
   call hlx_deliver_errors;

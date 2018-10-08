@@ -422,7 +422,7 @@ class PublishCommand {
   /**
    * Generates VCL for strain resolution from a list of strains
    */
-  static getVCL(strains) {
+  static getVCL(strains, version) {
     let retvcl = '# This file handles the strain resolution\n';
     const conditions = strains
       .map(PublishCommand.vclConditions)
@@ -438,6 +438,8 @@ class PublishCommand {
     } else {
       retvcl += 'set req.http.X-Strain = "default";\n';
     }
+    retvcl += '\n\n';
+    retvcl += `set req.http.X-Version = "${version}";\n`;
     return retvcl;
   }
 
@@ -580,7 +582,9 @@ class PublishCommand {
 
     const strains = this._strains;
 
-    const strainsVCL = PublishCommand.getVCL(strains);
+    const version = await this.getCurrentVersion();
+
+    const strainsVCL = PublishCommand.getVCL(strains, version);
     const strainp = this.setVCL(strainsVCL, 'strains.vcl');
 
     const strainjobs = [];
