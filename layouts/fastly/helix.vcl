@@ -484,6 +484,7 @@ sub vcl_fetch {
       # apply a longer ttl for images
       if (req.url.ext ~ "(?i)(?:gif|png|jpe?g|webp)") {
         set beresp.ttl = 2592000s;
+        set beresp.http.Cache-Control = "max-age=2592000, public";
       }
 
     } else {
