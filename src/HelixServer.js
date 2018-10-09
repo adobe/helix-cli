@@ -106,22 +106,16 @@ class HelixServer {
               // full response is an error: engine error
               throw result;
             }
-
-            if (result
-              && result.response
-              && result.response.error
-              && result.response.error instanceof Error) {
-              // response contains an error: processing error
-              throw result.response.error;
+            if (result && result.error && result.error instanceof Error) {
+              throw result.error;
             }
-
-            if (!result || !result.response || !result.response.body) {
+            if (!result || !result.body) {
               // empty body: nothing to render
               throw new Error('Response has no body, don\'t know what to do');
             }
-
-            esi.process(result.response.body).then((body) => {
-              res.send(body);
+            const status = result.statusCode || 200;
+            esi.process(result.body).then((body) => {
+              res.status(status).send(body);
             });
           })
           .catch((err) => {

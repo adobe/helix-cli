@@ -206,57 +206,43 @@ module.exports.main = function main(resource) {
 };
 
 function wrap(main) {
-  const { pipe } = require('@adobe/hypermedia-pipeline/src/defaults/html.pipe.js');
-  const { pre } = require('./html.pre.js');
-  const owwrapper = require('@adobe/openwhisk-loggly-wrapper');
+  const {
+    OpenWhiskAction
+  } = require('@adobe/hypermedia-pipeline');
 
-  const _isFunction = fn => !!(fn && fn.constructor && fn.call && fn.apply);
+  const {
+    pipe
+  } = require('@adobe/hypermedia-pipeline/src/defaults/html.pipe.js');
 
-  // this gets called by openwhisk
-  return function wrapped(params) {
-    const runthis = params => {
-      // create payload and action objects
-      const secrets = {};
-      const { __ow_headers, __ow_method, __ow_logger } = params;
-      const disclosed = Object.assign({}, params);
-      delete disclosed.__ow_headers; // todo: switch to test operator once parcel supports it
-      delete disclosed.__ow_method;
-      delete disclosed.__ow_logger;
+  const {
+    pre
+  } = require('./html.pre.js');
 
-      Object.keys(disclosed).forEach(key => {
-        if (key.match(/^[A-Z0-9_]+$/)) {
-          secrets[key] = disclosed[key];
-          delete disclosed[key];
+  const _isFunction = fn => !!(fn && fn.constructor && fn.call && fn.apply); // this gets called by openwhisk
+
+
+  return async function wrapped(params) {
+    function once(payload, action) {
+      // calls the pre function and then the script's main.
+      function invoker(next) {
+        const ret = pre(payload, action);
+
+        if (ret && _isFunction(ret.then)) {
+          return ret.then(pp => next(pp || payload, action));
         }
-      });
 
-      const action = {
-        secrets,
-        request: {
-          params: disclosed,
-          headers: __ow_headers,
-          method: __ow_method
-        },
-        logger: __ow_logger
-      };
-      const payload = {};
-      const next = (payload, action) => {
-        function cont(next) {
-          const ret = pre(payload, action);
-          if (ret && _isFunction(ret.then)) {
-            return ret.then(pp => next(pp || payload, action));
-          }
-          return next(ret || payload, action);
-        }
-        return cont(main).then(resobj => ({ response: resobj }));
-      };
-      return pipe(next, payload, action);
-    };
+        return next(ret || payload, action);
+      }
 
-    // the owrapper adds logging to the params
-    return owwrapper(runthis, params);
+      return invoker(main).then(resobj => ({
+        response: resobj
+      }));
+    }
+
+    return OpenWhiskAction.runPipeline(once, pipe, params);
   };
 }
+
 
 module.exports.main = wrap(module.exports.main);
 },{"./static/styles.css":[["styles.fbbbdc14.css","static/styles.css"],"static/styles.css"],"./html.pre.js":"html.pre.js"}]},{},["html.htl"], null)

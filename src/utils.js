@@ -12,6 +12,7 @@
 const fs = require('fs-extra');
 const request = require('request-promise');
 const path = require('path');
+const logger = require('./logger.js');
 
 const utils = {
 
@@ -53,10 +54,14 @@ const utils = {
       });
       return response.body;
     } catch (e) {
-      if (e.response.statusCode === 404) {
+      if (e.response && e.response.statusCode) {
+        if (e.response.statusCode !== 404) {
+          logger.error(`resource at ${uri} does not exist. got ${e.response.statusCode} from server`);
+        }
         return null;
       }
-      throw new Error(`resource at ${uri} does not exist. got ${e.response.statusCode} from server`);
+      logger.error(`resource at ${uri} does not exist. ${e.message}`);
+      return null;
     }
   },
 
