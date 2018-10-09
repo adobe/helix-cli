@@ -523,7 +523,7 @@ class PublishCommand {
     const vclfile = fs.existsSync(this._vclFile) ? this._vclFile : HELIX_VCL_DEFAULT_FILE;
     try {
       const content = include(vclfile);
-      this.setVCL(content, 'helix.vcl', true);
+      await this.setVCL(content, 'helix.vcl', true);
     } catch (e) {
       console.error(`❌  Unable to read ${vclfile}`);
       throw e;
