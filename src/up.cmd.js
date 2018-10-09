@@ -107,7 +107,8 @@ class UpCommand extends BuildCommand {
       .withCwd(this._cwd)
       .withBuildDir(this._target)
       .withWebRootDir(this._webroot)
-      .withDisplayVersion(pkgJson.version);
+      .withDisplayVersion(pkgJson.version)
+      .withRuntimeModulePaths(module.paths);
 
     if (this._httpPort >= 0) {
       this._project.withHttpPort(this._httpPort);
