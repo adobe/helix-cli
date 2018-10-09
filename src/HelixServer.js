@@ -38,7 +38,7 @@ function executeTemplate(ctx) {
 
   // the compiled script does not bundle the modules that are required for execution, since it
   // expects them to be provided by the runtime. We tweak the module loader here in order to
-  // inject our own module paths.
+  // inject the project module paths.
 
   /* eslint-disable no-underscore-dangle */
   const nodeModulePathsFn = Module._nodeModulePaths;
@@ -47,7 +47,7 @@ function executeTemplate(ctx) {
 
     // only tweak module path for scripts in build dir
     if (from === ctx.config.buildDir) {
-      paths = paths.concat(module.paths);
+      paths = paths.concat(ctx.config.runtimeModulePaths);
     }
     return paths;
   };

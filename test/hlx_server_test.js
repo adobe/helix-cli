@@ -48,7 +48,7 @@ function removeRepository(dir) {
 }
 
 // todo: use replay ?
-async function assertHttp(url, status, spec, port) {
+async function assertHttp(url, status, spec, port, gitPort) {
   return new Promise((resolve, reject) => {
     let data = '';
     http.get(url, (res) => {
@@ -70,7 +70,10 @@ async function assertHttp(url, status, spec, port) {
               if (port) {
                 expected = expected.replace(/SERVER_PORT/g, port);
               }
-              assert.equal(data, expected);
+              if (gitPort) {
+                expected = expected.replace(/GIT_PORT/g, gitPort);
+              }
+              assert.equal(data.trim(), expected.trim());
             }
             resolve();
           } catch (e) {
@@ -118,7 +121,7 @@ describe('Helix Server', () => {
     await project.init();
     try {
       await project.start();
-      await assertHttp(`http://localhost:${project.server.port}/index.dump.html`, 200, 'expected_dump.html', project.server.port);
+      await assertHttp(`http://localhost:${project.server.port}/index.dump.html`, 200, 'expected_dump.html', project.server.port, project.gitState.httpPort);
     } finally {
       await project.stop();
     }

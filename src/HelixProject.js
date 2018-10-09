@@ -100,6 +100,7 @@ class HelixProject {
     this._gitState = null;
     this._needLocalServer = false;
     this._buildDir = DEFAULT_BUILD_DIR;
+    this._runtimePaths = module.paths;
     this._webRootDir = DEFAULT_WEB_ROOT;
     this._contentRepo = null;
     this._server = new HelixServer(this);
@@ -131,6 +132,11 @@ class HelixProject {
     return this;
   }
 
+  withRuntimeModulePaths(paths) {
+    this._runtimePaths = paths;
+    return this;
+  }
+
   get gitConfig() {
     return this._gitConfig;
   }
@@ -141,6 +147,10 @@ class HelixProject {
 
   get webRootDir() {
     return this._webRootDir;
+  }
+
+  get runtimeModulePaths() {
+    return this._runtimePaths;
   }
 
   /**
@@ -161,6 +171,14 @@ class HelixProject {
    */
   get server() {
     return this._server;
+  }
+
+  /**
+   * Returns the git state
+   * @returns {Object}
+   */
+  get gitState() {
+    return this._gitState;
   }
 
   async loadConfig() {
