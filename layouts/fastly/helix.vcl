@@ -28,7 +28,7 @@ sub hlx_strain {
     set req.http.X-Strain = "default";
 
     # run custom strain resolution
-    include "strains.vcl";
+    include "dynamic.vcl";
   }
 }
 

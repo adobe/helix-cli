@@ -422,8 +422,8 @@ class PublishCommand {
   /**
    * Generates VCL for strain resolution from a list of strains
    */
-  static getVCL(strains, version) {
-    let retvcl = '# This file handles the strain resolution\n';
+  static getStrainResolutionVCL(strains) {
+    let retvcl = '# This section handles the strain resolution\n';
     const conditions = strains
       .map(PublishCommand.vclConditions)
       .filter(strain => strain.condition)
@@ -438,9 +438,23 @@ class PublishCommand {
     } else {
       retvcl += 'set req.http.X-Strain = "default";\n';
     }
-    retvcl += '\n\n';
-    retvcl += `set req.http.X-Version = "${version}";\n`;
     return retvcl;
+  }
+
+  async getVersionVCL() {
+    let retvcl = '# This section handles the strain resolution\n';
+
+    const version = await this.getCurrentVersion();
+    retvcl += `set req.http.X-Version = "${version}";\n`;
+
+    return retvcl;
+  }
+
+  async getDynamicVCL() {
+    let vcl = PublishCommand.getStrainResolutionVCL(this._strains);
+    vcl += '\n\n';
+    vcl += await this.getVersionVCL();
+    return this.setVCL(vcl, 'dynamic.vcl');
   }
 
   async vclopts(name, vcl) {
@@ -525,7 +539,7 @@ class PublishCommand {
     const vclfile = fs.existsSync(this._vclFile) ? this._vclFile : HELIX_VCL_DEFAULT_FILE;
     try {
       const content = include(vclfile);
-      this.setVCL(content, 'helix.vcl', true);
+      await this.setVCL(content, 'helix.vcl', true);
     } catch (e) {
       console.error(`❌  Unable to read ${vclfile}`);
       throw e;
@@ -582,10 +596,7 @@ class PublishCommand {
 
     const strains = this._strains;
 
-    const version = await this.getCurrentVersion();
-
-    const strainsVCL = PublishCommand.getVCL(strains, version);
-    const strainp = this.setVCL(strainsVCL, 'strains.vcl');
+    const strainp = this.getDynamicVCL();
 
     const strainjobs = [];
     strains.map((strain) => {
