@@ -425,7 +425,7 @@ class PublishCommand {
    * Generates VCL for strain resolution from a list of strains
    */
   static getStrainResolutionVCL(strains) {
-    let retvcl = '# This section handles the strain resolution\n';
+    let retvcl = '# This file handles the strain resolution\n';
     const conditions = strains
       .map(PublishCommand.vclConditions)
       .filter(strain => strain.condition)
@@ -459,12 +459,12 @@ class PublishCommand {
 
   async setStrainsVCL() {
     const vcl = PublishCommand.getStrainResolutionVCL(this._strains);
-    return this.setVCL(vcl, 'strains.vcl');
+    return this.transferVCL(vcl, 'strains.vcl');
   }
 
   async setDynamicVCL() {
     const vcl = await this.getVersionVCL();
-    return this.setVCL(vcl, 'dynamic.vcl');
+    return this.transferVCL(vcl, 'dynamic.vcl');
   }
 
   async vclopts(name, vcl) {
@@ -500,7 +500,7 @@ class PublishCommand {
    * @param {String} name name of the file
    * @param {boolean} isMain this the main VCL
    */
-  async setVCL(vcl, name, isMain = false) {
+  async transferVCL(vcl, name, isMain = false) {
     const opts = await this.vclopts(name, vcl);
     return request(opts)
       .then(async (r) => {
@@ -551,7 +551,7 @@ class PublishCommand {
     const vclfile = fs.existsSync(this._vclFile) ? this._vclFile : HELIX_VCL_DEFAULT_FILE;
     try {
       const content = include(vclfile);
-      await this.setVCL(content, 'helix.vcl', true);
+      await this.transferVCL(content, 'helix.vcl', true);
     } catch (e) {
       console.error(`❌  Unable to set ${vclfile}`);
       throw e;

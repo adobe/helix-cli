@@ -17,7 +17,7 @@ const fs = require('fs-extra');
 const path = require('path');
 const assert = require('assert');
 const { createTestRoot } = require('./utils.js');
-const StrainCommand = require('../src/publish.cmd');
+const PublishCommand = require('../src/publish.cmd');
 const strainconfig = require('../src/strain-config-utils');
 
 // disable replay for this test
@@ -32,38 +32,38 @@ const SRC_STRAINS = path.resolve(__dirname, 'fixtures/strains.yaml');
 describe('hlx strain #unit', () => {
   it('makeRegexp() #unit', () => {
     const globs1 = ['*.htl', '*.js'];
-    assert.equal(StrainCommand.makeRegexp(globs1), '^.*\\.htl$|^.*\\.js$');
+    assert.equal(PublishCommand.makeRegexp(globs1), '^.*\\.htl$|^.*\\.js$');
 
     const globs2 = ['test/**', 'test*.js'];
-    assert.equal(StrainCommand.makeRegexp(globs2), '^test\\/.*$|^test.*\\.js$');
+    assert.equal(PublishCommand.makeRegexp(globs2), '^test\\/.*$|^test.*\\.js$');
   });
 });
 
 describe('hlx strain (VCL) generation', () => {
-  it('getVCL generates VLC for empty strains', () => {
+  it('getStrainResolutionVCL generates VLC for empty strains', () => {
     const strainfile = strainconfig.load(fs.readFileSync(path.resolve(__dirname, 'fixtures/empty.yaml')));
     const vclfile = fs.readFileSync(path.resolve(__dirname, 'fixtures/empty.vcl')).toString();
-    assert.equal(vclfile, StrainCommand.getVCL(strainfile));
+    assert.equal(vclfile, PublishCommand.getStrainResolutionVCL(strainfile));
   });
 
-  it('getVCL generates VLC for non-existing conditions strains', () => {
+  it('getStrainResolutionVCL generates VLC for non-existing conditions strains', () => {
     const strainfile = strainconfig.load(fs.readFileSync(path.resolve(__dirname, 'fixtures/default.yaml')));
     const vclfile = fs.readFileSync(path.resolve(__dirname, 'fixtures/default.vcl')).toString();
-    assert.equal(vclfile, StrainCommand.getVCL(strainfile));
+    assert.equal(vclfile, PublishCommand.getStrainResolutionVCL(strainfile));
   });
 
-  it('getVCL generates VLC for simple conditions strains', () => {
+  it('getStrainResolutionVCL generates VLC for simple conditions strains', () => {
     const strainfile = strainconfig.load(fs.readFileSync(path.resolve(__dirname, 'fixtures/simple-condition.yaml')));
     const vclfile = fs.readFileSync(path.resolve(__dirname, 'fixtures/simple-condition.vcl')).toString();
-    // console.log(StrainCommand.getVCL(strainfile));
-    assert.equal(vclfile.trim(), StrainCommand.getVCL(strainfile).trim());
+    // console.log(PublishCommand.getStrainResolutionVCL(strainfile));
+    assert.equal(vclfile.trim(), PublishCommand.getStrainResolutionVCL(strainfile).trim());
   });
 
-  it('getVCL generates VLC for URL-based conditions', () => {
+  it('getStrainResolutionVCL generates VLC for URL-based conditions', () => {
     const strainfile = strainconfig.load(fs.readFileSync(path.resolve(__dirname, 'fixtures/urls.yaml')));
     const vclfile = fs.readFileSync(path.resolve(__dirname, 'fixtures/urls.vcl')).toString();
-    // console.log(StrainCommand.getVCL(strainfile));
-    assert.equal(vclfile.trim(), StrainCommand.getVCL(strainfile).trim());
+    // console.log(PublishCommand.getStrainResolutionVCL(strainfile));
+    assert.equal(vclfile.trim(), PublishCommand.getStrainResolutionVCL(strainfile).trim());
   });
 });
 
@@ -92,7 +92,7 @@ describe('hlx strain (Integration)', function suite() {
   });
 
   it('Publish Strains on an existing Service Config', async () => {
-    await new StrainCommand()
+    await new PublishCommand()
       .withStrainFile(dstStrains)
       .withDryRun(true)
       .withFastlyAuth(FASTLY_AUTH)
@@ -104,7 +104,7 @@ describe('hlx strain (Integration)', function suite() {
   });
 
   it('Publish Strains on a new Service Config', async () => {
-    await new StrainCommand()
+    await new PublishCommand()
       .withStrainFile(dstStrains)
       .withDryRun(true)
       .withFastlyAuth(FASTLY_AUTH)
@@ -119,7 +119,7 @@ describe('hlx strain (Integration)', function suite() {
     const brokenstrains = path.resolve(__dirname, 'fixtures/broken.yaml');
 
     try {
-      new StrainCommand()
+      new PublishCommand()
         .withStrainFile(brokenstrains)
         .withDryRun(true)
         .withFastlyAuth(FASTLY_AUTH)
