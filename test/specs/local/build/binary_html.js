@@ -11,8 +11,11 @@
  */
 
 /* eslint-disable */
-module.exports.main = function main() {
+module.exports.main = function main(){
   return {
-    body: '<html><head>Test</head><body>Hello, world.</body></html>',
-  }
+    headers: {
+      'Content-Type': 'application/octet-stream',
+    },
+    body: Buffer.from('00112233', 'hex'),
+  };
 };

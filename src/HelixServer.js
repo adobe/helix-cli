@@ -10,9 +10,10 @@
  * governing permissions and limitations under the License.
  */
 
+const EventEmitter = require('events');
+const { Module } = require('module');
 const express = require('express');
 const NodeESI = require('nodesi');
-const { Module } = require('module');
 const utils = require('./utils.js');
 const logger = require('./logger.js');
 
@@ -55,11 +56,17 @@ function executeTemplate(ctx) {
   // eslint-disable-next-line import/no-dynamic-require,global-require
   const mod = require(ctx.templatePath);
 
+  // openwhisk uses lowercase header names
+  const owHeaders = {};
+  Object.keys(ctx.wskHeaders).forEach((k) => {
+    owHeaders[k.toLowerCase()] = ctx.wskHeaders[k];
+  });
+
   Module._nodeModulePaths = nodeModulePathsFn;
   /* eslint-enable no-underscore-dangle */
   return Promise.resolve(mod.main({
-    __ow_headers: ctx.headers,
-    __ow_method: ctx.method,
+    __ow_headers: owHeaders,
+    __ow_method: ctx.method.toLowerCase(),
     __ow_logger: logger, // this causes ow-wrapper to use this logger
     owner: ctx.config.contentRepo.owner,
     repo: ctx.config.contentRepo.repo,
@@ -71,12 +78,13 @@ function executeTemplate(ctx) {
   }));
 }
 
-class HelixServer {
+class HelixServer extends EventEmitter {
   /**
    * Creates a new HelixServer for the given project.
    * @param {HelixProject} project
    */
   constructor(project) {
+    super();
     this._project = project;
     this._app = express();
     this._port = DEFAULT_PORT;
@@ -90,6 +98,7 @@ class HelixServer {
     const boundResolver = this._templateResolver.resolve.bind(this._templateResolver);
     this._app.get('*', (req, res) => {
       const ctx = new RequestContext(req, this._project);
+      this.emit('request', req, res, ctx);
       if (!ctx.valid) {
         res.status(404).send();
         return;
@@ -102,6 +111,9 @@ class HelixServer {
           .then(boundResolver)
           .then(executeTemplate)
           .then((result) => {
+            if (!result) {
+              throw new Error('Response is empty, don\'t know what to do');
+            }
             if (result instanceof Error) {
               // full response is an error: engine error
               throw result;
@@ -109,13 +121,18 @@ class HelixServer {
             if (result && result.error && result.error instanceof Error) {
               throw result.error;
             }
-            if (!result || !result.body) {
-              // empty body: nothing to render
-              throw new Error('Response has no body, don\'t know what to do');
-            }
+            let body = result.body || '';
+            const headers = result.headers || {};
             const status = result.statusCode || 200;
-            esi.process(result.body).then((body) => {
-              res.status(status).send(body);
+            const contentType = headers['Content-Type'] || 'text/html';
+            if (/.*\/json/.test(contentType)) {
+              body = JSON.stringify(body);
+            } else if (/.*\/octet-stream/.test(contentType) || /image\/.*/.test(contentType)) {
+              body = Buffer.from(body, 'base64');
+            }
+            res.set(headers);
+            esi.process(body).then((esiBody) => {
+              res.status(status).send(esiBody);
             });
           })
           .catch((err) => {

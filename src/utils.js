@@ -12,6 +12,7 @@
 const fs = require('fs-extra');
 const request = require('request-promise');
 const path = require('path');
+const crypto = require('crypto');
 const logger = require('./logger.js');
 
 const utils = {
@@ -90,6 +91,32 @@ const utils = {
     throw error;
   },
 
+  /**
+   * Generates a random string of the given `length` consisting of alpha numerical characters.
+   * if `hex` is {@code true}, the string will only consist of hexadecimal digits.
+   * @param {number}length length of the string.
+   * @param {boolean} hex returns a hex string if {@code true}
+   * @returns {String} a random string.
+   */
+  randomChars(length, hex = false) {
+    if (length === 0) {
+      return '';
+    }
+    if (hex) {
+      return crypto.randomBytes(Math.round(length / 2)).toString('hex').substring(0, length);
+    }
+    const str = crypto.randomBytes(length).toString('base64');
+    return str.substring(0, length);
+  },
+
+  /**
+   * Generates a completely random uuid of the format:
+   * `00000000-0000-0000-0000-000000000000`
+   * @returns {string} A random uuid.
+   */
+  uuid() {
+    return `${utils.randomChars(8, true)}-${utils.randomChars(4, true)}-${utils.randomChars(4, true)}-${utils.randomChars(4, true)}-${utils.randomChars(12, true)}`;
+  },
 };
 
 module.exports = Object.freeze(utils);

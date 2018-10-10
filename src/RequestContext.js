@@ -9,6 +9,9 @@
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
+
+const utils = require('./utils.js');
+
 /**
  * Context that is used during request handling.
  *
@@ -25,6 +28,9 @@ module.exports = class RequestContext {
     this._headers = req.headers || {};
     this._method = req.method || 'GET';
     this._params = req.query || {};
+    this._wskActivationId = utils.randomChars(32, true);
+    this._requestId = utils.randomChars(32);
+    this._cdnRequestId = utils.uuid();
 
     let relPath = this._path;
     const lastSlash = relPath.lastIndexOf('/');
@@ -46,6 +52,14 @@ module.exports = class RequestContext {
       relPath += 'index';
     }
     this._resourcePath = relPath;
+
+    // generate headers
+    this._wskHeaders = Object.assign({
+      'X-Openwhisk-Activation-Id': this._wskActivationId,
+      'X-Request-Id': this._requestId,
+      'X-Backend-Name': 'localhost--F_Petridish',
+      'X-CDN-Request-ID': this._cdnRequestId,
+    }, this._headers);
   }
 
   get url() {
@@ -83,6 +97,10 @@ module.exports = class RequestContext {
 
   get headers() {
     return this._headers;
+  }
+
+  get wskHeaders() {
+    return this._wskHeaders;
   }
 
   get method() {

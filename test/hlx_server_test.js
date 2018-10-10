@@ -28,6 +28,8 @@ if (!shell.which('git')) {
 // throw a Javascript error when any shell.js command encounters an error
 shell.config.fatal = true;
 
+const _isFunction = fn => !!(fn && fn.constructor && fn.call && fn.apply);
+
 const SPEC_ROOT = path.resolve(__dirname, 'specs');
 
 const SPECS_WITH_GIT = [
@@ -48,9 +50,9 @@ function removeRepository(dir) {
 }
 
 // todo: use replay ?
-async function assertHttp(url, status, spec, port, gitPort) {
+async function assertHttp(url, status, spec, subst) {
   return new Promise((resolve, reject) => {
-    let data = '';
+    const data = [];
     http.get(url, (res) => {
       try {
         assert.equal(res.statusCode, status);
@@ -61,19 +63,27 @@ async function assertHttp(url, status, spec, port, gitPort) {
 
       res
         .on('data', (chunk) => {
-          data += chunk;
+          data.push(chunk);
         })
         .on('end', () => {
           try {
             if (spec) {
+              const dat = Buffer.concat(data);
               let expected = fse.readFileSync(path.resolve(__dirname, 'specs', spec)).toString();
-              if (port) {
-                expected = expected.replace(/SERVER_PORT/g, port);
+              const repl = (_isFunction(subst) ? subst() : subst) || {};
+              Object.keys(repl).forEach((k) => {
+                const reg = new RegExp(k, 'g');
+                expected = expected.replace(reg, repl[k]);
+              });
+              if (/\/json/.test(res.headers['content-type'])) {
+                assert.deepEqual(JSON.parse(dat), JSON.parse(expected));
+              } else if (/octet-stream/.test(res.headers['content-type'])) {
+                expected = JSON.parse(expected).data;
+                const actual = dat.toString('hex');
+                assert.equal(actual, expected);
+              } else {
+                assert.equal(data.toString().trim(), expected.trim());
               }
-              if (gitPort) {
-                expected = expected.replace(/GIT_PORT/g, gitPort);
-              }
-              assert.equal(data.trim(), expected.trim());
             }
             resolve();
           } catch (e) {
@@ -121,7 +131,32 @@ describe('Helix Server', () => {
     await project.init();
     try {
       await project.start();
-      await assertHttp(`http://localhost:${project.server.port}/index.dump.html`, 200, 'expected_dump.html', project.server.port, project.gitState.httpPort);
+      let reqCtx = null;
+      project.server.on('request', (req, res, ctx) => {
+        reqCtx = ctx;
+      });
+      await assertHttp(`http://localhost:${project.server.port}/index.dump.html`, 200, 'expected_dump.json', () => ({
+        SERVER_PORT: project.server.port,
+        GIT_PORT: project.gitState.httpPort,
+        X_WSK_ACTIVATION_ID: reqCtx._wskActivationId,
+        X_REQUEST_ID: reqCtx._requestId,
+        X_CDN_REQUEST_ID: reqCtx._cdnRequestId,
+      }));
+    } finally {
+      await project.stop();
+    }
+  });
+
+  it('deliver binary data', async () => {
+    const cwd = path.join(SPEC_ROOT, 'local');
+    const project = new HelixProject()
+      .withCwd(cwd)
+      .withBuildDir('./build')
+      .withHttpPort(0);
+    await project.init();
+    try {
+      await project.start();
+      await assertHttp(`http://localhost:${project.server.port}/index.binary.html`, 200, 'expected_binary.json');
     } finally {
       await project.stop();
     }

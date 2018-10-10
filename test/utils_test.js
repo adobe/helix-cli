@@ -14,6 +14,7 @@
 
 const assert = require('assert');
 const RequestContext = require('../src/RequestContext.js');
+const utils = require('../src/utils.js');
 
 describe('Utils Test', () => {
   describe('Request context', () => {
@@ -85,6 +86,31 @@ describe('Utils Test', () => {
           }
         }
       });
+    });
+  });
+
+  describe('Random chars', () => {
+    it('generates a random string of the desired length', () => {
+      const generated = {};
+      for (let i = 0; i < 32; i += 1) {
+        const s = utils.randomChars(i);
+        assert.equal(s.length, i);
+        assert.ok(!generated[s]);
+        generated[s] = true;
+      }
+    });
+
+    it('generates a random hex string of the desired length', () => {
+      const generated = {};
+      for (let i = 0; i < 32; i += 1) {
+        const s = utils.randomChars(i, true);
+        if (i > 0) {
+          assert.ok(/^[0-9a-f]+$/.test(s));
+        }
+        assert.equal(s.length, i);
+        assert.ok(!generated[s]);
+        generated[s] = true;
+      }
     });
   });
 });
