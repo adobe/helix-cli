@@ -67,7 +67,9 @@ describe('hlx strain (VCL) generation', () => {
   });
 });
 
-describe('hlx strain (Integration)', () => {
+describe('hlx strain (Integration)', function suite() {
+  this.timeout(10000);
+
   let hlxDir;
   let dstStrains;
 
@@ -89,35 +91,29 @@ describe('hlx strain (Integration)', () => {
     Replay.mode = 'bloody';
   });
 
-  it('Publish Strains on an existing Service Config', (done) => {
-    const cmd = new StrainCommand()
+  it('Publish Strains on an existing Service Config', async () => {
+    await new StrainCommand()
       .withStrainFile(dstStrains)
       .withDryRun(true)
       .withFastlyAuth(FASTLY_AUTH)
-      .withFastlyNamespace('GM98lH4M9g5l4LvdWlqK0')
+      .withFastlyNamespace('54nWWFJicKgbdVHou26Y6a')
       .withWskHost('adobeioruntime.net')
       .withWskAuth(WSK_AUTH)
-      .withWskNamespace('trieloff');
+      .withWskNamespace('trieloff')
+      .run();
+  });
 
-    cmd.run().then(() => {
-      done();
-    }).catch(done);
-  }).timeout(10000);
-
-  it('Publish Strains on a new Service Config', (done) => {
-    const cmd = new StrainCommand()
+  it('Publish Strains on a new Service Config', async () => {
+    await new StrainCommand()
       .withStrainFile(dstStrains)
       .withDryRun(true)
       .withFastlyAuth(FASTLY_AUTH)
-      .withFastlyNamespace('GM98lH4M9g5l4LvdWlqK0')
+      .withFastlyNamespace('54nWWFJicKgbdVHou26Y6a')
       .withWskHost('adobeioruntime.net')
       .withWskAuth(WSK_AUTH)
-      .withWskNamespace('trieloff');
-
-    cmd.run().then(() => {
-      done();
-    }).catch(done);
-  }).timeout(10000);
+      .withWskNamespace('trieloff')
+      .run();
+  });
 
   it('Invalid strains.yaml gets rejected', () => {
     const brokenstrains = path.resolve(__dirname, 'fixtures/broken.yaml');

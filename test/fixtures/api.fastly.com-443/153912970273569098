@@ -1,0 +1,24 @@
+PUT /service/54nWWFJicKgbdVHou26Y6a/dictionary/6tmoyiJsES3E5YlwmjF8ls/item/default
+accept: application/json
+host: api.fastly.com
+content-type: application/x-www-form-urlencoded
+body: item_value=helix-cli
+
+HTTP/1.1 200 OK
+status: 200 OK
+content-type: application/json
+cache-control: no-cache
+fastly-ratelimit-remaining: 988
+fastly-ratelimit-reset: 1539133200
+accept-ranges: bytes, bytes
+via: 1.1 varnish, 1.1 varnish
+content-length: 126
+date: Wed, 10 Oct 2018 00:01:43 GMT
+connection: close
+x-served-by: cache-control-slwdc9037-CONTROL-SLWDC, cache-tyo19940-TYO
+x-cache: MISS, MISS
+x-cache-hits: 0, 0
+x-timer: S1539129701.590694,VS0,VE2931
+vary: Accept-Encoding
+
+{"dictionary_id":"6tmoyiJsES3E5YlwmjF8ls","service_id":"54nWWFJicKgbdVHou26Y6a","item_key":"default","item_value":"helix-cli"}
