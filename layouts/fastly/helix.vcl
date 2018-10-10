@@ -29,6 +29,9 @@ sub hlx_strain {
 
     # run custom strain resolution
     include "dynamic.vcl";
+
+    # run generated vcl
+    include "dynamic.vcl";
   }
 }
 
@@ -187,6 +190,9 @@ sub hlx_headers_deliver {
   # Header rewrite Host : 10
   set resp.http.X-Host = req.http.Fastly-Orig-Host;
   # Response Condition: Debug (Response) Prio: 10
+
+  set resp.http.X-Version = req.http.X-Version;
+
   if( req.http.X-Debug ) {
     # Header rewrite Backend URL : 10
     set resp.http.X-Backend-URL = req.url;
@@ -202,7 +208,6 @@ sub hlx_headers_deliver {
     set resp.http.X-Action-Root = req.http.X-Action-Root;
     set resp.http.X-URL = req.http.X-URL;
     set resp.http.X-Root-Path = req.http.X-Root-Path;
-    set resp.http.X-Version = req.http.X-Version;
  }
 
   call hlx_deliver_errors;

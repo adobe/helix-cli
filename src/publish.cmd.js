@@ -24,6 +24,7 @@ const strainconfig = require('./strain-config-utils');
 const include = require('./include-util');
 const GitUtils = require('./gitutils');
 const useragent = require('./user-agent-util');
+const cli = require('./cli-util');
 
 const HELIX_VCL_DEFAULT_FILE = path.resolve(__dirname, '../layouts/fastly/helix.vcl');
 
@@ -445,16 +446,24 @@ class PublishCommand {
   async getVersionVCL() {
     let retvcl = '# This section handles the strain resolution\n';
 
-    const version = await this.getCurrentVersion();
+    const configVersion = await this.getCurrentVersion();
+    const cliVersion = cli.getVersion();
+    const rev = GitUtils.getCurrentRevision();
+
+    const version = `${configVersion} | ${cliVersion} | ${rev}`;
+
     retvcl += `set req.http.X-Version = "${version}";\n`;
 
     return retvcl;
   }
 
-  async getDynamicVCL() {
-    let vcl = PublishCommand.getStrainResolutionVCL(this._strains);
-    vcl += '\n\n';
-    vcl += await this.getVersionVCL();
+  async setStrainsVCL() {
+    const vcl = PublishCommand.getStrainResolutionVCL(this._strains);
+    return this.setVCL(vcl, 'strains.vcl');
+  }
+
+  async setDynamicVCL() {
+    const vcl = await this.getVersionVCL();
     return this.setVCL(vcl, 'dynamic.vcl');
   }
 
@@ -536,13 +545,15 @@ class PublishCommand {
   async initFastly() {
     console.log('Checking Fastly Setup');
     await this.initBackends();
+  }
 
+  async setHelixVCL() {
     const vclfile = fs.existsSync(this._vclFile) ? this._vclFile : HELIX_VCL_DEFAULT_FILE;
     try {
       const content = include(vclfile);
       await this.setVCL(content, 'helix.vcl', true);
     } catch (e) {
-      console.error(`❌  Unable to read ${vclfile}`);
+      console.error(`❌  Unable to set ${vclfile}`);
       throw e;
     }
   }
@@ -596,8 +607,6 @@ class PublishCommand {
       });
 
     const strains = this._strains;
-
-    const strainp = this.getDynamicVCL();
 
     const strainjobs = [];
     strains.map((strain) => {
@@ -675,8 +684,11 @@ class PublishCommand {
     // wait for all dict updates to complete
     await Promise.all(strainjobs);
 
-    // also wait for the strain.vcl writing to finish
-    await strainp;
+    // set all VCL files
+    await this.setStrainsVCL();
+    await this.setDynamicVCL();
+    await this.setHelixVCL();
+
     await secretp;
     // also wait for the openwhisk namespace
     await ownsp;

@@ -76,6 +76,16 @@ class GitUtils {
   static getOriginURL() {
     return new GitUrl(GitUtils.getOrigin());
   }
+
+  static getCurrentRevision() {
+    const rev = $
+      .exec('git rev-parse HEAD', {
+        silent: true,
+      })
+      .stdout.replace(/\n/g, '')
+      .replace(/[\W]/g, '-');
+    return rev;
+  }
 }
 
 module.exports = GitUtils;
