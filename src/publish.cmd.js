@@ -319,23 +319,24 @@ class PublishCommand {
       .map(([_key, value]) => value);
     if (missingbackends.length > 0) {
       const baseopts = await this.version('/backend');
-      missingbackends.map((backend) => {
+      return Promise.all(missingbackends.map(async (backend) => {
         const opts = Object.assign({
           method: 'POST',
           form: backend,
         }, baseopts);
-        return request(opts).then((r) => {
+        try {
+          const r = await request(opts);
           console.log(`🔚  Backend ${r.name} has been created`);
           return r;
-        })
-          .catch((e) => {
-            const message = `Backend ${backend.name} could not be created`;
-            console.error(message);
-            console.error(e.message);
-            throw new Error(message, e);
-          });
-      });
+        } catch (e) {
+          const message = `Backend ${backend.name} could not be created`;
+          console.error(message);
+          console.error(e.message);
+          throw new Error(message, e);
+        }
+      }));
     }
+    return Promise.resolve();
   }
 
 

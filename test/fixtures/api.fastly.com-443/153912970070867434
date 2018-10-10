@@ -1,0 +1,24 @@
+PUT /service/54nWWFJicKgbdVHou26Y6a/dictionary/6tS8lvtRx0hWi7PATiYTlg/item/default
+accept: application/json
+host: api.fastly.com
+content-type: application/x-www-form-urlencoded
+body: item_value=master
+
+HTTP/1.1 200 OK
+status: 200 OK
+content-type: application/json
+cache-control: no-cache
+fastly-ratelimit-remaining: 980
+fastly-ratelimit-reset: 1539133200
+accept-ranges: bytes, bytes
+via: 1.1 varnish, 1.1 varnish
+content-length: 123
+date: Wed, 10 Oct 2018 00:01:41 GMT
+connection: close
+x-served-by: cache-control-slwdc9035-CONTROL-SLWDC, cache-tyo19929-TYO
+x-cache: MISS, MISS
+x-cache-hits: 0, 0
+x-timer: S1539129701.589723,VS0,VE904
+vary: Accept-Encoding
+
+{"dictionary_id":"6tS8lvtRx0hWi7PATiYTlg","service_id":"54nWWFJicKgbdVHou26Y6a","item_key":"default","item_value":"master"}
