@@ -28,11 +28,11 @@ sub hlx_strain {
     set req.http.X-Strain = "default";
 
     # run custom strain resolution
-    include "dynamic.vcl";
-
-    # run generated vcl
-    include "dynamic.vcl";
+    include "strains.vcl";
   }
+
+  # run generated vcl
+    include "dynamic.vcl";
 }
 
 # Gets the content whitelist for the current strain and sets the X-Allow header
