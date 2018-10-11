@@ -2,7 +2,6 @@ POST /service/4fO8LaVL7Xtza4ksTcItHW/version/2/vcl
 accept: application/json
 host: api.fastly.com
 content-type: application/x-www-form-urlencoded
-body: name=dynamic.vcl&content=%23%20This%20section%20handles%20the%20strain%20resolution%0Aset%20req.http.X-Version%20%3D%20%222%20%7C%200.8.1-pre.4%20%7C%206bd3c895a62e4909eb2232e0ed7a984f5c4b1b69%22%3B%0A
 
 HTTP/1.1 200 OK
 status: 200 OK

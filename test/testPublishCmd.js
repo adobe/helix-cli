@@ -82,10 +82,19 @@ describe('hlx strain (Integration)', function suite() {
 
     await fs.mkdirp(hlxDir);
     await fs.copyFile(SRC_STRAINS, dstStrains);
-    // if you need to re-record the test, change the mode in the next line to
-    // `record` and update the FASTLY_AUTH, WSK_AUTH and FASTLY_NAMESPACE
-    // don't forget to change it back afterwards, so that no credentials leak
+    // if you need to re-record the test:
+    // - change the mode in the next line to `record`
+    // - update the FASTLY_AUTH, WSK_AUTH and FASTLY_NAMESPACE
+    // DON'T forget to change it back afterwards, so that no credentials leak
     // you might also want to delete the previous test recordings in /test/fixtures
+    // - empty the fixtures/api.fastly.com-442 folder
+    // - run `npm test`
+    // - revert the changes above
+    // - search in the folder fixtures/api.fastly.com-442 for
+    // string `POST /service/4fO8LaVL7Xtza4ksTcItHW/version/2/vcl`
+    // - remove the `body` line of the request that uploads the `dynamic.vcl` file
+    // (body contains dynamic.vcl)
+    // TODO - simplify
     Replay.mode = 'replay';
   });
 
@@ -93,7 +102,7 @@ describe('hlx strain (Integration)', function suite() {
     Replay.mode = 'bloody';
   });
 
-  it('Publish Strains on an existing Service Config', async () => {
+  it.only('Publish Strains on an existing Service Config', async () => {
     const cmd = new PublishCommand()
       .withStrainFile(dstStrains)
       .withFastlyAuth(FASTLY_AUTH)
