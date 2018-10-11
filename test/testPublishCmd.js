@@ -69,6 +69,13 @@ describe('hlx strain (VCL) generation', () => {
   });
 });
 
+describe('Dynamic (VCL) generation', () => {
+  it('Version VCL', () => {
+    const vclfile = fs.readFileSync(path.resolve(__dirname, 'fixtures/dynamic-version.vcl')).toString();
+    assert.equal(vclfile.trim(), PublishCommand.getVersionVCL('A', 'B', 'C').trim());
+  });
+});
+
 describe('hlx strain (Integration)', function suite() {
   this.timeout(10000);
 
@@ -102,7 +109,7 @@ describe('hlx strain (Integration)', function suite() {
     Replay.mode = 'bloody';
   });
 
-  it.only('Publish Strains on an existing Service Config', async () => {
+  it('Publish Strains on an existing Service Config', async () => {
     const cmd = new PublishCommand()
       .withStrainFile(dstStrains)
       .withFastlyAuth(FASTLY_AUTH)
@@ -122,7 +129,7 @@ describe('hlx strain (Integration)', function suite() {
     assert.equal(afterVersion, 2);
 
     // VCL version can be computed and must contain X-Version and '<current version=2> |'
-    const vclVersion = await cmd.getVersionVCL();
+    const vclVersion = await cmd.getVersionVCLSection();
     assert.notEqual(vclVersion.indexOf('X-Version'), -1);
     assert.notEqual(vclVersion.indexOf('2 |'), -1);
   });

@@ -443,14 +443,10 @@ class PublishCommand {
     return retvcl;
   }
 
-  async getVersionVCL() {
+  static getVersionVCL(configVersion, cliVersion, revision) {
     let retvcl = '# This section handles the strain resolution\n';
 
-    const configVersion = await this.getCurrentVersion();
-    const cliVersion = cli.getVersion();
-    const rev = GitUtils.getCurrentRevision();
-
-    const version = `${configVersion} | ${cliVersion} | ${rev}`;
+    const version = `${configVersion} | ${cliVersion} | ${revision}`;
 
     retvcl += `set req.http.X-Version = "${version}";\n`;
 
@@ -462,8 +458,16 @@ class PublishCommand {
     return this.transferVCL(vcl, 'strains.vcl');
   }
 
+  async getVersionVCLSection() {
+    const configVersion = await this.getCurrentVersion();
+    const cliVersion = cli.getVersion();
+    const revision = GitUtils.getCurrentRevision();
+
+    return PublishCommand.getVersionVCL(configVersion, cliVersion, revision);
+  }
+
   async setDynamicVCL() {
-    const vcl = await this.getVersionVCL();
+    const vcl = await this.getVersionVCLSection();
     return this.transferVCL(vcl, 'dynamic.vcl');
   }
 
