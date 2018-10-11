@@ -704,7 +704,7 @@ class PublishCommand {
 
       this.showNextStep();
     } catch (e) {
-      const message = 'Error setting one or more edge dictionary values';
+      const message = 'Error while running the Publish command';
       console.error(message);
       console.error(e);
       throw new Error(message, e);
