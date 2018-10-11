@@ -25,7 +25,9 @@ Replay.mode = 'bloody';
 Replay.fixtures = path.resolve(__dirname, 'fixtures');
 
 const FASTLY_AUTH = '---';
+const FASTLY_NAMESPACE = '4fO8LaVL7Xtza4ksTcItHW';
 const WSK_AUTH = 'nope';
+const WSK_NAMESPACE = '---';
 
 const SRC_STRAINS = path.resolve(__dirname, 'fixtures/strains.yaml');
 
@@ -81,7 +83,7 @@ describe('hlx strain (Integration)', function suite() {
     await fs.mkdirp(hlxDir);
     await fs.copyFile(SRC_STRAINS, dstStrains);
     // if you need to re-record the test, change the mode in the next line to
-    // `record` and update the FASTLY_AUTH, WSK_AUTH, and FastlyNamespace parameters
+    // `record` and update the FASTLY_AUTH, WSK_AUTH and FASTLY_NAMESPACE
     // don't forget to change it back afterwards, so that no credentials leak
     // you might also want to delete the previous test recordings in /test/fixtures
     Replay.mode = 'replay';
@@ -92,27 +94,28 @@ describe('hlx strain (Integration)', function suite() {
   });
 
   it('Publish Strains on an existing Service Config', async () => {
-    await new PublishCommand()
+    const cmd = new PublishCommand()
       .withStrainFile(dstStrains)
-      .withDryRun(true)
       .withFastlyAuth(FASTLY_AUTH)
-      .withFastlyNamespace('54nWWFJicKgbdVHou26Y6a')
+      .withFastlyNamespace(FASTLY_NAMESPACE)
       .withWskHost('adobeioruntime.net')
       .withWskAuth(WSK_AUTH)
-      .withWskNamespace('trieloff')
-      .run();
-  });
+      .withWskNamespace(WSK_NAMESPACE);
 
-  it('Publish Strains on a new Service Config', async () => {
-    await new PublishCommand()
-      .withStrainFile(dstStrains)
-      .withDryRun(true)
-      .withFastlyAuth(FASTLY_AUTH)
-      .withFastlyNamespace('54nWWFJicKgbdVHou26Y6a')
-      .withWskHost('adobeioruntime.net')
-      .withWskAuth(WSK_AUTH)
-      .withWskNamespace('trieloff')
-      .run();
+    // current version must 1
+    const beforeVersion = await cmd.getCurrentVersion();
+    assert.equal(beforeVersion, 1);
+
+    await cmd.run();
+
+    // current version must be 2 now
+    const afterVersion = await cmd.getCurrentVersion();
+    assert.equal(afterVersion, 2);
+
+    // VCL version can be computed and must contain X-Version and '<current version=2> |'
+    const vclVersion = await cmd.getVersionVCL();
+    assert.notEqual(vclVersion.indexOf('X-Version'), -1);
+    assert.notEqual(vclVersion.indexOf('2 |'), -1);
   });
 
   it('Invalid strains.yaml gets rejected', () => {
@@ -121,12 +124,11 @@ describe('hlx strain (Integration)', function suite() {
     try {
       new PublishCommand()
         .withStrainFile(brokenstrains)
-        .withDryRun(true)
         .withFastlyAuth(FASTLY_AUTH)
-        .withFastlyNamespace('GM98lH4M9g5l4LvdWlqK0')
+        .withFastlyNamespace(FASTLY_NAMESPACE)
         .withWskHost('adobeioruntime.net')
         .withWskAuth(WSK_AUTH)
-        .withWskNamespace('trieloff');
+        .withWskNamespace(WSK_NAMESPACE);
       assert.fail('Broken strains should be rejected.');
     } catch (e) {
       assert.ok(e.message);

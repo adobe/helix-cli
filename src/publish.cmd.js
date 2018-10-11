@@ -544,14 +544,14 @@ class PublishCommand {
 
   async initFastly() {
     console.log('Checking Fastly Setup');
-    await this.initBackends();
+    return this.initBackends();
   }
 
   async setHelixVCL() {
     const vclfile = fs.existsSync(this._vclFile) ? this._vclFile : HELIX_VCL_DEFAULT_FILE;
     try {
       const content = include(vclfile);
-      await this.transferVCL(content, 'helix.vcl', true);
+      return this.transferVCL(content, 'helix.vcl', true);
     } catch (e) {
       console.error(`❌  Unable to set ${vclfile}`);
       throw e;
