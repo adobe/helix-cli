@@ -17,7 +17,7 @@ const fs = require('fs-extra');
 const path = require('path');
 const assert = require('assert');
 const { createTestRoot } = require('./utils.js');
-const StrainCommand = require('../src/publish.cmd');
+const PublishCommand = require('../src/publish.cmd');
 const strainconfig = require('../src/strain-config-utils');
 
 // disable replay for this test
@@ -25,45 +25,54 @@ Replay.mode = 'bloody';
 Replay.fixtures = path.resolve(__dirname, 'fixtures');
 
 const FASTLY_AUTH = '---';
+const FASTLY_NAMESPACE = '4fO8LaVL7Xtza4ksTcItHW';
 const WSK_AUTH = 'nope';
+const WSK_NAMESPACE = '---';
 
 const SRC_STRAINS = path.resolve(__dirname, 'fixtures/strains.yaml');
 
 describe('hlx strain #unit', () => {
   it('makeRegexp() #unit', () => {
     const globs1 = ['*.htl', '*.js'];
-    assert.equal(StrainCommand.makeRegexp(globs1), '^.*\\.htl$|^.*\\.js$');
+    assert.equal(PublishCommand.makeRegexp(globs1), '^.*\\.htl$|^.*\\.js$');
 
     const globs2 = ['test/**', 'test*.js'];
-    assert.equal(StrainCommand.makeRegexp(globs2), '^test\\/.*$|^test.*\\.js$');
+    assert.equal(PublishCommand.makeRegexp(globs2), '^test\\/.*$|^test.*\\.js$');
   });
 });
 
 describe('hlx strain (VCL) generation', () => {
-  it('getVCL generates VLC for empty strains', () => {
+  it('getStrainResolutionVCL generates VLC for empty strains', () => {
     const strainfile = strainconfig.load(fs.readFileSync(path.resolve(__dirname, 'fixtures/empty.yaml')));
     const vclfile = fs.readFileSync(path.resolve(__dirname, 'fixtures/empty.vcl')).toString();
-    assert.equal(vclfile, StrainCommand.getVCL(strainfile));
+    assert.equal(vclfile, PublishCommand.getStrainResolutionVCL(strainfile));
   });
 
-  it('getVCL generates VLC for non-existing conditions strains', () => {
+  it('getStrainResolutionVCL generates VLC for non-existing conditions strains', () => {
     const strainfile = strainconfig.load(fs.readFileSync(path.resolve(__dirname, 'fixtures/default.yaml')));
     const vclfile = fs.readFileSync(path.resolve(__dirname, 'fixtures/default.vcl')).toString();
-    assert.equal(vclfile, StrainCommand.getVCL(strainfile));
+    assert.equal(vclfile, PublishCommand.getStrainResolutionVCL(strainfile));
   });
 
-  it('getVCL generates VLC for simple conditions strains', () => {
+  it('getStrainResolutionVCL generates VLC for simple conditions strains', () => {
     const strainfile = strainconfig.load(fs.readFileSync(path.resolve(__dirname, 'fixtures/simple-condition.yaml')));
     const vclfile = fs.readFileSync(path.resolve(__dirname, 'fixtures/simple-condition.vcl')).toString();
-    // console.log(StrainCommand.getVCL(strainfile));
-    assert.equal(vclfile.trim(), StrainCommand.getVCL(strainfile).trim());
+    // console.log(PublishCommand.getStrainResolutionVCL(strainfile));
+    assert.equal(vclfile.trim(), PublishCommand.getStrainResolutionVCL(strainfile).trim());
   });
 
-  it('getVCL generates VLC for URL-based conditions', () => {
+  it('getStrainResolutionVCL generates VLC for URL-based conditions', () => {
     const strainfile = strainconfig.load(fs.readFileSync(path.resolve(__dirname, 'fixtures/urls.yaml')));
     const vclfile = fs.readFileSync(path.resolve(__dirname, 'fixtures/urls.vcl')).toString();
-    // console.log(StrainCommand.getVCL(strainfile));
-    assert.equal(vclfile.trim(), StrainCommand.getVCL(strainfile).trim());
+    // console.log(PublishCommand.getStrainResolutionVCL(strainfile));
+    assert.equal(vclfile.trim(), PublishCommand.getStrainResolutionVCL(strainfile).trim());
+  });
+});
+
+describe('Dynamic (VCL) generation', () => {
+  it('Version VCL', () => {
+    const vclfile = fs.readFileSync(path.resolve(__dirname, 'fixtures/dynamic-version.vcl')).toString();
+    assert.equal(vclfile.trim(), PublishCommand.getVersionVCL('A', 'B', 'C').trim());
   });
 });
 
@@ -80,10 +89,19 @@ describe('hlx strain (Integration)', function suite() {
 
     await fs.mkdirp(hlxDir);
     await fs.copyFile(SRC_STRAINS, dstStrains);
-    // if you need to re-record the test, change the mode in the next line to
-    // `record` and update the FASTLY_AUTH, WSK_AUTH, and FastlyNamespace parameters
-    // don't forget to change it back afterwards, so that no credentials leak
+    // if you need to re-record the test:
+    // - change the mode in the next line to `record`
+    // - update the FASTLY_AUTH, WSK_AUTH and FASTLY_NAMESPACE
+    // DON'T forget to change it back afterwards, so that no credentials leak
     // you might also want to delete the previous test recordings in /test/fixtures
+    // - empty the fixtures/api.fastly.com-442 folder
+    // - run `npm test`
+    // - revert the changes above
+    // - search in the folder fixtures/api.fastly.com-442 for
+    // string `POST /service/4fO8LaVL7Xtza4ksTcItHW/version/2/vcl`
+    // - remove the `body` line of the request that uploads the `dynamic.vcl` file
+    // (body contains dynamic.vcl)
+    // TODO - simplify
     Replay.mode = 'replay';
   });
 
@@ -92,41 +110,41 @@ describe('hlx strain (Integration)', function suite() {
   });
 
   it('Publish Strains on an existing Service Config', async () => {
-    await new StrainCommand()
+    const cmd = new PublishCommand()
       .withStrainFile(dstStrains)
-      .withDryRun(true)
       .withFastlyAuth(FASTLY_AUTH)
-      .withFastlyNamespace('54nWWFJicKgbdVHou26Y6a')
+      .withFastlyNamespace(FASTLY_NAMESPACE)
       .withWskHost('adobeioruntime.net')
       .withWskAuth(WSK_AUTH)
-      .withWskNamespace('trieloff')
-      .run();
-  });
+      .withWskNamespace(WSK_NAMESPACE);
 
-  it('Publish Strains on a new Service Config', async () => {
-    await new StrainCommand()
-      .withStrainFile(dstStrains)
-      .withDryRun(true)
-      .withFastlyAuth(FASTLY_AUTH)
-      .withFastlyNamespace('54nWWFJicKgbdVHou26Y6a')
-      .withWskHost('adobeioruntime.net')
-      .withWskAuth(WSK_AUTH)
-      .withWskNamespace('trieloff')
-      .run();
+    // current version must 1
+    const beforeVersion = await cmd.getCurrentVersion();
+    assert.equal(beforeVersion, 1);
+
+    await cmd.run();
+
+    // current version must be 2 now
+    const afterVersion = await cmd.getCurrentVersion();
+    assert.equal(afterVersion, 2);
+
+    // VCL version can be computed and must contain X-Version and '<current version=2> |'
+    const vclVersion = await cmd.getVersionVCLSection();
+    assert.notEqual(vclVersion.indexOf('X-Version'), -1);
+    assert.notEqual(vclVersion.indexOf('2 |'), -1);
   });
 
   it('Invalid strains.yaml gets rejected', () => {
     const brokenstrains = path.resolve(__dirname, 'fixtures/broken.yaml');
 
     try {
-      new StrainCommand()
+      new PublishCommand()
         .withStrainFile(brokenstrains)
-        .withDryRun(true)
         .withFastlyAuth(FASTLY_AUTH)
-        .withFastlyNamespace('GM98lH4M9g5l4LvdWlqK0')
+        .withFastlyNamespace(FASTLY_NAMESPACE)
         .withWskHost('adobeioruntime.net')
         .withWskAuth(WSK_AUTH)
-        .withWskNamespace('trieloff');
+        .withWskNamespace(WSK_NAMESPACE);
       assert.fail('Broken strains should be rejected.');
     } catch (e) {
       assert.ok(e.message);

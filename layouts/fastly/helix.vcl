@@ -30,6 +30,9 @@ sub hlx_strain {
     # run custom strain resolution
     include "strains.vcl";
   }
+
+  # run generated vcl
+    include "dynamic.vcl";
 }
 
 # Gets the content whitelist for the current strain and sets the X-Allow header
@@ -187,6 +190,9 @@ sub hlx_headers_deliver {
   # Header rewrite Host : 10
   set resp.http.X-Host = req.http.Fastly-Orig-Host;
   # Response Condition: Debug (Response) Prio: 10
+
+  set resp.http.X-Version = req.http.X-Version;
+
   if( req.http.X-Debug ) {
     # Header rewrite Backend URL : 10
     set resp.http.X-Backend-URL = req.url;

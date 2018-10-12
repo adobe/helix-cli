@@ -24,6 +24,7 @@ const strainconfig = require('./strain-config-utils');
 const include = require('./include-util');
 const GitUtils = require('./gitutils');
 const useragent = require('./user-agent-util');
+const cli = require('./cli-util');
 
 const HELIX_VCL_DEFAULT_FILE = path.resolve(__dirname, '../layouts/fastly/helix.vcl');
 
@@ -423,7 +424,7 @@ class PublishCommand {
   /**
    * Generates VCL for strain resolution from a list of strains
    */
-  static getVCL(strains) {
+  static getStrainResolutionVCL(strains) {
     let retvcl = '# This file handles the strain resolution\n';
     const conditions = strains
       .map(PublishCommand.vclConditions)
@@ -440,6 +441,34 @@ class PublishCommand {
       retvcl += 'set req.http.X-Strain = "default";\n';
     }
     return retvcl;
+  }
+
+  static getVersionVCL(configVersion, cliVersion, revision) {
+    let retvcl = '# This section handles the strain resolution\n';
+
+    const version = `${configVersion} | ${cliVersion} | ${revision}`;
+
+    retvcl += `set req.http.X-Version = "${version}";\n`;
+
+    return retvcl;
+  }
+
+  async setStrainsVCL() {
+    const vcl = PublishCommand.getStrainResolutionVCL(this._strains);
+    return this.transferVCL(vcl, 'strains.vcl');
+  }
+
+  async getVersionVCLSection() {
+    const configVersion = await this.getCurrentVersion();
+    const cliVersion = cli.getVersion();
+    const revision = GitUtils.getCurrentRevision();
+
+    return PublishCommand.getVersionVCL(configVersion, cliVersion, revision);
+  }
+
+  async setDynamicVCL() {
+    const vcl = await this.getVersionVCLSection();
+    return this.transferVCL(vcl, 'dynamic.vcl');
   }
 
   async vclopts(name, vcl) {
@@ -475,7 +504,7 @@ class PublishCommand {
    * @param {String} name name of the file
    * @param {boolean} isMain this the main VCL
    */
-  async setVCL(vcl, name, isMain = false) {
+  async transferVCL(vcl, name, isMain = false) {
     const opts = await this.vclopts(name, vcl);
     return request(opts)
       .then(async (r) => {
@@ -519,14 +548,16 @@ class PublishCommand {
 
   async initFastly() {
     console.log('Checking Fastly Setup');
-    await this.initBackends();
+    return this.initBackends();
+  }
 
+  async setHelixVCL() {
     const vclfile = fs.existsSync(this._vclFile) ? this._vclFile : HELIX_VCL_DEFAULT_FILE;
     try {
       const content = include(vclfile);
-      await this.setVCL(content, 'helix.vcl', true);
+      return this.transferVCL(content, 'helix.vcl', true);
     } catch (e) {
-      console.error(`❌  Unable to read ${vclfile}`);
+      console.error(`❌  Unable to set ${vclfile}`);
       throw e;
     }
   }
@@ -580,9 +611,6 @@ class PublishCommand {
       });
 
     const strains = this._strains;
-
-    const strainsVCL = PublishCommand.getVCL(strains);
-    const strainp = this.setVCL(strainsVCL, 'strains.vcl');
 
     const strainjobs = [];
     strains.map((strain) => {
@@ -660,8 +688,11 @@ class PublishCommand {
     // wait for all dict updates to complete
     await Promise.all(strainjobs);
 
-    // also wait for the strain.vcl writing to finish
-    await strainp;
+    // set all VCL files
+    await this.setStrainsVCL();
+    await this.setDynamicVCL();
+    await this.setHelixVCL();
+
     await secretp;
     // also wait for the openwhisk namespace
     await ownsp;
@@ -677,7 +708,7 @@ class PublishCommand {
 
       this.showNextStep();
     } catch (e) {
-      const message = 'Error setting one or more edge dictionary values';
+      const message = 'Error while running the Publish command';
       console.error(message);
       console.error(e);
       throw new Error(message, e);
