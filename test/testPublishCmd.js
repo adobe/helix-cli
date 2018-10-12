@@ -72,7 +72,7 @@ describe('hlx strain (VCL) generation', () => {
 describe('Dynamic (VCL) generation', () => {
   it('Version VCL', () => {
     const vclfile = fs.readFileSync(path.resolve(__dirname, 'fixtures/dynamic-version.vcl')).toString();
-    assert.equal(vclfile.trim(), PublishCommand.getVersionVCL('A', 'B', 'C').trim());
+    assert.equal(vclfile.trim(), PublishCommand.getXVersionExtensionVCL('A', 'B', 'C').trim());
   });
 });
 
@@ -130,8 +130,8 @@ describe('hlx strain (Integration)', function suite() {
 
     // VCL version can be computed and must contain X-Version and '<current version=2> |'
     const vclVersion = await cmd.getVersionVCLSection();
-    assert.notEqual(vclVersion.indexOf('X-Version'), -1);
-    assert.notEqual(vclVersion.indexOf('2 |'), -1);
+    assert.notEqual(vclVersion.indexOf('X-Version ='), -1);
+    assert.notEqual(vclVersion.indexOf('req.http.X-Version + " | 2 | '), -1);
   });
 
   it('Invalid strains.yaml gets rejected', () => {
