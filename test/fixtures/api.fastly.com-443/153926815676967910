@@ -20,4 +20,4 @@ x-cache-hits: 0, 0
 x-timer: S1539268156.221877,VS0,VE225
 vary: Accept-Encoding
 
-{"name":"dynamic.vcl","content":"# This section handles the strain resolution\nset req.http.X-Version = req.http.X-Version + \"2 | 2 | 0.8.1-pre.4 | 6bd3c895a62e4909eb2232e0ed7a984f5c4b1b69\";\n","service_id":"4fO8LaVL7Xtza4ksTcItHW","version":2,"deleted_at":null,"main":false,"created_at":"2018-10-11T14:29:16Z","updated_at":"2018-10-11T14:29:16Z"}
+{"name":"dynamic.vcl","content":"# This section handles the strain resolution\nset req.http.X-Version = req.http.X-Version + \"2; src=2; cli=0.8.1-pre.4; rev=6bd3c895a62e4909eb2232e0ed7a984f5c4b1b69\";\n","service_id":"4fO8LaVL7Xtza4ksTcItHW","version":2,"deleted_at":null,"main":false,"created_at":"2018-10-11T14:29:16Z","updated_at":"2018-10-11T14:29:16Z"}

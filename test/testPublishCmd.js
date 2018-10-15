@@ -131,7 +131,7 @@ describe('hlx strain (Integration)', function suite() {
     // VCL version can be computed and must contain X-Version and '<current version=2> |'
     const vclVersion = await cmd.getVersionVCLSection();
     assert.notEqual(vclVersion.indexOf('X-Version ='), -1);
-    assert.notEqual(vclVersion.indexOf('req.http.X-Version + " | 2 | '), -1);
+    assert.notEqual(vclVersion.indexOf('req.http.X-Version + "; src=2; cli='), -1);
   });
 
   it('Invalid strains.yaml gets rejected', () => {

@@ -446,7 +446,7 @@ class PublishCommand {
   static getXVersionExtensionVCL(configVersion, cliVersion, revision) {
     let retvcl = '# This section handles the strain resolution\n';
 
-    const version = ` | ${configVersion} | ${cliVersion} | ${revision}`;
+    const version = `; src=${configVersion}; cli=${cliVersion}; rev=${revision}`;
 
     retvcl += `set req.http.X-Version = req.http.X-Version + "${version}";\n`;
 
