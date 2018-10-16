@@ -24,10 +24,10 @@ const strainconfig = require('../src/strain-config-utils');
 Replay.mode = 'bloody';
 Replay.fixtures = path.resolve(__dirname, 'fixtures');
 
-const FASTLY_AUTH = '---';
-const FASTLY_NAMESPACE = '4fO8LaVL7Xtza4ksTcItHW';
-const WSK_AUTH = 'nope';
-const WSK_NAMESPACE = '---';
+let FASTLY_AUTH = '---';
+let FASTLY_NAMESPACE = '5mNJ6qXkeETj7FyLtRuWl5';
+let WSK_AUTH = 'nope';
+let WSK_NAMESPACE = '---';
 
 const SRC_STRAINS = path.resolve(__dirname, 'fixtures/strains.yaml');
 
@@ -103,29 +103,42 @@ describe('Dynamic Parameter (VCL) generation', () => {
 });
 
 describe('hlx strain (Integration)', function suite() {
-  this.timeout(10000);
+  this.timeout(50000);
 
   let hlxDir;
   let dstStrains;
   let replayheaders;
 
   beforeEach(async () => {
+    // if you need to re-record the test:
+    // - change the mode in the next line to `record`
+    // - set the FASTLY_AUTH, WSK_AUTH and WSK_NAMESPACE environment vars
+    // - change the FASTLY_NAMESPACE here in the code
+    // - run `npm run record`
+    // - commit the changes
+
+    if (process.env.MODE==='record') {
+      FASTLY_AUTH = process.env.FASTLY_AUTH;
+      WSK_AUTH = process.env.WSK_AUTH;
+      WSK_NAMESPACE = process.env.WSK_NAMESPACE;
+      if (!FASTLY_AUTH||!FASTLY_NAMESPACE||!WSK_AUTH||!WSK_NAMESPACE) {
+        console.error('FASTLY_AUTH, WSK_AUTH, WSK_NAMESPACE environment vars');
+        console.error('must be set to re-record test.');
+        console.log(FASTLY_AUTH, FASTLY_NAMESPACE, WSK_AUTH, WSK_NAMESPACE);
+        process.exit(1);
+      }
+      Replay.mode = 'record';
+      fs.removeSync(path.resolve(__dirname, 'fixtures/api.fastly.com-443'));
+    } else {
+      Replay.mode = 'replay';
+    }
+
     const testRoot = await createTestRoot();
     hlxDir = path.resolve(testRoot, '.hlx');
     dstStrains = path.resolve(hlxDir, 'strains.yaml');
 
     await fs.mkdirp(hlxDir);
     await fs.copyFile(SRC_STRAINS, dstStrains);
-    // if you need to re-record the test:
-    // - change the mode in the next line to `record`
-    // - update the FASTLY_AUTH, WSK_AUTH and FASTLY_NAMESPACE
-    // DON'T forget to change it back afterwards, so that no credentials leak
-    // you might also want to delete the previous test recordings in /test/fixtures
-    // - empty the fixtures/api.fastly.com-442 folder
-    // - run `npm test`
-    // - revert the changes above
-    // TODO - simplify
-    Replay.mode = 'replay';
     // don't record the authorization header
     replayheaders = Replay.headers;
     Replay.headers = Replay.headers.filter(e => new RegExp(e).toString() !== new RegExp(/^body/).toString());

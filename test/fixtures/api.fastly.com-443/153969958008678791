@@ -1,4 +1,4 @@
-POST /service/4fO8LaVL7Xtza4ksTcItHW/purge_all
+POST /service/5mNJ6qXkeETj7FyLtRuWl5/purge_all
 accept: application/json
 host: api.fastly.com
 
@@ -6,17 +6,17 @@ HTTP/1.1 200 OK
 status: 200 OK
 content-type: application/json
 cache-control: no-cache
-fastly-ratelimit-remaining: 974
-fastly-ratelimit-reset: 1539270000
+fastly-ratelimit-remaining: 952
+fastly-ratelimit-reset: 1539702000
 accept-ranges: bytes, bytes
 via: 1.1 varnish, 1.1 varnish
 content-length: 15
-date: Thu, 11 Oct 2018 14:29:35 GMT
+date: Tue, 16 Oct 2018 14:19:40 GMT
 connection: close
-x-served-by: cache-control-slwdc9035-CONTROL-SLWDC, cache-lcy19250-LCY
+x-served-by: cache-control-slwdc9035-CONTROL-SLWDC, cache-fra19149-FRA
 x-cache: MISS, MISS
 x-cache-hits: 0, 0
-x-timer: S1539268175.420197,VS0,VE212
+x-timer: S1539699579.472391,VS0,VE576
 vary: Accept-Encoding
 
 {"status":"ok"}
