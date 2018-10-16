@@ -357,6 +357,8 @@ sub vcl_recv {
       set var.extension = regsub(req.url.ext, "^\.", "");
     } else {
       call hlx_index;
+      # enable ESI
+      set req.http.x-esi = "1";
       if (req.http.X-Index ~ "(^[^\.]+)\.?(.*)\.([^\.]+$)") {
         # determine directory index from strain config
         set var.name = re.group.1;
