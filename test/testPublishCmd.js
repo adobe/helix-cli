@@ -41,7 +41,7 @@ describe('hlx strain #unit', () => {
   });
 });
 
-describe('hlx strain (VCL) generation', () => {
+describe('Dynamic Strain (VCL) generation', () => {
   it('getStrainResolutionVCL generates VLC for empty strains', () => {
     const strainfile = strainconfig.load(fs.readFileSync(path.resolve(__dirname, 'fixtures/empty.yaml')));
     const vclfile = fs.readFileSync(path.resolve(__dirname, 'fixtures/empty.vcl')).toString();
@@ -69,10 +69,18 @@ describe('hlx strain (VCL) generation', () => {
   });
 });
 
-describe('Dynamic (VCL) generation', () => {
+describe('Dynamic Version (VCL) generation', () => {
   it('Version VCL', () => {
     const vclfile = fs.readFileSync(path.resolve(__dirname, 'fixtures/dynamic-version.vcl')).toString();
     assert.equal(vclfile.trim(), PublishCommand.getXVersionExtensionVCL('A', 'B', 'C').trim());
+  });
+});
+
+describe('Dynamic Parameter (VCL) generation', () => {
+  it('getStrainParametersVCL generates VLC for empty strains', () => {
+    const strainfile = strainconfig.load(fs.readFileSync(path.resolve(__dirname, 'fixtures/empty.yaml')));
+    const vclfile = fs.readFileSync(path.resolve(__dirname, 'fixtures/empty-params.vcl')).toString();
+    assert.equal(vclfile, PublishCommand.getStrainParametersVCL(strainfile));
   });
 });
 
