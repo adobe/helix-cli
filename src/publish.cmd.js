@@ -451,21 +451,23 @@ class PublishCommand {
     return `^${params.join('|')}$`;
   }
 
-  static makeParamWhitelist(params) {
-    return `
-  set req.http.X-Old-Url = req.url;
-  set req.url = querystring.regfilter(req.url, "${PublishCommand.makeFilter(params)}");
-  set req.http.X-Encoded-Params = urlencode(req.url.qs);
-  `;
+  static makeParamWhitelist(params, indent = '') {
+    return `set req.http.X-Old-Url = req.url;
+set req.url = querystring.regfilter(req.url, "${PublishCommand.makeFilter(params)}");
+set req.http.X-Encoded-Params = urlencode(req.url.qs);`
+    .split('\n')
+    .map(line => indent + line)
+    .join('\n');
   }
 
    /**
    * Generates VCL for strain resolution from a list of strains
    */
   static getStrainParametersVCL(strains) {
-    let retvcl = '# This file handles the URL parameter whitelist\n';
+    let retvcl = '# This file handles the URL parameter whitelist\n\n';
     const [defaultstrain] = strains.filter(strain => strain.name === 'default');
     if (defaultstrain && defaultstrain.params && Array.isArray(defaultstrain.params)) {
+      retvcl += "# default parameters, can be overridden per strain\n";
       retvcl += PublishCommand.makeParamWhitelist(defaultstrain.params);
     }
     const otherstrains = strains
@@ -474,7 +476,7 @@ class PublishCommand {
 
     retvcl += otherstrains.map(({name, params}) => `
 if (req.http.X-Strain == "${name}") {
-  ${PublishCommand.makeParamWhitelist(params)}
+  ${PublishCommand.makeParamWhitelist(params, '  ')}
 }
 `);
     return retvcl;
