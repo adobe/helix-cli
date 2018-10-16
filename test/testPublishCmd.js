@@ -107,6 +107,7 @@ describe('hlx strain (Integration)', function suite() {
 
   let hlxDir;
   let dstStrains;
+  let replayheaders;
 
   beforeEach(async () => {
     const testRoot = await createTestRoot();
@@ -123,16 +124,16 @@ describe('hlx strain (Integration)', function suite() {
     // - empty the fixtures/api.fastly.com-442 folder
     // - run `npm test`
     // - revert the changes above
-    // - search in the folder fixtures/api.fastly.com-442 for
-    // string `POST /service/4fO8LaVL7Xtza4ksTcItHW/version/2/vcl`
-    // - remove the `body` line of the request that uploads the `dynamic.vcl` file
-    // (body contains dynamic.vcl)
     // TODO - simplify
     Replay.mode = 'replay';
+    // don't record the authorization header
+    replayheaders = Replay.headers;
+    Replay.headers = Replay.headers.filter(e => new RegExp(e).toString() !== new RegExp(/^body/).toString());
   });
 
   afterEach(async () => {
     Replay.mode = 'bloody';
+    Replay.headers = replayheaders;
   });
 
   it('Publish Strains on an existing Service Config', async () => {
