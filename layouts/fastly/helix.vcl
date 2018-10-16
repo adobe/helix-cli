@@ -373,8 +373,6 @@ sub vcl_recv {
 
     call hlx_action_root;
 
-
-
     if (var.selector ~ ".+") {
       set var.action = req.http.X-Action-Root + var.selector + "_" + var.extension;
     } else {
@@ -397,10 +395,24 @@ sub vcl_recv {
       set var.path = regsuball(var.path, "/+", "/");
       set req.url = "/" + var.owner + "/" + var.repo + "/" + var.ref + var.path + "?" + req.url.qs;
     } else {
+      # get (strain-specific) parameter whitelist
+      include "params.vcl";
+
+
       set var.path = var.dir + "/" + var.name + ".md";
       set var.path = regsuball(var.path, "/+", "/");
       # Invoke OpenWhisk
-      set req.url = "/api/v1/web" + var.action + "?owner=" + var.owner + "&repo=" + var.repo + "&ref=" + var.ref + "&path=" + var.path + "&selector=" + var.selector + "&extension=" + req.url.ext + "&branch=" + var.branch + "&strain=" + var.strain + "&GITHUB_KEY=" + table.lookup(secrets, "GITHUB_TOKEN");
+      set req.url = "/api/v1/web" + var.action + 
+        "?owner=" + var.owner + 
+        "&repo=" + var.repo + 
+        "&ref=" + var.ref + 
+        "&path=" + var.path + 
+        "&selector=" + var.selector + 
+        "&extension=" + req.url.ext + 
+        "&branch=" + var.branch + 
+        "&strain=" + var.strain + 
+        "&GITHUB_KEY=" + table.lookup(secrets, "GITHUB_TOKEN") +
+        "params=" + req.http.X-Encoded-Params;
     }
   }
 

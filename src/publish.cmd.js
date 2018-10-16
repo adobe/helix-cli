@@ -499,6 +499,11 @@ ${PublishCommand.makeParamWhitelist(params, '  ')}
     return this.transferVCL(vcl, 'strains.vcl');
   }
 
+  async setParametersVCL() {
+    const vcl = PublishCommand.getStrainParametersVCL(this._strains);
+    return this.transferVCL(vcl, 'params.vcl');
+  }
+
   async getVersionVCLSection() {
     const configVersion = await this.getCurrentVersion();
     const cliVersion = cli.getVersion();
@@ -729,9 +734,13 @@ ${PublishCommand.makeParamWhitelist(params, '  ')}
     // wait for all dict updates to complete
     await Promise.all(strainjobs);
 
-    // set all VCL files
-    await this.setStrainsVCL();
-    await this.setDynamicVCL();
+    // set all dependent VCL files
+    await Promise.all([
+      this.setStrainsVCL(),
+      this.setDynamicVCL(),
+      this.setParametersVCL()
+    ]); 
+    // then set the master VCL file
     await this.setHelixVCL();
 
     await secretp;
