@@ -454,7 +454,8 @@ class PublishCommand {
   static makeParamWhitelist(params, indent = '') {
     return `set req.http.X-Old-Url = req.url;
 set req.url = querystring.regfilter(req.url, "${PublishCommand.makeFilter(params)}");
-set req.http.X-Encoded-Params = urlencode(req.url.qs);`
+set req.http.X-Encoded-Params = urlencode(req.url.qs);
+set req.url = req.http.X-Old-Url;`
     .split('\n')
     .map(line => indent + line)
     .join('\n');
@@ -475,8 +476,9 @@ set req.http.X-Encoded-Params = urlencode(req.url.qs);`
       .filter(strain => strain.params && Array.isArray(strain.params));
 
     retvcl += otherstrains.map(({name, params}) => `
+
 if (req.http.X-Strain == "${name}") {
-  ${PublishCommand.makeParamWhitelist(params, '  ')}
+${PublishCommand.makeParamWhitelist(params, '  ')}
 }
 `);
     return retvcl;

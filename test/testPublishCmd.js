@@ -88,6 +88,12 @@ describe('Dynamic Parameter (VCL) generation', () => {
     const vclfile = fs.readFileSync(path.resolve(__dirname, 'fixtures/default-params.vcl')).toString();
     assert.equal(vclfile, PublishCommand.getStrainParametersVCL(strainfile));
   });
+
+  it('getStrainParametersVCL generates VLC for all strains with params', () => {
+    const strainfile = strainconfig.load(fs.readFileSync(path.resolve(__dirname, 'fixtures/some-params.yaml')));
+    const vclfile = fs.readFileSync(path.resolve(__dirname, 'fixtures/some-params.vcl')).toString();
+    assert.equal(vclfile, PublishCommand.getStrainParametersVCL(strainfile));
+  });
 });
 
 describe('hlx strain (Integration)', function suite() {
