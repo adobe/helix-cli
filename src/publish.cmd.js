@@ -20,9 +20,9 @@ const path = require('path');
 const URI = require('uri-js');
 const glob = require('glob-to-regexp');
 const { toBase64 } = require('request/lib/helpers');
+const { GitUtils } = require('@adobe/petridish');
 const strainconfig = require('./strain-config-utils');
 const include = require('./include-util');
-const GitUtils = require('./gitutils');
 const useragent = require('./user-agent-util');
 const cli = require('./cli-util');
 
@@ -36,7 +36,7 @@ class PublishCommand {
     this._fastly_namespace = null;
     this._fastly_auth = null;
     this._dryRun = false;
-    this._strainFile = path.resolve(process.cwd(), '.hlx', 'strains.yaml');
+    this._strainFile = path.resolve(process.cwd(), '.hlx', 'strains.json');
     this._strains = null;
     this._vclFile = path.resolve(process.cwd(), '.hlx', 'helix.vcl');
 
@@ -102,13 +102,12 @@ class PublishCommand {
     };
   }
 
-  loadStrains() {
-    const content = fs.readFileSync(this._strainFile);
+  async loadStrains() {
+    const content = await fs.readFile(this._strainFile, 'utf-8');
     this._strains = strainconfig.load(content);
     if (this._strains.filter(strain => strain.name === 'default').length !== 1) {
       throw new Error(`${this._strainFile} must include one strain 'default'`);
     }
-    return this._strains;
   }
 
   withWskHost(value) {
@@ -144,7 +143,6 @@ class PublishCommand {
 
   withStrainFile(value) {
     this._strainFile = value;
-    this.loadStrains();
     return this;
   }
 
@@ -699,7 +697,7 @@ class PublishCommand {
   }
 
   async run() {
-    this.loadStrains();
+    await this.loadStrains();
     try {
       await this._updateFastly();
       console.log('📕  All dicts have been updated.');

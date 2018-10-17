@@ -16,9 +16,9 @@
 
 const assert = require('assert');
 const sinon = require('sinon');
+const { GitUtils } = require('@adobe/petridish');
 const CLI = require('../src/cli.js');
 const DeployCommand = require('../src/deploy.cmd');
-const GitUtils = require('../src/gitutils');
 
 describe('hlx deploy', () => {
   // mocked command instance

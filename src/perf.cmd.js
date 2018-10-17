@@ -23,7 +23,7 @@ const JunitPerformanceReport = require('./junit-utils');
 
 class PerfCommand {
   constructor() {
-    this._strainFile = path.resolve(process.cwd(), '.hlx', 'strains.yaml');
+    this._strainFile = path.resolve(process.cwd(), '.hlx', 'strains.json');
     this._strains = null;
     this._auth = null;
     this._calibre = null;
@@ -70,10 +70,13 @@ class PerfCommand {
   }
 
   loadStrains() {
+    // todo: Is this correctly based on the .hlx/strains.json or should it rather read the
+    // helix-config.yaml ? performance testing can only be done on published sites, but
+    // modifying .hlx/strains.json is discouraged.
     if (this._strains) {
       return this._strains;
     }
-    const content = fs.readFileSync(this._strainFile);
+    const content = fs.readFileSync(this._strainFile, 'utf-8');
     this._strains = strainconfig.load(content);
     return this._strains;
   }

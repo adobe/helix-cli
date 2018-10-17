@@ -37,7 +37,7 @@ describe('hlx deploy (Integration)', () => {
     testRoot = await createTestRoot();
     hlxDir = path.resolve(testRoot, '.hlx');
     buildDir = path.resolve(hlxDir, 'build');
-    strainsFile = path.resolve(hlxDir, 'strains.yaml');
+    strainsFile = path.resolve(hlxDir, 'strains.json');
 
     cwd = process.cwd();
 

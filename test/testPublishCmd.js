@@ -43,26 +43,26 @@ describe('hlx strain #unit', () => {
 
 describe('hlx strain (VCL) generation', () => {
   it('getStrainResolutionVCL generates VLC for empty strains', () => {
-    const strainfile = strainconfig.load(fs.readFileSync(path.resolve(__dirname, 'fixtures/empty.yaml')));
+    const strainfile = strainconfig.load(fs.readFileSync(path.resolve(__dirname, 'fixtures/empty.yaml'), 'utf-8'));
     const vclfile = fs.readFileSync(path.resolve(__dirname, 'fixtures/empty.vcl')).toString();
     assert.equal(vclfile, PublishCommand.getStrainResolutionVCL(strainfile));
   });
 
   it('getStrainResolutionVCL generates VLC for non-existing conditions strains', () => {
-    const strainfile = strainconfig.load(fs.readFileSync(path.resolve(__dirname, 'fixtures/default.yaml')));
+    const strainfile = strainconfig.load(fs.readFileSync(path.resolve(__dirname, 'fixtures/default.yaml'), 'utf-8'));
     const vclfile = fs.readFileSync(path.resolve(__dirname, 'fixtures/default.vcl')).toString();
     assert.equal(vclfile, PublishCommand.getStrainResolutionVCL(strainfile));
   });
 
   it('getStrainResolutionVCL generates VLC for simple conditions strains', () => {
-    const strainfile = strainconfig.load(fs.readFileSync(path.resolve(__dirname, 'fixtures/simple-condition.yaml')));
+    const strainfile = strainconfig.load(fs.readFileSync(path.resolve(__dirname, 'fixtures/simple-condition.yaml'), 'utf-8'));
     const vclfile = fs.readFileSync(path.resolve(__dirname, 'fixtures/simple-condition.vcl')).toString();
     // console.log(PublishCommand.getStrainResolutionVCL(strainfile));
     assert.equal(vclfile.trim(), PublishCommand.getStrainResolutionVCL(strainfile).trim());
   });
 
   it('getStrainResolutionVCL generates VLC for URL-based conditions', () => {
-    const strainfile = strainconfig.load(fs.readFileSync(path.resolve(__dirname, 'fixtures/urls.yaml')));
+    const strainfile = strainconfig.load(fs.readFileSync(path.resolve(__dirname, 'fixtures/urls.yaml'), 'utf-8'));
     const vclfile = fs.readFileSync(path.resolve(__dirname, 'fixtures/urls.vcl')).toString();
     // console.log(PublishCommand.getStrainResolutionVCL(strainfile));
     assert.equal(vclfile.trim(), PublishCommand.getStrainResolutionVCL(strainfile).trim());
@@ -76,7 +76,7 @@ describe('Dynamic (VCL) generation', () => {
   });
 });
 
-describe('hlx strain (Integration)', function suite() {
+describe('hlx publish (Integration)', function suite() {
   this.timeout(10000);
 
   let hlxDir;
