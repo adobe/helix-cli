@@ -25,7 +25,7 @@ Replay.mode = 'bloody';
 Replay.fixtures = path.resolve(__dirname, 'fixtures');
 
 let FASTLY_AUTH = '---';
-let FASTLY_NAMESPACE = '5mNJ6qXkeETj7FyLtRuWl5';
+const FASTLY_NAMESPACE = '5mNJ6qXkeETj7FyLtRuWl5';
 let WSK_AUTH = 'nope';
 let WSK_NAMESPACE = '---';
 
@@ -117,14 +117,14 @@ describe('hlx strain (Integration)', function suite() {
     // - run `npm run record`
     // - commit the changes
 
-    if (process.env.MODE==='record') {
-      FASTLY_AUTH = process.env.FASTLY_AUTH;
-      WSK_AUTH = process.env.WSK_AUTH;
-      WSK_NAMESPACE = process.env.WSK_NAMESPACE;
-      if (!FASTLY_AUTH||!FASTLY_NAMESPACE||!WSK_AUTH||!WSK_NAMESPACE) {
+    if (process.env.MODE === 'record') {
+      ({ FASTLY_AUTH, WSK_AUTH, WSK_NAMESPACE } = process.env);
+      if (!FASTLY_AUTH || !FASTLY_NAMESPACE || !WSK_AUTH || !WSK_NAMESPACE) {
+        /* eslint-disable no-console */
         console.error('FASTLY_AUTH, WSK_AUTH, WSK_NAMESPACE environment vars');
         console.error('must be set to re-record test.');
         console.log(FASTLY_AUTH, FASTLY_NAMESPACE, WSK_AUTH, WSK_NAMESPACE);
+        /* eslint-enable no-console */
         process.exit(1);
       }
       Replay.mode = 'record';

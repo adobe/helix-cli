@@ -738,8 +738,8 @@ ${PublishCommand.makeParamWhitelist(params, '  ')}
     await Promise.all([
       this.setStrainsVCL(),
       this.setDynamicVCL(),
-      this.setParametersVCL()
-    ]); 
+      this.setParametersVCL(),
+    ]);
     // then set the master VCL file
     await this.setHelixVCL();
 
