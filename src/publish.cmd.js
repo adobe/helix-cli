@@ -448,7 +448,7 @@ class PublishCommand {
    * @param {Array(String)} params a list of parameter names
    */
   static makeFilter(params) {
-    return `^${params.join('|')}$`;
+    return `^(${[...params, 'hlx_.*'].join('|')})$`;
   }
 
   static makeParamWhitelist(params, indent = '') {
