@@ -453,7 +453,7 @@ class PublishCommand {
 
   static makeParamWhitelist(params, indent = '') {
     return `set req.http.X-Old-Url = req.url;
-set req.url = querystring.regfilter(req.url, "${PublishCommand.makeFilter(params)}");
+set req.url = querystring.regfilter_except(req.url, "${PublishCommand.makeFilter(params)}");
 set req.http.X-Encoded-Params = urlencode(req.url.qs);
 set req.url = req.http.X-Old-Url;`
       .split('\n')
