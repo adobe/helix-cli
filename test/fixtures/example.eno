@@ -1,0 +1,39 @@
+# Mount Points
+
+> This is where you can find content
+
+## project-helix.io content
+### /
+repo: project-helix.io
+org: adobe
+ref: master
+### /cli
+repo: helix-cli
+org: adobe
+### /pipeline
+repo: helix-cli
+org: adobe
+
+## local development content < project-helix.io content
+### /
+repo: localhost
+### /cli
+repo: localhost
+root: /cli
+ref: master
+
+# Strains
+
+> Strains map content and code
+
+## default
+code: /trieloff/default/git-github-com-adobe-helix-cli-git--
+### content < project-helix.io content
+#### /cli
+ref: 1.0
+
+## develop < default
+code: /trieloff/default/git-github-com-adobe-helix-cli-git--dirty
+
+## local < develop
+### content < local development content
