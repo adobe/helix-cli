@@ -1,5 +1,6 @@
 .hlx/
 .cache/
+dist/
 node_modules/
 pipeline.log
 logs
