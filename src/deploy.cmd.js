@@ -22,6 +22,8 @@ const path = require('path');
 const fs = require('fs-extra');
 const yaml = require('js-yaml');
 const GitUrl = require('@adobe/petridish/src/GitUrl');
+const ProgressBar = require('progress');
+const Promise = require('bluebird');
 const GitUtils = require('./gitutils');
 const strainconfig = require('./strain-config-utils');
 const useragent = require('./user-agent-util');
@@ -283,6 +285,7 @@ class DeployCommand {
 
     const scripts = [path.resolve(__dirname, 'openwhisk', 'static.js'), ...glob.sync(`${this._target}/*.js`)];
 
+    const bar = new ProgressBar('deploying [:bar] :etas', { total: (scripts.length * 2), width: 50 });
     const params = {
       ...this._default,
       LOGGLY_HOST: this._loggly_host,
@@ -293,36 +296,45 @@ class DeployCommand {
       this._prefix = `${GitUtils.getRepository()}--${GitUtils.getBranchFlag()}--`;
     }
 
-    scripts.map((script) => {
-      const name = this.actionName(script);
-      console.log(`⏳  Deploying ${script} as ${name}`);
+    const named = scripts.map(script => ({
+      script,
+      name: this.actionName(script),
+    }));
 
-      fs.readFile(script, { encoding: 'utf8' }, (err, action) => {
-        if (!err) {
-          const actionoptions = {
-            name,
-            'User-Agent': useragent,
-            action,
-            params,
-            kind: 'blackbox',
-            exec: { image: this._docker, main: 'module.exports.main' },
-            annotations: { 'web-export': true },
-          };
-          if (this._dryRun) {
-            console.log(`❎  Action ${name} has been skipped.`);
-          } else {
-            openwhisk.actions.update(actionoptions).then((result) => {
-              console.log(`✅  Action ${result.name} has been created.`);
-            }).catch((e) => {
-              console.error(`❌  Unable to deploy the action ${name}:  ${e.message}`);
-            });
-          }
-        } else {
-          console.error(`❌  File ${script} could not be read. ${err.message}`);
-        }
+    const read = Promise.map(named, ({ script, name }) => fs.readFile(script, { encoding: 'utf8' }).then(action => ({ script, name, action })));
+
+    const deployed = Promise.map(read, ({ script, name, action }) => {
+      const actionoptions = {
+        name,
+        'User-Agent': useragent,
+        action,
+        params,
+        kind: 'blackbox',
+        exec: { image: this._docker, main: 'module.exports.main' },
+        annotations: { 'web-export': true },
+      };
+
+      bar.tick({ message: `⏳  ${path.basename(script)} (deploying)` });
+      bar.render();
+
+      if (this._dryRun) {
+        bar.tick({ message: `️️️⌛️  ${path.basename(script)} (skipped)` });
+        return true;
+      }
+      return openwhisk.actions.update(actionoptions).then(() => {
+        bar.tick({ message: `⌛️  ${path.basename(script)} (deployed)` });
+        bar.render();
+        return true;
+      }).catch((e) => {
+        bar.interrupt(`❌  Unable to deploy the action ${name}:  ${e.message}`);
+        bar.tick();
+        return false;
       });
+    });
 
-      return name;
+    Promise.all(deployed).then(() => {
+      bar.tick();
+      console.log('deployment completed');
     });
 
     if (fs.existsSync(this._strainFile)) {
