@@ -29,7 +29,7 @@ jobs:
 
     - run:
         name: Bootstrapping Packages
-        command: npm lerna bootstrap
+        command: npx lerna bootstrap
 
     - save_cache:
         paths:
@@ -39,17 +39,17 @@ jobs:
         key: v3-dependencies-{{ arch }}-{{ checksum "package.json" }}-{{ checksum "packages/helix-cli/package.json" }}-{{ checksum "packages/petridish/package.json" }}
 
     # run tests!
-    - run: lerna exec mkdir junit
+    - run: npx lerna exec mkdir junit
     - run:
         name: prepare test git user
         command: git config --global user.email "you@example.com" && git config --global user.name "Your Name"
     - run:
         name: Lint
-        command: lerna run lint
+        command: npx lerna run lint
 
     - run:
         name: Tests
-        command: lerna run test
+        command: npx lerna run test
     # test & get code coverage
     # TODO properly
 #    - run:
