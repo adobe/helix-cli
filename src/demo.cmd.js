@@ -75,7 +75,9 @@ class InitCommand {
       shell.cd(dir);
       await execAsync('git init -q');
       await execAsync('git add -A');
-      await execAsync('git commit -q -m"Initial commit."');
+      // https://github.com/adobe/helix-cli/issues/280
+      // bypass pre-commit and commit-msg hooks when doing initial commit (-n,--no-verify)
+      await execAsync('git commit -q -n -m"Initial commit."');
       this.msg(chalk.yellow('initializing git repository'));
     } catch (e) {
       throw Error(`Unable to initialize git repository: ${e}`);
