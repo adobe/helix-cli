@@ -45,11 +45,11 @@ jobs:
         command: git config --global user.email "you@example.com" && git config --global user.name "Your Name"
     - run:
         name: Lint
-        command: npx lerna run lint
+        command: npx lerna exec npm run lint
 
     - run:
         name: Tests
-        command: npx lerna run test
+        command: npx lerna exec npm run test
     # test & get code coverage
     # TODO properly
 #    - run:

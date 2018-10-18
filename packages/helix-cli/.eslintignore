@@ -1,0 +1,7 @@
+.vscode/*
+logs/*
+demos/*
+test/integration
+test/tmp/*
+tmp/*
+coverage/*
