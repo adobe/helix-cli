@@ -411,7 +411,6 @@ sub vcl_recv {
         "&extension=" + req.url.ext + 
         "&branch=" + var.branch + 
         "&strain=" + var.strain + 
-        "&GITHUB_KEY=" + table.lookup(secrets, "GITHUB_TOKEN") +
         "&params=" + req.http.X-Encoded-Params;
     }
   }
