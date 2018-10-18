@@ -162,6 +162,10 @@ In the example above, the parameters `foo` and `bar` have been enabled. A reques
 
 Every allowed parameter value will affect the caching of your site in the CDN.
 
+#### Helix-Internal Request Parameters
+
+All request parameters starting with `hlx_` will be passed through to the action, so that they can be used for Helix-internal purposes.
+
 ### Directory Index
 
 The default behavior for directory indexes is to load `index.html` when requesting a path ending with `/`,
