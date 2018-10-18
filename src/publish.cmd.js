@@ -405,7 +405,7 @@ class PublishCommand {
 
   /**
    * Creates a condition expression in VCL language that maps requests to strains.
-   * @param {Strain} strain the strain to generate a condition expression for 
+   * @param {Strain} strain the strain to generate a condition expression for
    */
   static vclConditions(strain) {
     if (strain.url) {
@@ -422,9 +422,9 @@ class PublishCommand {
       return Object.assign({
         condition: `req.http.Host == "${uri.host}"`,
       }, strain);
-    } else if (strain.condition&&strain.sticky===undefined) {
+    } if (strain.condition && strain.sticky === undefined) {
       return Object.assign({
-        sticky: true
+        sticky: true,
       }, strain);
     }
     return strain;
@@ -438,7 +438,9 @@ class PublishCommand {
     const conditions = strains
       .map(PublishCommand.vclConditions)
       .filter(strain => strain.condition)
-      .map(({ condition, name, vcl = '', sticky = false }) => `if (${condition}) {
+      .map(({
+        condition, name, vcl = '', sticky = false,
+      }) => `if (${condition}) {
   set req.http.X-Sticky = "${sticky}";
   set req.http.X-Strain = "${name}";${vcl}
 } else `);
