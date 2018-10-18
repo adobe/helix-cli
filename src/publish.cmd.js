@@ -403,12 +403,17 @@ class PublishCommand {
     return Promise.resolve();
   }
 
+  /**
+   * Creates a condition expression in VCL language that maps requests to strains.
+   * @param {Strain} strain the strain to generate a condition expression for 
+   */
   static vclConditions(strain) {
     if (strain.url) {
       const uri = URI.parse(strain.url);
       if (uri.path && uri.path !== '/') {
         const pathname = uri.path.replace(/\/$/, '');
         return Object.assign({
+          sticky: false,
           condition: `req.http.Host == "${uri.host}" && (req.url.dirname ~ "^${pathname}$" || req.url.dirname ~ "^${pathname}/")`,
           vcl: `
   set req.http.X-Dirname = regsub(req.url.dirname, "^${pathname}", "");`,
@@ -416,6 +421,10 @@ class PublishCommand {
       }
       return Object.assign({
         condition: `req.http.Host == "${uri.host}"`,
+      }, strain);
+    } else if (strain.condition&&strain.sticky===undefined) {
+      return Object.assign({
+        sticky: true
       }, strain);
     }
     return strain;
@@ -429,7 +438,8 @@ class PublishCommand {
     const conditions = strains
       .map(PublishCommand.vclConditions)
       .filter(strain => strain.condition)
-      .map(({ condition, name, vcl = '' }) => `if (${condition}) {
+      .map(({ condition, name, vcl = '', sticky = false }) => `if (${condition}) {
+  set req.http.X-Sticky = "${sticky}";
   set req.http.X-Strain = "${name}";${vcl}
 } else `);
     if (conditions.length) {

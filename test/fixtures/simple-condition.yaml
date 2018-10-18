@@ -14,3 +14,4 @@
       ref: master
       owner: adobe
     condition: 'req.http.X-Debug == "true"'
+    sticky: false
