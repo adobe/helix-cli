@@ -1,0 +1,65 @@
+{
+  "name": "@adobe/petridish",
+  "version": "1.6.1-pre.1",
+  "description": "Helix Testing Environment",
+  "repository": "https://github.com/adobe/petridish",
+  "main": "src/index.js",
+  "license": "Apache-2.0",
+  "scripts": {
+    "start": "node src/run.js",
+    "test": "nyc mocha",
+    "lint": "./node_modules/.bin/eslint .",
+    "snyk-protect": "snyk protect",
+    "prepare": "npm run snyk-protect",
+    "preversion": "npm test",
+    "postversion": "git push origin master --follow-tags",
+    "delete-git-tag": "git tag -d v$npm_package_version && git push origin :v$npm_package_version"
+  },
+  "dependencies": {
+    "@adobe/git-server": "^0.9.7",
+    "colors": "^1.3.0",
+    "express": "^4.16.3",
+    "fs-extra": "^7.0.0",
+    "git-url-parse": "^10.0.1",
+    "js-yaml": "^3.12.0",
+    "lodash": "^4.17.5",
+    "moment": "^2.22.2",
+    "nodesi": "^1.8.0",
+    "request": "^2.85.0",
+    "request-promise": "^4.2.2",
+    "snyk": "^1.88.1",
+    "winston": "^3.0.0"
+  },
+  "devDependencies": {
+    "ajv": "^6.5.3",
+    "codecov": "^3.0.2",
+    "eslint": "^5.4.0",
+    "eslint-config-airbnb": "^17.1.0",
+    "eslint-plugin-header": "^2.0.0",
+    "eslint-plugin-import": "^2.14.0",
+    "eslint-plugin-jsx-a11y": "^6.1.1",
+    "eslint-plugin-react": "^7.11.1",
+    "istanbul": "^1.1.0-alpha.1",
+    "mocha": "^5.0.5",
+    "mocha-junit-reporter": "^1.17.0",
+    "nodemon": "^1.17.2",
+    "nyc": "^13.0.1",
+    "shelljs": "^0.8.2"
+  },
+  "nodemonConfig": {
+    "ignoreRoot": [
+      ".git"
+    ],
+    "ignore": [
+      "test/*",
+      "dishes/*",
+      "docs/*"
+    ],
+    "watch": [
+      "src",
+      "node_modules/@adobe/md2json/src",
+      "node_modules/@adobe/strainconfig/src"
+    ]
+  },
+  "snyk": true
+}

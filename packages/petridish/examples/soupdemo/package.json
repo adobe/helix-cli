@@ -1,0 +1,11 @@
+{
+  "name": "soupdemo",
+  "description": "Demo repository for helix",
+  "version": "1.0.0",
+  "scripts": {
+    "start": "node ../../src/run.js",
+    "build": "hlx build",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "license": "Apache-2.0"
+}

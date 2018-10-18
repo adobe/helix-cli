@@ -1,0 +1,5 @@
+.hlx/
+.cache/
+node_modules/
+pipeline.log
+logs

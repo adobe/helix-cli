@@ -1,0 +1,19 @@
+{
+  "__ow_headers": {
+    "x-openwhisk-activation-id": "X_WSK_ACTIVATION_ID",
+    "x-request-id": "X_REQUEST_ID",
+    "x-backend-name": "localhost--F_Petridish",
+    "x-cdn-request-id": "X_CDN_REQUEST_ID",
+    "host": "localhost:SERVER_PORT",
+    "connection": "close"
+  },
+  "__ow_method": "get",
+  "__ow_logger": {},
+  "owner": "helix",
+  "repo": "content",
+  "ref": "master",
+  "path": "/index.md",
+  "req": "{\"url\":\"/index.dump.html\",\"resourcePath\":\"/index\",\"path\":\"/index.dump.html\",\"selector\":\"dump\",\"extension\":\"html\",\"method\":\"GET\",\"headers\":{\"host\":\"localhost:SERVER_PORT\",\"connection\":\"close\"},\"params\":{}}",
+  "REPO_RAW_ROOT": "http://127.0.0.1:GIT_PORT/raw/",
+  "REPO_API_ROOT": "http://127.0.0.1:GIT_PORT/api/"
+}

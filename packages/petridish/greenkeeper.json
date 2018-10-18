@@ -1,0 +1,10 @@
+{
+  "groups": {
+    "default": {
+      "packages": [
+        "examples/soupdemo/package.json",
+        "package.json"
+      ]
+    }
+  }
+}
