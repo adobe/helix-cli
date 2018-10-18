@@ -285,7 +285,7 @@ class DeployCommand {
 
     const scripts = [path.resolve(__dirname, 'openwhisk', 'static.js'), ...glob.sync(`${this._target}/*.js`)];
 
-    const bar = new ProgressBar('deploying [:bar] :etas', { total: (scripts.length * 2), width: 50 });
+    const bar = new ProgressBar('deploying [:bar] :etas', { total: (scripts.length * 2), width: 50, renderThrottle: 1 });
     const params = {
       ...this._default,
       LOGGLY_HOST: this._loggly_host,
@@ -333,8 +333,8 @@ class DeployCommand {
     });
 
     Promise.all(deployed).then(() => {
-      bar.tick();
-      console.log('deployment completed');
+      this.progressBar().terminate();
+      console.log('✅  deployment completed');
     });
 
     if (fs.existsSync(this._strainFile)) {

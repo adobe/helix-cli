@@ -20,6 +20,8 @@ const path = require('path');
 const URI = require('uri-js');
 const glob = require('glob-to-regexp');
 const { toBase64 } = require('request/lib/helpers');
+const ProgressBar = require('progress');
+const Promise = require('bluebird');
 const strainconfig = require('./strain-config-utils');
 const include = require('./include-util');
 const GitUtils = require('./gitutils');
@@ -100,6 +102,32 @@ class PublishCommand {
         use_ssl: true,
       },
     };
+  }
+
+  progressBar() {
+    if (this._bar) {
+      return this._bar;
+    }
+
+    // number of backends
+    const backends = Object.keys(this._backends).length;
+    // number of dictionaries
+    const dictionaries = Object.keys(this._dictionaries).length;
+    // number of non-strain-specific dictionaries
+    const staticdictionaries = 1;
+    const strains = this._strains.length;
+    const vclfiles = 3;
+    const extrarequests = 3;
+
+    const ticks = 
+      backends + 
+      dictionaries + 
+      (strains * (dictionaries - staticdictionaries)) +
+      vclfiles +
+      extrarequests;
+    this._bar = new ProgressBar('publishing [:bar] :etas', { total: ticks, width:50, renderThrottle: 1});
+    
+    return this._bar;
   }
 
   loadStrains() {
@@ -286,6 +314,7 @@ class PublishCommand {
     const missingdicts = Object.entries(dictionaries)
       .filter(([_key, value]) => value === null)
       .map(([key, _value]) => key);
+      this.progressBar().tick(Object.entries(dictionaries).length - missingdicts.length);
     if (missingdicts.length > 0) {
       const baseopts = await this.version('/dictionary');
       missingdicts.map((dict) => {
@@ -297,7 +326,7 @@ class PublishCommand {
           },
         }, baseopts);
         return request(opts).then((r) => {
-          console.log(`📕  Dictionary ${r.name} has been created`);
+          this.progressBar().tick();
           return r;
         })
           .catch((e) => {
@@ -318,6 +347,7 @@ class PublishCommand {
     const missingbackends = Object.entries(backends)
       .filter(([_key, value]) => value.created_at === undefined)
       .map(([_key, value]) => value);
+    this.progressBar().tick(Object.entries(backends).length - missingbackends.length);
     if (missingbackends.length > 0) {
       const baseopts = await this.version('/backend');
       return Promise.all(missingbackends.map(async (backend) => {
@@ -327,7 +357,7 @@ class PublishCommand {
         }, baseopts);
         try {
           const r = await request(opts);
-          console.log(`🔚  Backend ${r.name} has been created`);
+          this.progressBar().tick();
           return r;
         } catch (e) {
           const message = `Backend ${backend.name} could not be created`;
@@ -347,8 +377,8 @@ class PublishCommand {
   async cloneVersion() {
     const cloneOpts = await this.putVersionOpts('/clone');
     return request(cloneOpts).then((r) => {
-      console.log(`🐑  Cloned latest version, version ${r.number} is ready`);
       this._version = r.number;
+      this.progressBar().tick();
       return Promise.resolve(this);
     })
       .catch((e) => {
@@ -365,7 +395,7 @@ class PublishCommand {
   async publishVersion() {
     const actOpts = await this.putVersionOpts('/activate');
     return request(actOpts).then((r) => {
-      console.log(`🚀  Activated latest version, version ${r.number} is live`);
+      this.progressBar().tick();
       this._version = r.number;
       return Promise.resolve(this);
     })
@@ -554,12 +584,12 @@ ${PublishCommand.makeParamWhitelist(params, '  ')}
     const opts = await this.vclopts(name, vcl);
     return request(opts)
       .then(async (r) => {
-        console.log(`✅  VCL ${r.name} has been updated`);
+        this.progressBar().tick();
         if (isMain) {
           const mainbaseopts = await this.version(`/vcl/${name}/main`);
           const mainopts = Object.assign({ method: 'PUT' }, mainbaseopts);
           return request(mainopts).then((_s) => {
-            console.log(`✅  VCL ${r.name} has been made main`);
+            this.progressBar().tick();
           });
         }
         return r;
@@ -581,7 +611,7 @@ ${PublishCommand.makeParamWhitelist(params, '  ')}
       method: 'POST',
     }, baseopts);
     return request(opts).then((r) => {
-      console.log('💀  Purged entire cache');
+      this.progressBar().tick();
       return r;
     })
       .catch((e) => {
@@ -593,7 +623,6 @@ ${PublishCommand.makeParamWhitelist(params, '  ')}
   }
 
   async initFastly() {
-    console.log('Checking Fastly Setup');
     return this.initBackends();
   }
 
@@ -612,8 +641,9 @@ ${PublishCommand.makeParamWhitelist(params, '  ')}
     const strains = this._strains;
 
     const urls = strains.filter(strain => strain.url).map(strain => strain.url);
+    this.progressBar().terminate();
 
-    console.log('✅  All strains have been published and are online.');
+    console.log(`✅  All strains have been published and version ${this._version} is now online.`);
     if (urls.length) {
       console.log('\nYou now access your site using:');
       console.log(chalk.grey(`$ curl ${urls[0]}`));
@@ -629,7 +659,7 @@ ${PublishCommand.makeParamWhitelist(params, '  ')}
   }
 
   async _updateFastly() {
-    console.log('🐑 👾 🚀  hlx is publishing strains');
+    this.progressBar();
 
     await this.cloneVersion();
     await this.initFastly();
@@ -637,7 +667,7 @@ ${PublishCommand.makeParamWhitelist(params, '  ')}
 
     const owsecret = `Basic ${toBase64(`${this._wsk_auth}`)}`;
     const secretp = this.putDict('secrets', 'OPENWHISK_AUTH', owsecret).then((_s) => {
-      console.log('🗝  Enabled Fastly to call secure OpenWhisk actions');
+      this.progressBar().tick();
     })
       .catch((e) => {
         const message = 'OpenWhisk authentication could not be passed on';
@@ -647,7 +677,7 @@ ${PublishCommand.makeParamWhitelist(params, '  ')}
       });
 
     const ownsp = this.putDict('secrets', 'OPENWHISK_NAMESPACE', this._wsk_namespace).then((_s) => {
-      console.log('🗝  Enabled Fastly to call OpenWhisk static action');
+      this.progressBar().tick();
     })
       .catch((e) => {
         const message = 'OpenWhisk namespace could not be passed on';
@@ -664,7 +694,7 @@ ${PublishCommand.makeParamWhitelist(params, '  ')}
         if (strainvalue) {
           const job = this.putDict(dictname, strainname, strainvalue)
             .then(() => {
-              console.log(`${message} for strain ${strainname}`);
+              this.progressBar().tick();
             })
             .catch((e) => {
               const msg = 'Error setting edge dictionary value';
@@ -711,6 +741,8 @@ ${PublishCommand.makeParamWhitelist(params, '  ')}
 
       if (strain.static && strain.static.root) {
         makeStrainjob('strain_github_static_root', strain.name, strain.static.root, '🌲  Set static root');
+      } else {
+        this.progressBar().tick();
       }
 
       if (strain.static && strain.static.magic) {
@@ -722,11 +754,15 @@ ${PublishCommand.makeParamWhitelist(params, '  ')}
       if (strain.static && strain.static.allow) {
         const allow = PublishCommand.makeRegexp(strain.static.allow);
         makeStrainjob('strain_allow', strain.name, allow, '⚪️  Set whitelist');
+      } else {
+        this.progressBar().tick();
       }
 
       if (strain.static && strain.static.deny) {
         const deny = PublishCommand.makeRegexp(strain.static.deny);
         makeStrainjob('strain_deny', strain.name, deny, '⚫️  Set blacklist');
+      } else {
+        this.progressBar().tick();
       }
       return strain;
     });
@@ -752,7 +788,7 @@ ${PublishCommand.makeParamWhitelist(params, '  ')}
     this.loadStrains();
     try {
       await this._updateFastly();
-      console.log('📕  All dicts have been updated.');
+      this.progressBar().tick();
       await this.publishVersion();
       await this.purgeAll();
 
