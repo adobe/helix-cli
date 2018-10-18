@@ -630,6 +630,10 @@ sub vcl_deliver {
     unset resp.http.X-GitHub-Request-Id;
     unset resp.http.X-Fastly-Request-ID;
     unset resp.http.X-Geo-Block-List;
+    unset resp.http.X-Content-Type-Options;
+    unset resp.http.X-Frame-Options;
+    unset resp.http.x-openwhisk-activation-id;
+    unset resp.http.x-xss-protection;
   }
   return(deliver);
 }
