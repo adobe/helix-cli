@@ -119,14 +119,13 @@ class PublishCommand {
     const vclfiles = 3;
     const extrarequests = 3;
 
-    const ticks = 
-      backends + 
-      dictionaries + 
-      (strains * (dictionaries - staticdictionaries)) +
-      vclfiles +
-      extrarequests;
-    this._bar = new ProgressBar('publishing [:bar] :etas', { total: ticks, width:50, renderThrottle: 1});
-    
+    const ticks = backends
+      + dictionaries
+      + (strains * (dictionaries - staticdictionaries))
+      + vclfiles
+      + extrarequests;
+    this._bar = new ProgressBar('publishing [:bar] :etas', { total: ticks, width: 50, renderThrottle: 1 });
+
     return this._bar;
   }
 
@@ -314,7 +313,7 @@ class PublishCommand {
     const missingdicts = Object.entries(dictionaries)
       .filter(([_key, value]) => value === null)
       .map(([key, _value]) => key);
-      this.progressBar().tick(Object.entries(dictionaries).length - missingdicts.length);
+    this.progressBar().tick(Object.entries(dictionaries).length - missingdicts.length);
     if (missingdicts.length > 0) {
       const baseopts = await this.version('/dictionary');
       missingdicts.map((dict) => {
@@ -690,7 +689,7 @@ ${PublishCommand.makeParamWhitelist(params, '  ')}
 
     const strainjobs = [];
     strains.map((strain) => {
-      const makeStrainjob = (dictname, strainname, strainvalue, message) => {
+      const makeStrainjob = (dictname, strainname, strainvalue, _message) => {
         if (strainvalue) {
           const job = this.putDict(dictname, strainname, strainvalue)
             .then(() => {
