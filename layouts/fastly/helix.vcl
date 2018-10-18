@@ -603,7 +603,9 @@ sub vcl_deliver {
 #FASTLY deliver
   call hlx_headers_deliver;
 
-  set resp.http.Set-Cookie = "X-Strain=" + req.http.X-Strain + "; Secure; HttpOnly; SameSite=Strict;";
+  if (req.http.X-Strain&&req.http.X-Sticky=="true") {
+    set resp.http.Set-Cookie = "X-Strain=" + req.http.X-Strain + "; Secure; HttpOnly; SameSite=Strict;";
+  }
 
   if (!req.http.X-Debug) {
     # Unless we are debugging, shut up chatty headers
@@ -612,24 +614,25 @@ sub vcl_deliver {
     unset resp.http.Access-Control-Allow-Origin;
     unset resp.http.Perf-Br-Resp-Out;
     unset resp.http.Server;
-    unset resp.http.X-Request-Id;
-    unset resp.http.X-Backend-Name;
-    unset resp.http.X-CDN-Request-ID;
     unset resp.http.Via;
-    unset resp.http.X-Served-By;
-    unset resp.http.X-Cache;
-    unset resp.http.X-Cache-Hits;
-    unset resp.http.X-Timer;
+    unset resp.http.X-Backend-Name;
     unset resp.http.X-Backend-URL;
     unset resp.http.X-Branch;
-    unset resp.http.X-Strain;
-    unset resp.http.X-GW-Cache;
-    unset resp.http.X-Static;
-    unset resp.http.X-URL;
+    unset resp.http.X-Cache-Hits;
+    unset resp.http.X-Cache;
+    unset resp.http.X-CDN-Request-ID;
     unset resp.http.X-Content-Type;
-    unset resp.http.X-GitHub-Request-Id;
     unset resp.http.X-Fastly-Request-ID;
     unset resp.http.X-Geo-Block-List;
+    unset resp.http.X-GitHub-Request-Id;
+    unset resp.http.X-GW-Cache;
+    unset resp.http.X-Request-Id;
+    unset resp.http.X-Served-By;
+    unset resp.http.X-Static;
+    unset resp.http.X-Sticky;
+    unset resp.http.X-Strain;
+    unset resp.http.X-Timer;
+    unset resp.http.X-URL;
   }
   return(deliver);
 }
