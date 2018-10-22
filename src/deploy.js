@@ -13,7 +13,7 @@
 'use strict';
 
 const deployCommon = require('./deploy-common');
-const { logArgs } = require('./log-common.js');
+const { logArgs, makeLogger } = require('./log-common.js');
 
 module.exports = function deploy() {
   let executor;
@@ -138,7 +138,7 @@ module.exports = function deploy() {
       if (!executor) {
         // eslint-disable-next-line global-require
         const DeployCommand = require('./deploy.cmd'); // lazy load the handler to speed up execution time
-        executor = new DeployCommand();
+        executor = new DeployCommand(makeLogger(argv));
       }
 
       await executor

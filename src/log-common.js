@@ -46,6 +46,9 @@ class Console {
     /* eslint-disable no-param-reassign */
     if (info[LEVEL] === 'info') {
       info[MESSAGE] = this.normal(info);
+    } else if (info[LEVEL] === 'maybe' && process.stderr.isTTY) {
+      // surpress maybe log messages on the console
+      return false;
     } else {
       info[MESSAGE] = this.elevated(info);
     }
@@ -86,7 +89,34 @@ function makeTransport(filename) {
 }
 
 module.exports.makeLogger = function makeLogger({ logLevel = 'info', logFile = ['-'] } = {}) {
-  const logger = winston.createLogger({ level: logLevel, transports: logFile.map(makeTransport) });
+  const mylevels = {
+    levels: {
+      error: 0,
+      warn: 1,
+      info: 2,
+      maybe: 2,
+      verbose: 3,
+      debug: 4,
+      silly: 5,
+    },
+    colors: {
+      error: 'red',
+      warn: 'yellow',
+      info: 'white',
+      maybe: 'white',
+      verbose: 'green',
+      debug: 'blue',
+      silly: 'purple',
+    },
+  };
+
+  const logger = winston.createLogger({
+    level: logLevel,
+    levels: mylevels.levels,
+    transports: logFile.map(makeTransport),
+  });
+
+  winston.addColors(mylevels.colors);
 
   return logger;
 };

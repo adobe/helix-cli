@@ -10,8 +10,6 @@
  * governing permissions and limitations under the License.
  */
 
-/* eslint no-console: off */
-
 'use strict';
 
 const request = require('request-promise-native');
@@ -26,9 +24,11 @@ const ProgressBar = require('progress');
 const GitUtils = require('./gitutils');
 const strainconfig = require('./strain-config-utils');
 const useragent = require('./user-agent-util');
+const { makeLogger } = require('./log-common');
 
 class DeployCommand {
-  constructor() {
+  constructor(logger = makeLogger()) {
+    this._logger = logger;
     this._enableAuto = true;
     this._circleciAuth = null;
     this._wsk_auth = null;
@@ -203,7 +203,7 @@ class DeployCommand {
       uri: `https://circleci.com/api/v1.1/project/github/${owner}/${repo}/follow`,
     };
 
-    console.log(`Automating deployment with ${followoptions.uri}`);
+    this._logger.info(`Automating deployment with ${followoptions.uri}`);
 
     const follow = await request(followoptions);
 
@@ -236,12 +236,12 @@ class DeployCommand {
     await Promise.all(envars);
 
     if (follow.first_build) {
-      console.log('\nAuto-deployment started.');
-      console.log('Configuration finished. Go to');
-      console.log(`${chalk.grey(`https://circleci.com/gh/${owner}/${repo}/edit`)} for build settings or`);
-      console.log(`${chalk.grey(`https://circleci.com/gh/${owner}/${repo}`)} for build status.`);
+      this._logger.info('\nAuto-deployment started.');
+      this._logger.info('Configuration finished. Go to');
+      this._logger.info(`${chalk.grey(`https://circleci.com/gh/${owner}/${repo}/edit`)} for build settings or`);
+      this._logger.info(`${chalk.grey(`https://circleci.com/gh/${owner}/${repo}`)} for build status.`);
     } else {
-      console.log('\nAuto-deployment already set up. Triggering a new build.');
+      this._logger.warn('\nAuto-deployment already set up. Triggering a new build.');
 
       const triggeroptions = {
         method: 'POST',
@@ -258,14 +258,14 @@ class DeployCommand {
       const triggered = await request(triggeroptions);
 
 
-      console.log(`Go to ${chalk.grey(`${triggered.build_url}`)} for build status.`);
+      this._logger.info(`Go to ${chalk.grey(`${triggered.build_url}`)} for build status.`);
     }
   }
 
   async run() {
     const dirty = GitUtils.isDirty();
     if (dirty && !this._enableDirty) {
-      console.error('hlx will not deploy a working copy that has uncommitted changes. Re-run with flag --dirty to force.');
+      this._logger.error('hlx will not deploy a working copy that has uncommitted changes. Re-run with flag --dirty to force.');
       process.exit(dirty);
     }
 
@@ -285,6 +285,12 @@ class DeployCommand {
     const scripts = [path.resolve(__dirname, 'openwhisk', 'static.js'), ...glob.sync(`${this._target}/*.js`)];
 
     const bar = new ProgressBar('deploying [:bar] :etas', { total: (scripts.length * 2), width: 50, renderThrottle: 1 });
+
+    const tick = (message) => {
+      bar.tick();
+      this._logger.maybe(message);
+    };
+
     const params = {
       ...this._default,
       LOGGLY_HOST: this._loggly_host,
@@ -313,19 +319,17 @@ class DeployCommand {
         annotations: { 'web-export': true },
       };
 
-      bar.tick({ message: `⏳  ${path.basename(script)} (deploying)` });
-      bar.render();
+      tick(`deploying ${path.basename(script)}`);
 
       if (this._dryRun) {
-        bar.tick({ message: `️️️⌛️  ${path.basename(script)} (skipped)` });
+        tick(`️️️skipped ${path.basename(script)} (skipped)`);
         return true;
       }
       return openwhisk.actions.update(actionoptions).then(() => {
-        bar.tick({ message: `⌛️  ${path.basename(script)} (deployed)` });
-        bar.render();
+        tick(`deployed ${path.basename(script)} (deployed)`);
         return true;
       }).catch((e) => {
-        bar.interrupt(`❌  Unable to deploy the action ${name}:  ${e.message}`);
+        this._logger.error(`❌  Unable to deploy the action ${name}:  ${e.message}`);
         bar.tick();
         return false;
       });
@@ -333,7 +337,7 @@ class DeployCommand {
 
     Promise.all(deployed).then(() => {
       bar.terminate();
-      console.log('✅  deployment completed');
+      this._logger.info('✅  deployment completed');
     });
 
     if (fs.existsSync(this._strainFile)) {
@@ -348,14 +352,14 @@ class DeployCommand {
       };
       const newstrains = strainconfig.append(oldstrains, strain);
       if (newstrains.length > oldstrains.length) {
-        console.log(`Updating strain config, adding strain ${strainconfig.name(strain)} as configuration has changed`);
+        this._logger.info(`Updating strain config, adding strain ${strainconfig.name(strain)} as configuration has changed`);
         fs.writeFileSync(
           this._strainFile,
           strainconfig.write(newstrains),
         );
       }
     } else {
-      console.log('Generating new strain config');
+      this._logger.info('Generating new strain config');
       const defaultstrain = {
         name: 'default',
         code: `/${this._wsk_namespace}/${this._prefix}`,
