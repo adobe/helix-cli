@@ -123,7 +123,7 @@ describe('hlx deploy (Integration)', () => {
       .withEnableAuto(false)
       .withEnableDirty(true)
       .withDryRun(true)
-      .withContent('https://github.com/adobe/helix-cli/tree/implement-init')
+      .withContent('https://github.com/adobe/helix-cli.git#implement-init')
       .withTarget(buildDir)
       .withStrainFile(strainsFile)
       .run();

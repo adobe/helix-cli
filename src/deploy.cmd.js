@@ -20,6 +20,7 @@ const ow = require('openwhisk');
 const glob = require('glob');
 const path = require('path');
 const fs = require('fs-extra');
+const yaml = require('js-yaml');
 const { GitUrl, GitUtils } = require('@adobe/petridish');
 const useragent = require('./user-agent-util');
 const AbstractCommand = require('./abstract.cmd.js');
@@ -45,16 +46,16 @@ class DeployCommand extends AbstractCommand {
     this._strainFile = null;
   }
 
-  // static getDefaultContentURL() {
-  //   if (fs.existsSync('helix-config.yaml')) {
-  //     const conf = yaml.safeLoad(fs.readFileSync('helix-config.yaml'));
-  //     if (conf && conf.contentRepo) {
-  //       return conf.contentRepo;
-  //     }
-  //   }
-  //   return GitUtils.getOrigin();
-  // }
-  //
+  static getDefaultContentURL() {
+    if (fs.existsSync('helix-config.yaml')) {
+      const conf = yaml.safeLoad(fs.readFileSync('helix-config.yaml'));
+      if (conf && conf.contentRepo) {
+        return conf.contentRepo;
+      }
+    }
+    return GitUtils.getOrigin();
+  }
+
   withEnableAuto(value) {
     this._enableAuto = value;
     return this;
