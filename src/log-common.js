@@ -11,6 +11,7 @@
  */
 
 const winston = require('winston');
+const { MESSAGE, LEVEL } = require('triple-beam');
 
 const { format } = winston;
 
@@ -28,10 +29,38 @@ module.exports.logArgs = yargs => yargs
     default: 'info',
   });
 
+/**
+   * A custom formatter that logs in the format
+   * `level: message` for most log messages and
+   * in the format `message` (without level) for
+   * `info` messages, making it an effective
+   * console.log replacement
+   */
+class Console {
+  constructor(normalFn, elevatedFn) {
+    this.normal = normalFn;
+    this.elevated = elevatedFn;
+  }
+
+  transform(info) {
+    /* eslint-disable no-param-reassign */
+    if (info[LEVEL] === 'info') {
+      info[MESSAGE] = this.normal(info);
+    } else {
+      info[MESSAGE] = this.elevated(info);
+    }
+    /* eslint-enable no-param-reassign */
+    return info;
+  }
+}
+
 function makeTransport(filename) {
   const consoleformat = format.combine(
     format.colorize({ all: true }),
-    format.simple(),
+    new Console(
+      info => `${info.message}`,
+      info => `${info.level}: ${info.message}`,
+    ),
   );
 
   const fileformat = format.combine(
@@ -56,7 +85,7 @@ function makeTransport(filename) {
   return new winston.transports.File({ filename, format: fileformat });
 }
 
-module.exports.makeLogger = function makeLogger({ logLevel = 'info', logFile = ['-'] }) {
+module.exports.makeLogger = function makeLogger({ logLevel = 'info', logFile = ['-'] } = {}) {
   const logger = winston.createLogger({ level: logLevel, transports: logFile.map(makeTransport) });
 
   return logger;

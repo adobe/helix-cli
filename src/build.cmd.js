@@ -12,8 +12,6 @@
 
 'use strict';
 
-/* eslint no-console: off */
-
 const EventEmitter = require('events');
 const Bundler = require('parcel-bundler');
 const HTLPreAsset = require('@adobe/parcel-plugin-htl/src/HTLPreAsset.js');
@@ -24,6 +22,7 @@ const fse = require('fs-extra');
 const klawSync = require('klaw-sync');
 const md5 = require('./md5.js');
 const strainconfig = require('./strain-config-utils');
+const { makeLogger } = require('./log-common');
 
 /**
  * Finds the non-htl files from the generated bundle
@@ -57,8 +56,9 @@ function findStaticFiles(bnd) {
 }
 
 class BuildCommand extends EventEmitter {
-  constructor() {
+  constructor(logger = makeLogger()) {
     super();
+    this._logger = logger;
     this._cache = null;
     this._minify = false;
     this._target = null;
@@ -118,7 +118,7 @@ class BuildCommand extends EventEmitter {
           if (report) {
             const relDest = path.relative(this._distDir, dst);
             const relDist = path.relative(this._cwd, this._distDir);
-            console.log(chalk.gray(relDist + path.sep) + chalk.cyanBright(relDest));
+            this._logger.info(chalk.gray(relDist + path.sep) + chalk.cyanBright(relDest));
           }
           resolve();
         }).catch(reject);
@@ -214,7 +214,7 @@ class BuildCommand extends EventEmitter {
 
     if (staticFiles.length > 0) {
       if (report) {
-        console.log(chalk.greenBright('\n✨  Moving static files in place:'));
+        this._logger.info(chalk.greenBright('\n✨  Moving static files in place:'));
       }
       await this.moveStaticFiles(staticFiles, report);
     }

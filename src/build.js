@@ -16,7 +16,7 @@
 /* eslint global-require: off */
 
 const { defaultArgs } = require('./defaults.js');
-const { logArgs } = require('./log-common.js');
+const { logArgs, makeLogger } = require('./log-common.js');
 
 module.exports = function build() {
   let executor;
@@ -34,7 +34,7 @@ module.exports = function build() {
       if (!executor) {
         // eslint-disable-next-line global-require
         const BuildCommand = require('./build.cmd'); // lazy load the handler to speed up execution time
-        executor = new BuildCommand();
+        executor = new BuildCommand(makeLogger(argv));
       }
 
       await executor
