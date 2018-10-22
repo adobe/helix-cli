@@ -12,7 +12,7 @@
 
 'use strict';
 
-const { logArgs } = require('./log-common.js');
+const { logArgs, makeLogger } = require('./log-common.js');
 
 module.exports = function demo() {
   let executor;
@@ -45,8 +45,8 @@ module.exports = function demo() {
     handler: async (argv) => {
       if (!executor) {
         // eslint-disable-next-line global-require
-        const InitCommand = require('./demo.cmd'); // lazy load the handler to speed up execution time
-        executor = new InitCommand();
+        const DemoCommand = require('./demo.cmd'); // lazy load the handler to speed up execution time
+        executor = new DemoCommand(makeLogger(argv));
       }
 
       await executor

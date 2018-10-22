@@ -19,13 +19,12 @@ const fse = require('fs-extra');
 const chalk = require('chalk');
 const shell = require('shelljs');
 const glob = require('glob');
+const { makeLogger } = require('./log-common');
 
 const ANSI_REGEXP = RegExp([
   '[\\u001B\\u009B][[\\]()#;?]*(?:(?:(?:[a-zA-Z\\d]*(?:;[a-zA-Z\\d]*)*)?\\u0007)',
   '(?:(?:\\d{1,4}(?:;\\d{0,4})*)?[\\dA-PRZcf-ntqry=><~]))',
 ].join('|'), 'g');
-
-/* eslint-disable no-console */
 
 function execAsync(cmd) {
   return new Promise((resolve, reject) => {
@@ -40,7 +39,8 @@ function execAsync(cmd) {
 }
 
 class InitCommand {
-  constructor() {
+  constructor(logger = makeLogger()) {
+    this._logger = logger;
     this._name = '';
     this._dir = process.cwd();
     this._padding = 50;
@@ -66,7 +66,7 @@ class InitCommand {
 
   msg(txt) {
     const dl = txt.length - txt.replace(ANSI_REGEXP, '').length;
-    console.log('%s', txt.padEnd(this._padding + dl, ' ') + chalk.green('[ok]'));
+    this._logger.info(txt.padEnd(this._padding + dl, ' ') + chalk.green('[ok]'));
   }
 
   async initGitRepository(dir) {
@@ -76,7 +76,7 @@ class InitCommand {
       await execAsync('git init -q');
       await execAsync('git add -A');
       await execAsync('git commit -q -m"Initial commit."');
-      this.msg(chalk.yellow('initializing git repository'));
+      this._logger.info(chalk.yellow('initializing git repository'));
     } catch (e) {
       throw Error(`Unable to initialize git repository: ${e}`);
     } finally {
@@ -151,7 +151,7 @@ See https://git-scm.com/book/en/v2/Getting-Started-First-Time-Git-Setup for more
     await Promise.all(jobs);
     await this.initGitRepository(projectDir);
 
-    console.log(chalk`
+    this._logger.info(chalk`
 Project {cyan ${this._name}} initialized {green successfully} with a simple example.
 For more examples, clone or fork one from http://github.com/adobe/project-helix/.
 
