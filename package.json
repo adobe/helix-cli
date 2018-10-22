@@ -1,6 +1,6 @@
 {
   "name": "@adobe/helix-cli",
-  "version": "0.8.1-pre.9",
+  "version": "0.8.1-pre.18",
   "description": "Project Helix CLI",
   "main": "index.js",
   "bin": {
@@ -8,6 +8,7 @@
   },
   "scripts": {
     "test": "nyc mocha --exit",
+    "record": "MODE=record mocha test/testPublishCmd.js -g \"Publish Strains on an existing Service Config\"",
     "junit": "mocha --exit -R mocha-junit-reporter",
     "lint": "./node_modules/.bin/eslint .",
     "preversion": "npm run junit",

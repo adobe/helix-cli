@@ -14,6 +14,7 @@
 
 const assert = require('assert');
 const path = require('path');
+const fs = require('fs-extra');
 const $ = require('shelljs');
 const { assertFile, createTestRoot } = require('./utils.js');
 
@@ -21,7 +22,8 @@ const DemoCommand = require('../src/demo.cmd');
 
 const pwd = process.cwd();
 
-describe('Integration test for demo command', () => {
+describe('Integration test for demo command', function suite() {
+  this.timeout(3000);
   let testDir;
 
   beforeEach(async () => {
@@ -44,7 +46,7 @@ describe('Integration test for demo command', () => {
     assertFile(path.resolve(testDir, 'project1', 'src/style.css'));
     assertFile(path.resolve(testDir, 'project1', 'src/favicon.ico'));
     assertFile(path.resolve(testDir, 'project1', 'helix_logo.png'));
-  }).timeout(3000);
+  });
 
   it('demo type full creates all files', async () => {
     await new DemoCommand()
@@ -60,7 +62,7 @@ describe('Integration test for demo command', () => {
     assertFile(path.resolve(testDir, 'project1', 'src/bootstrap.min.css'));
     assertFile(path.resolve(testDir, 'project1', 'src/favicon.ico'));
     assertFile(path.resolve(testDir, 'project1', 'helix_logo.png'));
-  }).timeout(3000);
+  });
 
   it('demo does not leave any files not checked in', async () => {
     await new DemoCommand()
@@ -70,5 +72,66 @@ describe('Integration test for demo command', () => {
     process.chdir(path.resolve(testDir, 'project2'));
     const status = $.exec('git status --porcelain', { silent: true });
     assert.equal('', status.stdout);
-  }).timeout(3000);
+  });
+
+  it('files generated in /dist are not ignored (simple)', async () => {
+    await new DemoCommand()
+      .withDirectory(testDir)
+      .withName('project2')
+      .run();
+    const distDir = path.resolve(testDir, 'project2', 'dist');
+    await fs.ensureDir(distDir);
+    await fs.writeFile(path.resolve(distDir, 'foo.js'), '// do not ignore!', 'utf-8');
+    process.chdir(path.resolve(testDir, 'project2'));
+    const status = $.exec('git status --porcelain', { silent: true });
+    assert.equal(status.stdout.trim(), '?? dist/');
+  });
+
+  it('files generated in /dist are not ignored (full)', async () => {
+    await new DemoCommand()
+      .withDirectory(testDir)
+      .withName('project2')
+      .withType('full')
+      .run();
+    const distDir = path.resolve(testDir, 'project2', 'dist');
+    await fs.ensureDir(distDir);
+    await fs.writeFile(path.resolve(distDir, 'foo.js'), '// do not ignore!', 'utf-8');
+    process.chdir(path.resolve(testDir, 'project2'));
+    const status = $.exec('git status --porcelain', { silent: true });
+    assert.equal(status.stdout.trim(), '?? dist/');
+  });
+
+  describe('Integration test for demo command with existing git hooks', () => {
+    let templateDir;
+
+    before(async () => {
+      templateDir = path.resolve(testDir, 'git_template');
+      // setup git template dir including a hook
+      await fs.ensureDir(templateDir);
+      const hooksDir = path.join(templateDir, 'hooks');
+      await fs.ensureDir(hooksDir);
+      // create pre-commit hook which always fails
+      const preCommitHook = path.join(hooksDir, 'pre-commit');
+      await fs.writeFile(preCommitHook, '#!/bin/sh\n\necho NAY!\nexit 1\n');
+      await fs.chmod(preCommitHook, '755');
+      // set GIT_TEMPLATE_DIR env variable to enable to hook
+      process.env.GIT_TEMPLATE_DIR = templateDir;
+    });
+
+    it('demo does not leave any files uncommitted files with existing git commit hooks', async () => {
+      await new DemoCommand()
+        .withDirectory(testDir)
+        .withName('project3')
+        .run();
+      process.chdir(path.resolve(testDir, 'project3'));
+      const status = $.exec('git status --porcelain', { silent: true });
+      assert.equal('', status.stdout);
+    });
+
+    after(async () => {
+      // cleanup
+      await fs.remove(templateDir);
+      delete process.env.GIT_TEMPLATE_DIR;
+    });
+  });
 });

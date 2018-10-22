@@ -441,6 +441,47 @@ class PublishCommand {
     return retvcl;
   }
 
+  /**
+   * Turns a list of parameter names into a regular expression string.
+   * @param {Array(String)} params a list of parameter names
+   */
+  static makeFilter(params) {
+    return `^(${[...params, 'hlx_.*'].join('|')})$`;
+  }
+
+  static makeParamWhitelist(params, indent = '') {
+    return `set req.http.X-Old-Url = req.url;
+set req.url = querystring.regfilter_except(req.url, "${PublishCommand.makeFilter(params)}");
+set req.http.X-Encoded-Params = urlencode(req.url.qs);
+set req.url = req.http.X-Old-Url;`
+      .split('\n')
+      .map(line => indent + line)
+      .join('\n');
+  }
+
+  /**
+   * Generates VCL for strain resolution from a list of strains
+   */
+  static getStrainParametersVCL(strains) {
+    let retvcl = '# This file handles the URL parameter whitelist\n\n';
+    const [defaultstrain] = strains.filter(strain => strain.name === 'default');
+    if (defaultstrain && defaultstrain.params && Array.isArray(defaultstrain.params)) {
+      retvcl += '# default parameters, can be overridden per strain\n';
+      retvcl += PublishCommand.makeParamWhitelist(defaultstrain.params);
+    }
+    const otherstrains = strains
+      .filter(strain => strain.name !== 'default')
+      .filter(strain => strain.params && Array.isArray(strain.params));
+
+    retvcl += otherstrains.map(({ name, params }) => `
+
+if (req.http.X-Strain == "${name}") {
+${PublishCommand.makeParamWhitelist(params, '  ')}
+}
+`);
+    return retvcl;
+  }
+
   static getXVersionExtensionVCL(configVersion, cliVersion, revision) {
     let retvcl = '# This section handles the strain resolution\n';
 
@@ -454,6 +495,11 @@ class PublishCommand {
   async setStrainsVCL() {
     const vcl = PublishCommand.getStrainResolutionVCL(this._strains);
     return this.transferVCL(vcl, 'strains.vcl');
+  }
+
+  async setParametersVCL() {
+    const vcl = PublishCommand.getStrainParametersVCL(this._strains);
+    return this.transferVCL(vcl, 'params.vcl');
   }
 
   async getVersionVCLSection() {
@@ -686,9 +732,13 @@ class PublishCommand {
     // wait for all dict updates to complete
     await Promise.all(strainjobs);
 
-    // set all VCL files
-    await this.setStrainsVCL();
-    await this.setDynamicVCL();
+    // set all dependent VCL files
+    await Promise.all([
+      this.setStrainsVCL(),
+      this.setDynamicVCL(),
+      this.setParametersVCL(),
+    ]);
+    // then set the master VCL file
     await this.setHelixVCL();
 
     await secretp;
