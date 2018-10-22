@@ -10,27 +10,27 @@
  * governing permissions and limitations under the License.
  */
 
-/* eslint-disable no-console */
-
 const path = require('path');
 const fse = require('fs-extra');
 const chalk = require('chalk');
+const { makeLogger } = require('./log-common');
 
-async function clean(dir) {
+async function clean(dir, logger) {
   if (!await fse.pathExists(dir)) {
     return;
   }
   try {
     await fse.remove(dir);
-    console.log(`${chalk.green('ok:')} removed ${path.relative(process.cwd(), dir)}`);
+    logger.info(`${chalk.green('ok:')} removed ${path.relative(process.cwd(), dir)}`);
   } catch (e) {
-    console.error(`${chalk.red('error:')} unable to remove ${path.relative(process.cwd(), dir)}: ${e.message}`);
+    logger.error(`${chalk.red('error:')} unable to remove ${path.relative(process.cwd(), dir)}: ${e.message}`);
   }
 }
 
 
 class CleanCommand {
-  constructor() {
+  constructor(logger = makeLogger()) {
+    this._logger = logger;
     this._cwd = process.cwd();
     this._target = null;
     this._cacheDir = null;
@@ -54,8 +54,10 @@ class CleanCommand {
       this._cacheDir = path.resolve(this._cwd, '.hlx', 'cache');
     }
 
-    await clean(this._target);
-    await clean(this._cacheDir);
+    await Promise.all([
+      clean(this._target, this._logger),
+      clean(this._cacheDir, this._logger),
+    ]);
   }
 }
 
