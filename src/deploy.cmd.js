@@ -23,7 +23,6 @@ const fs = require('fs-extra');
 const yaml = require('js-yaml');
 const GitUrl = require('@adobe/petridish/src/GitUrl');
 const ProgressBar = require('progress');
-const Promise = require('bluebird');
 const GitUtils = require('./gitutils');
 const strainconfig = require('./strain-config-utils');
 const useragent = require('./user-agent-util');
@@ -301,9 +300,9 @@ class DeployCommand {
       name: this.actionName(script),
     }));
 
-    const read = Promise.map(named, ({ script, name }) => fs.readFile(script, { encoding: 'utf8' }).then(action => ({ script, name, action })));
+    const read = named.map(({ script, name }) => fs.readFile(script, { encoding: 'utf8' }).then(action => ({ script, name, action })));
 
-    const deployed = Promise.map(read, ({ script, name, action }) => {
+    const deployed = read.map(p => p.then(({ script, name, action }) => {
       const actionoptions = {
         name,
         'User-Agent': useragent,
@@ -330,10 +329,10 @@ class DeployCommand {
         bar.tick();
         return false;
       });
-    });
+    }));
 
     Promise.all(deployed).then(() => {
-      this.progressBar().terminate();
+      bar.terminate();
       console.log('✅  deployment completed');
     });
 

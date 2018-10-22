@@ -21,7 +21,6 @@ const URI = require('uri-js');
 const glob = require('glob-to-regexp');
 const { toBase64 } = require('request/lib/helpers');
 const ProgressBar = require('progress');
-const Promise = require('bluebird');
 const strainconfig = require('./strain-config-utils');
 const include = require('./include-util');
 const GitUtils = require('./gitutils');

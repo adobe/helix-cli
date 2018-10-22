@@ -30,7 +30,6 @@
     "@adobe/parcel-plugin-htl": "^0.9.4",
     "@adobe/petridish": "^1.6.0",
     "archiver": "^3.0.0",
-    "bluebird": "^3.5.2",
     "calibre": "^1.1.1",
     "chalk": "^2.4.1",
     "decompress": "^4.2.0",
