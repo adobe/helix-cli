@@ -10,10 +10,15 @@
  * governing permissions and limitations under the License.
  */
 
+const winston = require('winston');
+
+const { format } = winston;
+
 module.exports.logArgs = yargs => yargs
   .option('log-file', {
     describe: 'Log file (use - for stdout)',
     type: 'string',
+    array: true,
     default: '-',
   })
   .option('log-level', {
@@ -22,3 +27,44 @@ module.exports.logArgs = yargs => yargs
     choices: ['silly', 'debug', 'verbose', 'info', 'warn', 'error'],
     default: 'info',
   });
+
+function makeTransport(filename) {
+  const consoleformat = format.combine(
+    format.colorize({ all: true }),
+    format.simple(),
+  );
+
+  const fileformat = format.combine(
+    format.timestamp(),
+    format.align(),
+    format.printf(info => `${info.timestamp} ${info.level}: ${info.message}`),
+  );
+
+  const jsonformat = format.combine(
+    format.timestamp(),
+    format.logstash(),
+  );
+
+
+  if (filename === '-' || filename === 'stdout') {
+    return new winston.transports.Console({
+      format: consoleformat,
+    });
+  } if (/\.json/.test(filename)) {
+    return new winston.transports.File({ filename, format: jsonformat });
+  }
+  return new winston.transports.File({ filename, format: fileformat });
+}
+
+module.exports.makeLogger = function makeLogger({ logLevel = 'info', logFile = ['-'] }) {
+  const logger = winston.createLogger({ level: logLevel, transports: logFile.map(makeTransport) });
+
+  logger.silly('Setting up shared logger');
+  logger.debug('Setting up shared logger');
+  logger.verbose('Setting up shared logger');
+  logger.info('Setting up shared logger');
+  logger.warn('Setting up shared logger', { hey: 'go' });
+  logger.error('Setting up shared logger', new Error('Fooo!'));
+
+  return logger;
+};
