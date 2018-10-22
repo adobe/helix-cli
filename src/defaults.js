@@ -27,6 +27,17 @@ module.exports.defaultArgs = yargs => yargs
     boolean: true,
     default: false,
   })
+  .option('log-file', {
+    describe: 'Log file (use - for stdout)',
+    type: 'string',
+    default: '-',
+  })
+  .option('log-level', {
+    describe: 'Log level',
+    type: 'string',
+    choices: ['silly', 'debug', 'verbose', 'info', 'warn', 'error'],
+    default: 'info',
+  })
   .positional('files', {
     describe: 'The template files to compile',
     default: DEFAULT_PATTERNS,
