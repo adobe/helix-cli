@@ -59,12 +59,5 @@ function makeTransport(filename) {
 module.exports.makeLogger = function makeLogger({ logLevel = 'info', logFile = ['-'] }) {
   const logger = winston.createLogger({ level: logLevel, transports: logFile.map(makeTransport) });
 
-  logger.silly('Setting up shared logger');
-  logger.debug('Setting up shared logger');
-  logger.verbose('Setting up shared logger');
-  logger.info('Setting up shared logger');
-  logger.warn('Setting up shared logger', { hey: 'go' });
-  logger.error('Setting up shared logger', new Error('Fooo!'));
-
   return logger;
 };
