@@ -12,7 +12,6 @@
 
 'use strict';
 
-/* eslint no-console: off */
 /* eslint global-require: off */
 
 const { defaultArgs } = require('./defaults.js');
