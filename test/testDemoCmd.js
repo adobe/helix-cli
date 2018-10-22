@@ -100,4 +100,38 @@ describe('Integration test for demo command', function suite() {
     const status = $.exec('git status --porcelain', { silent: true });
     assert.equal(status.stdout.trim(), '?? dist/');
   });
+
+  describe('Integration test for demo command with existing git hooks', () => {
+    let templateDir;
+
+    before(async () => {
+      templateDir = path.resolve(testDir, 'git_template');
+      // setup git template dir including a hook
+      await fs.ensureDir(templateDir);
+      const hooksDir = path.join(templateDir, 'hooks');
+      await fs.ensureDir(hooksDir);
+      // create pre-commit hook which always fails
+      const preCommitHook = path.join(hooksDir, 'pre-commit');
+      await fs.writeFile(preCommitHook, '#!/bin/sh\n\necho NAY!\nexit 1\n');
+      await fs.chmod(preCommitHook, '755');
+      // set GIT_TEMPLATE_DIR env variable to enable to hook
+      process.env.GIT_TEMPLATE_DIR = templateDir;
+    });
+
+    it('demo does not leave any files uncommitted files with existing git commit hooks', async () => {
+      await new DemoCommand()
+        .withDirectory(testDir)
+        .withName('project3')
+        .run();
+      process.chdir(path.resolve(testDir, 'project3'));
+      const status = $.exec('git status --porcelain', { silent: true });
+      assert.equal('', status.stdout);
+    });
+
+    after(async () => {
+      // cleanup
+      await fs.remove(templateDir);
+      delete process.env.GIT_TEMPLATE_DIR;
+    });
+  });
 });

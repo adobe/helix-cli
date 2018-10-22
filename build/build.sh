@@ -86,7 +86,7 @@ cd ..
 echo
 echo "running makeself..."
 echo
-./makeself.sh ../archive ./$install_script "SFX installer for hlx" ./install.sh
+./makeself.sh --nox11 ../archive ./$install_script "SFX installer for hlx" ./install.sh
 
 echo
 echo "copy generated script to ../$install_script"
