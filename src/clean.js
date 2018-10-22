@@ -12,6 +12,8 @@
 
 'use strict';
 
+const { logArgs } = require('./log-common.js');
+
 module.exports = function demo() {
   let executor;
 
@@ -22,7 +24,7 @@ module.exports = function demo() {
     command: 'clean',
     desc: 'Remove generated files and caches.',
     builder: (yargs) => {
-      yargs
+      logArgs(yargs)
         .option('target', {
           alias: 'o',
           default: '.hlx/build',

@@ -12,6 +12,8 @@
 
 'use strict';
 
+const { logArgs } = require('./log-common.js');
+
 module.exports = function demo() {
   let executor;
 
@@ -22,7 +24,7 @@ module.exports = function demo() {
     command: 'demo <name> [dir]',
     desc: 'Create example helix project.',
     builder: (yargs) => {
-      yargs
+      logArgs(yargs)
         .option('type', {
           describe: 'Demo source type',
           type: 'string',

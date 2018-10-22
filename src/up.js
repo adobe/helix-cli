@@ -15,6 +15,7 @@
 
 const path = require('path');
 const { defaultArgs } = require('./defaults.js');
+const { logArgs } = require('./log-common.js');
 
 module.exports = function up() {
   let executor;
@@ -25,7 +26,8 @@ module.exports = function up() {
     command: 'up [files...]',
     description: 'Run a Helix development server',
     builder: (yargs) => {
-      defaultArgs(yargs)
+      defaultArgs(yargs);
+      logArgs(yargs)
         .option('open', {
           describe: 'Open a browser window',
           boolean: true,

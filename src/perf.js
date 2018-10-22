@@ -16,6 +16,8 @@
 // TODO: remove the following line
 /* eslint no-unused-vars: off */
 
+const { logArgs } = require('./log-common.js');
+
 module.exports = function perf() {
   let executor;
 
@@ -26,7 +28,7 @@ module.exports = function perf() {
     command: 'perf',
     desc: 'Test performance',
     builder: (yargs) => {
-      yargs
+      logArgs(yargs)
         .option('calibre-auth', {
           describe: 'API token from https://calibreapp.com/',
           type: 'string',

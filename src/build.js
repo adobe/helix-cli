@@ -16,6 +16,7 @@
 /* eslint global-require: off */
 
 const { defaultArgs } = require('./defaults.js');
+const { logArgs } = require('./log-common.js');
 
 module.exports = function build() {
   let executor;
@@ -26,7 +27,8 @@ module.exports = function build() {
     command: 'build [files..]',
     desc: 'Compile the template functions and build package',
     builder: (yargs) => {
-      defaultArgs(yargs).help();
+      defaultArgs(yargs);
+      logArgs(yargs).help();
     },
     handler: async (argv) => {
       if (!executor) {

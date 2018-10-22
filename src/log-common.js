@@ -9,27 +9,16 @@
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-const DEFAULT_PATTERNS = ['src/**/*.htl'];
 
-module.exports.defaultArgs = yargs => yargs
-  .option('target', {
-    alias: 'o',
-    default: '.hlx/build',
-    describe: 'Target directory for compiled JS',
-  })
-  .option('cache', {
-    describe: 'Enable or disable compile cache',
-    boolean: true,
-    default: false,
-  })
-  .option('minify', {
-    describe: 'Minify JS',
-    boolean: true,
-    default: false,
-  })
-  .positional('files', {
-    describe: 'The template files to compile',
-    default: DEFAULT_PATTERNS,
+module.exports.logArgs = yargs => yargs
+  .option('log-file', {
+    describe: 'Log file (use - for stdout)',
     type: 'string',
+    default: '-',
   })
-  .array('files');
+  .option('log-level', {
+    describe: 'Log level',
+    type: 'string',
+    choices: ['silly', 'debug', 'verbose', 'info', 'warn', 'error'],
+    default: 'info',
+  });

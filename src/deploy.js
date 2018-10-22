@@ -13,6 +13,7 @@
 'use strict';
 
 const deployCommon = require('./deploy-common');
+const { logArgs } = require('./log-common.js');
 
 module.exports = function deploy() {
   let executor;
@@ -29,7 +30,8 @@ module.exports = function deploy() {
       // eslint-disable-next-line global-require
       const GitUtils = require('./gitutils'); // lazy load the handler to speed up execution time
 
-      deployCommon(yargs)
+      deployCommon(yargs);
+      logArgs(yargs)
         .option('auto', {
           describe: 'Enable auto-deployment',
           type: 'boolean',
