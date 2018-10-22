@@ -62,7 +62,7 @@ describe('hlx perf (CLI)', () => {
       .run(['perf']);
   });
 
-  it.only('hlx perf accepts HLX_CALIBRE_AUTH', () => {
+  it('hlx perf accepts HLX_CALIBRE_AUTH', () => {
     process.env.HLX_CALIBRE_AUTH = 'nope-nope-nope';
     new CLI()
       .withCommandExecutor('perf', mockPerf)
