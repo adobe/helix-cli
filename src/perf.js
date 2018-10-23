@@ -29,6 +29,8 @@ module.exports = function perf() {
     desc: 'Test performance',
     builder: (yargs) => {
       logArgs(yargs)
+        .env('HLX')
+        .strict(false)
         .option('calibre-auth', {
           describe: 'API token from https://calibreapp.com/',
           type: 'string',

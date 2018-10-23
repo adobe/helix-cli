@@ -18,7 +18,7 @@ jobs:
 
         - run:
             name: Installing Helix CLI
-            command: npm install @adobe/helix-cli
+            command: npm install @adobe/helix-cli --save=false
 
         - save_cache:
             paths:
