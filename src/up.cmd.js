@@ -15,15 +15,15 @@ const fs = require('fs');
 const opn = require('opn');
 const readline = require('readline');
 const { HelixProject } = require('@adobe/petridish');
-const logger = require('@adobe/petridish/src/logger'); // todo: unified logging
 const BuildCommand = require('./build.cmd');
 const pkgJson = require('../package.json');
+const { makeLogger } = require('./log-common');
 
 const HELIX_CONFIG = 'helix-config.yaml';
 
 class UpCommand extends BuildCommand {
-  constructor() {
-    super();
+  constructor(logger = makeLogger()) {
+    super(logger);
     this._httpPort = -1;
     this._open = false;
   }
@@ -55,7 +55,7 @@ class UpCommand extends BuildCommand {
       await this._watcher.close();
       this._watcher = null;
     }
-    logger.info('Helix project stopped.');
+    this._logger.info('Helix project stopped.');
     this.emit('stopped', this);
   }
 
@@ -107,7 +107,9 @@ class UpCommand extends BuildCommand {
       .withCwd(this._cwd)
       .withBuildDir(this._target)
       .withWebRootDir(this._webroot)
+      // TODO: .withLogger(this._logger)
       .withDisplayVersion(pkgJson.version)
+
       .withRuntimeModulePaths(module.paths);
 
     if (this._httpPort >= 0) {
@@ -128,7 +130,7 @@ class UpCommand extends BuildCommand {
       } else {
         buildMessage = 'Building project files...';
       }
-      logger.info(buildMessage);
+      this._logger.info(buildMessage);
       buildStartTime = Date.now();
     };
 
@@ -136,7 +138,7 @@ class UpCommand extends BuildCommand {
       readline.clearLine(process.stdout, 0);
       readline.moveCursor(process.stdout, 0, -1);
       const buildTime = Date.now() - buildStartTime;
-      logger.info(`${buildMessage}done ${buildTime}ms`);
+      this._logger.info(`${buildMessage}done ${buildTime}ms`);
 
       if (this._project.started) {
         this.emit('build', this);
@@ -169,7 +171,7 @@ class UpCommand extends BuildCommand {
 
     this._initSourceWatcher(async (files) => {
       if (HELIX_CONFIG in files) {
-        logger.info(`${HELIX_CONFIG} modified. Restarting dev server...`);
+        this._logger.info(`${HELIX_CONFIG} modified. Restarting dev server...`);
         await this._project.stop();
         await this._project.init();
         await this._project.start();

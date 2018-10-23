@@ -15,7 +15,7 @@
 
 const path = require('path');
 const { defaultArgs } = require('./defaults.js');
-const { logArgs } = require('./log-common.js');
+const { logArgs, makeLogger } = require('./log-common.js');
 
 module.exports = function up() {
   let executor;
@@ -39,7 +39,7 @@ module.exports = function up() {
       if (!executor) {
         // eslint-disable-next-line global-require
         const UpCommand = require('./up.cmd'); // lazy load the handler to speed up execution time
-        executor = new UpCommand();
+        executor = new UpCommand(makeLogger(argv));
       }
 
 
