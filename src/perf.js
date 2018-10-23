@@ -16,7 +16,7 @@
 // TODO: remove the following line
 /* eslint no-unused-vars: off */
 
-const { logArgs } = require('./log-common.js');
+const { logArgs, makeLogger } = require('./log-common.js');
 
 module.exports = function perf() {
   let executor;
@@ -96,7 +96,7 @@ module.exports = function perf() {
       if (!executor) {
         // eslint-disable-next-line global-require
         const PerfCommand = require('./perf.cmd'); // lazy load the handler to speed up execution time
-        executor = new PerfCommand();
+        executor = new PerfCommand(makeLogger(argv));
       }
 
       await executor

@@ -18,11 +18,11 @@ const fs = require('fs-extra');
 const _ = require('lodash/fp');
 const strainconfig = require('./strain-config-utils');
 const JunitPerformanceReport = require('./junit-utils');
-
-/* eslint-disable no-console */
+const { makeLogger } = require('./log-common');
 
 class PerfCommand {
-  constructor() {
+  constructor(logger = makeLogger()) {
+    this._logger = logger;
     this._strainFile = path.resolve(process.cwd(), '.hlx', 'strains.yaml');
     this._strains = null;
     this._auth = null;
@@ -133,21 +133,21 @@ class PerfCommand {
    * @param {*} limit
    * @returns true if successful, false if unsuccessful and undefined if the name isn't valid
    */
-  static format(metrics, name, limit) {
+  static format(metrics, name, limit, logger = makeLogger()) {
     const metric = metrics.filter(m => m.name === name).length === 1
       ? metrics.filter(m => m.name === name)[0] : null;
     if (metric && metric.name.endsWith('-score')) {
-      console.log(`  ${chalk.gray(`${metric.label}: `)}${PerfCommand.formatScore(metric.value, limit)}`);
+      logger.info(`  ${chalk.gray(`${metric.label}: `)}${PerfCommand.formatScore(metric.value, limit)}`);
       return PerfCommand.formatScore(metric.value, limit).indexOf('(failed)') === -1;
     } if (metric) {
-      console.log(`  ${chalk.gray(`${metric.label}: `)}${PerfCommand.formatMeasure(metric.value, limit)}`);
+      logger.info(`  ${chalk.gray(`${metric.label}: `)}${PerfCommand.formatMeasure(metric.value, limit)}`);
       return PerfCommand.formatMeasure(metric.value, limit).indexOf('(failed)') === -1;
     }
     return undefined;
   }
 
-  static formatResponse(response, params = {}, strainname = 'default') {
-    console.log(`\nTesting ${response.url} on ${response.device.title} (${response.connection.title}) from ${response.location.emoji}  ${response.location.name} using ${strainname} strain.\n`);
+  static formatResponse(response, params = {}, strainname = 'default', logger = makeLogger()) {
+    logger.info(`\nTesting ${response.url} on ${response.device.title} (${response.connection.title}) from ${response.location.emoji}  ${response.location.name} using ${strainname} strain.\n`);
     const strainresults = Object.keys(params).map((key) => {
       const value = params[key];
       if (Number.isInteger(value)) {
@@ -166,7 +166,7 @@ class PerfCommand {
   }
 
   async run() {
-    console.log(chalk.green('Testing performance…'));
+    this._logger.info(chalk.green('Testing performance…'));
 
     const tests = this.loadStrains()
       .filter(strain => PerfCommand.getURLs(strain).length)
@@ -186,10 +186,10 @@ class PerfCommand {
             if (this._junit) {
               this._junit.appendResults(result, params, strain.name);
             }
-            return PerfCommand.formatResponse(result, params, strain.name);
+            return PerfCommand.formatResponse(result, params, strain.name, this._logger);
           })
           .catch((err) => {
-            console.error(err);
+            this._logger.error(err);
             return null;
           }));
       });
@@ -199,15 +199,15 @@ class PerfCommand {
       if (this._junit) {
         this._junit.writeResults();
       }
-      console.log('');
+      this._logger.info('');
       const fail = results.filter(result => result === false).length;
       const succeed = results.filter(result => result === true).length;
       if (fail && succeed) {
-        console.error(chalk.yellow(`all tests completed with ${fail} failures and ${succeed} successes.`));
+        this._logger.error(chalk.yellow(`all tests completed with ${fail} failures and ${succeed} successes.`));
       } else if (fail) {
-        console.error(chalk.red(`all ${fail} tests failed.`));
+        this._logger.error(chalk.red(`all ${fail} tests failed.`));
       } else if (succeed) {
-        console.log(chalk.green(`all ${succeed} tests succeeded.`));
+        this._logger.log(chalk.green(`all ${succeed} tests succeeded.`));
       }
       process.exit(fail);
     });
