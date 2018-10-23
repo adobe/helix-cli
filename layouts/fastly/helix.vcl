@@ -621,11 +621,14 @@ sub vcl_deliver {
     unset resp.http.X-Cache-Hits;
     unset resp.http.X-Cache;
     unset resp.http.X-CDN-Request-ID;
+    unset resp.http.X-Content-Type-Options;
     unset resp.http.X-Content-Type;
     unset resp.http.X-Fastly-Request-ID;
+    unset resp.http.X-Frame-Options;
     unset resp.http.X-Geo-Block-List;
     unset resp.http.X-GitHub-Request-Id;
     unset resp.http.X-GW-Cache;
+    unset resp.http.x-openwhisk-activation-id;
     unset resp.http.X-Request-Id;
     unset resp.http.X-Served-By;
     unset resp.http.X-Static;
@@ -633,6 +636,7 @@ sub vcl_deliver {
     unset resp.http.X-Strain;
     unset resp.http.X-Timer;
     unset resp.http.X-URL;
+    unset resp.http.x-xss-protection;
   }
   return(deliver);
 }
