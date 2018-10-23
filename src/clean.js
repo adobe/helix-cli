@@ -34,7 +34,6 @@ module.exports = function demo() {
     },
     handler: async (argv) => {
       if (!executor) {
-        makeLogger(argv);
         // eslint-disable-next-line global-require
         const CleanCommand = require('./clean.cmd'); // lazy load the handler to speed up execution time
         executor = new CleanCommand(makeLogger(argv));

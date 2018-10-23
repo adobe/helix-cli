@@ -10,7 +10,6 @@
  * governing permissions and limitations under the License.
  */
 
-/* eslint no-console: off */
 /* eslint no-unused-vars: ["error", { "argsIgnorePattern": "^_" }] */
 
 const fs = require('fs-extra');
@@ -26,11 +25,13 @@ const include = require('./include-util');
 const GitUtils = require('./gitutils');
 const useragent = require('./user-agent-util');
 const cli = require('./cli-util');
+const { makeLogger } = require('./log-common');
 
 const HELIX_VCL_DEFAULT_FILE = path.resolve(__dirname, '../layouts/fastly/helix.vcl');
 
 class PublishCommand {
-  constructor() {
+  constructor(logger = makeLogger()) {
+    this._logger = logger;
     this._wsk_auth = null;
     this._wsk_namespace = null;
     this._wsk_host = null;
@@ -103,6 +104,13 @@ class PublishCommand {
     };
   }
 
+  tick(ticks = 1, message) {
+    this.progressBar().tick(ticks);
+    if (message) {
+      this._logger.maybe(message);
+    }
+  }
+
   progressBar() {
     if (this._bar) {
       return this._bar;
@@ -116,7 +124,7 @@ class PublishCommand {
     const staticdictionaries = 1;
     const strains = this._strains.length;
     const vclfiles = 3;
-    const extrarequests = 3;
+    const extrarequests = 4;
 
     const ticks = backends
       + dictionaries
@@ -247,7 +255,7 @@ class PublishCommand {
       try {
         this._service = await request(this.options(''));
       } catch (e) {
-        console.error('Unable to get service', e);
+        this._logger.error('Unable to get service', e);
         throw e;
       }
     }
@@ -312,7 +320,8 @@ class PublishCommand {
     const missingdicts = Object.entries(dictionaries)
       .filter(([_key, value]) => value === null)
       .map(([key, _value]) => key);
-    this.progressBar().tick(Object.entries(dictionaries).length - missingdicts.length);
+    const existing = Object.entries(dictionaries).length - missingdicts.length;
+    this.tick(existing, `Skipping ${existing} existing dictionaries`);
     if (missingdicts.length > 0) {
       const baseopts = await this.version('/dictionary');
       missingdicts.map((dict) => {
@@ -324,13 +333,12 @@ class PublishCommand {
           },
         }, baseopts);
         return request(opts).then((r) => {
-          this.progressBar().tick();
+          this.tick(1, `Dictionary ${dict} created`);
           return r;
         })
           .catch((e) => {
             const message = `Dictionary ${dict} could not be created`;
-            console.error(message);
-            console.error(e);
+            this._logger.error(message, e);
             throw new Error(message, e);
           });
       });
@@ -345,7 +353,8 @@ class PublishCommand {
     const missingbackends = Object.entries(backends)
       .filter(([_key, value]) => value.created_at === undefined)
       .map(([_key, value]) => value);
-    this.progressBar().tick(Object.entries(backends).length - missingbackends.length);
+    const existing = Object.entries(backends).length - missingbackends.length;
+    this.tick(existing, `Skipping ${existing} existing backends`);
     if (missingbackends.length > 0) {
       const baseopts = await this.version('/backend');
       return Promise.all(missingbackends.map(async (backend) => {
@@ -355,12 +364,11 @@ class PublishCommand {
         }, baseopts);
         try {
           const r = await request(opts);
-          this.progressBar().tick();
+          this.tick(1, `Created backend ${backend.name}`);
           return r;
         } catch (e) {
           const message = `Backend ${backend.name} could not be created`;
-          console.error(message);
-          console.error(e.message);
+          this._logger.error(`${message}`, e);
           throw new Error(message, e);
         }
       }));
@@ -376,13 +384,12 @@ class PublishCommand {
     const cloneOpts = await this.putVersionOpts('/clone');
     return request(cloneOpts).then((r) => {
       this._version = r.number;
-      this.progressBar().tick();
+      this.tick(1, `Cloning Service Config Version ${r.number}`);
       return Promise.resolve(this);
     })
       .catch((e) => {
         const message = 'Unable to create new service version';
-        console.error(message);
-        console.error(e);
+        this._logger.error(message, e);
         throw new Error(message, e);
       });
   }
@@ -393,14 +400,13 @@ class PublishCommand {
   async publishVersion() {
     const actOpts = await this.putVersionOpts('/activate');
     return request(actOpts).then((r) => {
-      this.progressBar().tick();
+      this.tick(1, `Activated version ${r.number}`);
       this._version = r.number;
       return Promise.resolve(this);
     })
       .catch((e) => {
         const message = 'Unable to activate new configuration';
-        console.error(message);
-        console.error(e);
+        this._logger.error(message, e);
         throw new Error(message, e);
       });
   }
@@ -415,7 +421,7 @@ class PublishCommand {
     await this.getDictionaries();
     const mydict = this._dictionaries[dict];
     if (!mydict) {
-      console.error(`${dict} does not exist`);
+      this._logger.error(`Dictionary ${dict} does not exist. Try ${Object.keys(this._dictionaries).join(', ')}`);
       return null;
     }
     if (value) {
@@ -426,7 +432,7 @@ class PublishCommand {
       const opts = await this.deleteOpts(`/dictionary/${mydict}/item/${key}`);
       await request(opts);
     } catch (e) {
-      // ignore
+      this._logger.error(`Unknown error when deleting key ${key} from dictionary ${mydict}`, e);
     }
     return Promise.resolve();
   }
@@ -582,20 +588,19 @@ ${PublishCommand.makeParamWhitelist(params, '  ')}
     const opts = await this.vclopts(name, vcl);
     return request(opts)
       .then(async (r) => {
-        this.progressBar().tick();
+        this.tick(1, `Uploading VCL ${name}`);
         if (isMain) {
           const mainbaseopts = await this.version(`/vcl/${name}/main`);
           const mainopts = Object.assign({ method: 'PUT' }, mainbaseopts);
           return request(mainopts).then((_s) => {
-            this.progressBar().tick();
+            this.tick(1, `Uploaded VCL ${name}`);
           });
         }
         return r;
       })
       .catch((e) => {
         const message = `Unable to update VCL ${name}`;
-        console.error(message);
-        console.error(e.message);
+        this._logger.error(message, e);
         throw new Error(message, e);
       });
   }
@@ -609,13 +614,12 @@ ${PublishCommand.makeParamWhitelist(params, '  ')}
       method: 'POST',
     }, baseopts);
     return request(opts).then((r) => {
-      this.progressBar().tick();
+      this.tick(1, 'Purging entire cache');
       return r;
     })
       .catch((e) => {
         const message = 'Cache could not be purged';
-        console.error(message);
-        console.error(e);
+        this._logger.error(message, e);
         throw new Error(message, e);
       });
   }
@@ -630,7 +634,7 @@ ${PublishCommand.makeParamWhitelist(params, '  ')}
       const content = include(vclfile);
       return this.transferVCL(content, 'helix.vcl', true);
     } catch (e) {
-      console.error(`❌  Unable to set ${vclfile}`);
+      this._logger.error(`❌  Unable to set ${vclfile}`);
       throw e;
     }
   }
@@ -641,10 +645,10 @@ ${PublishCommand.makeParamWhitelist(params, '  ')}
     const urls = strains.filter(strain => strain.url).map(strain => strain.url);
     this.progressBar().terminate();
 
-    console.log(`✅  All strains have been published and version ${this._version} is now online.`);
+    this._logger.info(`✅  All strains have been published and version ${this._version} is now online.`);
     if (urls.length) {
-      console.log('\nYou now access your site using:');
-      console.log(chalk.grey(`$ curl ${urls[0]}`));
+      this._logger.info('\nYou now access your site using:');
+      this._logger.info(chalk.grey(`$ curl ${urls[0]}`));
     }
   }
 
@@ -665,22 +669,20 @@ ${PublishCommand.makeParamWhitelist(params, '  ')}
 
     const owsecret = `Basic ${toBase64(`${this._wsk_auth}`)}`;
     const secretp = this.putDict('secrets', 'OPENWHISK_AUTH', owsecret).then((_s) => {
-      this.progressBar().tick();
+      this.tick(1, 'Setting OpenWhisk Authentication');
     })
       .catch((e) => {
         const message = 'OpenWhisk authentication could not be passed on';
-        console.error(message);
-        console.error(e);
+        this._logger.error(message, e);
         throw new Error(message, e);
       });
 
     const ownsp = this.putDict('secrets', 'OPENWHISK_NAMESPACE', this._wsk_namespace).then((_s) => {
-      this.progressBar().tick();
+      this.tick(1, 'Setting OpenWhisk namespace');
     })
       .catch((e) => {
         const message = 'OpenWhisk namespace could not be passed on';
-        console.error(message);
-        console.error(e);
+        this._logger.error(message, e);
         throw new Error(message, e);
       });
 
@@ -688,16 +690,15 @@ ${PublishCommand.makeParamWhitelist(params, '  ')}
 
     const strainjobs = [];
     strains.map((strain) => {
-      const makeStrainjob = (dictname, strainname, strainvalue, _message) => {
+      const makeStrainjob = (dictname, strainname, strainvalue, message) => {
         if (strainvalue) {
           const job = this.putDict(dictname, strainname, strainvalue)
             .then(() => {
-              this.progressBar().tick();
+              this.tick(1, message);
             })
             .catch((e) => {
               const msg = 'Error setting edge dictionary value';
-              console.error(msg);
-              console.error(e);
+              this._logger.error(message, e);
               throw new Error(msg, e);
             });
 
@@ -740,7 +741,8 @@ ${PublishCommand.makeParamWhitelist(params, '  ')}
       if (strain.static && strain.static.root) {
         makeStrainjob('strain_github_static_root', strain.name, strain.static.root, '🌲  Set static root');
       } else {
-        this.progressBar().tick();
+        // skipping: no message here
+        this.tick();
       }
 
       if (strain.static && strain.static.magic) {
@@ -753,14 +755,16 @@ ${PublishCommand.makeParamWhitelist(params, '  ')}
         const allow = PublishCommand.makeRegexp(strain.static.allow);
         makeStrainjob('strain_allow', strain.name, allow, '⚪️  Set whitelist');
       } else {
-        this.progressBar().tick();
+        // skipping: no message here
+        this.tick();
       }
 
       if (strain.static && strain.static.deny) {
         const deny = PublishCommand.makeRegexp(strain.static.deny);
         makeStrainjob('strain_deny', strain.name, deny, '⚫️  Set blacklist');
       } else {
-        this.progressBar().tick();
+        // skipping: no message here
+        this.tick();
       }
       return strain;
     });
@@ -786,15 +790,14 @@ ${PublishCommand.makeParamWhitelist(params, '  ')}
     this.loadStrains();
     try {
       await this._updateFastly();
-      this.progressBar().tick();
+      this.tick();
       await this.publishVersion();
       await this.purgeAll();
 
       this.showNextStep();
     } catch (e) {
       const message = 'Error while running the Publish command';
-      console.error(message);
-      console.error(e);
+      this._logger.error(message, e);
       throw new Error(message, e);
     }
   }
