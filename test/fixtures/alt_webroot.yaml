@@ -1,9 +1,1 @@
-- strain:
-    name: default
-    code: /tripod/default/git-github-com-tripodsan-hlxtest-git--master--
-    content:
-      repo: hlxtest
-      ref: master
-      owner: tripodsan
-    static:
-      root: /webroot
+staticRoot: /webroot

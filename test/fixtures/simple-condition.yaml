@@ -1,13 +1,11 @@
-- strain:
-    name: default
+default:
     code: /hlx/default/git-github-com-adobe-helix-cli-git--dirty--
     content:
       repo: helix-cli
       ref: master
       owner: adobe
     condition: '"http" == "http"'
-- strain:
-    name: debug
+debug:
     code: /hlx/default/git-github-com-adobe-helix-cli-git--dirty--
     content:
       repo: helix-cli

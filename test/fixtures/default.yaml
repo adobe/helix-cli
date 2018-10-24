@@ -1,2 +1,2 @@
-- strain:
-    name: default
+default:
+  content: foo

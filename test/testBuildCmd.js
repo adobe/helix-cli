@@ -75,7 +75,7 @@ describe('Integration test for build', () => {
       .withTargetDir(buildDir)
       .withCacheEnabled(false)
       .withDirectory(testRoot)
-      .withStrainFile('test/fixtures/alt_webroot.yaml')
+      .withConfigFile('test/fixtures/alt_webroot.yaml')
       .run();
 
     distDir = path.resolve(testRoot, 'webroot/dist');

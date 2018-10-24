@@ -37,7 +37,7 @@ describe('hlx deploy (Integration)', () => {
     testRoot = await createTestRoot();
     hlxDir = path.resolve(testRoot, '.hlx');
     buildDir = path.resolve(hlxDir, 'build');
-    strainsFile = path.resolve(hlxDir, 'strains.yaml');
+    strainsFile = path.resolve(hlxDir, 'strains.json');
 
     cwd = process.cwd();
 
@@ -123,7 +123,7 @@ describe('hlx deploy (Integration)', () => {
       .withEnableAuto(false)
       .withEnableDirty(true)
       .withDryRun(true)
-      .withContent('https://github.com/adobe/helix-cli/tree/implement-init')
+      .withContent('https://github.com/adobe/helix-cli.git#implement-init')
       .withTarget(buildDir)
       .withStrainFile(strainsFile)
       .run();

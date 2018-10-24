@@ -1,5 +1,4 @@
-- strain:
-    name: default
+default:
     code: /hlx/default/git-github-com-adobe-helix-cli-git--dirty--
     index: README.html
     url: https://www.example.com/
@@ -7,8 +6,7 @@
       repo: helix-cli
       ref: master
       owner: adobe
-- strain:
-    name: e7fab6e2b493b75a
+e7fab6e2b493b75a:
     code: /hlx/default/git-github-com-adobe-helix-cli-git--dirty--
     index: index.html
     content:
