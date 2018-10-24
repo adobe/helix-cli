@@ -16,8 +16,8 @@ const assert = require('assert');
 const path = require('path');
 const fse = require('fs-extra');
 const Replay = require('replay');
+const { GitUtils } = require('@adobe/petridish');
 const DemoCommand = require('../src/demo.cmd');
-const GitUtils = require('../src/gitutils');
 
 const TEST_DIR = path.resolve(__dirname, 'tmp');
 const PROJECT_NAME = 'pulvillar-pantograph';

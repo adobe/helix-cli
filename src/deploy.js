@@ -28,7 +28,7 @@ module.exports = function deploy() {
       // eslint-disable-next-line global-require
       const DeployCommand = require('./deploy.cmd'); // lazy load the handler to speed up execution time
       // eslint-disable-next-line global-require
-      const GitUtils = require('./gitutils'); // lazy load the handler to speed up execution time
+      const { GitUtils } = require('@adobe/petridish'); // lazy load the handler to speed up execution time
 
       deployCommon(yargs);
       logArgs(yargs)
@@ -87,7 +87,7 @@ module.exports = function deploy() {
           default: false,
         })
         .option('content', {
-          describe: 'Overrides the GitHub content URL',
+          describe: 'Overrides the GitHub content URL of the default strain',
           type: 'string',
           default: DeployCommand.getDefaultContentURL(),
         })

@@ -18,29 +18,16 @@ const path = require('path');
 const strainconfig = require('../src/strain-config-utils');
 
 describe('Strain Config', () => {
-  const config = fs.readFileSync(path.resolve(__dirname, 'fixtures/config.yaml'));
+  const config = fs.readFileSync(path.resolve(__dirname, 'fixtures/config.yaml'), 'utf-8');
 
-  const invalid = fs.readFileSync(path.resolve(__dirname, 'fixtures/invalid.yaml'));
-
-  const unsorted = fs.readFileSync(path.resolve(__dirname, 'fixtures/unsorted.yaml'));
-
-  const result = fs.readFileSync(path.resolve(__dirname, 'fixtures/result.yaml'));
+  const invalid = fs.readFileSync(path.resolve(__dirname, 'fixtures/invalid.yaml'), 'utf-8');
 
   it('config can be parsed', () => {
     assert.equal(3, strainconfig.load(config).length);
   });
 
   it('invalid config does not throw errors', () => {
-    assert.equal(1, strainconfig.load(invalid).length);
-  });
-
-  it('Can be saved as YAML', () => {
-    assert.equal(strainconfig.write(strainconfig.load(result)), result);
-  });
-
-  it('Strains get sorted in the right way', () => {
-    const sorted = strainconfig.load(strainconfig.write(strainconfig.load(unsorted)));
-    assert.equal('default', sorted[0].name);
+    assert.equal(2, strainconfig.load(invalid).length);
   });
 
   it('New strains can be appended', () => {
@@ -79,7 +66,7 @@ describe('Generated names are stable', () => {
 });
 
 describe('Invalid values are rejected or fixed on the fly', () => {
-  const buggy = fs.readFileSync(path.resolve(__dirname, 'fixtures/buggy.yaml'));
+  const buggy = fs.readFileSync(path.resolve(__dirname, 'fixtures/buggy.yaml'), 'utf-8');
 
   it('action names without a default path get a default path', () => {
     const mystrains = strainconfig.load(buggy);
@@ -108,7 +95,7 @@ describe('Appending works without errors', () => {
   });
 
   it('Appending to an existing file works', () => {
-    const config = fs.readFileSync(path.resolve(__dirname, 'fixtures/config.yaml'));
+    const config = fs.readFileSync(path.resolve(__dirname, 'fixtures/config.yaml'), 'utf-8');
 
     const oldstrains = strainconfig.load(config);
     const strain = {

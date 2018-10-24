@@ -20,25 +20,25 @@ const URI = require('uri-js');
 const glob = require('glob-to-regexp');
 const { toBase64 } = require('request/lib/helpers');
 const ProgressBar = require('progress');
+const { GitUtils } = require('@adobe/petridish');
 const strainconfig = require('./strain-config-utils');
 const include = require('./include-util');
-const GitUtils = require('./gitutils');
 const useragent = require('./user-agent-util');
 const cli = require('./cli-util');
-const { makeLogger } = require('./log-common');
+const AbstractCommand = require('./abstract.cmd.js');
 
 const HELIX_VCL_DEFAULT_FILE = path.resolve(__dirname, '../layouts/fastly/helix.vcl');
 
-class PublishCommand {
-  constructor(logger = makeLogger()) {
-    this._logger = logger;
+class PublishCommand extends AbstractCommand {
+  constructor(logger) {
+    super(logger);
     this._wsk_auth = null;
     this._wsk_namespace = null;
     this._wsk_host = null;
     this._fastly_namespace = null;
     this._fastly_auth = null;
     this._dryRun = false;
-    this._strainFile = path.resolve(process.cwd(), '.hlx', 'strains.yaml');
+    this._strainFile = path.resolve(process.cwd(), '.hlx', 'strains.json');
     this._strains = null;
     this._vclFile = path.resolve(process.cwd(), '.hlx', 'helix.vcl');
 
@@ -107,7 +107,7 @@ class PublishCommand {
   tick(ticks = 1, message) {
     this.progressBar().tick(ticks);
     if (message) {
-      this._logger.maybe(message);
+      this.log.maybe(message);
     }
   }
 
@@ -136,13 +136,12 @@ class PublishCommand {
     return this._bar;
   }
 
-  loadStrains() {
-    const content = fs.readFileSync(this._strainFile);
+  async loadStrains() {
+    const content = await fs.readFile(this._strainFile, 'utf-8');
     this._strains = strainconfig.load(content);
     if (this._strains.filter(strain => strain.name === 'default').length !== 1) {
       throw new Error(`${this._strainFile} must include one strain 'default'`);
     }
-    return this._strains;
   }
 
   withWskHost(value) {
@@ -178,7 +177,6 @@ class PublishCommand {
 
   withStrainFile(value) {
     this._strainFile = value;
-    this.loadStrains();
     return this;
   }
 
@@ -255,7 +253,7 @@ class PublishCommand {
       try {
         this._service = await request(this.options(''));
       } catch (e) {
-        this._logger.error('Unable to get service', e);
+        this.log.error('Unable to get service', e);
         throw e;
       }
     }
@@ -338,7 +336,7 @@ class PublishCommand {
         })
           .catch((e) => {
             const message = `Dictionary ${dict} could not be created`;
-            this._logger.error(message, e);
+            this.log.error(message, e);
             throw new Error(message, e);
           });
       });
@@ -368,7 +366,7 @@ class PublishCommand {
           return r;
         } catch (e) {
           const message = `Backend ${backend.name} could not be created`;
-          this._logger.error(`${message}`, e);
+          this.log.error(`${message}`, e);
           throw new Error(message, e);
         }
       }));
@@ -389,7 +387,7 @@ class PublishCommand {
     })
       .catch((e) => {
         const message = 'Unable to create new service version';
-        this._logger.error(message, e);
+        this.log.error(message, e);
         throw new Error(message, e);
       });
   }
@@ -406,7 +404,7 @@ class PublishCommand {
     })
       .catch((e) => {
         const message = 'Unable to activate new configuration';
-        this._logger.error(message, e);
+        this.log.error(message, e);
         throw new Error(message, e);
       });
   }
@@ -421,7 +419,7 @@ class PublishCommand {
     await this.getDictionaries();
     const mydict = this._dictionaries[dict];
     if (!mydict) {
-      this._logger.error(`Dictionary ${dict} does not exist. Try ${Object.keys(this._dictionaries).join(', ')}`);
+      this.log.error(`Dictionary ${dict} does not exist. Try ${Object.keys(this._dictionaries).join(', ')}`);
       return null;
     }
     if (value) {
@@ -432,7 +430,7 @@ class PublishCommand {
       const opts = await this.deleteOpts(`/dictionary/${mydict}/item/${key}`);
       await request(opts);
     } catch (e) {
-      this._logger.error(`Unknown error when deleting key ${key} from dictionary ${mydict}`, e);
+      this.log.error(`Unknown error when deleting key ${key} from dictionary ${mydict}`, e);
     }
     return Promise.resolve();
   }
@@ -600,7 +598,7 @@ ${PublishCommand.makeParamWhitelist(params, '  ')}
       })
       .catch((e) => {
         const message = `Unable to update VCL ${name}`;
-        this._logger.error(message, e);
+        this.log.error(message, e);
         throw new Error(message, e);
       });
   }
@@ -619,7 +617,7 @@ ${PublishCommand.makeParamWhitelist(params, '  ')}
     })
       .catch((e) => {
         const message = 'Cache could not be purged';
-        this._logger.error(message, e);
+        this.log.error(message, e);
         throw new Error(message, e);
       });
   }
@@ -634,7 +632,7 @@ ${PublishCommand.makeParamWhitelist(params, '  ')}
       const content = include(vclfile);
       return this.transferVCL(content, 'helix.vcl', true);
     } catch (e) {
-      this._logger.error(`❌  Unable to set ${vclfile}`);
+      this.log.error(`❌  Unable to set ${vclfile}`);
       throw e;
     }
   }
@@ -645,10 +643,10 @@ ${PublishCommand.makeParamWhitelist(params, '  ')}
     const urls = strains.filter(strain => strain.url).map(strain => strain.url);
     this.progressBar().terminate();
 
-    this._logger.info(`✅  All strains have been published and version ${this._version} is now online.`);
+    this.log.info(`✅  All strains have been published and version ${this._version} is now online.`);
     if (urls.length) {
-      this._logger.info('\nYou now access your site using:');
-      this._logger.info(chalk.grey(`$ curl ${urls[0]}`));
+      this.log.info('\nYou now access your site using:');
+      this.log.info(chalk.grey(`$ curl ${urls[0]}`));
     }
   }
 
@@ -673,7 +671,7 @@ ${PublishCommand.makeParamWhitelist(params, '  ')}
     })
       .catch((e) => {
         const message = 'OpenWhisk authentication could not be passed on';
-        this._logger.error(message, e);
+        this.log.error(message, e);
         throw new Error(message, e);
       });
 
@@ -682,7 +680,7 @@ ${PublishCommand.makeParamWhitelist(params, '  ')}
     })
       .catch((e) => {
         const message = 'OpenWhisk namespace could not be passed on';
-        this._logger.error(message, e);
+        this.log.error(message, e);
         throw new Error(message, e);
       });
 
@@ -698,7 +696,7 @@ ${PublishCommand.makeParamWhitelist(params, '  ')}
             })
             .catch((e) => {
               const msg = 'Error setting edge dictionary value';
-              this._logger.error(message, e);
+              this.log.error(message, e);
               throw new Error(msg, e);
             });
 
@@ -787,7 +785,7 @@ ${PublishCommand.makeParamWhitelist(params, '  ')}
   }
 
   async run() {
-    this.loadStrains();
+    await this.loadStrains();
     try {
       await this._updateFastly();
       this.tick();
@@ -797,7 +795,7 @@ ${PublishCommand.makeParamWhitelist(params, '  ')}
       this.showNextStep();
     } catch (e) {
       const message = 'Error while running the Publish command';
-      this._logger.error(message, e);
+      this.log.error(message, e);
       throw new Error(message, e);
     }
   }

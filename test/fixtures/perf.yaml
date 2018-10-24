@@ -1,4 +1,4 @@
-- strain:
+default:
     name: default
     content:
       owner: trieloff

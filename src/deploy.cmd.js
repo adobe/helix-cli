@@ -19,16 +19,14 @@ const glob = require('glob');
 const path = require('path');
 const fs = require('fs-extra');
 const yaml = require('js-yaml');
-const GitUrl = require('@adobe/petridish/src/GitUrl');
 const ProgressBar = require('progress');
-const GitUtils = require('./gitutils');
-const strainconfig = require('./strain-config-utils');
+const { GitUrl, GitUtils } = require('@adobe/petridish');
 const useragent = require('./user-agent-util');
-const { makeLogger } = require('./log-common');
+const AbstractCommand = require('./abstract.cmd.js');
 
-class DeployCommand {
-  constructor(logger = makeLogger()) {
-    this._logger = logger;
+class DeployCommand extends AbstractCommand {
+  constructor(logger) {
+    super(logger);
     this._enableAuto = true;
     this._circleciAuth = null;
     this._wsk_auth = null;
@@ -44,8 +42,7 @@ class DeployCommand {
     this._default = null;
     this._enableDirty = false;
     this._dryRun = false;
-    this._content = null;
-    this._strainFile = path.resolve(process.cwd(), '.hlx', 'strains.yaml');
+    this._strainFile = null;
   }
 
   static getDefaultContentURL() {
@@ -139,12 +136,10 @@ class DeployCommand {
   }
 
   withStrainFile(value) {
+    if (!/^.*\.json$/.test(value)) {
+      throw Error('non-json strain files are deprecated.');
+    }
     this._strainFile = value;
-    return this;
-  }
-
-  withDirectory(dir) {
-    this._cwd = dir;
     return this;
   }
 
@@ -153,6 +148,13 @@ class DeployCommand {
       return `hlx--${path.basename(script, '.js')}`;
     }
     return this._prefix + path.basename(script, '.js');
+  }
+
+  async init() {
+    await super.init();
+    if (!this._strainFile) {
+      this._strainFile = path.resolve(this._helixConfig.directory, '.hlx', 'strains.json');
+    }
   }
 
   static getBuildVarOptions(name, value, auth, owner, repo) {
@@ -203,7 +205,7 @@ class DeployCommand {
       uri: `https://circleci.com/api/v1.1/project/github/${owner}/${repo}/follow`,
     };
 
-    this._logger.info(`Automating deployment with ${followoptions.uri}`);
+    this.log.info(`Automating deployment with ${followoptions.uri}`);
 
     const follow = await request(followoptions);
 
@@ -236,12 +238,12 @@ class DeployCommand {
     await Promise.all(envars);
 
     if (follow.first_build) {
-      this._logger.info('\nAuto-deployment started.');
-      this._logger.info('Configuration finished. Go to');
-      this._logger.info(`${chalk.grey(`https://circleci.com/gh/${owner}/${repo}/edit`)} for build settings or`);
-      this._logger.info(`${chalk.grey(`https://circleci.com/gh/${owner}/${repo}`)} for build status.`);
+      this.log.info('\nAuto-deployment started.');
+      this.log.info('Configuration finished. Go to');
+      this.log.info(`${chalk.grey(`https://circleci.com/gh/${owner}/${repo}/edit`)} for build settings or`);
+      this.log.info(`${chalk.grey(`https://circleci.com/gh/${owner}/${repo}`)} for build status.`);
     } else {
-      this._logger.warn('\nAuto-deployment already set up. Triggering a new build.');
+      this.log.warn('\nAuto-deployment already set up. Triggering a new build.');
 
       const triggeroptions = {
         method: 'POST',
@@ -258,14 +260,15 @@ class DeployCommand {
       const triggered = await request(triggeroptions);
 
 
-      this._logger.info(`Go to ${chalk.grey(`${triggered.build_url}`)} for build status.`);
+      this.log.info(`Go to ${chalk.grey(`${triggered.build_url}`)} for build status.`);
     }
   }
 
   async run() {
+    await this.init();
     const dirty = GitUtils.isDirty();
     if (dirty && !this._enableDirty) {
-      this._logger.error('hlx will not deploy a working copy that has uncommitted changes. Re-run with flag --dirty to force.');
+      this.log.error('hlx will not deploy a working copy that has uncommitted changes. Re-run with flag --dirty to force.');
       process.exit(dirty);
     }
 
@@ -273,6 +276,7 @@ class DeployCommand {
       return this.autoDeploy();
     }
 
+    // todo: the default should be provided by the helix-config and not the yargs defaults!
     const giturl = new GitUrl(this._content);
 
     const owoptions = {
@@ -288,7 +292,7 @@ class DeployCommand {
 
     const tick = (message) => {
       bar.tick();
-      this._logger.maybe(message);
+      this.log.maybe(message);
     };
 
     const params = {
@@ -329,7 +333,7 @@ class DeployCommand {
         tick(`deployed ${path.basename(script)} (deployed)`);
         return true;
       }).catch((e) => {
-        this._logger.error(`❌  Unable to deploy the action ${name}:  ${e.message}`);
+        this.log.error(`❌  Unable to deploy the action ${name}:  ${e.message}`);
         bar.tick();
         return false;
       });
@@ -337,42 +341,22 @@ class DeployCommand {
 
     Promise.all(deployed).then(() => {
       bar.terminate();
-      this._logger.info('✅  deployment completed');
+      this.log.info('✅  deployment completed');
     });
 
-    if (fs.existsSync(this._strainFile)) {
-      const oldstrains = strainconfig.load(fs.readFileSync(this._strainFile));
-      const strain = {
-        code: `/${this._wsk_namespace}/default/${this._prefix}`,
-        content: {
-          repo: giturl.repo,
-          ref: giturl.ref,
-          owner: giturl.owner,
-        },
-      };
-      const newstrains = strainconfig.append(oldstrains, strain);
-      if (newstrains.length > oldstrains.length) {
-        this._logger.info(`Updating strain config, adding strain ${strainconfig.name(strain)} as configuration has changed`);
-        fs.writeFileSync(
-          this._strainFile,
-          strainconfig.write(newstrains),
-        );
-      }
-    } else {
-      this._logger.info('Generating new strain config');
-      const defaultstrain = {
-        name: 'default',
-        code: `/${this._wsk_namespace}/${this._prefix}`,
-        content: {
-          repo: giturl.repo,
-          ref: giturl.ref,
-          owner: giturl.owner,
-        },
-      };
-      await fs.ensureDir(path.dirname(this._strainFile));
-      fs.writeFileSync(this._strainFile, strainconfig.write([defaultstrain]));
-    }
+    // update action in default strain
+    const defaultStrain = this._helixConfig.strains.get('default');
+    defaultStrain.code = `/${this._wsk_namespace}/default/${this._prefix}`;
+    defaultStrain.content = giturl;
 
+    const newStrains = JSON.stringify(this._helixConfig.strains, null, '  ');
+    const oldStrains = await fs.exists(this._strainFile) ? await fs.readFile(this._strainFile, 'utf-8') : '';
+
+    if (oldStrains !== newStrains) {
+      this.log.info(`Updating strain config in ${path.relative(process.cwd(), this._strainFile)}`);
+      await fs.ensureDir(path.dirname(this._strainFile));
+      await fs.writeFile(this._strainFile, newStrains, 'utf-8');
+    }
     return this;
   }
 }

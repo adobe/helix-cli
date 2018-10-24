@@ -19,11 +19,12 @@ const _ = require('lodash/fp');
 const strainconfig = require('./strain-config-utils');
 const JunitPerformanceReport = require('./junit-utils');
 const { makeLogger } = require('./log-common');
+const AbstractCommand = require('./abstract.cmd.js');
 
-class PerfCommand {
-  constructor(logger = makeLogger()) {
-    this._logger = logger;
-    this._strainFile = path.resolve(process.cwd(), '.hlx', 'strains.yaml');
+class PerfCommand extends AbstractCommand {
+  constructor(logger) {
+    super(logger);
+    this._strainFile = path.resolve(process.cwd(), '.hlx', 'strains.json');
     this._strains = null;
     this._auth = null;
     this._calibre = null;
@@ -70,10 +71,13 @@ class PerfCommand {
   }
 
   loadStrains() {
+    // todo: Is this correctly based on the .hlx/strains.json or should it rather read the
+    // helix-config.yaml ? performance testing can only be done on published sites, but
+    // modifying .hlx/strains.json is discouraged.
     if (this._strains) {
       return this._strains;
     }
-    const content = fs.readFileSync(this._strainFile);
+    const content = fs.readFileSync(this._strainFile, 'utf-8');
     this._strains = strainconfig.load(content);
     return this._strains;
   }
@@ -166,7 +170,7 @@ class PerfCommand {
   }
 
   async run() {
-    this._logger.info(chalk.green('Testing performance…'));
+    this.log.info(chalk.green('Testing performance…'));
 
     const tests = this.loadStrains()
       .filter(strain => PerfCommand.getURLs(strain).length)
@@ -186,10 +190,10 @@ class PerfCommand {
             if (this._junit) {
               this._junit.appendResults(result, params, strain.name);
             }
-            return PerfCommand.formatResponse(result, params, strain.name, this._logger);
+            return PerfCommand.formatResponse(result, params, strain.name, this.log);
           })
           .catch((err) => {
-            this._logger.error(err);
+            this.log.error(err);
             return null;
           }));
       });
@@ -199,15 +203,15 @@ class PerfCommand {
       if (this._junit) {
         this._junit.writeResults();
       }
-      this._logger.info('');
+      this.log.info('');
       const fail = results.filter(result => result === false).length;
       const succeed = results.filter(result => result === true).length;
       if (fail && succeed) {
-        this._logger.error(chalk.yellow(`all tests completed with ${fail} failures and ${succeed} successes.`));
+        this.log.error(chalk.yellow(`all tests completed with ${fail} failures and ${succeed} successes.`));
       } else if (fail) {
-        this._logger.error(chalk.red(`all ${fail} tests failed.`));
+        this.log.error(chalk.red(`all ${fail} tests failed.`));
       } else if (succeed) {
-        this._logger.log(chalk.green(`all ${succeed} tests succeeded.`));
+        this.log.log(chalk.green(`all ${succeed} tests succeeded.`));
       }
       process.exit(fail);
     });
