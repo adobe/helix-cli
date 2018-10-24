@@ -14,7 +14,6 @@
 
 /* eslint no-console: off */
 
-const EventEmitter = require('events');
 const Bundler = require('parcel-bundler');
 const HTLPreAsset = require('@adobe/parcel-plugin-htl/src/HTLPreAsset.js');
 const glob = require('glob');
@@ -23,7 +22,7 @@ const chalk = require('chalk');
 const fse = require('fs-extra');
 const klawSync = require('klaw-sync');
 const md5 = require('./md5.js');
-const strainconfig = require('./strain-config-utils');
+const AbstractCommand = require('./abstract.cmd.js');
 
 /**
  * Finds the non-htl files from the generated bundle
@@ -56,7 +55,7 @@ function findStaticFiles(bnd) {
   return statics;
 }
 
-class BuildCommand extends EventEmitter {
+class BuildCommand extends AbstractCommand {
   constructor() {
     super();
     this._cache = null;
@@ -65,13 +64,6 @@ class BuildCommand extends EventEmitter {
     this._files = null;
     this._distDir = null;
     this._webroot = null;
-    this._cwd = process.cwd();
-    this._strainFile = null;
-  }
-
-  withDirectory(dir) {
-    this._cwd = dir;
-    return this;
   }
 
   withCacheEnabled(cache) {
@@ -99,11 +91,6 @@ class BuildCommand extends EventEmitter {
     return this;
   }
 
-  withStrainFile(file) {
-    this._strainFile = file;
-    return this;
-  }
-
   withWebRoot(root) {
     this._webroot = root;
     return this;
@@ -117,7 +104,7 @@ class BuildCommand extends EventEmitter {
         fse.move(src, dst, { overwrite: true }).then(() => {
           if (report) {
             const relDest = path.relative(this._distDir, dst);
-            const relDist = path.relative(this._cwd, this._distDir);
+            const relDist = path.relative(this.directory, this._distDir);
             console.log(chalk.gray(relDist + path.sep) + chalk.cyanBright(relDest));
           }
           resolve();
@@ -127,24 +114,20 @@ class BuildCommand extends EventEmitter {
     return Promise.all(jobs);
   }
 
-  async validate() {
-    if (!this._strainFile) {
-      this._strainFile = path.resolve(this._cwd, '.hlx', 'strains.yaml');
-    }
+  /**
+   * @override
+   */
+  async init() {
+    await super.init();
 
     if (!this._webroot) {
-      const exists = await fse.pathExists(this._strainFile);
-      if (exists) {
-        const strains = strainconfig.load(await fse.readFile(this._strainFile, 'utf8'));
-        const defaultStrain = strains.find(v => v.name === 'default');
-        if (defaultStrain && defaultStrain.static && defaultStrain.static.root) {
-          const root = defaultStrain.static.root.replace(/^\/+/, '');
-          this._webroot = path.resolve(this._cwd, root);
-        }
+      const defaultStaticRoot = this.config.strains.get('default').static.path;
+      if (defaultStaticRoot) {
+        this._webroot = path.resolve(this.directory, defaultStaticRoot.replace(/^\/+/, ''));
       }
     }
     if (!this._webroot) {
-      this._webroot = this._cwd;
+      this._webroot = this.directory;
     }
     if (!this._distDir) {
       this._distDir = path.resolve(this._webroot, 'dist');
@@ -153,7 +136,7 @@ class BuildCommand extends EventEmitter {
 
   async getBundlerOptions() {
     const opts = {
-      cacheDir: path.resolve(this._cwd, '.hlx', 'cache'),
+      cacheDir: path.resolve(this.directory, '.hlx', 'cache'),
       target: 'node',
       logLevel: 3,
       detailedReport: true,
@@ -221,7 +204,7 @@ class BuildCommand extends EventEmitter {
   }
 
   async run() {
-    await this.validate();
+    await this.init();
 
     // expand patterns from command line arguments
     const myfiles = this._files.reduce((a, f) => [...a, ...glob.sync(f)], []);

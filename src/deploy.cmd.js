@@ -21,13 +21,13 @@ const glob = require('glob');
 const path = require('path');
 const fs = require('fs-extra');
 const yaml = require('js-yaml');
-const GitUrl = require('@adobe/petridish/src/GitUrl');
-const GitUtils = require('./gitutils');
-const strainconfig = require('./strain-config-utils');
+const { GitUrl, GitUtils } = require('@adobe/petridish');
 const useragent = require('./user-agent-util');
+const AbstractCommand = require('./abstract.cmd.js');
 
-class DeployCommand {
+class DeployCommand extends AbstractCommand {
   constructor() {
+    super();
     this._enableAuto = true;
     this._circleciAuth = null;
     this._wsk_auth = null;
@@ -43,8 +43,7 @@ class DeployCommand {
     this._default = null;
     this._enableDirty = false;
     this._dryRun = false;
-    this._content = null;
-    this._strainFile = path.resolve(process.cwd(), '.hlx', 'strains.yaml');
+    this._strainFile = null;
   }
 
   static getDefaultContentURL() {
@@ -138,12 +137,10 @@ class DeployCommand {
   }
 
   withStrainFile(value) {
+    if (!/^.*\.json$/.test(value)) {
+      throw Error('non-json strain files are deprecated.');
+    }
     this._strainFile = value;
-    return this;
-  }
-
-  withDirectory(dir) {
-    this._cwd = dir;
     return this;
   }
 
@@ -152,6 +149,13 @@ class DeployCommand {
       return `hlx--${path.basename(script, '.js')}`;
     }
     return this._prefix + path.basename(script, '.js');
+  }
+
+  async init() {
+    await super.init();
+    if (!this._strainFile) {
+      this._strainFile = path.resolve(this._helixConfig.directory, '.hlx', 'strains.json');
+    }
   }
 
   static getBuildVarOptions(name, value, auth, owner, repo) {
@@ -262,6 +266,7 @@ class DeployCommand {
   }
 
   async run() {
+    await this.init();
     const dirty = GitUtils.isDirty();
     if (dirty && !this._enableDirty) {
       console.error('hlx will not deploy a working copy that has uncommitted changes. Re-run with flag --dirty to force.');
@@ -272,6 +277,7 @@ class DeployCommand {
       return this.autoDeploy();
     }
 
+    // todo: the default should be provided by the helix-config and not the yargs defaults!
     const giturl = new GitUrl(this._content);
 
     const owoptions = {
@@ -325,39 +331,19 @@ class DeployCommand {
       return name;
     });
 
-    if (fs.existsSync(this._strainFile)) {
-      const oldstrains = strainconfig.load(fs.readFileSync(this._strainFile));
-      const strain = {
-        code: `/${this._wsk_namespace}/default/${this._prefix}`,
-        content: {
-          repo: giturl.repo,
-          ref: giturl.ref,
-          owner: giturl.owner,
-        },
-      };
-      const newstrains = strainconfig.append(oldstrains, strain);
-      if (newstrains.length > oldstrains.length) {
-        console.log(`Updating strain config, adding strain ${strainconfig.name(strain)} as configuration has changed`);
-        fs.writeFileSync(
-          this._strainFile,
-          strainconfig.write(newstrains),
-        );
-      }
-    } else {
-      console.log('Generating new strain config');
-      const defaultstrain = {
-        name: 'default',
-        code: `/${this._wsk_namespace}/${this._prefix}`,
-        content: {
-          repo: giturl.repo,
-          ref: giturl.ref,
-          owner: giturl.owner,
-        },
-      };
-      await fs.ensureDir(path.dirname(this._strainFile));
-      fs.writeFileSync(this._strainFile, strainconfig.write([defaultstrain]));
-    }
+    // update action in default strain
+    const defaultStrain = this._helixConfig.strains.get('default');
+    defaultStrain.code = `/${this._wsk_namespace}/default/${this._prefix}`;
+    defaultStrain.content = giturl;
 
+    const newStrains = JSON.stringify(this._helixConfig.strains, null, '  ');
+    const oldStrains = await fs.exists(this._strainFile) ? await fs.readFile(this._strainFile, 'utf-8') : '';
+
+    if (oldStrains !== newStrains) {
+      console.log(`Updating strain config in ${path.relative(process.cwd(), this._strainFile)}`);
+      await fs.ensureDir(path.dirname(this._strainFile));
+      await fs.writeFile(this._strainFile, newStrains, 'utf-8');
+    }
     return this;
   }
 }

@@ -66,7 +66,7 @@ class UpCommand extends BuildCommand {
   _initSourceWatcher(fn) {
     let timer = null;
     let modifiedFiles = {};
-    this._watcher = fs.watch(this._cwd, {
+    this._watcher = fs.watch(this.directory, {
       recursive: true,
     }, (eventType, filename) => {
       if (filename.indexOf('src/') < 0 && filename !== HELIX_CONFIG) {
@@ -97,14 +97,14 @@ class UpCommand extends BuildCommand {
   }
 
   async run() {
-    await this.validate();
+    await super.init();
 
     // start debugger (#178)
     // https://nodejs.org/en/docs/guides/debugging-getting-started/#enable-inspector
     process.kill(process.pid, 'SIGUSR1');
 
     this._project = new HelixProject()
-      .withCwd(this._cwd)
+      .withCwd(this.directory)
       .withBuildDir(this._target)
       .withWebRootDir(this._webroot)
       .withDisplayVersion(pkgJson.version)

@@ -60,13 +60,7 @@ function name(strain) {
  * @returns {Strain} the unwrapped strain
  */
 function clean(strain) {
-  const mystrain = (() => {
-    if (strain.strain && strain.strain.name && !anon(strain.strain.name)) {
-      return strain.strain;
-    }
-    return { name: name(strain.strain), ...strain.strain };
-  })();
-
+  const mystrain = strain;
   // clean up code
   if (mystrain.code) {
     const match = mystrain.code.match(/^\/?([^/]+)\/?([^/]*)\/([^/]+)$/);
@@ -182,16 +176,27 @@ function append(strains, strain) {
 }
 
 /**
- * Loads a list of strains from a YAML string
- * @param {String} yml
+ * Loads a list of strains from a JSON or YAML string
+ * @param {String} data
  * @returns {Strain[]} the loaded strains
  */
-function load(yml) {
-  const yamlo = yaml.safeLoad(yml);
-  if (Array.isArray(yamlo)) {
-    return yamlo.map(clean).filter(validate);
+function load(data) {
+  let obj;
+  if (data.charAt(0) === '{') {
+    obj = JSON.parse(data);
+  } else {
+    obj = yaml.safeLoad(data);
   }
-  return [];
+  if (!obj) {
+    return [];
+  }
+  // convert to array for easier operation
+  return Object.keys(obj).map((key) => {
+    obj[key].name = key;
+    return obj[key];
+  })
+    .map(clean)
+    .filter(validate);
 }
 
 module.exports = {
