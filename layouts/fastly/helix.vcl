@@ -603,7 +603,9 @@ sub vcl_deliver {
 #FASTLY deliver
   call hlx_headers_deliver;
 
-  set resp.http.Set-Cookie = "X-Strain=" + req.http.X-Strain + "; Secure; HttpOnly; SameSite=Strict;";
+  if (req.http.X-Strain&&req.http.X-Sticky=="true") {
+    set resp.http.Set-Cookie = "X-Strain=" + req.http.X-Strain + "; Secure; HttpOnly; SameSite=Strict;";
+  }
 
   if (!req.http.X-Debug) {
     # Unless we are debugging, shut up chatty headers
@@ -630,6 +632,7 @@ sub vcl_deliver {
     unset resp.http.X-Request-Id;
     unset resp.http.X-Served-By;
     unset resp.http.X-Static;
+    unset resp.http.X-Sticky;
     unset resp.http.X-Strain;
     unset resp.http.X-Timer;
     unset resp.http.X-URL;

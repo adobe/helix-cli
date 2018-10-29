@@ -16,7 +16,7 @@
 
 const assert = require('assert');
 const sinon = require('sinon');
-const { GitUtils } = require('@adobe/petridish');
+const { GitUtils } = require('@adobe/helix-shared');
 const CLI = require('../src/cli.js');
 const DeployCommand = require('../src/deploy.cmd');
 

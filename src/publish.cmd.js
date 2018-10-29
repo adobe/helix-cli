@@ -20,7 +20,7 @@ const URI = require('uri-js');
 const glob = require('glob-to-regexp');
 const { toBase64 } = require('request/lib/helpers');
 const ProgressBar = require('progress');
-const { GitUtils } = require('@adobe/petridish');
+const { GitUtils } = require('@adobe/helix-shared');
 const strainconfig = require('./strain-config-utils');
 const include = require('./include-util');
 const useragent = require('./user-agent-util');
@@ -435,12 +435,17 @@ class PublishCommand extends AbstractCommand {
     return Promise.resolve();
   }
 
+  /**
+   * Creates a condition expression in VCL language that maps requests to strains.
+   * @param {Strain} strain the strain to generate a condition expression for
+   */
   static vclConditions(strain) {
     if (strain.url) {
       const uri = URI.parse(strain.url);
       if (uri.path && uri.path !== '/') {
         const pathname = uri.path.replace(/\/$/, '');
         return Object.assign({
+          sticky: false,
           condition: `req.http.Host == "${uri.host}" && (req.url.dirname ~ "^${pathname}$" || req.url.dirname ~ "^${pathname}/")`,
           vcl: `
   set req.http.X-Dirname = regsub(req.url.dirname, "^${pathname}", "");`,
@@ -448,6 +453,11 @@ class PublishCommand extends AbstractCommand {
       }
       return Object.assign({
         condition: `req.http.Host == "${uri.host}"`,
+      }, strain);
+    }
+    if (strain.condition && strain.sticky === undefined) {
+      return Object.assign({
+        sticky: true,
       }, strain);
     }
     return strain;
@@ -461,7 +471,10 @@ class PublishCommand extends AbstractCommand {
     const conditions = strains
       .map(PublishCommand.vclConditions)
       .filter(strain => strain.condition)
-      .map(({ condition, name, vcl = '' }) => `if (${condition}) {
+      .map(({
+        condition, name, vcl = '', sticky = false,
+      }) => `if (${condition}) {
+  set req.http.X-Sticky = "${sticky}";
   set req.http.X-Strain = "${name}";${vcl}
 } else `);
     if (conditions.length) {
