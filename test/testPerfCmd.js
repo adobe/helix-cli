@@ -40,32 +40,35 @@ describe('hlx perf #unittest', () => {
   });
 
   it('format() #unittest', () => {
-    assert.equal(PerfCommand.format(example.metrics, 'unknown-metric', 100), undefined);
-    assert.equal(PerfCommand.format(example.metrics, 'lighthouse-seo-score', 100), false);
-    assert.equal(PerfCommand.format(example.metrics, 'lighthouse-seo-score', 0), true);
+    const pc = new PerfCommand();
+    assert.equal(pc.format(example.metrics, 'unknown-metric', 100), undefined);
+    assert.equal(pc.format(example.metrics, 'lighthouse-seo-score', 100), false);
+    assert.equal(pc.format(example.metrics, 'lighthouse-seo-score', 0), true);
 
-    assert.equal(PerfCommand.format(example.metrics, 'visually_complete', 1000), false);
-    assert.equal(PerfCommand.format(example.metrics, 'visually_complete', 2000), true);
+    assert.equal(pc.format(example.metrics, 'visually_complete', 1000), false);
+    assert.equal(pc.format(example.metrics, 'visually_complete', 2000), true);
   });
 
   it('formatResponse() #unittest', () => {
+    const pc = new PerfCommand();
+
     // default
-    assert.equal(PerfCommand.formatResponse(example), false);
+    assert.equal(pc.formatResponse(example), false);
 
     // all failed
-    assert.equal(PerfCommand.formatResponse(example, {
+    assert.equal(pc.formatResponse(example, {
       'lighthouse-seo-score': 100,
       visually_complete: 1000,
     }), false);
 
     // all succeeded
-    assert.equal(PerfCommand.formatResponse(example, {
+    assert.equal(pc.formatResponse(example, {
       'lighthouse-seo-score': 0,
       visually_complete: 2000,
     }), true);
 
     // some failed
-    assert.equal(PerfCommand.formatResponse(example, {
+    assert.equal(pc.formatResponse(example, {
       'lighthouse-seo-score': 0,
       visually_complete: 1000,
     }), false);

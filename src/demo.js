@@ -12,6 +12,8 @@
 
 'use strict';
 
+const { logArgs, makeLogger } = require('./log-common.js');
+
 module.exports = function demo() {
   let executor;
 
@@ -22,7 +24,7 @@ module.exports = function demo() {
     command: 'demo <name> [dir]',
     desc: 'Create example helix project.',
     builder: (yargs) => {
-      yargs
+      logArgs(yargs)
         .option('type', {
           describe: 'Demo source type',
           type: 'string',
@@ -43,8 +45,8 @@ module.exports = function demo() {
     handler: async (argv) => {
       if (!executor) {
         // eslint-disable-next-line global-require
-        const InitCommand = require('./demo.cmd'); // lazy load the handler to speed up execution time
-        executor = new InitCommand();
+        const DemoCommand = require('./demo.cmd'); // lazy load the handler to speed up execution time
+        executor = new DemoCommand(makeLogger(argv));
       }
 
       await executor

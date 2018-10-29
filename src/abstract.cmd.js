@@ -14,17 +14,23 @@
 
 const EventEmitter = require('events');
 const { HelixConfig } = require('@adobe/helix-shared');
+const { makeLogger } = require('./log-common');
 
 class AbstractCommand extends EventEmitter {
-  constructor() {
+  constructor(logger) {
     super();
-    this._helixConfig = new HelixConfig();
     this._initialized = false;
+    this._logger = logger || makeLogger();
+    this._helixConfig = new HelixConfig().withLogger(this._logger);
   }
 
   withDirectory(dir) {
     this._helixConfig.withDirectory(dir);
     return this;
+  }
+
+  get log() {
+    return this._logger;
   }
 
   get directory() {

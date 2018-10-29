@@ -10,8 +10,6 @@
  * governing permissions and limitations under the License.
  */
 
-/* eslint no-console: off */
-
 'use strict';
 
 const request = require('request-promise-native');
@@ -21,13 +19,14 @@ const glob = require('glob');
 const path = require('path');
 const fs = require('fs-extra');
 const yaml = require('js-yaml');
+const ProgressBar = require('progress');
 const { GitUrl, GitUtils } = require('@adobe/helix-shared');
 const useragent = require('./user-agent-util');
 const AbstractCommand = require('./abstract.cmd.js');
 
 class DeployCommand extends AbstractCommand {
-  constructor() {
-    super();
+  constructor(logger) {
+    super(logger);
     this._enableAuto = true;
     this._circleciAuth = null;
     this._wsk_auth = null;
@@ -206,7 +205,7 @@ class DeployCommand extends AbstractCommand {
       uri: `https://circleci.com/api/v1.1/project/github/${owner}/${repo}/follow`,
     };
 
-    console.log(`Automating deployment with ${followoptions.uri}`);
+    this.log.info(`Automating deployment with ${followoptions.uri}`);
 
     const follow = await request(followoptions);
 
@@ -239,12 +238,12 @@ class DeployCommand extends AbstractCommand {
     await Promise.all(envars);
 
     if (follow.first_build) {
-      console.log('\nAuto-deployment started.');
-      console.log('Configuration finished. Go to');
-      console.log(`${chalk.grey(`https://circleci.com/gh/${owner}/${repo}/edit`)} for build settings or`);
-      console.log(`${chalk.grey(`https://circleci.com/gh/${owner}/${repo}`)} for build status.`);
+      this.log.info('\nAuto-deployment started.');
+      this.log.info('Configuration finished. Go to');
+      this.log.info(`${chalk.grey(`https://circleci.com/gh/${owner}/${repo}/edit`)} for build settings or`);
+      this.log.info(`${chalk.grey(`https://circleci.com/gh/${owner}/${repo}`)} for build status.`);
     } else {
-      console.log('\nAuto-deployment already set up. Triggering a new build.');
+      this.log.warn('\nAuto-deployment already set up. Triggering a new build.');
 
       const triggeroptions = {
         method: 'POST',
@@ -261,7 +260,7 @@ class DeployCommand extends AbstractCommand {
       const triggered = await request(triggeroptions);
 
 
-      console.log(`Go to ${chalk.grey(`${triggered.build_url}`)} for build status.`);
+      this.log.info(`Go to ${chalk.grey(`${triggered.build_url}`)} for build status.`);
     }
   }
 
@@ -269,7 +268,7 @@ class DeployCommand extends AbstractCommand {
     await this.init();
     const dirty = GitUtils.isDirty();
     if (dirty && !this._enableDirty) {
-      console.error('hlx will not deploy a working copy that has uncommitted changes. Re-run with flag --dirty to force.');
+      this.log.error('hlx will not deploy a working copy that has uncommitted changes. Re-run with flag --dirty to force.');
       process.exit(dirty);
     }
 
@@ -289,6 +288,22 @@ class DeployCommand extends AbstractCommand {
 
     const scripts = [path.resolve(__dirname, 'openwhisk', 'static.js'), ...glob.sync(`${this._target}/*.js`)];
 
+    const bar = new ProgressBar('[:bar] :action :etas', {
+      total: (scripts.length * 2),
+      width: 50,
+      renderThrottle: 1,
+      stream: process.stdout,
+    });
+
+    const tick = (message, name) => {
+      bar.tick({
+        action: name ? `deploying ${name}` : '',
+      });
+      if (message) {
+        this.log.maybe(message);
+      }
+    };
+
     const params = {
       ...this._default,
       LOGGLY_HOST: this._loggly_host,
@@ -299,36 +314,46 @@ class DeployCommand extends AbstractCommand {
       this._prefix = `${GitUtils.getRepository()}--${GitUtils.getBranchFlag()}--`;
     }
 
-    scripts.map((script) => {
-      const name = this.actionName(script);
-      console.log(`⏳  Deploying ${script} as ${name}`);
+    const actions = scripts.map(script => ({
+      script,
+      name: this.actionName(script),
+    }));
 
-      fs.readFile(script, { encoding: 'utf8' }, (err, action) => {
-        if (!err) {
-          const actionoptions = {
-            name,
-            'User-Agent': useragent,
-            action,
-            params,
-            kind: 'blackbox',
-            exec: { image: this._docker, main: 'module.exports.main' },
-            annotations: { 'web-export': true },
-          };
-          if (this._dryRun) {
-            console.log(`❎  Action ${name} has been skipped.`);
-          } else {
-            openwhisk.actions.update(actionoptions).then((result) => {
-              console.log(`✅  Action ${result.name} has been created.`);
-            }).catch((e) => {
-              console.error(`❌  Unable to deploy the action ${name}:  ${e.message}`);
-            });
-          }
-        } else {
-          console.error(`❌  File ${script} could not be read. ${err.message}`);
-        }
+    const read = actions.map(({ script, name }) => fs.readFile(script, { encoding: 'utf8' })
+      .then(action => ({ script, name, action })));
+
+    const deployed = read.map(p => p.then(({ script, name, action }) => {
+      const actionoptions = {
+        name,
+        'User-Agent': useragent,
+        action,
+        params,
+        kind: 'blackbox',
+        exec: { image: this._docker, main: 'module.exports.main' },
+        annotations: { 'web-export': true },
+      };
+
+      const baseName = path.basename(script);
+      tick(`deploying ${baseName}`, baseName);
+
+      if (this._dryRun) {
+        tick(` deployed ${baseName} (skipped)`);
+        return true;
+      }
+
+      return openwhisk.actions.update(actionoptions).then(() => {
+        tick(` deployed ${baseName} (deployed)`);
+        return true;
+      }).catch((e) => {
+        this.log.error(`❌  Unable to deploy the action ${name}:  ${e.message}`);
+        tick();
+        return false;
       });
+    }));
 
-      return name;
+    Promise.all(deployed).then(() => {
+      bar.terminate();
+      this.log.info('✅  deployment completed');
     });
 
     // update action in default strain
@@ -340,7 +365,7 @@ class DeployCommand extends AbstractCommand {
     const oldStrains = await fs.exists(this._strainFile) ? await fs.readFile(this._strainFile, 'utf-8') : '';
 
     if (oldStrains !== newStrains) {
-      console.log(`Updating strain config in ${path.relative(process.cwd(), this._strainFile)}`);
+      this.log.info(`Updating strain config in ${path.relative(process.cwd(), this._strainFile)}`);
       await fs.ensureDir(path.dirname(this._strainFile));
       await fs.writeFile(this._strainFile, newStrains, 'utf-8');
     }

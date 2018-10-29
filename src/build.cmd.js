@@ -12,8 +12,6 @@
 
 'use strict';
 
-/* eslint no-console: off */
-
 const Bundler = require('parcel-bundler');
 const HTLPreAsset = require('@adobe/parcel-plugin-htl/src/HTLPreAsset.js');
 const glob = require('glob');
@@ -56,8 +54,8 @@ function findStaticFiles(bnd) {
 }
 
 class BuildCommand extends AbstractCommand {
-  constructor() {
-    super();
+  constructor(logger) {
+    super(logger);
     this._cache = null;
     this._minify = false;
     this._target = null;
@@ -105,7 +103,7 @@ class BuildCommand extends AbstractCommand {
           if (report) {
             const relDest = path.relative(this._distDir, dst);
             const relDist = path.relative(this.directory, this._distDir);
-            console.log(chalk.gray(relDist + path.sep) + chalk.cyanBright(relDest));
+            this.log.info(chalk.gray(relDist + path.sep) + chalk.cyanBright(relDest));
           }
           resolve();
         }).catch(reject);
@@ -197,7 +195,7 @@ class BuildCommand extends AbstractCommand {
 
     if (staticFiles.length > 0) {
       if (report) {
-        console.log(chalk.greenBright('\n✨  Moving static files in place:'));
+        this.log.info(chalk.greenBright('\n✨  Moving static files in place:'));
       }
       await this.moveStaticFiles(staticFiles, report);
     }

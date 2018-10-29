@@ -13,6 +13,7 @@
 'use strict';
 
 const deployCommon = require('./deploy-common');
+const { logArgs, makeLogger } = require('./log-common.js');
 
 module.exports = function deploy() {
   let executor;
@@ -29,7 +30,8 @@ module.exports = function deploy() {
       // eslint-disable-next-line global-require
       const { GitUtils } = require('@adobe/helix-shared'); // lazy load the handler to speed up execution time
 
-      deployCommon(yargs)
+      deployCommon(yargs);
+      logArgs(yargs)
         .option('auto', {
           describe: 'Enable auto-deployment',
           type: 'boolean',
@@ -136,7 +138,7 @@ module.exports = function deploy() {
       if (!executor) {
         // eslint-disable-next-line global-require
         const DeployCommand = require('./deploy.cmd'); // lazy load the handler to speed up execution time
-        executor = new DeployCommand();
+        executor = new DeployCommand(makeLogger(argv));
       }
 
       await executor

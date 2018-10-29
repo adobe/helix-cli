@@ -10,7 +10,6 @@
  * governing permissions and limitations under the License.
  */
 
-/* eslint no-console: off */
 /* eslint no-unused-vars: ["error", { "argsIgnorePattern": "^_" }] */
 
 const fs = require('fs-extra');
@@ -20,16 +19,19 @@ const path = require('path');
 const URI = require('uri-js');
 const glob = require('glob-to-regexp');
 const { toBase64 } = require('request/lib/helpers');
+const ProgressBar = require('progress');
 const { GitUtils } = require('@adobe/helix-shared');
 const strainconfig = require('./strain-config-utils');
 const include = require('./include-util');
 const useragent = require('./user-agent-util');
 const cli = require('./cli-util');
+const AbstractCommand = require('./abstract.cmd.js');
 
 const HELIX_VCL_DEFAULT_FILE = path.resolve(__dirname, '../layouts/fastly/helix.vcl');
 
-class PublishCommand {
-  constructor() {
+class PublishCommand extends AbstractCommand {
+  constructor(logger) {
+    super(logger);
     this._wsk_auth = null;
     this._wsk_namespace = null;
     this._wsk_host = null;
@@ -100,6 +102,49 @@ class PublishCommand {
         use_ssl: true,
       },
     };
+  }
+
+  tick(ticks = 1, message, name) {
+    if (name === true) {
+      // eslint-disable-next-line no-param-reassign
+      name = message;
+    }
+    this.progressBar().tick(ticks, {
+      action: name || '',
+    });
+    if (message) {
+      this.log.maybe(message);
+    }
+  }
+
+  progressBar() {
+    if (this._bar) {
+      return this._bar;
+    }
+
+    // number of backends
+    const backends = Object.keys(this._backends).length;
+    // number of dictionaries
+    const dictionaries = Object.keys(this._dictionaries).length;
+    // number of non-strain-specific dictionaries
+    const staticdictionaries = 1;
+    const strains = this._strains.length;
+    const vclfiles = 3;
+    const extrarequests = 4;
+
+    const ticks = backends
+      + dictionaries
+      + (strains * (dictionaries - staticdictionaries))
+      + vclfiles
+      + extrarequests;
+    this._bar = new ProgressBar('Publishing [:bar] :action :etas', {
+      total: ticks,
+      width: 50,
+      renderThrottle: 1,
+      stream: process.stdout,
+    });
+
+    return this._bar;
   }
 
   async loadStrains() {
@@ -219,7 +264,7 @@ class PublishCommand {
       try {
         this._service = await request(this.options(''));
       } catch (e) {
-        console.error('Unable to get service', e);
+        this.log.error('Unable to get service', e);
         throw e;
       }
     }
@@ -284,6 +329,8 @@ class PublishCommand {
     const missingdicts = Object.entries(dictionaries)
       .filter(([_key, value]) => value === null)
       .map(([key, _value]) => key);
+    const existing = Object.entries(dictionaries).length - missingdicts.length;
+    this.tick(existing, `Skipping ${existing} existing dictionaries`);
     if (missingdicts.length > 0) {
       const baseopts = await this.version('/dictionary');
       missingdicts.map((dict) => {
@@ -295,13 +342,12 @@ class PublishCommand {
           },
         }, baseopts);
         return request(opts).then((r) => {
-          console.log(`📕  Dictionary ${r.name} has been created`);
+          this.tick(1, `Dictionary ${dict} created`, dict);
           return r;
         })
           .catch((e) => {
             const message = `Dictionary ${dict} could not be created`;
-            console.error(message);
-            console.error(e);
+            this.log.error(message, e);
             throw new Error(message, e);
           });
       });
@@ -316,6 +362,8 @@ class PublishCommand {
     const missingbackends = Object.entries(backends)
       .filter(([_key, value]) => value.created_at === undefined)
       .map(([_key, value]) => value);
+    const existing = Object.entries(backends).length - missingbackends.length;
+    this.tick(existing, `Skipping ${existing} existing backends`);
     if (missingbackends.length > 0) {
       const baseopts = await this.version('/backend');
       return Promise.all(missingbackends.map(async (backend) => {
@@ -324,13 +372,13 @@ class PublishCommand {
           form: backend,
         }, baseopts);
         try {
+          this.tick(0, `Creating backend ${backend.name}`, true);
           const r = await request(opts);
-          console.log(`🔚  Backend ${r.name} has been created`);
+          this.tick(1, `Created backend ${backend.name}`, true);
           return r;
         } catch (e) {
           const message = `Backend ${backend.name} could not be created`;
-          console.error(message);
-          console.error(e.message);
+          this.log.error(`${message}`, e);
           throw new Error(message, e);
         }
       }));
@@ -344,15 +392,15 @@ class PublishCommand {
    */
   async cloneVersion() {
     const cloneOpts = await this.putVersionOpts('/clone');
+    this.tick(0, 'Cloning Service Config version', 'cloning version');
     return request(cloneOpts).then((r) => {
-      console.log(`🐑  Cloned latest version, version ${r.number} is ready`);
       this._version = r.number;
+      this.tick(1, `Cloned Service Config Version ${r.number}`, `cloning version ${r.number}`);
       return Promise.resolve(this);
     })
       .catch((e) => {
         const message = 'Unable to create new service version';
-        console.error(message);
-        console.error(e);
+        this.log.error(message, e);
         throw new Error(message, e);
       });
   }
@@ -362,15 +410,15 @@ class PublishCommand {
    */
   async publishVersion() {
     const actOpts = await this.putVersionOpts('/activate');
+    this.tick(0, 'Activating version', 'activating version');
     return request(actOpts).then((r) => {
-      console.log(`🚀  Activated latest version, version ${r.number} is live`);
+      this.tick(1, `Activated version ${r.number}`, `activated version ${r.number}`);
       this._version = r.number;
       return Promise.resolve(this);
     })
       .catch((e) => {
         const message = 'Unable to activate new configuration';
-        console.error(message);
-        console.error(e);
+        this.log.error(message, e);
         throw new Error(message, e);
       });
   }
@@ -385,7 +433,7 @@ class PublishCommand {
     await this.getDictionaries();
     const mydict = this._dictionaries[dict];
     if (!mydict) {
-      console.error(`${dict} does not exist`);
+      this.log.error(`Dictionary ${dict} does not exist. Try ${Object.keys(this._dictionaries).join(', ')}`);
       return null;
     }
     if (value) {
@@ -396,7 +444,7 @@ class PublishCommand {
       const opts = await this.deleteOpts(`/dictionary/${mydict}/item/${key}`);
       await request(opts);
     } catch (e) {
-      // ignore
+      this.log.error(`Unknown error when deleting key ${key} from dictionary ${mydict}`, e);
     }
     return Promise.resolve();
   }
@@ -456,7 +504,7 @@ class PublishCommand {
 
   /**
    * Turns a list of parameter names into a regular expression string.
-   * @param {Array(String)} params a list of parameter names
+   * @param {Array<String>} params a list of parameter names
    */
   static makeFilter(params) {
     return `^(${[...params, 'hlx_.*'].join('|')})$`;
@@ -565,20 +613,19 @@ ${PublishCommand.makeParamWhitelist(params, '  ')}
     const opts = await this.vclopts(name, vcl);
     return request(opts)
       .then(async (r) => {
-        console.log(`✅  VCL ${r.name} has been updated`);
+        this.tick(1, `Uploading VCL ${name}`, true);
         if (isMain) {
           const mainbaseopts = await this.version(`/vcl/${name}/main`);
           const mainopts = Object.assign({ method: 'PUT' }, mainbaseopts);
-          return request(mainopts).then((_s) => {
-            console.log(`✅  VCL ${r.name} has been made main`);
+          return request(mainopts).then(() => {
+            this.tick(1, `Uploaded VCL ${name}`, true);
           });
         }
         return r;
       })
       .catch((e) => {
         const message = `Unable to update VCL ${name}`;
-        console.error(message);
-        console.error(e.message);
+        this.log.error(message, e);
         throw new Error(message, e);
       });
   }
@@ -592,19 +639,17 @@ ${PublishCommand.makeParamWhitelist(params, '  ')}
       method: 'POST',
     }, baseopts);
     return request(opts).then((r) => {
-      console.log('💀  Purged entire cache');
+      this.tick(1, 'Purging entire cache');
       return r;
     })
       .catch((e) => {
         const message = 'Cache could not be purged';
-        console.error(message);
-        console.error(e);
+        this.log.error(message, e);
         throw new Error(message, e);
       });
   }
 
   async initFastly() {
-    console.log('Checking Fastly Setup');
     return this.initBackends();
   }
 
@@ -614,7 +659,7 @@ ${PublishCommand.makeParamWhitelist(params, '  ')}
       const content = include(vclfile);
       return this.transferVCL(content, 'helix.vcl', true);
     } catch (e) {
-      console.error(`❌  Unable to set ${vclfile}`);
+      this.log.error(`❌  Unable to set ${vclfile}`);
       throw e;
     }
   }
@@ -623,127 +668,124 @@ ${PublishCommand.makeParamWhitelist(params, '  ')}
     const strains = this._strains;
 
     const urls = strains.filter(strain => strain.url).map(strain => strain.url);
+    this.progressBar().terminate();
 
-    console.log('✅  All strains have been published and are online.');
+    this.log.info(`✅  All strains have been published and version ${this._version} is now online.`);
     if (urls.length) {
-      console.log('\nYou now access your site using:');
-      console.log(chalk.grey(`$ curl ${urls[0]}`));
+      this.log.info('\nYou now access your site using:');
+      this.log.info(chalk.grey(`$ curl ${urls[0]}`));
     }
   }
 
   /**
    * Turns a list of globs into a regular expression string.
-   * @param {Array(String)} globs a list of globs
+   * @param {Array<String>} globs a list of globs
    */
   static makeRegexp(globs) {
     return globs.map(glob).map(re => re.toString().replace(/^\/|\/$/g, '')).join('|');
   }
 
   async _updateFastly() {
-    console.log('🐑 👾 🚀  hlx is publishing strains');
+    this.progressBar();
 
     await this.cloneVersion();
     await this.initFastly();
     await this.initDictionaries();
 
-    const owsecret = `Basic ${toBase64(`${this._wsk_auth}`)}`;
-    const secretp = this.putDict('secrets', 'OPENWHISK_AUTH', owsecret).then((_s) => {
-      console.log('🗝  Enabled Fastly to call secure OpenWhisk actions');
-    })
-      .catch((e) => {
-        const message = 'OpenWhisk authentication could not be passed on';
-        console.error(message);
-        console.error(e);
-        throw new Error(message, e);
-      });
+    const dictJobs = [];
+    const makeDictJob = (dictname, strainname, strainvalue, message, shortMsg) => {
+      if (strainvalue) {
+        const job = this.putDict(dictname, strainname, strainvalue)
+          .then(() => {
+            this.tick(1, message, shortMsg);
+          })
+          .catch((e) => {
+            const msg = 'Error setting edge dictionary value';
+            this.log.error(message, e);
+            throw new Error(msg, e);
+          });
 
-    const ownsp = this.putDict('secrets', 'OPENWHISK_NAMESPACE', this._wsk_namespace).then((_s) => {
-      console.log('🗝  Enabled Fastly to call OpenWhisk static action');
-    })
-      .catch((e) => {
-        const message = 'OpenWhisk namespace could not be passed on';
-        console.error(message);
-        console.error(e);
-        throw new Error(message, e);
-      });
+        dictJobs.push(job);
+      }
+    };
+
+    const owsecret = `Basic ${toBase64(`${this._wsk_auth}`)}`;
+    makeDictJob('secrets', 'OPENWHISK_AUTH', owsecret, 'Set OpenWhisk Authentication', 'openwhisk authentication');
+    makeDictJob('secrets', 'OPENWHISK_NAMESPACE', this._wsk_namespace, 'Set OpenWhisk namespace', 'openwhisk namespace');
+    const [secretp, ownsp] = dictJobs.splice(0, 2);
 
     const strains = this._strains;
-
-    const strainjobs = [];
     strains.map((strain) => {
-      const makeStrainjob = (dictname, strainname, strainvalue, message) => {
-        if (strainvalue) {
-          const job = this.putDict(dictname, strainname, strainvalue)
-            .then(() => {
-              console.log(`${message} for strain ${strainname}`);
-            })
-            .catch((e) => {
-              const msg = 'Error setting edge dictionary value';
-              console.error(msg);
-              console.error(e);
-              throw new Error(msg, e);
-            });
-
-          strainjobs.push(job);
-        }
-      };
-
       // required
-      makeStrainjob('strain_action_roots', strain.name, strain.code, '👾  Set action root');
-      makeStrainjob('strain_owners', strain.name, strain.content.owner, '🏢  Set content owner');
-      makeStrainjob('strain_repos', strain.name, strain.content.repo, '🌳  Set content repo');
-      makeStrainjob('strain_refs', strain.name, strain.content.ref, '🏷  Set content ref');
+      makeDictJob('strain_action_roots', strain.name, strain.code, '- Set action root', 'action root');
+      makeDictJob('strain_owners', strain.name, strain.content.owner, '- Set content owner', 'content owner');
+      makeDictJob('strain_repos', strain.name, strain.content.repo, '- Set content repo', 'content repo');
+      makeDictJob('strain_refs', strain.name, strain.content.ref, '- Set content ref', 'content ref');
 
       // optional
-      makeStrainjob('strain_index_files', strain.name, strain.index, '🗂  Set directory index');
-      makeStrainjob('strain_root_paths', strain.name, strain.content.root, '🌲  Set content root');
+      makeDictJob('strain_index_files', strain.name, strain.index, '- Set directory index', 'directory index');
+      makeDictJob('strain_root_paths', strain.name, strain.content.root, '- Set content root', 'content root');
 
       // static
       const origin = GitUtils.getOriginURL();
 
       if (strain.static && strain.static.repo) {
-        makeStrainjob('strain_github_static_repos', strain.name, strain.static.repo, '🌳  Set static repo');
+        makeDictJob('strain_github_static_repos', strain.name, strain.static.repo, '- Set static repo', 'static repo');
       } else {
-        makeStrainjob('strain_github_static_repos', strain.name, origin.repo, '🌳  Set static repo to current repo');
+        makeDictJob('strain_github_static_repos', strain.name, origin.repo, '- Set static repo to current repo', 'static repo');
       }
 
       if (strain.static && strain.static.owner) {
-        makeStrainjob('strain_github_static_owners', strain.name, strain.static.owner, '🏢  Set static owner');
+        makeDictJob('strain_github_static_owners', strain.name, strain.static.owner, '- Set static owner', 'static owner');
       } else {
-        makeStrainjob('strain_github_static_owners', strain.name, origin.owner, '🏢  Set static owner to current owner');
+        makeDictJob('strain_github_static_owners', strain.name, origin.owner, '- Set static owner to current owner', 'static owner');
       }
 
       if (strain.static && strain.static.ref) {
-        makeStrainjob('strain_github_static_refs', strain.name, strain.static.ref, '🏷  Set static ref');
+        makeDictJob('strain_github_static_refs', strain.name, strain.static.ref, '- Set static ref', 'static ref');
       } else {
         // TODO: replace ref with sha for better performance and lower risk of hitting rate limits
-        makeStrainjob('strain_github_static_refs', strain.name, origin.ref, '🏷  Set static ref to current ref');
+        makeDictJob('strain_github_static_refs', strain.name, origin.ref, '- Set static ref to current ref', 'static ref');
       }
 
       if (strain.static && strain.static.root) {
-        makeStrainjob('strain_github_static_root', strain.name, strain.static.root, '🌲  Set static root');
+        makeDictJob('strain_github_static_root', strain.name, strain.static.root, '- Set static root', 'static root');
+      } else {
+        // skipping: no message here
+        this.tick();
       }
 
       if (strain.static && strain.static.magic) {
-        makeStrainjob('strain_github_static_magic', strain.name, strain.static.magic ? 'true' : 'false', strain.static.magic ? '🔮  Enable magic' : '⚽️  Disable magic');
+        makeDictJob(
+          'strain_github_static_magic',
+          strain.name, strain.static.magic ? 'true' : 'false',
+          strain.static.magic ? '- Enable magic' : '- Disable magic',
+          'static magic',
+        );
       } else {
-        makeStrainjob('strain_github_static_magic', strain.name, 'false', '⚽️  Disable magic');
+        makeDictJob('strain_github_static_magic', strain.name, 'false', '- Disable magic', 'static magic');
       }
 
       if (strain.static && strain.static.allow) {
         const allow = PublishCommand.makeRegexp(strain.static.allow);
-        makeStrainjob('strain_allow', strain.name, allow, '⚪️  Set whitelist');
+        makeDictJob('strain_allow', strain.name, allow, '- Set whitelist', 'whitelist');
+      } else {
+        // skipping: no message here
+        this.tick();
       }
 
       if (strain.static && strain.static.deny) {
         const deny = PublishCommand.makeRegexp(strain.static.deny);
-        makeStrainjob('strain_deny', strain.name, deny, '⚫️  Set blacklist');
+        makeDictJob('strain_deny', strain.name, deny, '- Set blacklist', 'blacklist');
+      } else {
+        // skipping: no message here
+        this.tick();
       }
       return strain;
     });
 
     // wait for all dict updates to complete
-    await Promise.all(strainjobs);
+    await Promise.all(dictJobs);
 
     // set all dependent VCL files
     await Promise.all([
@@ -754,8 +796,8 @@ ${PublishCommand.makeParamWhitelist(params, '  ')}
     // then set the master VCL file
     await this.setHelixVCL();
 
-    await secretp;
     // also wait for the openwhisk namespace
+    await secretp;
     await ownsp;
   }
 
@@ -763,15 +805,14 @@ ${PublishCommand.makeParamWhitelist(params, '  ')}
     await this.loadStrains();
     try {
       await this._updateFastly();
-      console.log('📕  All dicts have been updated.');
+      this.tick(0);
       await this.publishVersion();
       await this.purgeAll();
 
       this.showNextStep();
     } catch (e) {
       const message = 'Error while running the Publish command';
-      console.error(message);
-      console.error(e);
+      this.log.error(message, e);
       throw new Error(message, e);
     }
   }

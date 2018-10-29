@@ -13,6 +13,7 @@
 'use strict';
 
 const deployCommon = require('./deploy-common');
+const { logArgs, makeLogger } = require('./log-common.js');
 
 module.exports = function strain() {
   let executor;
@@ -24,7 +25,8 @@ module.exports = function strain() {
     command: ['publish', 'strain'],
     desc: 'Activate strains in the Fastly CDN and publish the site',
     builder: (yargs) => {
-      deployCommon(yargs)
+      deployCommon(yargs);
+      logArgs(yargs)
         .option('fastly-namespace', {
           describe: 'CDN Namespace (e.g. Fastly Service ID)',
           type: 'string',
@@ -54,7 +56,7 @@ module.exports = function strain() {
       if (!executor) {
         // eslint-disable-next-line global-require
         const StrainCommand = require('./publish.cmd'); // lazy load the handler to speed up execution time
-        executor = new StrainCommand();
+        executor = new StrainCommand(makeLogger(argv));
       }
 
       await executor

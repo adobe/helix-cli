@@ -15,6 +15,7 @@
 'use strict';
 
 const yargs = require('yargs');
+const { logArgs } = require('./log-common.js');
 
 const MIN_MSG = 'You need at least one command.';
 
@@ -61,7 +62,7 @@ class CLI {
     const argv = yargs();
     Object.values(this._commands).forEach(cmd => argv.command(cmd));
 
-    return argv
+    return logArgs(argv)
       .fail(this._failFn)
       .exitProcess(false)
       .strict()

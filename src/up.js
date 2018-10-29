@@ -15,6 +15,7 @@
 
 const path = require('path');
 const { defaultArgs } = require('./defaults.js');
+const { logArgs, makeLogger } = require('./log-common.js');
 
 module.exports = function up() {
   let executor;
@@ -25,7 +26,8 @@ module.exports = function up() {
     command: 'up [files...]',
     description: 'Run a Helix development server',
     builder: (yargs) => {
-      defaultArgs(yargs)
+      defaultArgs(yargs);
+      logArgs(yargs)
         .option('open', {
           describe: 'Open a browser window',
           boolean: true,
@@ -37,7 +39,7 @@ module.exports = function up() {
       if (!executor) {
         // eslint-disable-next-line global-require
         const UpCommand = require('./up.cmd'); // lazy load the handler to speed up execution time
-        executor = new UpCommand();
+        executor = new UpCommand(makeLogger(argv));
       }
 
 
