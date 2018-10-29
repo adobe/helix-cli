@@ -18,7 +18,6 @@ const fs = require('fs-extra');
 const _ = require('lodash/fp');
 const strainconfig = require('./strain-config-utils');
 const JunitPerformanceReport = require('./junit-utils');
-const { makeLogger } = require('./log-common');
 const AbstractCommand = require('./abstract.cmd.js');
 
 class PerfCommand extends AbstractCommand {
@@ -137,31 +136,31 @@ class PerfCommand extends AbstractCommand {
    * @param {*} limit
    * @returns true if successful, false if unsuccessful and undefined if the name isn't valid
    */
-  static format(metrics, name, limit, logger = makeLogger()) {
+  format(metrics, name, limit) {
     const metric = metrics.filter(m => m.name === name).length === 1
       ? metrics.filter(m => m.name === name)[0] : null;
     if (metric && metric.name.endsWith('-score')) {
-      logger.info(`  ${chalk.gray(`${metric.label}: `)}${PerfCommand.formatScore(metric.value, limit)}`);
+      this.log.info(`  ${chalk.gray(`${metric.label}: `)}${PerfCommand.formatScore(metric.value, limit)}`);
       return PerfCommand.formatScore(metric.value, limit).indexOf('(failed)') === -1;
     } if (metric) {
-      logger.info(`  ${chalk.gray(`${metric.label}: `)}${PerfCommand.formatMeasure(metric.value, limit)}`);
+      this.log.info(`  ${chalk.gray(`${metric.label}: `)}${PerfCommand.formatMeasure(metric.value, limit)}`);
       return PerfCommand.formatMeasure(metric.value, limit).indexOf('(failed)') === -1;
     }
     return undefined;
   }
 
-  static formatResponse(response, params = {}, strainname = 'default', logger = makeLogger()) {
-    logger.info(`\nTesting ${response.url} on ${response.device.title} (${response.connection.title}) from ${response.location.emoji}  ${response.location.name} using ${strainname} strain.\n`);
+  formatResponse(response, params = {}, strainname = 'default') {
+    this.log.info(`\nTesting ${response.url} on ${response.device.title} (${response.connection.title}) from ${response.location.emoji}  ${response.location.name} using ${strainname} strain.\n`);
     const strainresults = Object.keys(params).map((key) => {
       const value = params[key];
       if (Number.isInteger(value)) {
-        return PerfCommand.format(response.metrics, key, value);
+        return this.format(response.metrics, key, value);
       }
       return undefined;
     });
     if (strainresults.length === 0 || strainresults.every(val => val === undefined)) {
-      const perf = PerfCommand.format(response.metrics, 'lighthouse-performance-score', 80);
-      const access = PerfCommand.format(response.metrics, 'lighthouse-accessibility-score', 80);
+      const perf = this.format(response.metrics, 'lighthouse-performance-score', 80);
+      const access = this.format(response.metrics, 'lighthouse-accessibility-score', 80);
       // use the default metrics
       return perf && access;
     }
@@ -190,7 +189,7 @@ class PerfCommand extends AbstractCommand {
             if (this._junit) {
               this._junit.appendResults(result, params, strain.name);
             }
-            return PerfCommand.formatResponse(result, params, strain.name, this.log);
+            return this.formatResponse(result, params, strain.name);
           })
           .catch((err) => {
             this.log.error(err);

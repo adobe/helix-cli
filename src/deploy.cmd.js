@@ -288,7 +288,11 @@ class DeployCommand extends AbstractCommand {
 
     const scripts = [path.resolve(__dirname, 'openwhisk', 'static.js'), ...glob.sync(`${this._target}/*.js`)];
 
-    const bar = new ProgressBar('deploying [:bar] :etas', { total: (scripts.length * 2), width: 50, renderThrottle: 1 });
+    const bar = new ProgressBar('deploying [:bar] :etas', {
+      total: (scripts.length * 2),
+      width: 50,
+      renderThrottle: 1,
+    });
 
     const tick = (message) => {
       bar.tick();
@@ -305,12 +309,13 @@ class DeployCommand extends AbstractCommand {
       this._prefix = `${GitUtils.getRepository()}--${GitUtils.getBranchFlag()}--`;
     }
 
-    const named = scripts.map(script => ({
+    const actions = scripts.map(script => ({
       script,
       name: this.actionName(script),
     }));
 
-    const read = named.map(({ script, name }) => fs.readFile(script, { encoding: 'utf8' }).then(action => ({ script, name, action })));
+    const read = actions.map(({ script, name }) => fs.readFile(script, { encoding: 'utf8' })
+      .then(action => ({ script, name, action })));
 
     const deployed = read.map(p => p.then(({ script, name, action }) => {
       const actionoptions = {

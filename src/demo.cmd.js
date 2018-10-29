@@ -78,7 +78,7 @@ class InitCommand {
       // https://github.com/adobe/helix-cli/issues/280
       // bypass pre-commit and commit-msg hooks when doing initial commit (-n,--no-verify)
       await execAsync('git commit -q -n -m"Initial commit."');
-      this._logger.info(chalk.yellow('initializing git repository'));
+      this.msg(chalk.yellow('initializing git repository'));
     } catch (e) {
       throw Error(`Unable to initialize git repository: ${e}`);
     } finally {

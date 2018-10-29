@@ -15,19 +15,21 @@ const { MESSAGE, LEVEL } = require('triple-beam');
 
 const { format } = winston;
 
-module.exports.logArgs = yargs => yargs
-  .option('log-file', {
-    describe: 'Log file (use - for stdout)',
-    type: 'string',
-    array: true,
-    default: '-',
-  })
-  .option('log-level', {
-    describe: 'Log level',
-    type: 'string',
-    choices: ['silly', 'debug', 'verbose', 'info', 'warn', 'error'],
-    default: 'info',
-  });
+module.exports.logArgs = function logArgs(yargs) {
+  return yargs
+    .option('log-file', {
+      describe: 'Log file (use - for stdout)',
+      type: 'string',
+      array: true,
+      default: '-',
+    })
+    .option('log-level', {
+      describe: 'Log level',
+      type: 'string',
+      choices: ['silly', 'debug', 'verbose', 'info', 'warn', 'error'],
+      default: 'info',
+    });
+};
 
 /**
    * A custom formatter that logs in the format
@@ -47,7 +49,7 @@ class Console {
     if (info[LEVEL] === 'info') {
       info[MESSAGE] = this.normal(info);
     } else if (info[LEVEL] === 'maybe' && process.stderr.isTTY) {
-      // surpress maybe log messages on the console
+      // suppress maybe log messages on the console
       return false;
     } else {
       info[MESSAGE] = this.elevated(info);
