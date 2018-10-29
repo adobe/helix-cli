@@ -19,9 +19,9 @@ const { makeLogger } = require('./log-common');
 class AbstractCommand extends EventEmitter {
   constructor(logger) {
     super();
-    this._helixConfig = new HelixConfig();
     this._initialized = false;
     this._logger = logger || makeLogger();
+    this._helixConfig = new HelixConfig().withLogger(this._logger);
   }
 
   withDirectory(dir) {

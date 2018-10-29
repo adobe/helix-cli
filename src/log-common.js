@@ -18,7 +18,7 @@ const { format } = winston;
 module.exports.logArgs = function logArgs(yargs) {
   return yargs
     .option('log-file', {
-      describe: 'Log file (use - for stdout)',
+      describe: 'Log file (use "-" for stdout)',
       type: 'string',
       array: true,
       default: '-',
@@ -48,9 +48,12 @@ class Console {
     /* eslint-disable no-param-reassign */
     if (info[LEVEL] === 'info') {
       info[MESSAGE] = this.normal(info);
-    } else if (info[LEVEL] === 'maybe' && process.stderr.isTTY) {
-      // suppress maybe log messages on the console
-      return false;
+    } else if (info[LEVEL] === 'maybe') {
+      if (process.stdout.isTTY) {
+        return false;
+      }
+      info[LEVEL] = 'info';
+      info[MESSAGE] = this.normal(info);
     } else {
       info[MESSAGE] = this.elevated(info);
     }
@@ -71,7 +74,7 @@ function makeTransport(filename) {
   const fileformat = format.combine(
     format.timestamp(),
     format.align(),
-    format.printf(info => `${info.timestamp} ${info.level}: ${info.message}`),
+    format.printf(info => `${info.timestamp} ${info.level === 'maybe' ? 'info' : info.level}: ${info.message}`),
   );
 
   const jsonformat = format.combine(

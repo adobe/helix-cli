@@ -104,8 +104,14 @@ class PublishCommand extends AbstractCommand {
     };
   }
 
-  tick(ticks = 1, message) {
-    this.progressBar().tick(ticks);
+  tick(ticks = 1, message, name) {
+    if (name === true) {
+      // eslint-disable-next-line no-param-reassign
+      name = message;
+    }
+    this.progressBar().tick(ticks, {
+      action: name || '',
+    });
     if (message) {
       this.log.maybe(message);
     }
@@ -131,7 +137,12 @@ class PublishCommand extends AbstractCommand {
       + (strains * (dictionaries - staticdictionaries))
       + vclfiles
       + extrarequests;
-    this._bar = new ProgressBar('publishing [:bar] :etas', { total: ticks, width: 50, renderThrottle: 1 });
+    this._bar = new ProgressBar('Publishing [:bar] :action :etas', {
+      total: ticks,
+      width: 50,
+      renderThrottle: 1,
+      stream: process.stdout,
+    });
 
     return this._bar;
   }
@@ -331,7 +342,7 @@ class PublishCommand extends AbstractCommand {
           },
         }, baseopts);
         return request(opts).then((r) => {
-          this.tick(1, `Dictionary ${dict} created`);
+          this.tick(1, `Dictionary ${dict} created`, dict);
           return r;
         })
           .catch((e) => {
@@ -361,8 +372,9 @@ class PublishCommand extends AbstractCommand {
           form: backend,
         }, baseopts);
         try {
+          this.tick(0, `Creating backend ${backend.name}`, true);
           const r = await request(opts);
-          this.tick(1, `Created backend ${backend.name}`);
+          this.tick(1, `Created backend ${backend.name}`, true);
           return r;
         } catch (e) {
           const message = `Backend ${backend.name} could not be created`;
@@ -380,9 +392,10 @@ class PublishCommand extends AbstractCommand {
    */
   async cloneVersion() {
     const cloneOpts = await this.putVersionOpts('/clone');
+    this.tick(0, 'Cloning Service Config version', 'cloning version');
     return request(cloneOpts).then((r) => {
       this._version = r.number;
-      this.tick(1, `Cloning Service Config Version ${r.number}`);
+      this.tick(1, `Cloned Service Config Version ${r.number}`, `cloning version ${r.number}`);
       return Promise.resolve(this);
     })
       .catch((e) => {
@@ -397,8 +410,9 @@ class PublishCommand extends AbstractCommand {
    */
   async publishVersion() {
     const actOpts = await this.putVersionOpts('/activate');
+    this.tick(0, 'Activating version', 'activating version');
     return request(actOpts).then((r) => {
-      this.tick(1, `Activated version ${r.number}`);
+      this.tick(1, `Activated version ${r.number}`, `activated version ${r.number}`);
       this._version = r.number;
       return Promise.resolve(this);
     })
@@ -490,7 +504,7 @@ class PublishCommand extends AbstractCommand {
 
   /**
    * Turns a list of parameter names into a regular expression string.
-   * @param {Array(String)} params a list of parameter names
+   * @param {Array<String>} params a list of parameter names
    */
   static makeFilter(params) {
     return `^(${[...params, 'hlx_.*'].join('|')})$`;
@@ -599,12 +613,12 @@ ${PublishCommand.makeParamWhitelist(params, '  ')}
     const opts = await this.vclopts(name, vcl);
     return request(opts)
       .then(async (r) => {
-        this.tick(1, `Uploading VCL ${name}`);
+        this.tick(1, `Uploading VCL ${name}`, true);
         if (isMain) {
           const mainbaseopts = await this.version(`/vcl/${name}/main`);
           const mainopts = Object.assign({ method: 'PUT' }, mainbaseopts);
-          return request(mainopts).then((_s) => {
-            this.tick(1, `Uploaded VCL ${name}`);
+          return request(mainopts).then(() => {
+            this.tick(1, `Uploaded VCL ${name}`, true);
           });
         }
         return r;
@@ -665,7 +679,7 @@ ${PublishCommand.makeParamWhitelist(params, '  ')}
 
   /**
    * Turns a list of globs into a regular expression string.
-   * @param {Array(String)} globs a list of globs
+   * @param {Array<String>} globs a list of globs
    */
   static makeRegexp(globs) {
     return globs.map(glob).map(re => re.toString().replace(/^\/|\/$/g, '')).join('|');
@@ -678,93 +692,83 @@ ${PublishCommand.makeParamWhitelist(params, '  ')}
     await this.initFastly();
     await this.initDictionaries();
 
-    const owsecret = `Basic ${toBase64(`${this._wsk_auth}`)}`;
-    const secretp = this.putDict('secrets', 'OPENWHISK_AUTH', owsecret).then((_s) => {
-      this.tick(1, 'Setting OpenWhisk Authentication');
-    })
-      .catch((e) => {
-        const message = 'OpenWhisk authentication could not be passed on';
-        this.log.error(message, e);
-        throw new Error(message, e);
-      });
+    const dictJobs = [];
+    const makeDictJob = (dictname, strainname, strainvalue, message, shortMsg) => {
+      if (strainvalue) {
+        const job = this.putDict(dictname, strainname, strainvalue)
+          .then(() => {
+            this.tick(1, message, shortMsg);
+          })
+          .catch((e) => {
+            const msg = 'Error setting edge dictionary value';
+            this.log.error(message, e);
+            throw new Error(msg, e);
+          });
 
-    const ownsp = this.putDict('secrets', 'OPENWHISK_NAMESPACE', this._wsk_namespace).then((_s) => {
-      this.tick(1, 'Setting OpenWhisk namespace');
-    })
-      .catch((e) => {
-        const message = 'OpenWhisk namespace could not be passed on';
-        this.log.error(message, e);
-        throw new Error(message, e);
-      });
+        dictJobs.push(job);
+      }
+    };
+
+    const owsecret = `Basic ${toBase64(`${this._wsk_auth}`)}`;
+    makeDictJob('secrets', 'OPENWHISK_AUTH', owsecret, 'Set OpenWhisk Authentication', 'openwhisk authentication');
+    makeDictJob('secrets', 'OPENWHISK_NAMESPACE', this._wsk_namespace, 'Set OpenWhisk namespace', 'openwhisk namespace');
+    const [secretp, ownsp] = dictJobs.splice(0, 2);
 
     const strains = this._strains;
-
-    const strainjobs = [];
     strains.map((strain) => {
-      const makeStrainjob = (dictname, strainname, strainvalue, message) => {
-        if (strainvalue) {
-          const job = this.putDict(dictname, strainname, strainvalue)
-            .then(() => {
-              this.tick(1, message);
-            })
-            .catch((e) => {
-              const msg = 'Error setting edge dictionary value';
-              this.log.error(message, e);
-              throw new Error(msg, e);
-            });
-
-          strainjobs.push(job);
-        }
-      };
-
       // required
-      makeStrainjob('strain_action_roots', strain.name, strain.code, '👾  Set action root');
-      makeStrainjob('strain_owners', strain.name, strain.content.owner, '🏢  Set content owner');
-      makeStrainjob('strain_repos', strain.name, strain.content.repo, '🌳  Set content repo');
-      makeStrainjob('strain_refs', strain.name, strain.content.ref, '🏷  Set content ref');
+      makeDictJob('strain_action_roots', strain.name, strain.code, '- Set action root', 'action root');
+      makeDictJob('strain_owners', strain.name, strain.content.owner, '- Set content owner', 'content owner');
+      makeDictJob('strain_repos', strain.name, strain.content.repo, '- Set content repo', 'content repo');
+      makeDictJob('strain_refs', strain.name, strain.content.ref, '- Set content ref', 'content ref');
 
       // optional
-      makeStrainjob('strain_index_files', strain.name, strain.index, '🗂  Set directory index');
-      makeStrainjob('strain_root_paths', strain.name, strain.content.root, '🌲  Set content root');
+      makeDictJob('strain_index_files', strain.name, strain.index, '- Set directory index', 'directory index');
+      makeDictJob('strain_root_paths', strain.name, strain.content.root, '- Set content root', 'content root');
 
       // static
       const origin = GitUtils.getOriginURL();
 
       if (strain.static && strain.static.repo) {
-        makeStrainjob('strain_github_static_repos', strain.name, strain.static.repo, '🌳  Set static repo');
+        makeDictJob('strain_github_static_repos', strain.name, strain.static.repo, '- Set static repo', 'static repo');
       } else {
-        makeStrainjob('strain_github_static_repos', strain.name, origin.repo, '🌳  Set static repo to current repo');
+        makeDictJob('strain_github_static_repos', strain.name, origin.repo, '- Set static repo to current repo', 'static repo');
       }
 
       if (strain.static && strain.static.owner) {
-        makeStrainjob('strain_github_static_owners', strain.name, strain.static.owner, '🏢  Set static owner');
+        makeDictJob('strain_github_static_owners', strain.name, strain.static.owner, '- Set static owner', 'static owner');
       } else {
-        makeStrainjob('strain_github_static_owners', strain.name, origin.owner, '🏢  Set static owner to current owner');
+        makeDictJob('strain_github_static_owners', strain.name, origin.owner, '- Set static owner to current owner', 'static owner');
       }
 
       if (strain.static && strain.static.ref) {
-        makeStrainjob('strain_github_static_refs', strain.name, strain.static.ref, '🏷  Set static ref');
+        makeDictJob('strain_github_static_refs', strain.name, strain.static.ref, '- Set static ref', 'static ref');
       } else {
         // TODO: replace ref with sha for better performance and lower risk of hitting rate limits
-        makeStrainjob('strain_github_static_refs', strain.name, origin.ref, '🏷  Set static ref to current ref');
+        makeDictJob('strain_github_static_refs', strain.name, origin.ref, '- Set static ref to current ref', 'static ref');
       }
 
       if (strain.static && strain.static.root) {
-        makeStrainjob('strain_github_static_root', strain.name, strain.static.root, '🌲  Set static root');
+        makeDictJob('strain_github_static_root', strain.name, strain.static.root, '- Set static root', 'static root');
       } else {
         // skipping: no message here
         this.tick();
       }
 
       if (strain.static && strain.static.magic) {
-        makeStrainjob('strain_github_static_magic', strain.name, strain.static.magic ? 'true' : 'false', strain.static.magic ? '🔮  Enable magic' : '⚽️  Disable magic');
+        makeDictJob(
+          'strain_github_static_magic',
+          strain.name, strain.static.magic ? 'true' : 'false',
+          strain.static.magic ? '- Enable magic' : '- Disable magic',
+          'static magic',
+        );
       } else {
-        makeStrainjob('strain_github_static_magic', strain.name, 'false', '⚽️  Disable magic');
+        makeDictJob('strain_github_static_magic', strain.name, 'false', '- Disable magic', 'static magic');
       }
 
       if (strain.static && strain.static.allow) {
         const allow = PublishCommand.makeRegexp(strain.static.allow);
-        makeStrainjob('strain_allow', strain.name, allow, '⚪️  Set whitelist');
+        makeDictJob('strain_allow', strain.name, allow, '- Set whitelist', 'whitelist');
       } else {
         // skipping: no message here
         this.tick();
@@ -772,7 +776,7 @@ ${PublishCommand.makeParamWhitelist(params, '  ')}
 
       if (strain.static && strain.static.deny) {
         const deny = PublishCommand.makeRegexp(strain.static.deny);
-        makeStrainjob('strain_deny', strain.name, deny, '⚫️  Set blacklist');
+        makeDictJob('strain_deny', strain.name, deny, '- Set blacklist', 'blacklist');
       } else {
         // skipping: no message here
         this.tick();
@@ -781,7 +785,7 @@ ${PublishCommand.makeParamWhitelist(params, '  ')}
     });
 
     // wait for all dict updates to complete
-    await Promise.all(strainjobs);
+    await Promise.all(dictJobs);
 
     // set all dependent VCL files
     await Promise.all([
@@ -792,8 +796,8 @@ ${PublishCommand.makeParamWhitelist(params, '  ')}
     // then set the master VCL file
     await this.setHelixVCL();
 
-    await secretp;
     // also wait for the openwhisk namespace
+    await secretp;
     await ownsp;
   }
 
@@ -801,7 +805,7 @@ ${PublishCommand.makeParamWhitelist(params, '  ')}
     await this.loadStrains();
     try {
       await this._updateFastly();
-      this.tick();
+      this.tick(0);
       await this.publishVersion();
       await this.purgeAll();
 

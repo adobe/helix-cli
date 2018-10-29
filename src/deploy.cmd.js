@@ -288,15 +288,20 @@ class DeployCommand extends AbstractCommand {
 
     const scripts = [path.resolve(__dirname, 'openwhisk', 'static.js'), ...glob.sync(`${this._target}/*.js`)];
 
-    const bar = new ProgressBar('deploying [:bar] :etas', {
+    const bar = new ProgressBar('[:bar] :action :etas', {
       total: (scripts.length * 2),
       width: 50,
       renderThrottle: 1,
+      stream: process.stdout,
     });
 
-    const tick = (message) => {
-      bar.tick();
-      this.log.maybe(message);
+    const tick = (message, name) => {
+      bar.tick({
+        action: name ? `deploying ${name}` : '',
+      });
+      if (message) {
+        this.log.maybe(message);
+      }
     };
 
     const params = {
@@ -328,18 +333,20 @@ class DeployCommand extends AbstractCommand {
         annotations: { 'web-export': true },
       };
 
-      tick(`deploying ${path.basename(script)}`);
+      const baseName = path.basename(script);
+      tick(`deploying ${baseName}`, baseName);
 
       if (this._dryRun) {
-        tick(`️️️skipped ${path.basename(script)} (skipped)`);
+        tick(` deployed ${baseName} (skipped)`);
         return true;
       }
+
       return openwhisk.actions.update(actionoptions).then(() => {
-        tick(`deployed ${path.basename(script)} (deployed)`);
+        tick(` deployed ${baseName} (deployed)`);
         return true;
       }).catch((e) => {
         this.log.error(`❌  Unable to deploy the action ${name}:  ${e.message}`);
-        bar.tick();
+        tick();
         return false;
       });
     }));
