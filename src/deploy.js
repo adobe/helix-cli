@@ -27,7 +27,7 @@ module.exports = function deploy() {
       // eslint-disable-next-line global-require
       const DeployCommand = require('./deploy.cmd'); // lazy load the handler to speed up execution time
       // eslint-disable-next-line global-require
-      const { GitUtils } = require('@adobe/petridish'); // lazy load the handler to speed up execution time
+      const { GitUtils } = require('@adobe/helix-shared'); // lazy load the handler to speed up execution time
 
       deployCommon(yargs)
         .option('auto', {
