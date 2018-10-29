@@ -13,7 +13,7 @@
 'use strict';
 
 const EventEmitter = require('events');
-const { HelixConfig } = require('@adobe/petridish');
+const { HelixConfig } = require('@adobe/helix-shared');
 
 class AbstractCommand extends EventEmitter {
   constructor() {

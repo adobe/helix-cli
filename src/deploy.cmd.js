@@ -21,7 +21,7 @@ const glob = require('glob');
 const path = require('path');
 const fs = require('fs-extra');
 const yaml = require('js-yaml');
-const { GitUrl, GitUtils } = require('@adobe/petridish');
+const { GitUrl, GitUtils } = require('@adobe/helix-shared');
 const useragent = require('./user-agent-util');
 const AbstractCommand = require('./abstract.cmd.js');
 
