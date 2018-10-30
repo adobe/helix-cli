@@ -113,7 +113,11 @@ class PublishCommand extends AbstractCommand {
       action: name || '',
     });
     if (message) {
-      this.log.maybe(message);
+      this.log.log({
+        progress: true,
+        level: 'info',
+        message,
+      });
     }
   }
 

@@ -15,7 +15,7 @@
 
 const path = require('path');
 const { defaultArgs } = require('./defaults.js');
-const { logArgs, makeLogger } = require('./log-common.js');
+const { makeLogger } = require('./log-common.js');
 
 module.exports = function up() {
   let executor;
@@ -27,7 +27,7 @@ module.exports = function up() {
     description: 'Run a Helix development server',
     builder: (yargs) => {
       defaultArgs(yargs);
-      logArgs(yargs)
+      yargs
         .option('open', {
           describe: 'Open a browser window',
           boolean: true,
@@ -41,7 +41,6 @@ module.exports = function up() {
         const UpCommand = require('./up.cmd'); // lazy load the handler to speed up execution time
         executor = new UpCommand(makeLogger(argv));
       }
-
 
       await executor
         .withCacheEnabled(argv.cache)

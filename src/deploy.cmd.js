@@ -300,7 +300,11 @@ class DeployCommand extends AbstractCommand {
         action: name ? `deploying ${name}` : '',
       });
       if (message) {
-        this.log.maybe(message);
+        this.log.log({
+          progress: true,
+          level: 'info',
+          message,
+        });
       }
     };
 
