@@ -14,12 +14,18 @@
 const assert = require('assert');
 const fs = require('fs-extra');
 const path = require('path');
+const winston = require('winston');
 const logCommon = require('../src/log-common');
 
 const testlogfile = path.resolve(__dirname, 'testlog.log');
 const testjsonfile = path.resolve(__dirname, 'testlog.json');
 
 describe('Testing standard logger configuration', () => {
+  beforeEach(() => {
+    // reset the winston loggers
+    winston.loggers.loggers.clear();
+  });
+
   it('Log level can be specified on the command line', () => {
     assert.equal(logCommon.makeLogger({ logLevel: 'debug' }).level, 'debug');
   });
