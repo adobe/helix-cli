@@ -15,7 +15,6 @@
 'use strict';
 
 const yargs = require('yargs');
-const { logArgs } = require('./log-common.js');
 
 const MIN_MSG = 'You need at least one command.';
 
@@ -25,6 +24,27 @@ if (process.env.NODE_OPTIONS) {
     .split(' ')
     .filter(opt => opt.indexOf('--inspect') === -1)
     .join(' ');
+}
+
+/**
+ * Adds the default logging options.
+ * @param argv Yargs
+ * @returns {Yargs} the args
+ */
+function logArgs(argv) {
+  return argv
+    .option('log-file', {
+      describe: 'Log file (use "-" for stdout)',
+      type: 'string',
+      array: true,
+      default: '-',
+    })
+    .option('log-level', {
+      describe: 'Log level',
+      type: 'string',
+      choices: ['silly', 'debug', 'verbose', 'info', 'warn', 'error'],
+      default: 'info',
+    });
 }
 
 class CLI {

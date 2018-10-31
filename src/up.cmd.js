@@ -106,9 +106,8 @@ class UpCommand extends BuildCommand {
       .withCwd(this.directory)
       .withBuildDir(this._target)
       .withWebRootDir(this._webroot)
-      // TODO: .withLogger(this.log)
+      .withLogger(this.log)
       .withDisplayVersion(pkgJson.version)
-
       .withRuntimeModulePaths(module.paths);
 
     if (this._httpPort >= 0) {
@@ -134,22 +133,25 @@ class UpCommand extends BuildCommand {
     };
 
     const onParcelBuildEnd = async () => {
-      readline.clearLine(process.stdout, 0);
-      readline.moveCursor(process.stdout, 0, -1);
-      const buildTime = Date.now() - buildStartTime;
-      this.log.info(`${buildMessage}done ${buildTime}ms`);
+      try {
+        readline.clearLine(process.stdout, 0);
+        readline.moveCursor(process.stdout, 0, -1);
+        const buildTime = Date.now() - buildStartTime;
+        this.log.info(`${buildMessage}done ${buildTime}ms`);
+        if (this._project.started) {
+          this.emit('build', this);
+          // todo
+          // this._project.invalidateCache();
+          return;
+        }
 
-      if (this._project.started) {
-        this.emit('build', this);
-        // todo
-        // this._project.invalidateCache();
-        return;
-      }
-
-      await this._project.start();
-      this.emit('started', this);
-      if (this._open) {
-        opn(`http://localhost:${this._project.server.port}/index.html`);
+        await this._project.start();
+        this.emit('started', this);
+        if (this._open) {
+          opn(`http://localhost:${this._project.server.port}/index.html`);
+        }
+      } catch (e) {
+        this.log.error(`Internal error: ${e.message}`);
       }
     };
 

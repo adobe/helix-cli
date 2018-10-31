@@ -13,7 +13,7 @@
 'use strict';
 
 const deployCommon = require('./deploy-common');
-const { logArgs, makeLogger } = require('./log-common.js');
+const { makeLogger } = require('./log-common.js');
 
 module.exports = function deploy() {
   let executor;
@@ -31,7 +31,7 @@ module.exports = function deploy() {
       const { GitUtils } = require('@adobe/helix-shared'); // lazy load the handler to speed up execution time
 
       deployCommon(yargs);
-      logArgs(yargs)
+      yargs
         .option('auto', {
           describe: 'Enable auto-deployment',
           type: 'boolean',

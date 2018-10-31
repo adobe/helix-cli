@@ -13,7 +13,7 @@
 'use strict';
 
 const deployCommon = require('./deploy-common');
-const { logArgs, makeLogger } = require('./log-common.js');
+const { makeLogger } = require('./log-common.js');
 
 module.exports = function strain() {
   let executor;
@@ -26,7 +26,7 @@ module.exports = function strain() {
     desc: 'Activate strains in the Fastly CDN and publish the site',
     builder: (yargs) => {
       deployCommon(yargs);
-      logArgs(yargs)
+      yargs
         .option('fastly-namespace', {
           describe: 'CDN Namespace (e.g. Fastly Service ID)',
           type: 'string',

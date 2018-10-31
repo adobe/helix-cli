@@ -16,7 +16,7 @@
 // TODO: remove the following line
 /* eslint no-unused-vars: off */
 
-const { logArgs, makeLogger } = require('./log-common.js');
+const { makeLogger } = require('./log-common.js');
 
 module.exports = function perf() {
   let executor;
@@ -28,7 +28,7 @@ module.exports = function perf() {
     command: 'perf',
     desc: 'Test performance',
     builder: (yargs) => {
-      logArgs(yargs)
+      yargs
         .env('HLX')
         .strict(false)
         .option('calibre-auth', {
