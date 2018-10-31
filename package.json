@@ -26,10 +26,10 @@
   },
   "homepage": "https://github.com/adobe/project-helix#readme",
   "dependencies": {
-    "@adobe/helix-shared": "^0.0.1",
+    "@adobe/helix-shared": "^0.0.2",
     "@adobe/hypermedia-pipeline": "^0.6.0",
     "@adobe/parcel-plugin-htl": "^0.9.4",
-    "@adobe/petridish": "^2.1.0",
+    "@adobe/petridish": "^2.2.0",
     "archiver": "^3.0.0",
     "calibre": "^1.1.1",
     "chalk": "^2.4.1",
