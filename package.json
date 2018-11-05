@@ -27,9 +27,9 @@
   "homepage": "https://github.com/adobe/project-helix#readme",
   "dependencies": {
     "@adobe/helix-shared": "^0.0.3",
-    "@adobe/hypermedia-pipeline": "^0.7.1",
+    "@adobe/hypermedia-pipeline": "^0.7.2",
     "@adobe/parcel-plugin-htl": "^0.9.4",
-    "@adobe/petridish": "^2.4.0",
+    "@adobe/petridish": "^2.4.1",
     "archiver": "^3.0.0",
     "calibre": "^1.1.1",
     "chalk": "^2.4.1",
@@ -73,7 +73,6 @@
     "mocha-parallel-tests": "^2.0.3",
     "nyc": "^13.0.1",
     "replay": "^2.3.0",
-    "request-promise": "^4.2.2",
     "sinon": "^6.1.0",
     "unzip": "^0.1.11",
     "uuid": "^3.3.2"
