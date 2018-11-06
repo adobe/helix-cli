@@ -26,7 +26,7 @@
   },
   "homepage": "https://github.com/adobe/project-helix#readme",
   "dependencies": {
-    "@adobe/helix-shared": "^0.0.3",
+    "@adobe/helix-shared": "^0.0.4",
     "@adobe/hypermedia-pipeline": "^0.7.2",
     "@adobe/parcel-plugin-htl": "^0.9.4",
     "@adobe/petridish": "^2.4.1",
