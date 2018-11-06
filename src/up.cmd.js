@@ -105,8 +105,8 @@ class UpCommand extends BuildCommand {
     this._project = new HelixProject()
       .withCwd(this.directory)
       .withBuildDir(this._target)
-      .withWebRootDir(this._webroot)
-      .withLogger(this.log)
+      .withWebRootDir(this._webroot) // todo
+      .withHelixConfig(this.config)
       .withDisplayVersion(pkgJson.version)
       .withRuntimeModulePaths(module.paths);
 
@@ -148,7 +148,7 @@ class UpCommand extends BuildCommand {
         await this._project.start();
         this.emit('started', this);
         if (this._open) {
-          opn(`http://localhost:${this._project.server.port}/index.html`);
+          opn(`http://localhost:${this._project.server.port}/`);
         }
       } catch (e) {
         this.log.error(`Internal error: ${e.message}`);
@@ -174,6 +174,8 @@ class UpCommand extends BuildCommand {
       if (HELIX_CONFIG in files) {
         this.log.info(`${HELIX_CONFIG} modified. Restarting dev server...`);
         await this._project.stop();
+        await this.reloadConfig();
+        this._project.withHelixConfig(this.config);
         await this._project.init();
         await this._project.start();
         if (Object.keys(files).length === 1) {
