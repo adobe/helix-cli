@@ -8,4 +8,7 @@ title: '{{project.name}}'
 # Specifies the git url to the content repository. helix will use the local directory if
 # not configured.
 #
-#contentRepo: https://github.com/Adobe-Marketing-Cloud/reactor-user-docs
+#content: https://github.com/Adobe-Marketing-Cloud/reactor-user-docs
+
+# specifies the directory index
+#directoryIndex: README.html

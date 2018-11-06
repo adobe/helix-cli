@@ -55,6 +55,19 @@ class AbstractCommand extends EventEmitter {
       this._initialized = true;
     }
   }
+
+  async reloadConfig() {
+    if (!this._initialized) {
+      return this.init();
+    }
+    this._helixConfig = await (new HelixConfig()
+      .withLogger(this._helixConfig.log)
+      // eslint-disable-next-line no-underscore-dangle
+      .withConfigPath(this._helixConfig._cfgPath) // todo, expose properly in HelixConfig
+      .withDirectory(this._helixConfig.directory)
+      .init());
+    return this;
+  }
 }
 
 module.exports = AbstractCommand;
