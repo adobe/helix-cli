@@ -72,6 +72,13 @@ git clone https://github.com/adobe/helix-cli.git
 # build executable (a.out)
 cd helix-cli
 git checkout $ref
+retVal=$?
+if [ $retVal -ne 0 ]; then
+    echo "unknown tag/ref: '$ref', aborting"
+    cd ../..
+    rm -rf tmp
+    exit $retval
+fi
 cp index.js hlx
 
 echo
