@@ -168,7 +168,7 @@ jobs:
     - image: circleci/node:8-stretch
     working_directory: ~/repo
     environment:
-    NPM_CONFIG_PREFIX: ~/.npm-global
+        NPM_CONFIG_PREFIX: ~/.npm-global
 
     steps:
         - checkout
@@ -204,7 +204,7 @@ jobs:
         # run smoke tests
         - run:
             name: Running Smoke Tests
-            command: npx mocha  --exit --reporter mocha-junit-reporter test/smoke/*
+            command: env HLX_SMOKE_EXEC='node ../index.js' npx mocha  --exit --reporter mocha-junit-reporter test/smoke/*
             working_directory: project-helix.io
             environment:
                 MOCHA_FILE: junit/test-results.xml
