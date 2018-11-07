@@ -228,4 +228,5 @@ workflows:
           branches:
             only: master
   smoke:
+    jobs:
     - smoke
