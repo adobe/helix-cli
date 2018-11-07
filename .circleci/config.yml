@@ -189,6 +189,11 @@ jobs:
         - run:
             name: Clone project-helix.io
             command: git clone https://github.com/adobe/project-helix.io.git
+
+        - run:
+            name: Install project-helix.io
+            command: npm install https://github.com/adobe/project-helix.io.git
+            working_directory: project-helix.io
         
         # run TESTS!
         - run: mkdir junit
