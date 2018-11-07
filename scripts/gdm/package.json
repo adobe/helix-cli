@@ -1,0 +1,12 @@
+{
+    "name": "Gt Dependency Maker",
+    "version": "1.0.0",
+    "description": "Convert versioned @adobe dependency into git dependencies",
+    "main": "index.js",
+    "author": "",
+    "license": "ISC",
+    "dependencies": {
+        "npm": "^6.4.0",
+        "shelljs": "^0.8.2"
+    }
+}

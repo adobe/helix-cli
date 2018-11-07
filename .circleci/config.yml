@@ -162,6 +162,55 @@ jobs:
     - store_artifacts:
         path: build/hlx_install.sh
 
+    smoke:
+        docker:
+        # specify the version you desire here
+        - image: circleci/node:8-stretch
+        working_directory: ~/repo
+        environment:
+        NPM_CONFIG_PREFIX: ~/.npm-global
+
+        steps:
+            - checkout
+
+            - run:
+                name: install npm 6.4.0
+                command: sudo npm -g install npm@6.4.0
+
+            - run:
+                name: Install Git Dependency Maker tool
+                command: npm install
+                working_directory: scripts/gdm
+
+            - run:
+                name: Install using git branches (master or specified)
+                command: env GDM_MODULE_BRANCHES=$GDM_MODULE_BRANCHES npm run gdm
+
+            - run:
+                name: Clone project-helix.io
+                command: git clone https://github.com/adobe/project-helix.io.git
+            
+            # run TESTS!
+            - run: mkdir junit
+            - run:
+                name: prepare test git user
+                command: git config --global user.email "you@example.com" && git config --global user.name "CircleCi Build"
+
+            # run smoke tests
+            - run:
+                name: Running Smoke Tests
+                command: npx mocha  --exit --reporter mocha-junit-reporter test/smoke/*
+                working_directory: project-helix.io
+                environment:
+                    MOCHA_FILE: junit/test-results.xml
+                when: always    
+
+            - store_test_results:
+                path: junit
+
+            - store_artifacts:
+                path: junit
+
 workflows:
   version: 2
   build:
@@ -178,3 +227,5 @@ workflows:
         filters:
           branches:
             only: master
+  smoke:
+    - smoke
