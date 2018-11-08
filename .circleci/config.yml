@@ -33,7 +33,7 @@ jobs:
         key: v3-dependencies-{{ arch }}-{{ checksum "package-lock.json" }}
 
         # run tests!
-    - run: mkdir ~/junit
+    - run: mkdir ${CIRCLE_WORKING_DIRECTORY}/junit
     - run:
         name: prepare test git user
         command: git config --global user.email "you@example.com" && git config --global user.name "Your Name"
@@ -46,13 +46,13 @@ jobs:
         name: Getting Code Coverage
         command: circleci tests glob test/test*.js | circleci tests split --split-by=timings | xargs ./node_modules/.bin/istanbul cover ./node_modules/mocha/bin/_mocha -- -R mocha-junit-reporter --exit && npx codecov
         environment:
-          MOCHA_FILE: ${HOME}/junit/test-results.xml
+          MOCHA_FILE: junit/test-results.xml
 
     - store_test_results:
-        path: ~/junit
+        path: ${CIRCLE_WORKING_DIRECTORY}/junit
       
     - store_artifacts:
-        path: ~/junit
+        path: ${CIRCLE_WORKING_DIRECTORY}/junit
 
   publish-pre-release:
     docker:
@@ -92,7 +92,7 @@ jobs:
         name: version pre-release
         command: npm version prerelease --preid=pre -m "Release %s [ci skip]"
         environment:
-          MOCHA_FILE: ${HOME}/junit/test-results.xml
+          MOCHA_FILE: /home/circleci/junit/test-results.xml
 
     - store_test_results:
         path: ~/junit
@@ -210,7 +210,7 @@ jobs:
             command: env HLX_SMOKE_EXEC='node ../index.js' npx mocha  --exit --reporter mocha-junit-reporter test/smoke/*
             working_directory: project-helix.io
             environment:
-                MOCHA_FILE: ${HOME}/junit/test-results.xml
+                MOCHA_FILE: /home/circleci/junit/test-results.xml
             when: always    
 
         - store_test_results:
