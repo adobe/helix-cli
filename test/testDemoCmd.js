@@ -43,8 +43,8 @@ describe('Integration test for demo command', function suite() {
     assertFile(path.resolve(testDir, 'project1', 'src/html.htl'));
     assertFile(path.resolve(testDir, 'project1', 'src/html.pre.js'));
     assertFile(path.resolve(testDir, 'project1', 'index.md'));
-    assertFile(path.resolve(testDir, 'project1', 'src/style.css'));
-    assertFile(path.resolve(testDir, 'project1', 'src/favicon.ico'));
+    assertFile(path.resolve(testDir, 'project1', 'dist/style.css'));
+    assertFile(path.resolve(testDir, 'project1', 'dist/favicon.ico'));
     assertFile(path.resolve(testDir, 'project1', 'helix_logo.png'));
   });
 
@@ -59,8 +59,8 @@ describe('Integration test for demo command', function suite() {
     assertFile(path.resolve(testDir, 'project1', 'src/html.pre.js'));
     assertFile(path.resolve(testDir, 'project1', 'index.md'));
     assertFile(path.resolve(testDir, 'project1', 'README.md'));
-    assertFile(path.resolve(testDir, 'project1', 'src/bootstrap.min.css'));
-    assertFile(path.resolve(testDir, 'project1', 'src/favicon.ico'));
+    assertFile(path.resolve(testDir, 'project1', 'webroot/bootstrap.min.css'));
+    assertFile(path.resolve(testDir, 'project1', 'webroot/favicon.ico'));
     assertFile(path.resolve(testDir, 'project1', 'helix_logo.png'));
   });
 
@@ -84,7 +84,7 @@ describe('Integration test for demo command', function suite() {
     await fs.writeFile(path.resolve(distDir, 'foo.js'), '// do not ignore!', 'utf-8');
     process.chdir(path.resolve(testDir, 'project2'));
     const status = $.exec('git status --porcelain', { silent: true });
-    assert.equal(status.stdout.trim(), '?? dist/');
+    assert.equal(status.stdout.trim(), '?? dist/foo.js');
   });
 
   it('files generated in /dist are not ignored (full)', async () => {
