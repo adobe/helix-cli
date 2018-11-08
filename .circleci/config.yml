@@ -46,7 +46,7 @@ jobs:
         name: Getting Code Coverage
         command: circleci tests glob test/test*.js | circleci tests split --split-by=timings | xargs ./node_modules/.bin/istanbul cover ./node_modules/mocha/bin/_mocha -- -R mocha-junit-reporter --exit && npx codecov
         environment:
-          MOCHA_FILE: ~/junit/test-results.xml
+          MOCHA_FILE: ${HOME}/junit/test-results.xml
 
     - store_test_results:
         path: ~/junit
@@ -92,13 +92,13 @@ jobs:
         name: version pre-release
         command: npm version prerelease --preid=pre -m "Release %s [ci skip]"
         environment:
-          MOCHA_FILE: ~/junit/test-results.xml
+          MOCHA_FILE: ${HOME}/junit/test-results.xml
 
     - store_test_results:
         path: ~/junit
 
     - store_artifacts:
-        path: ~/junit
+    path: ~/junit
 
     # unfortunately we cannot create a release commit with no tag with `npm version`, so we need to delete it here again
     - run:
@@ -210,7 +210,7 @@ jobs:
             command: env HLX_SMOKE_EXEC='node ../index.js' npx mocha  --exit --reporter mocha-junit-reporter test/smoke/*
             working_directory: project-helix.io
             environment:
-                MOCHA_FILE: ~/junit/test-results.xml
+                MOCHA_FILE: ${HOME}/junit/test-results.xml
             when: always    
 
         - store_test_results:
