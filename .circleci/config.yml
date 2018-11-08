@@ -33,7 +33,7 @@ jobs:
         key: v3-dependencies-{{ arch }}-{{ checksum "package-lock.json" }}
 
         # run tests!
-    - run: mkdir ${CIRCLE_WORKING_DIRECTORY}/junit
+    - run: mkdir junit
     - run:
         name: prepare test git user
         command: git config --global user.email "you@example.com" && git config --global user.name "Your Name"
@@ -49,10 +49,10 @@ jobs:
           MOCHA_FILE: junit/test-results.xml
 
     - store_test_results:
-        path: ${CIRCLE_WORKING_DIRECTORY}/junit
+        path: junit
       
     - store_artifacts:
-        path: ${CIRCLE_WORKING_DIRECTORY}/junit
+        path: junit
 
   publish-pre-release:
     docker:
