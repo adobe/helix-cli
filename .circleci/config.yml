@@ -49,10 +49,10 @@ jobs:
           MOCHA_FILE: junit/test-results.xml
 
     - store_test_results:
-        path: junit
-
+        path: ~/junit
+      
     - store_artifacts:
-        path: junit
+        path: ~/junit
 
   publish-pre-release:
     docker:
@@ -211,10 +211,10 @@ jobs:
             when: always    
 
         - store_test_results:
-            path: junit
-
+            path: ~/junit
+      
         - store_artifacts:
-            path: junit
+            path: ~/junit
 
 workflows:
   version: 2
