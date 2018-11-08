@@ -28,12 +28,14 @@ const TEST_DIR = path.resolve('test/integration');
 describe('Integration test for up command', () => {
   let testDir;
   let buildDir;
+  let webroot;
 
   beforeEach(async function before() {
     this.timeout(20000);
     const testRoot = await createTestRoot();
     testDir = path.resolve(testRoot, 'project');
     buildDir = path.resolve(testRoot, '.hlx/build');
+    webroot = path.resolve(testDir, 'webroot');
     await fse.copy(TEST_DIR, testDir);
   });
 
@@ -80,6 +82,7 @@ describe('Integration test for up command', () => {
       .withFiles([path.join(testDir, 'src', '*.htl')])
       .withTargetDir(buildDir)
       .withDirectory(testDir)
+      .withWebRoot(webroot)
       .withHttpPort(0);
 
     const myDone = (err) => {
@@ -90,11 +93,8 @@ describe('Integration test for up command', () => {
     cmd
       .on('started', async () => {
         try {
-          const replacements = [
-            { pattern: 'welcome.txt', with: 'welcome.bc53b44e.txt' },
-          ];
-          await assertHttp(`http://localhost:${cmd.project.server.port}/index.html`, 200, 'simple_response.html', replacements);
-          await assertHttp(`http://localhost:${cmd.project.server.port}/dist/welcome.bc53b44e.txt`, 200, 'welcome_response.txt');
+          await assertHttp(`http://localhost:${cmd.project.server.port}/index.html`, 200, 'simple_response.html');
+          await assertHttp(`http://localhost:${cmd.project.server.port}/welcome.txt`, 200, 'welcome_response.txt');
           myDone();
         } catch (e) {
           myDone(e);
@@ -123,6 +123,7 @@ describe('Integration test for up command', () => {
       .withFiles([path.join(testDir, 'src', '*.htl')])
       .withTargetDir(buildDir)
       .withDirectory(testDir)
+      .withWebRoot(webroot)
       .withHttpPort(0);
 
     const myDone = async (err) => {
@@ -133,11 +134,8 @@ describe('Integration test for up command', () => {
     cmd
       .on('started', async () => {
         try {
-          const replacements = [
-            { pattern: 'welcome.txt', with: 'welcome.bc53b44e.txt' },
-          ];
-          await assertHttp(`http://localhost:${cmd.project.server.port}/index.html`, 200, 'simple_response.html', replacements);
-          await assertHttp(`http://localhost:${cmd.project.server.port}/dist/welcome.bc53b44e.txt`, 200, 'welcome_response.txt');
+          await assertHttp(`http://localhost:${cmd.project.server.port}/index.html`, 200, 'simple_response.html');
+          await assertHttp(`http://localhost:${cmd.project.server.port}/welcome.txt`, 200, 'welcome_response.txt');
           await fse.copy(srcFile, dstFile);
         } catch (e) {
           await myDone(e);
@@ -149,57 +147,6 @@ describe('Integration test for up command', () => {
       .on('build', async () => {
         try {
           await assertHttp(`http://localhost:${cmd.project.server.port}/index.html`, 200, 'simple_response2.html');
-          await myDone();
-        } catch (e) {
-          await myDone(e);
-        }
-      })
-      .run()
-      .catch(done);
-  }).timeout(10000);
-
-  it('up command delivers modified static files and delivers correct response.', function test(done) {
-    // this test always hangs on the CI, probably due to the parcel workers. ignoring for now.
-    if (process.env.CI) {
-      this.skip();
-      return;
-    }
-    const srcFile = path.resolve(testDir, 'src/welcome2.txt');
-    const dstFile = path.resolve(testDir, 'src/welcome.txt');
-
-    initGit(testDir);
-    let error = null;
-    const cmd = new UpCommand()
-      .withCacheEnabled(false)
-      .withFiles([path.join(testDir, 'src', '*.htl')])
-      .withTargetDir(buildDir)
-      .withDirectory(testDir)
-      .withHttpPort(0);
-
-    const myDone = async (err) => {
-      error = err;
-      return cmd.stop();
-    };
-
-    cmd
-      .on('started', async () => {
-        try {
-          const replacements = [
-            { pattern: 'welcome.txt', with: 'welcome.bc53b44e.txt' },
-          ];
-          await assertHttp(`http://localhost:${cmd.project.server.port}/index.html`, 200, 'simple_response.html', replacements);
-          await assertHttp(`http://localhost:${cmd.project.server.port}/dist/welcome.bc53b44e.txt`, 200, 'welcome_response.txt');
-          await fse.copy(srcFile, dstFile);
-        } catch (e) {
-          await myDone(e);
-        }
-      })
-      .on('stopped', () => {
-        done(error);
-      })
-      .on('build', async () => {
-        try {
-          await assertHttp(`http://localhost:${cmd.project.server.port}/dist/welcome.bc53b44e.txt`, 200, 'welcome_response2.txt');
           await myDone();
         } catch (e) {
           await myDone(e);

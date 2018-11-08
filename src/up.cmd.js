@@ -101,11 +101,10 @@ class UpCommand extends BuildCommand {
     // start debugger (#178)
     // https://nodejs.org/en/docs/guides/debugging-getting-started/#enable-inspector
     process.kill(process.pid, 'SIGUSR1');
-
     this._project = new HelixProject()
       .withCwd(this.directory)
       .withBuildDir(this._target)
-      .withWebRootDir(this._webroot) // todo
+      .withWebRootDir(this._webroot)
       .withHelixConfig(this.config)
       .withDisplayVersion(pkgJson.version)
       .withRuntimeModulePaths(module.paths);
@@ -155,9 +154,7 @@ class UpCommand extends BuildCommand {
       }
     };
 
-    const onParcelBundled = async (bundle) => {
-      // get the static files processed by parcel.
-      await this.extractStaticFiles(bundle);
+    const onParcelBundled = async () => {
       await this.writeManifest();
     };
 
