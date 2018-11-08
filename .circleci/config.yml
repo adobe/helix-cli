@@ -98,7 +98,7 @@ jobs:
         path: ~/junit
 
     - store_artifacts:
-    path: ~/junit
+        path: ~/junit
 
     # unfortunately we cannot create a release commit with no tag with `npm version`, so we need to delete it here again
     - run:
