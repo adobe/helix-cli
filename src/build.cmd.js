@@ -106,7 +106,7 @@ class BuildCommand extends AbstractCommand {
       // todo: consider using async klaw
       const filter = (item) => {
         const basename = path.basename(item.path);
-        return basename === '.' || basename[0] !== '.';
+        return basename === '.' || basename[0] !== '.' || basename === 'node_modules';
       };
 
       klawSync(this._webroot, {

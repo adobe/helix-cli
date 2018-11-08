@@ -19,12 +19,15 @@ function md5(string, encoding = 'hex') {
     .digest(encoding);
 }
 
-md5.file = function md5File(filename) {
+md5.file = async function md5File(filename) {
   return new Promise((resolve, reject) => {
+    const hash = crypto.createHash('md5').setEncoding('hex');
     fs.createReadStream(filename)
-      .pipe(crypto.createHash('md5').setEncoding('hex'))
-      .on('finish', function finish() {
-        resolve(this.read());
+      .on('data', (data) => {
+        hash.update(data);
+      })
+      .on('end', () => {
+        resolve(hash.digest('hex'));
       })
       .on('error', reject);
   });

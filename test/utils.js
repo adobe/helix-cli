@@ -127,6 +127,7 @@ async function processSource(scriptName) {
   await new BuildCommand()
     .withFiles([path.resolve(__dirname, `specs/parcel/${scriptName}.htl`)])
     .withTargetDir(buildDir)
+    .withWebRoot('/webroot')
     .withCacheEnabled(false)
     .run();
 
