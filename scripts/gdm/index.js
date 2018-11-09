@@ -13,10 +13,11 @@
 
 'use strict';
 
-const fs = require('fs');
+const fse = require('fs-extra');
+const { dirname } = require('path');
 const $ = require('shelljs');
 
-const NODE_MODULES_LOCATION = './node_modules';
+const NODE_MODULES_LOCATION = 'node_modules';
 const ADOBE_MODULES = '@adobe';
 const ADOBE_ORG = 'adobe';
 
@@ -36,13 +37,13 @@ function install(mod) {
   }
 }
 
-function installDependency(depName, path) {
+function installDependency(depName, cwd) {
   console.log(`Installing dependency ${depName}`);
 
   const out = $.exec(`npm install ${depName}`, {
     silent: false,
     async: false,
-    cwd: path,
+    cwd,
   });
 
   // console.debug('Linking output:', out.stdout);
@@ -53,14 +54,16 @@ function installDependency(depName, path) {
 }
 
 function listModules(path) {
-  const files = fs.readdirSync(path);
-
   const modules = [];
+
+  if (!fse.existsSync(path)) return modules;
+
+  const files = fse.readdirSync(path);
+
   files.forEach((file) => {
     const modPath = `${path}/${file}`;
-    const stat = fs.statSync(modPath);
+    const stat = fse.statSync(modPath);
     if (stat.isDirectory()) {
-      console.log(`Found module ${modPath}`);
       modules.push({
         path: modPath,
         name: file,
@@ -71,19 +74,41 @@ function listModules(path) {
   return modules;
 }
 
+function installAsGitDependency(mod, branch, cwd) {
+  const dep = `github:${ADOBE_ORG}/${mod.name}#${branch}`;
+  installDependency(dep, cwd);
+}
+
+function link(source, target, cwd) {
+  console.log(`Linking ${source} as ${target} in ${cwd}`);
+
+  const out = $.exec(`ln -s ${source} ${target}`, {
+    silent: false,
+    async: false,
+    cwd,
+  });
+
+  // console.debug('Linking output:', out.stdout);
+
+  if (out.stderr && out.stderr !== '') {
+    console.error('Linking stderr:', out.stderr);
+  }
+}
 
 function start() {
   const helixCliPath = process.env.GDM_HELIX_CLI_PATH || process.cwd();
 
   // 1. install helix-cli
   // (should be current folder otherwise specified by GDM_HELIX_CLI_PATH env variable)
+  console.log(`Installing helix-cli located in ${helixCliPath}`);
   install({
     name: 'helix-cli',
     path: helixCliPath,
   });
 
   // 2. find list of all @adobe modules
-  console.log(`Look for ${ADOBE_MODULES} modules`);
+  console.debug();
+  console.debug(`Look for all ${ADOBE_MODULES} modules`);
   const modules = listModules(`${NODE_MODULES_LOCATION}/${ADOBE_MODULES}`);
 
   // 3. set npm dependencies as github modules + branch
@@ -93,11 +118,35 @@ function start() {
   } catch (err) {
     console.error('Cannot read GDM_MODULE_BRANCHES variable', err);
   }
+
   modules.forEach((mod) => {
     // compute the git branch or use master
-    const branch = branches[mod.name] || 'master';
-    const dep = `github:${ADOBE_ORG}/${mod.name}#${branch}`;
-    installDependency(dep, helixCliPath);
+    console.debug();
+    console.debug(`Found module ${mod.name} that needs to be installed from git`);
+    installAsGitDependency(mod, branches[mod.name] || 'master', helixCliPath);
+  });
+
+  // 4. find dependencies of dependencies (subdep) and set as link (might need a clone first)
+  modules.forEach((mod) => {
+    const sub = listModules(`${mod.path}/${NODE_MODULES_LOCATION}/${ADOBE_MODULES}`);
+    sub.forEach(async (subdep) => {
+      console.debug();
+      console.debug(`Found a subdep in ${mod.name}: ${subdep.path}`);
+
+      console.debug(`Deleting ${subdep.path}`);
+      // delete subsub to link it afterward
+      await fse.remove(subdep.path);
+
+      // if dep is missing in helix-cli then install it
+      const pathInParent = `${helixCliPath}/${NODE_MODULES_LOCATION}/${ADOBE_MODULES}/${subdep.name}`;
+      if (!fse.existsSync(pathInParent)) {
+        console.debug(`subdep ${mod.path} does not exist parent. Installing it as a git dependency in ${pathInParent}`);
+        installAsGitDependency(subdep, branches[mod.name] || 'master', helixCliPath);
+      }
+
+      // finally, link it in the subdep
+      link(pathInParent, subdep.name, `${helixCliPath}/${dirname(subdep.path)}`);
+    });
   });
 
   console.log('Done.');
