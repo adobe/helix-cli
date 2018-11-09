@@ -752,8 +752,8 @@ ${PublishCommand.makeParamWhitelist(params, '  ')}
         makeDictJob('strain_github_static_refs', strain.name, origin.ref, '- Set static ref to current ref', 'static ref');
       }
 
-      if (strain.static && strain.static.root) {
-        makeDictJob('strain_github_static_root', strain.name, strain.static.root, '- Set static root', 'static root');
+      if (strain.static && strain.static.path) {
+        makeDictJob('strain_github_static_root', strain.name, strain.static.path, '- Set static root', 'static root');
       } else {
         // skipping: no message here
         this.tick();
