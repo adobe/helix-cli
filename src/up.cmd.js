@@ -14,7 +14,7 @@ const glob = require('glob');
 const fs = require('fs');
 const opn = require('opn');
 const readline = require('readline');
-const { HelixProject } = require('@adobe/helix-simulator');
+const { HelixProject } = require('@adobe/petridish');
 const BuildCommand = require('./build.cmd');
 const pkgJson = require('../package.json');
 
