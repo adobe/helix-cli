@@ -6,7 +6,7 @@ jobs:
     # parallelism: 10
     docker:
     # specify the version you desire here
-    - image: circleci/node:8-stretch
+    - image: circleci/node
     working_directory: ~/repo
     environment:
       NPM_CONFIG_PREFIX: ~/.npm-global
