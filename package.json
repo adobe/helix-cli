@@ -28,6 +28,7 @@
   "dependencies": {
     "@adobe/helix-shared": "^0.0.5",
     "@adobe/hypermedia-pipeline": "^0.7.4",
+    "@adobe/git-server": "0.9.7",
     "@adobe/parcel-plugin-htl": "^1.0.0",
     "@adobe/petridish": "^2.5.0",
     "archiver": "^3.0.0",
