@@ -24,7 +24,7 @@ const BuildCommand = require('../src/build.cmd');
 Replay.mode = 'bloody';
 
 /**
- * init git in integration so that helix-simulator can run
+ * init git in integration so that petridish can run
  */
 function initGit(dir) {
   const pwd = shell.pwd();

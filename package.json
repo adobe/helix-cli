@@ -29,7 +29,7 @@
     "@adobe/helix-shared": "^0.0.5",
     "@adobe/hypermedia-pipeline": "^0.7.4",
     "@adobe/parcel-plugin-htl": "^1.0.0",
-    "@adobe/helix-simulator": "^2.6.0",
+    "@adobe/petridish": "^2.5.0",
     "archiver": "^3.0.0",
     "calibre": "^1.1.1",
     "chalk": "^2.4.1",
