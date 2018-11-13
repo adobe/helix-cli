@@ -332,8 +332,11 @@ class DeployCommand extends AbstractCommand {
         'User-Agent': useragent,
         action,
         params,
-        kind: 'blackbox',
-        exec: { image: this._docker, main: 'module.exports.main' },
+        kind: 'nodejs:10-fat',
+        exec: {
+          // image: this._docker,
+          main: 'module.exports.main',
+        },
         annotations: { 'web-export': true },
       };
 

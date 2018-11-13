@@ -18,6 +18,8 @@ const glob = require('glob');
 const path = require('path');
 const fse = require('fs-extra');
 const klawSync = require('klaw-sync');
+const webpack = require('webpack');
+const WebPackager = require('./parcel/WebPackager.js');
 const md5 = require('./md5.js');
 const AbstractCommand = require('./abstract.cmd.js');
 
@@ -72,6 +74,9 @@ class BuildCommand extends AbstractCommand {
     if (!this._webroot) {
       this._webroot = this.directory;
     }
+
+    // ensure target is absolute
+    this._target = path.resolve(this.directory, this._target);
   }
 
   async getBundlerOptions() {
@@ -87,6 +92,38 @@ class BuildCommand extends AbstractCommand {
     };
   }
 
+  async createPackage(file) {
+    const compiler = webpack({
+      target: 'node',
+      mode: 'development',
+      entry: file,
+      output: {
+        path: this._target,
+        filename: `${path.basename(file)}.pack.js`,
+        library: 'main',
+        libraryTarget: 'umd',
+      },
+      devtool: false,
+      externals: [
+        'lodash',
+      ],
+    });
+
+    return new Promise((resolve, reject) => {
+      compiler.run((err, stats) => {
+        if (err) {
+          reject(err);
+          return;
+        }
+        this.log.debug(stats.toString({
+          chunks: false,
+          colors: true,
+        }));
+        resolve();
+      });
+    });
+  }
+
   /**
    * Initializes the parcel bundler.
    * @param files entry files
@@ -97,6 +134,8 @@ class BuildCommand extends AbstractCommand {
     const bundler = new Bundler(files, options);
     bundler.addAssetType('htl', require.resolve('@adobe/parcel-plugin-htl/src/HTLAsset.js'));
     bundler.addAssetType('helix-js', require.resolve('./parcel/HelixAsset.js'));
+
+    bundler.addPackager('js', WebPackager);
     return bundler;
   }
 
@@ -155,6 +194,7 @@ class BuildCommand extends AbstractCommand {
         if (contents !== fixed) {
           await fse.writeFile(bnd.name, fixed, 'utf-8');
         }
+        // await this.createPackage(bnd.name);
       }
     }
     const jobs = [];
