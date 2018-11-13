@@ -1,38 +1,41 @@
-version: 2
-jobs:
-  build:
-    # Currently this doesn't help much since most of the time is spent in npm install,
-    # which is slow for all parallel processes
-    # parallelism: 10
+version: 2.1
+executors:
+  node8:
     docker:
-    # specify the version you desire here
     - image: circleci/node:8
-    working_directory: ~/repo
     environment:
       NPM_CONFIG_PREFIX: ~/.npm-global
 
+commands:
+  setup:
     steps:
     - checkout
-
-    # Download and cache dependencies
     - restore_cache:
         keys:
         - v3-dependencies-{{ arch }}-{{ checksum "package-lock.json" }}
-
     - run:
-        name: install npm 6.4.0
-        command: sudo npm -g install npm@6.4.0
-
+        name: install npm 6.4.1
+        command: sudo npm -g install npm@6.4.1
     - run:
         name: Installing Dependencies
         command: npm install
-
     - save_cache:
         paths:
         - node_modules
         key: v3-dependencies-{{ arch }}-{{ checksum "package-lock.json" }}
+    - run:
+        name: prepare test git user
+        command: git config --global user.email "circleci@project-helix.io" && git config --global user.name "CircleCi Build"
 
-        # run tests!
+jobs:
+  build:
+    executor: node8
+    working_directory: ~/repo
+
+    steps:
+    - setup
+
+    # run tests!
     - run: mkdir junit
     - run:
         name: prepare test git user
@@ -55,31 +58,11 @@ jobs:
         path: junit
 
   publish-pre-release:
-    docker:
-    # specify the version you desire here
-    - image: circleci/node:8-stretch
-
+    executor: node8
     working_directory: ~/repo
 
     steps:
-    - checkout
-
-    - restore_cache:
-        keys:
-        - v3-dependencies-{{ arch }}-{{ checksum "package-lock.json" }}
-
-    - run:
-        name: prepare test git user
-        command: git config --global user.email "circleci@example.com" && git config --global user.name "CircleCi Build"
-
-    - run:
-        name: install npm 6.4.0
-        command: sudo npm -g install npm@6.4.0
-
-    - run:
-        name: install
-        command: npm install
-
+    - setup
     - run:
         name: revert changes to package-lock.json
         command: git checkout -- package-lock.json
@@ -107,35 +90,11 @@ jobs:
         command: npm publish --tag next --access public
 
   publish-examples:
-    docker:
-    # specify the version you desire here
-    - image: circleci/node:8-stretch
-    environment:
-      NPM_CONFIG_PREFIX: ~/.npm-global
-
+    executor: node8
     working_directory: ~/repo
 
     steps:
-    - checkout
-
-    # Download and cache dependencies
-    - restore_cache:
-        keys:
-        - v3-dependencies-{{ arch }}-{{ checksum "package-lock.json" }}
-
-    - run:
-        name: install npm 6.4.0
-        command: sudo npm -g install npm@6.4.0
-
-    - run:
-        name: Install Dependencies
-        command: npm install
-
-    - save_cache:
-        paths:
-        - node_modules
-        key: v3-dependencies-{{ arch }}-{{ checksum "package-lock.json" }}
-
+    - setup
     - run:
         name: Install Globally
         command: mkdir -p ~/.npm-global && npm link
