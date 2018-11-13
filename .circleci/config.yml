@@ -125,8 +125,11 @@ jobs:
         path: build/hlx_install.sh
 
   smoke:
-    executor: node8
+    docker:
+        - image: circleci/node:8
     working_directory: ~/repo
+    environment:
+        NPM_CONFIG_PREFIX: ~/.npm-global
 
     steps:
         - checkout
