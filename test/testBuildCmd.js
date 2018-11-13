@@ -47,13 +47,14 @@ describe('Integration test for build', () => {
       .run();
 
     assertFile(path.resolve(buildDir, 'html.js'));
+    assertFile(path.resolve(buildDir, 'html.map'));
     assertFile(path.resolve(buildDir, 'html.pre.js'), true);
     assertFile(path.resolve(buildDir, 'example_html.js'));
     assertFile(path.resolve(buildDir, 'component', 'html.js'));
     assertFile(path.resolve(webroot, 'img', 'banner.png'));
 
     // test if manifest contains correct entries
-    const manifest = fs.readJsonSync(path.resolve(buildDir, 'manifest.json'));
+    const manifest = await fs.readJson(path.resolve(buildDir, 'manifest.json'));
     assert.deepStrictEqual(manifest, {
       'dist/vendor/example.css': {
         hash: 'f9806776872f8ff4940b806f94923c4d',
@@ -72,5 +73,9 @@ describe('Integration test for build', () => {
         size: 32,
       },
     });
+
+    // test if source map contains correct reference
+    const htmlJs = await fs.readFile(path.resolve(buildDir, 'html.js'), 'utf-8');
+    assert.ok(htmlJs.indexOf('sourceMappingURL=html.map') >= 0);
   });
 });
