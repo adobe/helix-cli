@@ -16,6 +16,7 @@ const objectHash = require('parcel-bundler/src//utils/objectHash');
 const path = require('path');
 const fs = require('fs-extra');
 const webpack = require('webpack');
+const UglifyJS = require("uglify-es");
 
 class RawPackager extends Packager {
   async createPackage(srcFile, dstFile) {
@@ -35,10 +36,66 @@ class RawPackager extends Packager {
       devtool: false,
       externals: [
         'lodash',
+        'alexa-sdk',
+        'apn',
+        'async',
+        'body-parser',
+        'btoa',
+        'cheerio',
+        'cloudant',
+        'commander',
+        'consul',
+        'continuation-local-storage',
+        'cookie-parser',
+        'cradle',
+        'errorhandler',
+        'express',
+        'express-session',
+        'glob',
+        'gm',
+        'iconv-lite',
+        'lodash',
+        'log4js',
+        'marked',
+        'merge',
+        'moment',
+        'mongodb',
+        'mustache',
+        'nano',
+        'node-uuid',
+        'nodemailer',
+        'oauth2-server',
+        'openwhisk',
+        'pkgcloud',
+        'process',
+        'pug',
+        'redis',
+        'request',
+        'request-promise',
+        'rimraf',
+        'semver',
+        'sendgrid',
+        'serve-favicon',
+        'socket.io',
+        'socket.io-client',
+        'superagent',
+        'swagger-tools',
+        'tmp',
+        'twilio',
+        'underscore',
+        'uuid',
+        'validator',
+        'watson-developer-cloud',
+        'when',
+        'winston',
+        'ws',
+        'xml2js',
+        'xmlhttprequest',
+        'yauzl',
       ],
     });
 
-    return new Promise((resolve, reject) => {
+    await new Promise((resolve, reject) => {
       compiler.run((err, stats) => {
         if (err) {
           reject(err);
@@ -48,9 +105,29 @@ class RawPackager extends Packager {
           chunks: false,
           colors: true,
         }));
+
+        const code = fs.readFileSync(dstFile, 'utf-8');
+
+        console.log(`minifiying ${dstFile}`);
+        const result = UglifyJS.minify(code, {
+
+        });
+        if (result.error) {
+          reject(result.error);
+        }
+
+        fs.writeFileSync(dstFile, result.code, 'utf-8');
+        // stats.compilation.modules.forEach(m => console.log(m.id));
         resolve();
       });
     });
+
+    this._size = (await fs.stat(dstFile)).size;
+  }
+
+
+  getSize() {
+    return this._size || 0;
   }
 
   async start() {
@@ -117,9 +194,9 @@ class RawPackager extends Packager {
         if (!this.bundle.assets.has(mod)) {
           this.externalModules.add(mod);
           if (
-            !this.bundle.parentBundle ||
-            this.bundle.isolated ||
-            this.bundle.parentBundle.type !== 'js'
+            !this.bundle.parentBundle
+            || this.bundle.isolated
+            || this.bundle.parentBundle.type !== 'js'
           ) {
             this.bundleLoaders.add(mod.type);
           }
