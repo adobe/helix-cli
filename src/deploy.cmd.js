@@ -20,6 +20,7 @@ const path = require('path');
 const fs = require('fs-extra');
 const yaml = require('js-yaml');
 const ProgressBar = require('progress');
+const archiver = require('archiver');
 const { GitUrl, GitUtils } = require('@adobe/helix-shared');
 const useragent = require('./user-agent-util');
 const AbstractCommand = require('./abstract.cmd.js');
@@ -155,6 +156,57 @@ class DeployCommand extends AbstractCommand {
     if (!this._strainFile) {
       this._strainFile = path.resolve(this._helixConfig.directory, '.hlx', 'strains.json');
     }
+  }
+
+  /**
+   * Creates a .zip package that contains the contents to be deployed to openwhisk.
+   * @parram name the action name
+   * @param script Filename of the main script file.
+   * @returns {Promise<any>} Promise that resolves to the package file {@code path}.
+   */
+  async createPackage(name, script) {
+    return new Promise((resolve, reject) => {
+      const zipFile = path.resolve(this._target, `${name}.zip`);
+      let hadErrors = false;
+
+      // create zip file for package
+      const output = fs.createWriteStream(zipFile);
+      const archive = archiver('zip');
+
+      console.log('⏳  preparing package %s: ', zipFile);
+      output.on('close', () => {
+        if (!hadErrors) {
+          console.log('    %d total bytes', archive.pointer());
+          resolve(zipFile);
+        }
+      });
+      archive.on('entry', (data) => {
+        console.log('    - %s', data.name);
+      });
+      archive.on('warning', (err) => {
+        console.log(`${chalk.redBright('[error] ')}File ${script} could not be read. ${err.message}`);
+        hadErrors = true;
+        reject(err);
+      });
+      archive.on('error', (err) => {
+        console.log(`${chalk.redBright('[error] ')}File ${script} could not be read. ${err.message}`);
+        hadErrors = true;
+        reject(err);
+      });
+
+      const packageJson = {
+        name,
+        version: '1.0',
+        description: `Lambda function of ${name}`,
+        main: 'main.js',
+        license: 'Apache-2.0',
+      };
+
+      archive.pipe(output);
+      archive.file(script, { name: 'main.js' });
+      archive.append(JSON.stringify(packageJson, null, '  '), { name: 'package.json' });
+      archive.finalize();
+    });
   }
 
   static getBuildVarOptions(name, value, auth, owner, repo) {
@@ -323,10 +375,10 @@ class DeployCommand extends AbstractCommand {
       name: this.actionName(script),
     }));
 
-    const read = actions.map(({ script, name }) => fs.readFile(script, { encoding: 'utf8' })
+    const zip = actions.map(({ script, name }) => this.createPackage(name, script)
       .then(action => ({ script, name, action })));
 
-    const deployed = read.map(p => p.then(({ script, name, action }) => {
+    const deployed = zip.map(p => p.then(({ script, name, action }) => {
       const actionoptions = {
         name,
         'User-Agent': useragent,

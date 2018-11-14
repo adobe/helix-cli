@@ -106,18 +106,18 @@ class RawPackager extends Packager {
           colors: true,
         }));
 
-        const code = fs.readFileSync(dstFile, 'utf-8');
+        // const code = fs.readFileSync(dstFile, 'utf-8');
 
-        console.log(`minifiying ${dstFile}`);
-        const result = UglifyJS.minify(code, {
-
-        });
-        if (result.error) {
-          reject(result.error);
-        }
-
-        fs.writeFileSync(dstFile, result.code, 'utf-8');
-        // stats.compilation.modules.forEach(m => console.log(m.id));
+        // console.log(`minifiying ${dstFile}`);
+        // const result = UglifyJS.minify(code, {
+        //
+        // });
+        // if (result.error) {
+        //   reject(result.error);
+        // }
+        //
+        // fs.writeFileSync(dstFile, result.code, 'utf-8');
+        // // stats.compilation.modules.forEach(m => console.log(m.id));
         resolve();
       });
     });
