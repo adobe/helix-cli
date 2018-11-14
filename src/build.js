@@ -40,6 +40,7 @@ module.exports = function build() {
         .withCacheEnabled(argv.cache)
         .withMinifyEnabled(argv.minify)
         .withTargetDir(argv.target)
+        .withBundled(argv.bundled)
         .withFiles(argv.files)
         .run();
     },

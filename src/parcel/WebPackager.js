@@ -16,20 +16,19 @@ const objectHash = require('parcel-bundler/src//utils/objectHash');
 const path = require('path');
 const fs = require('fs-extra');
 const webpack = require('webpack');
-const UglifyJS = require("uglify-es");
+const packageCfg = require('./packager-config.js');
 
 class RawPackager extends Packager {
   async createPackage(srcFile, dstFile) {
+    const log = this.bundler.logger;
+
     const target = path.dirname(dstFile);
     const filename = path.basename(dstFile);
 
     const compiler = webpack({
       target: 'node',
       mode: 'development',
-      entry: [
-        srcFile,
-        path.resolve(__dirname, 'webpack-helper.js'),
-      ],
+      entry: srcFile,
       output: {
         path: target,
         filename,
@@ -37,65 +36,7 @@ class RawPackager extends Packager {
         libraryTarget: 'umd',
       },
       devtool: false,
-      externals: [
-        'lodash',
-        'alexa-sdk',
-        'apn',
-        'async',
-        'body-parser',
-        'btoa',
-        'cheerio',
-        'cloudant',
-        'commander',
-        'consul',
-        'continuation-local-storage',
-        'cookie-parser',
-        'cradle',
-        'errorhandler',
-        'express',
-        'express-session',
-        'glob',
-        'gm',
-        'iconv-lite',
-        'lodash',
-        'log4js',
-        'marked',
-        'merge',
-        'moment',
-        'mongodb',
-        'mustache',
-        'nano',
-        'node-uuid',
-        'nodemailer',
-        'oauth2-server',
-        'openwhisk',
-        'pkgcloud',
-        'process',
-        'pug',
-        'redis',
-        'request',
-        'request-promise',
-        'rimraf',
-        'semver',
-        'sendgrid',
-        'serve-favicon',
-        'socket.io',
-        'socket.io-client',
-        'superagent',
-        'swagger-tools',
-        'tmp',
-        'twilio',
-        'underscore',
-        'uuid',
-        'validator',
-        'watson-developer-cloud',
-        'when',
-        // 'winston', (we need 3.x; they only provide 2.x)
-        'ws',
-        'xml2js',
-        'xmlhttprequest',
-        'yauzl',
-      ],
+      externals: [...packageCfg.externals, ...packageCfg.bundled],
     });
 
     await new Promise((resolve, reject) => {
@@ -104,24 +45,13 @@ class RawPackager extends Packager {
           reject(err);
           return;
         }
-        console.log(stats.toString({
+        log.info(stats.toString({
           chunks: false,
           colors: true,
         }));
 
-        // const code = fs.readFileSync(dstFile, 'utf-8');
-
-        // console.log(`minifiying ${dstFile}`);
-        // const result = UglifyJS.minify(code, {
-        //
-        // });
-        // if (result.error) {
-        //   reject(result.error);
-        // }
-        //
-        // fs.writeFileSync(dstFile, result.code, 'utf-8');
-        console.log('external modules used');
-        stats.compilation.modules.filter(m => m.type === 'javascript/dynamic').forEach(m => console.log(m.id));
+        log.debug('external modules used');
+        stats.compilation.modules.filter(m => m.type === 'javascript/dynamic').forEach(m => log.debug(m.id));
 
         resolve();
       });
@@ -140,6 +70,8 @@ class RawPackager extends Packager {
     this.dedupe = new Map();
     this.bundleLoaders = new Set();
     this.externalModules = new Set();
+
+    this.tmpModules = [];
 
     // let preludeCode = this.options.minify ? prelude.minified : prelude.source;
     // if (this.options.target === 'electron') {
@@ -214,6 +146,7 @@ class RawPackager extends Packager {
     if (asset.id.endsWith('.pre.js')) {
       const tmpfile = path.resolve(asset.parentBundle.name, '..', asset.id);
       await fs.writeFile(tmpfile, asset.generated.js, 'utf-8');
+      this.tmpModules.push(tmpfile);
     } else {
       await this.writeModule(
         asset.id,
@@ -383,6 +316,9 @@ class RawPackager extends Packager {
 
     // call webpack
     await this.createPackage(this.bundle.name, this.bundle.name);
+
+    // delete tmp scripts
+    await Promise.all(this.tmpModules.map(file => fs.remove(file)));
   }
 }
 

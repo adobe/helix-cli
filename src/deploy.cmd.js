@@ -24,6 +24,7 @@ const archiver = require('archiver');
 const { GitUrl, GitUtils } = require('@adobe/helix-shared');
 const useragent = require('./user-agent-util');
 const AbstractCommand = require('./abstract.cmd.js');
+const packageCfg = require('./parcel/packager-config.js');
 
 class DeployCommand extends AbstractCommand {
   constructor(logger) {
@@ -162,34 +163,37 @@ class DeployCommand extends AbstractCommand {
    * Creates a .zip package that contains the contents to be deployed to openwhisk.
    * @param name the action name
    * @param script Filename of the main script file.
+   * @param bar progress bar
    * @returns {Promise<any>} Promise that resolves to the package file {@code path}.
    */
-  async createPackage(name, script) {
+  async createPackage(name, script, bar) {
+    const { log } = this;
     return new Promise((resolve, reject) => {
-      const zipFile = path.resolve(this._target, `${name}.zip`);
+      const archiveName = `${name}.zip`;
+      const zipFile = path.resolve(this._target, archiveName);
       let hadErrors = false;
 
       // create zip file for package
       const output = fs.createWriteStream(zipFile);
       const archive = archiver('zip');
 
-      console.log('⏳  preparing package %s: ', zipFile);
+      log.debug(`preparing package ${archiveName}`);
       output.on('close', () => {
         if (!hadErrors) {
-          console.log('    %d total bytes', archive.pointer());
+          log.debug(`${archiveName}: Created package. ${archive.pointer()} total bytes`);
           resolve(zipFile);
         }
       });
       archive.on('entry', (data) => {
-        console.log('    - %s', data.name);
+        log.debug(`${archiveName}: A ${data.name}`);
       });
       archive.on('warning', (err) => {
-        console.log(`${chalk.redBright('[error] ')}File ${script} could not be read. ${err.message}`);
+        log.error(`${chalk.redBright('[error] ')}File ${script} could not be read. ${err.message}`);
         hadErrors = true;
         reject(err);
       });
       archive.on('error', (err) => {
-        console.log(`${chalk.redBright('[error] ')}File ${script} could not be read. ${err.message}`);
+        log.error(`${chalk.redBright('[error] ')}File ${script} could not be read. ${err.message}`);
         hadErrors = true;
         reject(err);
       });
@@ -202,9 +206,18 @@ class DeployCommand extends AbstractCommand {
         license: 'Apache-2.0',
       };
 
+      bar.tick();
       archive.pipe(output);
       archive.file(script, { name: 'main.js' });
       archive.append(JSON.stringify(packageJson, null, '  '), { name: 'package.json' });
+
+      // add modules that cause problems when embeded in webpack
+      packageCfg.bundled.forEach((mod) => {
+        bar.tick();
+        log.debug(`${archiveName}: Embedding Module ${mod}`);
+        archive.directory(path.resolve(__dirname, '..', 'node_modules', mod), `node_modules/${mod}`);
+      });
+
       archive.finalize();
     });
   }
@@ -341,7 +354,7 @@ class DeployCommand extends AbstractCommand {
     const scripts = [path.resolve(__dirname, 'openwhisk', 'static.js'), ...glob.sync(`${this._target}/*.js`)];
 
     const bar = new ProgressBar('[:bar] :action :etas', {
-      total: (scripts.length * 2),
+      total: scripts.length * (packageCfg.bundled.length + 3),
       width: 50,
       renderThrottle: 1,
       stream: process.stdout,
@@ -375,7 +388,7 @@ class DeployCommand extends AbstractCommand {
       name: this.actionName(script),
     }));
 
-    const read = actions.map(({ script, name }) => this.createPackage(name, script)
+    const read = actions.map(({ script, name }) => this.createPackage(name, script, bar)
       .then(fs.readFile)
       .then(action => ({ script, name, action })));
 

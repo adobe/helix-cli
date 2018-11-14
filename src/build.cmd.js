@@ -18,7 +18,6 @@ const glob = require('glob');
 const path = require('path');
 const fse = require('fs-extra');
 const klawSync = require('klaw-sync');
-const webpack = require('webpack');
 const WebPackager = require('./parcel/WebPackager.js');
 const md5 = require('./md5.js');
 const AbstractCommand = require('./abstract.cmd.js');
@@ -32,6 +31,7 @@ class BuildCommand extends AbstractCommand {
     this._files = null;
     this._distDir = null;
     this._webroot = null;
+    this._bundled = false;
   }
 
   withCacheEnabled(cache) {
@@ -56,6 +56,11 @@ class BuildCommand extends AbstractCommand {
 
   withWebRoot(root) {
     this._webroot = root;
+    return this;
+  }
+
+  withBundled(bundled) {
+    this._bundled = bundled;
     return this;
   }
 
@@ -89,39 +94,8 @@ class BuildCommand extends AbstractCommand {
       cache: this._cache,
       minify: this._minify,
       outDir: this._target,
+      sourceMaps: !this._bundled,
     };
-  }
-
-  async createPackage(file) {
-    const compiler = webpack({
-      target: 'node',
-      mode: 'development',
-      entry: file,
-      output: {
-        path: this._target,
-        filename: `${path.basename(file)}.pack.js`,
-        library: 'main',
-        libraryTarget: 'umd',
-      },
-      devtool: false,
-      externals: [
-        'lodash',
-      ],
-    });
-
-    return new Promise((resolve, reject) => {
-      compiler.run((err, stats) => {
-        if (err) {
-          reject(err);
-          return;
-        }
-        this.log.debug(stats.toString({
-          chunks: false,
-          colors: true,
-        }));
-        resolve();
-      });
-    });
   }
 
   /**
@@ -135,7 +109,10 @@ class BuildCommand extends AbstractCommand {
     bundler.addAssetType('htl', require.resolve('@adobe/parcel-plugin-htl/src/HTLAsset.js'));
     bundler.addAssetType('helix-js', require.resolve('./parcel/HelixAsset.js'));
 
-    bundler.addPackager('js', WebPackager);
+    if (this._bundled) {
+      bundler.addPackager('js', WebPackager);
+      bundler.logger = this.log;
+    }
     return bundler;
   }
 

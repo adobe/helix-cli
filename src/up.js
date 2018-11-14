@@ -47,6 +47,7 @@ module.exports = function up() {
         .withMinifyEnabled(argv.minify)
         .withTargetDir(argv.target)
         .withFiles(argv.files)
+        .withBundled(argv.bundled)
         // only open browser window when executable is `hlx`
         // this prevents the window to be opened during integration tests
         .withOpen(argv.open && path.basename(argv.$0) === 'hlx')
