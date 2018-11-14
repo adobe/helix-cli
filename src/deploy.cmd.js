@@ -160,7 +160,7 @@ class DeployCommand extends AbstractCommand {
 
   /**
    * Creates a .zip package that contains the contents to be deployed to openwhisk.
-   * @parram name the action name
+   * @param name the action name
    * @param script Filename of the main script file.
    * @returns {Promise<any>} Promise that resolves to the package file {@code path}.
    */
@@ -375,10 +375,14 @@ class DeployCommand extends AbstractCommand {
       name: this.actionName(script),
     }));
 
-    const zip = actions.map(({ script, name }) => this.createPackage(name, script)
+    const read = actions.map(({ script, name }) => this.createPackage(name, script)
+      .then(fs.readFile)
       .then(action => ({ script, name, action })));
 
-    const deployed = zip.map(p => p.then(({ script, name, action }) => {
+    // const read = actions.map(({ script, name }) => fs.readFile(script, { encoding: 'utf8' })
+    //   .then(action => ({ script, name, action })));
+
+    const deployed = read.map(p => p.then(({ script, name, action }) => {
       const actionoptions = {
         name,
         'User-Agent': useragent,

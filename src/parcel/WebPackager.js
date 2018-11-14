@@ -87,7 +87,7 @@ class RawPackager extends Packager {
         'validator',
         'watson-developer-cloud',
         'when',
-        'winston',
+        // 'winston', (we need 3.x; they only provide 2.x)
         'ws',
         'xml2js',
         'xmlhttprequest',
@@ -117,7 +117,9 @@ class RawPackager extends Packager {
         // }
         //
         // fs.writeFileSync(dstFile, result.code, 'utf-8');
-        // // stats.compilation.modules.forEach(m => console.log(m.id));
+        console.log('external modules used');
+        stats.compilation.modules.filter(m => m.type === 'javascript/dynamic').forEach(m => console.log(m.id));
+
         resolve();
       });
     });
