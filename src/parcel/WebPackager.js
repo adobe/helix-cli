@@ -26,7 +26,10 @@ class RawPackager extends Packager {
     const compiler = webpack({
       target: 'node',
       mode: 'development',
-      entry: srcFile,
+      entry: [
+        srcFile,
+        path.resolve(__dirname, 'webpack-helper.js'),
+      ],
       output: {
         path: target,
         filename,

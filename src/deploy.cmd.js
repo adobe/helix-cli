@@ -389,10 +389,10 @@ class DeployCommand extends AbstractCommand {
         action,
         params,
         kind: 'nodejs:10-fat',
-        exec: {
-          // image: this._docker,
-          main: 'module.exports.main',
-        },
+        // exec: {
+        //   // image: this._docker,
+        //   // main: 'module.exports.main',
+        // },
         annotations: { 'web-export': true },
       };
 
