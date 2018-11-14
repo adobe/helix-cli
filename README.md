@@ -189,14 +189,12 @@ The same core configuration options (`repo`, `ref`, `root`, and `owner`) are sup
 #### Keeping Your Repository Clean
 
 Although you can just put static content, e.g. an `index.html` loader for your SPA into the root 
-of your repository, this tends to litter the repository with many small files.
-
-To keep things clean, create for example a directory `docroot` in the repository and move your 
+of your repository, this tends to litter the repository with many small files. To keep things clean, create for example a directory `docroot` in the repository and move your 
 static files there. Then the `staticRoot` can be set in the root of the config:
 
 ```bash
 # defines the default static root relative to the static repository
-staticRoot: /webroot
+staticRoot: /docroot
 ``` 
 
 or individually using the `path` property in the _static_ definition of a strain:
