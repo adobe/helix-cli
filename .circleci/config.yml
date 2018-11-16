@@ -157,7 +157,7 @@ workflows:
 
   build-and-release:
     jobs:
-      - build
+      - build:
         filters:
           tags:
             only: /^v\d+\.\d+\.\d+$/
