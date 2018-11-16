@@ -25,6 +25,7 @@ const { GitUrl, GitUtils } = require('@adobe/helix-shared');
 const useragent = require('./user-agent-util');
 const AbstractCommand = require('./abstract.cmd.js');
 const packageCfg = require('./parcel/packager-config.js');
+const pkgLock = require('../package-lock');
 
 class DeployCommand extends AbstractCommand {
   constructor(logger) {
@@ -168,6 +169,35 @@ class DeployCommand extends AbstractCommand {
    */
   async createPackage(name, script, bar) {
     const { log } = this;
+
+    const bundled = {};
+
+    async function collectModules(mod) {
+      if (!mod) {
+        return;
+      }
+
+      await Promise.all(Object.keys(mod).map(async (dep) => {
+        if (bundled[dep] || packageCfg.builtin[dep] || packageCfg.externals[dep]) {
+          return;
+        }
+        const modPath = path.resolve(__dirname, '..', 'node_modules', dep);
+        bundled[dep] = modPath;
+
+        const info = await fs.readJson(`${modPath}/package.json`);
+        await collectModules(info.dependencies);
+      }));
+    }
+
+    // check for dependency info
+    const depJson = `${script}.json`;
+    if (await fs.pathExists(depJson)) {
+      const info = await fs.readJson(depJson);
+      await collectModules(info.requires);
+    }
+
+    console.log(bundled);
+
     return new Promise((resolve, reject) => {
       const archiveName = `${name}.zip`;
       const zipFile = path.resolve(this._target, archiveName);
@@ -212,10 +242,9 @@ class DeployCommand extends AbstractCommand {
       archive.append(JSON.stringify(packageJson, null, '  '), { name: 'package.json' });
 
       // add modules that cause problems when embeded in webpack
-      packageCfg.bundled.forEach((mod) => {
-        bar.tick();
-        log.debug(`${archiveName}: Embedding Module ${mod}`);
-        archive.directory(path.resolve(__dirname, '..', 'node_modules', mod), `node_modules/${mod}`);
+      Object.keys(bundled).forEach((mod) => {
+        log.info(`${archiveName}: Embedding Module ${mod}`);
+        archive.directory(bundled[mod], `node_modules/${mod}`);
       });
 
       archive.finalize();
@@ -351,10 +380,11 @@ class DeployCommand extends AbstractCommand {
     };
     const openwhisk = ow(owoptions);
 
-    const scripts = [path.resolve(__dirname, 'openwhisk', 'static.js'), ...glob.sync(`${this._target}/*.js`)];
+    // const scripts = [path.resolve(__dirname, 'openwhisk', 'static.js'), ...glob.sync(`${this._target}/*.js`)];
+    const scripts = [...glob.sync(`${this._target}/*.js`)];
 
     const bar = new ProgressBar('[:bar] :action :etas', {
-      total: scripts.length * (packageCfg.bundled.length + 3),
+      total: scripts.length * 3,
       width: 50,
       renderThrottle: 1,
       stream: process.stdout,

@@ -27,11 +27,6 @@ module.exports.defaultArgs = yargs => yargs
     boolean: true,
     default: false,
   })
-  .option('bundled', {
-    describe: 'Bundled all dependencies.',
-    boolean: true,
-    default: false,
-  })
   .positional('files', {
     describe: 'The template files to compile',
     default: DEFAULT_PATTERNS,

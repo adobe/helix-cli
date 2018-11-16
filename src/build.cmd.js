@@ -18,7 +18,7 @@ const glob = require('glob');
 const path = require('path');
 const fse = require('fs-extra');
 const klawSync = require('klaw-sync');
-const WebPackager = require('./parcel/WebPackager.js');
+const TrackingPackager = require('./parcel/TrackingPackager.js');
 const md5 = require('./md5.js');
 const AbstractCommand = require('./abstract.cmd.js');
 
@@ -31,7 +31,6 @@ class BuildCommand extends AbstractCommand {
     this._files = null;
     this._distDir = null;
     this._webroot = null;
-    this._bundled = false;
   }
 
   withCacheEnabled(cache) {
@@ -56,11 +55,6 @@ class BuildCommand extends AbstractCommand {
 
   withWebRoot(root) {
     this._webroot = root;
-    return this;
-  }
-
-  withBundled(bundled) {
-    this._bundled = bundled;
     return this;
   }
 
@@ -94,7 +88,6 @@ class BuildCommand extends AbstractCommand {
       cache: this._cache,
       minify: this._minify,
       outDir: this._target,
-      sourceMaps: !this._bundled,
     };
   }
 
@@ -108,11 +101,7 @@ class BuildCommand extends AbstractCommand {
     const bundler = new Bundler(files, options);
     bundler.addAssetType('htl', require.resolve('@adobe/parcel-plugin-htl/src/HTLAsset.js'));
     bundler.addAssetType('helix-js', require.resolve('./parcel/HelixAsset.js'));
-
-    if (this._bundled) {
-      bundler.addPackager('js', WebPackager);
-      bundler.logger = this.log;
-    }
+    bundler.addPackager('js', TrackingPackager);
     return bundler;
   }
 

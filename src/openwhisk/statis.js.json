@@ -1,0 +1,7 @@
+{
+  "dependencies": {
+    "request-promise-native": true,
+    "crypto": true,
+    "@mime-types": true
+  }
+}
