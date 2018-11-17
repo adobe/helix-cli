@@ -125,7 +125,7 @@ jobs:
         # save to workspace for downstream jobs
         root: ./build
         paths:
-          - hlx_install.sh ${CIRCLE_TAG}
+          - hlx_install.sh
 
   github-release:
     # https://circleci.com/blog/publishing-to-github-releases-via-circleci/
