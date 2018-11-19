@@ -201,7 +201,9 @@ class DeployCommand extends AbstractCommand {
       output.on('close', () => {
         if (!hadErrors) {
           log.debug(`${archiveName}: Created package. ${archive.pointer()} total bytes`);
-          resolve(zipFile);
+          // eslint-disable-next-line no-param-reassign
+          info.zipFile = zipFile;
+          resolve(info);
         }
       });
       archive.on('entry', (data) => {
@@ -403,6 +405,13 @@ class DeployCommand extends AbstractCommand {
       requires: [],
     });
 
+    const bar = new ProgressBar('[:bar] :action :etas', {
+      total: scripts.length,
+      width: 50,
+      renderThrottle: 1,
+      stream: process.stdout,
+    });
+
     // collect all the external modules of the scripts
     let steps = 0;
     await Promise.all(scripts.map(async (script) => {
@@ -414,15 +423,14 @@ class DeployCommand extends AbstractCommand {
       script.files = [script.main, ...script.requires].map(f => path.resolve(this._target, f));
       // eslint-disable-next-line no-param-reassign
       script.externals = await collector.collectModules(script.files);
-      steps += Object.keys(script.externals).length + script.files.length + 2;
+      steps += Object.keys(script.externals).length + script.files.length;
+      bar.tick(1, {
+        action: `analyzing ${path.basename(script.main)}`,
+      });
     }));
 
-    const bar = new ProgressBar('[:bar] :action :etas', {
-      total: steps,
-      width: 50,
-      renderThrottle: 1,
-      stream: process.stdout,
-    });
+    // trigger new progress bar
+    bar.total += steps;
 
     const tick = (message, name) => {
       bar.tick({
@@ -453,10 +461,15 @@ class DeployCommand extends AbstractCommand {
       script.name = this.actionName(script.main);
     });
 
-    const read = scripts.map(script => this.createPackage(script, bar)
-      .then(fs.readFile)
+    // package actions
+    await Promise.all(scripts.map(script => this.createPackage(script, bar)));
+
+    // read files ...
+    const read = scripts.map(script => fs.readFile(script.zipFile)
       .then(action => ({ script, action })));
 
+    // ... and deploy
+    bar.total += scripts.length * 2;
     const deployed = read.map(p => p.then(({ script, action }) => {
       const actionoptions = {
         name: script.name,
