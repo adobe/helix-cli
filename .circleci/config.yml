@@ -34,6 +34,7 @@ jobs:
 
     steps:
     - setup
+    - checkout
 
     # run tests!
     - run: mkdir junit
@@ -120,6 +121,24 @@ jobs:
         working_directory: build
     - store_artifacts:
         path: build/hlx_install.sh
+    - persist_to_workspace:
+        # save to workspace for downstream jobs
+        root: ./build
+        paths:
+          - hlx_install.sh
+
+  github-release:
+    # https://circleci.com/blog/publishing-to-github-releases-via-circleci/
+    docker:
+      - image: cibuilds/github:0.10
+    steps:
+      - attach_workspace:
+          at: ./build
+      - run:
+          name: "Publish Release on GitHub"
+          command: |
+            CHANGELOG="**Changes**\n\nTODO list resolved issues"
+            ghr -t ${GITHUB_API_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -n ${CIRCLE_TAG} -b ${CHANGES} -delete ${CIRCLE_TAG} ./build/      
 
 workflows:
   version: 2
@@ -137,3 +156,24 @@ workflows:
         filters:
           branches:
             only: master
+
+  build-and-release:
+    jobs:
+      - build:
+          filters:
+            tags:
+              only: /^v\d+\.\d+\.\d+$/
+      - installer:
+          requires:
+            - build
+          filters:
+            tags:
+              only: /^v\d+\.\d+\.\d+$/
+      - github-release:
+          requires:
+            - installer
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /^v\d+\.\d+\.\d+$/
