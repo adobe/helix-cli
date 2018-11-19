@@ -58,7 +58,7 @@ class HelixAsset extends Asset {
     body = body.replace(/MOD_PIPE/, pipe);
     body = body.replace(/MOD_PRE/, pre);
     return [{
-      type: 'js',
+      type: 'helix-pre-js',
       value: body,
       sourceMap: this.sourceMap,
     }];

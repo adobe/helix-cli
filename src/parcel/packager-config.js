@@ -11,53 +11,11 @@
  */
 
 module.exports = {
-  // node builtin modules
-  builtin: {
-    assert: true,
-    buffer: true,
-    child_process: true,
-    cluster: true,
-    console: true,
-    constants: true,
-    crypto: true,
-    dgram: true,
-    dns: true,
-    domain: true,
-    events: true,
-    fs: true,
-    http: true,
-    https: true,
-    module: true,
-    net: true,
-    os: true,
-    path: true,
-    punycode: true,
-    process: true,
-    querystring: true,
-    readline: true,
-    repl: true,
-    stream: true,
-    _stream_duplex: true,
-    _stream_passthrough: true,
-    _stream_readable: true,
-    _stream_transform: true,
-    _stream_writable: true,
-    string_decoder: true,
-    sys: true,
-    timers: true,
-    tls: true,
-    tty: true,
-    url: true,
-    util: true,
-    vm: true,
-    zlib: true,
-  },
-
   // modules that are provided by the runtime container
   externals: {
     'alexa-sdk': true,
     apn: true,
-    async: true,
+    // async: true, (we need 2.6.1; container provides 2.1.4)
     'body-parser': true,
     btoa: true,
     cheerio: true,
@@ -106,7 +64,7 @@ module.exports = {
     validator: true,
     'watson-developer-cloud': true,
     when: true,
-    // 'winston', // (we need 3.x; container provides 2.x)
+    // 'winston',  (we need 3.x; container provides 2.x)
     ws: true,
     xml2js: true,
     xmlhttprequest: true,

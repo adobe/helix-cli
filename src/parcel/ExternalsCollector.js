@@ -13,17 +13,7 @@ const path = require('path');
 const fs = require('fs-extra');
 const webpack = require('webpack');
 
-const scopedModuleRegex = new RegExp('@[a-zA-Z0-9][\\w-.]+/[a-zA-Z0-9][\\w-.]+([a-zA-Z0-9./]+)?', 'g');
-
-function getModuleName(request) {
-  const req = request.replace(/^.*?\/node_modules\//, '');
-  if (scopedModuleRegex.test(req)) {
-    // reset regexp
-    scopedModuleRegex.lastIndex = 0;
-    return req.split('/', 2).join('/');
-  }
-  return req.split('/')[0];
-}
+const nodeModulesRegex = new RegExp('(.*/node_modules/)((@[^/]+/)?([^/]+)).*');
 
 /**
  * Helper class that collects external modules from a script. Ideally, we could collect the external
@@ -33,10 +23,16 @@ class ExternalsCollector {
   constructor() {
     this._cwd = process.cwd();
     this._outputFile = '';
+    this._externals = [];
   }
 
   withDirectory(d) {
     this._cwd = d;
+    return this;
+  }
+
+  withExternals(ext) {
+    this._externals = ext;
     return this;
   }
 
@@ -45,42 +41,45 @@ class ExternalsCollector {
     return this;
   }
 
-  async collectModules(file) {
+  async collectModules(files) {
     const externals = {};
-    const filename = path.resolve(this._cwd, `${file}.collector.tmp`);
+    const filename = path.resolve(this._cwd, `${files[0]}.collector.tmp`);
     const compiler = webpack({
       target: 'node',
       mode: 'development',
-      entry: file,
+      entry: files,
       output: {
         path: this._cwd,
         filename: path.relative(this._cwd, filename),
         library: 'main',
         libraryTarget: 'umd',
       },
+      resolve: {
+        modules: [path.resolve(__dirname, '..', '..', 'node_modules'), 'node_modules'],
+      },
       devtool: false,
-      externals: [(context, req, callback) => {
-        // console.log('context', context, 'req', req);
-
-        const moduleName = getModuleName(req);
-        // console.log('module: ' + moduleName);
-        if (!moduleName) {
-          return callback();
-        }
-        if (moduleName !== '.') {
-          externals[moduleName] = true;
-        }
-        // return callback();
-        return callback(null, `commonjs ${req}`);
-      }],
+      externals: this._externals,
     });
 
     const ext = await new Promise((resolve, reject) => {
-      compiler.run((err) => {
+      compiler.run((err, stats) => {
         if (err) {
           reject(err);
           return;
         }
+        // console.log(stats.toString({
+        //   chunks: false,
+        //   colors: true,
+        // }));
+        stats.compilation.modules.forEach((mod) => {
+          if (mod.resource) {
+            const m = nodeModulesRegex.exec(mod.resource);
+            if (m) {
+              externals[m[2]] = m[1] + m[2];
+            }
+          }
+        });
+        // console.log(Object.keys(externals));
         resolve(externals);
       });
     });

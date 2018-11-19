@@ -25,7 +25,7 @@ const { GitUrl, GitUtils } = require('@adobe/helix-shared');
 const useragent = require('./user-agent-util');
 const AbstractCommand = require('./abstract.cmd.js');
 const packageCfg = require('./parcel/packager-config.js');
-const pkgLock = require('../package-lock');
+const ExternalsCollector = require('./parcel/ExternalsCollector.js');
 
 class DeployCommand extends AbstractCommand {
   constructor(logger) {
@@ -158,48 +158,38 @@ class DeployCommand extends AbstractCommand {
     if (!this._strainFile) {
       this._strainFile = path.resolve(this._helixConfig.directory, '.hlx', 'strains.json');
     }
+    this._target = path.resolve(this.directory, this._target);
   }
 
   /**
    * Creates a .zip package that contains the contents to be deployed to openwhisk.
-   * @param name the action name
-   * @param script Filename of the main script file.
+   * @param info The action info object
+   * @param info.name Name of the action
+   * @param info.main Main script of the action
+   * @param info.externals External modules
+   * @param info.requires Local dependencies
    * @param bar progress bar
    * @returns {Promise<any>} Promise that resolves to the package file {@code path}.
    */
-  async createPackage(name, script, bar) {
+  async createPackage(info, bar) {
     const { log } = this;
 
-    const bundled = {};
-
-    async function collectModules(mod) {
-      if (!mod) {
-        return;
+    const ticks = {};
+    const tick = (message, name) => {
+      bar.tick({
+        action: name ? `packaging ${name}` : '',
+      });
+      if (message) {
+        this.log.log({
+          progress: true,
+          level: 'info',
+          message,
+        });
       }
-
-      await Promise.all(Object.keys(mod).map(async (dep) => {
-        if (bundled[dep] || packageCfg.builtin[dep] || packageCfg.externals[dep]) {
-          return;
-        }
-        const modPath = path.resolve(__dirname, '..', 'node_modules', dep);
-        bundled[dep] = modPath;
-
-        const info = await fs.readJson(`${modPath}/package.json`);
-        await collectModules(info.dependencies);
-      }));
-    }
-
-    // check for dependency info
-    const depJson = `${script}.json`;
-    if (await fs.pathExists(depJson)) {
-      const info = await fs.readJson(depJson);
-      await collectModules(info.requires);
-    }
-
-    console.log(bundled);
+    };
 
     return new Promise((resolve, reject) => {
-      const archiveName = `${name}.zip`;
+      const archiveName = `${info.name}.zip`;
       const zipFile = path.resolve(this._target, archiveName);
       let hadErrors = false;
 
@@ -216,35 +206,42 @@ class DeployCommand extends AbstractCommand {
       });
       archive.on('entry', (data) => {
         log.debug(`${archiveName}: A ${data.name}`);
+        if (ticks[data.name]) {
+          tick('', data.name);
+        }
       });
       archive.on('warning', (err) => {
-        log.error(`${chalk.redBright('[error] ')}File ${script} could not be read. ${err.message}`);
+        log.error(`${chalk.redBright('[error] ')}Unable to create archive: ${err.message}`);
         hadErrors = true;
         reject(err);
       });
       archive.on('error', (err) => {
-        log.error(`${chalk.redBright('[error] ')}File ${script} could not be read. ${err.message}`);
+        log.error(`${chalk.redBright('[error] ')}Unable to create archive: ${err.message}`);
         hadErrors = true;
         reject(err);
       });
 
       const packageJson = {
-        name,
+        name: info.name,
         version: '1.0',
-        description: `Lambda function of ${name}`,
-        main: 'main.js',
+        description: `Lambda function of ${info.name}`,
+        main: path.basename(info.main),
         license: 'Apache-2.0',
       };
 
-      bar.tick();
       archive.pipe(output);
-      archive.file(script, { name: 'main.js' });
       archive.append(JSON.stringify(packageJson, null, '  '), { name: 'package.json' });
 
+      info.files.forEach((file) => {
+        const name = path.basename(file);
+        archive.file(path.resolve(this._target, file), { name });
+        ticks[name] = true;
+      });
+
       // add modules that cause problems when embeded in webpack
-      Object.keys(bundled).forEach((mod) => {
-        log.info(`${archiveName}: Embedding Module ${mod}`);
-        archive.directory(bundled[mod], `node_modules/${mod}`);
+      Object.keys(info.externals).forEach((mod) => {
+        archive.directory(info.externals[mod], `node_modules/${mod}`);
+        ticks[`node_modules/${mod}/package.json`] = true;
       });
 
       archive.finalize();
@@ -380,11 +377,48 @@ class DeployCommand extends AbstractCommand {
     };
     const openwhisk = ow(owoptions);
 
-    // const scripts = [path.resolve(__dirname, 'openwhisk', 'static.js'), ...glob.sync(`${this._target}/*.js`)];
-    const scripts = [...glob.sync(`${this._target}/*.js`)];
+    // get the list of scripts from the info files
+    const infos = [...glob.sync(`${this._target}/*.info.json`)];
+    const scriptInfos = {};
+    (await Promise.all(infos.map(info => fs.readJSON(info))))
+      .forEach((info) => {
+        scriptInfos[info.main] = info;
+      });
+
+    // remove dependencies
+    Object.keys(scriptInfos).forEach((key) => {
+      const script = scriptInfos[key];
+      if (script) {
+        script.requires.forEach((dep) => {
+          delete scriptInfos[dep];
+        });
+      }
+    });
+
+    const scripts = Object.values(scriptInfos);
+
+    // add static action
+    scripts.push({
+      main: path.resolve(__dirname, 'openwhisk', 'static.js'),
+      requires: [],
+    });
+
+    // collect all the external modules of the scripts
+    let steps = 0;
+    await Promise.all(scripts.map(async (script) => {
+      const collector = new ExternalsCollector()
+        .withDirectory(this._target)
+        .withExternals(Object.keys(packageCfg.externals));
+
+      // eslint-disable-next-line no-param-reassign
+      script.files = [script.main, ...script.requires].map(f => path.resolve(this._target, f));
+      // eslint-disable-next-line no-param-reassign
+      script.externals = await collector.collectModules(script.files);
+      steps += Object.keys(script.externals).length + script.files.length + 2;
+    }));
 
     const bar = new ProgressBar('[:bar] :action :etas', {
-      total: scripts.length * 3,
+      total: steps,
       width: 50,
       renderThrottle: 1,
       stream: process.stdout,
@@ -413,33 +447,36 @@ class DeployCommand extends AbstractCommand {
       this._prefix = `${GitUtils.getRepository()}--${GitUtils.getBranchFlag()}--`;
     }
 
-    const actions = scripts.map(script => ({
-      script,
-      name: this.actionName(script),
-    }));
+    // generate action names
+    scripts.forEach((script) => {
+      // eslint-disable-next-line no-param-reassign
+      script.name = this.actionName(script.main);
+    });
 
-    const read = actions.map(({ script, name }) => this.createPackage(name, script, bar)
+    const read = scripts.map(script => this.createPackage(script, bar)
       .then(fs.readFile)
-      .then(action => ({ script, name, action })));
+      .then(action => ({ script, action })));
 
-    // const read = actions.map(({ script, name }) => fs.readFile(script, { encoding: 'utf8' })
-    //   .then(action => ({ script, name, action })));
-
-    const deployed = read.map(p => p.then(({ script, name, action }) => {
+    const deployed = read.map(p => p.then(({ script, action }) => {
       const actionoptions = {
-        name,
+        name: script.name,
         'User-Agent': useragent,
         action,
         params,
         kind: 'nodejs:10-fat',
-        // exec: {
-        //   // image: this._docker,
-        //   // main: 'module.exports.main',
-        // },
         annotations: { 'web-export': true },
       };
 
-      const baseName = path.basename(script);
+      if (this._docker) {
+        this.log.warn(`Using docker image ${this._docker} instead of default nodejs:10-fat container.`);
+        delete actionoptions.kind;
+        actionoptions.exec = {
+          image: this._docker,
+          main: 'module.exports.main',
+        };
+      }
+
+      const baseName = path.basename(script.main);
       tick(`deploying ${baseName}`, baseName);
 
       if (this._dryRun) {
@@ -451,7 +488,7 @@ class DeployCommand extends AbstractCommand {
         tick(` deployed ${baseName} (deployed)`);
         return true;
       }).catch((e) => {
-        this.log.error(`❌  Unable to deploy the action ${name}:  ${e.message}`);
+        this.log.error(`❌  Unable to deploy the action ${script.name}:  ${e.message}`);
         tick();
         return false;
       });

@@ -19,6 +19,7 @@ const path = require('path');
 const fse = require('fs-extra');
 const klawSync = require('klaw-sync');
 const TrackingPackager = require('./parcel/TrackingPackager.js');
+const RawJSPackager = require('./parcel/RawJSPackager.js');
 const md5 = require('./md5.js');
 const AbstractCommand = require('./abstract.cmd.js');
 
@@ -101,7 +102,9 @@ class BuildCommand extends AbstractCommand {
     const bundler = new Bundler(files, options);
     bundler.addAssetType('htl', require.resolve('@adobe/parcel-plugin-htl/src/HTLAsset.js'));
     bundler.addAssetType('helix-js', require.resolve('./parcel/HelixAsset.js'));
-    bundler.addPackager('js', TrackingPackager);
+    bundler.addAssetType('helix-pre-js', require.resolve('./parcel/ProxyJSAsset.js'));
+    bundler.addPackager('js', RawJSPackager);
+    // bundler.addPackager('js', TrackingPackager);
     return bundler;
   }
 
@@ -179,7 +182,7 @@ class BuildCommand extends AbstractCommand {
     const bundler = await this.createBundler(myfiles);
     const bundle = await bundler.bundle();
     if (bundle) {
-      await this.fixSourceMappingURL(bundle);
+      // await this.fixSourceMappingURL(bundle);
       await this.writeManifest();
     }
   }
