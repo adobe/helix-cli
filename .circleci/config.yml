@@ -34,7 +34,6 @@ jobs:
 
     steps:
     - setup
-    - checkout
 
     # run tests!
     - run: mkdir junit
