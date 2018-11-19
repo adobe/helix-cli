@@ -137,10 +137,7 @@ jobs:
           name: "Publish Release on GitHub"
           command: |
             CHANGELOG="**Changes**\n\nTODO list resolved issues"
-            TAG="$(git describe --tags)"
-            echo "TAG - " ${TAG}
-            echo "CIRCLE_TAG - " ${CIRCLE_TAG}
-            ghr -t ${GITHUB_API_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -n ${CIRCLE_TAG} -b ${CHANGES} -delete ${CIRCLE_TAG} ./build/      
+            ghr -t ${GITHUB_API_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -b ${CHANGELOG} -recreate ${CIRCLE_TAG} ./build/      
 
 workflows:
   version: 2
