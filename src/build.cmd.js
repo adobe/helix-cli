@@ -18,7 +18,6 @@ const glob = require('glob');
 const path = require('path');
 const fse = require('fs-extra');
 const klawSync = require('klaw-sync');
-const TrackingPackager = require('./parcel/TrackingPackager.js');
 const RawJSPackager = require('./parcel/RawJSPackager.js');
 const md5 = require('./md5.js');
 const AbstractCommand = require('./abstract.cmd.js');
