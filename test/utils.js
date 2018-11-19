@@ -124,8 +124,15 @@ async function processSource(scriptName) {
   const distHtmlJS = path.resolve(buildDir, `${scriptName}.js`);
   const distHtmlHtl = path.resolve(buildDir, `${scriptName}.htl`);
 
+  const files = [
+    path.resolve(__dirname, `specs/parcel/${scriptName}.htl`),
+    path.resolve(__dirname, `specs/parcel/${scriptName}.pre.js`),
+    path.resolve(__dirname, 'specs/parcel/helpers.js'),
+  ];
+  //
+  // if (await fse.pathExists(pre))
   await new BuildCommand()
-    .withFiles([path.resolve(__dirname, `specs/parcel/${scriptName}.htl`)])
+    .withFiles(files)
     .withTargetDir(buildDir)
     .withWebRoot('/webroot')
     .withCacheEnabled(false)
