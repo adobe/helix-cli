@@ -197,7 +197,7 @@ jobs:
             name: prepare test git user
             command: git config --global user.email "you@example.com" && git config --global user.name "CircleCi Build"
 
-        - run
+        - run:
             name: Debug message on branches being used
             command: echo "Branch received as parameter: ${GDM_MODULE_BRANCHES}"
 
