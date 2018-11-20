@@ -58,9 +58,6 @@
     "winston": "^3.1.0",
     "yargs": "^12.0.2"
   },
-  "__deps": {
-    "lodash": "^4.17.10"
-  },
   "devDependencies": {
     "ajv": "^6.5.3",
     "codecov": "^3.0.2",
