@@ -199,7 +199,8 @@ jobs:
 
         - run:
             name: Debug message on branches being used
-            command: echo "Branch received as parameter: ${GDM_MODULE_BRANCHES}"
+            command: |
+                echo "Branch received as parameter: ${GDM_MODULE_BRANCHES}"
 
         # run smoke tests
         - run:
