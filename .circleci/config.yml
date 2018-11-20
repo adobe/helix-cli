@@ -200,8 +200,8 @@ jobs:
         # run smoke tests
         - run:
             name: Running Smoke Tests
-            command: env HLX_SMOKE_EXEC='node ../index.js' npx mocha  --exit 
-            # --reporter mocha-junit-reporter test/smoke/*
+            command: env HLX_SMOKE_EXEC='node ../index.js' npx mocha  --exit test/smoke/*
+            # --reporter mocha-junit-reporter 
             working_directory: project-helix.io
             # environment:
             #     MOCHA_FILE: /home/circleci/junit/test-results.xml
