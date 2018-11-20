@@ -137,7 +137,7 @@ jobs:
           name: "Publish Release on GitHub"
           command: |
             CHANGELOG="**Changes:**<p><p>[**TODO** list of resolved issues]"
-            ghr -t ${GITHUB_API_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -b "${CHANGELOG}"" -recreate ${CIRCLE_TAG} ./installer_build/      
+            ghr -t ${GITHUB_API_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -b "${CHANGELOG}" -recreate ${CIRCLE_TAG} ./installer_build/      
 
 workflows:
   version: 2
