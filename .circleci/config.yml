@@ -1,13 +1,14 @@
-version: 2.1
-executors:
-  node8:
+version: 2.0
+
+jobs:
+  build:
     docker:
         - image: circleci/node:8
     environment:
         NPM_CONFIG_PREFIX: ~/.npm-global
 
-commands:
-  setup:
+    working_directory: ~/repo
+
     steps:
     - checkout
     - restore_cache:
@@ -26,14 +27,6 @@ commands:
     - run:
         name: prepare test git user
         command: git config --global user.email "circleci@project-helix.io" && git config --global user.name "CircleCi Build"
-
-jobs:
-  build:
-    executor: node8
-    working_directory: ~/repo
-
-    steps:
-    - setup
 
     # run tests!
     - run: mkdir junit
@@ -58,11 +51,32 @@ jobs:
         path: junit
 
   publish-pre-release:
-    executor: node8
+    docker:
+        - image: circleci/node:8
+    environment:
+        NPM_CONFIG_PREFIX: ~/.npm-global
+
     working_directory: ~/repo
 
     steps:
-    - setup
+    - checkout
+    - restore_cache:
+        keys:
+        - v3-dependencies-{{ arch }}-{{ checksum "package-lock.json" }}
+    - run:
+        name: install npm 6.4.1
+        command: sudo npm -g install npm@6.4.1
+    - run:
+        name: Installing Dependencies
+        command: npm install
+    - save_cache:
+        paths:
+        - node_modules
+        key: v3-dependencies-{{ arch }}-{{ checksum "package-lock.json" }}
+    - run:
+        name: prepare test git user
+        command: git config --global user.email "circleci@project-helix.io" && git config --global user.name "CircleCi Build"
+
     - run:
         name: revert changes to package-lock.json
         command: git checkout -- package-lock.json
@@ -93,11 +107,32 @@ jobs:
         command: npm publish --tag next --access public
 
   publish-examples:
-    executor: node8
+    docker:
+        - image: circleci/node:8
+    environment:
+        NPM_CONFIG_PREFIX: ~/.npm-global
+
     working_directory: ~/repo
 
     steps:
-    - setup
+    - checkout
+    - restore_cache:
+        keys:
+        - v3-dependencies-{{ arch }}-{{ checksum "package-lock.json" }}
+    - run:
+        name: install npm 6.4.1
+        command: sudo npm -g install npm@6.4.1
+    - run:
+        name: Installing Dependencies
+        command: npm install
+    - save_cache:
+        paths:
+        - node_modules
+        key: v3-dependencies-{{ arch }}-{{ checksum "package-lock.json" }}
+    - run:
+        name: prepare test git user
+        command: git config --global user.email "circleci@project-helix.io" && git config --global user.name "CircleCi Build"
+
     - run:
         name: Install Globally
         command: mkdir -p ~/.npm-global && npm link
