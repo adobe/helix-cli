@@ -13,7 +13,6 @@
 'use strict';
 
 const Bundler = require('parcel-bundler');
-const HTLAsset = require('@adobe/parcel-plugin-htl/src/HTLAsset.js');
 const glob = require('glob');
 const path = require('path');
 const fse = require('fs-extra');
@@ -138,40 +137,6 @@ class BuildCommand extends AbstractCommand {
     return fse.writeFile(path.resolve(this._target, 'manifest.json'), JSON.stringify(mf, null, '  '));
   }
 
-  /**
-   * Fix source mapping URL.
-   *
-   * #190 sourceMappingURL annotation is incorrect
-   * see: https://github.com/parcel-bundler/parcel/issues/1028#issuecomment-374537098
-   *
-   * @param bnd the parcel bundle
-   */
-  // eslint-disable-next-line class-methods-use-this
-  async fixSourceMappingURL(bnd) {
-    if (bnd.type) {
-      // eslint-disable-next-line no-param-reassign
-      bnd.htl = bnd.entryAsset instanceof HTLAsset;
-      if (bnd.type === 'map' && bnd.parentBundle.htl) {
-        // eslint-disable-next-line no-param-reassign
-        bnd.htl = true;
-      }
-      if (bnd.htl && bnd.type === 'js') {
-        // strip leading / from sourceMappingURL
-        const contents = await fse.readFile(bnd.name, 'utf8');
-        const fixed = contents.replace(/\/\/# sourceMappingURL=\//, '//# sourceMappingURL=');
-        if (contents !== fixed) {
-          await fse.writeFile(bnd.name, fixed, 'utf-8');
-        }
-        // await this.createPackage(bnd.name);
-      }
-    }
-    const jobs = [];
-    bnd.childBundles.forEach((b) => {
-      jobs.push(this.fixSourceMappingURL(b));
-    });
-    return Promise.all(jobs);
-  }
-
   async run() {
     await this.init();
 
@@ -181,7 +146,6 @@ class BuildCommand extends AbstractCommand {
     const bundler = await this.createBundler(myfiles);
     const bundle = await bundler.bundle();
     if (bundle) {
-      // await this.fixSourceMappingURL(bundle);
       await this.writeManifest();
     }
   }

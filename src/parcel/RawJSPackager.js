@@ -17,8 +17,9 @@ const path = require('path');
 const fs = require('fs-extra');
 
 /**
- * Parcel packager that writes the source code as-is to the target without adding any transformation.
- * It also creates a `.info.json` file that contains the dependencies of the processed asset.
+ * Parcel packager that writes the source code as-is to the target without adding any
+ * transformation. It also creates a `.info.json` file that contains the dependencies of the
+ * processed asset.
  *
  * For example:
  *
