@@ -162,17 +162,21 @@ workflows:
           filters:
             tags:
               only: /^v\d+\.\d+\.\d+$/
+            branches:
+              ignore: /.*/
       - installer:
           requires:
             - build
           filters:
             tags:
               only: /^v\d+\.\d+\.\d+$/
+            branches:
+              ignore: /.*/
       - github-release:
           requires:
             - installer
           filters:
-            branches:
-              ignore: /.*/
             tags:
               only: /^v\d+\.\d+\.\d+$/
+            branches:
+              ignore: /.*/
