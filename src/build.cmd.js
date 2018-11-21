@@ -28,7 +28,6 @@ class BuildCommand extends AbstractCommand {
     this._minify = false;
     this._target = null;
     this._files = null;
-    this._distDir = null;
     this._webroot = null;
   }
 
@@ -100,9 +99,9 @@ class BuildCommand extends AbstractCommand {
     const bundler = new Bundler(files, options);
     bundler.addAssetType('htl', require.resolve('@adobe/parcel-plugin-htl/src/HTLAsset.js'));
     bundler.addAssetType('helix-js', require.resolve('./parcel/HelixAsset.js'));
+    bundler.addAssetType('js', require.resolve('./parcel/AdapterJSAsset.js'));
     bundler.addAssetType('helix-pre-js', require.resolve('./parcel/ProxyJSAsset.js'));
     bundler.addPackager('js', RawJSPackager);
-    // bundler.addPackager('js', TrackingPackager);
     return bundler;
   }
 
