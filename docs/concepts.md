@@ -12,7 +12,7 @@ the request. those are:
 - selector and extension
 - strain name
 
-based on this is looks up:
+based on this it looks up:
 
 - backend type and url
 - content repository
@@ -34,7 +34,7 @@ In order to allow for individual versions (strains) of the same pipeline script,
 name coded with the code repository location, branch and script name. it usually takes the format:
 
 ```
-<repository-url>--<branch>--<type>[_<selector>]
+<repository-url>--<branch>--[<selector>_]<type>
 
 ```
  
@@ -45,7 +45,7 @@ git-github-com-adobe-project-helix-io-git--master--html
 
 ```
 
-> _todo: adjust after #366 is fixed._
+> _todo: adjust after [#366](https://github.com/adobe/helix-cli/issues/366) is fixed._
 
 
 As mentioned above, based on the information in the request, the edge will invoke the respective
@@ -74,7 +74,7 @@ is turned into a pipeline script and then wrapped with a bit of code to turn the
 openwhisk action. It also ensures that a corresponding `pre.js` is executed before the `once` script.
 
 Scripts can also be provided directly as pipeline scripts (i.e. using kind of a null-template) 
-(**Note**: this is currently not working: see #334).
+(**Note**: this is currently not working: see [#334](https://github.com/adobe/helix-cli/issues/334)).
 
 for example:
 
@@ -82,7 +82,7 @@ for example:
 src
 ├── html.htl
 ├── html.pre.js
-└── json_nav.js
+└── nav_json.js
 ```
  
 would be compiled to:
@@ -92,8 +92,8 @@ would be compiled to:
 ├── html.js              // pipeline script (once)
 ├── html.pre.js          // pre script required by html.js
 ├── html.info.json       // script information for deployment
-├── json_nav.js          // pipeline script
-└── json_nav.info.json   // script info
+├── nav_json.js          // pipeline script
+└── nav_json.info.json   // script info
 ```
 
 The script information json contains information needed during deployment. 
