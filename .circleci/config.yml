@@ -138,9 +138,9 @@ jobs:
           name: "Publish Release on GitHub"
           command: |
             LATEST_RELEASE_TAG=$(curl -s https://api.github.com/repos/adobe/helix-cli/releases/latest | grep 'tag_name' | cut -d\" -f4)
-            CHANGELOG=$(git log ${LATEST_RELEASE_TAG}...master | fgrep \# | sed -e 's/^    /* /')
+            CHANGELOG=$(git log ${LATEST_RELEASE_TAG}...master | fgrep \# | sed -e 's/^    /- /')
             NEWLINE=$'\n'
-            RELEASE_NOTES="**Changes:**${NEWLINE}${NEWLINE}${CHANGELOG}${NEWLINE}${NEWLINE}[**TODO** review/edit list of changes]"
+            RELEASE_NOTES="Changes:${NEWLINE}--------${NEWLINE}${NEWLINE}${CHANGELOG}${NEWLINE}${NEWLINE}[**TODO** review/edit list of changes]"
             ghr -t ${GITHUB_API_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -b "${RELEASE_NOTES}" -recreate ${CIRCLE_TAG} ./installer_build/      
 
 workflows:
