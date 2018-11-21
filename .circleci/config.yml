@@ -1,14 +1,13 @@
-version: 2.0
-
-jobs:
-  build:
+version: 2.1
+executors:
+  node8:
     docker:
-        - image: circleci/node:8
+    - image: circleci/node:8
     environment:
-        NPM_CONFIG_PREFIX: ~/.npm-global
+      NPM_CONFIG_PREFIX: ~/.npm-global
 
-    working_directory: ~/repo
-
+commands:
+  setup:
     steps:
     - checkout
     - restore_cache:
@@ -27,6 +26,14 @@ jobs:
     - run:
         name: prepare test git user
         command: git config --global user.email "circleci@project-helix.io" && git config --global user.name "CircleCi Build"
+
+jobs:
+  build:
+    executor: node8
+    working_directory: ~/repo
+
+    steps:
+    - setup
 
     # run tests!
     - run: mkdir junit
@@ -46,37 +53,16 @@ jobs:
 
     - store_test_results:
         path: junit
-      
+
     - store_artifacts:
         path: junit
 
   publish-pre-release:
-    docker:
-        - image: circleci/node:8
-    environment:
-        NPM_CONFIG_PREFIX: ~/.npm-global
-
+    executor: node8
     working_directory: ~/repo
 
     steps:
-    - checkout
-    - restore_cache:
-        keys:
-        - v3-dependencies-{{ arch }}-{{ checksum "package-lock.json" }}
-    - run:
-        name: install npm 6.4.1
-        command: sudo npm -g install npm@6.4.1
-    - run:
-        name: Installing Dependencies
-        command: npm install
-    - save_cache:
-        paths:
-        - node_modules
-        key: v3-dependencies-{{ arch }}-{{ checksum "package-lock.json" }}
-    - run:
-        name: prepare test git user
-        command: git config --global user.email "circleci@project-helix.io" && git config --global user.name "CircleCi Build"
-
+    - setup
     - run:
         name: revert changes to package-lock.json
         command: git checkout -- package-lock.json
@@ -89,13 +75,10 @@ jobs:
         name: version pre-release
         command: npm version prerelease --preid=pre -m "Release %s [ci skip]"
         environment:
-          MOCHA_FILE: /home/circleci/junit/test-results.xml
+          MOCHA_FILE: junit/test-results.xml
 
     - store_test_results:
-        path: ~/junit
-
-    - store_artifacts:
-        path: ~/junit
+        path: junit
 
     # unfortunately we cannot create a release commit with no tag with `npm version`, so we need to delete it here again
     - run:
@@ -107,32 +90,11 @@ jobs:
         command: npm publish --tag next --access public
 
   publish-examples:
-    docker:
-        - image: circleci/node:8
-    environment:
-        NPM_CONFIG_PREFIX: ~/.npm-global
-
+    executor: node8
     working_directory: ~/repo
 
     steps:
-    - checkout
-    - restore_cache:
-        keys:
-        - v3-dependencies-{{ arch }}-{{ checksum "package-lock.json" }}
-    - run:
-        name: install npm 6.4.1
-        command: sudo npm -g install npm@6.4.1
-    - run:
-        name: Installing Dependencies
-        command: npm install
-    - save_cache:
-        paths:
-        - node_modules
-        key: v3-dependencies-{{ arch }}-{{ checksum "package-lock.json" }}
-    - run:
-        name: prepare test git user
-        command: git config --global user.email "circleci@project-helix.io" && git config --global user.name "CircleCi Build"
-
+    - setup
     - run:
         name: Install Globally
         command: mkdir -p ~/.npm-global && npm link
@@ -158,56 +120,24 @@ jobs:
         working_directory: build
     - store_artifacts:
         path: build/hlx_install.sh
+    - persist_to_workspace:
+        # save to workspace for downstream jobs
+        root: ./build
+        paths:
+          - hlx_install.sh
 
-  smoke:
+  github-release:
+    # https://circleci.com/blog/publishing-to-github-releases-via-circleci/
     docker:
-        - image: circleci/node:8
-    working_directory: ~/repo
-    environment:
-        NPM_CONFIG_PREFIX: ~/.npm-global
-
+      - image: cibuilds/github:0.12
     steps:
-        - checkout
-
-        - run:
-            name: install npm 6.4.0
-            command: sudo npm -g install npm@6.4.0
-
-        - run:
-            name: Install Git Dependency Maker tool
-            command: npm install
-            working_directory: scripts/gdm
-
-        - run:
-            name: Install using git branches (master or specified)
-            command: env GDM_MODULE_BRANCHES=$GDM_MODULE_BRANCHES npm run gdm
-
-        - run:
-            name: Clone project-helix.io
-            command: git clone https://github.com/adobe/project-helix.io.git
-
-        - run:
-            name: Install project-helix.io
-            command: npm install
-            working_directory: project-helix.io
-        
-        # run TESTS!
-        - run: mkdir ~/junit
-        - run:
-            name: prepare test git user
-            command: git config --global user.email "you@example.com" && git config --global user.name "CircleCi Build"
-
-        - run:
-            name: Debug message on branches being used
-            command: |
-                echo "Branch received as parameter: ${GDM_MODULE_BRANCHES}"
-
-        # run smoke tests
-        - run:
-            name: Running Smoke Tests
-            command: env HLX_SMOKE_EXEC='node ../index.js --log-level warn' npx mocha  --exit test/smoke/*
-            working_directory: project-helix.io
-            when: always
+      - attach_workspace:
+          at: ./installer_build
+      - run:
+          name: "Publish Release on GitHub"
+          command: |
+            CHANGELOG="**Changes:**<p><p>[**TODO** list of resolved issues]"
+            ghr -t ${GITHUB_API_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -b "${CHANGELOG}" -recreate ${CIRCLE_TAG} ./installer_build/      
 
 workflows:
   version: 2
@@ -225,6 +155,28 @@ workflows:
         filters:
           branches:
             only: master
-  smoke:
+
+  build-and-release:
     jobs:
-    - smoke
+      - build:
+          filters:
+            tags:
+              only: /^v\d+\.\d+\.\d+$/
+            branches:
+              ignore: /.*/
+      - installer:
+          requires:
+            - build
+          filters:
+            tags:
+              only: /^v\d+\.\d+\.\d+$/
+            branches:
+              ignore: /.*/
+      - github-release:
+          requires:
+            - installer
+          filters:
+            tags:
+              only: /^v\d+\.\d+\.\d+$/
+            branches:
+              ignore: /.*/
