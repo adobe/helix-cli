@@ -215,8 +215,19 @@ sub hlx_backend_recv {
   set req.backend = F_AdobeRuntime;
 
   # Request Condition: Binaries only Prio: 10
-  if( req.url ~ ".(jpg|png|gif)($|\?)" ) {
+  if( req.url ~ "(?i).(jp(e)?g|png|gif)($|\?)" ) {
     set req.backend = F_GitHub;
+
+    if (req.restarts == 0) {
+      # enable shielding, needed for Image Optimization
+      if (server.identity !~ "-IAD$" && req.http.Fastly-FF !~ "-IAD") {
+        set req.backend = ssl_shield_iad_va_us;
+      }
+      if (!req.backend.healthy) {
+        # the shield datacenter is broken so dont go to it
+        set req.backend = F_GitHub;
+      }
+    }
   }
 
   # Request Condition: HTML Only Prio: 10
@@ -383,16 +394,6 @@ sub vcl_recv {
 
     # check for images, and get them from GitHub
     if (req.url.ext ~ "(?i)(png|jpg|jpeg)") {
-      if (req.backend == F_GitHub && req.restarts == 0) {
-        if (server.identity !~ "-IAD$" && req.http.Fastly-FF !~ "-IAD") {
-          set req.backend = ssl_shield_iad_va_us;
-        }
-        if (!req.backend.healthy) {
-          # the shield datacenter is broken so dont go to it
-          set req.backend = F_GitHub;
-        }
-      }
-
       set var.path = var.dir + "/" + req.url.basename;
       set var.path = regsuball(var.path, "/+", "/");
       set req.url = "/" + var.owner + "/" + var.repo + "/" + var.ref + var.path + "?" + req.url.qs;
