@@ -154,9 +154,7 @@ class UpCommand extends BuildCommand {
       }
     };
 
-    const onParcelBundled = async (bundle) => {
-      // get the static files processed by parcel.
-      await this.fixSourceMappingURL(bundle);
+    const onParcelBundled = async () => {
       await this.writeManifest();
     };
 
@@ -184,8 +182,6 @@ class UpCommand extends BuildCommand {
 
       // recreate the bundler
       await initBundler();
-      // this._bundler.entryAssets = null;
-      // this._bundler.loadedAssets.clear();
       return this._bundler.bundle();
     });
 

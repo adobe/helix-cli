@@ -69,7 +69,6 @@ module.exports = function deploy() {
           describe: 'Target directory for compiled JS',
         })
         .option('docker', {
-          default: 'trieloff/custom-ow-nodejs8:latest',
           describe: 'Docker image for Adobe I/O Runtime function',
         })
         .option('prefix', {
