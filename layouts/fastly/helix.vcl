@@ -205,6 +205,8 @@ sub hlx_headers_deliver {
     set resp.http.X-Action-Root = req.http.X-Action-Root;
     set resp.http.X-URL = req.http.X-URL;
     set resp.http.X-Root-Path = req.http.X-Root-Path;
+
+    set resp.http.X-Fastly-Imageopto-Api = req.http.X-Fastly-Imageopto-Api;
  }
 
   call hlx_deliver_errors;
@@ -397,6 +399,9 @@ sub vcl_recv {
       set var.path = var.dir + "/" + req.url.basename;
       set var.path = regsuball(var.path, "/+", "/");
       set req.url = "/" + var.owner + "/" + var.repo + "/" + var.ref + var.path + "?" + req.url.qs;
+
+      # enable IO for image file-types
+      set req.http.X-Fastly-Imageopto-Api = "fastly";
     } else {
       # get (strain-specific) parameter whitelist
       include "params.vcl";
