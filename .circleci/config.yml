@@ -131,6 +131,7 @@ jobs:
     docker:
       - image: cibuilds/github:0.12
     steps:
+      - checkout
       - attach_workspace:
           at: ./installer_build
       - run:
