@@ -603,7 +603,9 @@ sub vcl_deliver {
 #FASTLY deliver
   call hlx_headers_deliver;
 
-  if (req.http.X-Strain&&req.http.X-Sticky=="true") {
+  # only set the strain cookie for sticky strains
+  # and only do it for the Adobe I/O Runtime backend
+  if (req.http.X-Strain&&req.http.X-Sticky=="true"&&req.backend == F_AdobeRuntime) {
     set resp.http.Set-Cookie = "X-Strain=" + req.http.X-Strain + "; Secure; HttpOnly; SameSite=Strict;";
   }
 
