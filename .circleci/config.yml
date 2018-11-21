@@ -120,6 +120,24 @@ jobs:
         working_directory: build
     - store_artifacts:
         path: build/hlx_install.sh
+    - persist_to_workspace:
+        # save to workspace for downstream jobs
+        root: ./build
+        paths:
+          - hlx_install.sh
+
+  github-release:
+    # https://circleci.com/blog/publishing-to-github-releases-via-circleci/
+    docker:
+      - image: cibuilds/github:0.12
+    steps:
+      - attach_workspace:
+          at: ./installer_build
+      - run:
+          name: "Publish Release on GitHub"
+          command: |
+            CHANGELOG="**Changes:**<p><p>[**TODO** list of resolved issues]"
+            ghr -t ${GITHUB_API_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -b "${CHANGELOG}" -recreate ${CIRCLE_TAG} ./installer_build/      
 
 workflows:
   version: 2
@@ -137,3 +155,28 @@ workflows:
         filters:
           branches:
             only: master
+
+  build-and-release:
+    jobs:
+      - build:
+          filters:
+            tags:
+              only: /^v\d+\.\d+\.\d+$/
+            branches:
+              ignore: /.*/
+      - installer:
+          requires:
+            - build
+          filters:
+            tags:
+              only: /^v\d+\.\d+\.\d+$/
+            branches:
+              ignore: /.*/
+      - github-release:
+          requires:
+            - installer
+          filters:
+            tags:
+              only: /^v\d+\.\d+\.\d+$/
+            branches:
+              ignore: /.*/
