@@ -215,7 +215,7 @@ sub hlx_backend_recv {
   set req.backend = F_AdobeRuntime;
 
   # Request Condition: Binaries only Prio: 10
-  if( req.url ~ "(?i).(jp(e)?g|png|gif)($|\?)" ) {
+  if( req.url.ext ~ "(?i)^(?:gif|png|jpe?g|webp)$" ) {
     set req.backend = F_GitHub;
 
     if (req.restarts == 0) {
@@ -393,7 +393,7 @@ sub vcl_recv {
     }
 
     # check for images, and get them from GitHub
-    if (req.url.ext ~ "(?i)(png|jpg|jpeg)") {
+    if (req.url.ext ~ "(?i)^(?:gif|png|jpe?g|webp)$") {
       set var.path = var.dir + "/" + req.url.basename;
       set var.path = regsuball(var.path, "/+", "/");
       set req.url = "/" + var.owner + "/" + var.repo + "/" + var.ref + var.path + "?" + req.url.qs;
