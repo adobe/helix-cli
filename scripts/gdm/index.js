@@ -96,20 +96,20 @@ function link(source, target, cwd) {
 }
 
 function start() {
-  const helixCliPath = process.env.GDM_HELIX_CLI_PATH || process.cwd();
+  const modulePath = process.env.GDM_MODULE_PATH || process.cwd();
 
-  // 1. install helix-cli
-  // (should be current folder otherwise specified by GDM_HELIX_CLI_PATH env variable)
-  console.log(`Installing helix-cli located in ${helixCliPath}`);
+  // 1. install the module
+  // (should be current folder otherwise specified by GDM_MODULE_PATH env variable)
+  console.log(`GDM will transform module located in ${modulePath}`);
   install({
-    name: 'helix-cli',
-    path: helixCliPath,
+    name: modulePath,
+    path: modulePath,
   });
 
   // 2. find list of all @adobe modules
   console.debug();
   console.debug(`Look for all ${ADOBE_MODULES} modules`);
-  const modules = listModules(`${NODE_MODULES_LOCATION}/${ADOBE_MODULES}`);
+  const modules = listModules(`${modulePath}/${NODE_MODULES_LOCATION}/${ADOBE_MODULES}`);
 
   // 3. set npm dependencies as github modules + branch
   let branches = {};
@@ -123,7 +123,7 @@ function start() {
     // compute the git branch or use master
     console.debug();
     console.debug(`Found module ${mod.name} that needs to be installed from git`);
-    installAsGitDependency(mod, branches[mod.name] || 'master', helixCliPath);
+    installAsGitDependency(mod, branches[mod.name] || 'master', modulePath);
   });
 
   // 4. find dependencies of dependencies (subdep) and set as link (might need a clone first)
@@ -137,15 +137,15 @@ function start() {
       // delete subsub to link it afterward
       await fse.remove(subdep.path);
 
-      // if dep is missing in helix-cli then install it
-      const pathInParent = `${helixCliPath}/${NODE_MODULES_LOCATION}/${ADOBE_MODULES}/${subdep.name}`;
+      // if dep is missing in module then install it
+      const pathInParent = `${modulePath}/${NODE_MODULES_LOCATION}/${ADOBE_MODULES}/${subdep.name}`;
       if (!fse.existsSync(pathInParent)) {
         console.debug(`subdep ${mod.path} does not exist parent. Installing it as a git dependency in ${pathInParent}`);
-        installAsGitDependency(subdep, branches[mod.name] || 'master', helixCliPath);
+        installAsGitDependency(subdep, branches[mod.name] || 'master', modulePath);
       }
 
       // finally, link it in the subdep
-      link(pathInParent, subdep.name, `${helixCliPath}/${dirname(subdep.path)}`);
+      link(pathInParent, subdep.name, `${modulePath}/${dirname(subdep.path)}`);
     });
   });
 
