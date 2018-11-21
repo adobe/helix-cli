@@ -133,7 +133,7 @@ Authentication is required. You can pass the key via the HLX_WSK_AUTH environmen
     sinon.assert.calledWith(mockDeploy.withLogglyHost, 'trieloff.loggly.com'); // TODO !!
     sinon.assert.calledWith(mockDeploy.withLogglyAuth, '');
     sinon.assert.calledWith(mockDeploy.withTarget, '.hlx/build');
-    sinon.assert.calledWith(mockDeploy.withDocker, 'trieloff/custom-ow-nodejs8:latest');
+    sinon.assert.calledWith(mockDeploy.withDocker, undefined);
     sinon.assert.calledWith(mockDeploy.withPrefix, 'git-github-com-example-project-helix--master--');
     sinon.assert.calledWith(mockDeploy.withDefault, undefined);
     sinon.assert.calledOnce(mockDeploy.run);
@@ -155,7 +155,7 @@ Authentication is required. You can pass the key via the HLX_WSK_AUTH environmen
     sinon.assert.calledWith(mockDeploy.withLogglyHost, 'trieloff.loggly.com'); // TODO !!
     sinon.assert.calledWith(mockDeploy.withLogglyAuth, '');
     sinon.assert.calledWith(mockDeploy.withTarget, '.hlx/build');
-    sinon.assert.calledWith(mockDeploy.withDocker, 'trieloff/custom-ow-nodejs8:latest');
+    sinon.assert.calledWith(mockDeploy.withDocker, undefined);
     sinon.assert.calledWith(mockDeploy.withPrefix, 'git-github-com-example-project-helix--master--');
     sinon.assert.calledWith(mockDeploy.withDefault, undefined);
     sinon.assert.calledOnce(mockDeploy.run);

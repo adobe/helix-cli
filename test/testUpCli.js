@@ -39,7 +39,7 @@ describe('hlx up', () => {
     sinon.assert.calledWith(mockUp.withCacheEnabled, false);
     sinon.assert.calledWith(mockUp.withMinifyEnabled, false);
     sinon.assert.calledWith(mockUp.withTargetDir, '.hlx/build');
-    sinon.assert.calledWith(mockUp.withFiles, ['src/**/*.htl']);
+    sinon.assert.calledWith(mockUp.withFiles, ['src/**/*.htl', 'src/**/*.js']);
     sinon.assert.calledOnce(mockUp.run);
   });
 

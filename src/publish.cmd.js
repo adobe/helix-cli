@@ -434,6 +434,7 @@ class PublishCommand extends AbstractCommand {
    * @param {String} value
    */
   async putDict(dict, key, value) {
+    this.log.silly(`update dict ${dict} ${key}=${value}`);
     await this.getDictionaries();
     const mydict = this._dictionaries[dict];
     if (!mydict) {

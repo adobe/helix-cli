@@ -9,7 +9,7 @@
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-const DEFAULT_PATTERNS = ['src/**/*.htl'];
+const DEFAULT_PATTERNS = ['src/**/*.htl', 'src/**/*.js'];
 
 module.exports.defaultArgs = yargs => yargs
   .option('target', {
