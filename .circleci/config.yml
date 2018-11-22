@@ -6,9 +6,6 @@ executors:
     environment:
       NPM_CONFIG_PREFIX: ~/.npm-global
 
-orbs:
-  adobe: adobe/helix-smoke-tests@0.0.2
-
 commands:
   setup:
     steps:
@@ -29,6 +26,9 @@ commands:
     - run:
         name: prepare test git user
         command: git config --global user.email "circleci@project-helix.io" && git config --global user.name "CircleCi Build"
+
+orbs:
+  adobe: adobe/helix-smoke-tests@0.0.2
 
 jobs:
   build:
@@ -190,6 +190,6 @@ workflows:
 
   smoke:
     jobs:
-      - adobe/helix-smoke-tests:
+    - adobe/helix-smoke-tests:
         token: ${SMOKE_TEST_TOKEN}
         remote_repo: adobe/helix-continuous
