@@ -423,12 +423,6 @@ sub vcl_recv {
     }
   }
 
-  # enable IO for image file-types
-  # but not for static images or redirected images
-  if (req.url.ext ~ "(?i)(?:gif|png|jpe?g|webp)" && (req.http.X-Static != "Static") && (req.http.X-Static == "Redirect"))  {
-    set req.http.X-Fastly-Imageopto-Api = "fastly";
-  }
-
   # set X-Version initial value
   set req.http.X-Version = regsub(req.vcl, "([^.]+)\.(\d+)_(\d+)-(.*)", "\2");
 
