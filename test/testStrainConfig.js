@@ -22,8 +22,15 @@ describe('Strain Config', () => {
 
   const invalid = fs.readFileSync(path.resolve(__dirname, 'fixtures/invalid.yaml'), 'utf-8');
 
+  const proxy = fs.readFileSync(path.resolve(__dirname, 'fixtures/proxystrains.yaml'), 'utf-8');
+
   it('config can be parsed', () => {
     assert.equal(3, strainconfig.load(config).length);
+  });
+
+
+  it('config with proxy strains can be parsed', () => {
+    assert.equal(strainconfig.load(proxy).length, 3);
   });
 
   it('invalid config does not throw errors', () => {

@@ -62,11 +62,16 @@ function name(strain) {
 function clean(strain) {
   const mystrain = strain;
   // clean up code
-  if (mystrain.code) {
+  if (mystrain.content&&mystrain.content.origin) {
+    mystrain.code = undefined;
+    mystrain.index = undefined;
+    mystrain.type = 'proxy';
+  } else if (mystrain.code) {
     const match = mystrain.code.match(/^\/?([^/]+)\/?([^/]*)\/([^/]+)$/);
     if (match) {
       const ns = match[2] === '' ? 'default' : match[2];
       mystrain.code = `/${match[1]}/${ns}/${match[3]}`;
+      mystrain.type = 'helix';
     } else {
       // eslint-disable-next-line no-console
       console.error(`Strain ${mystrain.name} has invalid code defined`);
@@ -86,6 +91,7 @@ function clean(strain) {
  */
 function validate(strain) {
   return (
+    // conditions for a normal strain
     !!strain
     && strain.name
     && strain.content
@@ -97,6 +103,13 @@ function validate(strain) {
     && typeof strain.content.repo === 'string'
     && strain.content.owner.match(/^[^/]+$/)
     && strain.content.repo.match(/^[^/]+$/)
+  ) || (
+    // conditions for a proxy strain
+    !! strain
+    && strain.name
+    && strain.content
+    && strain.content.origin
+    && typeof strain.content.origin === 'string'
   );
 }
 

@@ -157,6 +157,7 @@ class PublishCommand extends AbstractCommand {
     if (this._strains.filter(strain => strain.name === 'default').length !== 1) {
       throw new Error(`${this._strainFile} must include one strain 'default'`);
     }
+    
   }
 
   withWskHost(value) {

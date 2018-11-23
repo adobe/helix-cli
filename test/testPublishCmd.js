@@ -39,6 +39,15 @@ describe('hlx strain #unit', () => {
     const globs2 = ['test/**', 'test*.js'];
     assert.equal(PublishCommand.makeRegexp(globs2), '^test\\/.*$|^test.*\\.js$');
   });
+
+  it('loadStrains() #unit', async () => {
+    const cmd = new PublishCommand();
+
+    cmd.withStrainFile(path.resolve(__dirname, 'fixtures/proxystrains.yaml'));
+    await cmd.loadStrains();
+    assert.ok(cmd._strains);
+    assert.equal(cmd._strains.length, 3);
+  });
 });
 
 describe('Dynamic Strain (VCL) generation', () => {

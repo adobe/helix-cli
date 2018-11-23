@@ -1,0 +1,19 @@
+default:
+    code: /hlx/default/git-github-com-adobe-helix-cli-git--dirty--
+    index: README.html
+    url: https://www.example.com/
+    content:
+      repo: helix-cli
+      ref: master
+      owner: adobe
+e7fab6e2b493b75a:
+    code: /hlx/default/git-github-com-adobe-helix-cli-git--dirty--
+    index: index.html
+    content:
+      repo: helix-cli
+      ref: implement-init
+      owner: adobe
+proxy:
+  url: https://www.new-site.com/old-stuff
+  content:
+    origin: https://192.168.100.1:4503/old-stuff
