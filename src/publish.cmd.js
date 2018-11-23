@@ -477,7 +477,7 @@ class PublishCommand extends AbstractCommand {
   set req.http.X-Strain = "${name}";${vcl}
 } else `);
     if (strainconditions.length) {
-      retvcl += conditions.join('');
+      retvcl += strainconditions.join('');
       retvcl += `{
   set req.http.X-Strain = "default";
 }`;
