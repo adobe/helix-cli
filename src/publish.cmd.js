@@ -16,7 +16,6 @@ const fs = require('fs-extra');
 const request = require('request-promise-native');
 const chalk = require('chalk');
 const path = require('path');
-const URI = require('uri-js');
 const glob = require('glob-to-regexp');
 const { toBase64 } = require('request/lib/helpers');
 const ProgressBar = require('progress');
@@ -26,6 +25,7 @@ const include = require('./include-util');
 const useragent = require('./user-agent-util');
 const cli = require('./cli-util');
 const AbstractCommand = require('./abstract.cmd.js');
+const { conditions} = require('./fastly/vcl-utils');
 
 const HELIX_VCL_DEFAULT_FILE = path.resolve(__dirname, '../layouts/fastly/helix.vcl');
 
@@ -459,27 +459,7 @@ class PublishCommand extends AbstractCommand {
    * @param {Strain} strain the strain to generate a condition expression for
    */
   static vclConditions(strain) {
-    if (strain.url) {
-      const uri = URI.parse(strain.url);
-      if (uri.path && uri.path !== '/') {
-        const pathname = uri.path.replace(/\/$/, '');
-        return Object.assign({
-          sticky: false,
-          condition: `req.http.Host == "${uri.host}" && (req.url.dirname ~ "^${pathname}$" || req.url.dirname ~ "^${pathname}/")`,
-          vcl: `
-  set req.http.X-Dirname = regsub(req.url.dirname, "^${pathname}", "");`,
-        }, strain);
-      }
-      return Object.assign({
-        condition: `req.http.Host == "${uri.host}"`,
-      }, strain);
-    }
-    if (strain.condition && strain.sticky === undefined) {
-      return Object.assign({
-        sticky: true,
-      }, strain);
-    }
-    return strain;
+    return conditions(strain);
   }
 
   /**
