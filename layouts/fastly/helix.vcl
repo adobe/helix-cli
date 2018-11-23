@@ -247,13 +247,12 @@ sub vcl_recv {
 
   # Set original URL, so that we can log it afterwards.
   # If request is on Fastly-FF, we shouldn't override it.
-  if (!req.http.Fastly-FF) {
-    set req.http.X-Orig-URL = req.url;
+  set req.http.X-Orig-URL = req.url;
 
-    if (!req.http.X-URL) {
-      set req.http.X-URL = req.url;
-    }
+  if (!req.http.X-URL) {
+    set req.http.X-URL = req.url;
   }
+  
 
   if (req.request != "HEAD" && req.request != "GET" && req.request != "FASTLYPURGE") {
     return(pass);
@@ -341,7 +340,8 @@ sub vcl_recv {
     # - don't forget to override the Content-Type header
     set req.backend = F_GitHub;
 
-  } elsif (!req.http.Fastly-FF && req.http.Fastly-SSL && (req.url.basename ~ "(^[^\.]+)(\.?(.+))?(\.[^\.]*$)" || req.url.basename == "")) {
+        //(!req.http.Fastly-FF && req.http.Fastly-SSL && (req.url.basename ~ "(^[^\.]+)(\.?(.+))?(\.[^\.]*$)" || req.url.basename == ""))
+  } elsif (req.http.Fastly-SSL) {
     # This is a dynamic request.
 
     # Load important information from edge dicts
@@ -579,6 +579,11 @@ sub vcl_hit {
 
 sub vcl_miss {
 #FASTLY miss
+  unset bereq.http.X-Orig-Url;
+  if (req.backend.is_shield) {
+    set bereq.url = req.http.X-Orig-Url;
+  }
+
   # set backend host
   if (req.backend == F_AdobeRuntime) {
     set bereq.http.host = "adobeioruntime.net";
