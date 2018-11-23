@@ -45,6 +45,7 @@ describe('hlx strain #unit', () => {
 
     cmd.withStrainFile(path.resolve(__dirname, 'fixtures/proxystrains.yaml'));
     await cmd.loadStrains();
+    /* eslint-disable no-underscore-dangle */
     assert.ok(cmd._strains);
     assert.equal(cmd._strains.length, 3);
   });

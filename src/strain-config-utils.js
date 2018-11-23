@@ -62,7 +62,7 @@ function name(strain) {
 function clean(strain) {
   const mystrain = strain;
   // clean up code
-  if (mystrain.content&&mystrain.content.origin) {
+  if (mystrain.content && mystrain.content.origin) {
     mystrain.code = undefined;
     mystrain.index = undefined;
     mystrain.type = 'proxy';
@@ -105,7 +105,7 @@ function validate(strain) {
     && strain.content.repo.match(/^[^/]+$/)
   ) || (
     // conditions for a proxy strain
-    !! strain
+    !!strain
     && strain.name
     && strain.content
     && strain.content.origin
