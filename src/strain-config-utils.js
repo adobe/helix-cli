@@ -14,14 +14,6 @@ const yaml = require('js-yaml');
 const hash = require('object-hash');
 
 /**
- * Determines if a strain name is auto-generated, i.e. for an anonymous strain.
- * @param {String} stname name of the strain
- * @returns true for anonymous strains
- */
-function anon(stname) {
-  return !!stname.match(/^[0-9a-f]{16}$/);
-}
-/**
  * Generates a strain name for unnamed strains by hashing the contents
  * @param {Object} strain the strain configuration
  */

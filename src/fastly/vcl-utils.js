@@ -35,4 +35,4 @@ function conditions(strain) {
   return strain;
 }
 
-module.exports = {conditions}
+module.exports = { conditions };
