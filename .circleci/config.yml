@@ -109,11 +109,34 @@ jobs:
       xcode: "9.0"
     steps:
     - checkout
-    - run: xcodebuild -version
+    - run:
+        name: "Setup build tools"
+        command: |
+          # makeself
+          curl -LO https://github.com/megastep/makeself/releases/download/release-2.4.0/makeself-2.4.0.run
+          chmod +x makeself-2.4.0.run
+          ./makeself-2.4.0.run
+          cp makeself-2.4.0/*.sh .
+          # squashfs
+          brew install squashfs
+          # nodec
+          curl -L http://enclose.io/nodec/nodec-darwin-x64.gz | gunzip > nodec
+          chmod +x nodec
+    - restore_cache:
+        keys:
+        - v1-nodec-cache-$(./nodec -v)
     - run:
         name: Build Installer
-        command: ./build.sh
-        working_directory: build
+        command: |
+          ./nodec -o build/archive/a.out --tmpdir=../nodec_tmp index.js
+    - save_cache:
+        paths:
+        - ../nodec_tmp
+        key: v1-nodec-cache-$(./nodec -v)
+    - run:
+        name: Build SFX shell script
+        command: |
+          ./makeself.sh --nox11 build/archive build/hlx_install.sh "SFX installer for hlx" ./install.sh
     - run:
         name: Verify Installer
         command: sh hlx_install.sh -- --overwrite && hlx --version
