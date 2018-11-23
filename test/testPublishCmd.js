@@ -81,7 +81,6 @@ describe('Dynamic Strain (VCL) generation', () => {
   it('getStrainResolutionVCL generates VLC for proxy strains', () => {
     const strainfile = strainconfig.load(fs.readFileSync(path.resolve(__dirname, 'fixtures/proxystrains.yaml'), 'utf-8'));
     const vclfile = fs.readFileSync(path.resolve(__dirname, 'fixtures/proxystrains.vcl')).toString();
-    // console.log(PublishCommand.getStrainResolutionVCL(strainfile));
     assert.equal(vclfile.trim(), PublishCommand.getStrainResolutionVCL(strainfile).trim());
   });
 });

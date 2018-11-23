@@ -25,7 +25,7 @@ const include = require('./include-util');
 const useragent = require('./user-agent-util');
 const cli = require('./cli-util');
 const AbstractCommand = require('./abstract.cmd.js');
-const { conditions } = require('./fastly/vcl-utils');
+const { conditions, resolve } = require('./fastly/vcl-utils');
 
 const HELIX_VCL_DEFAULT_FILE = path.resolve(__dirname, '../layouts/fastly/helix.vcl');
 
@@ -466,25 +466,7 @@ class PublishCommand extends AbstractCommand {
    * Generates VCL for strain resolution from a list of strains
    */
   static getStrainResolutionVCL(strains) {
-    let retvcl = '# This file handles the strain resolution\n';
-    const strainconditions = strains
-      .map(PublishCommand.vclConditions)
-      .filter(strain => strain.condition)
-      .map(({
-        condition, name, vcl = '', sticky = false,
-      }) => `if (${condition}) {
-  set req.http.X-Sticky = "${sticky}";
-  set req.http.X-Strain = "${name}";${vcl}
-} else `);
-    if (strainconditions.length) {
-      retvcl += strainconditions.join('');
-      retvcl += `{
-  set req.http.X-Strain = "default";
-}`;
-    } else {
-      retvcl += 'set req.http.X-Strain = "default";\n';
-    }
-    return retvcl;
+    return resolve(strains);
   }
 
   /**
