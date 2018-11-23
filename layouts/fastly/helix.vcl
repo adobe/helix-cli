@@ -370,8 +370,6 @@ sub vcl_recv {
       set var.extension = regsub(req.url.ext, "^\.", "");
     } else {
       call hlx_index;
-      # enable ESI
-      set req.http.x-esi = "1";
       if (req.http.X-Index ~ "(^[^\.]+)\.?(.*)\.([^\.]+$)") {
         # determine directory index from strain config
         set var.name = re.group.1;
@@ -520,7 +518,10 @@ sub vcl_fetch {
     }
   }
 
-  if ( req.http.x-esi ) {
+  # esi on edge only
+  if ( beresp.http.X-ESI && !req.http.Fastly-FF) {
+    # only enable ESI if the backend tells us to do so
+    set req.esi = true;
     esi;
   }
 
