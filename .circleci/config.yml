@@ -122,9 +122,14 @@ jobs:
           # nodec
           curl -L http://enclose.io/nodec/nodec-darwin-x64.gz | gunzip > nodec
           chmod +x nodec
+    - run: 
+        name: "Creating cache key file"
+        command: |
+          NODEC_VERSION=$(./nodec -v)
+          echo "$NODEC_VERSION" > _cache_key
     - restore_cache:
         keys:
-        - v1-nodec-cache-$(./nodec -v)
+        - v1-nodec-cache-{{ checksum "_cache_key" }}
     - run:
         name: Build Installer
         command: |
@@ -132,7 +137,7 @@ jobs:
     - save_cache:
         paths:
         - ../nodec_tmp
-        key: v1-nodec-cache-$(./nodec -v)
+        key: v1-nodec-cache-{{ checksum "_cache_key" }}
     - run:
         name: Build SFX shell script
         command: |
