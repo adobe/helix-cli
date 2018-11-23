@@ -118,7 +118,7 @@ jobs:
           ./makeself-2.4.0.run
           cp makeself-2.4.0/*.sh .
           # squashfs
-          brew install squashfs
+          HOMEBREW_NO_AUTO_UPDATE=1 brew install squashfs
           # nodec
           curl -L http://enclose.io/nodec/nodec-darwin-x64.gz | gunzip > nodec
           chmod +x nodec
