@@ -114,57 +114,6 @@ function validate(strain) {
 }
 
 /**
- * Wraps a strain for writing into a YAML list
- * @param {Strain} strain
- * @returns {Wrapped}
- */
-function wrap(strain) {
-  return { strain };
-}
-
-/**
- * Helper function for sorting strains in the output file.
- * Desired order:
- * 1. default
- * 2. named strains (alphabetically)
- * 3. anonymous strains (alphabetically)
- * @param {Strain} straina
- * @param {Strain} strainb
- */
-function compare(straina, strainb) {
-  // default strain always comes first
-  if (straina.strain.name === 'default') {
-    return -1;
-  }
-  if (strainb.strain.name === 'default') {
-    return 1;
-  }
-  // named strains come next
-  const anona = anon(straina.strain.name);
-  const anonb = anon(strainb.strain.name);
-  if (anonb && !anona) {
-    return -1;
-  }
-  if (anona && !anonb) {
-    return 1;
-  }
-  return straina.strain.name.localeCompare(strainb.strain.name);
-}
-
-/**
- * Converts a list of strains into YAML
- * @param {Strain[]} strains
- * @returns {String} YAML
- */
-function write(strains) {
-  return yaml.safeDump(strains
-    .map(wrap)
-    .map(clean)
-    .map(wrap)
-    .sort(compare));
-}
-
-/**
  * Appends a strain to a list of known strains, avoiding duplicates
  * @param {Strain[]} strains
  * @param {Strain} strain
@@ -215,6 +164,5 @@ function load(data) {
 module.exports = {
   load,
   name,
-  write,
   append,
 };
