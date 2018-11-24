@@ -112,6 +112,7 @@ jobs:
     - run:
         name: "Setup build tools"
         command: |
+          cd ..
           # makeself
           curl -LO https://github.com/megastep/makeself/releases/download/release-2.4.0/makeself-2.4.0.run
           chmod +x makeself-2.4.0.run
@@ -133,24 +134,24 @@ jobs:
     - run:
         name: Build Installer
         command: |
-          ./nodec -o build/archive/a.out --tmpdir=../nodec_tmp index.js
+          ./nodec -r ./project -o ./project/build/archive/a.out --tmpdir=./nodec_tmp ./project/index.js
     - save_cache:
         paths:
-        - ../nodec_tmp
+        - ./nodec_tmp
         key: v1-nodec-cache-{{ checksum "_cache_key" }}
     - run:
         name: Build SFX shell script
         command: |
-          ./makeself.sh --nox11 build/archive build/hlx_install.sh "SFX installer for hlx" ./install.sh
+          ./makeself.sh --nox11 ./project/build/archive ./project/build/hlx_install.sh "SFX installer for hlx" ./install.sh
     - run:
         name: Verify Installer
         command: sh hlx_install.sh -- --overwrite && hlx --version
-        working_directory: build
+        working_directory: ./project/build
     - store_artifacts:
-        path: build/hlx_install.sh
+        path: ./project/build/hlx_install.sh
     - persist_to_workspace:
         # save to workspace for downstream jobs
-        root: ./build
+        root: ./project/build
         paths:
           - hlx_install.sh
 
