@@ -123,32 +123,40 @@ jobs:
           # nodec
           curl -L http://enclose.io/nodec/nodec-darwin-x64.gz | gunzip > nodec
           chmod +x nodec
+
     - run: 
         name: "Creating cache key file"
         command: |
           NODEC_VERSION=$(./nodec -v)
           echo "$NODEC_VERSION" > _cache_key
+
     - restore_cache:
         keys:
         - v1-nodec-cache-{{ checksum "_cache_key" }}
+
     - run:
         name: Build Installer
         command: |
           ./nodec -r ./project -o ./project/build/archive/a.out --tmpdir=./nodec_tmp ./project/index.js
+
     - save_cache:
         paths:
         - ./nodec_tmp
         key: v1-nodec-cache-{{ checksum "_cache_key" }}
+
     - run:
         name: Build SFX shell script
         command: |
           ./makeself.sh --nox11 ./project/build/archive ./project/build/hlx_install.sh "SFX installer for hlx" ./install.sh
+
     - run:
         name: Verify Installer
         command: sh hlx_install.sh -- --overwrite && hlx --version
         working_directory: ./project/build
+
     - store_artifacts:
         path: ./project/build/hlx_install.sh
+        
     - persist_to_workspace:
         # save to workspace for downstream jobs
         root: ./project/build
