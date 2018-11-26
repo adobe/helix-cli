@@ -345,8 +345,15 @@ sub vcl_recv {
         //(!req.http.Fastly-FF && req.http.Fastly-SSL && (req.url.basename ~ "(^[^\.]+)(\.?(.+))?(\.[^\.]*$)" || req.url.basename == ""))
   } elseif (req.http.Fastly-SSL && req.http.host == "adobeioruntime.net") {
     # This is an embed request
+    # Fastly sends embed requests back to the same service config (which is why
+    # we are handling it here), but keeps the correct Host header in place (which
+    # is why we can check against it)
 
     set req.backend = F_AdobeRuntime;
+
+    # make sure we hit the right backend
+    # and keep everything else in place
+
     set req.http.X-Embed = req.http.X-URL;
   } elsif (req.http.Fastly-SSL) {
     # This is a dynamic request.
