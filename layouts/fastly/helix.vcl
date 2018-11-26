@@ -207,6 +207,8 @@ sub hlx_headers_deliver {
     set resp.http.X-Root-Path = req.http.X-Root-Path;
 
     set resp.http.X-Fastly-Imageopto-Api = req.http.X-Fastly-Imageopto-Api;
+
+    set resp.http.X-Embed = req.http.X-Embed;
  }
 
   call hlx_deliver_errors;
@@ -341,6 +343,11 @@ sub vcl_recv {
     set req.backend = F_GitHub;
 
         //(!req.http.Fastly-FF && req.http.Fastly-SSL && (req.url.basename ~ "(^[^\.]+)(\.?(.+))?(\.[^\.]*$)" || req.url.basename == ""))
+  } elseif (req.http.Fastly-SSL && req.http.host === "adobeioruntime.net") {
+    # This is an embed request
+
+    set req.backend = F_AdobeRuntime;
+    set req.http.X-Embed = req.http.X-URL;
   } elsif (req.http.Fastly-SSL) {
     # This is a dynamic request.
 
