@@ -104,4 +104,4 @@ function resolve(strains) {
 }
 
 
-module.exports = { conditions, resolve };
+module.exports = { conditions, resolve, backend };

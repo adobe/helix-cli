@@ -12,6 +12,7 @@
 
 const yaml = require('js-yaml');
 const hash = require('object-hash');
+const { backend } = require('./fastly/vcl-utils');
 
 /**
  * Generates a strain name for unnamed strains by hashing the contents
@@ -161,8 +162,19 @@ function load(data) {
     .filter(validate);
 }
 
+/** Filters the list of strains for proxy strains */
 function proxies(strains) {
   return strains.filter(isproxy);
+}
+
+function addbackends(strains = [], backends = {}) {
+  return proxies(strains)
+    .map(({ content }) => backend(content.origin))
+    .reduce((bes, be) => {
+      const newbackends = bes;
+      newbackends[be.name] = be;
+      return newbackends;
+    }, backends);
 }
 
 module.exports = {
@@ -170,4 +182,5 @@ module.exports = {
   name,
   append,
   proxies,
+  addbackends,
 };

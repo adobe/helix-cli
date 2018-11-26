@@ -123,4 +123,27 @@ describe('Understands Proxy Strains', () => {
     const mystrains = strainconfig.load(proxy);
     assert.equal(strainconfig.proxies(mystrains).length, 1);
   });
+
+  it('addbackends() returns new backend definitions', () => {
+    const mystrains = strainconfig.load(proxy);
+    assert.deepStrictEqual(strainconfig.addbackends(mystrains), {
+
+      Proxy1921681001bcbe: {
+        address: '192.168.100.1',
+        between_bytes_timeout: 10000,
+        connect_timeout: 1000,
+        error_threshold: 0,
+        first_byte_timeout: 15000,
+        hostname: '192.168.100.1',
+        max_conn: 200,
+        name: 'Proxy1921681001bcbe',
+        port: 4503,
+        shield: 'iad-va-us',
+        ssl_cert_hostname: '192.168.100.1',
+        use_ssl: true,
+        weight: 100,
+      },
+
+    });
+  });
 });
