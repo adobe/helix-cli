@@ -25,6 +25,18 @@ function name(strain) {
 }
 
 /**
+ * Returns true if the strain is a proxy strain
+ * @param {Strain} strain
+ */
+function isproxy(strain) {
+  return !!strain
+  && strain.name
+  && strain.content
+  && strain.content.origin
+  && typeof strain.content.origin === 'string';
+}
+
+/**
  * @typedef {Object} Content
  * @property {String} owner
  * @property {String} ref
@@ -97,11 +109,7 @@ function validate(strain) {
     && strain.content.repo.match(/^[^/]+$/)
   ) || (
     // conditions for a proxy strain
-    !!strain
-    && strain.name
-    && strain.content
-    && strain.content.origin
-    && typeof strain.content.origin === 'string'
+    isproxy(strain)
   );
 }
 
@@ -153,8 +161,13 @@ function load(data) {
     .filter(validate);
 }
 
+function proxies(strains) {
+  return strains.filter(isproxy);
+}
+
 module.exports = {
   load,
   name,
   append,
+  proxies,
 };

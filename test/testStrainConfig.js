@@ -17,12 +17,12 @@ const fs = require('fs-extra');
 const path = require('path');
 const strainconfig = require('../src/strain-config-utils');
 
+const proxy = fs.readFileSync(path.resolve(__dirname, 'fixtures/proxystrains.yaml'), 'utf-8');
+
 describe('Strain Config', () => {
   const config = fs.readFileSync(path.resolve(__dirname, 'fixtures/config.yaml'), 'utf-8');
 
   const invalid = fs.readFileSync(path.resolve(__dirname, 'fixtures/invalid.yaml'), 'utf-8');
-
-  const proxy = fs.readFileSync(path.resolve(__dirname, 'fixtures/proxystrains.yaml'), 'utf-8');
 
   it('config can be parsed', () => {
     assert.equal(3, strainconfig.load(config).length);
@@ -115,5 +115,12 @@ describe('Appending works without errors', () => {
     };
     const newstrains = strainconfig.append(oldstrains, strain);
     assert.equal(4, newstrains.length);
+  });
+});
+
+describe('Understands Proxy Strains', () => {
+  it('proxies() returns all proxy strains', () => {
+    const mystrains = strainconfig.load(proxy);
+    assert.equal(strainconfig.proxies(mystrains).length, 1);
   });
 });
