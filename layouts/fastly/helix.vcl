@@ -343,7 +343,7 @@ sub vcl_recv {
     set req.backend = F_GitHub;
 
         //(!req.http.Fastly-FF && req.http.Fastly-SSL && (req.url.basename ~ "(^[^\.]+)(\.?(.+))?(\.[^\.]*$)" || req.url.basename == ""))
-  } elseif (req.http.Fastly-SSL && req.http.host === "adobeioruntime.net") {
+  } elseif (req.http.Fastly-SSL && req.http.host == "adobeioruntime.net") {
     # This is an embed request
 
     set req.backend = F_AdobeRuntime;
