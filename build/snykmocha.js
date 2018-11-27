@@ -9,14 +9,18 @@
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
+const interval = 1000;
 require('@snyk/nodejs-runtime-agent')({
   projectId: '44fb83e0-fe5c-4cee-94bc-9f5349737356',
-  beaconIntervalMs: 1000
+  beaconIntervalMs: interval,
 });
 /* eslint-disable import/no-extraneous-dependencies */
 const Mocha = require('mocha');
 const fs = require('fs');
 const path = require('path');
+const util = require('util');
+
+const setTimeoutPromise = util.promisify(setTimeout);
 
 const testDir = './test';
 const mocha = new Mocha();
@@ -30,5 +34,7 @@ fs.readdirSync(testDir).filter(file => file.substr(-3) === '.js').forEach((file)
 // Run the tests.
 mocha.run((failures) => {
   process.exitCode = failures ? 1 : 0; // exit with non-zero status if there were failures
-  process.exit(failures ? 1 : 0);
+  setTimeoutPromise(2 * interval).then(() => {
+    process.exit(failures ? 1 : 0);
+  });
 });
