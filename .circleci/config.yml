@@ -27,6 +27,9 @@ commands:
         name: prepare test git user
         command: git config --global user.email "circleci@project-helix.io" && git config --global user.name "CircleCi Build"
 
+orbs:
+  helix-smoke-tests: adobe/helix-smoke-tests@0.0.4
+
 jobs:
   build:
     executor: node8
@@ -216,3 +219,9 @@ workflows:
               only: /^v\d+\.\d+\.\d+$/
             branches:
               ignore: /.*/
+
+  smoke:
+    jobs:
+    - helix-smoke-tests/run:
+        token: ${SMOKE_TEST_TOKEN}
+        remote_repo: adobe/helix-continuous
