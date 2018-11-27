@@ -39,7 +39,7 @@ class PublishCommand extends AbstractCommand {
     this._fastly_auth = null;
     this._dryRun = false;
     this._strainFile = path.resolve(process.cwd(), '.hlx', 'strains.json');
-    this._strains = null;
+    this._strains = [];
     this._vclFile = path.resolve(process.cwd(), '.hlx', 'helix.vcl');
 
     this._service = null;
@@ -617,6 +617,7 @@ ${PublishCommand.makeParamWhitelist(params, '  ')}
   }
 
   async initFastly() {
+    this._backends = strainconfig.addbackends(this._strains, this._backends);
     return this.initBackends();
   }
 

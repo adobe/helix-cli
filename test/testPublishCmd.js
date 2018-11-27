@@ -16,7 +16,7 @@ const Replay = require('replay');
 const fs = require('fs-extra');
 const path = require('path');
 const assert = require('assert');
-const { createTestRoot } = require('./utils.js');
+const { createTestRoot, createLogger } = require('./utils.js');
 const PublishCommand = require('../src/publish.cmd');
 const strainconfig = require('../src/strain-config-utils');
 
@@ -82,6 +82,20 @@ describe('Dynamic Strain (VCL) generation', () => {
     const strainfile = strainconfig.load(fs.readFileSync(path.resolve(__dirname, 'fixtures/proxystrains.yaml'), 'utf-8'));
     const vclfile = fs.readFileSync(path.resolve(__dirname, 'fixtures/proxystrains.vcl')).toString();
     assert.equal(vclfile.trim(), PublishCommand.getStrainResolutionVCL(strainfile).trim());
+  });
+
+  it('initFastly generates new backends for defined Proxies', async () => {
+    const strainfile = path.resolve(__dirname, 'fixtures/proxystrains.yaml');
+    const cmd = new PublishCommand(createLogger()).withStrainFile(strainfile);
+    try {
+      await cmd.loadStrains();
+      await cmd.initFastly();
+    } catch (e) {
+      // we expect initFastly to fail
+      assert.equal(e.statusCode, 401);
+    }
+    assert.equal(Object.keys(cmd._backends).length, 3);
+    assert.ok(cmd._backends.Proxy1921681001bcbe);
   });
 });
 
