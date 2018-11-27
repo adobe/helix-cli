@@ -28,6 +28,22 @@ commands:
         command: git config --global user.email "circleci@project-helix.io" && git config --global user.name "CircleCi Build"
 
 jobs:
+  snyk:
+    executor: node8
+    working_directory: ~/repo
+
+    steps:
+    - setup
+
+    - run:
+        name: prepare test git user
+        command: git config --global user.email "you@example.com" && git config --global user.name "Your Name"
+
+    # test & get code coverage
+    - run:
+        name: Running Tests with Snyk Agent
+        command: node build/snykmocha.js
+
   build:
     executor: node8
     working_directory: ~/repo
@@ -187,6 +203,7 @@ workflows:
           branches:
             only: master
     - build
+    - snyk
     - installer:
         filters:
           branches:
