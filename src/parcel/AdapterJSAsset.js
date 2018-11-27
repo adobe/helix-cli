@@ -10,6 +10,7 @@
  * governing permissions and limitations under the License.
  */
 
+const path = require('path');
 const JSAsset = require('parcel-bundler/src/assets/JSAsset');
 
 /**
@@ -20,7 +21,7 @@ class AdapterJSAsset extends JSAsset {
     const gen = await super.generate();
 
     // if we dealing with a .pre.js, we're done.
-    if (this.basename.endsWith('.pre.js')) {
+    if (this.basename.endsWith('.pre.js') || this.basename.endsWith('helper.js')) {
       gen.type = 'js';
       return gen;
     }
@@ -31,6 +32,16 @@ class AdapterJSAsset extends JSAsset {
       value: gen.js,
       sourceMap: gen.map,
     }];
+  }
+
+  addDependency(name, opts) {
+    // return;
+    const isRelativeImport = /^[/~.]/.test(name);
+    if (isRelativeImport) {
+      // we mark the asset as dynamic so it won't get merged into this source.
+      const resolved = path.resolve(path.dirname(this.name), name);
+      super.addDependency(name, Object.assign({ dynamic: true, resolved }, opts));
+    }
   }
 }
 
