@@ -109,20 +109,52 @@ jobs:
       xcode: "9.0"
     steps:
     - checkout
-    - run: xcodebuild -version
+    - run:
+        name: "Setup build tools"
+        working_directory: ~/
+        command: |
+          # makeself
+          curl -LO https://github.com/megastep/makeself/releases/download/release-2.4.0/makeself-2.4.0.run
+          chmod +x makeself-2.4.0.run
+          ./makeself-2.4.0.run
+          cp makeself-2.4.0/*.sh .
+          # squashfs
+          HOMEBREW_NO_AUTO_UPDATE=1 brew install squashfs
+          # nodec
+          curl -L http://enclose.io/nodec/nodec-darwin-x64.gz | gunzip > nodec
+          chmod +x nodec
+    - run: 
+        name: "Creating cache key file"
+        working_directory: ~/
+        command: |
+          NODEC_VERSION=$(./nodec -v)
+          echo "$NODEC_VERSION" > _cache_key
+    - restore_cache:
+        keys:
+        - v1-nodec-cache-{{ checksum "~/_cache_key" }}
     - run:
         name: Build Installer
-        command: ./build.sh
-        working_directory: build
+        working_directory: ~/
+        command: |
+          ~/nodec -r ~/project -o ~/project/build/archive/a.out --tmpdir=~/nodec_tmp ~/project/index.js
+    - save_cache:
+        paths:
+        - ~/nodec_tmp
+        key: v1-nodec-cache-{{ checksum "~/_cache_key" }}
+    - run:
+        name: Build SFX shell script
+        working_directory: ~/
+        command: |
+          ~/makeself.sh --nox11 ~/project/build/archive ~/project/build/hlx_install.sh "SFX installer for hlx" ./install.sh
     - run:
         name: Verify Installer
+        working_directory: ~/project/build
         command: sh hlx_install.sh -- --overwrite && hlx --version
-        working_directory: build
     - store_artifacts:
-        path: build/hlx_install.sh
+        path: ~/project/build/hlx_install.sh
     - persist_to_workspace:
         # save to workspace for downstream jobs
-        root: ./build
+        root: ~/project/build
         paths:
           - hlx_install.sh
 
