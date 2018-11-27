@@ -11,6 +11,7 @@
  */
 require('@snyk/nodejs-runtime-agent')({
   projectId: '44fb83e0-fe5c-4cee-94bc-9f5349737356',
+  beaconIntervalMs: 1000
 });
 /* eslint-disable import/no-extraneous-dependencies */
 const Mocha = require('mocha');
