@@ -2,7 +2,9 @@ version: 2.1
 executors:
   node8:
     docker:
-    - image: circleci/node:8
+    # use latest node 8 on debian 8 (jessie)
+    # (on debian 9 (stretch) a runtime error occurs: Error: libcrypto.so.1.0.0: cannot open shared object file: No such file or directory)
+    - image: circleci/node:8-jessie
     environment:
       NPM_CONFIG_PREFIX: ~/.npm-global
 
@@ -26,6 +28,9 @@ commands:
     - run:
         name: prepare test git user
         command: git config --global user.email "circleci@project-helix.io" && git config --global user.name "CircleCi Build"
+
+orbs:
+  helix-smoke-tests: adobe/helix-smoke-tests@0.0.4
 
 jobs:
   snyk:
@@ -233,3 +238,9 @@ workflows:
               only: /^v\d+\.\d+\.\d+$/
             branches:
               ignore: /.*/
+
+  smoke:
+    jobs:
+    - helix-smoke-tests/run:
+        token: ${SMOKE_TEST_TOKEN}
+        remote_repo: adobe/helix-continuous
