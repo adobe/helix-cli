@@ -3,7 +3,7 @@ executors:
   node8:
     docker:
     # use node 8.12 on debian 8 (jessie)
-    - image: circleci/node:8.12-jessie
+    - image: circleci/node:8.13-jessie
     environment:
       NPM_CONFIG_PREFIX: ~/.npm-global
 
