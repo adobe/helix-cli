@@ -2,9 +2,8 @@ version: 2.1
 executors:
   node8:
     docker:
-    # workaround: circleci/node:8 changed and led to 'Error: libcrypto.so.1.0.0: cannot open shared object file: No such file or directory'
-    # fix the image to the last known to work build of circleci/node:8 
-    - image: circleci/node@sha256:09e1035e50a7574fa1786df406559b4a10362fa62ee552ccb49df89e03249c79
+    # use node 8.12 on debian 8 (jessie)
+    - image: circleci/node:8.12-jessie
     environment:
       NPM_CONFIG_PREFIX: ~/.npm-global
 
