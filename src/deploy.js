@@ -35,7 +35,7 @@ module.exports = function deploy() {
         .option('auto', {
           describe: 'Enable auto-deployment',
           type: 'boolean',
-          default: true,
+          default: false,
           demandOption: true,
         })
         .option('loggly-host', {

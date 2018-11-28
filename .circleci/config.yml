@@ -106,7 +106,7 @@ jobs:
 
     - run:
         name: Deploy Snapshot to Adobe I/O Runtime
-        command: ~/.npm-global/bin/hlx build && ~/.npm-global/bin/hlx deploy --dirty --no-auto --wsk-namespace trieloff --wsk-auth $WSK_AUTH --loggly-host trieloff --loggly-auth $LOGGLY_AUTH
+        command: ~/.npm-global/bin/hlx build && ~/.npm-global/bin/hlx deploy --dirty --wsk-namespace trieloff --wsk-auth $WSK_AUTH --loggly-host trieloff --loggly-auth $LOGGLY_AUTH
         working_directory: test/integration
 
   installer:
