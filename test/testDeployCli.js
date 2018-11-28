@@ -109,7 +109,7 @@ Authentication is required. You can pass the key via the HLX_WSK_AUTH environmen
         assert.equal(err, 'Error: Auto-deployment requires: --circleci-auth, --fastly-auth, --fastly-namespace');
         done();
       })
-      .run(['deploy', '--auto',
+      .run(['deploy', '--auto', 'true',
         '--wsk-auth', 'secret-key',
         '--wsk-namespace', 'hlx']);
 
@@ -169,6 +169,22 @@ Authentication is required. You can pass the key via the HLX_WSK_AUTH environmen
         '--wsk-auth', 'secret-key',
         '--wsk-namespace', 'hlx',
       ]);
+  });
+
+  it.skip('hlx deploy can enable auto', (done) => {
+    new CLI()
+      .withCommandExecutor('deploy', mockDeploy)
+      .onFail((err) => {
+        assert.equal(err, 'Error: Auto-deployment requires: --circleci-auth, --fastly-auth, --fastly-namespace');
+        done();
+      })
+      .run(['deploy', '--auto', 'true',
+        '--wsk-auth', 'secret-key',
+        '--wsk-namespace', 'hlx',
+      ]);
+
+    sinon.assert.calledWith(mockDeploy.withEnableAuto, true);
+    sinon.assert.calledOnce(mockDeploy.run);
   });
 
   it('hlx deploy works can enable dirty', () => {
