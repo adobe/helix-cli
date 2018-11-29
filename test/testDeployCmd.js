@@ -131,7 +131,7 @@ describe('hlx deploy (Integration)', () => {
     assertFile(strainsFile);
     const thirdrun = fs.readFileSync(strainsFile).toString();
     assert.notEqual(firstrun, thirdrun);
-  }).timeout(10000);
+  }).timeout(30000);
 });
 
 describe('DeployCommand #unittest', () => {

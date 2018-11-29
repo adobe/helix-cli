@@ -171,7 +171,7 @@ Authentication is required. You can pass the key via the HLX_WSK_AUTH environmen
       ]);
   });
 
-  it.skip('hlx deploy can enable auto', (done) => {
+  it('hlx deploy can enable auto', (done) => {
     new CLI()
       .withCommandExecutor('deploy', mockDeploy)
       .onFail((err) => {
