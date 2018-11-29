@@ -10,21 +10,6 @@
  * governing permissions and limitations under the License.
  */
 
-/* eslint-disable */
-
-// you can also require external modules in pre.js
-// relative imports will be inlined in the generated code
-const { foo } = require('./helpers.js');
-
-/**
- * The 'pre' function that is executed before the HTML is rendered.
- * @param payload The current payload of processing pipeline
- * @param payload.content The content content
- */
-function pre(payload) {
-
-  payload.content.foo = foo();
-
-}
-
-module.exports.pre = pre;
+module.exports.utils = {
+  stamp: () => "Hello",
+};
