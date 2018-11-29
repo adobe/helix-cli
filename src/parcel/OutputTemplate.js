@@ -15,7 +15,7 @@
 // CONTENTS
 
 function wrap(main) {
-  const { OpenWhiskAction } = require('@adobe/hypermedia-pipeline');
+  const { OpenWhiskAction } = require('@adobe/helix-pipeline');
   const { pipe } = require('MOD_PIPE');
   const { pre } = require('MOD_PRE');
 
