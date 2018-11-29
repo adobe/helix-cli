@@ -190,7 +190,7 @@ class DeployCommand extends AbstractCommand {
     };
 
     if (this._dryRun) {
-      log.debug('Skipping ZIP file creation for ' + info.name);
+      log.debug(`Skipping ZIP file creation for ${info.name}`);
       return Promise.resolve({});
     }
 
@@ -472,9 +472,9 @@ class DeployCommand extends AbstractCommand {
 
     // read files ...
     const read = scripts
-      .filter(script => script.zipFile) //skip empty zip files
+      .filter(script => script.zipFile) // skip empty zip files
       .map(script => fs.readFile(script.zipFile)
-      .then(action => ({ script, action })));
+        .then(action => ({ script, action })));
 
     // ... and deploy
     bar.total += scripts.length * 2;
