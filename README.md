@@ -403,3 +403,4 @@ Before running `npm install`, make sure that `nodegit` can find all dependencies
 $ export LDFLAGS="-L/usr/local/opt/openssl/lib"
 $ export CPPFLAGS="-I/usr/local/opt/openssl/include"
 ```
+
