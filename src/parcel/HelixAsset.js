@@ -17,7 +17,7 @@ const logger = require('parcel-bundler/src/Logger');
 const { SourceMapConsumer, SourceMapGenerator } = require('source-map');
 const resolver = require('./resolver');
 
-const DEFAULT_PIPELINE = '@adobe/hypermedia-pipeline/src/defaults/default.js';
+const DEFAULT_PIPELINE = '@adobe/helix-pipeline/src/defaults/default.js';
 
 const OUTPUT_TEMPLATE = path.resolve(__dirname, 'OutputTemplate.js');
 
@@ -40,11 +40,11 @@ class HelixAsset extends Asset {
 
     const pipe = this.getPreprocessor(
       `${rootname}.pipe.js`,
-      `@adobe/hypermedia-pipeline/src/defaults/${extension}.pipe.js`,
+      `@adobe/helix-pipeline/src/defaults/${extension}.pipe.js`,
     );
     const pre = this.getPreprocessor(
       `${rootname}.pre.js`,
-      `@adobe/hypermedia-pipeline/src/defaults/${extension}.pre.js`,
+      `@adobe/helix-pipeline/src/defaults/${extension}.pre.js`,
     );
 
     let body = fs.readFileSync(OUTPUT_TEMPLATE, 'utf-8');
