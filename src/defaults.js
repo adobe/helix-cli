@@ -11,14 +11,6 @@
  */
 const DEFAULT_PATTERNS = ['src/**/*.htl', 'src/**/*.js'];
 
-// const DEFAULT_PATTERNS = ['html', 'json', 'xml', 'svg', 'css', 'txt'].reduce((globs, ext) => {
-//   globs.push(`src/**/${ext}.js`);        // pure-js functions
-//   globs.push(`src/**/*_${ext}.js`);      // pure-js functions with selector
-//   return globs;
-// }, ['src/**/*.htl', 'src/**/*.pre.js']);
-
-console.log(DEFAULT_PATTERNS);
-
 module.exports.defaultArgs = yargs => yargs
   .option('target', {
     alias: 'o',

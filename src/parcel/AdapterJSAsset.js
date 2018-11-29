@@ -13,6 +13,8 @@
 const path = require('path');
 const JSAsset = require('parcel-bundler/src/assets/JSAsset');
 
+const PURE_JS_SCRIPTS = ['html.js', 'json.js', 'xml.js', 'svg.js', 'css.js', 'txt.js'];
+
 /**
  * Adapts Pure-JS actions to the `helix-js` type so that it can be wrapped via the `HelixAsset.js`.
  */
@@ -20,8 +22,18 @@ class AdapterJSAsset extends JSAsset {
   async generate() {
     const gen = await super.generate();
 
-    // if we dealing with a .pre.js, we're done.
-    if (this.basename.endsWith('.pre.js') || this.basename.endsWith('helper.js')) {
+    // check if it's a pure-JS action
+    let isScript = false;
+    for (let i = 0; i < PURE_JS_SCRIPTS.length; i += 1) {
+      const ext = PURE_JS_SCRIPTS[i];
+      if (this.basename === ext || this.basename.endsWith(`_${ext}`)) {
+        isScript = true;
+        break;
+      }
+    }
+
+    // if this no, we're done.
+    if (!isScript) {
       gen.type = 'js';
       return gen;
     }
