@@ -40,7 +40,7 @@ describe('Integration test for build', () => {
   it('build command succeeds and produces files', async function test() {
     this.timeout(5000);
     await new BuildCommand()
-      .withFiles(['test/integration/src/**/*.htl'])
+      .withFiles(['test/integration/src/**/*.htl', 'test/integration/src/**/*.js'])
       .withTargetDir(buildDir)
       .withWebRoot(webroot)
       .withCacheEnabled(false)
@@ -49,6 +49,13 @@ describe('Integration test for build', () => {
     assertFile(path.resolve(buildDir, 'html.js'));
     assertFile(path.resolve(buildDir, 'html.map'));
     assertFile(path.resolve(buildDir, 'html.pre.js'), true);
+
+    assertFile(path.resolve(buildDir, 'xml.js'));
+    assertFile(path.resolve(buildDir, 'xml.map'));
+
+    assertFile(path.resolve(buildDir, 'helper.js'));
+    assertFile(path.resolve(buildDir, 'helper.map'));
+
     assertFile(path.resolve(buildDir, 'example_html.js'));
     assertFile(path.resolve(buildDir, 'component', 'html.js'));
     assertFile(path.resolve(webroot, 'img', 'banner.png'));
@@ -77,5 +84,22 @@ describe('Integration test for build', () => {
     // test if source map contains correct reference
     const htmlJs = await fs.readFile(path.resolve(buildDir, 'html.js'), 'utf-8');
     assert.ok(htmlJs.indexOf('sourceMappingURL=html.map') >= 0);
+
+    // test if xml.js is wrapped
+    const xmlJS = await fs.readFile(path.resolve(buildDir, 'xml.js'), 'utf-8');
+    assert.ok(xmlJS.indexOf('return async function wrapped(params)') >= 0);
+
+    // test if helper.js is not wrapped
+    const helperJS = await fs.readFile(path.resolve(buildDir, 'helper.js'), 'utf-8');
+    assert.equal(helperJS.indexOf('return async function wrapped(params)') >= 0, false);
+
+    // test if xml.info.json contains helper as dependency
+    const xmlInfo = await fs.readJson(path.resolve(buildDir, 'xml.info.json'));
+    assert.deepEqual(xmlInfo, {
+      main: 'xml.js',
+      requires: [
+        'helper.js',
+      ],
+    });
   });
 });

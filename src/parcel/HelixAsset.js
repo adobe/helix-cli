@@ -66,8 +66,7 @@ class HelixAsset extends Asset {
 
   getPreprocessor(name, fallback) {
     if (fs.existsSync(name)) {
-      const relname = path.relative(this.name, name).substr(1);
-      return relname;
+      return path.relative(this.name, name).substr(1);
     }
     try {
       if (require.resolve(fallback)) {
@@ -92,7 +91,11 @@ class HelixAsset extends Asset {
       file: sourceMap.file,
       sourceRoot: sourceMap.sourceRoot,
     });
-    await SourceMapConsumer.with(sourceMap, null, (consumer) => {
+
+    // need to detour to string version. we can't use parcel's internal sourcemap here.
+    const srcMap = sourceMap.version ? sourceMap : sourceMap.stringify();
+
+    await SourceMapConsumer.with(srcMap, null, (consumer) => {
       consumer.eachMapping((m) => {
         generator.addMapping({
           source: m.source,
