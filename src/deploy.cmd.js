@@ -176,11 +176,12 @@ class DeployCommand extends AbstractCommand {
 
     const ticks = {};
     const tick = (message, name) => {
+      const shortname = name.replace(/\/package.json.*/, '').replace(/node_modules\//, '');
       bar.tick({
-        action: name ? `packaging ${name}` : '',
+        action: name ? `packaging ${shortname}` : '',
       });
       if (message) {
-        this.log.log({
+        this.log.maybe({
           progress: true,
           level: 'info',
           message,
