@@ -107,8 +107,11 @@ class RawJSPackager extends Packager {
 
     // handle source map
     const mapBundle = this.bundle.siblingBundlesMap.get('map');
-    const mapName = path.basename(mapBundle.name);
-    const code = `${asset.generated.js}\n//# sourceMappingURL=${mapName}`;
+    let code = asset.generated.js;
+    if (mapBundle) {
+      const mapName = path.basename(mapBundle.name);
+      code = `${code}\n//# sourceMappingURL=${mapName}`;
+    }
 
     // write file
     await fs.writeFile(this.bundle.name, code, 'utf-8');

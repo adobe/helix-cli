@@ -2,7 +2,9 @@ version: 2.1
 executors:
   node8:
     docker:
-    - image: circleci/node:8
+    # use latest node 8 on debian 8 (jessie)
+    # (on debian 9 (stretch) a runtime error occurs: Error: libcrypto.so.1.0.0: cannot open shared object file: No such file or directory)
+    - image: circleci/node:8-jessie
     environment:
       NPM_CONFIG_PREFIX: ~/.npm-global
 
@@ -31,6 +33,22 @@ orbs:
   helix-smoke-tests: adobe/helix-smoke-tests@0.0.4
 
 jobs:
+  snyk:
+    executor: node8
+    working_directory: ~/repo
+
+    steps:
+    - setup
+
+    - run:
+        name: prepare test git user
+        command: git config --global user.email "you@example.com" && git config --global user.name "Your Name"
+
+    # test & get code coverage
+    - run:
+        name: Running Tests with Snyk Agent
+        command: node build/snykmocha.js
+
   build:
     executor: node8
     working_directory: ~/repo
@@ -104,7 +122,7 @@ jobs:
 
     - run:
         name: Deploy Snapshot to Adobe I/O Runtime
-        command: ~/.npm-global/bin/hlx build && ~/.npm-global/bin/hlx deploy --dirty --no-auto --wsk-namespace trieloff --wsk-auth $WSK_AUTH --loggly-host trieloff --loggly-auth $LOGGLY_AUTH
+        command: ~/.npm-global/bin/hlx build && ~/.npm-global/bin/hlx deploy --dirty --wsk-namespace trieloff --wsk-auth $WSK_AUTH --loggly-host trieloff --loggly-auth $LOGGLY_AUTH
         working_directory: test/integration
 
   installer:
@@ -190,6 +208,7 @@ workflows:
           branches:
             only: master
     - build
+    - snyk
     - installer:
         filters:
           branches:

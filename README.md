@@ -99,7 +99,7 @@ Alternatively, you can also perfom a one-shot deployment like this:
 
 ```bash
 # In <my-cool-project>
-$ hlx deploy --no-auto --wsk-namespace <your-namespace> --wsk-auth <your-key>
+$ hlx deploy --wsk-namespace <your-namespace> --wsk-auth <your-key>
   
 [==================================================]  0.0s
 ✅  deployment completed
@@ -403,3 +403,4 @@ Before running `npm install`, make sure that `nodegit` can find all dependencies
 $ export LDFLAGS="-L/usr/local/opt/openssl/lib"
 $ export CPPFLAGS="-I/usr/local/opt/openssl/include"
 ```
+

@@ -118,14 +118,14 @@ function createLogger() {
   });
 }
 
-async function processSource(scriptName) {
+async function processSource(scriptName, type = 'htl') {
   const testRoot = await createTestRoot();
   const buildDir = path.resolve(testRoot, '.hlx/build');
   const distHtmlJS = path.resolve(buildDir, `${scriptName}.js`);
-  const distHtmlHtl = path.resolve(buildDir, `${scriptName}.htl`);
+  const distHtmlHtl = path.resolve(buildDir, `${scriptName}.${type}`);
 
   const files = [
-    path.resolve(__dirname, `specs/parcel/${scriptName}.htl`),
+    path.resolve(__dirname, `specs/parcel/${scriptName}.${type}`),
     path.resolve(__dirname, `specs/parcel/${scriptName}.pre.js`),
     path.resolve(__dirname, 'specs/parcel/helpers.js'),
   ];
