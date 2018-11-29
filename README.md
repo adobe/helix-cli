@@ -99,7 +99,7 @@ Alternatively, you can also perfom a one-shot deployment like this:
 
 ```bash
 # In <my-cool-project>
-$ hlx deploy --no-auto --wsk-namespace <your-namespace> --wsk-auth <your-key>
+$ hlx deploy --wsk-namespace <your-namespace> --wsk-auth <your-key>
   
 [==================================================]  0.0s
 ✅  deployment completed
