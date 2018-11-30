@@ -49,7 +49,6 @@ class DeployCommand extends AbstractCommand {
   }
 
   static getDefaultContentURL() {
-    
     if (fs.existsSync('helix-config.yaml')) {
       const conf = yaml.safeLoad(fs.readFileSync('helix-config.yaml'));
       if (conf && conf.contentRepo) {
