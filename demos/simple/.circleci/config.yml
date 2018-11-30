@@ -7,14 +7,19 @@ jobs:
     steps:
         - checkout
 
+        - run:
+            name: Provide package-lock.json
+            command:  test ! -f package.json && touch package-lock.json || echo "package.json exists"
+
         # Download and cache dependencies
         - restore_cache:
             keys:
-            - v1-dependencies-{{ checksum "package.json" }}
+            - v1-dependencies-{{ checksum "package-lock.json" }}
+            - v1-dependencies-
 
         - run:
             name: Installing Dependencies
-            command: npm install
+            command: test -f package.json && npm install || echo "package.json does not exist"
 
         - run:
             name: Installing Helix CLI
@@ -23,20 +28,37 @@ jobs:
         - save_cache:
             paths:
                 - node_modules
-            key: v1-dependencies-{{ checksum "package.json" }}
+            key: v1-dependencies-{{ checksum "package-lock.json" }}
+
+        - run:
+            name: Reset package-lock.json
+            command:  test ! -f package.json && rm package-lock.json || echo "package.json exists"
 
         - run:
             name: Building Templates
             command: npx hlx build
 
         - run:
+            name: Resetting Working Copy
+            command: git status; git checkout -- .
+
+        - run:
             name: Deploying to Adobe I/O Runtime
-            command: npx hlx deploy
+            command: npx hlx deploy | cat
 
         - run:
             name: Activate CDN
-            command: npx hlx publish
+            command: npx hlx publish | cat
 
         - run:
             name: Test Performance
-            command: npx hlx perf
+            command: |
+                mkdir -p junit
+                if [ ! -z $HLX_CALIBRE_AUTH ]; then
+                    npx hlx perf --junit junit/test-results.xml
+                else
+                    echo "Add HLX_CALIBRE_AUTH to your CircleCI config to enable performance testing"
+                fi
+
+        - store_test_results:
+            path: junit
