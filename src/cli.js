@@ -84,7 +84,7 @@ class CLI {
 
     return logArgs(argv)
       .fail(this._failFn)
-      .exitProcess(args.indexOf('--get-yargs-completions')>-1)
+      .exitProcess(args.indexOf('--get-yargs-completions') > -1)
       .strict()
       .demandCommand(1, MIN_MSG)
       .epilogue('for more information, find our manual at https://github.com/adobe/helix-cli')
