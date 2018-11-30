@@ -15,24 +15,20 @@
 // CONTENTS
 
 function wrap(main) {
-  const { OpenWhiskAction } = require('@adobe/hypermedia-pipeline');
+  const { OpenWhiskAction } = require('@adobe/helix-pipeline');
   const { pipe } = require('MOD_PIPE');
   const { pre } = require('MOD_PRE');
 
-  const _isFunction = (fn) => !!(fn && fn.constructor && fn.call && fn.apply);
-
   // this gets called by openwhisk
   return async function wrapped(params) {
-    function once(payload, action) {
+    // this is the once function that will be installed in the pipeline
+    async function once(payload, action) {
       // calls the pre function and then the script's main.
-      function invoker(next) {
-        const ret = pre(payload, action);
-        if (ret && _isFunction(ret.then)) {
-          return ret.then((pp) => next(pp || payload, action));
-        }
-        return next(ret || payload, action);
+      async function invoker(next) {
+        const ret = await Promise.resolve(pre(payload, action));
+        return Promise.resolve(next(ret || payload, action));
       }
-      return invoker(main).then(resobj => ({ response: resobj }));
+      return invoker(main);
     }
     return OpenWhiskAction.runPipeline(once, pipe, params);
   };

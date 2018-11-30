@@ -28,7 +28,7 @@ Resource processing scripts
 
 Typically every **resource type + selector** tuple is handled by 1 pipeline script. With the current
 architecture, every pipeline script is deployed as 1 adobeioruntime action. the pipeline scripts
-are in essence a openwhisk wrapper around a [hypermedia pipeline](https://github.com/adobe/hypermedia-pipeline).
+are in essence a openwhisk wrapper around the [helix pipeline](https://github.com/adobe/helix-pipeline).
 
 In order to allow for individual versions (strains) of the same pipeline script, the actions are
 name coded with the code repository location, branch and script name. it usually takes the format:
@@ -57,13 +57,13 @@ Compiling the sources (building)
 --------------------------------
 
 Since it would be cumbersome to write full fledged openwhisk action scripts for the entire resource
-processing, helix uses a [hypermedia pipeline](https://github.com/adobe/hypermedia-pipeline) that
+processing, helix uses the [helix pipeline](https://github.com/adobe/helix-pipeline) that
 does most of the job. The developer usually only needs to provide a script that transforms the
 generated virtual dom of the resource into the respective media type.
 
 The default pipeline provides a way to specify a `once` function for this purpose, which are normal
 pipeline scripts `Context function(Context ctx, Action act)` that operate on the `context`.
-See [Anatomy of a Pipeline](https://github.com/adobe/hypermedia-pipeline/blob/master/README.md) for more details.
+See [Anatomy of a Pipeline](https://github.com/adobe/helix-pipeline/blob/master/README.md) for more details.
 
 To make things even easier for developers, helix supports [htl](https://github.com/adobe/htl-spec) templates
 and turns them into pipeline scripts during build time.

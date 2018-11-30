@@ -205,6 +205,10 @@ sub hlx_headers_deliver {
     set resp.http.X-Action-Root = req.http.X-Action-Root;
     set resp.http.X-URL = req.http.X-URL;
     set resp.http.X-Root-Path = req.http.X-Root-Path;
+
+    set resp.http.X-Fastly-Imageopto-Api = req.http.X-Fastly-Imageopto-Api;
+
+    set resp.http.X-Embed = req.http.X-Embed;
  }
 
   call hlx_deliver_errors;
@@ -215,8 +219,19 @@ sub hlx_backend_recv {
   set req.backend = F_AdobeRuntime;
 
   # Request Condition: Binaries only Prio: 10
-  if( req.url ~ ".(jpg|png|gif)($|\?)" ) {
+  if( req.url.ext ~ "(?i)^(?:gif|png|jpe?g|webp)$" ) {
     set req.backend = F_GitHub;
+
+    if (req.restarts == 0) {
+      # enable shielding, needed for Image Optimization
+      if (server.identity !~ "-IAD$" && req.http.Fastly-FF !~ "-IAD") {
+        set req.backend = ssl_shield_iad_va_us;
+      }
+      if (!req.backend.healthy) {
+        # the shield datacenter is broken so dont go to it
+        set req.backend = F_GitHub;
+      }
+    }
   }
 
   # Request Condition: HTML Only Prio: 10
@@ -234,13 +249,12 @@ sub vcl_recv {
 
   # Set original URL, so that we can log it afterwards.
   # If request is on Fastly-FF, we shouldn't override it.
-  if (!req.http.Fastly-FF) {
-    set req.http.X-Orig-URL = req.url;
+  set req.http.X-Orig-URL = req.url;
 
-    if (!req.http.X-URL) {
-      set req.http.X-URL = req.url;
-    }
+  if (!req.http.X-URL) {
+    set req.http.X-URL = req.url;
   }
+  
 
   if (req.request != "HEAD" && req.request != "GET" && req.request != "FASTLYPURGE") {
     return(pass);
@@ -328,7 +342,20 @@ sub vcl_recv {
     # - don't forget to override the Content-Type header
     set req.backend = F_GitHub;
 
-  } elsif (!req.http.Fastly-FF && req.http.Fastly-SSL && (req.url.basename ~ "(^[^\.]+)(\.?(.+))?(\.[^\.]*$)" || req.url.basename == "")) {
+        //(!req.http.Fastly-FF && req.http.Fastly-SSL && (req.url.basename ~ "(^[^\.]+)(\.?(.+))?(\.[^\.]*$)" || req.url.basename == ""))
+  } elseif (req.http.Fastly-SSL && req.http.host == "adobeioruntime.net") {
+    # This is an embed request
+    # Fastly sends embed requests back to the same service config (which is why
+    # we are handling it here), but keeps the correct Host header in place (which
+    # is why we can check against it)
+
+    set req.backend = F_AdobeRuntime;
+
+    # make sure we hit the right backend
+    # and keep everything else in place
+
+    set req.http.X-Embed = req.http.X-URL;
+  } elsif (req.http.Fastly-SSL) {
     # This is a dynamic request.
 
     # Load important information from edge dicts
@@ -382,20 +409,13 @@ sub vcl_recv {
     }
 
     # check for images, and get them from GitHub
-    if (req.url.ext ~ "(?i)(png|jpg|jpeg)") {
-      if (req.backend == F_GitHub && req.restarts == 0) {
-        if (server.identity !~ "-IAD$" && req.http.Fastly-FF !~ "-IAD") {
-          set req.backend = ssl_shield_iad_va_us;
-        }
-        if (!req.backend.healthy) {
-          # the shield datacenter is broken so dont go to it
-          set req.backend = F_GitHub;
-        }
-      }
-
+    if (req.url.ext ~ "(?i)^(?:gif|png|jpe?g|webp)$") {
       set var.path = var.dir + "/" + req.url.basename;
       set var.path = regsuball(var.path, "/+", "/");
       set req.url = "/" + var.owner + "/" + var.repo + "/" + var.ref + var.path + "?" + req.url.qs;
+
+      # enable IO for image file-types
+      set req.http.X-Fastly-Imageopto-Api = "fastly";
     } else {
       # get (strain-specific) parameter whitelist
       include "params.vcl";
@@ -415,12 +435,6 @@ sub vcl_recv {
         "&strain=" + var.strain + 
         "&params=" + req.http.X-Encoded-Params;
     }
-  }
-
-  # enable IO for image file-types
-  # but not for static images or redirected images
-  if (req.url.ext ~ "(?i)(?:gif|png|jpe?g|webp)" && (req.http.X-Static != "Static") && (req.http.X-Static == "Redirect"))  {
-    set req.http.X-Fastly-Imageopto-Api = "fastly";
   }
 
   # set X-Version initial value
@@ -579,6 +593,11 @@ sub vcl_hit {
 
 sub vcl_miss {
 #FASTLY miss
+  unset bereq.http.X-Orig-Url;
+  if (req.backend.is_shield) {
+    set bereq.url = req.http.X-Orig-Url;
+  }
+
   # set backend host
   if (req.backend == F_AdobeRuntime) {
     set bereq.http.host = "adobeioruntime.net";
@@ -603,7 +622,9 @@ sub vcl_deliver {
 #FASTLY deliver
   call hlx_headers_deliver;
 
-  if (req.http.X-Strain&&req.http.X-Sticky=="true") {
+  # only set the strain cookie for sticky strains
+  # and only do it for the Adobe I/O Runtime backend
+  if (req.http.X-Strain&&req.http.X-Sticky=="true"&&req.backend == F_AdobeRuntime) {
     set resp.http.Set-Cookie = "X-Strain=" + req.http.X-Strain + "; Secure; HttpOnly; SameSite=Strict;";
   }
 
