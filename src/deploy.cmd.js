@@ -49,6 +49,7 @@ class DeployCommand extends AbstractCommand {
   }
 
   static getDefaultContentURL() {
+    
     if (fs.existsSync('helix-config.yaml')) {
       const conf = yaml.safeLoad(fs.readFileSync('helix-config.yaml'));
       if (conf && conf.contentRepo) {
@@ -188,11 +189,6 @@ class DeployCommand extends AbstractCommand {
         });
       }
     };
-
-    if (this._dryRun) {
-      log.debug(`Skipping ZIP file creation for ${info.name}`);
-      return Promise.resolve({});
-    }
 
     return new Promise((resolve, reject) => {
       const archiveName = `${info.name}.zip`;
