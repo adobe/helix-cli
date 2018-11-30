@@ -75,6 +75,8 @@ const TEST_SCRIPTS = [
   { name: 'require_html', matches: [/Hello, world/, /this is a bar/] },
   { name: 'simple_html', matches: [/Hello, world/, /this is a bar/] },
   { name: 'return_simple_html', matches: [/Hello, world/, /this is a bar/] },
+  { name: 'xml', type: 'js', matches: [/works: bar/] },
+  { name: 'async_xml', type: 'js', matches: [/works: bar/] },
 ];
 
 describe('Generated Action Tests', () => {
@@ -85,13 +87,18 @@ describe('Generated Action Tests', () => {
     describe(`Testing ${testScript.name}`, function testSuite() {
       this.timeout(10000);
 
-      before(`Run Parcel programmatically on ${testScript.name}.htl`, async () => {
-        ({ distHtmlJS: distJS, distHtmlHtl: distHtl } = await processSource(testScript.name));
+      before(`Run Parcel programmatically on ${testScript.name}`, async () => {
+        ({ distHtmlJS: distJS, distHtmlHtl: distHtl } = await processSource(
+          testScript.name,
+          testScript.type,
+        ));
       });
 
       it('correct output files have been generated', () => {
         assert.ok(fs.existsSync(distJS), 'output file has been generated');
-        assert.ok(!fs.existsSync(distHtl), 'input file has been passed through');
+        if (testScript.type !== 'js') {
+          assert.ok(!fs.existsSync(distHtl), 'input file has been passed through');
+        }
       });
 
       it('script can be required', () => {
@@ -120,7 +127,9 @@ describe('Generated Action Tests', () => {
         assert.ok(res, 'no response received');
         assert.ok(res.body, 'response has no body');
         testScript.matches.forEach((m) => {
-          assert.ok(res.body.match(m), `response body contains ${m}`);
+          if (!res.body.match(m)) {
+            assert.fail(`response body should contain ${m} but was:\n${res.body}`);
+          }
         });
         if (testScript === 'logger_html') {
           assert(spy.calledWith('pre was here!'));

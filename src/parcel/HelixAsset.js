@@ -17,7 +17,7 @@ const logger = require('parcel-bundler/src/Logger');
 const { SourceMapConsumer, SourceMapGenerator } = require('source-map');
 const resolver = require('./resolver');
 
-const DEFAULT_PIPELINE = '@adobe/hypermedia-pipeline/src/defaults/default.js';
+const DEFAULT_PIPELINE = '@adobe/helix-pipeline/src/defaults/default.js';
 
 const OUTPUT_TEMPLATE = path.resolve(__dirname, 'OutputTemplate.js');
 
@@ -40,11 +40,11 @@ class HelixAsset extends Asset {
 
     const pipe = this.getPreprocessor(
       `${rootname}.pipe.js`,
-      `@adobe/hypermedia-pipeline/src/defaults/${extension}.pipe.js`,
+      `@adobe/helix-pipeline/src/defaults/${extension}.pipe.js`,
     );
     const pre = this.getPreprocessor(
       `${rootname}.pre.js`,
-      `@adobe/hypermedia-pipeline/src/defaults/${extension}.pre.js`,
+      `@adobe/helix-pipeline/src/defaults/${extension}.pre.js`,
     );
 
     let body = fs.readFileSync(OUTPUT_TEMPLATE, 'utf-8');
@@ -66,8 +66,7 @@ class HelixAsset extends Asset {
 
   getPreprocessor(name, fallback) {
     if (fs.existsSync(name)) {
-      const relname = path.relative(this.name, name).substr(1);
-      return relname;
+      return path.relative(this.name, name).substr(1);
     }
     try {
       if (require.resolve(fallback)) {
@@ -92,7 +91,11 @@ class HelixAsset extends Asset {
       file: sourceMap.file,
       sourceRoot: sourceMap.sourceRoot,
     });
-    await SourceMapConsumer.with(sourceMap, null, (consumer) => {
+
+    // need to detour to string version. we can't use parcel's internal sourcemap here.
+    const srcMap = sourceMap.version ? sourceMap : sourceMap.stringify();
+
+    await SourceMapConsumer.with(srcMap, null, (consumer) => {
       consumer.eachMapping((m) => {
         generator.addMapping({
           source: m.source,

@@ -2,7 +2,9 @@ version: 2.1
 executors:
   node8:
     docker:
-    - image: circleci/node:8
+    # use latest node 8 on debian 8 (jessie)
+    # (on debian 9 (stretch) a runtime error occurs: Error: libcrypto.so.1.0.0: cannot open shared object file: No such file or directory)
+    - image: circleci/node:8-jessie
     environment:
       NPM_CONFIG_PREFIX: ~/.npm-global
 
@@ -27,7 +29,26 @@ commands:
         name: prepare test git user
         command: git config --global user.email "circleci@project-helix.io" && git config --global user.name "CircleCi Build"
 
+orbs:
+  helix-smoke-tests: adobe/helix-smoke-tests@0.0.4
+
 jobs:
+  snyk:
+    executor: node8
+    working_directory: ~/repo
+
+    steps:
+    - setup
+
+    - run:
+        name: prepare test git user
+        command: git config --global user.email "you@example.com" && git config --global user.name "Your Name"
+
+    # test & get code coverage
+    - run:
+        name: Running Tests with Snyk Agent
+        command: node build/snykmocha.js
+
   build:
     executor: node8
     working_directory: ~/repo
@@ -101,7 +122,7 @@ jobs:
 
     - run:
         name: Deploy Snapshot to Adobe I/O Runtime
-        command: ~/.npm-global/bin/hlx build && ~/.npm-global/bin/hlx deploy --dirty --no-auto --wsk-namespace trieloff --wsk-auth $WSK_AUTH --loggly-host trieloff --loggly-auth $LOGGLY_AUTH
+        command: ~/.npm-global/bin/hlx build && ~/.npm-global/bin/hlx deploy --dirty --wsk-namespace trieloff --wsk-auth $WSK_AUTH --loggly-host trieloff --loggly-auth $LOGGLY_AUTH
         working_directory: test/integration
 
   installer:
@@ -109,20 +130,52 @@ jobs:
       xcode: "9.0"
     steps:
     - checkout
-    - run: xcodebuild -version
+    - run:
+        name: "Setup build tools"
+        working_directory: ~/
+        command: |
+          # makeself
+          curl -LO https://github.com/megastep/makeself/releases/download/release-2.4.0/makeself-2.4.0.run
+          chmod +x makeself-2.4.0.run
+          ./makeself-2.4.0.run
+          cp makeself-2.4.0/*.sh .
+          # squashfs
+          HOMEBREW_NO_AUTO_UPDATE=1 brew install squashfs
+          # nodec
+          curl -L http://enclose.io/nodec/nodec-darwin-x64.gz | gunzip > nodec
+          chmod +x nodec
+    - run: 
+        name: "Creating cache key file"
+        working_directory: ~/
+        command: |
+          NODEC_VERSION=$(./nodec -v)
+          echo "$NODEC_VERSION" > _cache_key
+    - restore_cache:
+        keys:
+        - v1-nodec-cache-{{ checksum "~/_cache_key" }}
     - run:
         name: Build Installer
-        command: ./build.sh
-        working_directory: build
+        working_directory: ~/
+        command: |
+          ~/nodec -r ~/project -o ~/project/build/archive/a.out --tmpdir=~/nodec_tmp ~/project/index.js
+    - save_cache:
+        paths:
+        - ~/nodec_tmp
+        key: v1-nodec-cache-{{ checksum "~/_cache_key" }}
+    - run:
+        name: Build SFX shell script
+        working_directory: ~/
+        command: |
+          ~/makeself.sh --nox11 ~/project/build/archive ~/project/build/hlx_install.sh "SFX installer for hlx" ./install.sh
     - run:
         name: Verify Installer
+        working_directory: ~/project/build
         command: sh hlx_install.sh -- --overwrite && hlx --version
-        working_directory: build
     - store_artifacts:
-        path: build/hlx_install.sh
+        path: ~/project/build/hlx_install.sh
     - persist_to_workspace:
         # save to workspace for downstream jobs
-        root: ./build
+        root: ~/project/build
         paths:
           - hlx_install.sh
 
@@ -155,6 +208,7 @@ workflows:
           branches:
             only: master
     - build
+    - snyk
     - installer:
         filters:
           branches:
@@ -184,3 +238,9 @@ workflows:
               only: /^v\d+\.\d+\.\d+$/
             branches:
               ignore: /.*/
+
+  smoke:
+    jobs:
+    - helix-smoke-tests/run:
+        token: ${SMOKE_TEST_TOKEN}
+        remote_repo: adobe/helix-continuous

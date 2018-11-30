@@ -44,7 +44,7 @@ jobs:
 
         - run:
             name: Deploying to Adobe I/O Runtime
-            command: npx hlx deploy --no-auto | cat
+            command: npx hlx deploy | cat
 
         - run:
             name: Activate CDN
