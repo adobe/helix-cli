@@ -176,11 +176,12 @@ class DeployCommand extends AbstractCommand {
 
     const ticks = {};
     const tick = (message, name) => {
+      const shortname = name.replace(/\/package.json.*/, '').replace(/node_modules\//, '');
       bar.tick({
-        action: name ? `packaging ${name}` : '',
+        action: name ? `packaging ${shortname}` : '',
       });
       if (message) {
-        this.log.log({
+        this.log.maybe({
           progress: true,
           level: 'info',
           message,
@@ -465,8 +466,10 @@ class DeployCommand extends AbstractCommand {
     await Promise.all(scripts.map(script => this.createPackage(script, bar)));
 
     // read files ...
-    const read = scripts.map(script => fs.readFile(script.zipFile)
-      .then(action => ({ script, action })));
+    const read = scripts
+      .filter(script => script.zipFile) // skip empty zip files
+      .map(script => fs.readFile(script.zipFile)
+        .then(action => ({ script, action })));
 
     // ... and deploy
     bar.total += scripts.length * 2;
