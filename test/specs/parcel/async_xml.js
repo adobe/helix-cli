@@ -14,6 +14,11 @@ const helpers = require('./helpers.js');
 
 module.exports.main = async function main() {
   return {
-    body: `<xml>works: ${helpers.foo()}</xml>`,
+    response: {
+      headers: {
+        'Content-Type': 'text/xml',
+      },
+      body: `<xml>works: ${helpers.foo()}</xml>`,
+    },
   };
 };

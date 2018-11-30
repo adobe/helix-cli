@@ -17,9 +17,13 @@
  */
 const helper = require('./helper.js');
 
-module.exports.main = async (payload, config) => {
+module.exports.main = async () => {
   return {
-    body: `<xml>works: ${helper.utils.stamp()}</xml>`,
-  }
+    response: {
+      headers: {
+        'Content-Type': 'text/xml',
+      },
+      body: `<xml>works: ${helper.utils.stamp()}</xml>`,
+    },
+  };
 };
-

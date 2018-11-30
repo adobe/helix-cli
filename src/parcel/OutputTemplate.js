@@ -28,7 +28,7 @@ function wrap(main) {
         const ret = await Promise.resolve(pre(payload, action));
         return Promise.resolve(next(ret || payload, action));
       }
-      return { response: await invoker(main)　};
+      return invoker(main);
     }
     return OpenWhiskAction.runPipeline(once, pipe, params);
   };
