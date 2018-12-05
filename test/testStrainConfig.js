@@ -31,8 +31,11 @@ describe('Strain Config', () => {
   });
 
 
-  it('config with proxy strains can be parsed', () => {
-    assert.equal(strainconfig.load(proxy).length, 3);
+  it('config with proxy strains can be parsed', async () => {
+    const config = await new HelixConfig().withConfigPath(proxyfile).init();
+    const mystrains = config.strains;
+
+    assert.equal(Array.from(mystrains.entries()).length, 3);
   });
 
   it('invalid config does not throw errors', () => {
