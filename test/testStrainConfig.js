@@ -19,7 +19,6 @@ const { HelixConfig } = require('@adobe/helix-shared');
 const strainconfig = require('../src/strain-config-utils');
 
 const proxyfile = path.resolve(__dirname, 'fixtures/proxystrains.yaml');
-const proxy = fs.readFileSync(proxyfile, 'utf-8');
 
 describe('Strain Config', () => {
   const config = fs.readFileSync(path.resolve(__dirname, 'fixtures/config.yaml'), 'utf-8');
@@ -32,8 +31,8 @@ describe('Strain Config', () => {
 
 
   it('config with proxy strains can be parsed', async () => {
-    const config = await new HelixConfig().withConfigPath(proxyfile).init();
-    const mystrains = config.strains;
+    const myconfig = await new HelixConfig().withConfigPath(proxyfile).init();
+    const mystrains = myconfig.strains;
 
     assert.equal(Array.from(mystrains.entries()).length, 3);
   });

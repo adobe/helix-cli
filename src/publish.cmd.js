@@ -152,8 +152,15 @@ class PublishCommand extends AbstractCommand {
   }
 
   async loadStrains() {
-    const content = await fs.readFile(this._strainFile, 'utf-8');
-    this._strains = strainconfig.load(content);
+    if (this._helixConfig) {
+      await this._helixConfig.init();
+      this._logger.debug('loading a YAML configuration');
+      this._strains = Array.from(this._helixConfig.strains.values());
+    } else {
+      this._logger.debug('loading a JSON configuration');
+      const content = await fs.readFile(this._strainFile, 'utf-8');
+      this._strains = strainconfig.load(content);
+    }
     if (this._strains.filter(strain => strain.name === 'default').length !== 1) {
       throw new Error(`${this._strainFile} must include one strain 'default'`);
     }
