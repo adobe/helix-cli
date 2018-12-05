@@ -86,7 +86,7 @@ describe('Dynamic Strain (VCL) generation', () => {
 
   it('initFastly generates new backends for defined Proxies', async () => {
     const strainfile = path.resolve(__dirname, 'fixtures/proxystrains.yaml');
-    const cmd = new PublishCommand(createLogger()).withStrainFile(strainfile);
+    const cmd = new PublishCommand(createLogger()).withConfigFile(strainfile);
     try {
       await cmd.loadStrains();
       await cmd.initFastly();
