@@ -165,8 +165,10 @@ describe('Understands Proxy Strains', () => {
     assert.deepStrictEqual(strainconfig.addbackends(mystrains, backends), backends);
   });
 
-  it('addbackends() does not overwrite backends #unit', () => {
-    const mystrains = strainconfig.load(proxy);
+  it('addbackends() does not overwrite backends #unit', async () => {
+    const config = await new HelixConfig().withConfigPath(proxyfile).init();
+    const mystrains = config.strains;
+
     const backends = {
       foo: "I'm a backend",
     };
