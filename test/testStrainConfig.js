@@ -15,9 +15,11 @@
 const assert = require('assert');
 const fs = require('fs-extra');
 const path = require('path');
+const { HelixConfig } = require('@adobe/helix-shared');
 const strainconfig = require('../src/strain-config-utils');
 
-const proxy = fs.readFileSync(path.resolve(__dirname, 'fixtures/proxystrains.yaml'), 'utf-8');
+const proxyfile = path.resolve(__dirname, 'fixtures/proxystrains.yaml');
+const proxy = fs.readFileSync(proxyfile, 'utf-8');
 
 describe('Strain Config', () => {
   const config = fs.readFileSync(path.resolve(__dirname, 'fixtures/config.yaml'), 'utf-8');
@@ -119,8 +121,9 @@ describe('Appending works without errors', () => {
 });
 
 describe('Understands Proxy Strains', () => {
-  it('proxies() returns all proxy strains #unit', () => {
-    const mystrains = strainconfig.load(proxy);
+  it('proxies() returns all proxy strains #unit', async () => {
+    const config = await new HelixConfig().withConfigPath(proxyfile).init();
+    const mystrains = config.strains;
     assert.equal(strainconfig.proxies(mystrains).length, 1);
   });
 

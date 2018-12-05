@@ -30,9 +30,10 @@ function name(strain) {
  */
 function isproxy(strain) {
   return !!strain
-  && strain.name
-  && strain.origin
-  && typeof strain.origin === 'object';
+  && ((strain.isProxy && strain.isProxy())
+    || (strain.name
+    && strain.origin
+    && typeof strain.origin === 'object'));
 }
 
 /**
@@ -162,7 +163,12 @@ function load(data) {
 
 /** Filters the list of strains for proxy strains */
 function proxies(strains) {
-  return strains.filter(isproxy);
+  if (Array.isArray(strains)) {
+    return strains.filter(isproxy);
+  } if (typeof strains === 'object' && strains instanceof Map) {
+    return Array.from(strains.values()).filter(isproxy);
+  }
+  return [];
 }
 
 function addbackends(strains = [], backends = {}) {
