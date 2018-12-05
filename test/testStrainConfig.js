@@ -127,9 +127,12 @@ describe('Understands Proxy Strains', () => {
     assert.equal(strainconfig.proxies(mystrains).length, 1);
   });
 
-  it('addbackends() returns new backend definitions #unit', () => {
-    const mystrains = strainconfig.load(proxy);
-    assert.deepStrictEqual(strainconfig.addbackends(mystrains), {
+  it('addbackends() returns new backend definitions #unit', async () => {
+    const config = await new HelixConfig().withConfigPath(proxyfile).init();
+    const mystrains = config.strains;
+    const mybackends = strainconfig.addbackends(mystrains);
+    assert.deepEqual(Object.keys(mybackends), ['Proxy1921681001bcbe']);
+    assert.deepEqual(strainconfig.addbackends(mystrains), {
       Proxy1921681001bcbe: {
         address: '192.168.100.1',
         between_bytes_timeout: 10000,

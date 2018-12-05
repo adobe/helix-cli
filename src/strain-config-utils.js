@@ -176,7 +176,11 @@ function addbackends(strains = [], backends = {}) {
     .map(({ origin }) => origin)
     .reduce((bes, be) => {
       const newbackends = bes;
-      newbackends[be.name] = be;
+      if (be.toJSON) {
+        newbackends[be.name] = be.toJSON();
+      } else {
+        newbackends[be.name] = be;
+      }
       return newbackends;
     }, backends);
 }
