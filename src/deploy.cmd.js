@@ -18,7 +18,6 @@ const ow = require('openwhisk');
 const glob = require('glob');
 const path = require('path');
 const fs = require('fs-extra');
-const yaml = require('js-yaml');
 const ProgressBar = require('progress');
 const archiver = require('archiver');
 const { GitUrl, GitUtils } = require('@adobe/helix-shared');
@@ -46,16 +45,6 @@ class DeployCommand extends AbstractCommand {
     this._enableDirty = false;
     this._dryRun = false;
     this._strainFile = null;
-  }
-
-  static getDefaultContentURL() {
-    if (fs.existsSync('helix-config.yaml')) {
-      const conf = yaml.safeLoad(fs.readFileSync('helix-config.yaml'));
-      if (conf && conf.contentRepo) {
-        return conf.contentRepo;
-      }
-    }
-    return GitUtils.getOrigin();
   }
 
   withEnableAuto(value) {
@@ -151,6 +140,12 @@ class DeployCommand extends AbstractCommand {
       return `hlx--${path.basename(script, '.js')}`;
     }
     return this._prefix + path.basename(script, '.js');
+  }
+
+  getDefaultContentURL() {
+    // default content is the content url of the default strain - HelixConfig always defines one.
+    const defaultStrain = this._helixConfig.strains.get('default');
+    return defaultStrain.content;
   }
 
   async init() {
@@ -370,8 +365,16 @@ class DeployCommand extends AbstractCommand {
       return this.autoDeploy();
     }
 
-    // todo: the default should be provided by the helix-config and not the yargs defaults!
-    const giturl = new GitUrl(this._content);
+
+    let giturl;
+    if (!this._content) {
+      // if no content provided, use the default one
+      giturl = this.getDefaultContentURL();
+      this.log.debug(`Using the default content url: ${giturl.toString()}`);
+    } else {
+      giturl = new GitUrl(this._content);
+      this.log.debug(`Using the provided content url: ${giturl.toString()}`);
+    }
 
     const owoptions = {
       apihost: this._wsk_host,

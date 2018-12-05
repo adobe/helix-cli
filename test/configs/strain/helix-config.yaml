@@ -1,0 +1,6 @@
+strains:
+  default:
+    content:
+      repo: project-helix.io
+      ref: abranch
+      owner: adobe

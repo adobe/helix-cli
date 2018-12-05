@@ -292,4 +292,17 @@ Authentication is required. You can pass the key via the HLX_WSK_AUTH environmen
     sinon.assert.calledWith(mockDeploy.withDefault, { FEATURE: 'red, green' });
     sinon.assert.calledOnce(mockDeploy.run);
   });
+
+  it('hlx deploy can set default content url', () => {
+    new CLI()
+      .withCommandExecutor('deploy', mockDeploy)
+      .run(['deploy',
+        '--wsk-auth', 'secret-key',
+        '--wsk-namespace', 'hlx',
+        '--content', 'https://localhost/local/default.git',
+      ]);
+
+    sinon.assert.calledWith(mockDeploy.withContent, 'https://localhost/local/default.git');
+    sinon.assert.calledOnce(mockDeploy.run);
+  });
 });

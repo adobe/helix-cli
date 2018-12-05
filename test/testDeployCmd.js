@@ -113,7 +113,7 @@ describe('hlx deploy (Integration)', () => {
 
     assertFile(strainsFile);
     const secondrun = fs.readFileSync(strainsFile).toString();
-    assert.equal(firstrun, secondrun, 'generated strains.yaml differs between first and second run');
+    assert.deepEqual(JSON.parse(firstrun), JSON.parse(secondrun), 'generated strains.json differs between first and second run');
 
     await new DeployCommand()
       .withDirectory(testRoot)
@@ -130,8 +130,38 @@ describe('hlx deploy (Integration)', () => {
 
     assertFile(strainsFile);
     const thirdrun = fs.readFileSync(strainsFile).toString();
-    assert.notEqual(firstrun, thirdrun);
+    assert.notDeepEqual(JSON.parse(firstrun), JSON.parse(thirdrun));
   }).timeout(30000);
+
+  it('hlx deploy defines a default content url', async () => {
+    await new DeployCommand()
+      .withDirectory(testRoot)
+      .withWskHost('adobeioruntime.net')
+      .withWskAuth('secret-key')
+      .withWskNamespace('hlx')
+      .withEnableAuto(false)
+      .withEnableDirty(true)
+      .withDryRun(true)
+      .withTarget(buildDir)
+      .withStrainFile(strainsFile)
+      .run();
+
+    assertFile(strainsFile);
+    const run = fs.readFileSync(strainsFile).toString();
+    const json = JSON.parse(run);
+    assert.ok(json.default && json.default.content, 'default content is present');
+    // default is GitUrl internal default.
+    assert.deepEqual(json.default.content, {
+      protocol: 'http',
+      host: 'localhost',
+      port: '',
+      hostname: 'localhost',
+      owner: 'local',
+      repo: 'default',
+      ref: '',
+      path: '',
+    });
+  }).timeout(15000);
 });
 
 describe('DeployCommand #unittest', () => {
@@ -140,5 +170,85 @@ describe('DeployCommand #unittest', () => {
     assert.equal(options.method, 'POST');
     assert.equal(JSON.parse(options.body).name, 'FOO');
     assert.equal(JSON.parse(options.body).value, 'BAR');
+  });
+});
+
+describe('hlx deploy (Integration)', () => {
+  async function getDefaultContentTest(test) {
+    const buildFolder = path.resolve(test.configFolder, 'tmp');
+    const cmd = new DeployCommand()
+      .withDirectory(test.configFolder)
+      .withTarget(buildFolder)
+      .withWskHost('adobeioruntime.net')
+      .withWskAuth('secret-key')
+      .withWskNamespace('hlx')
+      .withEnableAuto(false)
+      .withEnableDirty(true)
+      .withDryRun(true);
+    await cmd.init();
+    const url = cmd.getDefaultContentURL();
+    assert.equal(test.expectedContentURL, url.toString());
+
+    await cmd.run();
+    const strain = path.resolve(test.configFolder, '.hlx/strains.json');
+    assertFile(strain);
+    const run = fs.readFileSync(strain).toString();
+    const json = JSON.parse(run);
+    assert.ok(json.default && json.default.content, 'default strain content is present');
+    assert.deepEqual(json.default.content, test.expectedStrainContent);
+
+    fs.remove(buildFolder);
+    fs.remove(path.resolve(test.configFolder, '.hlx'));
+  }
+
+  it.only('getDefaultContentTest and content url is ssh', async () => {
+    await getDefaultContentTest({
+      configFolder: `${__dirname}/configs/git`,
+      expectedContentURL: 'ssh://github.com/adobe/project-helix.io.git#abranch',
+      expectedStrainContent: {
+        protocol: 'ssh',
+        host: 'github.com',
+        port: '',
+        hostname: 'github.com',
+        owner: 'adobe',
+        repo: 'project-helix.io',
+        ref: 'abranch',
+        path: '',
+      },
+    });
+  });
+
+  it.only('getDefaultContentTest and content url is https', async () => {
+    await getDefaultContentTest({
+      configFolder: `${__dirname}/configs/https`,
+      expectedContentURL: 'https://github.com/adobe/project-helix.io.git#abranch',
+      expectedStrainContent: {
+        protocol: 'https',
+        host: 'github.com',
+        port: '',
+        hostname: 'github.com',
+        owner: 'adobe',
+        repo: 'project-helix.io',
+        ref: 'abranch',
+        path: '',
+      },
+    });
+  });
+
+  it.only('getDefaultContentTest and content url is in strain', async () => {
+    await getDefaultContentTest({
+      configFolder: `${__dirname}/configs/strain`,
+      expectedContentURL: 'http://localhost/adobe/project-helix.io.git#abranch',
+      expectedStrainContent: {
+        protocol: 'http',
+        host: 'localhost',
+        port: '',
+        hostname: 'localhost',
+        owner: 'adobe',
+        repo: 'project-helix.io',
+        ref: 'abranch',
+        path: '',
+      },
+    });
   });
 });
