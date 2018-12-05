@@ -10,30 +10,6 @@
  * governing permissions and limitations under the License.
  */
 const URI = require('uri-js');
-const hash = require('object-hash');
-
-/**
- * Generates a backend JSON definition for a given
- * origin URL.
-*/
-function backend(uri) {
-  const backenduri = URI.parse(uri);
-  return {
-    hostname: backenduri.host,
-    error_threshold: 0,
-    first_byte_timeout: 15000,
-    weight: 100,
-    address: backenduri.host,
-    connect_timeout: 1000,
-    name: `Proxy${backenduri.host.replace(/[^\w]/g, '')}${hash(backenduri).substr(0, 4)}`,
-    port: backenduri.port || 443,
-    between_bytes_timeout: 10000,
-    shield: 'iad-va-us',
-    ssl_cert_hostname: backenduri.host,
-    max_conn: 200,
-    use_ssl: backenduri.scheme === 'https',
-  };
-}
 
 function conditions(strain) {
   if (strain.url) {
@@ -65,14 +41,14 @@ function conditions(strain) {
  * what the backend is that should handle the requests.
  */
 function proxy(strain) {
-  if (strain.type === 'proxy') {
+  if (strain.origin && typeof strain.origin === 'object') {
     const vcl = `${strain.vcl || ''}
   # Enable passing through of requests
 
-  set req.http.X-Proxy = "${strain.content.origin}";
+  set req.http.X-Proxy = "${strain.origin.address}";
   set req.http.X-Static = "Proxy";
 
-  set req.backend = F_${backend(strain.content.origin).name};
+  set req.backend = F_${strain.origin.name};
 
 `;
     return Object.assign(strain, { vcl });
@@ -104,4 +80,4 @@ function resolve(strains) {
 }
 
 
-module.exports = { conditions, resolve, backend };
+module.exports = { conditions, resolve };

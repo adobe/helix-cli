@@ -12,7 +12,6 @@
 
 const yaml = require('js-yaml');
 const hash = require('object-hash');
-const { backend } = require('./fastly/vcl-utils');
 
 /**
  * Generates a strain name for unnamed strains by hashing the contents
@@ -32,9 +31,8 @@ function name(strain) {
 function isproxy(strain) {
   return !!strain
   && strain.name
-  && strain.content
-  && strain.content.origin
-  && typeof strain.content.origin === 'string';
+  && strain.origin
+  && typeof strain.origin === 'object';
 }
 
 /**
@@ -67,7 +65,7 @@ function isproxy(strain) {
 function clean(strain) {
   const mystrain = strain;
   // clean up code
-  if (mystrain.content && mystrain.content.origin) {
+  if (mystrain.origin) {
     mystrain.code = undefined;
     mystrain.index = undefined;
     mystrain.type = 'proxy';
@@ -169,7 +167,7 @@ function proxies(strains) {
 
 function addbackends(strains = [], backends = {}) {
   return proxies(strains)
-    .map(({ content }) => backend(content.origin))
+    .map(({ origin }) => origin)
     .reduce((bes, be) => {
       const newbackends = bes;
       newbackends[be.name] = be;

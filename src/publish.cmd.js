@@ -683,7 +683,9 @@ ${PublishCommand.makeParamWhitelist(params, '  ')}
     const [secretp, ownsp] = dictJobs.splice(0, 2);
 
     const strains = this._strains;
-    strains.map((strain) => {
+    strains.filter(strain => !strain.origin).map((strain) => {
+      // TODO: update progress bar for skipped strains, too - otherwise it never completes
+
       // required
       makeDictJob('strain_action_roots', strain.name, strain.code, '- Set action root', 'action root');
       makeDictJob('strain_owners', strain.name, strain.content.owner, '- Set content owner', 'content owner');
@@ -780,7 +782,7 @@ ${PublishCommand.makeParamWhitelist(params, '  ')}
       this.showNextStep();
     } catch (e) {
       const message = 'Error while running the Publish command';
-      this.log.error(message, e);
+      this.log.error(`${message}: ${e.stack}`, e);
       throw new Error(message, e);
     }
   }
