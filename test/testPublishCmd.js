@@ -19,6 +19,7 @@ const assert = require('assert');
 const { createTestRoot, createLogger } = require('./utils.js');
 const PublishCommand = require('../src/publish.cmd');
 const strainconfig = require('../src/strain-config-utils');
+const { HelixConfig } = require('@adobe/helix-shared');
 
 // disable replay for this test
 Replay.mode = 'bloody';
@@ -52,36 +53,51 @@ describe('hlx strain #unit', () => {
 });
 
 describe('Dynamic Strain (VCL) generation', () => {
-  it('getStrainResolutionVCL generates VLC for empty strains', () => {
-    const strainfile = strainconfig.load(fs.readFileSync(path.resolve(__dirname, 'fixtures/empty.yaml'), 'utf-8'));
+  it('getStrainResolutionVCL generates VLC for empty strains', async () => {
+    const strainfile = path.resolve(__dirname, 'fixtures/empty.yaml');
+    const config = await new HelixConfig().withConfigPath(strainfile).init();
+    const mystrains = Array.from(config.strains.values());
+
     const vclfile = fs.readFileSync(path.resolve(__dirname, 'fixtures/empty.vcl')).toString();
-    assert.equal(vclfile, PublishCommand.getStrainResolutionVCL(strainfile));
+    assert.equal(vclfile, PublishCommand.getStrainResolutionVCL(mystrains));
   });
 
-  it('getStrainResolutionVCL generates VLC for non-existing conditions strains', () => {
-    const strainfile = strainconfig.load(fs.readFileSync(path.resolve(__dirname, 'fixtures/default.yaml'), 'utf-8'));
+  it('getStrainResolutionVCL generates VLC for non-existing conditions strains', async () => {
+    const strainfile = path.resolve(__dirname, 'fixtures/default.yaml');
+    const config = await new HelixConfig().withConfigPath(strainfile).init();
+    const mystrains = Array.from(config.strains.values());
+
     const vclfile = fs.readFileSync(path.resolve(__dirname, 'fixtures/default.vcl')).toString();
-    assert.equal(vclfile, PublishCommand.getStrainResolutionVCL(strainfile));
+    assert.equal(vclfile, PublishCommand.getStrainResolutionVCL(mystrains));
   });
 
-  it('getStrainResolutionVCL generates VLC for simple conditions strains', () => {
-    const strainfile = strainconfig.load(fs.readFileSync(path.resolve(__dirname, 'fixtures/simple-condition.yaml'), 'utf-8'));
+  it('getStrainResolutionVCL generates VLC for simple conditions strains', async () => {
+    const strainfile = path.resolve(__dirname, 'fixtures/simple-condition.yaml');
+    const config = await new HelixConfig().withConfigPath(strainfile).init();
+    const mystrains = Array.from(config.strains.values());
+
     const vclfile = fs.readFileSync(path.resolve(__dirname, 'fixtures/simple-condition.vcl')).toString();
     // console.log(PublishCommand.getStrainResolutionVCL(strainfile));
-    assert.equal(vclfile.trim(), PublishCommand.getStrainResolutionVCL(strainfile).trim());
+    assert.equal(vclfile.trim(), PublishCommand.getStrainResolutionVCL(mystrains).trim());
   });
 
-  it('getStrainResolutionVCL generates VLC for URL-based conditions', () => {
-    const strainfile = strainconfig.load(fs.readFileSync(path.resolve(__dirname, 'fixtures/urls.yaml'), 'utf-8'));
+  it('getStrainResolutionVCL generates VLC for URL-based conditions', async () => {
+    const strainfile = path.resolve(__dirname, 'fixtures/urls.yaml');
+    const config = await new HelixConfig().withConfigPath(strainfile).init();
+    const mystrains = Array.from(config.strains.values());
+    
     const vclfile = fs.readFileSync(path.resolve(__dirname, 'fixtures/urls.vcl')).toString();
     // console.log(PublishCommand.getStrainResolutionVCL(strainfile));
-    assert.equal(vclfile.trim(), PublishCommand.getStrainResolutionVCL(strainfile).trim());
+    assert.equal(vclfile.trim(), PublishCommand.getStrainResolutionVCL(mystrains).trim());
   });
 
-  it('getStrainResolutionVCL generates VLC for proxy strains', () => {
-    const strainfile = strainconfig.load(fs.readFileSync(path.resolve(__dirname, 'fixtures/proxystrains.yaml'), 'utf-8'));
+  it('getStrainResolutionVCL generates VLC for proxy strains', async () => {
+    const strainfile = path.resolve(__dirname, 'fixtures/proxystrains.yaml');
+    const config = await new HelixConfig().withConfigPath(strainfile).init();
+    const mystrains = Array.from(config.strains.values());
+
     const vclfile = fs.readFileSync(path.resolve(__dirname, 'fixtures/proxystrains.vcl')).toString();
-    assert.equal(vclfile.trim(), PublishCommand.getStrainResolutionVCL(strainfile).trim());
+    assert.equal(vclfile.trim(), PublishCommand.getStrainResolutionVCL(mystrains).trim());
   });
 
   it('initFastly generates new backends for defined Proxies', async () => {

@@ -1,2 +1,3 @@
-default:
-  content: foo
+strains:
+  default:
+    content: foo
