@@ -77,7 +77,7 @@ function stickybody([strain, argvcl]) {
  * @param {*} param0
  */
 function namebody([strain, vcl]) {
-  vcl.body.push(`  set req.http.X-Strain = "${strain.name}";`);
+  vcl.body.push(`set req.http.X-Strain = "${strain.name}";`);
 
   return [strain, vcl];
 }
@@ -94,7 +94,7 @@ function resolve(mystrains) {
     .map(namebody)
     .filter(([strain, vcl]) => strain.condition || vcl.condition)
     .map(([strain, vcl]) => `if (${strain.condition || vcl.condition}) {
-  ${vcl.body.join('\n')}
+${vcl.body.map(snippet => snippet.split('\n').map(line => `  ${line}`).join('\n')).join('\n')}
 } else `);
   if (strainconditions.length) {
     retvcl += strainconditions.join('');
