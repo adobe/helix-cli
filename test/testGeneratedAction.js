@@ -127,7 +127,9 @@ describe('Generated Action Tests', () => {
         assert.ok(res, 'no response received');
         assert.ok(res.body, 'response has no body');
         testScript.matches.forEach((m) => {
-          assert.ok(res.body.match(m), `response body contains ${m}`);
+          if (!res.body.match(m)) {
+            assert.fail(`response body should contain ${m} but was:\n${res.body}`);
+          }
         });
         if (testScript === 'logger_html') {
           assert(spy.calledWith('pre was here!'));
