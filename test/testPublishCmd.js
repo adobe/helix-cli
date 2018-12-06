@@ -110,7 +110,7 @@ describe('Dynamic Strain (VCL) generation', () => {
       assert.equal(e.statusCode, 401);
     }
     assert.equal(Object.keys(cmd._backends).length, 3);
-    assert.ok(cmd._backends.Proxy1921681001bcbe);
+    assert.ok(cmd._backends.Proxy1921681001f402);
   });
 });
 
