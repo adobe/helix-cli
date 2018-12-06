@@ -690,9 +690,10 @@ ${PublishCommand.makeParamWhitelist(params, '  ')}
     const [secretp, ownsp] = dictJobs.splice(0, 2);
 
     const strains = this._strains;
+    strains.filter(strain => !!strain.origin).forEach((proxy) => {
+      this.tick(13, `skipping proxy strain ${proxy.name}`);
+    });
     strains.filter(strain => !strain.origin).map((strain) => {
-      // TODO: update progress bar for skipped strains, too - otherwise it never completes
-
       // required
       makeDictJob('strain_action_roots', strain.name, strain.code, '- Set action root', 'action root');
       makeDictJob('strain_owners', strain.name, strain.content.owner, '- Set content owner', 'content owner');
