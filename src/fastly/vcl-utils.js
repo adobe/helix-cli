@@ -107,5 +107,31 @@ ${vcl.body.map(snippet => snippet.split('\n').map(line => `  ${line}`).join('\n'
   return retvcl;
 }
 
+function shielding({ name }) {
+  return `if (req.backend == F_${name} && req.restarts == 0) {
+  if (server.identity !~ "-IAD$" && req.http.Fastly-FF !~ "-IAD") {
+    set req.backend = ssl_shield_iad_va_us;
+  }
+  if (!req.backend.healthy) {
+    set req.backend = F_${name};
+  }
+}`;
+}
 
-module.exports = { conditions, resolve };
+/**
+ * Generates VCL to reset backends, so that shielding is enforced for each
+ * backend.
+ * @param {*} mystrains
+ */
+function reset(backends) {
+  let retval = '# This file resets shielding for all known backends\n';
+
+  const backendresets = Object.values(backends).map(shielding);
+
+  retval += backendresets.join('\n');
+
+  return retval;
+}
+
+
+module.exports = { conditions, resolve, reset };
