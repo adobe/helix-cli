@@ -16,10 +16,9 @@ const Replay = require('replay');
 const fs = require('fs-extra');
 const path = require('path');
 const assert = require('assert');
+const { HelixConfig } = require('@adobe/helix-shared');
 const { createTestRoot, createLogger } = require('./utils.js');
 const PublishCommand = require('../src/publish.cmd');
-const strainconfig = require('../src/strain-config-utils');
-const { HelixConfig } = require('@adobe/helix-shared');
 
 // disable replay for this test
 Replay.mode = 'bloody';
@@ -85,7 +84,7 @@ describe('Dynamic Strain (VCL) generation', () => {
     const strainfile = path.resolve(__dirname, 'fixtures/urls.yaml');
     const config = await new HelixConfig().withConfigPath(strainfile).init();
     const mystrains = Array.from(config.strains.values());
-    
+
     const vclfile = fs.readFileSync(path.resolve(__dirname, 'fixtures/urls.vcl')).toString();
     // console.log(PublishCommand.getStrainResolutionVCL(strainfile));
     assert.equal(vclfile.trim(), PublishCommand.getStrainResolutionVCL(mystrains).trim());

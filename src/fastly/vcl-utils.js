@@ -11,28 +11,29 @@
  */
 const URI = require('uri-js');
 
-function conditions(strain) {
+function conditions([strain, vcl]) {
   if (strain.url) {
     const uri = URI.parse(strain.url);
     if (uri.path && uri.path !== '/') {
       const pathname = uri.path.replace(/\/$/, '');
-      return Object.assign({
+      const body = vcl.body || [];
+      body.push(`set req.http.X-Dirname = regsub(req.url.dirname, "^${pathname}", "");`);
+      return [strain, {
         sticky: false,
         condition: `req.http.Host == "${uri.host}" && (req.url.dirname ~ "^${pathname}$" || req.url.dirname ~ "^${pathname}/")`,
-        vcl: `
-  set req.http.X-Dirname = regsub(req.url.dirname, "^${pathname}", "");`,
-      }, strain);
+        body,
+      }];
     }
-    return Object.assign({
+    return [strain, {
       condition: `req.http.Host == "${uri.host}"`,
-    }, strain);
+    }, strain];
   }
   if (strain.condition && strain.sticky === undefined) {
-    return Object.assign({
+    return [strain, {
       sticky: true,
-    }, strain);
+    }];
   }
-  return strain;
+  return [strain, vcl];
 }
 
 /**
@@ -40,33 +41,60 @@ function conditions(strain) {
  * downstream processing that this is a proxy strain and
  * what the backend is that should handle the requests.
  */
-function proxy(strain) {
+function proxy([strain, vcl]) {
   if (strain.origin && typeof strain.origin === 'object') {
-    const vcl = `${strain.vcl || ''}
+    const body = vcl.body || [];
+    body.push(`${vcl.body || ''}
   # Enable passing through of requests
 
   set req.http.X-Proxy = "${strain.origin.address}";
   set req.http.X-Static = "Proxy";
 
   set req.backend = F_${strain.origin.name};
-
-`;
-    return Object.assign(strain, { vcl });
+`);
+    return [strain, Object.assign(vcl, { body })];
   }
-  return strain;
+  return [strain, vcl];
 }
 
-function resolve(strains) {
+/**
+ * Generates the VCL snippet to set the X-Sticky header
+ * @param {*} param0
+ */
+function stickybody([strain, argvcl]) {
+  const vcl = argvcl;
+  vcl.body = vcl.body || [];
+  if (strain.sticky || vcl.sticky) {
+    vcl.body.push('set req.http.X-Sticky = "true";');
+  } else {
+    vcl.body.push('set req.http.X-Sticky = "false";');
+  }
+  return [strain, vcl];
+}
+
+/**
+ * Generates the VCL snippet to set the X-Name header
+ * @param {*} param0
+ */
+function namebody([strain, vcl]) {
+  vcl.body.push(`  set req.http.X-Strain = "${strain.name}";`);
+
+  return [strain, vcl];
+}
+
+
+function resolve(mystrains) {
+  const strains = mystrains instanceof Map ? Array.from(mystrains.values()) : mystrains;
   let retvcl = '# This file handles the strain resolution\n';
   const strainconditions = strains
+    .map(strain => [strain, { body: [] }])
     .map(conditions)
     .map(proxy)
-    .filter(strain => strain.condition)
-    .map(({
-      condition, name, vcl = '', sticky = false,
-    }) => `if (${condition}) {
-  set req.http.X-Sticky = "${sticky}";
-  set req.http.X-Strain = "${name}";${vcl}
+    .map(stickybody)
+    .map(namebody)
+    .filter(([strain, vcl]) => strain.condition || vcl.condition)
+    .map(([strain, vcl]) => `if (${strain.condition || vcl.condition}) {
+  ${vcl.body.join('\n')}
 } else `);
   if (strainconditions.length) {
     retvcl += strainconditions.join('');
