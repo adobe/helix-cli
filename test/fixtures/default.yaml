@@ -1,3 +1,3 @@
 strains:
   default:
-    content: foo
+    content: git@github.com:adobe/helix-cli.git
