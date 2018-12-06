@@ -344,7 +344,7 @@ class PublishCommand extends AbstractCommand {
     this.tick(existing, `Skipping ${existing} existing dictionaries`);
     if (missingdicts.length > 0) {
       const baseopts = await this.version('/dictionary');
-      missingdicts.map((dict) => {
+      const fixdicts = missingdicts.map((dict) => {
         const opts = Object.assign({
           method: 'POST',
           form: {
@@ -354,6 +354,7 @@ class PublishCommand extends AbstractCommand {
         }, baseopts);
         return request(opts).then((r) => {
           this.tick(1, `Dictionary ${dict} created`, dict);
+          this._dictionaries[r.name] = r.id;
           return r;
         })
           .catch((e) => {
@@ -362,6 +363,11 @@ class PublishCommand extends AbstractCommand {
             throw new Error(message, e);
           });
       });
+
+      // wait for all dictionaries to be created
+      await Promise.all(fixdicts);
+
+      await this.getDictionaries();
     }
   }
 
@@ -569,7 +575,7 @@ ${PublishCommand.makeParamWhitelist(params, '  ')}
           content: vcl,
         },
       }, baseopts)).catch((e) => {
-      if (e.response.statusCode === 404) {
+      if (e.response && e.response.statusCode === 404) {
       // create new
         return Object.assign({
           method: 'POST',
@@ -670,8 +676,8 @@ ${PublishCommand.makeParamWhitelist(params, '  ')}
     this.progressBar();
 
     await this.cloneVersion();
-    await this.initFastly();
     await this.initDictionaries();
+    await this.initFastly();
 
     const dictJobs = [];
     const makeDictJob = (dictname, strainname, strainvalue, message, shortMsg) => {

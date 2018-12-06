@@ -25,7 +25,7 @@ Replay.mode = 'bloody';
 Replay.fixtures = path.resolve(__dirname, 'fixtures');
 
 let FASTLY_AUTH = '---';
-const FASTLY_NAMESPACE = '5mNJ6qXkeETj7FyLtRuWl5';
+const FASTLY_NAMESPACE = '1s45RKXKEjuo2s0GWrF391';
 let WSK_AUTH = 'nope';
 let WSK_NAMESPACE = '---';
 

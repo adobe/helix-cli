@@ -107,13 +107,17 @@ ${vcl.body.map(snippet => snippet.split('\n').map(line => `  ${line}`).join('\n'
   return retvcl;
 }
 
+function fname(name) {
+  return `F_${name.replace(/[^A-Z0-9_]/ig, '_')}`;
+}
+
 function shielding({ name }) {
-  return `if (req.backend == F_${name} && req.restarts == 0) {
+  return `if (req.backend == ${fname(name)} && req.restarts == 0) {
   if (server.identity !~ "-IAD$" && req.http.Fastly-FF !~ "-IAD") {
     set req.backend = ssl_shield_iad_va_us;
   }
   if (!req.backend.healthy) {
-    set req.backend = F_${name};
+    set req.backend = ${fname(name)};
   }
 }`;
 }
