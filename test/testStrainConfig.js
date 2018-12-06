@@ -133,9 +133,9 @@ describe('Understands Proxy Strains', () => {
     const config = await new HelixConfig().withConfigPath(proxyfile).init();
     const mystrains = config.strains;
     const mybackends = strainconfig.addbackends(mystrains);
-    assert.deepEqual(Object.keys(mybackends), ['Proxy1921681001bcbe']);
+    assert.deepEqual(Object.keys(mybackends), ['Proxy1921681001f402']);
     assert.deepEqual(strainconfig.addbackends(mystrains), {
-      Proxy1921681001bcbe: {
+      Proxy1921681001f402: {
         address: '192.168.100.1',
         between_bytes_timeout: 10000,
         connect_timeout: 1000,
@@ -143,7 +143,7 @@ describe('Understands Proxy Strains', () => {
         first_byte_timeout: 15000,
         hostname: '192.168.100.1',
         max_conn: 200,
-        name: 'Proxy1921681001bcbe',
+        name: 'Proxy1921681001f402',
         port: 4503,
         shield: 'iad-va-us',
         ssl_cert_hostname: '192.168.100.1',
@@ -175,7 +175,7 @@ describe('Understands Proxy Strains', () => {
       foo: "I'm a backend",
     };
     assert.deepStrictEqual(strainconfig.addbackends(mystrains, backends), {
-      Proxy1921681001bcbe: {
+      Proxy1921681001f402: {
         address: '192.168.100.1',
         between_bytes_timeout: 10000,
         connect_timeout: 1000,
@@ -183,7 +183,7 @@ describe('Understands Proxy Strains', () => {
         first_byte_timeout: 15000,
         hostname: '192.168.100.1',
         max_conn: 200,
-        name: 'Proxy1921681001bcbe',
+        name: 'Proxy1921681001f402',
         port: 4503,
         shield: 'iad-va-us',
         ssl_cert_hostname: '192.168.100.1',

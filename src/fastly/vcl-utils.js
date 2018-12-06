@@ -44,13 +44,13 @@ function conditions([strain, vcl]) {
 function proxy([strain, vcl]) {
   if (strain.origin && typeof strain.origin === 'object') {
     const body = vcl.body || [];
-    body.push(`${vcl.body || ''}
-  # Enable passing through of requests
+    body.push(`
+# Enable passing through of requests
 
-  set req.http.X-Proxy = "${strain.origin.address}";
-  set req.http.X-Static = "Proxy";
+set req.http.X-Proxy = "${strain.origin.useSSL ? 'https' : 'http'}://${strain.origin.address}:${strain.origin.port}/";
+set req.http.X-Static = "Proxy";
 
-  set req.backend = F_${strain.origin.name};
+set req.backend = F_${strain.origin.name};
 `);
     return [strain, Object.assign(vcl, { body })];
   }

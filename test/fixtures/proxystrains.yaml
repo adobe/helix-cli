@@ -16,4 +16,4 @@ strains:
         owner: adobe
   proxy:
     url: https://www.new-site.com/old-stuff
-    origin: https://192.168.100.1:4503/old-stuff
+    origin: https://192.168.100.1:4503/
