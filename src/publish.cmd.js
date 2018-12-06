@@ -25,7 +25,7 @@ const include = require('./include-util');
 const useragent = require('./user-agent-util');
 const cli = require('./cli-util');
 const AbstractCommand = require('./abstract.cmd.js');
-const { conditions, resolve } = require('./fastly/vcl-utils');
+const { conditions, resolve, reset } = require('./fastly/vcl-utils');
 
 const HELIX_VCL_DEFAULT_FILE = path.resolve(__dirname, '../layouts/fastly/helix.vcl');
 
@@ -133,7 +133,7 @@ class PublishCommand extends AbstractCommand {
     // number of non-strain-specific dictionaries
     const staticdictionaries = 1;
     const strains = this._strains.length;
-    const vclfiles = 3;
+    const vclfiles = 4;
     const extrarequests = 4;
 
     const ticks = backends
@@ -428,8 +428,9 @@ class PublishCommand extends AbstractCommand {
       return Promise.resolve(this);
     })
       .catch((e) => {
-        const message = 'Unable to activate new configuration';
-        this.log.error(message, e);
+        const message = `Unable to activate new configuration: ${
+          e.error && e.error.msg ? e.error.msg : ''} ${
+          e.error && e.error.detail ? e.error.detail : ''}`;
         throw new Error(message, e);
       });
   }
@@ -548,6 +549,11 @@ ${PublishCommand.makeParamWhitelist(params, '  ')}
   async setDynamicVCL() {
     const vcl = await this.getVersionVCLSection();
     return this.transferVCL(vcl, 'dynamic.vcl');
+  }
+
+  async setResetVCL() {
+    const vcl = reset(this._backends);
+    return this.transferVCL(vcl, 'reset.vcl');
   }
 
   async vclopts(name, vcl) {
@@ -770,6 +776,7 @@ ${PublishCommand.makeParamWhitelist(params, '  ')}
       this.setStrainsVCL(),
       this.setDynamicVCL(),
       this.setParametersVCL(),
+      this.setResetVCL(),
     ]);
     // then set the master VCL file
     await this.setHelixVCL();

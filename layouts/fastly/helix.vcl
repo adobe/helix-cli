@@ -442,6 +442,8 @@ sub vcl_recv {
 
   # run generated vcl
   include "dynamic.vcl";
+  # re-enable shielding for changed backends
+  include "reset.vcl";
 
   return(lookup);
 }
