@@ -107,7 +107,7 @@ describe('Integration test for up command', () => {
       .catch(done);
   }).timeout(5000);
 
-  it('up command delivers modified sources and delivers correct response.', function test(done) {
+  it('up command delivers modified sources and delivers correct response.', (done) => {
     // this test always hangs on the CI, probably due to the parcel workers. ignoring for now.
     const srcFile = path.resolve(testDir, 'src/html2.htl');
     const dstFile = path.resolve(testDir, 'src/html.htl');

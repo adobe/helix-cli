@@ -11,7 +11,6 @@
  */
 
 const glob = require('glob');
-const fs = require('fs');
 const opn = require('opn');
 const readline = require('readline');
 const watch = require('node-watch');
