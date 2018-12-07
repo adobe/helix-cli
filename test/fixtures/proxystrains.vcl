@@ -11,6 +11,7 @@ if (req.http.Host == "www.example.com") {
   set req.http.X-Static = "Proxy";
   
   set req.backend = F_Proxy1921681001f402;
+  set req.http.host = "192.168.100.1";
   
   set req.http.X-Sticky = "false";
   set req.http.X-Strain = "proxy";

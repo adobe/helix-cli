@@ -51,6 +51,7 @@ set req.http.X-Proxy = "${strain.origin.useSSL ? 'https' : 'http'}://${strain.or
 set req.http.X-Static = "Proxy";
 
 set req.backend = F_${strain.origin.name};
+set req.http.host = "${strain.origin.hostname}";
 `);
     return [strain, Object.assign(vcl, { body })];
   }
