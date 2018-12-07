@@ -682,6 +682,7 @@ ${PublishCommand.makeParamWhitelist(params, '  ')}
     const dictJobs = [];
     const makeDictJob = (dictname, strainname, strainvalue, message, shortMsg) => {
       if (strainvalue) {
+        this._logger.debug(`Setting ${strainname} ${dictname}=${strainvalue}`);
         const job = this.putDict(dictname, strainname, strainvalue)
           .then(() => {
             this.tick(1, message, shortMsg);
@@ -774,22 +775,17 @@ ${PublishCommand.makeParamWhitelist(params, '  ')}
       return strain;
     });
 
-    // wait for all dict updates to complete
-    await Promise.all(dictJobs);
-
-    // set all dependent VCL files
+    // do everything at once
     await Promise.all([
+      ...dictJobs,
       this.setStrainsVCL(),
       this.setDynamicVCL(),
       this.setParametersVCL(),
       this.setResetVCL(),
+      this.setHelixVCL(),
+      secretp,
+      ownsp
     ]);
-    // then set the master VCL file
-    await this.setHelixVCL();
-
-    // also wait for the openwhisk namespace
-    await secretp;
-    await ownsp;
   }
 
   async run() {
