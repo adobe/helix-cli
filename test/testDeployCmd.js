@@ -201,7 +201,7 @@ describe('hlx deploy (Integration)', () => {
     fs.remove(path.resolve(test.configFolder, '.hlx'));
   }
 
-  it.only('getDefaultContentTest and content url is ssh', async () => {
+  it('getDefaultContentTest - content url is ssh', async () => {
     await getDefaultContentTest({
       configFolder: `${__dirname}/configs/git`,
       expectedContentURL: 'ssh://github.com/adobe/project-helix.io.git#abranch',
@@ -218,7 +218,7 @@ describe('hlx deploy (Integration)', () => {
     });
   });
 
-  it.only('getDefaultContentTest and content url is https', async () => {
+  it('getDefaultContentTest - content url is https', async () => {
     await getDefaultContentTest({
       configFolder: `${__dirname}/configs/https`,
       expectedContentURL: 'https://github.com/adobe/project-helix.io.git#abranch',
@@ -235,18 +235,56 @@ describe('hlx deploy (Integration)', () => {
     });
   });
 
-  it.only('getDefaultContentTest and content url is in strain', async () => {
+  // TODO review implementation because this is wrong! should not be http://localhost but https://github.com
+  it('getDefaultContentTest - content url is in default strain', async () => {
     await getDefaultContentTest({
       configFolder: `${__dirname}/configs/strain`,
-      expectedContentURL: 'http://localhost/adobe/project-helix.io.git#abranch',
+      expectedContentURL: 'https://github.com/adobe/project-helix.io.git#abranch',
       expectedStrainContent: {
-        protocol: 'http',
-        host: 'localhost',
+        protocol: 'https',
+        host: 'github.com',
         port: '',
-        hostname: 'localhost',
+        hostname: 'github.com',
         owner: 'adobe',
         repo: 'project-helix.io',
         ref: 'abranch',
+        path: '',
+      },
+    });
+  });
+
+  // TODO review because this is meaningless - should fall back to git remote url ?
+  // i.e. helix-cli when running the test case...
+  it('getDefaultContentTest - empty config', async () => {
+    await getDefaultContentTest({
+      configFolder: `${__dirname}/configs/empty`,
+      expectedContentURL: 'https://github.com/adobe/helix-cli.git',
+      expectedStrainContent: {
+        protocol: 'https',
+        host: 'github.com',
+        port: '',
+        hostname: 'github.com',
+        owner: 'adobe',
+        repo: 'helix-cli',
+        ref: '',
+        path: '',
+      },
+    });
+  });
+
+  // TODO review: strain config has priority. Needs to be clear to developer.
+  it('getDefaultContentTest - config contains content and default strain', async () => {
+    await getDefaultContentTest({
+      configFolder: `${__dirname}/configs/dual`,
+      expectedContentURL: 'https://github.com/Adobe-Marketing-Cloud/reactor-user-docs.git#anotherbranch',
+      expectedStrainContent: {
+        protocol: 'https',
+        host: 'github.com',
+        port: '',
+        hostname: 'github.com',
+        owner: 'Adobe-Marketing-Cloud',
+        repo: 'reactor-user-docs',
+        ref: 'anotherbranch',
         path: '',
       },
     });

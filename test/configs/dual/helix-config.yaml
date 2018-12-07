@@ -1,0 +1,8 @@
+content: https://github.com/adobe/project-helix.io.git#abranch
+
+strains:
+  default:
+    content:
+      repo: reactor-user-docs
+      ref: anotherbranch
+      owner: Adobe-Marketing-Cloud

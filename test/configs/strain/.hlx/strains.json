@@ -1,0 +1,36 @@
+{
+  "default": {
+    "name": "default",
+    "code": "/hlx/default/https---github-com-adobe-helix-cli--dirty--",
+    "content": {
+      "protocol": "http",
+      "host": "localhost",
+      "port": "",
+      "hostname": "localhost",
+      "owner": "adobe",
+      "repo": "project-helix.io",
+      "ref": "abranch",
+      "path": ""
+    },
+    "static": {
+      "protocol": "http",
+      "host": "localhost",
+      "port": "",
+      "hostname": "localhost",
+      "owner": "local",
+      "repo": "default",
+      "ref": "",
+      "path": "",
+      "magic": false,
+      "allow": [],
+      "deny": []
+    },
+    "condition": "",
+    "directoryIndex": "index.html",
+    "perf": {
+      "device": "",
+      "location": "",
+      "connection": ""
+    }
+  }
+}
