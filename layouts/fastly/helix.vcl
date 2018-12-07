@@ -241,6 +241,169 @@ sub hlx_backend_recv {
   #end condition
 }
 
+/**
+ * This subroutine implements static file handling by calling
+ * the hlx--static action in OpenWhisk
+ * @header X-GitHub-Static-Owner  the owner or organization of the repo that contains the source files
+ * @header X-GitHub-Static-Repo   the repository name of the repo containing the static files
+ * @header X-GitHub-Static-Ref    the branch or tag (or commit) name to serve source files from
+ * @header X-URL                  the original (unmodified) URL, starting after hostname and port
+ */
+sub hlx_recv_static {
+  # This is a static request.
+  # Load important information from edge dicts
+  call hlx_github_static_owner;
+  set var.owner = req.http.X-Github-Static-Owner;
+
+  call hlx_github_static_repo;
+  set var.repo = req.http.X-Github-Static-Repo;
+
+  call hlx_github_static_ref;
+  set var.ref = req.http.X-Github-Static-Ref;
+
+  call hlx_github_static_root;
+
+  # TODO: check for URL ending with `/` and look up index file
+  set var.path = req.http.X-URL;
+  set var.entry = req.http.X-URL;
+
+  # TODO: load magic flag
+  set req.http.X-Plain = "true";
+
+  # get it from OpenWhisk
+  set req.backend = F_AdobeRuntime;
+
+  set req.http.X-Action-Root = "/api/v1/web/" + table.lookup(secrets, "OPENWHISK_NAMESPACE") + "/default/hlx--static";
+  set req.url = req.http.X-Action-Root + "?owner=" + var.owner + "&repo=" + var.repo + "&strain=" + var.strain + "&ref=" + var.ref + "&entry=" + var.entry + "&path=" + var.path + "&plain=true"  + "&allow=" urlencode(req.http.X-Allow) + "&deny=" urlencode(req.http.X-Deny) + "&root=" + req.http.X-Github-Static-Root;
+
+}
+
+/**
+ * Handle redirect-serving for static files
+ * If the static file is too large for the hlx--static action to serve,
+ * because the payload would exceed 1 MB (OpenWhisk limit), the request
+ * is restarted, using the `X-Static: Redirect` header, which means the
+ * static content will be fetched directly from GitHub, and the required
+ * response headers like Content-Type will be injected later on.
+ */
+sub hlx_recv_redirect {
+  # Handle a redirect from static.js by
+  # - fetching the resource from GitHub
+  # - don't forget to override the Content-Type header
+  set req.backend = F_GitHub;
+
+  //(!req.http.Fastly-FF && req.http.Fastly-SSL && (req.url.basename ~ "(^[^\.]+)(\.?(.+))?(\.[^\.]*$)" || req.url.basename == ""))
+}
+
+/**
+ * Handle requests to Adobe I/O Runtime services.
+ * When Fastly handles ESI requests to 3rd-party domains, they still get routed
+ * through this service. In this method we make sure that ESI requests destined
+ * for Adobe I/O Runtime, e.g. the helix-embed service are passed through to
+ * the correct backend.
+ */
+sub hlx_recv_embed {
+  # This is an embed request
+  # Fastly sends embed requests back to the same service config (which is why
+  # we are handling it here), but keeps the correct Host header in place (which
+  # is why we can check against it)
+
+  set req.backend = F_AdobeRuntime;
+
+  # make sure we hit the right backend
+  # and keep everything else in place
+
+  set req.http.X-Embed = req.http.X-URL;
+}
+
+/**
+ * Handles requests for the main Helix rendering pipeline.
+ */
+sub hlx_recv_pipeline {
+  # This is a dynamic request.
+
+  # Load important information from edge dicts
+  call hlx_owner;
+  set var.owner = req.http.X-Owner;
+
+  call hlx_repo;
+  set var.repo = req.http.X-Repo;
+
+  call hlx_ref;
+  set var.ref = req.http.X-Ref;
+
+  call hlx_root_path;
+  if (req.http.X-Dirname) {
+    # set root path based on strain-specific dirname (strips away strain root)
+    set var.dir = req.http.X-Root-Path + req.http.X-Dirname;
+  } else {
+    set var.dir = req.http.X-Root-Path + req.url.dirname;
+  }
+  set var.dir = regsuball(var.dir, "/+", "/");
+
+  # repeat the regex in case another re-function has been called in the meantime
+  if (req.url.basename ~ "(^[^\.]+)(\.?(.+))?(\.[^\.]*$)") {
+    set var.name = re.group.1;
+    set var.selector = re.group.3;
+    set var.extension = regsub(req.url.ext, "^\.", "");
+  } else {
+    call hlx_index;
+    # enable ESI
+    set req.http.x-esi = "1";
+    if (req.http.X-Index ~ "(^[^\.]+)\.?(.*)\.([^\.]+$)") {
+      # determine directory index from strain config
+      set var.name = re.group.1;
+      set var.selector = re.group.2;
+      set var.extension = re.group.3;
+    } else {
+      # force default directory index
+      set req.http.X-Index = "default";
+      set var.name = "index";
+      set var.selector = "";
+      set var.extension = "html";
+    }
+  }
+
+  call hlx_action_root;
+
+  if (var.selector ~ ".+") {
+    set var.action = req.http.X-Action-Root + var.selector + "_" + var.extension;
+  } else {
+    set var.action = req.http.X-Action-Root + var.extension;
+  }
+
+  # check for images, and get them from GitHub
+  if (req.url.ext ~ "(?i)^(?:gif|png|jpe?g|webp)$") {
+    set var.path = var.dir + "/" + req.url.basename;
+    set var.path = regsuball(var.path, "/+", "/");
+    set req.url = "/" + var.owner + "/" + var.repo + "/" + var.ref + var.path + "?" + req.url.qs;
+
+    # enable IO for image file-types
+    set req.http.X-Fastly-Imageopto-Api = "fastly";
+  } else {
+    # get (strain-specific) parameter whitelist
+    include "params.vcl";
+
+
+    set var.path = var.dir + "/" + var.name + ".md";
+    set var.path = regsuball(var.path, "/+", "/");
+    # Invoke OpenWhisk
+    set req.url = "/api/v1/web" + var.action + 
+      "?owner=" + var.owner + 
+      "&repo=" + var.repo + 
+      "&ref=" + var.ref + 
+      "&path=" + var.path + 
+      "&selector=" + var.selector + 
+      "&extension=" + req.url.ext + 
+      "&branch=" + var.branch + 
+      "&strain=" + var.strain + 
+      "&params=" + req.http.X-Encoded-Params;
+  }
+}
+
+/**
+ * This is where all requests are received.
+ */
 sub vcl_recv {
 #FASTLY recv
 
@@ -278,7 +441,7 @@ sub vcl_recv {
     # disable ESI processing on Origin Shield
     set req.esi = false;
   } elseif ( req.url.ext == "html" ) {
-       set req.http.x-esi = "1";
+    set req.http.x-esi = "1";
   }
 
   set var.branch = "www";
@@ -298,143 +461,21 @@ sub vcl_recv {
   set req.http.X-Branch = var.branch;
 
 
+  # Determine the current strain and execute strain-specific code
   call hlx_strain;
   set var.strain = req.http.X-Strain;
 
   # block bad requests – needs current strain and unchanged req.url
   call hlx_block_recv;
 
-  # Parse the Request URL, if this is a proper SSL-request
-  # (non-SSL gets redirected) to SSL-equivalent
-
-
   if (req.http.Fastly-SSL && (req.http.X-Static == "Static")) {
-    # This is a static request.
-
-    # Load important information from edge dicts
-    call hlx_github_static_owner;
-    set var.owner = req.http.X-Github-Static-Owner;
-
-    call hlx_github_static_repo;
-    set var.repo = req.http.X-Github-Static-Repo;
-
-    call hlx_github_static_ref;
-    set var.ref = req.http.X-Github-Static-Ref;
-
-    call hlx_github_static_root;
-
-    # TODO: check for URL ending with `/` and look up index file
-    set var.path = req.http.X-URL;
-    set var.entry = req.http.X-URL;
-
-    # TODO: load magic flag
-    set req.http.X-Plain = "true";
-
-    # get it from OpenWhisk
-    set req.backend = F_AdobeRuntime;
-
-    set req.http.X-Action-Root = "/api/v1/web/" + table.lookup(secrets, "OPENWHISK_NAMESPACE") + "/default/hlx--static";
-    set req.url = req.http.X-Action-Root + "?owner=" + var.owner + "&repo=" + var.repo + "&strain=" + var.strain + "&ref=" + var.ref + "&entry=" + var.entry + "&path=" + var.path + "&plain=true"  + "&allow=" urlencode(req.http.X-Allow) + "&deny=" urlencode(req.http.X-Deny) + "&root=" + req.http.X-Github-Static-Root;
-
+    call hlx_recv_static;
   } elseif (req.http.Fastly-SSL && (req.http.X-Static == "Redirect")) {
-    # Handle a redirect from static.js by
-    # - fetching the resource from GitHub
-    # - don't forget to override the Content-Type header
-    set req.backend = F_GitHub;
-
-        //(!req.http.Fastly-FF && req.http.Fastly-SSL && (req.url.basename ~ "(^[^\.]+)(\.?(.+))?(\.[^\.]*$)" || req.url.basename == ""))
+    call hlx_recv_redirect;
   } elseif (req.http.Fastly-SSL && req.http.host == "adobeioruntime.net") {
-    # This is an embed request
-    # Fastly sends embed requests back to the same service config (which is why
-    # we are handling it here), but keeps the correct Host header in place (which
-    # is why we can check against it)
-
-    set req.backend = F_AdobeRuntime;
-
-    # make sure we hit the right backend
-    # and keep everything else in place
-
-    set req.http.X-Embed = req.http.X-URL;
+    call hlx_recv_embed;
   } elsif (req.http.Fastly-SSL) {
-    # This is a dynamic request.
-
-    # Load important information from edge dicts
-    call hlx_owner;
-    set var.owner = req.http.X-Owner;
-
-    call hlx_repo;
-    set var.repo = req.http.X-Repo;
-
-    call hlx_ref;
-    set var.ref = req.http.X-Ref;
-
-    call hlx_root_path;
-    if (req.http.X-Dirname) {
-      # set root path based on strain-specific dirname (strips away strain root)
-      set var.dir = req.http.X-Root-Path + req.http.X-Dirname;
-    } else {
-      set var.dir = req.http.X-Root-Path + req.url.dirname;
-    }
-    set var.dir = regsuball(var.dir, "/+", "/");
-
-    # repeat the regex in case another re-function has been called in the meantime
-    if (req.url.basename ~ "(^[^\.]+)(\.?(.+))?(\.[^\.]*$)") {
-      set var.name = re.group.1;
-      set var.selector = re.group.3;
-      set var.extension = regsub(req.url.ext, "^\.", "");
-    } else {
-      call hlx_index;
-      # enable ESI
-      set req.http.x-esi = "1";
-      if (req.http.X-Index ~ "(^[^\.]+)\.?(.*)\.([^\.]+$)") {
-        # determine directory index from strain config
-        set var.name = re.group.1;
-        set var.selector = re.group.2;
-        set var.extension = re.group.3;
-      } else {
-        # force default directory index
-        set req.http.X-Index = "default";
-        set var.name = "index";
-        set var.selector = "";
-        set var.extension = "html";
-      }
-    }
-
-    call hlx_action_root;
-
-    if (var.selector ~ ".+") {
-      set var.action = req.http.X-Action-Root + var.selector + "_" + var.extension;
-    } else {
-      set var.action = req.http.X-Action-Root + var.extension;
-    }
-
-    # check for images, and get them from GitHub
-    if (req.url.ext ~ "(?i)^(?:gif|png|jpe?g|webp)$") {
-      set var.path = var.dir + "/" + req.url.basename;
-      set var.path = regsuball(var.path, "/+", "/");
-      set req.url = "/" + var.owner + "/" + var.repo + "/" + var.ref + var.path + "?" + req.url.qs;
-
-      # enable IO for image file-types
-      set req.http.X-Fastly-Imageopto-Api = "fastly";
-    } else {
-      # get (strain-specific) parameter whitelist
-      include "params.vcl";
-
-
-      set var.path = var.dir + "/" + var.name + ".md";
-      set var.path = regsuball(var.path, "/+", "/");
-      # Invoke OpenWhisk
-      set req.url = "/api/v1/web" + var.action + 
-        "?owner=" + var.owner + 
-        "&repo=" + var.repo + 
-        "&ref=" + var.ref + 
-        "&path=" + var.path + 
-        "&selector=" + var.selector + 
-        "&extension=" + req.url.ext + 
-        "&branch=" + var.branch + 
-        "&strain=" + var.strain + 
-        "&params=" + req.http.X-Encoded-Params;
-    }
+    call hlx_recv_pipeline;
   }
 
   # set X-Version initial value
