@@ -784,7 +784,7 @@ ${PublishCommand.makeParamWhitelist(params, '  ')}
       this.setResetVCL(),
       this.setHelixVCL(),
       secretp,
-      ownsp
+      ownsp,
     ]);
   }
 
