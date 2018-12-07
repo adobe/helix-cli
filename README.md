@@ -278,6 +278,33 @@ strains:
       owner: Adobe-Marketing-Cloud
 ```
 
+## Mixing old and new Content
+
+Helix can run old and new versions of the same site side by side, and even intermixed. This allows you to gradually upgrade to using Helix. 
+
+If you want to serve content from another origin server, just add the property `origin` to any strain. `code`, `content`, `directoryIndex`, and most other properties will then be ignored, as all content for that strain will be retrieved from the URL specified in `origin`.
+
+You are still able to set strain `conditions` or assign traffic to a strain based on the `url` property. 
+
+```yaml
+strains:
+  default:
+    code: /trieloff/default/git-github-com-trieloff-helix-demo-git--dirty--
+    content: https://github.com/trieloff/helix-demo.git
+    static: https://github.com/trieloff/helix-demo.git
+  oldcontent:
+    origin: https://www.adobe.io
+    url: https://www.primordialsoup.life/content/
+  proxy:
+    origin: https://www.adobe.io
+    condition: req.http.host == "proxy.primordialsoup.life"
+```
+
+In the example above, there are three strains: `default` serves content from `www.primordialsoup.life` using Helix. But all URLs that start with `https://www.primordialsoup.life/content/` will be served from `www.adobe.io`. This means an image that is referenced as `/content/example.png` will be served from the Adobe I/O website.
+
+Finally, on `proxy.primordialsoup.life`, all content of the old site is being served. This allows you to easily switch back to an old configuration.
+
+
 ## (Recommended) Performance Testing
 
 You can (and should) test the performance of your deployed site by running `hlx perf`.

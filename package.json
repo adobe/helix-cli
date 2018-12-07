@@ -8,7 +8,7 @@
   },
   "scripts": {
     "test": "nyc mocha --exit",
-    "record": "MODE=record mocha test/testPublishCmd.js -g \"Publish Strains on an existing Service Config\"",
+    "record": "rm -rf test/fixtures/api.fastly.com-443 && MODE=record mocha test/testPublishCmd.js -g \"Publish Strains on an existing Service Config\"",
     "junit": "mocha --exit -R mocha-junit-reporter",
     "lint": "./node_modules/.bin/eslint .",
     "preversion": "npm run junit",

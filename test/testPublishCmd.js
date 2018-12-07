@@ -16,16 +16,16 @@ const Replay = require('replay');
 const fs = require('fs-extra');
 const path = require('path');
 const assert = require('assert');
-const { createTestRoot } = require('./utils.js');
+const { HelixConfig } = require('@adobe/helix-shared');
+const { createTestRoot, createLogger } = require('./utils.js');
 const PublishCommand = require('../src/publish.cmd');
-const strainconfig = require('../src/strain-config-utils');
 
 // disable replay for this test
 Replay.mode = 'bloody';
 Replay.fixtures = path.resolve(__dirname, 'fixtures');
 
 let FASTLY_AUTH = '---';
-const FASTLY_NAMESPACE = '5mNJ6qXkeETj7FyLtRuWl5';
+const FASTLY_NAMESPACE = '1s45RKXKEjuo2s0GWrF391';
 let WSK_AUTH = 'nope';
 let WSK_NAMESPACE = '---';
 
@@ -39,33 +39,78 @@ describe('hlx strain #unit', () => {
     const globs2 = ['test/**', 'test*.js'];
     assert.equal(PublishCommand.makeRegexp(globs2), '^test\\/.*$|^test.*\\.js$');
   });
+
+  it('loadStrains() #unit', async () => {
+    const cmd = new PublishCommand();
+
+    cmd.withConfigFile(path.resolve(__dirname, 'fixtures/proxystrains.yaml'));
+    await cmd.loadStrains();
+    /* eslint-disable no-underscore-dangle */
+    assert.ok(cmd._strains);
+    assert.equal(cmd._strains.length, 3);
+  });
 });
 
 describe('Dynamic Strain (VCL) generation', () => {
-  it('getStrainResolutionVCL generates VLC for empty strains', () => {
-    const strainfile = strainconfig.load(fs.readFileSync(path.resolve(__dirname, 'fixtures/empty.yaml'), 'utf-8'));
+  it('getStrainResolutionVCL generates VLC for empty strains', async () => {
+    const strainfile = path.resolve(__dirname, 'fixtures/empty.yaml');
+    const config = await new HelixConfig().withConfigPath(strainfile).init();
+    const mystrains = Array.from(config.strains.values());
+
     const vclfile = fs.readFileSync(path.resolve(__dirname, 'fixtures/empty.vcl')).toString();
-    assert.equal(vclfile, PublishCommand.getStrainResolutionVCL(strainfile));
+    assert.equal(vclfile, PublishCommand.getStrainResolutionVCL(mystrains));
   });
 
-  it('getStrainResolutionVCL generates VLC for non-existing conditions strains', () => {
-    const strainfile = strainconfig.load(fs.readFileSync(path.resolve(__dirname, 'fixtures/default.yaml'), 'utf-8'));
+  it('getStrainResolutionVCL generates VLC for non-existing conditions strains', async () => {
+    const strainfile = path.resolve(__dirname, 'fixtures/default.yaml');
+    const config = await new HelixConfig().withConfigPath(strainfile).init();
+    const mystrains = Array.from(config.strains.values());
+
     const vclfile = fs.readFileSync(path.resolve(__dirname, 'fixtures/default.vcl')).toString();
-    assert.equal(vclfile, PublishCommand.getStrainResolutionVCL(strainfile));
+    assert.equal(vclfile, PublishCommand.getStrainResolutionVCL(mystrains));
   });
 
-  it('getStrainResolutionVCL generates VLC for simple conditions strains', () => {
-    const strainfile = strainconfig.load(fs.readFileSync(path.resolve(__dirname, 'fixtures/simple-condition.yaml'), 'utf-8'));
+  it('getStrainResolutionVCL generates VLC for simple conditions strains', async () => {
+    const strainfile = path.resolve(__dirname, 'fixtures/simple-condition.yaml');
+    const config = await new HelixConfig().withConfigPath(strainfile).init();
+    const mystrains = Array.from(config.strains.values());
+
     const vclfile = fs.readFileSync(path.resolve(__dirname, 'fixtures/simple-condition.vcl')).toString();
     // console.log(PublishCommand.getStrainResolutionVCL(strainfile));
-    assert.equal(vclfile.trim(), PublishCommand.getStrainResolutionVCL(strainfile).trim());
+    assert.equal(vclfile.trim(), PublishCommand.getStrainResolutionVCL(mystrains).trim());
   });
 
-  it('getStrainResolutionVCL generates VLC for URL-based conditions', () => {
-    const strainfile = strainconfig.load(fs.readFileSync(path.resolve(__dirname, 'fixtures/urls.yaml'), 'utf-8'));
+  it('getStrainResolutionVCL generates VLC for URL-based conditions', async () => {
+    const strainfile = path.resolve(__dirname, 'fixtures/urls.yaml');
+    const config = await new HelixConfig().withConfigPath(strainfile).init();
+    const mystrains = Array.from(config.strains.values());
+
     const vclfile = fs.readFileSync(path.resolve(__dirname, 'fixtures/urls.vcl')).toString();
     // console.log(PublishCommand.getStrainResolutionVCL(strainfile));
-    assert.equal(vclfile.trim(), PublishCommand.getStrainResolutionVCL(strainfile).trim());
+    assert.equal(vclfile.trim(), PublishCommand.getStrainResolutionVCL(mystrains).trim());
+  });
+
+  it('getStrainResolutionVCL generates VLC for proxy strains', async () => {
+    const strainfile = path.resolve(__dirname, 'fixtures/proxystrains.yaml');
+    const config = await new HelixConfig().withConfigPath(strainfile).init();
+    const mystrains = Array.from(config.strains.values());
+
+    const vclfile = fs.readFileSync(path.resolve(__dirname, 'fixtures/proxystrains.vcl')).toString();
+    assert.equal(vclfile.trim(), PublishCommand.getStrainResolutionVCL(mystrains).trim());
+  });
+
+  it('initFastly generates new backends for defined Proxies', async () => {
+    const strainfile = path.resolve(__dirname, 'fixtures/proxystrains.yaml');
+    const cmd = new PublishCommand(createLogger()).withConfigFile(strainfile);
+    try {
+      await cmd.loadStrains();
+      await cmd.initFastly();
+    } catch (e) {
+      // we expect initFastly to fail
+      assert.equal(e.statusCode, 401);
+    }
+    assert.equal(Object.keys(cmd._backends).length, 3);
+    assert.ok(cmd._backends.Proxy1921681001f402);
   });
 });
 
