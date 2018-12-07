@@ -14,6 +14,7 @@ const glob = require('glob');
 const fs = require('fs');
 const opn = require('opn');
 const readline = require('readline');
+const watch = require('node-watch');
 const { HelixProject } = require('@adobe/helix-simulator');
 const BuildCommand = require('./build.cmd');
 const pkgJson = require('../package.json');
@@ -65,7 +66,7 @@ class UpCommand extends BuildCommand {
   _initSourceWatcher(fn) {
     let timer = null;
     let modifiedFiles = {};
-    this._watcher = fs.watch(this.directory, {
+    this._watcher = watch(this.directory, {
       recursive: true,
     }, (eventType, filename) => {
       if (filename.indexOf('src/') < 0 && filename !== HELIX_CONFIG) {
