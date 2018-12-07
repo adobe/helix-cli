@@ -193,8 +193,6 @@ sub hlx_headers_deliver {
   if( req.http.X-Debug ) {
     # Header rewrite Backend URL : 10
     set resp.http.X-Backend-URL = req.url;
-    # Header rewrite Branch : 10
-    set resp.http.X-Branch = req.http.X-Branch;
     # Header rewrite Strain : 10
     set resp.http.X-Strain = req.http.X-Strain;
     # Header rewrite Strain : 10
@@ -251,6 +249,22 @@ sub hlx_backend_recv {
  */
 sub hlx_recv_static {
   # This is a static request.
+
+  # declare local variables
+  declare local var.owner STRING; # the GitHub user or org, e.g. adobe
+  declare local var.repo STRING; # the GitHub repo, e.g. project-helix
+  declare local var.ref STRING; # the GitHub branch or revision, e.g. master
+  declare local var.dir STRING; # the directory of the content
+  declare local var.name STRING; # the name (without extension) of the resource
+  declare local var.selector STRING; # the selector (between name and extension)
+  declare local var.extension STRING;
+  declare local var.strain STRING; # the resolved strain
+  declare local var.action STRING; # the action to call
+  declare local var.path STRING; # resource path
+  declare local var.entry STRING; # bundler entry point
+
+  set var.strain = req.http.X-Strain;
+
   # Load important information from edge dicts
   call hlx_github_static_owner;
   set var.owner = req.http.X-Github-Static-Owner;
@@ -321,6 +335,21 @@ sub hlx_recv_embed {
  */
 sub hlx_recv_pipeline {
   # This is a dynamic request.
+
+  # declare local variables
+  declare local var.owner STRING; # the GitHub user or org, e.g. adobe
+  declare local var.repo STRING; # the GitHub repo, e.g. project-helix
+  declare local var.ref STRING; # the GitHub branch or revision, e.g. master
+  declare local var.dir STRING; # the directory of the content
+  declare local var.name STRING; # the name (without extension) of the resource
+  declare local var.selector STRING; # the selector (between name and extension)
+  declare local var.extension STRING;
+  declare local var.strain STRING; # the resolved strain
+  declare local var.action STRING; # the action to call
+  declare local var.path STRING; # resource path
+  declare local var.entry STRING; # bundler entry point
+
+  set var.strain = req.http.X-Strain;
 
   # Load important information from edge dicts
   call hlx_owner;
@@ -395,10 +424,18 @@ sub hlx_recv_pipeline {
       "&path=" + var.path + 
       "&selector=" + var.selector + 
       "&extension=" + req.url.ext + 
-      "&branch=" + var.branch + 
       "&strain=" + var.strain + 
       "&params=" + req.http.X-Encoded-Params;
   }
+}
+
+/**
+ * Handle requests to Proxy Strains.
+ * These requests already have a backend set as part of the strain resolution
+ * so there is no need for URL rewriting.
+ */
+sub hlx_recv_proxy {
+
 }
 
 /**
@@ -418,24 +455,10 @@ sub vcl_recv {
     set req.http.X-URL = req.url;
   }
   
-
+  # We only handle GET and HEAD requests
   if (req.request != "HEAD" && req.request != "GET" && req.request != "FASTLYPURGE") {
     return(pass);
   }
-
-  # shorten URL
-  declare local var.owner STRING; # the GitHub user or org, e.g. adobe
-  declare local var.repo STRING; # the GitHub repo, e.g. project-helix
-  declare local var.ref STRING; # the GitHub branch or revision, e.g. master
-  declare local var.dir STRING; # the directory of the content
-  declare local var.name STRING; # the name (without extension) of the resource
-  declare local var.selector STRING; # the selector (between name and extension)
-  declare local var.extension STRING;
-  declare local var.branch STRING; # the branch of helix code to execute
-  declare local var.strain STRING; # the resolved strain
-  declare local var.action STRING; # the action to call
-  declare local var.path STRING; # resource path
-  declare local var.entry STRING; # bundler entry point
 
   if (req.http.Fastly-FF) {
     # disable ESI processing on Origin Shield
@@ -444,38 +467,31 @@ sub vcl_recv {
     set req.http.x-esi = "1";
   }
 
-  set var.branch = "www";
-
-  if (req.http.Host ~ "^([^\.]+)\..+$") {
-    set var.branch = re.group.1;
-  }
-
-  if (var.branch == "www") {
-    set var.branch = "master";
-  }
-
   set req.http.X-Orig-Host = req.http.Fastly-Orig-Host;
   # set req.http.X-URL = req.url;
   set req.http.X-Host = req.http.Host;
 
-  set req.http.X-Branch = var.branch;
-
 
   # Determine the current strain and execute strain-specific code
   call hlx_strain;
-  set var.strain = req.http.X-Strain;
 
   # block bad requests – needs current strain and unchanged req.url
   call hlx_block_recv;
 
-  if (req.http.Fastly-SSL && (req.http.X-Static == "Static")) {
-    call hlx_recv_static;
-  } elseif (req.http.Fastly-SSL && (req.http.X-Static == "Redirect")) {
-    call hlx_recv_redirect;
-  } elseif (req.http.Fastly-SSL && req.http.host == "adobeioruntime.net") {
-    call hlx_recv_embed;
-  } elsif (req.http.Fastly-SSL) {
-    call hlx_recv_pipeline;
+
+  if (req.http.Fastly-SSL) {
+    # we enforce SSL for Helix
+    if (req.http.X-Static == "Proxy") {
+      call hlx_recv_proxy;
+    } elseif (req.http.X-Static == "Static") {
+      call hlx_recv_static;
+    } elseif (req.http.X-Static == "Redirect") {
+      call hlx_recv_redirect;
+    } elseif (req.http.host == "adobeioruntime.net") {
+      call hlx_recv_embed;
+    } else {
+      call hlx_recv_pipeline;
+    }
   }
 
   # set X-Version initial value
@@ -681,7 +697,6 @@ sub vcl_deliver {
     unset resp.http.Via;
     unset resp.http.X-Backend-Name;
     unset resp.http.X-Backend-URL;
-    unset resp.http.X-Branch;
     unset resp.http.X-Cache-Hits;
     unset resp.http.X-Cache;
     unset resp.http.X-CDN-Request-ID;
