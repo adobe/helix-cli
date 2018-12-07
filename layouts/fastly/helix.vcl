@@ -12,6 +12,7 @@
 
 # Determines the current strain, and sets the X-Strain header
 sub hlx_strain {
+  set req.http.X-Trace = req.http.X-Trace + "; hlx_strain";
   # TODO: add X-Strain-Key as a random-generated, validation property
   # read strain from URL query string
   if (subfield(req.url.qs, "hlx_strain", "&")) {
@@ -34,6 +35,8 @@ sub hlx_strain {
 
 # Gets the content whitelist for the current strain and sets the X-Allow header
 sub hlx_allow {
+  set req.http.X-Trace = req.http.X-Trace + "; hlx_allow";
+
   # starting permissive – change this for a more restrictive default
   set req.http.X-Allow = ".*";
   set req.http.X-Allow = table.lookup(strain_allow, req.http.X-Strain);
@@ -44,6 +47,8 @@ sub hlx_allow {
 
 # Gets the content blacklist for the current strain and sets the X-Deny header
 sub hlx_deny {
+  set req.http.X-Trace = req.http.X-Trace + "; hlx_deny";
+
   set req.http.X-Deny = "^.hlx$";
   set req.http.X-Deny = table.lookup(strain_deny, req.http.X-Strain);
   if (!req.http.X-Deny) {
@@ -53,12 +58,16 @@ sub hlx_deny {
 
 # Implements the content block list (to be called from vcl_recv)
 sub hlx_block_recv {
+  set req.http.X-Trace = req.http.X-Trace + "; hlx_block_recv";
+
   call hlx_deny;
   call hlx_allow;
 }
 
 # Gets the content owner for the current strain and sets the X-Owner header
 sub hlx_owner {
+  set req.http.X-Trace = req.http.X-Trace + "; hlx_owner";
+
   set req.http.X-Owner = table.lookup(strain_owners, req.http.X-Strain);
   if (!req.http.X-Owner) {
     set req.http.X-Owner = table.lookup(strain_owners, "default");
@@ -67,6 +76,8 @@ sub hlx_owner {
 
 # Gets the directory index for the current strain
 sub hlx_index {
+  set req.http.X-Trace = req.http.X-Trace + "; hlx_index";
+
   set req.http.X-Index = table.lookup(strain_index_files, req.http.X-Strain);
   if (!req.http.X-Index) {
     set req.http.X-Index = table.lookup(strain_index_files, "default");
@@ -75,6 +86,7 @@ sub hlx_index {
 
 # Gets the content repo
 sub hlx_repo {
+  set req.http.X-Trace = req.http.X-Trace + "; hlx_repo";
   set req.http.X-Repo = table.lookup(strain_repos, req.http.X-Strain);
   if (!req.http.X-Repo) {
     set req.http.X-Repo = table.lookup(strain_repos, "default");
@@ -83,6 +95,7 @@ sub hlx_repo {
 
 # Gets the content ref
 sub hlx_ref {
+  set req.http.X-Trace = req.http.X-Trace + "; hlx_ref";
   set req.http.X-Ref = table.lookup(strain_refs, req.http.X-Strain);
   # fall back to default strain
   if (!req.http.X-Ref) {
@@ -96,6 +109,7 @@ sub hlx_ref {
 
 # Gets the content path root
 sub hlx_root_path {
+  set req.http.X-Trace = req.http.X-Trace + "; hlx_root_path";
   set req.http.X-Root-Path = table.lookup(strain_root_paths, req.http.X-Strain);
   if (!req.http.X-Root-Path) {
     set req.http.X-Root-Path = table.lookup(strain_root_paths, "default");
@@ -106,6 +120,7 @@ sub hlx_root_path {
 }
 
 sub hlx_action_root {
+  set req.http.X-Trace = req.http.X-Trace + "; hlx_action_root";
   set req.http.X-Action-Root = table.lookup(strain_action_roots, req.http.X-Strain);
   if (!req.http.X-Action-Root) {
     set req.http.X-Action-Root = table.lookup(strain_action_roots, "default");
@@ -115,6 +130,7 @@ sub hlx_action_root {
 
 # Gets the github static repo
 sub hlx_github_static_repo {
+  set req.http.X-Trace = req.http.X-Trace + "; hlx_github_static_repo";
   set req.http.X-Github-Static-Repo = table.lookup(strain_github_static_repos, req.http.X-Strain);
   if (!req.http.X-Github-Static-Repo) {
     set req.http.X-Github-Static-Repo = table.lookup(strain_github_static_repos, "default");
@@ -123,6 +139,7 @@ sub hlx_github_static_repo {
 
 # Gets the github static owner
 sub hlx_github_static_owner {
+  set req.http.X-Trace = req.http.X-Trace + "; hlx_github_static_owner";
   set req.http.X-Github-Static-Owner = table.lookup(strain_github_static_owners, req.http.X-Strain);
   if (!req.http.X-Github-Static-Owner) {
     set req.http.X-Github-Static-Owner = table.lookup(strain_github_static_owners, "default");
@@ -131,6 +148,7 @@ sub hlx_github_static_owner {
 
 # Gets the github static root
 sub hlx_github_static_root {
+  set req.http.X-Trace = req.http.X-Trace + "; hlx_github_static_root";
   set req.http.X-Github-Static-Root = table.lookup(strain_github_static_root, req.http.X-Strain);
   if (!req.http.X-Github-Static-Root) {
     set req.http.X-Github-Static-Root = table.lookup(strain_github_static_root, "default");
@@ -142,6 +160,7 @@ sub hlx_github_static_root {
 
 # Gets the github static ref
 sub hlx_github_static_ref {
+  set req.http.X-Trace = req.http.X-Trace + "; hlx_github_static_ref";
   set req.http.X-Github-Static-Ref = table.lookup(strain_github_static_refs, req.http.X-Strain);
   if (!req.http.X-Github-Static-Ref) {
     set req.http.X-Github-Static-Ref = table.lookup(strain_github_static_refs, "default");
@@ -150,6 +169,7 @@ sub hlx_github_static_ref {
 
 # rewrite required headers (called from recv)
 sub hlx_headers_recv {
+  set req.http.X-Trace = req.http.X-Trace + "; hlx_headers_recv";
   # default conditions
   if (!req.http.Fastly-SSL) {
      error 801 "Force SSL";
@@ -169,6 +189,7 @@ sub hlx_headers_recv {
 
 # rewrite required headers (called from fetch)
 sub hlx_headers_fetch {
+  set req.http.X-Trace = req.http.X-Trace + "; hlx_headers_fetch";
   if ( req.http.X-Debug ) {
     # Header rewrite Backend Name : 10
     if (!beresp.http.X-Backend-Name) {
@@ -182,6 +203,7 @@ sub hlx_headers_fetch {
 }
 
 sub hlx_headers_deliver {
+  set req.http.X-Trace = req.http.X-Trace + "; hlx_headers_deliver";
   # Header rewrite HSTS : 10
   set resp.http.Strict-Transport-Security = "max-age=31536000; includeSubDomains";
   # Header rewrite Host : 10
@@ -207,6 +229,8 @@ sub hlx_headers_deliver {
     set resp.http.X-Fastly-Imageopto-Api = req.http.X-Fastly-Imageopto-Api;
 
     set resp.http.X-Embed = req.http.X-Embed;
+
+    set resp.http.X-Trace = req.http.X-Trace;
  }
 
   call hlx_deliver_errors;
@@ -214,6 +238,7 @@ sub hlx_headers_deliver {
 
 # set backend (called from recv)
 sub hlx_backend_recv {
+  set req.http.X-Trace = req.http.X-Trace + "; hlx_backend_recv";
   set req.backend = F_AdobeRuntime;
 
   # Request Condition: Binaries only Prio: 10
@@ -248,6 +273,7 @@ sub hlx_backend_recv {
  * @header X-URL                  the original (unmodified) URL, starting after hostname and port
  */
 sub hlx_recv_static {
+  set req.http.X-Trace = req.http.X-Trace + "; hlx_recv_static";
   # This is a static request.
 
   # declare local variables
@@ -301,6 +327,7 @@ sub hlx_recv_static {
  * response headers like Content-Type will be injected later on.
  */
 sub hlx_recv_redirect {
+  set req.http.X-Trace = req.http.X-Trace + "; hlx_recv_redirect";
   # Handle a redirect from static.js by
   # - fetching the resource from GitHub
   # - don't forget to override the Content-Type header
@@ -317,6 +344,7 @@ sub hlx_recv_redirect {
  * the correct backend.
  */
 sub hlx_recv_embed {
+  set req.http.X-Trace = req.http.X-Trace + "; hlx_recv_embed";
   # This is an embed request
   # Fastly sends embed requests back to the same service config (which is why
   # we are handling it here), but keeps the correct Host header in place (which
@@ -334,6 +362,7 @@ sub hlx_recv_embed {
  * Handles requests for the main Helix rendering pipeline.
  */
 sub hlx_recv_pipeline {
+  set req.http.X-Trace = req.http.X-Trace + "; hlx_recv_pipeline";
   # This is a dynamic request.
 
   # declare local variables
@@ -435,6 +464,7 @@ sub hlx_recv_pipeline {
  * so there is no need for URL rewriting.
  */
 sub hlx_recv_proxy {
+  set req.http.X-Trace = req.http.X-Trace + "; hlx_recv_proxy";
 
 }
 
@@ -443,6 +473,11 @@ sub hlx_recv_proxy {
  */
 sub vcl_recv {
 #FASTLY recv
+  if (req.http.X-Trace) {
+    set req.http.X-Trace = req.http.X-Trace + "; vcl_recv";
+  } else {
+    set req.http.X-Trace = "vcl_recv";
+  }
 
   call hlx_headers_recv;
   call hlx_backend_recv;
@@ -500,12 +535,13 @@ sub vcl_recv {
   # run generated vcl
   include "dynamic.vcl";
   # re-enable shielding for changed backends
-  #include "reset.vcl";
+  # include "reset.vcl";
 
   return(lookup);
 }
 
 sub hlx_fetch_errors {
+  set req.http.X-Trace = req.http.X-Trace + "; hlx_fetch_errors";
   # Interpreting OpenWhisk errors is a bit tricky, because we don't have access to the JSON
   # of the response body. Instead we are using the Content-Length of known error messages
   # to determine the most likely root cause. Each root cause will get an internal status code
@@ -527,6 +563,7 @@ sub hlx_fetch_errors {
 }
 
 sub hlx_deliver_errors {
+  set req.http.X-Trace = req.http.X-Trace + "; hlx_deliver_errors";
 
   # Cache Condition: OpenWhisk Error Prio: 10
   if (resp.status == 951 ) {
@@ -544,6 +581,7 @@ sub hlx_deliver_errors {
 }
 
 sub hlx_error_errors {
+  set req.http.X-Trace = req.http.X-Trace + "; hlx_error_errors";
   # Cache Condition: OpenWhisk Error Prio: 10
   if (obj.status == 951 ) {
     set obj.http.Content-Type = "text/html";
@@ -564,6 +602,7 @@ sub hlx_error_errors {
 
 sub vcl_fetch {
 #FASTLY fetch
+  set req.http.X-Trace = req.http.X-Trace + "; vcl_fetch";
 
   call hlx_fetch_errors;
   call hlx_headers_fetch;
@@ -605,6 +644,8 @@ sub vcl_fetch {
       set req.http.X-Static = "Redirect";
       set req.url = beresp.http.Location;
       set req.http.X-Content-Type = beresp.http.X-Content-Type;
+
+      set req.http.X-Trace = req.http.X-Trace + "; RESTART";
       restart;
     } else {
       return(deliver);
@@ -634,6 +675,8 @@ sub vcl_fetch {
       set beresp.http.X-Static = "Static";
     }
     set req.url = req.http.X-URL;
+
+    set req.http.X-Trace = req.http.X-Trace + "; RESTART";
     restart;
   }
 
@@ -643,6 +686,7 @@ sub vcl_fetch {
 
 sub vcl_hit {
 #FASTLY hit
+  set req.http.X-Trace = req.http.X-Trace + "; vcl_hit";
 
   if (!obj.cacheable) {
     return(pass);
@@ -652,6 +696,7 @@ sub vcl_hit {
 
 sub vcl_miss {
 #FASTLY miss
+  set req.http.X-Trace = req.http.X-Trace + "; vcl_miss";
   unset bereq.http.X-Orig-Url;
   if (req.backend.is_shield) {
     set bereq.url = req.http.X-Orig-Url;
@@ -679,6 +724,8 @@ sub vcl_miss {
 
 sub vcl_deliver {
 #FASTLY deliver
+
+  set req.http.X-Trace = req.http.X-Trace + "; vcl_deliver";
   call hlx_headers_deliver;
 
   # only set the strain cookie for sticky strains
@@ -722,11 +769,13 @@ sub vcl_deliver {
 
 sub vcl_error {
 #FASTLY error
+  set req.http.X-Trace = req.http.X-Trace + "; vcl_error";
   call hlx_error_errors;
 }
 
 sub vcl_pass {
 #FASTLY pass
+  set req.http.X-Trace = req.http.X-Trace + "; vcl_pass";
   # set backend host
   if (req.backend == F_AdobeRuntime) {
     set bereq.http.host = "adobeioruntime.net";
