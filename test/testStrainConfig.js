@@ -15,7 +15,10 @@
 const assert = require('assert');
 const fs = require('fs-extra');
 const path = require('path');
+const { HelixConfig } = require('@adobe/helix-shared');
 const strainconfig = require('../src/strain-config-utils');
+
+const proxyfile = path.resolve(__dirname, 'fixtures/proxystrains.yaml');
 
 describe('Strain Config', () => {
   const config = fs.readFileSync(path.resolve(__dirname, 'fixtures/config.yaml'), 'utf-8');
@@ -24,6 +27,14 @@ describe('Strain Config', () => {
 
   it('config can be parsed', () => {
     assert.equal(3, strainconfig.load(config).length);
+  });
+
+
+  it('config with proxy strains can be parsed', async () => {
+    const myconfig = await new HelixConfig().withConfigPath(proxyfile).init();
+    const mystrains = myconfig.strains;
+
+    assert.equal(Array.from(mystrains.entries()).length, 3);
   });
 
   it('invalid config does not throw errors', () => {
@@ -108,5 +119,78 @@ describe('Appending works without errors', () => {
     };
     const newstrains = strainconfig.append(oldstrains, strain);
     assert.equal(4, newstrains.length);
+  });
+});
+
+describe('Understands Proxy Strains', () => {
+  it('proxies() returns all proxy strains #unit', async () => {
+    const config = await new HelixConfig().withConfigPath(proxyfile).init();
+    const mystrains = config.strains;
+    assert.equal(strainconfig.proxies(mystrains).length, 1);
+  });
+
+  it('addbackends() returns new backend definitions #unit', async () => {
+    const config = await new HelixConfig().withConfigPath(proxyfile).init();
+    const mystrains = config.strains;
+    const mybackends = strainconfig.addbackends(mystrains);
+    assert.deepEqual(Object.keys(mybackends), ['Proxy1921681001f402']);
+    assert.deepEqual(strainconfig.addbackends(mystrains), {
+      Proxy1921681001f402: {
+        address: '192.168.100.1',
+        between_bytes_timeout: 10000,
+        connect_timeout: 1000,
+        error_threshold: 0,
+        first_byte_timeout: 15000,
+        hostname: '192.168.100.1',
+        max_conn: 200,
+        name: 'Proxy1921681001f402',
+        port: 4503,
+        shield: 'iad-va-us',
+        ssl_cert_hostname: '192.168.100.1',
+        use_ssl: true,
+        weight: 100,
+      },
+    });
+  });
+
+  it('addbackends() handles empty lists well #unit', () => {
+    const mystrains = [];
+    assert.deepStrictEqual(strainconfig.addbackends(mystrains), {
+    });
+  });
+
+  it('addbackends() keeps existing backends in place #unit', () => {
+    const mystrains = [];
+    const backends = {
+      foo: "I'm a backend",
+    };
+    assert.deepStrictEqual(strainconfig.addbackends(mystrains, backends), backends);
+  });
+
+  it('addbackends() does not overwrite backends #unit', async () => {
+    const config = await new HelixConfig().withConfigPath(proxyfile).init();
+    const mystrains = config.strains;
+
+    const backends = {
+      foo: "I'm a backend",
+    };
+    assert.deepStrictEqual(strainconfig.addbackends(mystrains, backends), {
+      Proxy1921681001f402: {
+        address: '192.168.100.1',
+        between_bytes_timeout: 10000,
+        connect_timeout: 1000,
+        error_threshold: 0,
+        first_byte_timeout: 15000,
+        hostname: '192.168.100.1',
+        max_conn: 200,
+        name: 'Proxy1921681001f402',
+        port: 4503,
+        shield: 'iad-va-us',
+        ssl_cert_hostname: '192.168.100.1',
+        use_ssl: true,
+        weight: 100,
+      },
+      foo: "I'm a backend",
+    });
   });
 });

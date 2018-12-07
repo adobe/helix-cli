@@ -14,14 +14,6 @@ const yaml = require('js-yaml');
 const hash = require('object-hash');
 
 /**
- * Determines if a strain name is auto-generated, i.e. for an anonymous strain.
- * @param {String} stname name of the strain
- * @returns true for anonymous strains
- */
-function anon(stname) {
-  return !!stname.match(/^[0-9a-f]{16}$/);
-}
-/**
  * Generates a strain name for unnamed strains by hashing the contents
  * @param {Object} strain the strain configuration
  */
@@ -30,6 +22,18 @@ function name(strain) {
     return hash.sha1(strain).substr(24);
   }
   return null;
+}
+
+/**
+ * Returns true if the strain is a proxy strain
+ * @param {Strain} strain
+ */
+function isproxy(strain) {
+  return !!strain
+  && ((strain.isProxy && strain.isProxy())
+    || (strain.name
+    && strain.origin
+    && typeof strain.origin === 'object'));
 }
 
 /**
@@ -62,11 +66,16 @@ function name(strain) {
 function clean(strain) {
   const mystrain = strain;
   // clean up code
-  if (mystrain.code) {
+  if (mystrain.origin) {
+    mystrain.code = undefined;
+    mystrain.index = undefined;
+    mystrain.type = 'proxy';
+  } else if (mystrain.code) {
     const match = mystrain.code.match(/^\/?([^/]+)\/?([^/]*)\/([^/]+)$/);
     if (match) {
       const ns = match[2] === '' ? 'default' : match[2];
       mystrain.code = `/${match[1]}/${ns}/${match[3]}`;
+      mystrain.type = 'helix';
     } else {
       // eslint-disable-next-line no-console
       console.error(`Strain ${mystrain.name} has invalid code defined`);
@@ -86,6 +95,7 @@ function clean(strain) {
  */
 function validate(strain) {
   return (
+    // conditions for a normal strain
     !!strain
     && strain.name
     && strain.content
@@ -97,58 +107,10 @@ function validate(strain) {
     && typeof strain.content.repo === 'string'
     && strain.content.owner.match(/^[^/]+$/)
     && strain.content.repo.match(/^[^/]+$/)
+  ) || (
+    // conditions for a proxy strain
+    isproxy(strain)
   );
-}
-
-/**
- * Wraps a strain for writing into a YAML list
- * @param {Strain} strain
- * @returns {Wrapped}
- */
-function wrap(strain) {
-  return { strain };
-}
-
-/**
- * Helper function for sorting strains in the output file.
- * Desired order:
- * 1. default
- * 2. named strains (alphabetically)
- * 3. anonymous strains (alphabetically)
- * @param {Strain} straina
- * @param {Strain} strainb
- */
-function compare(straina, strainb) {
-  // default strain always comes first
-  if (straina.strain.name === 'default') {
-    return -1;
-  }
-  if (strainb.strain.name === 'default') {
-    return 1;
-  }
-  // named strains come next
-  const anona = anon(straina.strain.name);
-  const anonb = anon(strainb.strain.name);
-  if (anonb && !anona) {
-    return -1;
-  }
-  if (anona && !anonb) {
-    return 1;
-  }
-  return straina.strain.name.localeCompare(strainb.strain.name);
-}
-
-/**
- * Converts a list of strains into YAML
- * @param {Strain[]} strains
- * @returns {String} YAML
- */
-function write(strains) {
-  return yaml.safeDump(strains
-    .map(wrap)
-    .map(clean)
-    .map(wrap)
-    .sort(compare));
 }
 
 /**
@@ -199,9 +161,34 @@ function load(data) {
     .filter(validate);
 }
 
+/** Filters the list of strains for proxy strains */
+function proxies(strains) {
+  if (Array.isArray(strains)) {
+    return strains.filter(isproxy);
+  } if (typeof strains === 'object' && strains instanceof Map) {
+    return Array.from(strains.values()).filter(isproxy);
+  }
+  return [];
+}
+
+function addbackends(strains = [], backends = {}) {
+  return proxies(strains)
+    .map(({ origin }) => origin)
+    .reduce((bes, be) => {
+      const newbackends = bes;
+      if (be.toJSON) {
+        newbackends[be.name] = be.toJSON();
+      } else {
+        newbackends[be.name] = be;
+      }
+      return newbackends;
+    }, backends);
+}
+
 module.exports = {
   load,
   name,
-  write,
   append,
+  proxies,
+  addbackends,
 };

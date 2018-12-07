@@ -16,7 +16,6 @@ const fs = require('fs-extra');
 const request = require('request-promise-native');
 const chalk = require('chalk');
 const path = require('path');
-const URI = require('uri-js');
 const glob = require('glob-to-regexp');
 const { toBase64 } = require('request/lib/helpers');
 const ProgressBar = require('progress');
@@ -26,6 +25,7 @@ const include = require('./include-util');
 const useragent = require('./user-agent-util');
 const cli = require('./cli-util');
 const AbstractCommand = require('./abstract.cmd.js');
+const { conditions, resolve, reset } = require('./fastly/vcl-utils');
 
 const HELIX_VCL_DEFAULT_FILE = path.resolve(__dirname, '../layouts/fastly/helix.vcl');
 
@@ -39,7 +39,7 @@ class PublishCommand extends AbstractCommand {
     this._fastly_auth = null;
     this._dryRun = false;
     this._strainFile = path.resolve(process.cwd(), '.hlx', 'strains.json');
-    this._strains = null;
+    this._strains = [];
     this._vclFile = path.resolve(process.cwd(), '.hlx', 'helix.vcl');
 
     this._service = null;
@@ -133,7 +133,7 @@ class PublishCommand extends AbstractCommand {
     // number of non-strain-specific dictionaries
     const staticdictionaries = 1;
     const strains = this._strains.length;
-    const vclfiles = 3;
+    const vclfiles = 4;
     const extrarequests = 4;
 
     const ticks = backends
@@ -152,8 +152,15 @@ class PublishCommand extends AbstractCommand {
   }
 
   async loadStrains() {
-    const content = await fs.readFile(this._strainFile, 'utf-8');
-    this._strains = strainconfig.load(content);
+    if (this._helixConfig) {
+      await this._helixConfig.init();
+      this._logger.debug('loading a YAML configuration');
+      this._strains = Array.from(this._helixConfig.strains.values());
+    } else {
+      this._logger.debug('loading a JSON configuration');
+      const content = await fs.readFile(this._strainFile, 'utf-8');
+      this._strains = strainconfig.load(content);
+    }
     if (this._strains.filter(strain => strain.name === 'default').length !== 1) {
       throw new Error(`${this._strainFile} must include one strain 'default'`);
     }
@@ -337,7 +344,7 @@ class PublishCommand extends AbstractCommand {
     this.tick(existing, `Skipping ${existing} existing dictionaries`);
     if (missingdicts.length > 0) {
       const baseopts = await this.version('/dictionary');
-      missingdicts.map((dict) => {
+      const fixdicts = missingdicts.map((dict) => {
         const opts = Object.assign({
           method: 'POST',
           form: {
@@ -347,6 +354,7 @@ class PublishCommand extends AbstractCommand {
         }, baseopts);
         return request(opts).then((r) => {
           this.tick(1, `Dictionary ${dict} created`, dict);
+          this._dictionaries[r.name] = r.id;
           return r;
         })
           .catch((e) => {
@@ -355,6 +363,11 @@ class PublishCommand extends AbstractCommand {
             throw new Error(message, e);
           });
       });
+
+      // wait for all dictionaries to be created
+      await Promise.all(fixdicts);
+
+      await this.getDictionaries();
     }
   }
 
@@ -421,8 +434,9 @@ class PublishCommand extends AbstractCommand {
       return Promise.resolve(this);
     })
       .catch((e) => {
-        const message = 'Unable to activate new configuration';
-        this.log.error(message, e);
+        const message = `Unable to activate new configuration: ${
+          e.error && e.error.msg ? e.error.msg : ''} ${
+          e.error && e.error.detail ? e.error.detail : ''}`;
         throw new Error(message, e);
       });
   }
@@ -459,52 +473,14 @@ class PublishCommand extends AbstractCommand {
    * @param {Strain} strain the strain to generate a condition expression for
    */
   static vclConditions(strain) {
-    if (strain.url) {
-      const uri = URI.parse(strain.url);
-      if (uri.path && uri.path !== '/') {
-        const pathname = uri.path.replace(/\/$/, '');
-        return Object.assign({
-          sticky: false,
-          condition: `req.http.Host == "${uri.host}" && (req.url.dirname ~ "^${pathname}$" || req.url.dirname ~ "^${pathname}/")`,
-          vcl: `
-  set req.http.X-Dirname = regsub(req.url.dirname, "^${pathname}", "");`,
-        }, strain);
-      }
-      return Object.assign({
-        condition: `req.http.Host == "${uri.host}"`,
-      }, strain);
-    }
-    if (strain.condition && strain.sticky === undefined) {
-      return Object.assign({
-        sticky: true,
-      }, strain);
-    }
-    return strain;
+    return conditions(strain);
   }
 
   /**
    * Generates VCL for strain resolution from a list of strains
    */
   static getStrainResolutionVCL(strains) {
-    let retvcl = '# This file handles the strain resolution\n';
-    const conditions = strains
-      .map(PublishCommand.vclConditions)
-      .filter(strain => strain.condition)
-      .map(({
-        condition, name, vcl = '', sticky = false,
-      }) => `if (${condition}) {
-  set req.http.X-Sticky = "${sticky}";
-  set req.http.X-Strain = "${name}";${vcl}
-} else `);
-    if (conditions.length) {
-      retvcl += conditions.join('');
-      retvcl += `{
-  set req.http.X-Strain = "default";
-}`;
-    } else {
-      retvcl += 'set req.http.X-Strain = "default";\n';
-    }
-    return retvcl;
+    return resolve(strains);
   }
 
   /**
@@ -581,6 +557,11 @@ ${PublishCommand.makeParamWhitelist(params, '  ')}
     return this.transferVCL(vcl, 'dynamic.vcl');
   }
 
+  async setResetVCL() {
+    const vcl = reset(this._backends);
+    return this.transferVCL(vcl, 'reset.vcl');
+  }
+
   async vclopts(name, vcl) {
     const baseopts = await this.version(`/vcl/${name}`);
     const postopts = await this.version('/vcl');
@@ -594,7 +575,7 @@ ${PublishCommand.makeParamWhitelist(params, '  ')}
           content: vcl,
         },
       }, baseopts)).catch((e) => {
-      if (e.response.statusCode === 404) {
+      if (e.response && e.response.statusCode === 404) {
       // create new
         return Object.assign({
           method: 'POST',
@@ -655,6 +636,7 @@ ${PublishCommand.makeParamWhitelist(params, '  ')}
   }
 
   async initFastly() {
+    this._backends = strainconfig.addbackends(this._strains, this._backends);
     return this.initBackends();
   }
 
@@ -694,12 +676,13 @@ ${PublishCommand.makeParamWhitelist(params, '  ')}
     this.progressBar();
 
     await this.cloneVersion();
-    await this.initFastly();
     await this.initDictionaries();
+    await this.initFastly();
 
     const dictJobs = [];
     const makeDictJob = (dictname, strainname, strainvalue, message, shortMsg) => {
       if (strainvalue) {
+        this._logger.debug(`Setting ${strainname} ${dictname}=${strainvalue}`);
         const job = this.putDict(dictname, strainname, strainvalue)
           .then(() => {
             this.tick(1, message, shortMsg);
@@ -720,7 +703,10 @@ ${PublishCommand.makeParamWhitelist(params, '  ')}
     const [secretp, ownsp] = dictJobs.splice(0, 2);
 
     const strains = this._strains;
-    strains.map((strain) => {
+    strains.filter(strain => !!strain.origin).forEach((proxy) => {
+      this.tick(13, `skipping proxy strain ${proxy.name}`);
+    });
+    strains.filter(strain => !strain.origin).map((strain) => {
       // required
       makeDictJob('strain_action_roots', strain.name, strain.code, '- Set action root', 'action root');
       makeDictJob('strain_owners', strain.name, strain.content.owner, '- Set content owner', 'content owner');
@@ -789,21 +775,17 @@ ${PublishCommand.makeParamWhitelist(params, '  ')}
       return strain;
     });
 
-    // wait for all dict updates to complete
-    await Promise.all(dictJobs);
-
-    // set all dependent VCL files
+    // do everything at once
     await Promise.all([
+      ...dictJobs,
       this.setStrainsVCL(),
       this.setDynamicVCL(),
       this.setParametersVCL(),
+      this.setResetVCL(),
+      this.setHelixVCL(),
+      secretp,
+      ownsp,
     ]);
-    // then set the master VCL file
-    await this.setHelixVCL();
-
-    // also wait for the openwhisk namespace
-    await secretp;
-    await ownsp;
   }
 
   async run() {
@@ -817,7 +799,7 @@ ${PublishCommand.makeParamWhitelist(params, '  ')}
       this.showNextStep();
     } catch (e) {
       const message = 'Error while running the Publish command';
-      this.log.error(message, e);
+      this.log.error(`${message}: ${e.stack}`, e);
       throw new Error(message, e);
     }
   }

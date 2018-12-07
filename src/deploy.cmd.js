@@ -184,6 +184,11 @@ class DeployCommand extends AbstractCommand {
       }
     };
 
+    if (this._dryRun) {
+      log.debug(`Skipping ZIP file creation for ${info.name}`);
+      return Promise.resolve({});
+    }
+
     return new Promise((resolve, reject) => {
       const archiveName = `${info.name}.zip`;
       const zipFile = path.resolve(this._target, archiveName);

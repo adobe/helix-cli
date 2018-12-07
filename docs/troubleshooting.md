@@ -64,6 +64,13 @@ x-root-path:
 set-cookie: X-Strain=default; Secure; HttpOnly; SameSite=Strict;
 ```
 
+### Disable the Static Fallback
+
+The default processing path is to first make a request to the pipeline action, and if that produces an error 404, to fall back to the static action.
+This can lead to the static action obscuring error messages (and headers) coming from the pipeline action or the OpenWhisk Runtime.
+
+In order to disable this fallback, add the request header `X-Disable-Static: true`.
+
 ### Force-load a Strain
 
 In order to override the strain selection that happens in the CDN, make a request with the `X-Strain` request header. 
