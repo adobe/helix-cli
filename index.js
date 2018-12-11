@@ -17,7 +17,7 @@
 // just in case...
 const SegfaultHandler = require('segfault-handler');
 
-SegfaultHandler.registerHandler('crash.log');
+SegfaultHandler.registerHandler('hlx_crash.log');
 
 const CLI = require('./src/cli.js');
 
