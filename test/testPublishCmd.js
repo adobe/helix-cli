@@ -111,7 +111,7 @@ describe('Dynamic Strain (VCL) generation', () => {
     }
     assert.equal(Object.keys(cmd._backends).length, 3);
     assert.ok(cmd._backends.Proxy1921681001f402);
-  });
+  }).timeout(50000);
 });
 
 describe('hlx publish (Integration)', function suite() {
