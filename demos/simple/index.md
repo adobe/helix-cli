@@ -24,7 +24,7 @@ It works! {{project.name}} is up and running.
 
 1. Try editing `index.md` and see what happens.
 2. Try editing `src/html.htl` to change the HTML output
-3. Try editing `src/static/style.css` to change the way this page looks
+3. Try editing `dist/style.css` to change the way this page looks
 
 ## And then?
 
