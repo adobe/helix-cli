@@ -14,6 +14,11 @@
 
 'use strict';
 
+// just in case...
+const SegfaultHandler = require('segfault-handler');
+
+SegfaultHandler.registerHandler('crash.log');
+
 const CLI = require('./src/cli.js');
 
 new CLI().run(process.argv.slice(2));
