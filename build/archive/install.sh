@@ -60,6 +60,12 @@ fi
 if cp a.out $dest; then
   chmod 755 $dest   # TODO: respect umask
   version=$($dest --version)
+  # hlx bash completion
+  # remove traces of previous installations
+  cat ~/.bash_profile | sed '/###-begin-hlx-completions-###/,/###-end-hlx-completions-###/d' >> ~/.bash_profile
+  # append hlx bash completion
+  printf '\n' >> ~/.bash_profile
+  hlx completion >> ~/.bash_profile
   echo "hlx version $version successfully installed: $dest"
 else
   error_exit "failed to install hlx, aborting"
