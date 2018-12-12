@@ -14,7 +14,14 @@
 
 const path = require('path');
 const fs = require('fs-extra');
-const { createTestRoot, assertFile } = require('./utils.js');
+const assert = require('assert');
+const sinon = require('sinon');
+
+const {
+  createTestRoot,
+  createFakeTestRoot,
+  assertFile,
+} = require('./utils.js');
 
 const CleanCommand = require('../src/clean.cmd');
 
@@ -49,5 +56,42 @@ describe('Integration test for clean', () => {
 
     assertFile(testFile1, true);
     assertFile(testFile2, true);
+  });
+
+  it('clean command fails gracefully if directory does not exist', async () => {
+    const fakeTestRoot = await createFakeTestRoot();
+    const fakeBuildDir = path.resolve(fakeTestRoot, '.hlx/build');
+
+    await new CleanCommand()
+      .withDirectory(fakeTestRoot)
+      .withTargetDir(fakeBuildDir)
+      .run();
+  });
+
+  it('clean command uses default target dir if none specified', async () => {
+    // add some files to the directories
+    const testFile1 = path.resolve(buildDir, 'html.htl');
+    await fs.copy(path.resolve(testRoot, 'src', 'html.htl'), testFile1);
+    assertFile(testFile1);
+
+    await new CleanCommand()
+      .withDirectory(testRoot)
+      .run();
+
+    assertFile(testFile1, true);
+  });
+
+  it('clean command logs and catches error if deletion fails', async () => {
+    const testFile1 = path.resolve(buildDir, 'html.htl');
+    await fs.copy(path.resolve(testRoot, 'src', 'html.htl'), testFile1);
+    const stub = sinon.stub(fs, 'remove')
+      .throws(new Error('oops'));
+    assert.doesNotThrow(async () => {
+      await new CleanCommand()
+        .withDirectory(testRoot)
+        .withTargetDir(buildDir)
+        .run();
+      stub.reset();
+    });
   });
 });
