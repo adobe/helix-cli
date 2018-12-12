@@ -38,7 +38,7 @@ function initGit(dir) {
 function assertFile(p, expectMissing) {
   const exists = fse.pathExistsSync(p);
   if (!exists && !expectMissing) {
-    assert.fail(`Expected file at ${p} to exists`);
+    assert.fail(`Expected file at ${p} exists`);
   }
   if (exists && expectMissing) {
     assert.fail(`Unexpected file at ${p} exists`);
@@ -107,6 +107,14 @@ async function createTestRoot() {
   const dir = path.resolve(__dirname, 'tmp', uuidv4());
   await fse.ensureDir(dir);
   return dir;
+}
+
+async function createFakeTestRoot() {
+  const dir = path.resolve(__dirname, 'tmp', uuidv4());
+  if (!await fse.pathExists(dir)) {
+    return dir;
+  }
+  return createFakeTestRoot();
 }
 
 function createLogger() {
@@ -260,6 +268,7 @@ module.exports = {
   assertZipEntry,
   initGit,
   createTestRoot,
+  createFakeTestRoot,
   createLogger,
   processSource,
   perfExample,
