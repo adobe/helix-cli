@@ -91,7 +91,7 @@ describe('Integration test for clean', () => {
         .withDirectory(testRoot)
         .withTargetDir(buildDir)
         .run();
-      stub.reset();
+      stub.restore();
     });
   });
 });

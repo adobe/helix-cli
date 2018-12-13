@@ -31,5 +31,5 @@ describe('Test VCL utils', () => {
     }
     /* eslint-disable-next-line no-underscore-dangle */
     assert.equal(reset(cmd._backends), fs.readFileSync(path.resolve(__dirname, 'fixtures/reset-proxystrains.vcl')).toString());
-  });
+  }).timeout(10000);
 });
