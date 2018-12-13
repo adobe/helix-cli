@@ -17,14 +17,23 @@ const path = require('path');
 const winston = require('winston');
 const logCommon = require('../src/log-common');
 
-const testlogfile = path.resolve(__dirname, 'testlog.log');
-const testjsonfile = path.resolve(__dirname, 'testlog.json');
+const testlogfile = path.resolve(__dirname, 'tmp', 'testlog.log');
+const testjsonfile = path.resolve(__dirname, 'tmp', 'testlog.json');
 
 describe('Testing standard logger configuration', () => {
-  beforeEach(() => {
+  async function clean() {
+    await Promise.all([
+      fs.remove(testlogfile),
+      fs.remove(testjsonfile)]);
+  }
+
+  beforeEach(async () => {
     // reset the winston loggers
     winston.loggers.loggers.clear();
+    await clean();
   });
+
+  afterEach(clean);
 
   it('Log level can be specified on the command line', () => {
     assert.equal(logCommon.makeLogger({ logLevel: 'debug' }).level, 'debug');
@@ -37,15 +46,6 @@ describe('Testing standard logger configuration', () => {
   it('Multiple loggers can be created', () => {
     assert.equal(logCommon.makeLogger({ logFile: ['-', '-', '-'] }).transports.length, 3);
   });
-
-  async function clean() {
-    await Promise.all([
-      fs.remove(testlogfile),
-      fs.remove(testjsonfile)]);
-  }
-
-  beforeEach(clean);
-  afterEach(clean);
 
   it('File logger can be created', (done) => {
     const logger = logCommon.makeLogger({ logFile: [testlogfile] });
