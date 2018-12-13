@@ -157,7 +157,8 @@ jobs:
         name: Build Installer
         working_directory: ~/
         command: |
-          ~/nodec -r ~/project -o ~/project/build/archive/a.out --tmpdir=~/nodec_tmp ~/project/index.js
+          cp ~/project/index.js ~/project/hlx
+          ~/nodec -r ~/project -o ~/project/build/archive/a.out --tmpdir=~/nodec_tmp ~/project/hlx
     - save_cache:
         paths:
         - ~/nodec_tmp
