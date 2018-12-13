@@ -681,20 +681,17 @@ ${PublishCommand.makeParamWhitelist(params, '  ')}
 
     const dictJobs = [];
     const makeDictJob = (dictname, strainname, strainvalue, message, shortMsg) => {
-      if (strainvalue) {
-        this._logger.debug(`Setting ${strainname} ${dictname}=${strainvalue}`);
-        const job = this.putDict(dictname, strainname, strainvalue)
-          .then(() => {
-            this.tick(1, message, shortMsg);
-          })
-          .catch((e) => {
-            const msg = 'Error setting edge dictionary value';
-            this.log.error(message, e);
-            throw new Error(msg, e);
-          });
-
-        dictJobs.push(job);
-      }
+      this._logger.debug(`Setting ${strainname} ${dictname}=${strainvalue || ''}`);
+      const job = this.putDict(dictname, strainname, strainvalue || '')
+        .then(() => {
+          this.tick(1, message, shortMsg);
+        })
+        .catch((e) => {
+          const msg = 'Error setting edge dictionary value';
+          this.log.error(message, e);
+          throw new Error(msg, e);
+        });
+      dictJobs.push(job);
     };
 
     const owsecret = `Basic ${toBase64(`${this._wsk_auth}`)}`;
@@ -714,8 +711,8 @@ ${PublishCommand.makeParamWhitelist(params, '  ')}
       makeDictJob('strain_refs', strain.name, strain.content.ref, '- Set content ref', 'content ref');
 
       // optional
-      makeDictJob('strain_index_files', strain.name, strain.index, '- Set directory index', 'directory index');
-      makeDictJob('strain_root_paths', strain.name, strain.content.root, '- Set content root', 'content root');
+      makeDictJob('strain_index_files', strain.name, strain.directoryIndex, '- Set directory index', 'directory index');
+      makeDictJob('strain_root_paths', strain.name, strain.content.path, '- Set content root', 'content root');
 
       // static
       const origin = GitUtils.getOriginURL();
