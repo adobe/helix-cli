@@ -16,8 +16,10 @@ const Replay = require('replay');
 const fs = require('fs-extra');
 const assert = require('assert');
 const path = require('path');
+const unzip = require('unzip2');
 const $ = require('shelljs');
 const { createTestRoot, assertFile } = require('./utils.js');
+const BuildCommand = require('../src/build.cmd.js');
 const DeployCommand = require('../src/deploy.cmd.js');
 
 const CI_TOKEN = 'nope';
@@ -29,6 +31,7 @@ describe('hlx deploy (Integration)', () => {
   let testRoot;
   let hlxDir;
   let buildDir;
+  let webroot;
   let strainsFile;
   let replayheaders;
   let cwd;
@@ -38,6 +41,7 @@ describe('hlx deploy (Integration)', () => {
     hlxDir = path.resolve(testRoot, '.hlx');
     buildDir = path.resolve(hlxDir, 'build');
     strainsFile = path.resolve(hlxDir, 'strains.json');
+    webroot = path.resolve(testRoot, 'webroot');
 
     cwd = process.cwd();
 
@@ -48,7 +52,7 @@ describe('hlx deploy (Integration)', () => {
   });
 
   afterEach(() => {
-    fs.remove(testRoot);
+    // fs.remove(testRoot);
     Replay.mode = 'bloody';
     Replay.headers = replayheaders;
     $.cd(cwd);
@@ -132,6 +136,49 @@ describe('hlx deploy (Integration)', () => {
     const thirdrun = fs.readFileSync(strainsFile).toString();
     assert.notEqual(firstrun, thirdrun);
   }).timeout(30000);
+
+  it('deploy create correct package', async () => {
+    await new BuildCommand()
+      .withFiles(['test/integration/src/xml.js', 'test/integration/src/helper.js'])
+      .withTargetDir(buildDir)
+      .withWebRoot(webroot)
+      .withCacheEnabled(false)
+      .run();
+
+    await new DeployCommand()
+      .withDirectory(testRoot)
+      .withWskHost('adobeioruntime.net')
+      .withWskAuth('secret-key')
+      .withWskNamespace('hlx')
+      .withEnableAuto(false)
+      .withEnableDirty(true)
+      .withDryRun(false)
+      .withContent('git@github.com:adobe/helix-cli')
+      .withTarget(buildDir)
+      .withStrainFile(strainsFile)
+      .run();
+
+    const zip = path.resolve(buildDir, 'git-github-com-adobe-helix-cli--dirty--xml.zip');
+    assertFile(zip);
+
+    // check zip
+    const entries = await new Promise((resolve, reject) => {
+      const es = [];
+      const srcStream = fs.createReadStream(zip);
+      srcStream.pipe(unzip.Parse())
+        .on('entry', (entry) => {
+          es.push(entry.path);
+          entry.autodrain();
+        })
+        .on('close', () => {
+          resolve(es);
+        })
+        .on('error', reject);
+    });
+    ['package.json', 'xml.js', 'helper.js'].forEach((s) => {
+      assert.ok(entries.indexOf(s) >= 0, `${s} must be included`);
+    });
+  }).timeout(60000);
 });
 
 describe('DeployCommand #unittest', () => {
