@@ -68,14 +68,15 @@ class UpCommand extends BuildCommand {
     this._watcher = watch(this.directory, {
       recursive: true,
     }, (eventType, filename) => {
-      if (filename.indexOf('src/') < 0 && filename !== HELIX_CONFIG) {
+      const file = filename.split(process.cwd()).join(''); // only consider paths starting from project root
+      if (file.indexOf('src/') < 0 && file !== HELIX_CONFIG) {
         return;
       }
       // ignore some files
-      if (/(.*\.swx|.*\.swp|.*~)/.test(filename)) {
+      if (/(.*\.swx|.*\.swp|.*~)/.test(file)) {
         return;
       }
-      modifiedFiles[filename] = true;
+      modifiedFiles[file] = true;
       if (timer) {
         clearTimeout(timer);
       }
