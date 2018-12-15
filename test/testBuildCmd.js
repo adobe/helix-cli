@@ -48,7 +48,7 @@ describe('Integration test for build', () => {
 
     assertFile(path.resolve(buildDir, 'html.js'));
     assertFile(path.resolve(buildDir, 'html.map'));
-    assertFile(path.resolve(buildDir, 'html.pre.js'), true);
+    assertFile(path.resolve(buildDir, 'html.pre.js'));
 
     assertFile(path.resolve(buildDir, 'xml.js'));
     assertFile(path.resolve(buildDir, 'xml.map'));

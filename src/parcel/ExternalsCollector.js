@@ -67,10 +67,6 @@ class ExternalsCollector {
           reject(err);
           return;
         }
-        // console.log(stats.toString({
-        //   chunks: false,
-        //   colors: true,
-        // }));
         stats.compilation.modules.forEach((mod) => {
           if (mod.resource) {
             const m = nodeModulesRegex.exec(mod.resource);
@@ -79,7 +75,6 @@ class ExternalsCollector {
             }
           }
         });
-        // console.log(Object.keys(externals));
         resolve(externals);
       });
     });
