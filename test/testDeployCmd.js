@@ -136,7 +136,8 @@ describe('hlx deploy (Integration)', () => {
     assert.notEqual(firstrun, thirdrun);
   }).timeout(30000);
 
-  it('deploy create correct package', async () => {
+  it.skip('deploy create correct package', async () => {
+    // todo: enable after https://github.com/adobe/helix-cli/issues/336 is fixed.
     await new BuildCommand()
       .withFiles([
         'test/integration/src/html.htl',
