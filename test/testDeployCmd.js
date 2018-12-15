@@ -51,7 +51,7 @@ describe('hlx deploy (Integration)', () => {
   });
 
   afterEach(() => {
-    // fs.remove(testRoot);
+    fs.remove(testRoot);
     Replay.mode = 'bloody';
     Replay.headers = replayheaders;
     $.cd(cwd);
