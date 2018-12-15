@@ -12,6 +12,7 @@
 
 const glob = require('glob');
 const opn = require('opn');
+const path = require('path');
 const readline = require('readline');
 const watch = require('node-watch');
 const { HelixProject } = require('@adobe/helix-simulator');
@@ -68,7 +69,8 @@ class UpCommand extends BuildCommand {
     this._watcher = watch(this.directory, {
       recursive: true,
     }, (eventType, filename) => {
-      const file = filename.split(process.cwd()).join(''); // only consider paths starting from project root
+      // only consider paths starting from project root
+      const file = path.relative(this.directory, filename);
       if (file.indexOf('src/') < 0 && file !== HELIX_CONFIG) {
         return;
       }
