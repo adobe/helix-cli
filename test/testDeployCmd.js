@@ -16,9 +16,8 @@ const Replay = require('replay');
 const fs = require('fs-extra');
 const assert = require('assert');
 const path = require('path');
-const unzip = require('unzip2');
 const $ = require('shelljs');
-const { createTestRoot, assertFile } = require('./utils.js');
+const { createTestRoot, assertFile, assertZipEntries } = require('./utils.js');
 const BuildCommand = require('../src/build.cmd.js');
 const DeployCommand = require('../src/deploy.cmd.js');
 
@@ -139,7 +138,12 @@ describe('hlx deploy (Integration)', () => {
 
   it('deploy create correct package', async () => {
     await new BuildCommand()
-      .withFiles(['test/integration/src/xml.js', 'test/integration/src/helper.js'])
+      .withFiles([
+        'test/integration/src/html.htl',
+        'test/integration/src/html.pre.js',
+        'test/integration/src/helper.js',
+        // 'test/integration/src/xml.js',
+      ])
       .withTargetDir(buildDir)
       .withWebRoot(webroot)
       .withCacheEnabled(false)
@@ -158,26 +162,14 @@ describe('hlx deploy (Integration)', () => {
       .withStrainFile(strainsFile)
       .run();
 
-    const zip = path.resolve(buildDir, 'git-github-com-adobe-helix-cli--dirty--xml.zip');
-    assertFile(zip);
-
-    // check zip
-    const entries = await new Promise((resolve, reject) => {
-      const es = [];
-      const srcStream = fs.createReadStream(zip);
-      srcStream.pipe(unzip.Parse())
-        .on('entry', (entry) => {
-          es.push(entry.path);
-          entry.autodrain();
-        })
-        .on('close', () => {
-          resolve(es);
-        })
-        .on('error', reject);
-    });
-    ['package.json', 'xml.js', 'helper.js'].forEach((s) => {
-      assert.ok(entries.indexOf(s) >= 0, `${s} must be included`);
-    });
+    await assertZipEntries(
+      path.resolve(buildDir, 'git-github-com-adobe-helix-cli--dirty--html.zip'),
+      ['package.json', 'html.js', 'html.pre.js', 'helper.js'],
+    );
+    // await assertZipEntries(
+    //   path.resolve(buildDir, 'git-github-com-adobe-helix-cli--dirty--xml.zip'),
+    //   ['package.json', 'xml.js', 'helper.js'],
+    // );
   }).timeout(60000);
 });
 
