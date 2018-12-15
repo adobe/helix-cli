@@ -45,29 +45,6 @@ function assertFile(p, expectMissing) {
   }
 }
 
-async function assertZipEntry(zipFile, name, exists = true) {
-  return new Promise((resolve, reject) => {
-    let doesExist = false;
-    fse.createReadStream(zipFile)
-      .pipe(unzip.Parse())
-      .on('entry', (entry) => {
-        const fileName = entry.path;
-        if (fileName === name) {
-          doesExist = true;
-        } else {
-          entry.autodrain();
-        }
-      })
-      .on('close', () => {
-        if (exists === doesExist) {
-          resolve();
-        } else {
-          reject(Error(`Zip ${path.relative(process.cwd(), zipFile)} should ${exists ? '' : 'not '}contain entry ${name}.`));
-        }
-      });
-  });
-}
-
 async function assertHttp(url, status, spec, replacements = []) {
   return new Promise((resolve, reject) => {
     let data = '';
@@ -287,7 +264,6 @@ const perfExample = {
 module.exports = {
   assertFile,
   assertHttp,
-  assertZipEntry,
   initGit,
   createTestRoot,
   createFakeTestRoot,
