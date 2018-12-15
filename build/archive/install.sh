@@ -62,7 +62,7 @@ if cp a.out $dest; then
   version=$($dest --version)
   # hlx bash completion
   # remove traces of previous installations
-  cat ~/.bash_profile | sed '/###-begin-hlx-completions-###/,/###-end-hlx-completions-###/d' >> ~/.bash_profile
+  cat ~/.bash_profile | sed '/###-begin-hlx-completions-###/,/###-end-hlx-completions-###/d' > ~/.bash_profile
   # append hlx bash completion
   printf '\n' >> ~/.bash_profile
   hlx completion >> ~/.bash_profile
