@@ -11,14 +11,21 @@
 # governing permissions and limitations under the License.
 
 # determine latest version
-version=$(curl -s https://api.github.com/repos/adobe/helix-cli/releases/latest | grep 'tag_name' | cut -d\" -f4)
+
+# avoid github api, see https://github.com/adobe/helix-cli/issues/400
+#version=$(curl -s https://api.github.com/repos/adobe/helix-cli/releases/latest | grep 'tag_name' | cut -d\" -f4)
+#download_url=$(curl -s https://api.github.com/repos/adobe/helix-cli/releases/latest | grep 'browser_download_url' | cut -d\" -f4)
+
+release_url=$(curl -fsSLI -o /dev/null -w %{url_effective} https://github.com/adobe/helix-cli/releases/latest && echo)
+version="${release_url##*/}"
+download_url=https://github.com/adobe/helix-cli/releases/download/${version}/hlx_install.sh
 
 echo
 echo "downloading hlx installer $version ..."
 echo 
 
 # download hlx_install.sh from latest release
-curl -OL $(curl -s https://api.github.com/repos/adobe/helix-cli/releases/latest | grep 'browser_download_url' | cut -d\" -f4)
+curl -OL ${download_url}
 
 echo
 echo "running hlx installer $version ..."
