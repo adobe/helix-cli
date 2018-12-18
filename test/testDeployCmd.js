@@ -17,7 +17,8 @@ const fs = require('fs-extra');
 const assert = require('assert');
 const path = require('path');
 const $ = require('shelljs');
-const { createTestRoot, assertFile } = require('./utils.js');
+const { createTestRoot, assertFile, assertZipEntries } = require('./utils.js');
+const BuildCommand = require('../src/build.cmd.js');
 const DeployCommand = require('../src/deploy.cmd.js');
 
 const CI_TOKEN = 'nope';
@@ -29,6 +30,7 @@ describe('hlx deploy (Integration)', () => {
   let testRoot;
   let hlxDir;
   let buildDir;
+  let webroot;
   let strainsFile;
   let replayheaders;
   let cwd;
@@ -38,6 +40,7 @@ describe('hlx deploy (Integration)', () => {
     hlxDir = path.resolve(testRoot, '.hlx');
     buildDir = path.resolve(hlxDir, 'build');
     strainsFile = path.resolve(hlxDir, 'strains.json');
+    webroot = path.resolve(testRoot, 'webroot');
 
     cwd = process.cwd();
 
@@ -132,6 +135,43 @@ describe('hlx deploy (Integration)', () => {
     const thirdrun = fs.readFileSync(strainsFile).toString();
     assert.notEqual(firstrun, thirdrun);
   }).timeout(30000);
+
+  it.skip('deploy create correct package', async () => {
+    // todo: enable after https://github.com/adobe/helix-cli/issues/336 is fixed.
+    await new BuildCommand()
+      .withFiles([
+        'test/integration/src/html.htl',
+        'test/integration/src/html.pre.js',
+        'test/integration/src/helper.js',
+        // 'test/integration/src/xml.js',
+      ])
+      .withTargetDir(buildDir)
+      .withWebRoot(webroot)
+      .withCacheEnabled(false)
+      .run();
+
+    await new DeployCommand()
+      .withDirectory(testRoot)
+      .withWskHost('adobeioruntime.net')
+      .withWskAuth('secret-key')
+      .withWskNamespace('hlx')
+      .withEnableAuto(false)
+      .withEnableDirty(true)
+      .withDryRun(false)
+      .withContent('git@github.com:adobe/helix-cli')
+      .withTarget(buildDir)
+      .withStrainFile(strainsFile)
+      .run();
+
+    await assertZipEntries(
+      path.resolve(buildDir, 'git-github-com-adobe-helix-cli--dirty--html.zip'),
+      ['package.json', 'html.js', 'html.pre.js', 'helper.js'],
+    );
+    // await assertZipEntries(
+    //   path.resolve(buildDir, 'git-github-com-adobe-helix-cli--dirty--xml.zip'),
+    //   ['package.json', 'xml.js', 'helper.js'],
+    // );
+  }).timeout(60000);
 });
 
 describe('DeployCommand #unittest', () => {

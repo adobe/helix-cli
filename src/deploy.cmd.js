@@ -26,6 +26,7 @@ const useragent = require('./user-agent-util');
 const AbstractCommand = require('./abstract.cmd.js');
 const packageCfg = require('./parcel/packager-config.js');
 const ExternalsCollector = require('./parcel/ExternalsCollector.js');
+const { flattenDependencies } = require('./packager-utils.js');
 
 class DeployCommand extends AbstractCommand {
   constructor(logger) {
@@ -387,23 +388,10 @@ class DeployCommand extends AbstractCommand {
 
     // get the list of scripts from the info files
     const infos = [...glob.sync(`${this._target}/*.info.json`)];
-    const scriptInfos = {};
-    (await Promise.all(infos.map(info => fs.readJSON(info))))
-      .forEach((info) => {
-        scriptInfos[info.main] = info;
-      });
+    const scriptInfos = await Promise.all(infos.map(info => fs.readJSON(info)));
 
-    // remove dependencies
-    Object.keys(scriptInfos).forEach((key) => {
-      const script = scriptInfos[key];
-      if (script) {
-        script.requires.forEach((dep) => {
-          delete scriptInfos[dep];
-        });
-      }
-    });
-
-    const scripts = Object.values(scriptInfos);
+    // resolve dependencies
+    const scripts = flattenDependencies(scriptInfos);
 
     // add static action
     scripts.push({

@@ -13,10 +13,10 @@ const assert = require('assert');
 const path = require('path');
 const shell = require('shelljs');
 const fse = require('fs-extra');
-const unzip = require('unzip');
 const http = require('http');
 const Replay = require('replay');
 const uuidv4 = require('uuid/v4');
+const unzip = require('unzip2');
 const winston = require('winston');
 const BuildCommand = require('../src/build.cmd');
 
@@ -43,29 +43,6 @@ function assertFile(p, expectMissing) {
   if (exists && expectMissing) {
     assert.fail(`Unexpected file at ${p} exists`);
   }
-}
-
-async function assertZipEntry(zipFile, name, exists = true) {
-  return new Promise((resolve, reject) => {
-    let doesExist = false;
-    fse.createReadStream(zipFile)
-      .pipe(unzip.Parse())
-      .on('entry', (entry) => {
-        const fileName = entry.path;
-        if (fileName === name) {
-          doesExist = true;
-        } else {
-          entry.autodrain();
-        }
-      })
-      .on('close', () => {
-        if (exists === doesExist) {
-          resolve();
-        } else {
-          reject(Error(`Zip ${path.relative(process.cwd(), zipFile)} should ${exists ? '' : 'not '}contain entry ${name}.`));
-        }
-      });
-  });
 }
 
 async function assertHttp(url, status, spec, replacements = []) {
@@ -100,6 +77,28 @@ async function assertHttp(url, status, spec, replacements = []) {
     }).on('error', (e) => {
       reject(e);
     });
+  });
+}
+
+async function assertZipEntries(zipPath, entries) {
+  assertFile(zipPath);
+
+  // check zip
+  const result = await new Promise((resolve, reject) => {
+    const es = [];
+    const srcStream = fse.createReadStream(zipPath);
+    srcStream.pipe(unzip.Parse())
+      .on('entry', (entry) => {
+        es.push(entry.path);
+        entry.autodrain();
+      })
+      .on('close', () => {
+        resolve(es);
+      })
+      .on('error', reject);
+  });
+  entries.forEach((s) => {
+    assert.ok(result.indexOf(s) >= 0, `${s} must be included in ${zipPath}`);
   });
 }
 
@@ -265,11 +264,11 @@ const perfExample = {
 module.exports = {
   assertFile,
   assertHttp,
-  assertZipEntry,
   initGit,
   createTestRoot,
   createFakeTestRoot,
   createLogger,
   processSource,
   perfExample,
+  assertZipEntries,
 };
