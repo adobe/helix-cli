@@ -2,6 +2,7 @@
 .github
 .nyc_output
 .vscode
+adobe-helix-*
 logs
 test
 test-results.xml
