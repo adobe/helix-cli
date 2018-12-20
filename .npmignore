@@ -2,7 +2,9 @@
 .github
 .nyc_output
 .vscode
+.eslint*
 adobe-helix-*
+build
 logs
 test
 test-results.xml
