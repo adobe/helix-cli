@@ -64,7 +64,7 @@ if cp a.out $dest; then
   # remove traces of previous installations
   sed -i '' '/###-begin-hlx-completions-###/,/###-end-hlx-completions-###/d' ~/.bash_profile
   # remove trailing empty lines
-  sed -i '' -e :a -e '/^\n*$/{$d;N;};/\n$/ba' .bash_profile
+  sed -i '' -e :a -e '/^\n*$/{$d;N;};/\n$/ba' ~/.bash_profile
   # append hlx bash completion
   printf '\n' >> ~/.bash_profile
   hlx completion >> ~/.bash_profile
