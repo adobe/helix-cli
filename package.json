@@ -1,6 +1,6 @@
 {
   "name": "@adobe/helix-cli",
-  "version": "0.10.15-pre.0",
+  "version": "0.10.16-pre.0",
   "description": "Project Helix CLI",
   "main": "index.js",
   "bin": {
@@ -28,7 +28,7 @@
   "dependencies": {
     "@adobe/helix-pipeline": "0.10.1",
     "@adobe/helix-shared": "0.2.1",
-    "@adobe/helix-simulator": "2.7.4",
+    "@adobe/helix-simulator": "2.7.5",
     "@adobe/parcel-plugin-htl": "2.0.0",
     "@snyk/nodejs-runtime-agent": "1.28.0",
     "archiver": "3.0.0",
