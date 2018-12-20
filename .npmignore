@@ -3,7 +3,7 @@
 .nyc_output
 .vscode
 .eslint*
-adobe-helix-*
+*.tgz
 build
 logs
 test
