@@ -423,6 +423,11 @@ as failed in case metrics are not met.
 
 # Developing Helix CLI
 
+## Testing
+
+You can use `npm run check` to run the tests and check whether your code adheres
+to the helix-cli coding style.
+
 ## Building on macOS Mojave
 
 Before running `npm install`, make sure that `nodegit` can find all dependencies:
