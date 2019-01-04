@@ -29,9 +29,9 @@ Replay.mode = 'bloody';
 function initGit(dir) {
   const pwd = shell.pwd();
   shell.cd(dir);
-  shell.exec('git init');
-  shell.exec('git add -A');
-  shell.exec('git commit -m"initial commit."');
+  shell.exec('git init', { silent: true });
+  shell.exec('git add -A', { silent: true });
+  shell.exec('git commit -m"initial commit."', { silent: true });
   shell.cd(pwd);
 }
 

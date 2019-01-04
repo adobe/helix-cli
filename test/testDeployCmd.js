@@ -60,7 +60,7 @@ describe('hlx deploy (Integration)', () => {
   it.skip('Auto-Deploy works', (done) => {
     try {
       $.cd(testRoot);
-      $.exec('git clone https://github.com/trieloff/helix-helpx.git');
+      $.exec('git clone https://github.com/trieloff/helix-helpx.git', { silent: true });
       $.cd(path.resolve(testRoot, 'helix-helpx'));
 
       new DeployCommand()

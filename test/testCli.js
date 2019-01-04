@@ -21,7 +21,13 @@ const pkgJson = require('../package.json');
 
 function runCLI(...args) {
   const cmd = ['node', path.resolve(__dirname, '../index.js'), ...args].join(' ');
-  return shell.exec(cmd);
+  // Workaround for https://github.com/shelljs/shelljs/issues/905
+  // can be removed once they release their fix...
+  const oldSilent = shell.config.silent;
+  shell.config.silent = true;
+  const ret = shell.exec(cmd, { silent: true });
+  shell.config.silent = oldSilent;
+  return ret;
 }
 
 describe('hlx command line', () => {
