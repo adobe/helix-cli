@@ -25,7 +25,8 @@ For other contributors, a maintainer of the project has to approve the pull requ
 
 1. Fork the repository
 2. Make some changes on a branch on your fork
-3. Create a pull request from your branch
+3. Use `npm run check` to make sure your code can run the tests and adheres to the style guide
+4. Create a pull request from your branch
 
 In your pull request, outline:
 
