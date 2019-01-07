@@ -10,11 +10,9 @@
  * governing permissions and limitations under the License.
  */
 
-const glob = require('glob');
 const opn = require('opn');
-const path = require('path');
 const readline = require('readline');
-const watch = require('node-watch');
+const chokidar = require('chokidar');
 const { HelixProject } = require('@adobe/helix-simulator');
 const BuildCommand = require('./build.cmd');
 const pkgJson = require('../package.json');
@@ -43,10 +41,6 @@ class UpCommand extends BuildCommand {
   }
 
   async stop() {
-    if (this._bundler) {
-      await this._bundler.stop();
-      this._bundler = null;
-    }
     if (this._project) {
       await this._project.stop();
       this._project = null;
@@ -66,18 +60,15 @@ class UpCommand extends BuildCommand {
   _initSourceWatcher(fn) {
     let timer = null;
     let modifiedFiles = {};
-    this._watcher = watch(this.directory, {
-      recursive: true,
-    }, (eventType, filename) => {
-      // only consider paths starting from project root
-      const file = path.relative(this.directory, filename);
-      if (file.indexOf('src/') < 0 && file !== HELIX_CONFIG) {
-        return;
-      }
-      // ignore some files
-      if (/(.*\.swx|.*\.swp|.*~)/.test(file)) {
-        return;
-      }
+
+    this._watcher = chokidar.watch(['src', HELIX_CONFIG], {
+      ignored: /(.*\.swx|.*\.swp|.*~)/,
+      persistent: true,
+      ignoreInitial: true,
+      cwd: this.directory,
+    });
+
+    this._watcher.on('all', (eventType, file) => {
       modifiedFiles[file] = true;
       if (timer) {
         clearTimeout(timer);
@@ -124,7 +115,7 @@ class UpCommand extends BuildCommand {
 
     let buildStartTime;
     let buildMessage;
-    const onParcelBuildStart = async () => {
+    const onBuildStart = async () => {
       if (this._project.started) {
         buildMessage = 'Rebuilding project files...';
       } else {
@@ -134,7 +125,7 @@ class UpCommand extends BuildCommand {
       buildStartTime = Date.now();
     };
 
-    const onParcelBuildEnd = async () => {
+    const onBuildEnd = async () => {
       try {
         readline.clearLine(process.stdout, 0);
         readline.moveCursor(process.stdout, 0, -1);
@@ -157,18 +148,8 @@ class UpCommand extends BuildCommand {
       }
     };
 
-    const onParcelBundled = async () => {
-      await this.writeManifest();
-    };
-
-    const initBundler = async () => {
-      // expand patterns from command line arguments and create parcel bundler
-      const myfiles = this._files.reduce((a, f) => [...a, ...glob.sync(f)], []);
-      this._bundler = await this.createBundler(myfiles);
-      this._bundler.on('buildStart', onParcelBuildStart);
-      this._bundler.on('buildEnd', onParcelBuildEnd);
-      this._bundler.on('bundled', onParcelBundled);
-    };
+    this.on('buildStart', onBuildStart);
+    this.on('buildEnd', onBuildEnd);
 
     this._initSourceWatcher(async (files) => {
       if (HELIX_CONFIG in files) {
@@ -182,14 +163,10 @@ class UpCommand extends BuildCommand {
           return Promise.resolve();
         }
       }
-
-      // recreate the bundler
-      await initBundler();
-      return this._bundler.bundle();
+      return this.build();
     });
 
-    await initBundler();
-    return this._bundler.bundle();
+    this.build();
   }
 }
 
