@@ -11,9 +11,8 @@
  */
 
 const opn = require('opn');
-const path = require('path');
 const readline = require('readline');
-const watch = require('node-watch');
+const chokidar = require('chokidar');
 const { HelixProject } = require('@adobe/helix-simulator');
 const BuildCommand = require('./build.cmd');
 const pkgJson = require('../package.json');
@@ -61,19 +60,15 @@ class UpCommand extends BuildCommand {
   _initSourceWatcher(fn) {
     let timer = null;
     let modifiedFiles = {};
-    this._watcher = watch(this.directory, {
-      recursive: true,
-      filter: (f) => {
-        // ignore some files
-        if (/(.*\.swx|.*\.swp|.*~)/.test(f)) {
-          return false;
-        }
-        const file = path.relative(this.directory, f);
-        return file.indexOf('src/') === 0 || file === HELIX_CONFIG;
-      },
-    }, (eventType, filename) => {
-      // only consider paths starting from project root
-      const file = path.relative(this.directory, filename);
+
+    this._watcher = chokidar.watch(['src', HELIX_CONFIG], {
+      ignored: /(.*\.swx|.*\.swp|.*~)/,
+      persistent: true,
+      ignoreInitial: true,
+      cwd: this.directory,
+    });
+
+    this._watcher.on('all', (eventType, file) => {
       modifiedFiles[file] = true;
       if (timer) {
         clearTimeout(timer);
