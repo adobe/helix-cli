@@ -42,7 +42,6 @@ class UpCommand extends BuildCommand {
   }
 
   async stop() {
-    await this._stopBundler();
     if (this._project) {
       await this._project.stop();
       this._project = null;
@@ -53,13 +52,6 @@ class UpCommand extends BuildCommand {
     }
     this.log.info('Helix project stopped.');
     this.emit('stopped', this);
-  }
-
-  async _stopBundler() {
-    if (this._bundler) {
-      await this._bundler.stop();
-      this._bundler = null;
-    }
   }
 
   /**
