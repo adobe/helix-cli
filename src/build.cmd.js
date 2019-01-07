@@ -86,6 +86,7 @@ class BuildCommand extends AbstractCommand {
       cache: this._cache,
       minify: this._minify,
       outDir: this._target,
+      killWorkers: true,
     };
   }
 
@@ -136,17 +137,22 @@ class BuildCommand extends AbstractCommand {
     return fse.writeFile(path.resolve(this._target, 'manifest.json'), JSON.stringify(mf, null, '  '));
   }
 
-  async run() {
-    await this.init();
-
+  async build() {
+    this.emit('buildStart');
     // expand patterns from command line arguments
     const myfiles = this._files.reduce((a, f) => [...a, ...glob.sync(f)], []);
-
     const bundler = await this.createBundler(myfiles);
     const bundle = await bundler.bundle();
     if (bundle) {
       await this.writeManifest();
     }
+    this.emit('buildEnd');
+    return bundle;
+  }
+
+  async run() {
+    await this.init();
+    await this.build();
   }
 }
 
