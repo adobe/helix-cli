@@ -129,13 +129,7 @@ function deliverPlain(owner, repo, ref, entry, root) {
         'X-Static': 'Raw/Static',
       },
     };
-  }).catch((rqerror) => {
-    console.error('REQUEST FAILED', rqerror.response.body.toString());
-    if (rqerror.statusCode === 404) {
-      return error(rqerror.response.body.toString(), 404);
-    }
-    return error(rqerror.message, rqerror.statusCode);
-  });
+  }).catch(rqerror => error(rqerror.response.body.toString(), rqerror.statusCode));
 }
 
 /**
