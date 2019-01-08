@@ -53,6 +53,7 @@ class CLI {
       demo: require('./demo.js')(),
       up: require('./up.js')(),
       build: require('./build.js')(),
+      package: require('./package.js')(),
       deploy: require('./deploy.js')(),
       perf: require('./perf.js')(),
       publish: require('./publish.js')(),
