@@ -61,7 +61,7 @@ describe('Integration test for demo command', function suite() {
     assertFile(path.resolve(testDir, 'project1', 'README.md'));
     assertFile(path.resolve(testDir, 'project1', 'webroot/bootstrap.min.css'));
     assertFile(path.resolve(testDir, 'project1', 'webroot/favicon.ico'));
-    assertFile(path.resolve(testDir, 'project1', 'helix_logo.png'));
+    assertFile(path.resolve(testDir, 'project1', 'webroot/helix_logo.png'));
   });
 
   it('demo does not leave any files not checked in', async () => {
