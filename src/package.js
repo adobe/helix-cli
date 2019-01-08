@@ -27,7 +27,7 @@ module.exports = function deploy() {
       // eslint-disable-next-line global-require
       yargs
         .option('force', {
-          describe: 'Forces creating packages even if the sources are not modified.',
+          describe: 'Forces creation of packages even if the sources are not modified.',
           type: 'boolean',
           default: false,
         })
@@ -37,6 +37,7 @@ module.exports = function deploy() {
           type: 'string',
           describe: 'Target directory for packaged actions',
         })
+        .group(['force', 'target'], 'Package options')
         .help();
     },
     handler: async (argv) => {
