@@ -66,7 +66,7 @@ module.exports = function deploy() {
           alias: 'o',
           default: '.hlx/build',
           type: 'string',
-          describe: 'Target directory for compiled JS',
+          describe: 'Target directory of created action packages.',
         })
         .option('docker', {
           describe: 'Docker image for Adobe I/O Runtime function',
