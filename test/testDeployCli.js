@@ -54,6 +54,7 @@ describe('hlx deploy', () => {
     mockDeploy.withContent.returnsThis();
     mockDeploy.withFastlyAuth.returnsThis();
     mockDeploy.withFastlyNamespace.returnsThis();
+    mockDeploy.withCreatePackages.returnsThis();
     mockDeploy.run.returnsThis();
 
     // disable static functions as well to avoid shelljs executions.
@@ -136,6 +137,7 @@ Authentication is required. You can pass the key via the HLX_WSK_AUTH environmen
     sinon.assert.calledWith(mockDeploy.withDocker, undefined);
     sinon.assert.calledWith(mockDeploy.withPrefix, 'git-github-com-example-project-helix--master--');
     sinon.assert.calledWith(mockDeploy.withDefault, undefined);
+    sinon.assert.calledWith(mockDeploy.withCreatePackages, 'auto');
     sinon.assert.calledOnce(mockDeploy.run);
   });
 
@@ -290,6 +292,45 @@ Authentication is required. You can pass the key via the HLX_WSK_AUTH environmen
       ]);
 
     sinon.assert.calledWith(mockDeploy.withDefault, { FEATURE: 'red, green' });
+    sinon.assert.calledOnce(mockDeploy.run);
+  });
+
+  it('hlx deploy can set package=ignore', () => {
+    new CLI()
+      .withCommandExecutor('deploy', mockDeploy)
+      .run(['deploy',
+        '--wsk-auth', 'secret-key',
+        '--wsk-namespace', 'hlx',
+        '--package', 'ignore',
+      ]);
+
+    sinon.assert.calledWith(mockDeploy.withCreatePackages, 'ignore');
+    sinon.assert.calledOnce(mockDeploy.run);
+  });
+
+  it('hlx deploy can set package=always', () => {
+    new CLI()
+      .withCommandExecutor('deploy', mockDeploy)
+      .run(['deploy',
+        '--wsk-auth', 'secret-key',
+        '--wsk-namespace', 'hlx',
+        '--package', 'always',
+      ]);
+
+    sinon.assert.calledWith(mockDeploy.withCreatePackages, 'always');
+    sinon.assert.calledOnce(mockDeploy.run);
+  });
+
+  it('hlx deploy can set package=auto', () => {
+    new CLI()
+      .withCommandExecutor('deploy', mockDeploy)
+      .run(['deploy',
+        '--wsk-auth', 'secret-key',
+        '--wsk-namespace', 'hlx',
+        '--package', 'auto',
+      ]);
+
+    sinon.assert.calledWith(mockDeploy.withCreatePackages, 'auto');
     sinon.assert.calledOnce(mockDeploy.run);
   });
 });
