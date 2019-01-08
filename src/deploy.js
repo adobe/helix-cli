@@ -107,6 +107,7 @@ module.exports = function deploy() {
         }, {}))
         .group(['auto', 'wsk-auth', 'wsk-namespace', 'default', 'dirty'], 'Deployment Options')
         .group(['wsk-host', 'loggly-host', 'loggly-auth', 'target', 'docker', 'prefix', 'content'], 'Advanced Options')
+        .group(['package', 'target'], 'Package options')
         .check((args) => {
           if (!args.auto) {
             // single-shot deployment is easy
