@@ -12,6 +12,7 @@
 
 /* eslint-env mocha */
 
+const assert = require('assert');
 const fs = require('fs-extra');
 const path = require('path');
 const { createTestRoot, assertZipEntries } = require('./utils.js');
@@ -41,17 +42,31 @@ describe('hlx package (Integration)', () => {
         'test/integration/src/html.htl',
         'test/integration/src/html.pre.js',
         'test/integration/src/helper.js',
-        // 'test/integration/src/xml.js',
       ])
       .withTargetDir(buildDir)
       .withWebRoot(webroot)
       .withCacheEnabled(false)
       .run();
 
+    const created = {};
+    const ignored = {};
     await new PackageCommand()
       .withDirectory(testRoot)
       .withTarget(buildDir)
+      .withOnlyModified(false)
+      .on('create-package', (info) => {
+        created[info.name] = true;
+      })
+      .on('ignore-package', (info) => {
+        ignored[info.name] = true;
+      })
       .run();
+
+    assert.deepEqual(created, {
+      html: true,
+      static: true,
+    }, 'created packages');
+    assert.deepEqual(ignored, {}, 'ignored packages');
 
     await assertZipEntries(
       path.resolve(buildDir, 'html.zip'),
@@ -61,9 +76,48 @@ describe('hlx package (Integration)', () => {
       path.resolve(buildDir, 'static.zip'),
       ['package.json', 'static.js'],
     );
-    // await assertZipEntries(
-    //   path.resolve(buildDir, 'git-github-com-adobe-helix-cli--dirty--xml.zip'),
-    //   ['package.json', 'xml.js', 'helper.js'],
-    // );
+  }).timeout(60000);
+
+  it('package does not recreate existing package', async () => {
+    await new BuildCommand()
+      .withFiles([
+        'test/integration/src/helper.js',
+        'test/integration/src/xml.js',
+      ])
+      .withTargetDir(buildDir)
+      .withWebRoot(webroot)
+      .withCacheEnabled(false)
+      .run();
+
+    await new PackageCommand()
+      .withDirectory(testRoot)
+      .withTarget(buildDir)
+      .withOnlyModified(true)
+      .run();
+
+    await assertZipEntries(
+      path.resolve(buildDir, 'xml.zip'),
+      ['package.json', 'xml.js', 'helper.js'],
+    );
+
+    const created = {};
+    const ignored = {};
+    await new PackageCommand()
+      .withDirectory(testRoot)
+      .withTarget(buildDir)
+      .withOnlyModified(true)
+      .on('create-package', (info) => {
+        created[info.name] = true;
+      })
+      .on('ignore-package', (info) => {
+        ignored[info.name] = true;
+      })
+      .run();
+
+    assert.deepEqual(created, {}, 'created packages');
+    assert.deepEqual(ignored, {
+      xml: true,
+      static: true,
+    }, 'ignored packages');
   }).timeout(60000);
 });

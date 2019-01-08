@@ -87,6 +87,7 @@ class PackageCommand extends AbstractCommand {
           log.debug(`${archiveName}: Created package. ${archive.pointer()} total bytes`);
           // eslint-disable-next-line no-param-reassign
           info.archiveSize = archive.pointer();
+          this.emit('create-package', info);
           resolve(info);
         }
       });
@@ -163,6 +164,9 @@ class PackageCommand extends AbstractCommand {
           delete script.zipFile;
         }
       }));
+      scripts.filter(script => script.zipFile).forEach((script) => {
+        this.emit('ignore-package', script);
+      });
       scripts = scripts.filter(script => !script.zipFile);
     }
 
