@@ -275,7 +275,7 @@ class PublishCommand extends AbstractCommand {
       try {
         this._service = await request(this.options(''));
       } catch (e) {
-        this.log.error('Unable to get service', e);
+        this.log.error('Unable to get service from fastly', e);
         throw e;
       }
     }
