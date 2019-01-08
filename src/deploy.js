@@ -85,6 +85,12 @@ module.exports = function deploy() {
           type: 'boolean',
           default: false,
         })
+        .option('package', {
+          describe: 'Automatically create or update outdated action packages.',
+          type: 'string',
+          choices: ['auto', 'ignore', 'always'],
+          default: 'auto',
+        })
         .option('content', {
           describe: 'Overrides the GitHub content URL of the default strain',
           type: 'string',
@@ -157,6 +163,7 @@ module.exports = function deploy() {
         .withCircleciAuth(argv.circleciAuth)
         .withFastlyAuth(argv.fastlyAuth)
         .withFastlyNamespace(argv.fastlyNamespace)
+        .withCreatePackages(argv.package)
         .run();
     },
 

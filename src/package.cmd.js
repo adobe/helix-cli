@@ -85,6 +85,8 @@ class PackageCommand extends AbstractCommand {
       output.on('close', () => {
         if (!hadErrors) {
           log.debug(`${archiveName}: Created package. ${archive.pointer()} total bytes`);
+          // eslint-disable-next-line no-param-reassign
+          info.archiveSize = archive.pointer();
           resolve(info);
         }
       });
@@ -142,14 +144,29 @@ class PackageCommand extends AbstractCommand {
     // resolve dependencies
     let scripts = flattenDependencies(scriptInfos);
 
-    // add static action
-    scripts.push({
-      main: path.resolve(__dirname, 'openwhisk', 'static.js'),
-      isStatic: true,
-      requires: [],
-    });
+    // add the static script if missing
+    if (!scripts.find(script => script.isStatic)) {
+      // add static action
+      scripts.push({
+        main: path.resolve(__dirname, 'openwhisk', 'static.js'),
+        isStatic: true,
+        requires: [],
+      });
+    }
 
-    // generate action names
+    // filter out the ones that already have the info and a valid zip file
+    if (this._onlyModified) {
+      await Promise.all(scripts.map(async (script) => {
+        // check if zip exists, and if not, clear the path entry
+        if (!script.zipFile || !(await fs.pathExists(script.zipFile))) {
+          // eslint-disable-next-line no-param-reassign
+          delete script.zipFile;
+        }
+      }));
+      scripts = scripts.filter(script => !script.zipFile);
+    }
+
+    // generate additional infos
     scripts.forEach((script) => {
       /* eslint-disable no-param-reassign */
       script.name = path.basename(script.main, '.js');
@@ -158,34 +175,6 @@ class PackageCommand extends AbstractCommand {
       script.infoFile = path.resolve(this._target, `${script.name}.info.json`);
       /* eslint-enable no-param-reassign */
     });
-
-    // filter out the not modified ones
-    if (this._onlyModified) {
-      await Promise.all(scripts.map(async (script) => {
-        // check if zip exists
-        if (!(await fs.pathExists(script.zipFile))) {
-          return;
-        }
-        // static is always up-to-date
-        if (script.isStatic) {
-          this.log.info(`${script.archiveName} is up-to-date. skipping.`);
-          // eslint-disable-next-line no-param-reassign
-          script.skip = true;
-          return;
-        }
-
-        const infoLastModified = (await fs.stat(script.infoFile)).mtime;
-        const zipLastModified = (await fs.stat(script.zipFile)).mtime;
-        if (zipLastModified >= infoLastModified) {
-          this.log.info(`${script.archiveName} is up-to-date. skipping.`);
-          // eslint-disable-next-line no-param-reassign
-          script.skip = true;
-        }
-        // eslint-disable-next-line no-param-reassign
-        script.name = path.basename(script.main, '.js');
-      }));
-      scripts = scripts.filter(script => !script.skip);
-    }
 
     const bar = new ProgressBar('[:bar] :action :etas', {
       total: scripts.length * 2,
@@ -219,6 +208,9 @@ class PackageCommand extends AbstractCommand {
 
     // package actions
     await Promise.all(scripts.map(script => this.createPackage(script, bar)));
+
+    // write back the updated infos
+    await Promise.all(scripts.map(script => fs.writeJson(script.infoFile, script, { spaces: 2 })));
 
     this.log.info('✅  packaging completed');
     return this;
