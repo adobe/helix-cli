@@ -35,14 +35,21 @@ Commands:
   hlx demo <name> [dir]  Create example helix project.
   hlx up [files...]      Run a Helix development server
   hlx build [files..]    Compile the template functions and build package
+  hlx package            Create Adobe I/O runtime packages
   hlx deploy             Deploy packaged functions to Adobe I/O runtime
   hlx perf               Test performance
   hlx publish            Activate strains in the Fastly CDN and publish the site
                                                                [aliases: strain]
+  hlx clean              Remove generated files and caches.
+  hlx completion         generate bash completion script
 
 Options:
-  --version  Show version number                                       [boolean]
-  --help     Show help                                                 [boolean]
+  --version    Show version number                                     [boolean]
+  --log-file   Log file (use "-" for stdout)              [array] [default: "-"]
+  --log-level  Log level
+        [string] [choices: "silly", "debug", "verbose", "info", "warn", "error"]
+                                                               [default: "info"]
+  --help       Show help                                               [boolean]
 
 for more information, find our manual at https://github.com/adobe/helix-cli
 ```
@@ -101,11 +108,11 @@ Alternatively, you can also perfom a one-shot deployment like this:
 ```bash
 # In <my-cool-project>
 $ hlx deploy --wsk-namespace <your-namespace> --wsk-auth <your-key>
-  
-[==================================================]  0.0s
+[==================================================] analyzing 0.0s
+[==================================================] packaging 0.0s
+✅  packaging completed  
+[==================================================] deploying 0.0s
 ✅  deployment completed
-
-
 ```
 
 Instead of passing `--wsk-auth` as a command line option, you can also set the `HLX_WSK_AUTH` environment variable.
