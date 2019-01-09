@@ -12,6 +12,3 @@ title: '{{project.name}}'
 
 # specifies the directory index
 #directoryIndex: README.html
-
-# location of the webroot
-staticRoot: /htdocs
