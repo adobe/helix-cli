@@ -18,7 +18,6 @@ const ow = require('openwhisk');
 const glob = require('glob');
 const path = require('path');
 const fs = require('fs-extra');
-const yaml = require('js-yaml');
 const ProgressBar = require('progress');
 const { GitUrl, GitUtils } = require('@adobe/helix-shared');
 const useragent = require('./user-agent-util');
@@ -53,14 +52,13 @@ class DeployCommand extends AbstractCommand {
     this._createPackages = 'auto';
   }
 
-  static getDefaultContentURL() {
-    if (fs.existsSync('helix-config.yaml')) {
-      const conf = yaml.safeLoad(fs.readFileSync('helix-config.yaml'));
-      if (conf && conf.contentRepo) {
-        return conf.contentRepo;
-      }
+  getDefaultContentURL() {
+    const url = this.config.strains.get('default').content.toString();
+    // todo: ref should never be empty
+    if (url === 'http://localhost/local/default.git#master' || url === 'http://localhost/local/default.git') {
+      return GitUtils.getOrigin();
     }
-    return GitUtils.getOrigin();
+    return url;
   }
 
   withEnableAuto(value) {
@@ -290,10 +288,22 @@ class DeployCommand extends AbstractCommand {
       return this.autoDeploy();
     }
 
-    // todo: the default should be provided by the helix-config and not the yargs defaults!
-    const giturl = new GitUrl(this._content);
+    if (!this._content) {
+      this._content = this.getDefaultContentURL();
+    }
+    if (!this._content) {
+      // content is still empty, so local checkout
+      this._content = `http://localhost/default/${path.basename(process.cwd())}.git#master`;
+    }
+
+    let giturl = new GitUrl(this._content);
+    // ensure default ref. todo: harmonize
+    if (!giturl.ref) {
+      giturl = new GitUrl(`${this._content}#master`);
+    }
+
     if (!this._prefix) {
-      this._prefix = `${GitUtils.getRepository()}--${GitUtils.getBranchFlag()}--`;
+      this._prefix = `${giturl.host.replace(/[\W]/g, '-')}-${giturl.owner.replace(/[\W]/g, '-')}-${giturl.repo.replace(/[\W]/g, '-')}--${giturl.ref.replace(/[\W]/g, '-')}${GitUtils.isDirty() ? '-dirty' : ''}--`;
     }
 
     const owoptions = {

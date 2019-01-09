@@ -25,11 +25,6 @@ module.exports = function deploy() {
     command: 'deploy',
     desc: 'Deploy packaged functions to Adobe I/O runtime',
     builder: (yargs) => {
-      // eslint-disable-next-line global-require
-      const DeployCommand = require('./deploy.cmd'); // lazy load the handler to speed up execution time
-      // eslint-disable-next-line global-require
-      const { GitUtils } = require('@adobe/helix-shared'); // lazy load the handler to speed up execution time
-
       deployCommon(yargs);
       yargs
         .option('auto', {
@@ -74,7 +69,6 @@ module.exports = function deploy() {
         .option('prefix', {
           alias: 'p',
           describe: 'Prefix for the deployed action name.',
-          default: `${GitUtils.getRepository()}--${GitUtils.getBranchFlag()}--`,
         })
         .option('default', {
           describe: 'Adds a default parameter to the function',
@@ -94,7 +88,6 @@ module.exports = function deploy() {
         .option('content', {
           describe: 'Overrides the GitHub content URL of the default strain',
           type: 'string',
-          default: DeployCommand.getDefaultContentURL(),
         })
         .array('default')
         .nargs('default', 2)

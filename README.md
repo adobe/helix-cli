@@ -137,7 +137,7 @@ If you need to pass request parameters, you can whitelist the parameters you nee
 ```yaml
 strains:
   default:
-    code: /hlx/default/git-github-com-adobe-helix-cli-git--dirty--
+    code: /hlx/default/github-com-adobe-helix-cli--master-dirty--
     params:
       - foo
       - bar
@@ -164,7 +164,7 @@ by adding an `index` property:
 ```yaml
 strains:
   default:
-    code: /hlx/default/git-github-com-adobe-helix-cli-git--dirty--
+    code: /hlx/default/github-com-adobe-helix-cli--master-dirty--
     directoryIndex: README.html
     content:
       repo: helix-cli
@@ -211,7 +211,7 @@ An example configuration could look like this:
 ```yaml
 strains:
   default:
-    code: /trieloff/default/https---github-com-adobe-helix-helpx-git--master--
+    code: /trieloff/default/github-com-adobe-helix-helpx--master--
     url: https://www.primordialsoup.life
     content:
       repo: reactor-user-docs
@@ -220,7 +220,7 @@ strains:
 
   develop:
     url: https://dev.primordialsoup.life/develop/
-    code: /trieloff/default/https---github-com-adobe-helix-helpx-git--develop--
+    code: /trieloff/default/github-com-adobe-helix-helpx--develop--
     content:
       repo: reactor-user-docs
       ref: master
@@ -238,7 +238,7 @@ You are still able to set strain `conditions` or assign traffic to a strain base
 ```yaml
 strains:
   default:
-    code: /trieloff/default/git-github-com-trieloff-helix-demo-git--dirty--
+    code: /trieloff/default/github-com-trieloff-helix-demo--master-dirty--
     content: https://github.com/trieloff/helix-demo.git
     static: https://github.com/trieloff/helix-demo.git
   oldcontent:
@@ -269,7 +269,7 @@ An example performance configuration might look like this:
 ```yaml
 strains:
   default:
-    code: /trieloff/default/https---github-com-adobe-helix-helpx-git--master--
+    code: /trieloff/default/github-com-adobe-helix-helpx--master--
     directoryIndex: README.html
     url: https://www.primordialsoup.life
     urls:
