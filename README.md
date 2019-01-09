@@ -181,7 +181,7 @@ directoryIndex: readme.html
 
 ### Static Content Handling
 
-Static content is delivered from `htdocs` directory of the _code_ repository of the Helix project. By default, whatever 
+Static content is delivered from the `htdocs` directory of the _code_ repository of the Helix project. By default, whatever 
 remote `origin` repository is set at the time of running `hlx publish` is used, but this can be 
 overridden in the configuration file:
 
