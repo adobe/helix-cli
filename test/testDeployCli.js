@@ -36,7 +36,6 @@ describe('hlx deploy', () => {
       return true;
     });
 
-
     mockDeploy = sinon.createStubInstance(DeployCommand);
     mockDeploy.withEnableAuto.returnsThis();
     mockDeploy.withCircleciAuth.returnsThis();
@@ -135,7 +134,7 @@ Authentication is required. You can pass the key via the HLX_WSK_AUTH environmen
     sinon.assert.calledWith(mockDeploy.withLogglyAuth, '');
     sinon.assert.calledWith(mockDeploy.withTarget, '.hlx/build');
     sinon.assert.calledWith(mockDeploy.withDocker, undefined);
-    sinon.assert.calledWith(mockDeploy.withPrefix, 'git-github-com-example-project-helix--master--');
+    sinon.assert.calledWith(mockDeploy.withPrefix, undefined);
     sinon.assert.calledWith(mockDeploy.withDefault, undefined);
     sinon.assert.calledWith(mockDeploy.withCreatePackages, 'auto');
     sinon.assert.calledOnce(mockDeploy.run);
@@ -158,7 +157,7 @@ Authentication is required. You can pass the key via the HLX_WSK_AUTH environmen
     sinon.assert.calledWith(mockDeploy.withLogglyAuth, '');
     sinon.assert.calledWith(mockDeploy.withTarget, '.hlx/build');
     sinon.assert.calledWith(mockDeploy.withDocker, undefined);
-    sinon.assert.calledWith(mockDeploy.withPrefix, 'git-github-com-example-project-helix--master--');
+    sinon.assert.calledWith(mockDeploy.withPrefix, undefined);
     sinon.assert.calledWith(mockDeploy.withDefault, undefined);
     sinon.assert.calledOnce(mockDeploy.run);
   });
