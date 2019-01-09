@@ -20,13 +20,16 @@ const path = require('path');
 const fs = require('fs-extra');
 const yaml = require('js-yaml');
 const ProgressBar = require('progress');
-const archiver = require('archiver');
 const { GitUrl, GitUtils } = require('@adobe/helix-shared');
 const useragent = require('./user-agent-util');
 const AbstractCommand = require('./abstract.cmd.js');
-const packageCfg = require('./parcel/packager-config.js');
-const ExternalsCollector = require('./parcel/ExternalsCollector.js');
-const { flattenDependencies } = require('./packager-utils.js');
+const PackageCommand = require('./package.cmd.js');
+
+function humanFileSize(size) {
+  const i = size === 0 ? 0 : Math.floor(Math.log(size) / Math.log(1024));
+  const p2 = 1024 ** i;
+  return `${(size / p2).toFixed(2)} ${['B', 'KiB', 'MiB', 'GiB', 'TiB'][i]}`;
+}
 
 class DeployCommand extends AbstractCommand {
   constructor(logger) {
@@ -47,6 +50,7 @@ class DeployCommand extends AbstractCommand {
     this._enableDirty = false;
     this._dryRun = false;
     this._strainFile = null;
+    this._createPackages = 'auto';
   }
 
   static getDefaultContentURL() {
@@ -147,11 +151,16 @@ class DeployCommand extends AbstractCommand {
     return this;
   }
 
+  withCreatePackages(value) {
+    this._createPackages = value;
+    return this;
+  }
+
   actionName(script) {
-    if (script.indexOf(path.resolve(__dirname, 'openwhisk')) === 0) {
-      return `hlx--${path.basename(script, '.js')}`;
+    if (script.main.indexOf(path.resolve(__dirname, 'openwhisk')) === 0) {
+      return `hlx--${script.name}`;
     }
-    return this._prefix + path.basename(script, '.js');
+    return this._prefix + script.name;
   }
 
   async init() {
@@ -160,101 +169,6 @@ class DeployCommand extends AbstractCommand {
       this._strainFile = path.resolve(this._helixConfig.directory, '.hlx', 'strains.json');
     }
     this._target = path.resolve(this.directory, this._target);
-  }
-
-  /**
-   * Creates a .zip package that contains the contents to be deployed to openwhisk.
-   * @param info The action info object
-   * @param info.name Name of the action
-   * @param info.main Main script of the action
-   * @param info.externals External modules
-   * @param info.requires Local dependencies
-   * @param bar progress bar
-   * @returns {Promise<any>} Promise that resolves to the package file {@code path}.
-   */
-  async createPackage(info, bar) {
-    const { log } = this;
-
-    const ticks = {};
-    const tick = (message, name) => {
-      const shortname = name.replace(/\/package.json.*/, '').replace(/node_modules\//, '');
-      bar.tick({
-        action: name ? `packaging ${shortname}` : '',
-      });
-      if (message) {
-        this.log.maybe({
-          progress: true,
-          level: 'info',
-          message,
-        });
-      }
-    };
-
-    if (this._dryRun) {
-      log.debug(`Skipping ZIP file creation for ${info.name}`);
-      return Promise.resolve({});
-    }
-
-    return new Promise((resolve, reject) => {
-      const archiveName = `${info.name}.zip`;
-      const zipFile = path.resolve(this._target, archiveName);
-      let hadErrors = false;
-
-      // create zip file for package
-      const output = fs.createWriteStream(zipFile);
-      const archive = archiver('zip');
-
-      log.debug(`preparing package ${archiveName}`);
-      output.on('close', () => {
-        if (!hadErrors) {
-          log.debug(`${archiveName}: Created package. ${archive.pointer()} total bytes`);
-          // eslint-disable-next-line no-param-reassign
-          info.zipFile = zipFile;
-          resolve(info);
-        }
-      });
-      archive.on('entry', (data) => {
-        log.debug(`${archiveName}: A ${data.name}`);
-        if (ticks[data.name]) {
-          tick('', data.name);
-        }
-      });
-      archive.on('warning', (err) => {
-        log.error(`${chalk.redBright('[error] ')}Unable to create archive: ${err.message}`);
-        hadErrors = true;
-        reject(err);
-      });
-      archive.on('error', (err) => {
-        log.error(`${chalk.redBright('[error] ')}Unable to create archive: ${err.message}`);
-        hadErrors = true;
-        reject(err);
-      });
-
-      const packageJson = {
-        name: info.name,
-        version: '1.0',
-        description: `Lambda function of ${info.name}`,
-        main: path.basename(info.main),
-        license: 'Apache-2.0',
-      };
-
-      archive.pipe(output);
-      archive.append(JSON.stringify(packageJson, null, '  '), { name: 'package.json' });
-
-      info.files.forEach((file) => {
-        const name = path.basename(file);
-        archive.file(path.resolve(this._target, file), { name });
-        ticks[name] = true;
-      });
-
-      // add modules that cause problems when embeded in webpack
-      Object.keys(info.externals).forEach((mod) => {
-        archive.directory(info.externals[mod], `node_modules/${mod}`);
-        ticks[`node_modules/${mod}/package.json`] = true;
-      });
-
-      archive.finalize();
-    });
   }
 
   static getBuildVarOptions(name, value, auth, owner, repo) {
@@ -378,6 +292,9 @@ class DeployCommand extends AbstractCommand {
 
     // todo: the default should be provided by the helix-config and not the yargs defaults!
     const giturl = new GitUrl(this._content);
+    if (!this._prefix) {
+      this._prefix = `${GitUtils.getRepository()}--${GitUtils.getBranchFlag()}--`;
+    }
 
     const owoptions = {
       apihost: this._wsk_host,
@@ -386,45 +303,30 @@ class DeployCommand extends AbstractCommand {
     };
     const openwhisk = ow(owoptions);
 
+    if (this._createPackages !== 'ignore') {
+      const pgkCommand = new PackageCommand(this.log)
+        .withTarget(this._target)
+        .withOnlyModified(this._createPackages === 'auto');
+      await pgkCommand.run();
+    }
+
     // get the list of scripts from the info files
     const infos = [...glob.sync(`${this._target}/*.info.json`)];
     const scriptInfos = await Promise.all(infos.map(info => fs.readJSON(info)));
+    const scripts = scriptInfos.filter(script => script.zipFile);
 
-    // resolve dependencies
-    const scripts = flattenDependencies(scriptInfos);
-
-    // add static action
-    scripts.push({
-      main: path.resolve(__dirname, 'openwhisk', 'static.js'),
-      requires: [],
+    // generate action names
+    scripts.forEach((script) => {
+      // eslint-disable-next-line no-param-reassign
+      script.actionName = this.actionName(script);
     });
 
     const bar = new ProgressBar('[:bar] :action :etas', {
-      total: scripts.length,
+      total: scripts.length * 2,
       width: 50,
       renderThrottle: 1,
       stream: process.stdout,
     });
-
-    // collect all the external modules of the scripts
-    let steps = 0;
-    await Promise.all(scripts.map(async (script) => {
-      const collector = new ExternalsCollector()
-        .withDirectory(this._target)
-        .withExternals(Object.keys(packageCfg.externals));
-
-      // eslint-disable-next-line no-param-reassign
-      script.files = [script.main, ...script.requires].map(f => path.resolve(this._target, f));
-      // eslint-disable-next-line no-param-reassign
-      script.externals = await collector.collectModules(script.files);
-      steps += Object.keys(script.externals).length + script.files.length;
-      bar.tick(1, {
-        action: `analyzing ${path.basename(script.main)}`,
-      });
-    }));
-
-    // trigger new progress bar
-    bar.total += steps;
 
     const tick = (message, name) => {
       bar.tick({
@@ -445,19 +347,6 @@ class DeployCommand extends AbstractCommand {
       LOGGLY_KEY: this._loggly_auth,
     };
 
-    if (!this._prefix) {
-      this._prefix = `${GitUtils.getRepository()}--${GitUtils.getBranchFlag()}--`;
-    }
-
-    // generate action names
-    scripts.forEach((script) => {
-      // eslint-disable-next-line no-param-reassign
-      script.name = this.actionName(script.main);
-    });
-
-    // package actions
-    await Promise.all(scripts.map(script => this.createPackage(script, bar)));
-
     // read files ...
     const read = scripts
       .filter(script => script.zipFile) // skip empty zip files
@@ -465,10 +354,9 @@ class DeployCommand extends AbstractCommand {
         .then(action => ({ script, action })));
 
     // ... and deploy
-    bar.total += scripts.length * 2;
     const deployed = read.map(p => p.then(({ script, action }) => {
       const actionoptions = {
-        name: script.name,
+        name: script.actionName,
         'User-Agent': useragent,
         action,
         params,
@@ -503,9 +391,11 @@ class DeployCommand extends AbstractCommand {
       });
     }));
 
-    Promise.all(deployed).then(() => {
-      bar.terminate();
-      this.log.info('✅  deployment completed');
+    await Promise.all(deployed);
+    bar.terminate();
+    this.log.info(`✅  deployment of ${scripts.length} actions completed:`);
+    scripts.forEach((script) => {
+      this.log.info(`   - ${this._wsk_namespace}/${script.actionName} (${humanFileSize(script.archiveSize)})`);
     });
 
     // update action in default strain

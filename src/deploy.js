@@ -66,7 +66,7 @@ module.exports = function deploy() {
           alias: 'o',
           default: '.hlx/build',
           type: 'string',
-          describe: 'Target directory for compiled JS',
+          describe: 'Target directory of created action packages.',
         })
         .option('docker', {
           describe: 'Docker image for Adobe I/O Runtime function',
@@ -85,6 +85,12 @@ module.exports = function deploy() {
           type: 'boolean',
           default: false,
         })
+        .option('package', {
+          describe: 'Automatically create or update outdated action packages.',
+          type: 'string',
+          choices: ['auto', 'ignore', 'always'],
+          default: 'auto',
+        })
         .option('content', {
           describe: 'Overrides the GitHub content URL of the default strain',
           type: 'string',
@@ -101,6 +107,7 @@ module.exports = function deploy() {
         }, {}))
         .group(['auto', 'wsk-auth', 'wsk-namespace', 'default', 'dirty'], 'Deployment Options')
         .group(['wsk-host', 'loggly-host', 'loggly-auth', 'target', 'docker', 'prefix', 'content'], 'Advanced Options')
+        .group(['package', 'target'], 'Package options')
         .check((args) => {
           if (!args.auto) {
             // single-shot deployment is easy
@@ -157,6 +164,7 @@ module.exports = function deploy() {
         .withCircleciAuth(argv.circleciAuth)
         .withFastlyAuth(argv.fastlyAuth)
         .withFastlyNamespace(argv.fastlyNamespace)
+        .withCreatePackages(argv.package)
         .run();
     },
 
