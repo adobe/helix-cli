@@ -43,9 +43,9 @@ describe('Integration test for demo command', function suite() {
     assertFile(path.resolve(testDir, 'project1', 'src/html.htl'));
     assertFile(path.resolve(testDir, 'project1', 'src/html.pre.js'));
     assertFile(path.resolve(testDir, 'project1', 'index.md'));
+    assertFile(path.resolve(testDir, 'project1', 'helix_logo.png'));
     assertFile(path.resolve(testDir, 'project1', 'htdocs/style.css'));
     assertFile(path.resolve(testDir, 'project1', 'htdocs/favicon.ico'));
-    assertFile(path.resolve(testDir, 'project1', 'htdocs/helix_logo.png'));
   });
 
   it('demo type full creates all files', async () => {
@@ -59,9 +59,9 @@ describe('Integration test for demo command', function suite() {
     assertFile(path.resolve(testDir, 'project1', 'src/html.pre.js'));
     assertFile(path.resolve(testDir, 'project1', 'index.md'));
     assertFile(path.resolve(testDir, 'project1', 'README.md'));
+    assertFile(path.resolve(testDir, 'project1', 'helix_logo.png'));
     assertFile(path.resolve(testDir, 'project1', 'htdocs/bootstrap.min.css'));
     assertFile(path.resolve(testDir, 'project1', 'htdocs/favicon.ico'));
-    assertFile(path.resolve(testDir, 'project1', 'htdocs/helix_logo.png'));
   });
 
   it('demo does not leave any files not checked in', async () => {
