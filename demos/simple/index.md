@@ -14,7 +14,7 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-![helix-logo](./htdocs/helix_logo.png) <!-- remove /htdocs prefix once it's the default static root -->
+![helix-logo](./helix_logo.png) <!-- this image is served from this content repository -->
 
 # Helix - {{project.name}}
 

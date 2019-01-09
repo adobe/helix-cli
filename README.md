@@ -181,11 +181,7 @@ directoryIndex: readme.html
 
 ### Static Content Handling
 
-Static content is delivered from the _code_ repository below the defined `staticRoot`. The default
-is `/`, so any file in the _code_ repository can be delivered. For better separation of content
-and _security_, it is advisable to create a distinct `webroot` or `docroot` (see below)
-
-Static content is served from the code repository of the Helix project. By default, whatever 
+Static content is delivered from the `htdocs` directory of the _code_ repository of the Helix project. By default, whatever 
 remote `origin` repository is set at the time of running `hlx publish` is used, but this can be 
 overridden in the configuration file:
 
@@ -200,64 +196,9 @@ strains:
 
 The same core configuration options (`repo`, `ref`, `root`, and `owner`) are supported for `static` as for `content`. 
 
-#### Keeping Your Repository Clean
-
-Although you can just put static content, e.g. an `index.html` loader for your SPA into the root 
-of your repository, this tends to litter the repository with many small files. To keep things clean, create for example a directory `docroot` in the repository and move your 
-static files there. Then the `staticRoot` can be set in the root of the config:
-
-```bash
-# defines the default static root relative to the static repository
-staticRoot: /docroot
-``` 
-
-or individually using the `path` property in the _static_ definition of a strain:
-
-
-```yaml
-strains:
-  default:
-    static:
-      repo: reactor-user-docs
-      ref: master
-      owner: Adobe-Marketing-Cloud
-      path: /docroot
-```
-
 After your next deployment with `hlx publish`, all static content will be served out of the 
-directory `docroot`. None of this will be visible in the URL, so that no visitor will ever see 
-_docroot_ in the URL. `https://example.com/favico.ico` would be served from `$REPO/docroot/favico.ico`.
-
-#### Securing Static Content
-
-Because the code repository may contain sensitive information, static content is protected using a 
-hard-coded blacklist. This blacklist includes `package.json`, `src`, and every hidden file or 
-directory (starting with `.`).
-
-In `helix-config.yaml`, additional white- and blacklists may be specified using the `allow` and `deny` 
-properties underneath `static`. Each `allow` or `deny` is a list of glob expressions such as `"*.js"`. 
-YAML requires you to put quotes around the glob expression.
-
-Examples of a whitelist and blacklist configuration may look like this:
-
-```yaml
-strains:
-  default:
-    static:
-      repo: reactor-user-docs
-      ref: master
-      owner: Adobe-Marketing-Cloud
-      allow:
-        - "/dist/*"
-        - "/static/*"
-      deny:
-        - "*.htl"
-```
-
-If a blacklist is specified, every path matching any of the patterns in the blacklist will be rejected. 
-If a whitelist is specified, only paths matching patterns on the whitelist will be accepted.
-
-A blacklist can block items that have been allowed by the whitelist, but not vice versa.
+directory `htdocs`. None of this will be visible in the URL, so that no visitor will ever see 
+_htdocs_ in the URL. `https://example.com/favico.ico` would be served from `$REPO/htdocs/favico.ico`.
 
 ## Matching Strains to URLs
 
@@ -330,9 +271,6 @@ strains:
   default:
     code: /trieloff/default/https---github-com-adobe-helix-helpx-git--master--
     directoryIndex: README.html
-    static:
-      deny:
-        - "*.md"
     url: https://www.primordialsoup.life
     urls:
       - https://www.primordialsoup.life/README.html
