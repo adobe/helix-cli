@@ -14,7 +14,7 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-![helix-logo](./helix_logo.png)
+![helix-logo](./htdocs/helix_logo.png) <!-- remove /htdocs prefix once it's the default static root -->
 
 # Helix - {{project.name}}
 
@@ -24,7 +24,7 @@ It works! {{project.name}} is up and running.
 
 1. Try editing `index.md` and see what happens.
 2. Try editing `src/html.htl` to change the HTML output
-3. Try editing `dist/style.css` to change the way this page looks
+3. Try editing `htdocs/style.css` to change the way this page looks
 
 ## And then?
 
