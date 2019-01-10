@@ -15,6 +15,7 @@
 const EventEmitter = require('events');
 const { HelixConfig } = require('@adobe/helix-shared');
 const { makeLogger } = require('./log-common');
+const ConfigUtils = require('./config/config-utils.js');
 
 class AbstractCommand extends EventEmitter {
   constructor(logger) {
@@ -22,6 +23,7 @@ class AbstractCommand extends EventEmitter {
     this._initialized = false;
     this._logger = logger || makeLogger();
     this._helixConfig = new HelixConfig().withLogger(this._logger);
+    this._requireConfigFile = true;
   }
 
   withDirectory(dir) {
@@ -35,6 +37,11 @@ class AbstractCommand extends EventEmitter {
 
   get directory() {
     return this._helixConfig.directory;
+  }
+
+  withRequireConfigFile(value) {
+    this._requireConfigFile = value;
+    return this;
   }
 
   withConfigFile(file) {
@@ -51,6 +58,10 @@ class AbstractCommand extends EventEmitter {
 
   async init() {
     if (!this._initialized) {
+      if (!this._requireConfigFile && !(await this._helixConfig.hasFile())) {
+        // set default config
+        this._helixConfig.withSource(await ConfigUtils.createDefaultConfig());
+      }
       await this._helixConfig.init();
       this._initialized = true;
     }
@@ -62,8 +73,7 @@ class AbstractCommand extends EventEmitter {
     }
     this._helixConfig = await (new HelixConfig()
       .withLogger(this._helixConfig.log)
-      // eslint-disable-next-line no-underscore-dangle
-      .withConfigPath(this._helixConfig._cfgPath) // todo, expose properly in HelixConfig
+      .withConfigPath(this._helixConfig.configPath)
       .withDirectory(this._helixConfig.directory)
       .init());
     return this;

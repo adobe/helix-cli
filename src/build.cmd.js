@@ -29,6 +29,7 @@ class BuildCommand extends AbstractCommand {
     this._target = null;
     this._files = null;
     this._webroot = null;
+    this.withRequireConfigFile(false);
   }
 
   withCacheEnabled(cache) {

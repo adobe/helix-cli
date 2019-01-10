@@ -1,0 +1,18 @@
+#
+# helix configuration for local development
+#
+version: 1
+
+definitions:
+  defaults:
+    - &localRepo "http://localhost/local/default.git"
+    - &defaultRepo "$CURRENT_ORIGIN"
+
+strains:
+  dev:
+    code: *localRepo
+    content: *localRepo
+
+  default:
+    code: *defaultRepo
+    content: *defaultRepo
