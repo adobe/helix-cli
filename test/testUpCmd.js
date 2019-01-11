@@ -16,7 +16,7 @@ const assert = require('assert');
 const path = require('path');
 const fse = require('fs-extra');
 const winston = require('winston');
-const logCommon = require('../src/log-common');
+const { makeLogger } = require('../src/log-common');
 
 const {
   initGit,
@@ -85,7 +85,7 @@ describe('Integration test for up command', () => {
 
   it('up command shows warning if no helix-config is present.', (done) => {
     initGit(testDir);
-    const logger = logCommon.makeLogger({ logFile: [testlogfile] });
+    const logger = makeLogger({ logFile: [testlogfile] });
     new UpCommand(logger)
       .withCacheEnabled(false)
       .withFiles([path.join(testDir, 'src', '*.htl'), path.join(testDir, 'src', '*.js')])
@@ -113,7 +113,7 @@ describe('Integration test for up command', () => {
   it('up command shows no warning if helix-config is present.', (done) => {
     initGit(testDir);
     fse.renameSync(path.resolve(testDir, 'default-config.yaml'), path.resolve(testDir, 'helix-config.yaml'));
-    const logger = logCommon.makeLogger({ logFile: [testlogfile] });
+    const logger = makeLogger({ logFile: [testlogfile] });
     new UpCommand(logger)
       .withCacheEnabled(false)
       .withFiles([path.join(testDir, 'src', '*.htl'), path.join(testDir, 'src', '*.js')])
