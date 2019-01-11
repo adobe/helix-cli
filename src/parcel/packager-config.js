@@ -63,6 +63,9 @@ module.exports = {
     // uuid: true,
     validator: true,
     'watson-developer-cloud': true,
+    // webpack injects itself during the collection phase due to a reference to `require.cache`
+    // currently it is not needed in the action, so we deliberately exclude it here.
+    webpack: true,
     when: true,
     // 'winston',  (we need 3.x; container provides 2.x)
     ws: true,
