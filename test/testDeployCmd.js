@@ -17,7 +17,7 @@ const fs = require('fs-extra');
 const assert = require('assert');
 const path = require('path');
 const $ = require('shelljs');
-const { createTestRoot, assertFile } = require('./utils.js');
+const { initGit, createTestRoot, assertFile } = require('./utils.js');
 const DeployCommand = require('../src/deploy.cmd.js');
 
 const CI_TOKEN = 'nope';
@@ -52,6 +52,29 @@ describe('hlx deploy (Integration)', () => {
     Replay.mode = 'bloody';
     Replay.headers = replayheaders;
     $.cd(cwd);
+  });
+
+  it('deploy fails if no helix-config is present.', async () => {
+    initGit(testRoot);
+    try {
+      await new DeployCommand()
+        .withWskHost('adobeioruntime.net')
+        .withWskAuth('secret-key')
+        .withWskNamespace('hlx')
+        .withEnableAuto(false)
+        .withEnableDirty(true)
+        .withDryRun(true)
+        .withContent('git@github.com:adobe/helix-cli')
+        .withTarget(buildDir)
+        .withStrainFile(strainsFile)
+        .withFastlyAuth('nope')
+        .withFastlyNamespace('justtesting')
+        .withCircleciAuth(CI_TOKEN)
+        .run();
+      assert.fail('deploy should fail if no helix-config is present');
+    } catch (e) {
+      assert.ok(e.toString().indexOf('Error: Invalid configuration:') === 0);
+    }
   });
 
   it.skip('Auto-Deploy works', (done) => {
