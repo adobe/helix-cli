@@ -13,6 +13,7 @@
 const opn = require('opn');
 const readline = require('readline');
 const chokidar = require('chokidar');
+const chalk = require('chalk');
 const { HelixProject } = require('@adobe/helix-simulator');
 const BuildCommand = require('./build.cmd');
 const pkgJson = require('../package.json');
@@ -24,6 +25,7 @@ class UpCommand extends BuildCommand {
     super(logger);
     this._httpPort = -1;
     this._open = false;
+    this._strainName = '';
   }
 
   withHttpPort(p) {
@@ -33,6 +35,12 @@ class UpCommand extends BuildCommand {
 
   withOpen(o) {
     this._open = !!o;
+    return this;
+  }
+
+  // temporary solution until proper condition evaluation
+  withStrainName(value) {
+    this._strainName = value;
     return this;
   }
 
@@ -92,6 +100,11 @@ class UpCommand extends BuildCommand {
   async run() {
     await super.init();
 
+    if (!await this.config.hasFile()) {
+      this.log.warn(chalk`No {cyan helix-config.yaml}. Please add one before deployment.`);
+      this.log.info(chalk`You can auto generate one with\n{grey $ hlx up --save}\n`);
+    }
+
     // start debugger (#178)
     // https://nodejs.org/en/docs/guides/debugging-getting-started/#enable-inspector
     process.kill(process.pid, 'SIGUSR1');
@@ -100,6 +113,7 @@ class UpCommand extends BuildCommand {
       .withBuildDir(this._target)
       .withWebRootDir(this._webroot)
       .withHelixConfig(this.config)
+      .withStrainName(this._strainName || 'default')
       .withDisplayVersion(pkgJson.version)
       .withRuntimeModulePaths(module.paths);
 

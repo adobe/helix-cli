@@ -15,6 +15,9 @@
 const assert = require('assert');
 const path = require('path');
 const fse = require('fs-extra');
+const winston = require('winston');
+const logCommon = require('../src/log-common');
+
 const {
   initGit,
   assertHttp,
@@ -29,6 +32,7 @@ describe('Integration test for up command', () => {
   let testDir;
   let buildDir;
   let webroot;
+  let testlogfile;
 
   beforeEach(async function before() {
     this.timeout(20000);
@@ -36,22 +40,26 @@ describe('Integration test for up command', () => {
     testDir = path.resolve(testRoot, 'project');
     buildDir = path.resolve(testRoot, '.hlx/build');
     webroot = path.resolve(testDir, 'webroot');
+    testlogfile = path.resolve(testDir, 'testlog.log');
     await fse.copy(TEST_DIR, testDir);
+
+    // reset the winston loggers
+    winston.loggers.loggers.clear();
   });
 
-  it('up command fails outside git repository', (done) => {
-    new UpCommand()
-      .withCacheEnabled(false)
-      .withFiles([path.join(testDir, 'src', '*.htl'), path.join(testDir, 'src', '*.js')])
-      .withTargetDir(buildDir)
-      .withDirectory(testDir)
-      .run()
-      .then(() => assert.fail('hlx up without .git should fail.'))
-      .catch((err) => {
-        assert.equal(err.message, 'Unable to start helix: Local README.md or index.md must be inside a valid git repository.');
-        done();
-      })
-      .catch(done);
+  it('up command fails outside git repository', async () => {
+    try {
+      await new UpCommand()
+        .withCacheEnabled(false)
+        .withFiles([path.join(testDir, 'src', '*.htl'), path.join(testDir, 'src', '*.js')])
+        .withTargetDir(buildDir)
+        .withDirectory(testDir)
+        .withStrainName('dev')
+        .run();
+      assert.fail('hlx up without .git should fail.');
+    } catch (e) {
+      assert.equal(e.message, 'Unable to start helix: Local README.md or index.md must be inside a valid git repository.');
+    }
   });
 
   it('up command succeeds and can be stopped', (done) => {
@@ -61,6 +69,7 @@ describe('Integration test for up command', () => {
       .withFiles([path.join(testDir, 'src', '*.htl'), path.join(testDir, 'src', '*.js')])
       .withTargetDir(buildDir)
       .withDirectory(testDir)
+      .withStrainName('dev')
       .withHttpPort(0)
       .on('started', (cmd) => {
         // eslint-disable-next-line no-console
@@ -69,6 +78,61 @@ describe('Integration test for up command', () => {
       })
       .on('stopped', () => {
         done();
+      })
+      .run()
+      .catch(done);
+  }).timeout(5000);
+
+  it('up command shows warning if no helix-config is present.', (done) => {
+    initGit(testDir);
+    const logger = logCommon.makeLogger({ logFile: [testlogfile] });
+    new UpCommand(logger)
+      .withCacheEnabled(false)
+      .withFiles([path.join(testDir, 'src', '*.htl'), path.join(testDir, 'src', '*.js')])
+      .withTargetDir(buildDir)
+      .withDirectory(testDir)
+      .withStrainName('dev')
+      .withHttpPort(0)
+      .on('started', (cmd) => {
+        // eslint-disable-next-line no-console
+        console.log(`test server running on port ${cmd.project.server.port}`);
+        cmd.stop();
+      })
+      .on('stopped', () => {
+        const log = fse.readFileSync(testlogfile, 'utf-8');
+        if (log.indexOf('warn: No [36mhelix-config.yaml[39m. Please add one before deployment') < 0) {
+          done(Error('hlx up should show warning for missing helix-config.yaml'));
+        } else {
+          done();
+        }
+      })
+      .run()
+      .catch(done);
+  }).timeout(5000);
+
+  it('up command shows no warning if helix-config is present.', (done) => {
+    initGit(testDir);
+    fse.renameSync(path.resolve(testDir, 'default-config.yaml'), path.resolve(testDir, 'helix-config.yaml'));
+    const logger = logCommon.makeLogger({ logFile: [testlogfile] });
+    new UpCommand(logger)
+      .withCacheEnabled(false)
+      .withFiles([path.join(testDir, 'src', '*.htl'), path.join(testDir, 'src', '*.js')])
+      .withTargetDir(buildDir)
+      .withDirectory(testDir)
+      .withStrainName('dev')
+      .withHttpPort(0)
+      .on('started', (cmd) => {
+        // eslint-disable-next-line no-console
+        console.log(`test server running on port ${cmd.project.server.port}`);
+        cmd.stop();
+      })
+      .on('stopped', () => {
+        const log = fse.readFileSync(testlogfile, 'utf-8');
+        if (log.indexOf('warn: No [36mhelix-config.yaml[39m. Please add one before deployment') >= 0) {
+          done(Error('hlx up should show no warning if helix-config.yaml is present'));
+        } else {
+          done();
+        }
       })
       .run()
       .catch(done);
@@ -83,6 +147,7 @@ describe('Integration test for up command', () => {
       .withTargetDir(buildDir)
       .withDirectory(testDir)
       .withWebRoot(webroot)
+      .withStrainName('dev')
       .withHttpPort(0);
 
     const myDone = (err) => {
@@ -120,6 +185,7 @@ describe('Integration test for up command', () => {
       .withTargetDir(buildDir)
       .withDirectory(testDir)
       .withWebRoot(webroot)
+      .withStrainName('dev')
       .withHttpPort(0);
 
     const myDone = async (err) => {
