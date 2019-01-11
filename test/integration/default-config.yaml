@@ -11,7 +11,9 @@ strains:
   dev:
     code: *localRepo
     content: *localRepo
+    static: *localRepo
 
   default:
     code: *localRepo
     content: *localRepo
+    static: *localRepo

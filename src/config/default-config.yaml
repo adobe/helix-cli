@@ -12,7 +12,9 @@ strains:
   dev:
     code: *localRepo
     content: *localRepo
+    static: *localRepo
 
   default:
     code: *defaultRepo
     content: *defaultRepo
+    static: *defaultRepo
