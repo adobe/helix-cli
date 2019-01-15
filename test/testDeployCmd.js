@@ -17,9 +17,9 @@ const fs = require('fs-extra');
 const assert = require('assert');
 const path = require('path');
 const $ = require('shelljs');
+const winston = require('winston');
 const { initGit, createTestRoot, assertFile } = require('./utils.js');
 const DeployCommand = require('../src/deploy.cmd.js');
-const winston = require('winston');
 const { makeLogger } = require('../src/log-common');
 
 const CI_TOKEN = 'nope';
@@ -73,7 +73,6 @@ describe('hlx deploy (Integration)', () => {
         .withEnableAuto(false)
         .withEnableDirty(true)
         .withDryRun(true)
-        .withContent('git@github.com:adobe/helix-cli')
         .withTarget(buildDir)
         .withStrainFile(strainsFile)
         .withFastlyAuth('nope')
@@ -100,7 +99,6 @@ describe('hlx deploy (Integration)', () => {
         .withEnableAuto(false)
         .withEnableDirty(true)
         .withDryRun(true)
-        .withContent('git@github.com:adobe/helix-cli')
         .withTarget(buildDir)
         .withStrainFile(strainsFile)
         .withFastlyAuth('nope')
@@ -128,7 +126,6 @@ describe('hlx deploy (Integration)', () => {
         .withEnableAuto(false)
         .withEnableDirty(false)
         .withDryRun(true)
-        .withContent('git@github.com:adobe/helix-cli')
         .withTarget(buildDir)
         .withStrainFile(strainsFile)
         .withFastlyAuth('nope')
@@ -138,6 +135,33 @@ describe('hlx deploy (Integration)', () => {
       assert.fail('deploy fails if dirty');
     } catch (e) {
       assert.equal(e.toString(), 'Error: hlx will not deploy a working copy that has uncommitted changes. Re-run with flag --dirty to force.');
+    }
+  });
+
+  it('deploy fails if no strain is affected', async () => {
+    await fs.copy(TEST_DIR, testRoot);
+    await fs.rename(path.resolve(testRoot, 'default-config.yaml'), path.resolve(testRoot, 'helix-config.yaml'));
+    initGit(testRoot, 'git@github.com:adobe/project-helix.io.git#foo');
+    const logger = makeLogger({ logFile: [testlogfile] });
+    try {
+      await new DeployCommand(logger)
+        .withDirectory(testRoot)
+        .withWskHost('adobeioruntime.net')
+        .withWskAuth('secret-key')
+        .withWskNamespace('hlx')
+        .withEnableAuto(false)
+        .withEnableDirty(false)
+        .withDryRun(true)
+        .withTarget(buildDir)
+        .withStrainFile(strainsFile)
+        .withFastlyAuth('nope')
+        .withFastlyNamespace('justtesting')
+        .withCircleciAuth(CI_TOKEN)
+        .run();
+      assert.fail('deploy fails if no stain is affected');
+    } catch (e) {
+      const log = await fs.readFile(testlogfile, 'utf-8');
+      assert.ok(log.indexOf('warn: Remote repository [36mssh://git@github.com/adobe/project-helix.io.git#foo#master[39m does not affect any strains.' > 0));
     }
   });
 
@@ -154,7 +178,6 @@ describe('hlx deploy (Integration)', () => {
         .withEnableAuto(true)
         .withEnableDirty(true)
         .withDryRun(true)
-        .withContent('git@github.com:adobe/helix-cli')
         .withTarget(buildDir)
         .withStrainFile(strainsFile)
         .withFastlyAuth('nope')
@@ -176,7 +199,6 @@ describe('hlx deploy (Integration)', () => {
       .withEnableAuto(false)
       .withEnableDirty(true)
       .withDryRun(true)
-      .withContent('git@github.com:adobe/helix-cli')
       .withTarget(buildDir)
       .withStrainFile(strainsFile)
       .withCreatePackages('ignore')
@@ -194,7 +216,6 @@ describe('hlx deploy (Integration)', () => {
       .withEnableAuto(false)
       .withEnableDirty(true)
       .withDryRun(true)
-      .withContent('git@github.com:adobe/helix-cli')
       .withTarget(buildDir)
       .withStrainFile(strainsFile)
       .withCreatePackages('ignore')
@@ -212,7 +233,6 @@ describe('hlx deploy (Integration)', () => {
       .withEnableAuto(false)
       .withEnableDirty(true)
       .withDryRun(true)
-      .withContent('https://github.com/adobe/helix-cli.git#implement-init')
       .withTarget(buildDir)
       .withStrainFile(strainsFile)
       .withCreatePackages('ignore')

@@ -284,15 +284,19 @@ class DeployCommand extends AbstractCommand {
     if (affected.length === 0) {
       const newStrain = this.config.strains.get('default').clone();
       newStrain.name = uuidv4();
+      newStrain.code = giturl;
       this.log.warn(chalk`Remote repository {cyan ${giturl}} does not affect any strains.
       
 Add a strain definition to your config file:
 {grey ${newStrain.toYAML()}}
 
 Alternatively you can auto-add one using the {grey --add <name>} option.`);
-      return;
+      throw Error();
     }
-    this.log.info(`Deploying strains of ${giturl}:`);
+    this.log.info(`Affected strains of ${giturl}:`);
+    affected.forEach((s) => {
+      this.log.info(`- ${s.name}`);
+    });
 
 
     if (!this._prefix) {
