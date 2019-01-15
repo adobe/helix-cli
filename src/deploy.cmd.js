@@ -298,7 +298,6 @@ Alternatively you can auto-add one using the {grey --add <name>} option.`);
       this.log.info(`- ${s.name}`);
     });
 
-
     if (!this._prefix) {
       this._prefix = `${giturl.host.replace(/[\W]/g, '-')}-${giturl.owner.replace(/[\W]/g, '-')}-${giturl.repo.replace(/[\W]/g, '-')}--${giturl.ref.replace(/[\W]/g, '-')}${GitUtils.isDirty() ? '-dirty' : ''}--`;
     }
@@ -313,6 +312,7 @@ Alternatively you can auto-add one using the {grey --add <name>} option.`);
     if (this._createPackages !== 'ignore') {
       const pgkCommand = new PackageCommand(this.log)
         .withTarget(this._target)
+        .withDirectory(this.directory)
         .withOnlyModified(this._createPackages === 'auto');
       await pgkCommand.run();
     }
@@ -406,18 +406,18 @@ Alternatively you can auto-add one using the {grey --add <name>} option.`);
     });
 
     // update action in default strain
-    const defaultStrain = this._helixConfig.strains.get('default');
-    defaultStrain.code = `/${this._wsk_namespace}/default/${this._prefix}`;
-    defaultStrain.content = giturl;
-
-    const newStrains = JSON.stringify(this._helixConfig.strains, null, '  ');
-    const oldStrains = await fs.exists(this._strainFile) ? await fs.readFile(this._strainFile, 'utf-8') : '';
-
-    if (oldStrains !== newStrains) {
-      this.log.info(`Updating strain config in ${path.relative(process.cwd(), this._strainFile)}`);
-      await fs.ensureDir(path.dirname(this._strainFile));
-      await fs.writeFile(this._strainFile, newStrains, 'utf-8');
-    }
+    // const defaultStrain = this._helixConfig.strains.get('default');
+    // defaultStrain.code = `/${this._wsk_namespace}/default/${this._prefix}`;
+    // defaultStrain.content = giturl;
+    //
+    // const newStrains = JSON.stringify(this._helixConfig.strains, null, '  ');
+    // const oldStrains = await fs.exists(this._strainFile) ? await fs.readFile(this._strainFile, 'utf-8') : '';
+    //
+    // if (oldStrains !== newStrains) {
+    //   this.log.info(`Updating strain config in ${path.relative(process.cwd(), this._strainFile)}`);
+    //   await fs.ensureDir(path.dirname(this._strainFile));
+    //   await fs.writeFile(this._strainFile, newStrains, 'utf-8');
+    // }
     return this;
   }
 }
