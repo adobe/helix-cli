@@ -25,9 +25,7 @@
 </head>
 <body>
 
-<div data-sly-list="${content.children}">
-    <div class="container-fluid">${item}</div>
-</div>
+${content.html}
 
 <div class="container-fluid">
     <em>generated at ${content.time}</em>
