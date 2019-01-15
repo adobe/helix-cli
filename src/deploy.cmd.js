@@ -18,6 +18,7 @@ const ow = require('openwhisk');
 const glob = require('glob');
 const path = require('path');
 const fs = require('fs-extra');
+const uuidv4 = require('uuid/v4');
 const ProgressBar = require('progress');
 const { GitUrl, GitUtils } = require('@adobe/helix-shared');
 const useragent = require('./user-agent-util');
@@ -50,15 +51,6 @@ class DeployCommand extends AbstractCommand {
     this._dryRun = false;
     this._strainFile = null;
     this._createPackages = 'auto';
-  }
-
-  getDefaultContentURL() {
-    const url = this.config.strains.get('default').content.toString();
-    // todo: ref should never be empty
-    if (url === 'http://localhost/local/default.git#master' || url === 'http://localhost/local/default.git') {
-      return GitUtils.getOrigin();
-    }
-    return url;
   }
 
   withEnableAuto(value) {
@@ -133,11 +125,6 @@ class DeployCommand extends AbstractCommand {
 
   withDryRun(value) {
     this._dryRun = value;
-    return this;
-  }
-
-  withContent(value) {
-    this._content = value;
     return this;
   }
 
@@ -278,29 +265,35 @@ class DeployCommand extends AbstractCommand {
 
   async run() {
     await this.init();
-    const dirty = GitUtils.isDirty();
-    if (dirty && !this._enableDirty) {
-      this.log.error('hlx will not deploy a working copy that has uncommitted changes. Re-run with flag --dirty to force.');
-      process.exit(dirty);
+    const origin = GitUtils.getOrigin(this.directory);
+    if (!origin) {
+      throw Error('hlx cannot deploy without a remote git repository.');
     }
-
+    const dirty = GitUtils.isDirty(this.directory);
+    if (dirty && !this._enableDirty) {
+      throw Error('hlx will not deploy a working copy that has uncommitted changes. Re-run with flag --dirty to force.');
+    }
     if (this._enableAuto) {
       return this.autoDeploy();
     }
 
-    if (!this._content) {
-      this._content = this.getDefaultContentURL();
-    }
-    if (!this._content) {
-      // content is still empty, so local checkout
-      this._content = `http://localhost/default/${path.basename(process.cwd())}.git#master`;
-    }
+    // get git coordinates and list affected strains
+    const ref = GitUtils.getBranch(this.directory);
+    const giturl = new GitUrl(`${origin}#${ref}`);
+    const affected = this.config.strains.filterByCode(giturl);
+    if (affected.length === 0) {
+      const newStrain = this.config.strains.get('default').clone();
+      newStrain.name = uuidv4();
+      this.log.warn(chalk`Remote repository {cyan ${giturl}} does not affect any strains.
+      
+Add a strain definition to your config file:
+{grey ${newStrain.toYAML()}}
 
-    let giturl = new GitUrl(this._content);
-    // ensure default ref. todo: harmonize
-    if (!giturl.ref) {
-      giturl = new GitUrl(`${this._content}#master`);
+Alternatively you can auto-add one using the {grey --add <name>} option.`);
+      return;
     }
+    this.log.info(`Deploying strains of ${giturl}:`);
+
 
     if (!this._prefix) {
       this._prefix = `${giturl.host.replace(/[\W]/g, '-')}-${giturl.owner.replace(/[\W]/g, '-')}-${giturl.repo.replace(/[\W]/g, '-')}--${giturl.ref.replace(/[\W]/g, '-')}${GitUtils.isDirty() ? '-dirty' : ''}--`;

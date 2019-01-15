@@ -26,12 +26,15 @@ Replay.mode = 'bloody';
 /**
  * init git in integration so that helix-simulator can run
  */
-function initGit(dir) {
+function initGit(dir, remote) {
   const pwd = shell.pwd();
   shell.cd(dir);
   shell.exec('git init');
   shell.exec('git add -A');
   shell.exec('git commit -m"initial commit."');
+  if (remote) {
+    shell.exec(`git remote add origin ${remote}`);
+  }
   shell.cd(pwd);
 }
 

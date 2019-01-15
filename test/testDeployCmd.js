@@ -19,8 +19,11 @@ const path = require('path');
 const $ = require('shelljs');
 const { initGit, createTestRoot, assertFile } = require('./utils.js');
 const DeployCommand = require('../src/deploy.cmd.js');
+const winston = require('winston');
+const { makeLogger } = require('../src/log-common');
 
 const CI_TOKEN = 'nope';
+const TEST_DIR = path.resolve('test/integration');
 
 Replay.mode = 'bloody';
 Replay.fixtures = `${__dirname}/fixtures/`;
@@ -31,6 +34,7 @@ describe('hlx deploy (Integration)', () => {
   let buildDir;
   let strainsFile;
   let replayheaders;
+  let testlogfile;
   let cwd;
 
   beforeEach(async () => {
@@ -38,8 +42,12 @@ describe('hlx deploy (Integration)', () => {
     hlxDir = path.resolve(testRoot, '.hlx');
     buildDir = path.resolve(hlxDir, 'build');
     strainsFile = path.resolve(hlxDir, 'strains.json');
+    testlogfile = path.resolve(testRoot, 'testlog.log');
 
     cwd = process.cwd();
+
+    // reset the winston loggers
+    winston.loggers.loggers.clear();
 
     Replay.mode = 'replay';
     // don't record the authorization header
@@ -48,7 +56,7 @@ describe('hlx deploy (Integration)', () => {
   });
 
   afterEach(() => {
-    fs.remove(testRoot);
+    // fs.remove(testRoot);
     Replay.mode = 'bloody';
     Replay.headers = replayheaders;
     $.cd(cwd);
@@ -58,6 +66,7 @@ describe('hlx deploy (Integration)', () => {
     initGit(testRoot);
     try {
       await new DeployCommand()
+        .withDirectory(testRoot)
         .withWskHost('adobeioruntime.net')
         .withWskAuth('secret-key')
         .withWskNamespace('hlx')
@@ -74,6 +83,61 @@ describe('hlx deploy (Integration)', () => {
       assert.fail('deploy should fail if no helix-config is present');
     } catch (e) {
       assert.ok(e.toString().indexOf('Error: Invalid configuration:') === 0);
+    }
+  });
+
+  it('deploy fails if no git remote', async () => {
+    await fs.copy(TEST_DIR, testRoot);
+    await fs.rename(path.resolve(testRoot, 'default-config.yaml'), path.resolve(testRoot, 'helix-config.yaml'));
+    initGit(testRoot);
+    const logger = makeLogger({ logFile: [testlogfile] });
+    try {
+      await new DeployCommand(logger)
+        .withDirectory(testRoot)
+        .withWskHost('adobeioruntime.net')
+        .withWskAuth('secret-key')
+        .withWskNamespace('hlx')
+        .withEnableAuto(false)
+        .withEnableDirty(true)
+        .withDryRun(true)
+        .withContent('git@github.com:adobe/helix-cli')
+        .withTarget(buildDir)
+        .withStrainFile(strainsFile)
+        .withFastlyAuth('nope')
+        .withFastlyNamespace('justtesting')
+        .withCircleciAuth(CI_TOKEN)
+        .run();
+      assert.fail('deploy fails if no git remote');
+    } catch (e) {
+      assert.equal(e.toString(), 'Error: hlx cannot deploy without a remote git repository.');
+    }
+  });
+
+  it('deploy fails if dirty', async () => {
+    await fs.copy(TEST_DIR, testRoot);
+    await fs.rename(path.resolve(testRoot, 'default-config.yaml'), path.resolve(testRoot, 'helix-config.yaml'));
+    initGit(testRoot, 'git@github.com:adobe/project-helix.io.git');
+    await fs.copy(path.resolve(testRoot, 'README.md'), path.resolve(testRoot, 'README-copy.md'));
+    const logger = makeLogger({ logFile: [testlogfile] });
+    try {
+      await new DeployCommand(logger)
+        .withDirectory(testRoot)
+        .withWskHost('adobeioruntime.net')
+        .withWskAuth('secret-key')
+        .withWskNamespace('hlx')
+        .withEnableAuto(false)
+        .withEnableDirty(false)
+        .withDryRun(true)
+        .withContent('git@github.com:adobe/helix-cli')
+        .withTarget(buildDir)
+        .withStrainFile(strainsFile)
+        .withFastlyAuth('nope')
+        .withFastlyNamespace('justtesting')
+        .withCircleciAuth(CI_TOKEN)
+        .run();
+      assert.fail('deploy fails if dirty');
+    } catch (e) {
+      assert.equal(e.toString(), 'Error: hlx will not deploy a working copy that has uncommitted changes. Re-run with flag --dirty to force.');
     }
   });
 

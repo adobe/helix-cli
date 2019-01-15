@@ -85,10 +85,6 @@ module.exports = function deploy() {
           choices: ['auto', 'ignore', 'always'],
           default: 'auto',
         })
-        .option('content', {
-          describe: 'Overrides the GitHub content URL of the default strain',
-          type: 'string',
-        })
         .array('default')
         .nargs('default', 2)
         .coerce('default', arg => arg.reduce((result, value, index, array) => {
@@ -99,7 +95,7 @@ module.exports = function deploy() {
           return Object.assign(res, result);
         }, {}))
         .group(['auto', 'wsk-auth', 'wsk-namespace', 'default', 'dirty'], 'Deployment Options')
-        .group(['wsk-host', 'loggly-host', 'loggly-auth', 'target', 'docker', 'prefix', 'content'], 'Advanced Options')
+        .group(['wsk-host', 'loggly-host', 'loggly-auth', 'target', 'docker', 'prefix'], 'Advanced Options')
         .group(['package', 'target'], 'Package options')
         .check((args) => {
           if (!args.auto) {
@@ -153,7 +149,6 @@ module.exports = function deploy() {
         .withPrefix(argv.prefix)
         .withDefault(argv.default)
         .withDryRun(argv.dryRun)
-        .withContent(argv.content)
         .withCircleciAuth(argv.circleciAuth)
         .withFastlyAuth(argv.fastlyAuth)
         .withFastlyNamespace(argv.fastlyNamespace)
