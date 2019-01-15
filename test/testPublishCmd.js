@@ -52,15 +52,6 @@ describe('hlx strain #unit', () => {
 });
 
 describe('Dynamic Strain (VCL) generation', () => {
-  it('getStrainResolutionVCL generates VLC for empty strains', async () => {
-    const strainfile = path.resolve(__dirname, 'fixtures/empty.yaml');
-    const config = await new HelixConfig().withConfigPath(strainfile).init();
-    const mystrains = Array.from(config.strains.values());
-
-    const vclfile = fs.readFileSync(path.resolve(__dirname, 'fixtures/empty.vcl')).toString();
-    assert.equal(vclfile, PublishCommand.getStrainResolutionVCL(mystrains));
-  });
-
   it('getStrainResolutionVCL generates VLC for non-existing conditions strains', async () => {
     const strainfile = path.resolve(__dirname, 'fixtures/default.yaml');
     const config = await new HelixConfig().withConfigPath(strainfile).init();
@@ -120,6 +111,7 @@ describe('hlx publish (Integration)', function suite() {
   let hlxDir;
   let dstStrains;
   let replayheaders;
+  let testRoot;
 
   beforeEach(async () => {
     // if you need to re-record the test:
@@ -145,9 +137,10 @@ describe('hlx publish (Integration)', function suite() {
       Replay.mode = 'replay';
     }
 
-    const testRoot = await createTestRoot();
+    testRoot = await createTestRoot();
     hlxDir = path.resolve(testRoot, '.hlx');
     dstStrains = path.resolve(hlxDir, 'strains.yaml');
+    await fs.copyFile(path.resolve(__dirname, 'fixtures', 'default.yaml'), path.resolve(testRoot, 'helix-config.yaml'));
 
     await fs.mkdirp(hlxDir);
     await fs.copyFile(SRC_STRAINS, dstStrains);
@@ -163,6 +156,7 @@ describe('hlx publish (Integration)', function suite() {
 
   it('Publish Strains on an existing Service Config', async () => {
     const cmd = new PublishCommand()
+      .withDirectory(testRoot)
       .withStrainFile(dstStrains)
       .withFastlyAuth(FASTLY_AUTH)
       .withFastlyNamespace(FASTLY_NAMESPACE)

@@ -50,7 +50,6 @@ describe('hlx deploy', () => {
     mockDeploy.withDefault.returnsThis();
     mockDeploy.withEnableDirty.returnsThis();
     mockDeploy.withDryRun.returnsThis();
-    mockDeploy.withContent.returnsThis();
     mockDeploy.withFastlyAuth.returnsThis();
     mockDeploy.withFastlyNamespace.returnsThis();
     mockDeploy.withCreatePackages.returnsThis();

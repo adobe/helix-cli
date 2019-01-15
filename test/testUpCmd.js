@@ -16,7 +16,7 @@ const assert = require('assert');
 const path = require('path');
 const fse = require('fs-extra');
 const winston = require('winston');
-const { makeLogger } = require('../src/log-common');
+const { makeTestLogger } = require('../src/log-common');
 
 const {
   initGit,
@@ -32,7 +32,6 @@ describe('Integration test for up command', () => {
   let testDir;
   let buildDir;
   let webroot;
-  let testlogfile;
 
   beforeEach(async function before() {
     this.timeout(20000);
@@ -40,7 +39,6 @@ describe('Integration test for up command', () => {
     testDir = path.resolve(testRoot, 'project');
     buildDir = path.resolve(testRoot, '.hlx/build');
     webroot = path.resolve(testDir, 'webroot');
-    testlogfile = path.resolve(testDir, 'testlog.log');
     await fse.copy(TEST_DIR, testDir);
 
     // reset the winston loggers
@@ -85,7 +83,7 @@ describe('Integration test for up command', () => {
 
   it('up command shows warning if no helix-config is present.', (done) => {
     initGit(testDir);
-    const logger = makeLogger({ logFile: [testlogfile] });
+    const logger = makeTestLogger();
     new UpCommand(logger)
       .withCacheEnabled(false)
       .withFiles([path.join(testDir, 'src', '*.htl'), path.join(testDir, 'src', '*.js')])
@@ -98,8 +96,8 @@ describe('Integration test for up command', () => {
         console.log(`test server running on port ${cmd.project.server.port}`);
         cmd.stop();
       })
-      .on('stopped', () => {
-        const log = fse.readFileSync(testlogfile, 'utf-8');
+      .on('stopped', async () => {
+        const log = await logger.getOutput();
         if (log.indexOf('warn: No [36mhelix-config.yaml[39m. Please add one before deployment') < 0) {
           done(Error('hlx up should show warning for missing helix-config.yaml'));
         } else {
@@ -113,7 +111,7 @@ describe('Integration test for up command', () => {
   it('up command shows no warning if helix-config is present.', (done) => {
     initGit(testDir);
     fse.renameSync(path.resolve(testDir, 'default-config.yaml'), path.resolve(testDir, 'helix-config.yaml'));
-    const logger = makeLogger({ logFile: [testlogfile] });
+    const logger = makeTestLogger();
     new UpCommand(logger)
       .withCacheEnabled(false)
       .withFiles([path.join(testDir, 'src', '*.htl'), path.join(testDir, 'src', '*.js')])
@@ -126,8 +124,8 @@ describe('Integration test for up command', () => {
         console.log(`test server running on port ${cmd.project.server.port}`);
         cmd.stop();
       })
-      .on('stopped', () => {
-        const log = fse.readFileSync(testlogfile, 'utf-8');
+      .on('stopped', async () => {
+        const log = await logger.getOutput();
         if (log.indexOf('warn: No [36mhelix-config.yaml[39m. Please add one before deployment') >= 0) {
           done(Error('hlx up should show no warning if helix-config.yaml is present'));
         } else {

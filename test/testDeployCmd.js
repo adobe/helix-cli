@@ -18,7 +18,8 @@ const assert = require('assert');
 const path = require('path');
 const $ = require('shelljs');
 const winston = require('winston');
-const { initGit, createTestRoot, assertFile } = require('./utils.js');
+const { initGit, createTestRoot } = require('./utils.js');
+const BuildCommand = require('../src/build.cmd.js');
 const DeployCommand = require('../src/deploy.cmd.js');
 const { makeTestLogger } = require('../src/log-common');
 
@@ -213,7 +214,24 @@ describe('hlx deploy (Integration)', () => {
   }).timeout(15000);
 
   it('Dry-Running works', async () => {
-    await new DeployCommand()
+    await fs.copy(TEST_DIR, testRoot);
+    await fs.rename(path.resolve(testRoot, 'default-config.yaml'), path.resolve(testRoot, 'helix-config.yaml'));
+    initGit(testRoot, 'git@github.com:adobe/project-helix.io.git');
+    const logger = makeTestLogger();
+
+    await new BuildCommand(logger)
+      .withDirectory(testRoot)
+      .withFiles([
+        path.resolve(testRoot, 'src/html.htl'),
+        path.resolve(testRoot, 'src/html.pre.js'),
+        path.resolve(testRoot, 'src/helper.js'),
+      ])
+      .withTargetDir(buildDir)
+      .withWebRoot(path.resolve('webroot'))
+      .withCacheEnabled(false)
+      .run();
+
+    await new DeployCommand(logger)
       .withDirectory(testRoot)
       .withWskHost('adobeioruntime.net')
       .withWskAuth('secret-key')
@@ -223,46 +241,12 @@ describe('hlx deploy (Integration)', () => {
       .withDryRun(true)
       .withTarget(buildDir)
       .withStrainFile(strainsFile)
-      .withCreatePackages('ignore')
       .run();
 
-    assertFile(strainsFile);
-    const firstrun = fs.readFileSync(strainsFile).toString();
-
-    await fs.remove(buildDir);
-    await new DeployCommand()
-      .withDirectory(testRoot)
-      .withWskHost('adobeioruntime.net')
-      .withWskAuth('secret-key')
-      .withWskNamespace('hlx')
-      .withEnableAuto(false)
-      .withEnableDirty(true)
-      .withDryRun(true)
-      .withTarget(buildDir)
-      .withStrainFile(strainsFile)
-      .withCreatePackages('ignore')
-      .run();
-
-    assertFile(strainsFile);
-    const secondrun = fs.readFileSync(strainsFile).toString();
-    assert.equal(firstrun, secondrun, 'generated strains.yaml differs between first and second run');
-
-    await new DeployCommand()
-      .withDirectory(testRoot)
-      .withWskHost('adobeioruntime.net')
-      .withWskAuth('secret-key')
-      .withWskNamespace('hlx')
-      .withEnableAuto(false)
-      .withEnableDirty(true)
-      .withDryRun(true)
-      .withTarget(buildDir)
-      .withStrainFile(strainsFile)
-      .withCreatePackages('ignore')
-      .run();
-
-    assertFile(strainsFile);
-    const thirdrun = fs.readFileSync(strainsFile).toString();
-    assert.notEqual(firstrun, thirdrun);
+    const log = await logger.getOutput();
+    assert.ok(log.indexOf('deployment of 2 actions completed') >= 0);
+    assert.ok(log.indexOf('- hlx/github-com-adobe-project-helix-io--master-dirty--html') >= 0);
+    assert.ok(log.indexOf('- hlx/hlx--static') >= 0);
   }).timeout(30000);
 });
 

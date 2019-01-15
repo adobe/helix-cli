@@ -28,6 +28,7 @@ class PackageCommand extends AbstractCommand {
     super(logger);
     this._target = null;
     this._onlyModified = false;
+    this.withRequireConfigFile(false);
   }
 
   withTarget(value) {

@@ -1,16 +1,12 @@
 strains:
   default:
-      code: /hlx/default/git-github-com-adobe-helix-cli-git--dirty--
-      content:
-        repo: helix-cli
-        ref: master
-        owner: adobe
-      condition: '"http" == "http"'
+    content: ssh://git@github.com/adobe/helix-cli.git
+    code: ssh://git@github.com/adobe/helix-cli.git
+    static: ssh://git@github.com/adobe/helix-cli.git
+    condition: '"http" == "http"'
   debug:
-      code: /hlx/default/git-github-com-adobe-helix-cli-git--dirty--
-      content:
-        repo: helix-cli
-        ref: master
-        owner: adobe
-      condition: 'req.http.X-Debug == "true"'
-      sticky: false
+    content: ssh://git@github.com/adobe/helix-cli.git
+    code: ssh://git@github.com/adobe/helix-cli.git
+    static: ssh://git@github.com/adobe/helix-cli.git
+    condition: 'req.http.X-Debug == "true"'
+    sticky: false

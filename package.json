@@ -28,7 +28,7 @@
   "homepage": "https://github.com/adobe/project-helix#readme",
   "dependencies": {
     "@adobe/helix-pipeline": "0.10.1",
-    "@adobe/helix-shared": "0.3.2-pre.0",
+    "@adobe/helix-shared": "0.3.2-pre.1",
     "@adobe/helix-simulator": "2.7.5",
     "@adobe/parcel-plugin-htl": "2.0.0",
     "@snyk/nodejs-runtime-agent": "1.33.0",
