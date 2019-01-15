@@ -20,7 +20,7 @@ const $ = require('shelljs');
 const winston = require('winston');
 const { initGit, createTestRoot, assertFile } = require('./utils.js');
 const DeployCommand = require('../src/deploy.cmd.js');
-const { makeLogger } = require('../src/log-common');
+const { makeTestLogger } = require('../src/log-common');
 
 const CI_TOKEN = 'nope';
 const TEST_DIR = path.resolve('test/integration');
@@ -28,22 +28,12 @@ const TEST_DIR = path.resolve('test/integration');
 Replay.mode = 'bloody';
 Replay.fixtures = `${__dirname}/fixtures/`;
 
-function getLog(logger, logfile) {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      const log = fs.readFileSync(logfile, 'utf-8');
-      resolve(log);
-    }, 500);
-  });
-}
-
 describe('hlx deploy (Integration)', () => {
   let testRoot;
   let hlxDir;
   let buildDir;
   let strainsFile;
   let replayheaders;
-  let testlogfile;
   let cwd;
 
   beforeEach(async () => {
@@ -51,7 +41,6 @@ describe('hlx deploy (Integration)', () => {
     hlxDir = path.resolve(testRoot, '.hlx');
     buildDir = path.resolve(hlxDir, 'build');
     strainsFile = path.resolve(hlxDir, 'strains.json');
-    testlogfile = path.resolve(testRoot, 'testlog.log');
 
     cwd = process.cwd();
 
@@ -98,9 +87,8 @@ describe('hlx deploy (Integration)', () => {
     await fs.copy(TEST_DIR, testRoot);
     await fs.rename(path.resolve(testRoot, 'default-config.yaml'), path.resolve(testRoot, 'helix-config.yaml'));
     initGit(testRoot);
-    const logger = makeLogger({ logFile: [testlogfile] });
     try {
-      await new DeployCommand(logger)
+      await new DeployCommand()
         .withDirectory(testRoot)
         .withWskHost('adobeioruntime.net')
         .withWskAuth('secret-key')
@@ -125,9 +113,8 @@ describe('hlx deploy (Integration)', () => {
     await fs.rename(path.resolve(testRoot, 'default-config.yaml'), path.resolve(testRoot, 'helix-config.yaml'));
     initGit(testRoot, 'git@github.com:adobe/project-helix.io.git');
     await fs.copy(path.resolve(testRoot, 'README.md'), path.resolve(testRoot, 'README-copy.md'));
-    const logger = makeLogger({ logFile: [testlogfile] });
     try {
-      await new DeployCommand(logger)
+      await new DeployCommand()
         .withDirectory(testRoot)
         .withWskHost('adobeioruntime.net')
         .withWskAuth('secret-key')
@@ -151,7 +138,7 @@ describe('hlx deploy (Integration)', () => {
     await fs.copy(TEST_DIR, testRoot);
     await fs.rename(path.resolve(testRoot, 'default-config.yaml'), path.resolve(testRoot, 'helix-config.yaml'));
     initGit(testRoot, 'git@github.com:adobe/project-foo.io.git');
-    const logger = makeLogger({ logFile: [testlogfile] });
+    const logger = makeTestLogger();
     try {
       await new DeployCommand(logger)
         .withDirectory(testRoot)
@@ -169,9 +156,8 @@ describe('hlx deploy (Integration)', () => {
         .run();
       assert.fail('deploy fails if no stain is affected');
     } catch (e) {
-      // todo: create better test logger
-      // const log = await getLog(logger, testlogfile);
-      // assert.ok(log.indexOf('warn: Remote repository [36mssh://git@github.com/adobe/project-foo.io.git#master[39m does not affect any strains.') > 0);
+      const log = await logger.getOutput();
+      assert.ok(log.indexOf('warn: Remote repository [36mssh://git@github.com/adobe/project-foo.io.git#master[39m does not affect any strains.') >= 0);
     }
   });
 
@@ -179,7 +165,7 @@ describe('hlx deploy (Integration)', () => {
     await fs.copy(TEST_DIR, testRoot);
     await fs.rename(path.resolve(testRoot, 'default-config.yaml'), path.resolve(testRoot, 'helix-config.yaml'));
     initGit(testRoot, 'git@github.com:adobe/project-helix.io.git');
-    const logger = makeLogger({ logFile: [testlogfile] });
+    const logger = makeTestLogger();
     await new DeployCommand(logger)
       .withDirectory(testRoot)
       .withWskHost('adobeioruntime.net')
@@ -195,10 +181,10 @@ describe('hlx deploy (Integration)', () => {
       .withCircleciAuth(CI_TOKEN)
       .withCreatePackages('ignore')
       .run();
-    // todo: create better test logger
-    // const log = await getLog(logger, testlogfile);
-    // assert.ok(log.indexOf('Affected strains of ssh://git@github.com/adobe/project-helix.io.git#master') > 0);
-    // assert.ok(log.indexOf('- dev') > 0);
+
+    const log = await logger.getOutput();
+    assert.ok(log.indexOf('Affected strains of ssh://git@github.com/adobe/project-helix.io.git#master') >= 0);
+    assert.ok(log.indexOf('- dev') >= 0);
   });
 
   it.skip('Auto-Deploy works', (done) => {

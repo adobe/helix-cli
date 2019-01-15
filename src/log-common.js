@@ -10,12 +10,59 @@
  * governing permissions and limitations under the License.
  */
 
+const stream = require('stream');
+const winston = require('winston');
+const uuidv4 = require('uuid/v4');
 const { Logger } = require('@adobe/helix-shared');
 
-module.exports.makeLogger = function makeLogger({ logLevel = 'info', logFile = ['-'] } = {}) {
+function makeLogger({ logLevel = 'info', logFile = ['-'] } = {}) {
   return Logger.getLogger({
     category: 'cli',
     logFile,
     level: logLevel,
   });
+}
+
+class StringStream extends stream.Writable {
+  constructor() {
+    super();
+    this.data = '';
+  }
+
+  _write(chunk, enc, next) {
+    this.data += chunk.toString();
+    next();
+  }
+}
+
+function makeTestLogger() {
+  const logger = Logger.getLogger({
+    category: uuidv4(),
+    logFile: ['-'],
+    level: 'info',
+  });
+  const s = new StringStream();
+
+  logger.add(new winston.transports.Stream({
+    stream: s,
+    format: winston.format.simple(),
+  }));
+
+  const finishPromise = new Promise((resolve) => {
+    logger.on('finish', () => {
+      resolve(s.data);
+    });
+  });
+
+  logger.getOutput = async () => {
+    logger.end();
+    return finishPromise;
+  };
+
+  return logger;
+}
+
+module.exports = {
+  makeLogger,
+  makeTestLogger,
 };

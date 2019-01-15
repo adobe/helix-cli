@@ -293,6 +293,7 @@ Add a strain definition to your config file:
 Alternatively you can auto-add one using the {grey --add <name>} option.`);
       throw Error();
     }
+
     this.log.info(`Affected strains of ${giturl}:`);
     affected.forEach((s) => {
       this.log.info(`- ${s.name}`);
@@ -411,10 +412,12 @@ Alternatively you can auto-add one using the {grey --add <name>} option.`);
     // defaultStrain.content = giturl;
     //
     // const newStrains = JSON.stringify(this._helixConfig.strains, null, '  ');
-    // const oldStrains = await fs.exists(this._strainFile) ? await fs.readFile(this._strainFile, 'utf-8') : '';
+    // const oldStrains = await fs.exists(this._strainFile)
+    //     ? await fs.readFile(this._strainFile, 'utf-8') : '';
     //
     // if (oldStrains !== newStrains) {
-    //   this.log.info(`Updating strain config in ${path.relative(process.cwd(), this._strainFile)}`);
+    //   this.log.info(`Updating strain config in ${path.relative(process.cwd(),
+    //   this._strainFile)}`);
     //   await fs.ensureDir(path.dirname(this._strainFile));
     //   await fs.writeFile(this._strainFile, newStrains, 'utf-8');
     // }
