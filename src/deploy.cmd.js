@@ -108,11 +108,6 @@ class DeployCommand extends AbstractCommand {
     return this;
   }
 
-  withPrefix(value) {
-    this._prefix = value;
-    return this;
-  }
-
   withDefault(value) {
     this._default = value;
     return this;
@@ -145,7 +140,7 @@ class DeployCommand extends AbstractCommand {
     if (script.main.indexOf(path.resolve(__dirname, 'openwhisk')) === 0) {
       return `hlx--${script.name}`;
     }
-    return this._prefix + script.name;
+    return `${this._prefix}--${script.name}`;
   }
 
   async init() {
@@ -299,8 +294,9 @@ Alternatively you can auto-add one using the {grey --add <name>} option.`);
       this.log.info(`- ${s.name}`);
     });
 
-    if (!this._prefix) {
-      this._prefix = `${giturl.host.replace(/[\W]/g, '-')}-${giturl.owner.replace(/[\W]/g, '-')}-${giturl.repo.replace(/[\W]/g, '-')}--${giturl.ref.replace(/[\W]/g, '-')}${GitUtils.isDirty() ? '-dirty' : ''}--`;
+    this._prefix = GitUtils.getCurrentRevision(this.directory);
+    if (dirty) {
+      this._prefix += '-dirty';
     }
 
     const owoptions = {
@@ -360,6 +356,22 @@ Alternatively you can auto-add one using the {grey --add <name>} option.`);
       .filter(script => script.zipFile) // skip empty zip files
       .map(script => fs.readFile(script.zipFile)
         .then(action => ({ script, action })));
+
+    // create openwhisk package
+    // don't use packages for now...
+    // if (!this._dryRun) {
+    //   const parameters = Object.keys(params).map((key) => {
+    //     const value = params[key];
+    //     return { key, value };
+    //   });
+    //   await openwhisk.packages.update({
+    //     name: this._prefix,
+    //     package: {
+    //       publish: true,
+    //       parameters,
+    //     },
+    //   });
+    // }
 
     // ... and deploy
     const deployed = read.map(p => p.then(({ script, action }) => {

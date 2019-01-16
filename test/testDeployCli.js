@@ -46,7 +46,6 @@ describe('hlx deploy', () => {
     mockDeploy.withLogglyAuth.returnsThis();
     mockDeploy.withTarget.returnsThis();
     mockDeploy.withDocker.returnsThis();
-    mockDeploy.withPrefix.returnsThis();
     mockDeploy.withDefault.returnsThis();
     mockDeploy.withEnableDirty.returnsThis();
     mockDeploy.withDryRun.returnsThis();
@@ -133,7 +132,6 @@ Authentication is required. You can pass the key via the HLX_WSK_AUTH environmen
     sinon.assert.calledWith(mockDeploy.withLogglyAuth, '');
     sinon.assert.calledWith(mockDeploy.withTarget, '.hlx/build');
     sinon.assert.calledWith(mockDeploy.withDocker, undefined);
-    sinon.assert.calledWith(mockDeploy.withPrefix, undefined);
     sinon.assert.calledWith(mockDeploy.withDefault, undefined);
     sinon.assert.calledWith(mockDeploy.withCreatePackages, 'auto');
     sinon.assert.calledOnce(mockDeploy.run);
@@ -156,7 +154,6 @@ Authentication is required. You can pass the key via the HLX_WSK_AUTH environmen
     sinon.assert.calledWith(mockDeploy.withLogglyAuth, '');
     sinon.assert.calledWith(mockDeploy.withTarget, '.hlx/build');
     sinon.assert.calledWith(mockDeploy.withDocker, undefined);
-    sinon.assert.calledWith(mockDeploy.withPrefix, undefined);
     sinon.assert.calledWith(mockDeploy.withDefault, undefined);
     sinon.assert.calledOnce(mockDeploy.run);
   });
@@ -276,7 +273,6 @@ Authentication is required. You can pass the key via the HLX_WSK_AUTH environmen
         '--prefix', '_hlx_',
       ]);
 
-    sinon.assert.calledWith(mockDeploy.withPrefix, '_hlx_');
     sinon.assert.calledOnce(mockDeploy.run);
   });
 

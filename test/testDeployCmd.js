@@ -18,6 +18,7 @@ const assert = require('assert');
 const path = require('path');
 const $ = require('shelljs');
 const winston = require('winston');
+const { GitUtils } = require('@adobe/helix-shared');
 const { initGit, createTestRoot } = require('./utils.js');
 const BuildCommand = require('../src/build.cmd.js');
 const DeployCommand = require('../src/deploy.cmd.js');
@@ -237,15 +238,16 @@ describe('hlx deploy (Integration)', () => {
       .withWskAuth('secret-key')
       .withWskNamespace('hlx')
       .withEnableAuto(false)
-      .withEnableDirty(true)
+      .withEnableDirty(false)
       .withDryRun(true)
       .withTarget(buildDir)
       .withStrainFile(strainsFile)
       .run();
 
+    const ref = GitUtils.getCurrentRevision(testRoot);
     const log = await logger.getOutput();
     assert.ok(log.indexOf('deployment of 2 actions completed') >= 0);
-    assert.ok(log.indexOf('- hlx/github-com-adobe-project-helix-io--master-dirty--html') >= 0);
+    assert.ok(log.indexOf(`- hlx/${ref}--html`) >= 0);
     assert.ok(log.indexOf('- hlx/hlx--static') >= 0);
   }).timeout(30000);
 });
