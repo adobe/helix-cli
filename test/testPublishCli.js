@@ -19,7 +19,7 @@ const sinon = require('sinon');
 const CLI = require('../src/cli.js');
 const StrainCommand = require('../src/publish.cmd');
 
-describe('hlx strain', () => {
+describe('hlx publish', () => {
   // mocked command instance
   let mockPublish;
   let processenv = {};
@@ -51,22 +51,22 @@ describe('hlx strain', () => {
     });
   });
 
-  it('hlx strain requires auth', (done) => {
+  it('hlx publish requires auth', (done) => {
     new CLI()
       .withCommandExecutor('publish', mockPublish)
       .onFail((err) => {
         assert.ok(err.indexOf('required'));
         done();
       })
-      .run(['strain']);
+      .run(['publish']);
 
-    assert.fail('strain w/o arguments should fail.');
+    assert.fail('publish w/o arguments should fail.');
   });
 
   it('hlx strain works with minimal arguments', () => {
     new CLI()
       .withCommandExecutor('publish', mockPublish)
-      .run(['strain',
+      .run(['publish',
         '--wsk-auth', 'secret-key',
         '--wsk-namespace', 'hlx',
         '--fastly-auth', 'secret-key',

@@ -22,7 +22,7 @@ module.exports = function strain() {
     set executor(value) {
       executor = value;
     },
-    command: ['publish', 'strain'],
+    command: ['publish'],
     desc: 'Activate strains in the Fastly CDN and publish the site',
     builder: (yargs) => {
       deployCommon(yargs);

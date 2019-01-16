@@ -29,7 +29,7 @@ const FASTLY_NAMESPACE = '1s45RKXKEjuo2s0GWrF391';
 let WSK_AUTH = 'nope';
 let WSK_NAMESPACE = '---';
 
-const SRC_STRAINS = path.resolve(__dirname, 'fixtures/strains.yaml');
+// const SRC_STRAINS = path.resolve(__dirname, 'fixtures/strains.yaml');
 
 describe('hlx strain #unit', () => {
   it('makeRegexp() #unit', () => {
@@ -42,9 +42,7 @@ describe('hlx strain #unit', () => {
 
   it('loadStrains() #unit', async () => {
     const cmd = new PublishCommand();
-
-    cmd.withConfigFile(path.resolve(__dirname, 'fixtures/proxystrains.yaml'));
-    await cmd.loadStrains();
+    await cmd.withConfigFile(path.resolve(__dirname, 'fixtures/proxystrains.yaml')).init();
     /* eslint-disable no-underscore-dangle */
     assert.ok(cmd._strains);
     assert.equal(cmd._strains.length, 3);
@@ -94,7 +92,7 @@ describe('Dynamic Strain (VCL) generation', () => {
     const strainfile = path.resolve(__dirname, 'fixtures/proxystrains.yaml');
     const cmd = new PublishCommand(createLogger()).withConfigFile(strainfile);
     try {
-      await cmd.loadStrains();
+      await cmd.init();
       await cmd.initFastly();
     } catch (e) {
       // we expect initFastly to fail
@@ -108,8 +106,6 @@ describe('Dynamic Strain (VCL) generation', () => {
 describe('hlx publish (Integration)', function suite() {
   this.timeout(50000);
 
-  let hlxDir;
-  let dstStrains;
   let replayheaders;
   let testRoot;
 
@@ -138,12 +134,8 @@ describe('hlx publish (Integration)', function suite() {
     }
 
     testRoot = await createTestRoot();
-    hlxDir = path.resolve(testRoot, '.hlx');
-    dstStrains = path.resolve(hlxDir, 'strains.yaml');
     await fs.copyFile(path.resolve(__dirname, 'fixtures', 'default.yaml'), path.resolve(testRoot, 'helix-config.yaml'));
 
-    await fs.mkdirp(hlxDir);
-    await fs.copyFile(SRC_STRAINS, dstStrains);
     // don't record the authorization header
     replayheaders = Replay.headers;
     Replay.headers = Replay.headers.filter(e => new RegExp(e).toString() !== new RegExp(/^body/).toString());
@@ -157,7 +149,6 @@ describe('hlx publish (Integration)', function suite() {
   it('Publish Strains on an existing Service Config', async () => {
     const cmd = new PublishCommand()
       .withDirectory(testRoot)
-      .withStrainFile(dstStrains)
       .withFastlyAuth(FASTLY_AUTH)
       .withFastlyNamespace(FASTLY_NAMESPACE)
       .withWskHost('adobeioruntime.net')
