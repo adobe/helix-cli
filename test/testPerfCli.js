@@ -35,7 +35,6 @@ describe('hlx perf (CLI)', () => {
 
     mockPerf = sinon.createStubInstance(PerfCommand);
     mockPerf.run.returnsThis();
-    mockPerf.withStrainFile.returnsThis();
     mockPerf.withCalibreAuth.returnsThis();
     mockPerf.withConnection.returnsThis();
     mockPerf.withLocation.returnsThis();

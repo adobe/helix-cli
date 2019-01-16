@@ -65,6 +65,7 @@ class AbstractCommand extends EventEmitter {
       await this._helixConfig.init();
       this._initialized = true;
     }
+    return this;
   }
 
   async reloadConfig() {
