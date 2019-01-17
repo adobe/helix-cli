@@ -19,7 +19,7 @@ const path = require('path');
 const glob = require('glob-to-regexp');
 const { toBase64 } = require('request/lib/helpers');
 const ProgressBar = require('progress');
-const { GitUtils, GitUrl } = require('@adobe/helix-shared');
+const { GitUtils } = require('@adobe/helix-shared');
 const strainconfig = require('./strain-config-utils');
 const include = require('./include-util');
 const useragent = require('./user-agent-util');
@@ -635,7 +635,14 @@ ${PublishCommand.makeParamWhitelist(params, '  ')}
     const urls = strains.filter(strain => strain.url).map(strain => strain.url);
     this.progressBar().terminate();
 
-    this.log.info(`✅  All strains have been published and version ${this._version} is now online.`);
+    this.log.info(`✅  The following strains have been published and version ${this._version} is now online:`);
+    this._strains.forEach((strain) => {
+      if (strain.package) {
+        const url = strain.url ? ` -> ${strain.url}` : '';
+        this.log.info(`- ${strain.name}${url}`);
+      }
+    });
+
     if (urls.length) {
       this.log.info('\nYou now access your site using:');
       this.log.info(chalk.grey(`$ curl ${urls[0]}`));
@@ -681,25 +688,13 @@ ${PublishCommand.makeParamWhitelist(params, '  ')}
       this.tick(13, `skipping proxy strain ${proxy.name}`);
     });
 
-    let giturl = null;
-    let prefix = null;
-    const origin = GitUtils.getOrigin(this.directory);
-    if (origin) {
-      const ref = GitUtils.getBranch(this.directory);
-      giturl = new GitUrl(`${origin}#${ref}`);
-      prefix = GitUtils.getCurrentRevision(this.directory);
-      if (GitUtils.isDirty(this.directory)) {
-        prefix += '-dirty';
-      }
-    }
-
     this.config.strains.getRuntimeStrains().forEach((strain) => {
       // skip the strains where we can't determine the action name
-      if ((giturl && !strain.code.equalsIgnoreTransport(giturl)) || (!giturl && !strain.package)) {
+      if (!strain.package) {
         this.tick(13, `skipping unaffected strain ${strain.name}`);
         return;
       }
-      let actionPrefix = `/${this._wsk_namespace}/default/${strain.package || prefix}`;
+      let actionPrefix = `/${this._wsk_namespace}/default/${strain.package}`;
       if (!actionPrefix.endsWith('--')) {
         actionPrefix += '--';
       }
