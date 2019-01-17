@@ -232,7 +232,7 @@ describe('hlx deploy (Integration)', () => {
       .withCacheEnabled(false)
       .run();
 
-    await new DeployCommand(logger)
+    const cmd = await new DeployCommand(logger)
       .withDirectory(testRoot)
       .withWskHost('adobeioruntime.net')
       .withWskAuth('secret-key')
@@ -245,10 +245,15 @@ describe('hlx deploy (Integration)', () => {
       .run();
 
     const ref = GitUtils.getCurrentRevision(testRoot);
+    assert.equal(cmd.config.strains.get('default').package, '');
+    assert.equal(cmd.config.strains.get('dev').package, ref);
+    // todo: can't test writeback of helix-config.yaml, since it's disabled during dry-run
+
     const log = await logger.getOutput();
     assert.ok(log.indexOf('deployment of 2 actions completed') >= 0);
     assert.ok(log.indexOf(`- hlx/${ref}--html`) >= 0);
     assert.ok(log.indexOf('- hlx/hlx--static') >= 0);
+
   }).timeout(30000);
 });
 

@@ -289,11 +289,6 @@ Alternatively you can auto-add one using the {grey --add <name>} option.`);
       throw Error();
     }
 
-    this.log.info(`Affected strains of ${giturl}:`);
-    affected.forEach((s) => {
-      this.log.info(`- ${s.name}`);
-    });
-
     this._prefix = GitUtils.getCurrentRevision(this.directory);
     if (dirty) {
       this._prefix += '-dirty';
@@ -418,21 +413,23 @@ Alternatively you can auto-add one using the {grey --add <name>} option.`);
       this.log.info(`   - ${this._wsk_namespace}/${script.actionName} (${humanFileSize(script.archiveSize)})`);
     });
 
-    // update action in default strain
-    // const defaultStrain = this._helixConfig.strains.get('default');
-    // defaultStrain.code = `/${this._wsk_namespace}/default/${this._prefix}`;
-    // defaultStrain.content = giturl;
-    //
-    // const newStrains = JSON.stringify(this._helixConfig.strains, null, '  ');
-    // const oldStrains = await fs.exists(this._strainFile)
-    //     ? await fs.readFile(this._strainFile, 'utf-8') : '';
-    //
-    // if (oldStrains !== newStrains) {
-    //   this.log.info(`Updating strain config in ${path.relative(process.cwd(),
-    //   this._strainFile)}`);
-    //   await fs.ensureDir(path.dirname(this._strainFile));
-    //   await fs.writeFile(this._strainFile, newStrains, 'utf-8');
-    // }
+    // update package in affected strains
+    this.log.info(`Affected strains of ${giturl}:`);
+    let modified = false;
+    affected.forEach((strain) => {
+      this.log.info(`- ${strain.name}`);
+      if (strain.package !== this._prefix) {
+        modified = true;
+        // eslint-disable-next-line no-param-reassign
+        strain.package = this._prefix;
+      }
+    });
+
+    if (!this._dryRun && modified) {
+      this.config.saveConfig();
+      this.log.info(`Updated ${path.relative(this.directory, this.config.configPath)}`);
+    }
+
     return this;
   }
 }
