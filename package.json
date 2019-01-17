@@ -69,7 +69,7 @@
     "eslint-plugin-header": "2.0.0",
     "eslint-plugin-import": "2.14.0",
     "eslint-plugin-jsx-a11y": "6.1.1",
-    "eslint-plugin-react": "7.12.2",
+    "eslint-plugin-react": "7.12.4",
     "istanbul": "1.1.0-alpha.1",
     "less": "3.8.1",
     "mocha": "5.2.0",
