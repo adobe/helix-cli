@@ -13,6 +13,7 @@
 /* eslint no-unused-vars: ["error", { "argsIgnorePattern": "^_" }] */
 
 const request = require('request-promise-native');
+const fastly = require('@adobe/fastly-native-promises');
 const chalk = require('chalk');
 const ProgressBar = require('progress');
 const AbstractCommand = require('./abstract.cmd.js');
@@ -51,7 +52,7 @@ class RemotePublishCommand extends AbstractCommand {
       return this._bar;
     }
     this._bar = new ProgressBar('Publishing [:bar] :action :etas', {
-      total: 2,
+      total: 23,
       width: 50,
       renderThrottle: 1,
       stream: process.stdout,
@@ -111,32 +112,94 @@ class RemotePublishCommand extends AbstractCommand {
     }
   }
 
-  async publish() {
-
+  addlogger() {
+    return request.post('https://adobeioruntime.net/api/v1/web/helix/default/addlogger', {
+      json: true,
+      body: {
+        service: this._fastly_namespace,
+        token: this._fastly_auth,
+        version: this._version
+      }
+    }).then(() => {
+      this.tick(10, 'set up logging', true);
+    }).catch(e => {
+      this.tick(10, 'failed to set up logging', true);
+      this.log.error(`Remote addlogger service failed ${e}`);
+      return false;
+    });;
   }
 
-  async addlogger() {
-
+  purge() {
+    if (this._dryRun) {
+      this.tick(1, 'skipping cache purge');
+      return false;
+    } else {
+      return this._fastly.purgeAll()
+        .then(() => {
+          this.tick(1, 'purged cache', true);
+          return true;
+        })
+        .catch(e => {
+          this.tick(1, 'failed to purge cache', true);
+          this.log.error(`Cache could not get purged ${e}`);
+          return false;
+        });
+    }
   }
 
-  async purge() {
-
+  prepare() {
+    return request.post('https://adobeioruntime.net/api/v1/web/helix/default/publish', {
+      json: true,
+      body: {
+        configuration: this.config.toJSON(),
+        service: this._fastly_namespace,
+        token: this._fastly_auth,
+        version: this._version
+      }
+    }).then(() => {
+      this.tick(10, 'set service config up for Helix', true);
+      return true;
+    }).catch(e => {
+      this.tick(10, 'failed to set service config up for Helix', true);
+      this.log.error(`Remote publish service failed ${e}`);
+      return false;
+    });
   }
 
-  async prepare() {
-
+  async secrets() {
+    const jobs = [];
+    if (this._wsk_auth) {
+      const auth = this._fastly.writeDictValue(this._version, 'secrets', 'OPENWHISK_AUTH', this._wsk_auth);
+      this.jobs.push(auth);
+    }
+    if (this._wsk_namespace) {
+      const namespace = this._fastly.writeDictValue(this._version, 'secrets', 'OPENWHISK_NAMESPACE', this._wsk_namespace);
+      this.jobs.push(namespace);
+    }
+    return Promise.all(jobs).then(() => {
+      this.tick(2, 'enabled authentication', true);
+      return true;
+    }).catch(e => {
+      this.tick(2, 'failed to enable authentication', true);
+      this.log.error(`failed to enable authentication ${e}`);
+      return false;
+    });
   }
 
   async init() {
     await super.init();
+    this._fastly = fastly(this._fastly_auth, this._fastly_namespace);
   }
 
   async run() {
     await this.init();
     try {
-      await this.prepare();
-      await this.addlogger();
-      await this.publish();
+      await this._fastly.transact(async version => {
+        this._version = version;
+        await this.prepare();
+        await this.addlogger();
+        await this.secrets();
+      }, !this._dryRun);
       await this.purge();
       this.showNextStep();
     } catch (e) {
