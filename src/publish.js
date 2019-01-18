@@ -59,9 +59,15 @@ module.exports = function strain() {
     },
     handler: async (argv) => {
       if (!executor) {
-        // eslint-disable-next-line global-require
-        const StrainCommand = require('./publish.cmd'); // lazy load the handler to speed up execution time
-        executor = new StrainCommand(makeLogger(argv));
+        if (argv.remote) {
+          // eslint-disable-next-line global-require
+          const PublishCommand = require('./remotepublish.cmd'); // lazy load the handler to speed up execution time
+          executor = new PublishCommand(makeLogger(argv));
+        } else {
+          // eslint-disable-next-line global-require
+          const StrainCommand = require('./publish.cmd'); // lazy load the handler to speed up execution time
+          executor = new StrainCommand(makeLogger(argv));
+        }
       }
 
       await executor
