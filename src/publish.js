@@ -40,6 +40,11 @@ module.exports = function strain() {
           type: 'boolean',
           default: false,
         })
+        .option('remote', {
+          describe: 'Use the remote publishing service',
+          type: 'boolean',
+          default: false,
+        })
         .demandOption(
           'fastly-auth',
           'Authentication is required. You can pass the key via the HLX_FASTLY_AUTH environment variable, too',
