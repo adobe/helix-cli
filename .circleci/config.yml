@@ -30,7 +30,7 @@ commands:
         command: git config --global user.email "circleci@project-helix.io" && git config --global user.name "CircleCi Build"
 
 orbs:
-  helix-smoke-tests: adobe/helix-smoke-tests@0.0.4
+  helix-smoke-tests: adobe/helix-smoke-tests@dev:first
 
 jobs:
   snyk:
@@ -245,3 +245,4 @@ workflows:
     - helix-smoke-tests/run:
         token: ${SMOKE_TEST_TOKEN}
         remote_repo: adobe/helix-continuous
+        smoketest_branch: new-config
