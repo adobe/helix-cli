@@ -24,7 +24,6 @@ class AbstractCommand extends EventEmitter {
     this._initialized = false;
     this._logger = logger || makeLogger();
     this._helixConfig = new HelixConfig().withLogger(this._logger);
-    this._requireConfigFile = true;
   }
 
   withDirectory(dir) {
@@ -40,9 +39,9 @@ class AbstractCommand extends EventEmitter {
     return this._helixConfig.directory;
   }
 
-  withRequireConfigFile(value) {
-    this._requireConfigFile = value;
-    return this;
+  // eslint-disable-next-line class-methods-use-this
+  get requireConfigFile() {
+    return true;
   }
 
   withConfigFile(file) {
@@ -60,7 +59,7 @@ class AbstractCommand extends EventEmitter {
   async init() {
     if (!this._initialized) {
       if (!await this._helixConfig.hasFile()) {
-        if (this._requireConfigFile) {
+        if (this.requireConfigFile) {
           this.log.error(chalk`No {cyan helix-config.yaml}. Please add one before deployment.`);
           this.log.info(chalk`You can auto generate a default config with\n{grey $ hlx deploy --add=default}\n`);
           throw Error();

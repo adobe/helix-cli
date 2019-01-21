@@ -26,7 +26,11 @@ class BuildCommand extends AbstractCommand {
     this._target = null;
     this._files = null;
     this._webroot = null;
-    this.withRequireConfigFile(false);
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  get requireConfigFile() {
+    return false;
   }
 
   withCacheEnabled(cache) {
