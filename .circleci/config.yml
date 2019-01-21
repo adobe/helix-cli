@@ -245,5 +245,5 @@ workflows:
     - helix-smoke-tests/run:
         token: ${SMOKE_TEST_TOKEN}
         remote_repo: adobe/helix-continuous
-        remote_branch: 
+        remote_branch: smoke_test_branch
         smoketest_branch: new-config
