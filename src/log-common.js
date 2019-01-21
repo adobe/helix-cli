@@ -15,6 +15,11 @@ const winston = require('winston');
 const uuidv4 = require('uuid/v4');
 const { Logger } = require('@adobe/helix-shared');
 
+const ANSI_REGEXP = RegExp([
+  '[\\u001B\\u009B][[\\]()#;?]*(?:(?:(?:[a-zA-Z\\d]*(?:;[a-zA-Z\\d]*)*)?\\u0007)',
+  '(?:(?:\\d{1,4}(?:;\\d{0,4})*)?[\\dA-PRZcf-ntqry=><~]))',
+].join('|'), 'g');
+
 function makeLogger({ logLevel = 'info', logFile = ['-'] } = {}) {
   return Logger.getLogger({
     category: 'cli',
@@ -30,7 +35,8 @@ class StringStream extends stream.Writable {
   }
 
   _write(chunk, enc, next) {
-    this.data += chunk.toString();
+    // add chunk but strip ansi control characters
+    this.data += chunk.toString().replace(ANSI_REGEXP, '');
     next();
   }
 }

@@ -48,6 +48,12 @@ function assertFile(p, expectMissing) {
   }
 }
 
+async function assertFileEqual(actualFile, expectedFile) {
+  const actual = await fse.readFile(actualFile, 'utf-8');
+  const expected = await fse.readFile(expectedFile, 'utf-8');
+  assert.equal(actual.trim(), expected.trim());
+}
+
 async function assertHttp(url, status, spec, replacements = []) {
   return new Promise((resolve, reject) => {
     let data = '';
@@ -266,6 +272,7 @@ const perfExample = {
 
 module.exports = {
   assertFile,
+  assertFileEqual,
   assertHttp,
   initGit,
   createTestRoot,

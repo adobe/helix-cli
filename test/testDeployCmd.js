@@ -34,7 +34,6 @@ describe('hlx deploy (Integration)', () => {
   let testRoot;
   let hlxDir;
   let buildDir;
-  let strainsFile;
   let replayheaders;
   let cwd;
 
@@ -42,7 +41,6 @@ describe('hlx deploy (Integration)', () => {
     testRoot = await createTestRoot();
     hlxDir = path.resolve(testRoot, '.hlx');
     buildDir = path.resolve(hlxDir, 'build');
-    strainsFile = path.resolve(hlxDir, 'strains.json');
 
     cwd = process.cwd();
 
@@ -64,8 +62,9 @@ describe('hlx deploy (Integration)', () => {
 
   it('deploy fails if no helix-config is present.', async () => {
     initGit(testRoot);
+    const logger = makeTestLogger();
     try {
-      await new DeployCommand()
+      await new DeployCommand(logger)
         .withDirectory(testRoot)
         .withWskHost('adobeioruntime.net')
         .withWskAuth('secret-key')
@@ -74,14 +73,14 @@ describe('hlx deploy (Integration)', () => {
         .withEnableDirty(true)
         .withDryRun(true)
         .withTarget(buildDir)
-        .withStrainFile(strainsFile)
         .withFastlyAuth('nope')
         .withFastlyNamespace('justtesting')
         .withCircleciAuth(CI_TOKEN)
         .run();
       assert.fail('deploy should fail if no helix-config is present');
     } catch (e) {
-      assert.ok(e.toString().indexOf('Error: Invalid configuration:') === 0);
+      const log = await logger.getOutput();
+      assert.ok(log.indexOf('error: No helix-config.yaml. Please add one before deployment.') >= 0);
     }
   });
 
@@ -99,7 +98,6 @@ describe('hlx deploy (Integration)', () => {
         .withEnableDirty(true)
         .withDryRun(true)
         .withTarget(buildDir)
-        .withStrainFile(strainsFile)
         .withFastlyAuth('nope')
         .withFastlyNamespace('justtesting')
         .withCircleciAuth(CI_TOKEN)
@@ -125,7 +123,6 @@ describe('hlx deploy (Integration)', () => {
         .withEnableDirty(false)
         .withDryRun(true)
         .withTarget(buildDir)
-        .withStrainFile(strainsFile)
         .withFastlyAuth('nope')
         .withFastlyNamespace('justtesting')
         .withCircleciAuth(CI_TOKEN)
@@ -151,7 +148,6 @@ describe('hlx deploy (Integration)', () => {
         .withEnableDirty(false)
         .withDryRun(true)
         .withTarget(buildDir)
-        .withStrainFile(strainsFile)
         .withFastlyAuth('nope')
         .withFastlyNamespace('justtesting')
         .withCircleciAuth(CI_TOKEN)
@@ -159,8 +155,70 @@ describe('hlx deploy (Integration)', () => {
       assert.fail('deploy fails if no stain is affected');
     } catch (e) {
       const log = await logger.getOutput();
-      assert.ok(log.indexOf('warn: Remote repository [36mssh://git@github.com/adobe/project-foo.io.git#master[39m does not affect any strains.') >= 0);
+      assert.ok(log.indexOf('error: Remote repository ssh://git@github.com/adobe/project-foo.io.git#master does not affect any strains.') >= 0);
     }
+  });
+
+  it('deploy adds missing strain with --add=foo', async () => {
+    await fs.copy(TEST_DIR, testRoot);
+    const cfg = path.resolve(testRoot, 'helix-config.yaml');
+    await fs.rename(path.resolve(testRoot, 'default-config.yaml'), cfg);
+    initGit(testRoot, 'git@github.com:adobe/project-foo.io.git');
+    const logger = makeTestLogger();
+    const cmd = await new DeployCommand(logger)
+      .withDirectory(testRoot)
+      .withWskHost('adobeioruntime.net')
+      .withWskAuth('secret-key')
+      .withWskNamespace('hlx')
+      .withEnableAuto(false)
+      .withEnableDirty(false)
+      .withDryRun(true)
+      .withTarget(buildDir)
+      .withFastlyAuth('nope')
+      .withFastlyNamespace('justtesting')
+      .withCircleciAuth(CI_TOKEN)
+      .withAddStrain('foo')
+      .withCreatePackages('ignore')
+      .run();
+
+    const log = await logger.getOutput();
+    assert.ok(log.indexOf('info: Updated strain foo in helix-config.yaml') >= 0);
+    await cmd.config.saveConfig(); // trigger manual save because of dry-run
+    const actual = await fs.readFile(cfg, 'utf-8');
+    const expected = await fs.readFile(path.resolve(__dirname, 'fixtures', 'default-updated-foo.yaml'), 'utf-8');
+    // eslint-disable-next-line no-underscore-dangle
+    assert.equal(actual, expected.replace('$REF', cmd._prefix));
+  });
+
+  it('deploy replaces default --add=default', async () => {
+    await fs.copy(TEST_DIR, testRoot);
+    const cfg = path.resolve(testRoot, 'helix-config.yaml');
+    await fs.rename(path.resolve(testRoot, 'default-config.yaml'), cfg);
+    initGit(testRoot, 'git@github.com:adobe/project-foo.io.git');
+    const logger = makeTestLogger();
+    const cmd = await new DeployCommand(logger)
+      .withDirectory(testRoot)
+      .withWskHost('adobeioruntime.net')
+      .withWskAuth('secret-key')
+      .withWskNamespace('hlx')
+      .withEnableAuto(false)
+      .withEnableDirty(false)
+      .withDryRun(true)
+      .withTarget(buildDir)
+      .withFastlyAuth('nope')
+      .withFastlyNamespace('justtesting')
+      .withCircleciAuth(CI_TOKEN)
+      .withAddStrain('default')
+      .withCreatePackages('ignore')
+      .run();
+
+    const log = await logger.getOutput();
+    assert.ok(log.indexOf('info: Updated strain default in helix-config.yaml') >= 0);
+    await cmd.config.saveConfig(); // trigger manual save because of dry-run
+    const actual = await fs.readFile(cfg, 'utf-8');
+    const expected = await fs.readFile(path.resolve(__dirname, 'fixtures', 'default-updated.yaml'), 'utf-8');
+    // eslint-disable-next-line no-underscore-dangle
+    assert.equal(actual, expected.replace('$REF', cmd._prefix));
   });
 
   it('deploy reports affected strains', async () => {
@@ -177,7 +235,6 @@ describe('hlx deploy (Integration)', () => {
       .withEnableDirty(false)
       .withDryRun(true)
       .withTarget(buildDir)
-      .withStrainFile(strainsFile)
       .withFastlyAuth('nope')
       .withFastlyNamespace('justtesting')
       .withCircleciAuth(CI_TOKEN)
@@ -203,7 +260,6 @@ describe('hlx deploy (Integration)', () => {
         .withEnableDirty(true)
         .withDryRun(true)
         .withTarget(buildDir)
-        .withStrainFile(strainsFile)
         .withFastlyAuth('nope')
         .withFastlyNamespace('justtesting')
         .withCircleciAuth(CI_TOKEN)
@@ -241,7 +297,6 @@ describe('hlx deploy (Integration)', () => {
       .withEnableDirty(false)
       .withDryRun(true)
       .withTarget(buildDir)
-      .withStrainFile(strainsFile)
       .run();
 
     const ref = GitUtils.getCurrentRevision(testRoot);
@@ -251,9 +306,8 @@ describe('hlx deploy (Integration)', () => {
 
     const log = await logger.getOutput();
     assert.ok(log.indexOf('deployment of 2 actions completed') >= 0);
-    assert.ok(log.indexOf(`- hlx/${ref}--html`) >= 0);
+    assert.ok(log.indexOf(`- hlx/${ref}/html`) >= 0);
     assert.ok(log.indexOf('- hlx/hlx--static') >= 0);
-
   }).timeout(30000);
 });
 

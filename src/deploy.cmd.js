@@ -49,8 +49,12 @@ class DeployCommand extends AbstractCommand {
     this._default = null;
     this._enableDirty = false;
     this._dryRun = false;
-    this._strainFile = null;
     this._createPackages = 'auto';
+    this._addStrain = null;
+  }
+
+  get requireConfigFile() {
+    return this._addStrain === null;
   }
 
   withEnableAuto(value) {
@@ -123,16 +127,13 @@ class DeployCommand extends AbstractCommand {
     return this;
   }
 
-  withStrainFile(value) {
-    if (!/^.*\.json$/.test(value)) {
-      throw Error('non-json strain files are deprecated.');
-    }
-    this._strainFile = value;
+  withCreatePackages(value) {
+    this._createPackages = value;
     return this;
   }
 
-  withCreatePackages(value) {
-    this._createPackages = value;
+  withAddStrain(value) {
+    this._addStrain = value === undefined ? null : value;
     return this;
   }
 
@@ -140,14 +141,11 @@ class DeployCommand extends AbstractCommand {
     if (script.main.indexOf(path.resolve(__dirname, 'openwhisk')) === 0) {
       return `hlx--${script.name}`;
     }
-    return `${this._prefix}--${script.name}`;
+    return `${this._prefix}/${script.name}`;
   }
 
   async init() {
     await super.init();
-    if (!this._strainFile) {
-      this._strainFile = path.resolve(this._helixConfig.directory, '.hlx', 'strains.json');
-    }
     this._target = path.resolve(this.directory, this._target);
   }
 
@@ -277,16 +275,35 @@ class DeployCommand extends AbstractCommand {
     const giturl = new GitUrl(`${origin}#${ref}`);
     const affected = this.config.strains.filterByCode(giturl);
     if (affected.length === 0) {
-      const newStrain = this.config.strains.get('default').clone();
-      newStrain.name = uuidv4();
+      let newStrain = this._addStrain ? this.config.strains.get(this._addStrain) : null;
+      if (!newStrain) {
+        newStrain = this.config.strains.get('default');
+        newStrain = newStrain.clone();
+        newStrain.name = this._addStrain || uuidv4();
+        this.config.strains.add(newStrain);
+      }
+
       newStrain.code = giturl;
-      this.log.warn(chalk`Remote repository {cyan ${giturl}} does not affect any strains.
+      // also tweak content and static url, if default is still local
+      if (newStrain.content.isLocal) {
+        newStrain.content = giturl;
+      }
+      if (newStrain.static.url.isLocal) {
+        newStrain.static.url = giturl;
+      }
+      if (this._addStrain === null) {
+        this.log.error(chalk`Remote repository {cyan ${giturl}} does not affect any strains.
       
 Add a strain definition to your config file:
 {grey ${newStrain.toYAML()}}
 
 Alternatively you can auto-add one using the {grey --add <name>} option.`);
-      throw Error();
+        throw Error();
+      }
+
+      affected.push(newStrain);
+      this.config.modified = true;
+      this.log.info(chalk`Updated strain {cyan ${newStrain.name}} in helix-config.yaml`);
     }
 
     this._prefix = GitUtils.getCurrentRevision(this.directory);
@@ -353,20 +370,25 @@ Alternatively you can auto-add one using the {grey --add <name>} option.`);
         .then(action => ({ script, action })));
 
     // create openwhisk package
-    // don't use packages for now...
-    // if (!this._dryRun) {
-    //   const parameters = Object.keys(params).map((key) => {
-    //     const value = params[key];
-    //     return { key, value };
-    //   });
-    //   await openwhisk.packages.update({
-    //     name: this._prefix,
-    //     package: {
-    //       publish: true,
-    //       parameters,
-    //     },
-    //   });
-    // }
+    if (!this._dryRun) {
+      const parameters = Object.keys(params).map((key) => {
+        const value = params[key];
+        return { key, value };
+      });
+      await openwhisk.packages.update({
+        name: this._prefix,
+        package: {
+          publish: true,
+          parameters,
+          annotations: [
+            {
+              key: 'hlx-code-origin',
+              value: giturl.toString(),
+            },
+          ],
+        },
+      });
+    }
 
     // ... and deploy
     const deployed = read.map(p => p.then(({ script, action }) => {
@@ -374,7 +396,6 @@ Alternatively you can auto-add one using the {grey --add <name>} option.`);
         name: script.actionName,
         'User-Agent': useragent,
         action,
-        params,
         kind: 'nodejs:10-fat',
         annotations: { 'web-export': true },
       };
@@ -415,21 +436,19 @@ Alternatively you can auto-add one using the {grey --add <name>} option.`);
 
     // update package in affected strains
     this.log.info(`Affected strains of ${giturl}:`);
-    let modified = false;
     affected.forEach((strain) => {
       this.log.info(`- ${strain.name}`);
       if (strain.package !== this._prefix) {
-        modified = true;
+        this.config.modified = true;
         // eslint-disable-next-line no-param-reassign
         strain.package = this._prefix;
       }
     });
 
-    if (!this._dryRun && modified) {
+    if (!this._dryRun && this.config.modified) {
       this.config.saveConfig();
       this.log.info(`Updated ${path.relative(this.directory, this.config.configPath)}`);
     }
-
     return this;
   }
 }

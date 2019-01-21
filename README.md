@@ -27,7 +27,7 @@ $ curl -sL http://www.project-helix.io/cli.sh | sh
 
 ## Quick Start
 
-```bash
+```
 $ hlx --help
 hlx <command>
 
@@ -39,7 +39,6 @@ Commands:
   hlx deploy             Deploy packaged functions to Adobe I/O runtime
   hlx perf               Test performance
   hlx publish            Activate strains in the Fastly CDN and publish the site
-                                                               [aliases: strain]
   hlx clean              Remove generated files and caches.
   hlx completion         generate bash completion script
 
@@ -56,13 +55,13 @@ for more information, find our manual at https://github.com/adobe/helix-cli
 
 ## Setting up a project
 
-```bash
+```
 $ hlx demo <my-cool-project>
 ```
 
 ## Starting development
 
-```bash
+```
 $ cd <my-cool-project>
 $ hlx up
 ```
@@ -71,16 +70,9 @@ Just change contents in your project directory and reload `http://localhost:3000
 
 ## (Optional) Build artifacts
 
-```bash
+```
 # In <my-cool-project>
 $ hlx build
-```
-
-## (Optional) Test functions
-
-```bash
-# In <my-cool-project>
-$ hlx test
 ```
 
 ## (Optional) Deploy to Adobe I/O Runtime
@@ -89,7 +81,7 @@ $ hlx test
 
 By default, Helix will set up automated deployment that deploys whenever a new commit has been pushed to your GitHub code repository. In order to do so, you need a [CircleCI](https://circleci.com) account and generate a [personal API Token](https://circleci.com/account/api).
 
-```bash
+```
 # In <my-cool-project>
 $ hlx deploy \
   --circleci-auth <personal-api-token> \
@@ -103,9 +95,9 @@ As always, you can keep all parameters in `HLX_CIRCLECI_AUTH`, `HLX_WSK_AUTH`, a
 
 ### One-Shot Deployment
 
-Alternatively, you can also perfom a one-shot deployment like this:
+Alternatively, you can also perform a one-shot deployment like this:
 
-```bash
+```
 # In <my-cool-project>
 $ hlx deploy --wsk-namespace <your-namespace> --wsk-auth <your-key>
 [==================================================] analyzing 0.0s
@@ -119,7 +111,7 @@ Instead of passing `--wsk-auth` as a command line option, you can also set the `
 
 ## (Optional) Publish your Site
 
-```bash
+```
 # In <my-cool-project>
 $ hlx publish --fastly-auth <key> --fastly-namespace <serviceid>
 Publishing [========================================----------]  4.1s
@@ -137,14 +129,12 @@ If you need to pass request parameters, you can whitelist the parameters you nee
 ```yaml
 strains:
   default:
-    code: /hlx/default/github-com-adobe-helix-cli--master-dirty--
+    code: https://github.com/adobe/project-helix.io.git#master
+    content: https://github.com/adobe/project-helix.io.git#master
+    static: https://github.com/adobe/project-helix.io.git/htdocs#master
     params:
       - foo
       - bar
-    content:
-      repo: helix-cli
-      ref: master
-      owner: adobe
 ```
 
 In the example above, the parameters `foo` and `bar` have been enabled. A request made to `https://www.example.com/index.html?foo=here&bar=there&baz=everywhere` will enable your application to read the `foo` and `bar` parameters. The `baz` parameter and all other parameters will be filtered out.
@@ -164,34 +154,22 @@ by adding an `index` property:
 ```yaml
 strains:
   default:
-    code: /hlx/default/github-com-adobe-helix-cli--master-dirty--
+    code: https://github.com/adobe/project-helix.io.git#master
+    content: https://github.com/adobe/project-helix.io.git#master
+    static: https://github.com/adobe/project-helix.io.git/htdocs#master
     directoryIndex: README.html
-    content:
-      repo: helix-cli
-      ref: master
-      owner: adobe
-```
-
-alternatively you can also the it as default, in the root section of the config. eg:
-
-```yaml
-# defines the directory index file
-directoryIndex: readme.html
 ```
 
 ### Static Content Handling
 
-Static content is delivered from the `htdocs` directory of the _code_ repository of the Helix project. By default, whatever 
-remote `origin` repository is set at the time of running `hlx publish` is used, but this can be 
-overridden in the configuration file:
+Static content is delivered from the `htdocs` directory of the _code_ repository of the Helix project:
 
 ```yaml
 strains:
   default:
-    static:
-      repo: reactor-user-docs
-      ref: master
-      owner: Adobe-Marketing-Cloud
+    code: https://github.com/adobe/project-helix.io.git#master
+    content: https://github.com/adobe/project-helix.io.git#master
+    static: https://github.com/adobe/project-helix.io.git/htdocs#master
 ```
 
 The same core configuration options (`repo`, `ref`, `root`, and `owner`) are supported for `static` as for `content`. 
@@ -211,20 +189,16 @@ An example configuration could look like this:
 ```yaml
 strains:
   default:
-    code: /trieloff/default/github-com-adobe-helix-helpx--master--
+    code: https://github.com/adobe/project-helix.io.git#master
+    content: https://github.com/adobe/project-helix.io.git#master
+    static: https://github.com/adobe/project-helix.io.git/htdocs#master
     url: https://www.primordialsoup.life
-    content:
-      repo: reactor-user-docs
-      ref: master
-      owner: Adobe-Marketing-Cloud
 
   develop:
+    code: https://github.com/adobe/project-helix.io.git#dev
+    content: https://github.com/adobe/project-helix.io.git#master
+    static: https://github.com/adobe/project-helix.io.git/htdocs#master
     url: https://dev.primordialsoup.life/develop/
-    code: /trieloff/default/github-com-adobe-helix-helpx--develop--
-    content:
-      repo: reactor-user-docs
-      ref: master
-      owner: Adobe-Marketing-Cloud
 ```
 
 ## Mixing old and new Content
@@ -238,9 +212,9 @@ You are still able to set strain `conditions` or assign traffic to a strain base
 ```yaml
 strains:
   default:
-    code: /trieloff/default/github-com-trieloff-helix-demo--master-dirty--
-    content: https://github.com/trieloff/helix-demo.git
-    static: https://github.com/trieloff/helix-demo.git
+    code: https://github.com/adobe/project-helix.io.git#master
+    content: https://github.com/adobe/project-helix.io.git#master
+    static: https://github.com/adobe/project-helix.io.git/htdocs#master
   oldcontent:
     origin: https://www.adobe.io
     url: https://www.primordialsoup.life/content/
@@ -269,8 +243,9 @@ An example performance configuration might look like this:
 ```yaml
 strains:
   default:
-    code: /trieloff/default/github-com-adobe-helix-helpx--master--
-    directoryIndex: README.html
+    code: https://github.com/adobe/project-helix.io.git#master
+    content: https://github.com/adobe/project-helix.io.git#master
+    static: https://github.com/adobe/project-helix.io.git/htdocs#master
     url: https://www.primordialsoup.life
     urls:
       - https://www.primordialsoup.life/README.html

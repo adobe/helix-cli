@@ -52,6 +52,7 @@ describe('hlx deploy', () => {
     mockDeploy.withFastlyAuth.returnsThis();
     mockDeploy.withFastlyNamespace.returnsThis();
     mockDeploy.withCreatePackages.returnsThis();
+    mockDeploy.withAddStrain.returnsThis();
     mockDeploy.run.returnsThis();
 
     // disable static functions as well to avoid shelljs executions.
@@ -121,7 +122,6 @@ Authentication is required. You can pass the key via the HLX_WSK_AUTH environmen
         '--wsk-auth', 'secret-key',
         '--wsk-namespace', 'hlx',
       ]);
-
 
     sinon.assert.calledWith(mockDeploy.withEnableAuto, false);
     sinon.assert.calledWith(mockDeploy.withEnableDirty, false);
@@ -325,6 +325,32 @@ Authentication is required. You can pass the key via the HLX_WSK_AUTH environmen
       ]);
 
     sinon.assert.calledWith(mockDeploy.withCreatePackages, 'auto');
+    sinon.assert.calledOnce(mockDeploy.run);
+  });
+
+  it('hlx deploy can add strain', () => {
+    new CLI()
+      .withCommandExecutor('deploy', mockDeploy)
+      .run(['deploy',
+        '--wsk-auth', 'secret-key',
+        '--wsk-namespace', 'hlx',
+        '--add', 'foo',
+      ]);
+
+    sinon.assert.calledWith(mockDeploy.withAddStrain, 'foo');
+    sinon.assert.calledOnce(mockDeploy.run);
+  });
+
+  it('hlx deploy can add empty strain', () => {
+    new CLI()
+      .withCommandExecutor('deploy', mockDeploy)
+      .run(['deploy',
+        '--add',
+        '--wsk-auth', 'secret-key',
+        '--wsk-namespace', 'hlx',
+      ]);
+
+    sinon.assert.calledWith(mockDeploy.withAddStrain, '');
     sinon.assert.calledOnce(mockDeploy.run);
   });
 });

@@ -75,6 +75,10 @@ module.exports = function deploy() {
           type: 'boolean',
           default: false,
         })
+        .option('add', {
+          describe: 'Adds missing strains to the config',
+          type: 'string',
+        })
         .option('package', {
           describe: 'Automatically create or update outdated action packages.',
           type: 'string',
@@ -148,6 +152,7 @@ module.exports = function deploy() {
         .withFastlyAuth(argv.fastlyAuth)
         .withFastlyNamespace(argv.fastlyNamespace)
         .withCreatePackages(argv.package)
+        .withAddStrain(argv.add)
         .run();
     },
 

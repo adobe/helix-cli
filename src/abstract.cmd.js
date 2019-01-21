@@ -13,6 +13,7 @@
 'use strict';
 
 const EventEmitter = require('events');
+const chalk = require('chalk');
 const { HelixConfig } = require('@adobe/helix-shared');
 const { makeLogger } = require('./log-common');
 const ConfigUtils = require('./config/config-utils.js');
@@ -23,7 +24,6 @@ class AbstractCommand extends EventEmitter {
     this._initialized = false;
     this._logger = logger || makeLogger();
     this._helixConfig = new HelixConfig().withLogger(this._logger);
-    this._requireConfigFile = true;
   }
 
   withDirectory(dir) {
@@ -39,9 +39,9 @@ class AbstractCommand extends EventEmitter {
     return this._helixConfig.directory;
   }
 
-  withRequireConfigFile(value) {
-    this._requireConfigFile = value;
-    return this;
+  // eslint-disable-next-line class-methods-use-this
+  get requireConfigFile() {
+    return true;
   }
 
   withConfigFile(file) {
@@ -58,9 +58,15 @@ class AbstractCommand extends EventEmitter {
 
   async init() {
     if (!this._initialized) {
-      if (!this._requireConfigFile && !(await this._helixConfig.hasFile())) {
-        // set default config
-        this._helixConfig.withSource(await ConfigUtils.createDefaultConfig());
+      if (!await this._helixConfig.hasFile()) {
+        if (this.requireConfigFile) {
+          this.log.error(chalk`No {cyan helix-config.yaml}. Please add one before deployment.`);
+          this.log.info(chalk`You can auto generate a default config with\n{grey $ hlx deploy --add=default}\n`);
+          throw Error();
+        } else {
+          // set default config
+          this._helixConfig.withSource(await ConfigUtils.createDefaultConfig());
+        }
       }
       await this._helixConfig.init();
       this._initialized = true;

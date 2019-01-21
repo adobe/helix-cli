@@ -16,7 +16,6 @@ const assert = require('assert');
 const path = require('path');
 const fse = require('fs-extra');
 const winston = require('winston');
-const { makeTestLogger } = require('../src/log-common');
 
 const {
   initGit,
@@ -76,61 +75,6 @@ describe('Integration test for up command', () => {
       })
       .on('stopped', () => {
         done();
-      })
-      .run()
-      .catch(done);
-  }).timeout(5000);
-
-  it('up command shows warning if no helix-config is present.', (done) => {
-    initGit(testDir);
-    const logger = makeTestLogger();
-    new UpCommand(logger)
-      .withCacheEnabled(false)
-      .withFiles([path.join(testDir, 'src', '*.htl'), path.join(testDir, 'src', '*.js')])
-      .withTargetDir(buildDir)
-      .withDirectory(testDir)
-      .withStrainName('dev')
-      .withHttpPort(0)
-      .on('started', (cmd) => {
-        // eslint-disable-next-line no-console
-        console.log(`test server running on port ${cmd.project.server.port}`);
-        cmd.stop();
-      })
-      .on('stopped', async () => {
-        const log = await logger.getOutput();
-        if (log.indexOf('warn: No [36mhelix-config.yaml[39m. Please add one before deployment') < 0) {
-          done(Error('hlx up should show warning for missing helix-config.yaml'));
-        } else {
-          done();
-        }
-      })
-      .run()
-      .catch(done);
-  }).timeout(5000);
-
-  it('up command shows no warning if helix-config is present.', (done) => {
-    initGit(testDir);
-    fse.renameSync(path.resolve(testDir, 'default-config.yaml'), path.resolve(testDir, 'helix-config.yaml'));
-    const logger = makeTestLogger();
-    new UpCommand(logger)
-      .withCacheEnabled(false)
-      .withFiles([path.join(testDir, 'src', '*.htl'), path.join(testDir, 'src', '*.js')])
-      .withTargetDir(buildDir)
-      .withDirectory(testDir)
-      .withStrainName('dev')
-      .withHttpPort(0)
-      .on('started', (cmd) => {
-        // eslint-disable-next-line no-console
-        console.log(`test server running on port ${cmd.project.server.port}`);
-        cmd.stop();
-      })
-      .on('stopped', async () => {
-        const log = await logger.getOutput();
-        if (log.indexOf('warn: No [36mhelix-config.yaml[39m. Please add one before deployment') >= 0) {
-          done(Error('hlx up should show no warning if helix-config.yaml is present'));
-        } else {
-          done();
-        }
       })
       .run()
       .catch(done);

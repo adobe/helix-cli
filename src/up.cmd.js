@@ -13,7 +13,6 @@
 const opn = require('opn');
 const readline = require('readline');
 const chokidar = require('chokidar');
-const chalk = require('chalk');
 const { HelixProject } = require('@adobe/helix-simulator');
 const BuildCommand = require('./build.cmd');
 const pkgJson = require('../package.json');
@@ -99,11 +98,6 @@ class UpCommand extends BuildCommand {
 
   async run() {
     await super.init();
-
-    if (!await this.config.hasFile()) {
-      this.log.warn(chalk`No {cyan helix-config.yaml}. Please add one before deployment.`);
-      this.log.info(chalk`You can auto generate one with\n{grey $ hlx up --save}\n`);
-    }
 
     // start debugger (#178)
     // https://nodejs.org/en/docs/guides/debugging-getting-started/#enable-inspector

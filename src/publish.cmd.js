@@ -131,7 +131,7 @@ class PublishCommand extends AbstractCommand {
     const dictionaries = Object.keys(this._dictionaries).length;
     // number of non-strain-specific dictionaries
     const staticdictionaries = 1;
-    const strains = this._strains.length;
+    const strains = this._strainsToPublish.length;
     const vclfiles = 4;
     const extrarequests = 4;
 
@@ -659,7 +659,6 @@ ${PublishCommand.makeParamWhitelist(params, '  ')}
 
   async _updateFastly() {
     this.progressBar();
-
     await this.cloneVersion();
     await this.initDictionaries();
     await this.initFastly();
@@ -684,16 +683,7 @@ ${PublishCommand.makeParamWhitelist(params, '  ')}
     makeDictJob('secrets', 'OPENWHISK_NAMESPACE', this._wsk_namespace, 'Set OpenWhisk namespace', 'openwhisk namespace');
     const [secretp, ownsp] = dictJobs.splice(0, 2);
 
-    this.config.strains.getProxyStrains().forEach((proxy) => {
-      this.tick(13, `skipping proxy strain ${proxy.name}`);
-    });
-
-    this.config.strains.getRuntimeStrains().forEach((strain) => {
-      // skip the strains where we can't determine the action name
-      if (!strain.package) {
-        this.tick(13, `skipping unaffected strain ${strain.name}`);
-        return;
-      }
+    this._strainsToPublish.forEach((strain) => {
       let actionPrefix = `/${this._wsk_namespace}/default/${strain.package}`;
       if (!actionPrefix.endsWith('--')) {
         actionPrefix += '--';
@@ -773,6 +763,23 @@ ${PublishCommand.makeParamWhitelist(params, '  ')}
     }
     if (!await fs.pathExists(this._vclFile)) {
       this._vclFile = HELIX_VCL_DEFAULT_FILE;
+    }
+
+    this._strainsToPublish = this.config.strains.getByFilter((strain) => {
+      if (strain.isProxy()) {
+        this.log.debug(`ignoring proxy strain ${strain.name}`);
+        return false;
+      }
+      // skip the strains where we can't determine the action name
+      if (!strain.package) {
+        this.log.debug(`ignoring unaffected strain ${strain.name}`);
+        return false;
+      }
+      return true;
+    });
+
+    if (this._strainsToPublish.length === 0) {
+      this.log.warn(chalk`None of the strains contains {cyan package} information.`);
     }
   }
 

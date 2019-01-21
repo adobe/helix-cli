@@ -29,8 +29,8 @@
   "dependencies": {
     "@adobe/fastly-native-promises": "^1.2.0",
     "@adobe/helix-pipeline": "0.10.1",
-    "@adobe/helix-shared": "adobe/helix-shared#new-config",
-    "@adobe/helix-simulator": "2.7.6",
+    "@adobe/helix-shared": "0.4.1",
+    "@adobe/helix-simulator": "2.8.0",
     "@adobe/parcel-plugin-htl": "2.0.1",
     "@snyk/nodejs-runtime-agent": "1.35.0",
     "archiver": "3.0.0",
