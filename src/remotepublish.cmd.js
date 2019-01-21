@@ -83,7 +83,6 @@ class RemotePublishCommand extends AbstractCommand {
 
   withFastlyAuth(value) {
     this._fastly_auth = value;
-    this._options.headers['Fastly-Key'] = value;
     return this;
   }
 
@@ -93,21 +92,18 @@ class RemotePublishCommand extends AbstractCommand {
   }
 
   showNextStep() {
-    const strains = this._strains;
-
-    const urls = strains.filter(strain => strain.url).map(strain => strain.url);
+    const urls = this.config.strains.getByFilter(strain => strain.url).map(strain => strain.url);
     this.progressBar().terminate();
 
     this.log.info(`✅  The following strains have been published and version ${this._version} is now online:`);
-    this._strains.forEach((strain) => {
-      if (strain.package) {
-        const url = strain.url ? ` -> ${strain.url}` : '';
-        this.log.info(`- ${strain.name}${url}`);
-      }
+    this.config.strains.getByFilter(strain => !!strain.url).forEach((strain) => {
+      const { url } = strain;
+      urls.push(url);
+      this.log.info(`- ${strain.name}: ${url}`);
     });
 
     if (urls.length) {
-      this.log.info('\nYou now access your site using:');
+      this.log.info('\nYou may now access your site using:');
       this.log.info(chalk.grey(`$ curl ${urls[0]}`));
     }
   }
@@ -118,33 +114,32 @@ class RemotePublishCommand extends AbstractCommand {
       body: {
         service: this._fastly_namespace,
         token: this._fastly_auth,
-        version: this._version
-      }
+        version: this._version,
+      },
     }).then(() => {
       this.tick(10, 'set up logging', true);
-    }).catch(e => {
+    }).catch((e) => {
       this.tick(10, 'failed to set up logging', true);
       this.log.error(`Remote addlogger service failed ${e}`);
       return false;
-    });;
+    });
   }
 
   purge() {
     if (this._dryRun) {
       this.tick(1, 'skipping cache purge');
       return false;
-    } else {
-      return this._fastly.purgeAll()
-        .then(() => {
-          this.tick(1, 'purged cache', true);
-          return true;
-        })
-        .catch(e => {
-          this.tick(1, 'failed to purge cache', true);
-          this.log.error(`Cache could not get purged ${e}`);
-          return false;
-        });
     }
+    return this._fastly.purgeAll()
+      .then(() => {
+        this.tick(1, 'purged cache', true);
+        return true;
+      })
+      .catch((e) => {
+        this.tick(1, 'failed to purge cache', true);
+        this.log.error(`Cache could not get purged ${e}`);
+        return false;
+      });
   }
 
   prepare() {
@@ -154,12 +149,12 @@ class RemotePublishCommand extends AbstractCommand {
         configuration: this.config.toJSON(),
         service: this._fastly_namespace,
         token: this._fastly_auth,
-        version: this._version
-      }
+        version: this._version,
+      },
     }).then(() => {
       this.tick(10, 'set service config up for Helix', true);
       return true;
-    }).catch(e => {
+    }).catch((e) => {
       this.tick(10, 'failed to set service config up for Helix', true);
       this.log.error(`Remote publish service failed ${e}`);
       return false;
@@ -169,17 +164,17 @@ class RemotePublishCommand extends AbstractCommand {
   async secrets() {
     const jobs = [];
     if (this._wsk_auth) {
-      const auth = this._fastly.writeDictValue(this._version, 'secrets', 'OPENWHISK_AUTH', this._wsk_auth);
-      this.jobs.push(auth);
+      const auth = this._fastly.writeDictItem(this._version, 'secrets', 'OPENWHISK_AUTH', this._wsk_auth);
+      jobs.push(auth);
     }
     if (this._wsk_namespace) {
-      const namespace = this._fastly.writeDictValue(this._version, 'secrets', 'OPENWHISK_NAMESPACE', this._wsk_namespace);
-      this.jobs.push(namespace);
+      const namespace = this._fastly.writeDictItem(this._version, 'secrets', 'OPENWHISK_NAMESPACE', this._wsk_namespace);
+      jobs.push(namespace);
     }
     return Promise.all(jobs).then(() => {
       this.tick(2, 'enabled authentication', true);
       return true;
-    }).catch(e => {
+    }).catch((e) => {
       this.tick(2, 'failed to enable authentication', true);
       this.log.error(`failed to enable authentication ${e}`);
       return false;
@@ -194,7 +189,7 @@ class RemotePublishCommand extends AbstractCommand {
   async run() {
     await this.init();
     try {
-      await this._fastly.transact(async version => {
+      await this._fastly.transact(async (version) => {
         this._version = version;
         await this.prepare();
         await this.addlogger();
