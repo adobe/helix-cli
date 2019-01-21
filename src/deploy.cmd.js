@@ -280,7 +280,14 @@ class DeployCommand extends AbstractCommand {
       const newStrain = this.config.strains.get('default').clone();
       newStrain.name = uuidv4();
       newStrain.code = giturl;
-      this.log.warn(chalk`Remote repository {cyan ${giturl}} does not affect any strains.
+      // also tweak content and static url, if default is still local
+      if (newStrain.content.isLocal) {
+        newStrain.content = giturl;
+      }
+      if (newStrain.static.url.isLocal) {
+        newStrain.static.url = giturl;
+      }
+      this.log.error(chalk`Remote repository {cyan ${giturl}} does not affect any strains.
       
 Add a strain definition to your config file:
 {grey ${newStrain.toYAML()}}

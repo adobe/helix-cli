@@ -64,8 +64,9 @@ describe('hlx deploy (Integration)', () => {
 
   it('deploy fails if no helix-config is present.', async () => {
     initGit(testRoot);
+    const logger = makeTestLogger();
     try {
-      await new DeployCommand()
+      await new DeployCommand(logger)
         .withDirectory(testRoot)
         .withWskHost('adobeioruntime.net')
         .withWskAuth('secret-key')
@@ -81,7 +82,8 @@ describe('hlx deploy (Integration)', () => {
         .run();
       assert.fail('deploy should fail if no helix-config is present');
     } catch (e) {
-      assert.ok(e.toString().indexOf('Error: Invalid configuration:') === 0);
+      const log = await logger.getOutput();
+      assert.ok(log.indexOf('error: No helix-config.yaml. Please add one before deployment.') >= 0);
     }
   });
 
@@ -159,7 +161,7 @@ describe('hlx deploy (Integration)', () => {
       assert.fail('deploy fails if no stain is affected');
     } catch (e) {
       const log = await logger.getOutput();
-      assert.ok(log.indexOf('warn: Remote repository [36mssh://git@github.com/adobe/project-foo.io.git#master[39m does not affect any strains.') >= 0);
+      assert.ok(log.indexOf('error: Remote repository ssh://git@github.com/adobe/project-foo.io.git#master does not affect any strains.') >= 0);
     }
   });
 
@@ -253,7 +255,6 @@ describe('hlx deploy (Integration)', () => {
     assert.ok(log.indexOf('deployment of 2 actions completed') >= 0);
     assert.ok(log.indexOf(`- hlx/${ref}--html`) >= 0);
     assert.ok(log.indexOf('- hlx/hlx--static') >= 0);
-
   }).timeout(30000);
 });
 
