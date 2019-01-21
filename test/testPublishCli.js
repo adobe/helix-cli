@@ -17,7 +17,7 @@
 const assert = require('assert');
 const sinon = require('sinon');
 const CLI = require('../src/cli.js');
-const StrainCommand = require('../src/publish.cmd');
+const PublishCommand = require('../src/publish.cmd');
 
 describe('hlx publish', () => {
   // mocked command instance
@@ -33,7 +33,7 @@ describe('hlx publish', () => {
       return true;
     });
 
-    mockPublish = sinon.createStubInstance(StrainCommand);
+    mockPublish = sinon.createStubInstance(PublishCommand);
     mockPublish.withWskHost.returnsThis();
     mockPublish.withWskAuth.returnsThis();
     mockPublish.withWskNamespace.returnsThis();
@@ -63,7 +63,7 @@ describe('hlx publish', () => {
     assert.fail('publish w/o arguments should fail.');
   });
 
-  it('hlx strain works with minimal arguments', () => {
+  it('hlx publish works with minimal arguments', () => {
     new CLI()
       .withCommandExecutor('publish', mockPublish)
       .run(['publish',
@@ -71,6 +71,25 @@ describe('hlx publish', () => {
         '--wsk-namespace', 'hlx',
         '--fastly-auth', 'secret-key',
         '--fastly-namespace', 'hlx',
+      ]);
+
+    sinon.assert.calledWith(mockPublish.withWskHost, 'adobeioruntime.net');
+    sinon.assert.calledWith(mockPublish.withWskAuth, 'secret-key');
+    sinon.assert.calledWith(mockPublish.withWskNamespace, 'hlx');
+    sinon.assert.calledWith(mockPublish.withFastlyNamespace, 'hlx'); // TODO !!
+    sinon.assert.calledWith(mockPublish.withFastlyAuth, 'secret-key');
+    sinon.assert.calledOnce(mockPublish.run);
+  });
+
+  it('hlx publish works with remote arguments', () => {
+    new CLI()
+      .withCommandExecutor('publish', mockPublish)
+      .run(['publish',
+        '--wsk-auth', 'secret-key',
+        '--wsk-namespace', 'hlx',
+        '--fastly-auth', 'secret-key',
+        '--fastly-namespace', 'hlx',
+        '--remote', 'true',
       ]);
 
     sinon.assert.calledWith(mockPublish.withWskHost, 'adobeioruntime.net');
