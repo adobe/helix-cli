@@ -31,27 +31,19 @@ architecture, every pipeline script is deployed as 1 adobeioruntime action. the 
 are in essence a openwhisk wrapper around the [helix pipeline](https://github.com/adobe/helix-pipeline).
 
 In order to allow for individual versions (strains) of the same pipeline script, the actions are
-name coded with the code repository location, branch and script name. it usually takes the format:
+name coded with the SHA of the commit during deploy time and the script name. it takes the format:
 
 ```
-<repository-url>--<branch>--[<selector>_]<type>
+/<sha>/<type>
 
 ```
  
 For example:
 
 ```
-git-github-com-adobe-project-helix-io-git--master--html
-
+/f436464e87ee5c09058ea57cf5c0bc4fe3a30b33/html
 ```
 
-> _todo: adjust after [#366](https://github.com/adobe/helix-cli/issues/366) is fixed._
-
-
-As mentioned above, based on the information in the request, the edge will invoke the respective
-script. for example a request for `www.project-helix.io/docs/index.nav.json` on the `develop` strain, 
-might invoke `git-github-com-adobe-project-helix-io-git--dev--nav_json`.
-  
 
 Compiling the sources (building)
 --------------------------------
