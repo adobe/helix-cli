@@ -18,13 +18,14 @@ const path = require('path');
 const proxyquire = require('proxyquire');
 const sinon = require('sinon');
 
-describe('hlx publish --remote (default)', () => {
+describe('hlx publish --remote --dry-run (default)', () => {
   let scope;
   let RemotePublishCommand;
   let writeDictItem;
   let purgeAll;
 
-  before('Setting up Fake Server', () => {
+  before('Setting up Fake Server', function bef() {
+    this.timeout - 5000;
     writeDictItem = sinon.fake.resolves(true);
     purgeAll = sinon.fake.resolves(true);
 
@@ -51,10 +52,14 @@ describe('hlx publish --remote (default)', () => {
       .withFastlyNamespace('fake_name')
       .withWskHost('doesn.t.matter')
       .withConfigFile(path.resolve(__dirname, 'fixtures/deployed.yaml'))
-      .withDryRun(false);
+      .withDryRun(true);
     await remote.run();
 
     sinon.assert.calledTwice(writeDictItem);
-    sinon.assert.calledOnce(purgeAll);
+    sinon.assert.notCalled(purgeAll);
+  });
+
+  after('Showing results', () => {
+    assert.ok(scope.isDone());
   });
 });

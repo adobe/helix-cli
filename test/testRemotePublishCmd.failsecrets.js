@@ -16,23 +16,25 @@ const assert = require('assert');
 const nock = require('nock');
 const path = require('path');
 const proxyquire = require('proxyquire');
+const AssertionError = require('assert').AssertionError;
 const sinon = require('sinon');
 
-describe('hlx publish --remote (default)', () => {
+describe('hlx publish --remote (fail secrets)', () => {
   let scope;
   let RemotePublishCommand;
-  let writeDictItem;
   let purgeAll;
 
-  before('Setting up Fake Server', () => {
-    writeDictItem = sinon.fake.resolves(true);
+  before('Setting up Fake Server', function bef() {
+    this.timeout - 5000;
     purgeAll = sinon.fake.resolves(true);
 
     RemotePublishCommand = proxyquire('../src/remotepublish.cmd', {
       '@adobe/fastly-native-promises': () => ({
         transact: fn => fn(3),
-        writeDictItem,
-        purgeAll,
+        writeDictItem: async () => {
+          throw new Error('Cannot write secrets.');
+        },
+        purgeAll
       }),
     });
 
@@ -52,9 +54,18 @@ describe('hlx publish --remote (default)', () => {
       .withWskHost('doesn.t.matter')
       .withConfigFile(path.resolve(__dirname, 'fixtures/deployed.yaml'))
       .withDryRun(false);
-    await remote.run();
 
-    sinon.assert.calledTwice(writeDictItem);
-    sinon.assert.calledOnce(purgeAll);
+    try {
+        await remote.run();
+        assert.fail();
+        
+      } catch (e) {
+        if (e instanceof AssertionError) {
+          assert.fail(e);
+        }
+        sinon.assert.notCalled(purgeAll);
+      }
+
+    
   });
 });

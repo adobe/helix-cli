@@ -121,7 +121,7 @@ class RemotePublishCommand extends AbstractCommand {
     }).catch((e) => {
       this.tick(10, 'failed to set up logging', true);
       this.log.error(`Remote addlogger service failed ${e}`);
-      return false;
+      throw new Error('Unable to set up remote logging');
     });
   }
 
@@ -138,7 +138,7 @@ class RemotePublishCommand extends AbstractCommand {
       .catch((e) => {
         this.tick(1, 'failed to purge cache', true);
         this.log.error(`Cache could not get purged ${e}`);
-        return false;
+        throw new Error('Unable to purge cache: ');
       });
   }
 
@@ -157,7 +157,7 @@ class RemotePublishCommand extends AbstractCommand {
     }).catch((e) => {
       this.tick(10, 'failed to set service config up for Helix', true);
       this.log.error(`Remote publish service failed ${e}`);
-      return false;
+      throw new Error('Unable to setup service config');
     });
   }
 
@@ -177,7 +177,7 @@ class RemotePublishCommand extends AbstractCommand {
     }).catch((e) => {
       this.tick(2, 'failed to enable authentication', true);
       this.log.error(`failed to enable authentication ${e}`);
-      return false;
+      throw new Error('Unable to set credentials');
     });
   }
 
