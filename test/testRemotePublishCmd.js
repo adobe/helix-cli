@@ -61,5 +61,7 @@ describe('hlx publish --remote (default)', () => {
   after(() => {
     scope.done();
     nock.restore();
+    nock.cleanAll();
+    nock.activate();
   });
 });

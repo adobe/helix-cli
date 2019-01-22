@@ -61,5 +61,8 @@ describe('hlx publish --remote --dry-run (default)', () => {
 
   after('Showing results', () => {
     assert.ok(scope.isDone());
+    nock.restore();
+    nock.cleanAll();
+    nock.activate();
   });
 });

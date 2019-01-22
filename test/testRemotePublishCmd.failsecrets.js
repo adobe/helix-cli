@@ -69,5 +69,7 @@ describe('hlx publish --remote (fail secrets)', () => {
   after(() => {
     scope.done();
     nock.restore();
+    nock.cleanAll();
+    nock.activate();
   });
 });
