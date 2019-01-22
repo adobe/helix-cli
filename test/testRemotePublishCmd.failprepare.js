@@ -40,9 +40,7 @@ describe('hlx publish --remote (fail prepare service config)', () => {
 
     scope = nock('https://adobeioruntime.net')
       .post('/api/v1/web/helix/default/publish')
-      .reply(400, {})
-      .post('/api/v1/web/helix/default/addlogger')
-      .reply(200, {});
+      .reply(400, {});
   });
 
   it('publishing makes HTTP requests', async () => {

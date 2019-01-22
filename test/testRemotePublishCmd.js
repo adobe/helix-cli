@@ -23,7 +23,8 @@ describe('hlx publish --remote (default)', () => {
   let writeDictItem;
   let purgeAll;
 
-  before('Setting up Fake Server', () => {
+  before('Setting up Fake Server', function bef() {
+    this.timeout(5000);
     writeDictItem = sinon.fake.resolves(true);
     purgeAll = sinon.fake.resolves(true);
 
