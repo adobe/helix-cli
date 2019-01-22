@@ -17,10 +17,15 @@ const fs = require('fs-extra');
 const assert = require('assert');
 const path = require('path');
 const $ = require('shelljs');
-const { createTestRoot, assertFile } = require('./utils.js');
+const winston = require('winston');
+const { GitUtils } = require('@adobe/helix-shared');
+const { initGit, createTestRoot } = require('./utils.js');
+const BuildCommand = require('../src/build.cmd.js');
 const DeployCommand = require('../src/deploy.cmd.js');
+const { makeTestLogger } = require('../src/log-common');
 
 const CI_TOKEN = 'nope';
+const TEST_DIR = path.resolve('test/integration');
 
 Replay.mode = 'bloody';
 Replay.fixtures = `${__dirname}/fixtures/`;
@@ -29,7 +34,6 @@ describe('hlx deploy (Integration)', () => {
   let testRoot;
   let hlxDir;
   let buildDir;
-  let strainsFile;
   let replayheaders;
   let cwd;
 
@@ -37,9 +41,11 @@ describe('hlx deploy (Integration)', () => {
     testRoot = await createTestRoot();
     hlxDir = path.resolve(testRoot, '.hlx');
     buildDir = path.resolve(hlxDir, 'build');
-    strainsFile = path.resolve(hlxDir, 'strains.json');
 
     cwd = process.cwd();
+
+    // reset the winston loggers
+    winston.loggers.loggers.clear();
 
     Replay.mode = 'replay';
     // don't record the authorization header
@@ -48,10 +54,196 @@ describe('hlx deploy (Integration)', () => {
   });
 
   afterEach(() => {
-    fs.remove(testRoot);
+    // fs.remove(testRoot);
     Replay.mode = 'bloody';
     Replay.headers = replayheaders;
     $.cd(cwd);
+  });
+
+  it('deploy fails if no helix-config is present.', async () => {
+    initGit(testRoot);
+    const logger = makeTestLogger();
+    try {
+      await new DeployCommand(logger)
+        .withDirectory(testRoot)
+        .withWskHost('adobeioruntime.net')
+        .withWskAuth('secret-key')
+        .withWskNamespace('hlx')
+        .withEnableAuto(false)
+        .withEnableDirty(true)
+        .withDryRun(true)
+        .withTarget(buildDir)
+        .withFastlyAuth('nope')
+        .withFastlyNamespace('justtesting')
+        .withCircleciAuth(CI_TOKEN)
+        .run();
+      assert.fail('deploy should fail if no helix-config is present');
+    } catch (e) {
+      const log = await logger.getOutput();
+      assert.ok(log.indexOf('error: No helix-config.yaml. Please add one before deployment.') >= 0);
+    }
+  });
+
+  it('deploy fails if no git remote', async () => {
+    await fs.copy(TEST_DIR, testRoot);
+    await fs.rename(path.resolve(testRoot, 'default-config.yaml'), path.resolve(testRoot, 'helix-config.yaml'));
+    initGit(testRoot);
+    try {
+      await new DeployCommand()
+        .withDirectory(testRoot)
+        .withWskHost('adobeioruntime.net')
+        .withWskAuth('secret-key')
+        .withWskNamespace('hlx')
+        .withEnableAuto(false)
+        .withEnableDirty(true)
+        .withDryRun(true)
+        .withTarget(buildDir)
+        .withFastlyAuth('nope')
+        .withFastlyNamespace('justtesting')
+        .withCircleciAuth(CI_TOKEN)
+        .run();
+      assert.fail('deploy fails if no git remote');
+    } catch (e) {
+      assert.equal(e.toString(), 'Error: hlx cannot deploy without a remote git repository.');
+    }
+  });
+
+  it('deploy fails if dirty', async () => {
+    await fs.copy(TEST_DIR, testRoot);
+    await fs.rename(path.resolve(testRoot, 'default-config.yaml'), path.resolve(testRoot, 'helix-config.yaml'));
+    initGit(testRoot, 'git@github.com:adobe/project-helix.io.git');
+    await fs.copy(path.resolve(testRoot, 'README.md'), path.resolve(testRoot, 'README-copy.md'));
+    try {
+      await new DeployCommand()
+        .withDirectory(testRoot)
+        .withWskHost('adobeioruntime.net')
+        .withWskAuth('secret-key')
+        .withWskNamespace('hlx')
+        .withEnableAuto(false)
+        .withEnableDirty(false)
+        .withDryRun(true)
+        .withTarget(buildDir)
+        .withFastlyAuth('nope')
+        .withFastlyNamespace('justtesting')
+        .withCircleciAuth(CI_TOKEN)
+        .run();
+      assert.fail('deploy fails if dirty');
+    } catch (e) {
+      assert.equal(e.toString(), 'Error: hlx will not deploy a working copy that has uncommitted changes. Re-run with flag --dirty to force.');
+    }
+  });
+
+  it('deploy fails if no strain is affected', async () => {
+    await fs.copy(TEST_DIR, testRoot);
+    await fs.rename(path.resolve(testRoot, 'default-config.yaml'), path.resolve(testRoot, 'helix-config.yaml'));
+    initGit(testRoot, 'git@github.com:adobe/project-foo.io.git');
+    const logger = makeTestLogger();
+    try {
+      await new DeployCommand(logger)
+        .withDirectory(testRoot)
+        .withWskHost('adobeioruntime.net')
+        .withWskAuth('secret-key')
+        .withWskNamespace('hlx')
+        .withEnableAuto(false)
+        .withEnableDirty(false)
+        .withDryRun(true)
+        .withTarget(buildDir)
+        .withFastlyAuth('nope')
+        .withFastlyNamespace('justtesting')
+        .withCircleciAuth(CI_TOKEN)
+        .run();
+      assert.fail('deploy fails if no stain is affected');
+    } catch (e) {
+      const log = await logger.getOutput();
+      assert.ok(log.indexOf('error: Remote repository ssh://git@github.com/adobe/project-foo.io.git#master does not affect any strains.') >= 0);
+    }
+  });
+
+  it('deploy adds missing strain with --add=foo', async () => {
+    await fs.copy(TEST_DIR, testRoot);
+    const cfg = path.resolve(testRoot, 'helix-config.yaml');
+    await fs.rename(path.resolve(testRoot, 'default-config.yaml'), cfg);
+    initGit(testRoot, 'git@github.com:adobe/project-foo.io.git');
+    const logger = makeTestLogger();
+    const cmd = await new DeployCommand(logger)
+      .withDirectory(testRoot)
+      .withWskHost('adobeioruntime.net')
+      .withWskAuth('secret-key')
+      .withWskNamespace('hlx')
+      .withEnableAuto(false)
+      .withEnableDirty(false)
+      .withDryRun(true)
+      .withTarget(buildDir)
+      .withFastlyAuth('nope')
+      .withFastlyNamespace('justtesting')
+      .withCircleciAuth(CI_TOKEN)
+      .withAddStrain('foo')
+      .withCreatePackages('ignore')
+      .run();
+
+    const log = await logger.getOutput();
+    assert.ok(log.indexOf('info: Updated strain foo in helix-config.yaml') >= 0);
+    await cmd.config.saveConfig(); // trigger manual save because of dry-run
+    const actual = await fs.readFile(cfg, 'utf-8');
+    const expected = await fs.readFile(path.resolve(__dirname, 'fixtures', 'default-updated-foo.yaml'), 'utf-8');
+    // eslint-disable-next-line no-underscore-dangle
+    assert.equal(actual, expected.replace('$REF', cmd._prefix));
+  });
+
+  it('deploy replaces default --add=default', async () => {
+    await fs.copy(TEST_DIR, testRoot);
+    const cfg = path.resolve(testRoot, 'helix-config.yaml');
+    await fs.rename(path.resolve(testRoot, 'default-config.yaml'), cfg);
+    initGit(testRoot, 'git@github.com:adobe/project-foo.io.git');
+    const logger = makeTestLogger();
+    const cmd = await new DeployCommand(logger)
+      .withDirectory(testRoot)
+      .withWskHost('adobeioruntime.net')
+      .withWskAuth('secret-key')
+      .withWskNamespace('hlx')
+      .withEnableAuto(false)
+      .withEnableDirty(false)
+      .withDryRun(true)
+      .withTarget(buildDir)
+      .withFastlyAuth('nope')
+      .withFastlyNamespace('justtesting')
+      .withCircleciAuth(CI_TOKEN)
+      .withAddStrain('default')
+      .withCreatePackages('ignore')
+      .run();
+
+    const log = await logger.getOutput();
+    assert.ok(log.indexOf('info: Updated strain default in helix-config.yaml') >= 0);
+    await cmd.config.saveConfig(); // trigger manual save because of dry-run
+    const actual = await fs.readFile(cfg, 'utf-8');
+    const expected = await fs.readFile(path.resolve(__dirname, 'fixtures', 'default-updated.yaml'), 'utf-8');
+    // eslint-disable-next-line no-underscore-dangle
+    assert.equal(actual, expected.replace('$REF', cmd._prefix));
+  });
+
+  it('deploy reports affected strains', async () => {
+    await fs.copy(TEST_DIR, testRoot);
+    await fs.rename(path.resolve(testRoot, 'default-config.yaml'), path.resolve(testRoot, 'helix-config.yaml'));
+    initGit(testRoot, 'git@github.com:adobe/project-helix.io.git');
+    const logger = makeTestLogger();
+    await new DeployCommand(logger)
+      .withDirectory(testRoot)
+      .withWskHost('adobeioruntime.net')
+      .withWskAuth('secret-key')
+      .withWskNamespace('hlx')
+      .withEnableAuto(false)
+      .withEnableDirty(false)
+      .withDryRun(true)
+      .withTarget(buildDir)
+      .withFastlyAuth('nope')
+      .withFastlyNamespace('justtesting')
+      .withCircleciAuth(CI_TOKEN)
+      .withCreatePackages('ignore')
+      .run();
+
+    const log = await logger.getOutput();
+    assert.ok(log.indexOf('Affected strains of ssh://git@github.com/adobe/project-helix.io.git#master') >= 0);
+    assert.ok(log.indexOf('- dev') >= 0);
   });
 
   it.skip('Auto-Deploy works', (done) => {
@@ -67,9 +259,7 @@ describe('hlx deploy (Integration)', () => {
         .withEnableAuto(true)
         .withEnableDirty(true)
         .withDryRun(true)
-        .withContent('git@github.com:adobe/helix-cli')
         .withTarget(buildDir)
-        .withStrainFile(strainsFile)
         .withFastlyAuth('nope')
         .withFastlyNamespace('justtesting')
         .withCircleciAuth(CI_TOKEN)
@@ -81,59 +271,43 @@ describe('hlx deploy (Integration)', () => {
   }).timeout(15000);
 
   it('Dry-Running works', async () => {
-    await new DeployCommand()
+    await fs.copy(TEST_DIR, testRoot);
+    await fs.rename(path.resolve(testRoot, 'default-config.yaml'), path.resolve(testRoot, 'helix-config.yaml'));
+    initGit(testRoot, 'git@github.com:adobe/project-helix.io.git');
+    const logger = makeTestLogger();
+
+    await new BuildCommand(logger)
+      .withDirectory(testRoot)
+      .withFiles([
+        path.resolve(testRoot, 'src/html.htl'),
+        path.resolve(testRoot, 'src/html.pre.js'),
+        path.resolve(testRoot, 'src/helper.js'),
+      ])
+      .withTargetDir(buildDir)
+      .withWebRoot(path.resolve('webroot'))
+      .withCacheEnabled(false)
+      .run();
+
+    const cmd = await new DeployCommand(logger)
       .withDirectory(testRoot)
       .withWskHost('adobeioruntime.net')
       .withWskAuth('secret-key')
       .withWskNamespace('hlx')
       .withEnableAuto(false)
-      .withEnableDirty(true)
+      .withEnableDirty(false)
       .withDryRun(true)
-      .withContent('git@github.com:adobe/helix-cli')
       .withTarget(buildDir)
-      .withStrainFile(strainsFile)
-      .withCreatePackages('ignore')
       .run();
 
-    assertFile(strainsFile);
-    const firstrun = fs.readFileSync(strainsFile).toString();
+    const ref = GitUtils.getCurrentRevision(testRoot);
+    assert.equal(cmd.config.strains.get('default').package, '');
+    assert.equal(cmd.config.strains.get('dev').package, ref);
+    // todo: can't test writeback of helix-config.yaml, since it's disabled during dry-run
 
-    await fs.remove(buildDir);
-    await new DeployCommand()
-      .withDirectory(testRoot)
-      .withWskHost('adobeioruntime.net')
-      .withWskAuth('secret-key')
-      .withWskNamespace('hlx')
-      .withEnableAuto(false)
-      .withEnableDirty(true)
-      .withDryRun(true)
-      .withContent('git@github.com:adobe/helix-cli')
-      .withTarget(buildDir)
-      .withStrainFile(strainsFile)
-      .withCreatePackages('ignore')
-      .run();
-
-    assertFile(strainsFile);
-    const secondrun = fs.readFileSync(strainsFile).toString();
-    assert.equal(firstrun, secondrun, 'generated strains.yaml differs between first and second run');
-
-    await new DeployCommand()
-      .withDirectory(testRoot)
-      .withWskHost('adobeioruntime.net')
-      .withWskAuth('secret-key')
-      .withWskNamespace('hlx')
-      .withEnableAuto(false)
-      .withEnableDirty(true)
-      .withDryRun(true)
-      .withContent('https://github.com/adobe/helix-cli.git#implement-init')
-      .withTarget(buildDir)
-      .withStrainFile(strainsFile)
-      .withCreatePackages('ignore')
-      .run();
-
-    assertFile(strainsFile);
-    const thirdrun = fs.readFileSync(strainsFile).toString();
-    assert.notEqual(firstrun, thirdrun);
+    const log = await logger.getOutput();
+    assert.ok(log.indexOf('deployment of 2 actions completed') >= 0);
+    assert.ok(log.indexOf(`- hlx/${ref}/html`) >= 0);
+    assert.ok(log.indexOf('- hlx/hlx--static') >= 0);
   }).timeout(30000);
 });
 

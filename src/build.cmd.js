@@ -15,10 +15,7 @@
 const Bundler = require('parcel-bundler');
 const glob = require('glob');
 const path = require('path');
-const fse = require('fs-extra');
-const klawSync = require('klaw-sync');
 const RawJSPackager = require('./parcel/RawJSPackager.js');
-const md5 = require('./md5.js');
 const AbstractCommand = require('./abstract.cmd.js');
 
 class BuildCommand extends AbstractCommand {
@@ -29,6 +26,11 @@ class BuildCommand extends AbstractCommand {
     this._target = null;
     this._files = null;
     this._webroot = null;
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  get requireConfigFile() {
+    return false;
   }
 
   withCacheEnabled(cache) {
@@ -106,46 +108,12 @@ class BuildCommand extends AbstractCommand {
     return bundler;
   }
 
-  async writeManifest() {
-    const mf = {};
-    const jobs = [];
-    if (await fse.pathExists(this._webroot)) {
-      // todo: consider using async klaw
-      const filter = (item) => {
-        const basename = path.basename(item.path);
-        return basename === '.' || basename[0] !== '.' || basename === 'node_modules';
-      };
-
-      klawSync(this._webroot, {
-        nodir: true,
-        filter,
-      }).forEach(async (f) => {
-        const info = {
-          size: f.stats.size,
-          hash: '',
-        };
-        jobs.push(new Promise((resolve, reject) => {
-          md5.file(f.path).then((hash) => {
-            info.hash = hash;
-            resolve();
-          }).catch(reject);
-        }));
-        mf[path.relative(this._webroot, f.path)] = info;
-      });
-    }
-    await Promise.all(jobs);
-    return fse.writeFile(path.resolve(this._target, 'manifest.json'), JSON.stringify(mf, null, '  '));
-  }
-
   async build() {
     this.emit('buildStart');
     // expand patterns from command line arguments
     const myfiles = this._files.reduce((a, f) => [...a, ...glob.sync(f)], []);
     const bundler = await this.createBundler(myfiles);
     const bundle = await bundler.bundle();
-    if (bundle) {
-      await this.writeManifest();
-    }
     this.emit('buildEnd');
     return bundle;
   }

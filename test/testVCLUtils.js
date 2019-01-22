@@ -23,7 +23,7 @@ describe('Test VCL utils', () => {
     const strainfile = path.resolve(__dirname, 'fixtures/proxystrains.yaml');
     const cmd = new PublishCommand(createLogger()).withConfigFile(strainfile);
     try {
-      await cmd.loadStrains();
+      await cmd.init();
       await cmd.initFastly();
     } catch (e) {
       // we expect initFastly to fail

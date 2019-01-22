@@ -26,12 +26,15 @@ Replay.mode = 'bloody';
 /**
  * init git in integration so that helix-simulator can run
  */
-function initGit(dir) {
+function initGit(dir, remote) {
   const pwd = shell.pwd();
   shell.cd(dir);
   shell.exec('git init');
   shell.exec('git add -A');
   shell.exec('git commit -m"initial commit."');
+  if (remote) {
+    shell.exec(`git remote add origin ${remote}`);
+  }
   shell.cd(pwd);
 }
 
@@ -43,6 +46,12 @@ function assertFile(p, expectMissing) {
   if (exists && expectMissing) {
     assert.fail(`Unexpected file at ${p} exists`);
   }
+}
+
+async function assertFileEqual(actualFile, expectedFile) {
+  const actual = await fse.readFile(actualFile, 'utf-8');
+  const expected = await fse.readFile(expectedFile, 'utf-8');
+  assert.equal(actual.trim(), expected.trim());
 }
 
 async function assertHttp(url, status, spec, replacements = []) {
@@ -263,6 +272,7 @@ const perfExample = {
 
 module.exports = {
   assertFile,
+  assertFileEqual,
   assertHttp,
   initGit,
   createTestRoot,

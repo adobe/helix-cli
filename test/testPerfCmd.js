@@ -74,28 +74,29 @@ describe('hlx perf #unittest', () => {
     }), false);
   });
 
-  it('getDefaultParams() #unittest', () => {
-    const defcmd = new PerfCommand().withStrainFile(path.resolve(__dirname, 'fixtures/default.yaml'));
-    const perfcmd = new PerfCommand().withStrainFile(path.resolve(__dirname, 'fixtures/perf.yaml'));
+  it('getDefaultParams() #unittest', async () => {
+    const defcmd = await new PerfCommand().withConfigFile(path.resolve(__dirname, 'fixtures/default.yaml')).init();
+    const perfcmd = await new PerfCommand().withConfigFile(path.resolve(__dirname, 'fixtures/perf.yaml')).init();
 
     assert.equal(defcmd.getDefaultParams().device, 'MotorolaMotoG4');
     assert.equal(perfcmd.getDefaultParams().device, 'iPhone8');
   });
 
-  it('getDefaultParams() override #unittest', () => {
-    const defcmd = new PerfCommand()
-      .withStrainFile(path.resolve(__dirname, 'fixtures/default.yaml'))
+  it('getDefaultParams() override #unittest', async () => {
+    const defcmd = await new PerfCommand()
+      .withConfigFile(path.resolve(__dirname, 'fixtures/default.yaml'))
       .withDevice('Nexus5X')
       .withLocation('Oregon')
-      .withConnection('slow2G');
+      .withConnection('slow2G')
+      .init();
 
     assert.equal(defcmd.getDefaultParams().connection, 'slow2G');
     assert.equal(defcmd.getDefaultParams().device, 'Nexus5X');
     assert.equal(defcmd.getDefaultParams().location, 'Oregon');
   });
 
-  it('getStrainParams() #unittest', () => {
-    const defcmd = new PerfCommand().withStrainFile(path.resolve(__dirname, 'fixtures/default.yaml'));
+  it('getStrainParams() #unittest', async () => {
+    const defcmd = await new PerfCommand().withConfigFile(path.resolve(__dirname, 'fixtures/default.yaml')).init();
     assert.equal(defcmd.getStrainParams({}).device, 'MotorolaMotoG4');
     assert.equal(defcmd.getStrainParams({ perf: { device: 'iPad' } }).device, 'iPad');
   });

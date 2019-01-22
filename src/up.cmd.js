@@ -24,6 +24,7 @@ class UpCommand extends BuildCommand {
     super(logger);
     this._httpPort = -1;
     this._open = false;
+    this._strainName = '';
   }
 
   withHttpPort(p) {
@@ -33,6 +34,12 @@ class UpCommand extends BuildCommand {
 
   withOpen(o) {
     this._open = !!o;
+    return this;
+  }
+
+  // temporary solution until proper condition evaluation
+  withStrainName(value) {
+    this._strainName = value;
     return this;
   }
 
@@ -100,6 +107,7 @@ class UpCommand extends BuildCommand {
       .withBuildDir(this._target)
       .withWebRootDir(this._webroot)
       .withHelixConfig(this.config)
+      .withStrainName(this._strainName || 'default')
       .withDisplayVersion(pkgJson.version)
       .withRuntimeModulePaths(module.paths);
 

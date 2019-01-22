@@ -18,6 +18,7 @@ const ow = require('openwhisk');
 const glob = require('glob');
 const path = require('path');
 const fs = require('fs-extra');
+const uuidv4 = require('uuid/v4');
 const ProgressBar = require('progress');
 const { GitUrl, GitUtils } = require('@adobe/helix-shared');
 const useragent = require('./user-agent-util');
@@ -48,17 +49,12 @@ class DeployCommand extends AbstractCommand {
     this._default = null;
     this._enableDirty = false;
     this._dryRun = false;
-    this._strainFile = null;
     this._createPackages = 'auto';
+    this._addStrain = null;
   }
 
-  getDefaultContentURL() {
-    const url = this.config.strains.get('default').content.toString();
-    // todo: ref should never be empty
-    if (url === 'http://localhost/local/default.git#master' || url === 'http://localhost/local/default.git') {
-      return GitUtils.getOrigin();
-    }
-    return url;
+  get requireConfigFile() {
+    return this._addStrain === null;
   }
 
   withEnableAuto(value) {
@@ -116,11 +112,6 @@ class DeployCommand extends AbstractCommand {
     return this;
   }
 
-  withPrefix(value) {
-    this._prefix = value;
-    return this;
-  }
-
   withDefault(value) {
     this._default = value;
     return this;
@@ -136,21 +127,13 @@ class DeployCommand extends AbstractCommand {
     return this;
   }
 
-  withContent(value) {
-    this._content = value;
-    return this;
-  }
-
-  withStrainFile(value) {
-    if (!/^.*\.json$/.test(value)) {
-      throw Error('non-json strain files are deprecated.');
-    }
-    this._strainFile = value;
-    return this;
-  }
-
   withCreatePackages(value) {
     this._createPackages = value;
+    return this;
+  }
+
+  withAddStrain(value) {
+    this._addStrain = value === undefined ? null : value;
     return this;
   }
 
@@ -158,14 +141,11 @@ class DeployCommand extends AbstractCommand {
     if (script.main.indexOf(path.resolve(__dirname, 'openwhisk')) === 0) {
       return `hlx--${script.name}`;
     }
-    return this._prefix + script.name;
+    return `${this._prefix}/${script.name}`;
   }
 
   async init() {
     await super.init();
-    if (!this._strainFile) {
-      this._strainFile = path.resolve(this._helixConfig.directory, '.hlx', 'strains.json');
-    }
     this._target = path.resolve(this.directory, this._target);
   }
 
@@ -278,32 +258,57 @@ class DeployCommand extends AbstractCommand {
 
   async run() {
     await this.init();
-    const dirty = GitUtils.isDirty();
-    if (dirty && !this._enableDirty) {
-      this.log.error('hlx will not deploy a working copy that has uncommitted changes. Re-run with flag --dirty to force.');
-      process.exit(dirty);
+    const origin = GitUtils.getOrigin(this.directory);
+    if (!origin) {
+      throw Error('hlx cannot deploy without a remote git repository.');
     }
-
+    const dirty = GitUtils.isDirty(this.directory);
+    if (dirty && !this._enableDirty) {
+      throw Error('hlx will not deploy a working copy that has uncommitted changes. Re-run with flag --dirty to force.');
+    }
     if (this._enableAuto) {
       return this.autoDeploy();
     }
 
-    if (!this._content) {
-      this._content = this.getDefaultContentURL();
-    }
-    if (!this._content) {
-      // content is still empty, so local checkout
-      this._content = `http://localhost/default/${path.basename(process.cwd())}.git#master`;
+    // get git coordinates and list affected strains
+    const ref = GitUtils.getBranch(this.directory);
+    const giturl = new GitUrl(`${origin}#${ref}`);
+    const affected = this.config.strains.filterByCode(giturl);
+    if (affected.length === 0) {
+      let newStrain = this._addStrain ? this.config.strains.get(this._addStrain) : null;
+      if (!newStrain) {
+        newStrain = this.config.strains.get('default');
+        newStrain = newStrain.clone();
+        newStrain.name = this._addStrain || uuidv4();
+        this.config.strains.add(newStrain);
+      }
+
+      newStrain.code = giturl;
+      // also tweak content and static url, if default is still local
+      if (newStrain.content.isLocal) {
+        newStrain.content = giturl;
+      }
+      if (newStrain.static.url.isLocal) {
+        newStrain.static.url = giturl;
+      }
+      if (this._addStrain === null) {
+        this.log.error(chalk`Remote repository {cyan ${giturl}} does not affect any strains.
+      
+Add a strain definition to your config file:
+{grey ${newStrain.toYAML()}}
+
+Alternatively you can auto-add one using the {grey --add <name>} option.`);
+        throw Error();
+      }
+
+      affected.push(newStrain);
+      this.config.modified = true;
+      this.log.info(chalk`Updated strain {cyan ${newStrain.name}} in helix-config.yaml`);
     }
 
-    let giturl = new GitUrl(this._content);
-    // ensure default ref. todo: harmonize
-    if (!giturl.ref) {
-      giturl = new GitUrl(`${this._content}#master`);
-    }
-
-    if (!this._prefix) {
-      this._prefix = `${giturl.host.replace(/[\W]/g, '-')}-${giturl.owner.replace(/[\W]/g, '-')}-${giturl.repo.replace(/[\W]/g, '-')}--${giturl.ref.replace(/[\W]/g, '-')}${GitUtils.isDirty() ? '-dirty' : ''}--`;
+    this._prefix = GitUtils.getCurrentRevision(this.directory);
+    if (dirty) {
+      this._prefix += '-dirty';
     }
 
     const owoptions = {
@@ -316,6 +321,7 @@ class DeployCommand extends AbstractCommand {
     if (this._createPackages !== 'ignore') {
       const pgkCommand = new PackageCommand(this.log)
         .withTarget(this._target)
+        .withDirectory(this.directory)
         .withOnlyModified(this._createPackages === 'auto');
       await pgkCommand.run();
     }
@@ -363,13 +369,33 @@ class DeployCommand extends AbstractCommand {
       .map(script => fs.readFile(script.zipFile)
         .then(action => ({ script, action })));
 
+    // create openwhisk package
+    if (!this._dryRun) {
+      const parameters = Object.keys(params).map((key) => {
+        const value = params[key];
+        return { key, value };
+      });
+      await openwhisk.packages.update({
+        name: this._prefix,
+        package: {
+          publish: true,
+          parameters,
+          annotations: [
+            {
+              key: 'hlx-code-origin',
+              value: giturl.toString(),
+            },
+          ],
+        },
+      });
+    }
+
     // ... and deploy
     const deployed = read.map(p => p.then(({ script, action }) => {
       const actionoptions = {
         name: script.actionName,
         'User-Agent': useragent,
         action,
-        params,
         kind: 'nodejs:10-fat',
         annotations: { 'web-export': true },
       };
@@ -408,18 +434,20 @@ class DeployCommand extends AbstractCommand {
       this.log.info(`   - ${this._wsk_namespace}/${script.actionName} (${humanFileSize(script.archiveSize)})`);
     });
 
-    // update action in default strain
-    const defaultStrain = this._helixConfig.strains.get('default');
-    defaultStrain.code = `/${this._wsk_namespace}/default/${this._prefix}`;
-    defaultStrain.content = giturl;
+    // update package in affected strains
+    this.log.info(`Affected strains of ${giturl}:`);
+    affected.forEach((strain) => {
+      this.log.info(`- ${strain.name}`);
+      if (strain.package !== this._prefix) {
+        this.config.modified = true;
+        // eslint-disable-next-line no-param-reassign
+        strain.package = this._prefix;
+      }
+    });
 
-    const newStrains = JSON.stringify(this._helixConfig.strains, null, '  ');
-    const oldStrains = await fs.exists(this._strainFile) ? await fs.readFile(this._strainFile, 'utf-8') : '';
-
-    if (oldStrains !== newStrains) {
-      this.log.info(`Updating strain config in ${path.relative(process.cwd(), this._strainFile)}`);
-      await fs.ensureDir(path.dirname(this._strainFile));
-      await fs.writeFile(this._strainFile, newStrains, 'utf-8');
+    if (!this._dryRun && this.config.modified) {
+      this.config.saveConfig();
+      this.log.info(`Updated ${path.relative(this.directory, this.config.configPath)}`);
     }
     return this;
   }

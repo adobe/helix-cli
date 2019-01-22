@@ -38,9 +38,8 @@ class PublishCommand extends AbstractCommand {
     this._fastly_namespace = null;
     this._fastly_auth = null;
     this._dryRun = false;
-    this._strainFile = path.resolve(process.cwd(), '.hlx', 'strains.json');
     this._strains = [];
-    this._vclFile = path.resolve(process.cwd(), '.hlx', 'helix.vcl');
+    this._vclFile = null;
 
     this._service = null;
     this._options = {
@@ -132,7 +131,7 @@ class PublishCommand extends AbstractCommand {
     const dictionaries = Object.keys(this._dictionaries).length;
     // number of non-strain-specific dictionaries
     const staticdictionaries = 1;
-    const strains = this._strains.length;
+    const strains = this._strainsToPublish.length;
     const vclfiles = 4;
     const extrarequests = 4;
 
@@ -149,21 +148,6 @@ class PublishCommand extends AbstractCommand {
     });
 
     return this._bar;
-  }
-
-  async loadStrains() {
-    if (this._helixConfig) {
-      await this._helixConfig.init();
-      this._logger.debug('loading a YAML configuration');
-      this._strains = Array.from(this._helixConfig.strains.values());
-    } else {
-      this._logger.debug('loading a JSON configuration');
-      const content = await fs.readFile(this._strainFile, 'utf-8');
-      this._strains = strainconfig.load(content);
-    }
-    if (this._strains.filter(strain => strain.name === 'default').length !== 1) {
-      throw new Error(`${this._strainFile} must include one strain 'default'`);
-    }
   }
 
   withWskHost(value) {
@@ -194,11 +178,6 @@ class PublishCommand extends AbstractCommand {
 
   withDryRun(value) {
     this._dryRun = value;
-    return this;
-  }
-
-  withStrainFile(value) {
-    this._strainFile = value;
     return this;
   }
 
@@ -641,12 +620,11 @@ ${PublishCommand.makeParamWhitelist(params, '  ')}
   }
 
   async setHelixVCL() {
-    const vclfile = fs.existsSync(this._vclFile) ? this._vclFile : HELIX_VCL_DEFAULT_FILE;
     try {
-      const content = include(vclfile);
+      const content = include(this._vclFile);
       return this.transferVCL(content, 'helix.vcl', true);
     } catch (e) {
-      this.log.error(`❌  Unable to set ${vclfile}`);
+      this.log.error(`❌  Unable to set ${this._vclFile}`);
       throw e;
     }
   }
@@ -657,7 +635,14 @@ ${PublishCommand.makeParamWhitelist(params, '  ')}
     const urls = strains.filter(strain => strain.url).map(strain => strain.url);
     this.progressBar().terminate();
 
-    this.log.info(`✅  All strains have been published and version ${this._version} is now online.`);
+    this.log.info(`✅  The following strains have been published and version ${this._version} is now online:`);
+    this._strains.forEach((strain) => {
+      if (strain.package) {
+        const url = strain.url ? ` -> ${strain.url}` : '';
+        this.log.info(`- ${strain.name}${url}`);
+      }
+    });
+
     if (urls.length) {
       this.log.info('\nYou now access your site using:');
       this.log.info(chalk.grey(`$ curl ${urls[0]}`));
@@ -674,7 +659,6 @@ ${PublishCommand.makeParamWhitelist(params, '  ')}
 
   async _updateFastly() {
     this.progressBar();
-
     await this.cloneVersion();
     await this.initDictionaries();
     await this.initFastly();
@@ -699,44 +683,29 @@ ${PublishCommand.makeParamWhitelist(params, '  ')}
     makeDictJob('secrets', 'OPENWHISK_NAMESPACE', this._wsk_namespace, 'Set OpenWhisk namespace', 'openwhisk namespace');
     const [secretp, ownsp] = dictJobs.splice(0, 2);
 
-    const strains = this._strains;
-    strains.filter(strain => !!strain.origin).forEach((proxy) => {
-      this.tick(13, `skipping proxy strain ${proxy.name}`);
-    });
-    strains.filter(strain => !strain.origin).map((strain) => {
-      // required
-      makeDictJob('strain_action_roots', strain.name, strain.code, '- Set action root', 'action root');
+    this._strainsToPublish.forEach((strain) => {
+      let actionPrefix = `/${this._wsk_namespace}/default/${strain.package}`;
+      if (!actionPrefix.endsWith('--')) {
+        actionPrefix += '--';
+      }
+
+      // content repo
       makeDictJob('strain_owners', strain.name, strain.content.owner, '- Set content owner', 'content owner');
       makeDictJob('strain_repos', strain.name, strain.content.repo, '- Set content repo', 'content repo');
       makeDictJob('strain_refs', strain.name, strain.content.ref, '- Set content ref', 'content ref');
+
+      makeDictJob('strain_action_roots', strain.name, actionPrefix, '- Set action root', 'action root');
 
       // optional
       makeDictJob('strain_index_files', strain.name, strain.directoryIndex, '- Set directory index', 'directory index');
       makeDictJob('strain_root_paths', strain.name, strain.content.path, '- Set content root', 'content root');
 
       // static
-      const origin = GitUtils.getOriginURL();
-
-      if (strain.static && strain.static.repo) {
-        makeDictJob('strain_github_static_repos', strain.name, strain.static.repo, '- Set static repo', 'static repo');
-      } else {
-        makeDictJob('strain_github_static_repos', strain.name, origin.repo, '- Set static repo to current repo', 'static repo');
-      }
-
-      if (strain.static && strain.static.owner) {
-        makeDictJob('strain_github_static_owners', strain.name, strain.static.owner, '- Set static owner', 'static owner');
-      } else {
-        makeDictJob('strain_github_static_owners', strain.name, origin.owner, '- Set static owner to current owner', 'static owner');
-      }
-
-      if (strain.static && strain.static.ref) {
-        makeDictJob('strain_github_static_refs', strain.name, strain.static.ref, '- Set static ref', 'static ref');
-      } else {
-        // TODO: replace ref with sha for better performance and lower risk of hitting rate limits
-        makeDictJob('strain_github_static_refs', strain.name, origin.ref, '- Set static ref to current ref', 'static ref');
-      }
-
-      if (strain.static && strain.static.path) {
+      // TODO: replace ref with sha for better performance and lower risk of hitting rate limits
+      makeDictJob('strain_github_static_repos', strain.name, strain.static.repo, '- Set static repo', 'static repo');
+      makeDictJob('strain_github_static_owners', strain.name, strain.static.owner, '- Set static owner', 'static owner');
+      makeDictJob('strain_github_static_refs', strain.name, strain.static.ref, '- Set static ref', 'static ref');
+      if (strain.static.path) {
         makeDictJob('strain_github_static_root', strain.name, strain.static.path, '- Set static root', 'static root');
       } else {
         // skipping: no message here
@@ -769,12 +738,13 @@ ${PublishCommand.makeParamWhitelist(params, '  ')}
         // skipping: no message here
         this.tick();
       }
-      return strain;
     });
 
     // do everything at once
     await Promise.all([
       ...dictJobs,
+      // todo: those below act on this._strains which include all strains, not just the
+      // todo: ones handled in dictJobs. is this correct?
       this.setStrainsVCL(),
       this.setDynamicVCL(),
       this.setParametersVCL(),
@@ -785,8 +755,36 @@ ${PublishCommand.makeParamWhitelist(params, '  ')}
     ]);
   }
 
+  async init() {
+    await super.init();
+    this._strains = Array.from(this.config.strains.values());
+    if (!this._vclFile) {
+      this._vclFile = path.resolve(this.directory, '.hlx', 'helix.vcl');
+    }
+    if (!await fs.pathExists(this._vclFile)) {
+      this._vclFile = HELIX_VCL_DEFAULT_FILE;
+    }
+
+    this._strainsToPublish = this.config.strains.getByFilter((strain) => {
+      if (strain.isProxy()) {
+        this.log.debug(`ignoring proxy strain ${strain.name}`);
+        return false;
+      }
+      // skip the strains where we can't determine the action name
+      if (!strain.package) {
+        this.log.debug(`ignoring unaffected strain ${strain.name}`);
+        return false;
+      }
+      return true;
+    });
+
+    if (this._strainsToPublish.length === 0) {
+      this.log.warn(chalk`None of the strains contains {cyan package} information.`);
+    }
+  }
+
   async run() {
-    await this.loadStrains();
+    await this.init();
     try {
       await this._updateFastly();
       this.tick(0);

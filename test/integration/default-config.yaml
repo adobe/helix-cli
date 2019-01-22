@@ -1,0 +1,20 @@
+#
+# helix configuration for local development
+#
+version: 1
+
+definitions:
+  defaults:
+    - &localRepo "http://localhost/local/default.git"
+    - &remoteRepo "ssh://git@github.com/adobe/project-helix.io.git#master"
+
+strains:
+  dev:
+    code: *remoteRepo
+    content: *localRepo
+    static: *localRepo
+
+  default:
+    code: *localRepo
+    content: *localRepo
+    static: *localRepo

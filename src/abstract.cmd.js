@@ -13,8 +13,10 @@
 'use strict';
 
 const EventEmitter = require('events');
+const chalk = require('chalk');
 const { HelixConfig } = require('@adobe/helix-shared');
 const { makeLogger } = require('./log-common');
+const ConfigUtils = require('./config/config-utils.js');
 
 class AbstractCommand extends EventEmitter {
   constructor(logger) {
@@ -37,6 +39,11 @@ class AbstractCommand extends EventEmitter {
     return this._helixConfig.directory;
   }
 
+  // eslint-disable-next-line class-methods-use-this
+  get requireConfigFile() {
+    return true;
+  }
+
   withConfigFile(file) {
     this._helixConfig.withConfigPath(file);
     return this;
@@ -51,9 +58,20 @@ class AbstractCommand extends EventEmitter {
 
   async init() {
     if (!this._initialized) {
+      if (!await this._helixConfig.hasFile()) {
+        if (this.requireConfigFile) {
+          this.log.error(chalk`No {cyan helix-config.yaml}. Please add one before deployment.`);
+          this.log.info(chalk`You can auto generate a default config with\n{grey $ hlx deploy --add=default}\n`);
+          throw Error();
+        } else {
+          // set default config
+          this._helixConfig.withSource(await ConfigUtils.createDefaultConfig());
+        }
+      }
       await this._helixConfig.init();
       this._initialized = true;
     }
+    return this;
   }
 
   async reloadConfig() {
@@ -62,8 +80,7 @@ class AbstractCommand extends EventEmitter {
     }
     this._helixConfig = await (new HelixConfig()
       .withLogger(this._helixConfig.log)
-      // eslint-disable-next-line no-underscore-dangle
-      .withConfigPath(this._helixConfig._cfgPath) // todo, expose properly in HelixConfig
+      .withConfigPath(this._helixConfig.configPath)
       .withDirectory(this._helixConfig.directory)
       .init());
     return this;

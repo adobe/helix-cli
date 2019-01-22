@@ -30,6 +30,11 @@ class PackageCommand extends AbstractCommand {
     this._onlyModified = false;
   }
 
+  // eslint-disable-next-line class-methods-use-this
+  get requireConfigFile() {
+    return false;
+  }
+
   withTarget(value) {
     this._target = value;
     return this;
