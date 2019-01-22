@@ -27,7 +27,7 @@
   },
   "homepage": "https://github.com/adobe/project-helix#readme",
   "dependencies": {
-    "@adobe/fastly-native-promises": "^1.3.0",
+    "@adobe/fastly-native-promises": "^1.3.2",
     "@adobe/helix-pipeline": "0.10.1",
     "@adobe/helix-shared": "0.4.1",
     "@adobe/helix-simulator": "2.8.0",
