@@ -25,7 +25,7 @@ describe('hlx publish --remote --dry-run (default)', () => {
   let purgeAll;
 
   before('Setting up Fake Server', function bef() {
-    this.timeout - 5000;
+    this.timeout(5000);
     writeDictItem = sinon.fake.resolves(true);
     purgeAll = sinon.fake.resolves(true);
 

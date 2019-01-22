@@ -16,7 +16,7 @@ const assert = require('assert');
 const nock = require('nock');
 const path = require('path');
 const proxyquire = require('proxyquire');
-const AssertionError = require('assert').AssertionError;
+const { AssertionError } = require('assert');
 const sinon = require('sinon');
 
 describe('hlx publish --remote (fail purge)', () => {
@@ -25,7 +25,7 @@ describe('hlx publish --remote (fail purge)', () => {
   let writeDictItem;
 
   before('Setting up Fake Server', function bef() {
-    this.timeout - 5000;
+    this.timeout(5000);
     writeDictItem = sinon.fake.resolves(true);
 
     RemotePublishCommand = proxyquire('../src/remotepublish.cmd', {
@@ -34,7 +34,7 @@ describe('hlx publish --remote (fail purge)', () => {
         writeDictItem,
         purgeAll: async () => {
           throw new Error('Cannot purge.');
-        }
+        },
       }),
     });
 
@@ -56,16 +56,18 @@ describe('hlx publish --remote (fail purge)', () => {
       .withDryRun(false);
 
     try {
-        await remote.run();
-        assert.fail();
-        
-      } catch (e) {
-        if (e instanceof AssertionError) {
-          assert.fail(e);
-        }
-        sinon.assert.calledTwice(writeDictItem);
+      await remote.run();
+      assert.fail();
+    } catch (e) {
+      if (e instanceof AssertionError) {
+        assert.fail(e);
       }
+      sinon.assert.calledTwice(writeDictItem);
+    }
+  });
 
-    
+  after(() => {
+    scope.done();
+    nock.restore();
   });
 });

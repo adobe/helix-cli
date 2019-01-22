@@ -91,20 +91,25 @@ class RemotePublishCommand extends AbstractCommand {
     return this;
   }
 
-  showNextStep() {
-    const urls = this.config.strains.getByFilter(strain => strain.url).map(strain => strain.url);
+  showNextStep(dryrun) {
     this.progressBar().terminate();
+    if (dryrun) {
+      this.log.info(`✅  A new version has been prepared, but not activated. See version ${this._version} in the Fastly UI at:`);
+      this.log.info(chalk.grey(`https://manage.fastly.com/configure/services/${this._fastly_namespace}/versions/${this._version}/domains`));
+    } else {
+      const urls = this.config.strains.getByFilter(strain => strain.url).map(strain => strain.url);
 
-    this.log.info(`✅  The following strains have been published and version ${this._version} is now online:`);
-    this.config.strains.getByFilter(strain => !!strain.url).forEach((strain) => {
-      const { url } = strain;
-      urls.push(url);
-      this.log.info(`- ${strain.name}: ${url}`);
-    });
+      this.log.info(`✅  The following strains have been published and version ${this._version} is now online:`);
+      this.config.strains.getByFilter(strain => !!strain.url).forEach((strain) => {
+        const { url } = strain;
+        urls.push(url);
+        this.log.info(`- ${strain.name}: ${url}`);
+      });
 
-    if (urls.length) {
-      this.log.info('\nYou may now access your site using:');
-      this.log.info(chalk.grey(`$ curl ${urls[0]}`));
+      if (urls.length) {
+        this.log.info('\nYou may now access your site using:');
+        this.log.info(chalk.grey(`$ curl ${urls[0]}`));
+      }
     }
   }
 
@@ -196,7 +201,7 @@ class RemotePublishCommand extends AbstractCommand {
         await this.secrets();
       }, !this._dryRun);
       await this.purge();
-      this.showNextStep();
+      this.showNextStep(this._dryRun);
     } catch (e) {
       const message = 'Error while running the Publish command';
       this.log.error(`${message}: ${e.stack}`, e);

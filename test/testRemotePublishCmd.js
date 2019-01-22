@@ -12,7 +12,6 @@
 
 /* eslint-env mocha */
 
-const assert = require('assert');
 const nock = require('nock');
 const path = require('path');
 const proxyquire = require('proxyquire');
@@ -56,5 +55,10 @@ describe('hlx publish --remote (default)', () => {
 
     sinon.assert.calledTwice(writeDictItem);
     sinon.assert.calledOnce(purgeAll);
+  });
+
+  after(() => {
+    scope.done();
+    nock.restore();
   });
 });

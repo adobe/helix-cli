@@ -13,7 +13,7 @@
 /* eslint-env mocha */
 
 const assert = require('assert');
-const AssertionError = require('assert').AssertionError;
+const { AssertionError } = require('assert');
 const nock = require('nock');
 const path = require('path');
 const proxyquire = require('proxyquire');
@@ -26,7 +26,7 @@ describe('hlx publish --remote (fail log setup)', () => {
   let purgeAll;
 
   before('Setting up Fake Server', function bef() {
-    this.timeout - 5000;
+    this.timeout(5000);
     writeDictItem = sinon.fake.resolves(true);
     purgeAll = sinon.fake.resolves(true);
 
@@ -67,7 +67,8 @@ describe('hlx publish --remote (fail log setup)', () => {
     }
   });
 
-  after('Showing results', () => {
-    assert.ok(scope.isDone());
+  after(() => {
+    scope.done();
+    nock.restore();
   });
 });
