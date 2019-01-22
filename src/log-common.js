@@ -10,15 +10,7 @@
  * governing permissions and limitations under the License.
  */
 
-const stream = require('stream');
-const winston = require('winston');
-const uuidv4 = require('uuid/v4');
 const { Logger } = require('@adobe/helix-shared');
-
-const ANSI_REGEXP = RegExp([
-  '[\\u001B\\u009B][[\\]()#;?]*(?:(?:(?:[a-zA-Z\\d]*(?:;[a-zA-Z\\d]*)*)?\\u0007)',
-  '(?:(?:\\d{1,4}(?:;\\d{0,4})*)?[\\dA-PRZcf-ntqry=><~]))',
-].join('|'), 'g');
 
 function makeLogger({ logLevel = 'info', logFile = ['-'] } = {}) {
   return Logger.getLogger({
@@ -28,47 +20,6 @@ function makeLogger({ logLevel = 'info', logFile = ['-'] } = {}) {
   });
 }
 
-class StringStream extends stream.Writable {
-  constructor() {
-    super();
-    this.data = '';
-  }
-
-  _write(chunk, enc, next) {
-    // add chunk but strip ansi control characters
-    this.data += chunk.toString().replace(ANSI_REGEXP, '');
-    next();
-  }
-}
-
-function makeTestLogger() {
-  const logger = Logger.getLogger({
-    category: uuidv4(),
-    logFile: ['-'],
-    level: 'info',
-  });
-  const s = new StringStream();
-
-  logger.add(new winston.transports.Stream({
-    stream: s,
-    format: winston.format.simple(),
-  }));
-
-  const finishPromise = new Promise((resolve) => {
-    logger.on('finish', () => {
-      resolve(s.data);
-    });
-  });
-
-  logger.getOutput = async () => {
-    logger.end();
-    return finishPromise;
-  };
-
-  return logger;
-}
-
 module.exports = {
   makeLogger,
-  makeTestLogger,
 };

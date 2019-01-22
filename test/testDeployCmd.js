@@ -17,12 +17,10 @@ const fs = require('fs-extra');
 const assert = require('assert');
 const path = require('path');
 const $ = require('shelljs');
-const winston = require('winston');
-const { GitUtils } = require('@adobe/helix-shared');
+const { GitUtils, Logger } = require('@adobe/helix-shared');
 const { initGit, createTestRoot } = require('./utils.js');
 const BuildCommand = require('../src/build.cmd.js');
 const DeployCommand = require('../src/deploy.cmd.js');
-const { makeTestLogger } = require('../src/log-common');
 
 const CI_TOKEN = 'nope';
 const TEST_DIR = path.resolve('test/integration');
@@ -44,9 +42,6 @@ describe('hlx deploy (Integration)', () => {
 
     cwd = process.cwd();
 
-    // reset the winston loggers
-    winston.loggers.loggers.clear();
-
     Replay.mode = 'replay';
     // don't record the authorization header
     replayheaders = Replay.headers;
@@ -62,7 +57,7 @@ describe('hlx deploy (Integration)', () => {
 
   it('deploy fails if no helix-config is present.', async () => {
     initGit(testRoot);
-    const logger = makeTestLogger();
+    const logger = Logger.getTestLogger();
     try {
       await new DeployCommand(logger)
         .withDirectory(testRoot)
@@ -137,7 +132,7 @@ describe('hlx deploy (Integration)', () => {
     await fs.copy(TEST_DIR, testRoot);
     await fs.rename(path.resolve(testRoot, 'default-config.yaml'), path.resolve(testRoot, 'helix-config.yaml'));
     initGit(testRoot, 'git@github.com:adobe/project-foo.io.git');
-    const logger = makeTestLogger();
+    const logger = Logger.getTestLogger();
     try {
       await new DeployCommand(logger)
         .withDirectory(testRoot)
@@ -164,7 +159,7 @@ describe('hlx deploy (Integration)', () => {
     const cfg = path.resolve(testRoot, 'helix-config.yaml');
     await fs.rename(path.resolve(testRoot, 'default-config.yaml'), cfg);
     initGit(testRoot, 'git@github.com:adobe/project-foo.io.git');
-    const logger = makeTestLogger();
+    const logger = Logger.getTestLogger();
     const cmd = await new DeployCommand(logger)
       .withDirectory(testRoot)
       .withWskHost('adobeioruntime.net')
@@ -195,7 +190,7 @@ describe('hlx deploy (Integration)', () => {
     const cfg = path.resolve(testRoot, 'helix-config.yaml');
     await fs.rename(path.resolve(testRoot, 'default-config.yaml'), cfg);
     initGit(testRoot, 'git@github.com:adobe/project-foo.io.git');
-    const logger = makeTestLogger();
+    const logger = Logger.getTestLogger();
     const cmd = await new DeployCommand(logger)
       .withDirectory(testRoot)
       .withWskHost('adobeioruntime.net')
@@ -225,7 +220,7 @@ describe('hlx deploy (Integration)', () => {
     await fs.copy(TEST_DIR, testRoot);
     await fs.rename(path.resolve(testRoot, 'default-config.yaml'), path.resolve(testRoot, 'helix-config.yaml'));
     initGit(testRoot, 'git@github.com:adobe/project-helix.io.git');
-    const logger = makeTestLogger();
+    const logger = Logger.getTestLogger();
     await new DeployCommand(logger)
       .withDirectory(testRoot)
       .withWskHost('adobeioruntime.net')
@@ -274,7 +269,7 @@ describe('hlx deploy (Integration)', () => {
     await fs.copy(TEST_DIR, testRoot);
     await fs.rename(path.resolve(testRoot, 'default-config.yaml'), path.resolve(testRoot, 'helix-config.yaml'));
     initGit(testRoot, 'git@github.com:adobe/project-helix.io.git');
-    const logger = makeTestLogger();
+    const logger = Logger.getTestLogger();
 
     await new BuildCommand(logger)
       .withDirectory(testRoot)

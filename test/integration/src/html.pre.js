@@ -10,11 +10,11 @@
  * governing permissions and limitations under the License.
  */
 const fs = require('fs');
-const winston = require('winston');
+const _ = require('lodash');
 const { utils } = require('./helper.js');
 
 module.exports.pre = (payload, config) => {
-  payload.content.time = new Date() + winston;
+  payload.content.time = new Date() + _.camelCase('hello world.')
   payload.content.pkg = fs.readFileSync('package.json');
   payload.content.stamp = utils.stamp();
 };
