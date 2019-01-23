@@ -81,7 +81,7 @@ describe('Integration test for up command', () => {
   }).timeout(5000);
 
   it('up command delivers correct response.', (done) => {
-    initGit(testDir);
+    initGit(testDir, 'https://github.com/adobe/dummy-foo.git');
     let error = null;
     const cmd = new UpCommand()
       .withCacheEnabled(false)
@@ -89,7 +89,6 @@ describe('Integration test for up command', () => {
       .withTargetDir(buildDir)
       .withDirectory(testDir)
       .withWebRoot(webroot)
-      .withStrainName('dev')
       .withHttpPort(0);
 
     const myDone = (err) => {
