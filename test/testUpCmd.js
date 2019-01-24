@@ -15,7 +15,6 @@
 const assert = require('assert');
 const path = require('path');
 const fse = require('fs-extra');
-const winston = require('winston');
 
 const {
   initGit,
@@ -39,9 +38,6 @@ describe('Integration test for up command', () => {
     buildDir = path.resolve(testRoot, '.hlx/build');
     webroot = path.resolve(testDir, 'webroot');
     await fse.copy(TEST_DIR, testDir);
-
-    // reset the winston loggers
-    winston.loggers.loggers.clear();
   });
 
   it('up command fails outside git repository', async () => {
