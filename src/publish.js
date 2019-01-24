@@ -65,7 +65,7 @@ module.exports = function strain() {
       } else {
         // eslint-disable-next-line global-require
         const PublishCommand = require('./publish.cmd'); // lazy load the handler to speed up execution time
-        executor = executor || new StrainCommand(makeLogger(argv));
+        executor = executor || new PublishCommand(makeLogger(argv));
       }
 
       await executor
