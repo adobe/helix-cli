@@ -15,11 +15,11 @@
 const assert = require('assert');
 const path = require('path');
 const fse = require('fs-extra');
-const winston = require('winston');
 
 const {
   initGit,
   assertHttp,
+  assertFile,
   createTestRoot,
 } = require('./utils.js');
 
@@ -39,9 +39,6 @@ describe('Integration test for up command', () => {
     buildDir = path.resolve(testRoot, '.hlx/build');
     webroot = path.resolve(testDir, 'webroot');
     await fse.copy(TEST_DIR, testDir);
-
-    // reset the winston loggers
-    winston.loggers.loggers.clear();
   });
 
   it('up command fails outside git repository', async () => {
@@ -51,7 +48,6 @@ describe('Integration test for up command', () => {
         .withFiles([path.join(testDir, 'src', '*.htl'), path.join(testDir, 'src', '*.js')])
         .withTargetDir(buildDir)
         .withDirectory(testDir)
-        .withStrainName('dev')
         .run();
       assert.fail('hlx up without .git should fail.');
     } catch (e) {
@@ -66,7 +62,6 @@ describe('Integration test for up command', () => {
       .withFiles([path.join(testDir, 'src', '*.htl'), path.join(testDir, 'src', '*.js')])
       .withTargetDir(buildDir)
       .withDirectory(testDir)
-      .withStrainName('dev')
       .withHttpPort(0)
       .on('started', (cmd) => {
         // eslint-disable-next-line no-console
@@ -81,7 +76,7 @@ describe('Integration test for up command', () => {
   }).timeout(5000);
 
   it('up command delivers correct response.', (done) => {
-    initGit(testDir);
+    initGit(testDir, 'https://github.com/adobe/dummy-foo.git');
     let error = null;
     const cmd = new UpCommand()
       .withCacheEnabled(false)
@@ -89,7 +84,6 @@ describe('Integration test for up command', () => {
       .withTargetDir(buildDir)
       .withDirectory(testDir)
       .withWebRoot(webroot)
-      .withStrainName('dev')
       .withHttpPort(0);
 
     const myDone = (err) => {
@@ -102,6 +96,40 @@ describe('Integration test for up command', () => {
         try {
           await assertHttp(`http://localhost:${cmd.project.server.port}/index.html`, 200, 'simple_response.html');
           await assertHttp(`http://localhost:${cmd.project.server.port}/welcome.txt`, 200, 'welcome_response.txt');
+          myDone();
+        } catch (e) {
+          myDone(e);
+        }
+      })
+      .on('stopped', () => {
+        done(error);
+      })
+      .run()
+      .catch(done);
+  }).timeout(5000);
+
+  it('up command writes default config.', (done) => {
+    initGit(testDir, 'https://github.com/adobe/dummy-foo.git');
+    assertFile(path.resolve(testDir, 'helix-config.yaml'), true);
+    let error = null;
+    const cmd = new UpCommand()
+      .withCacheEnabled(false)
+      .withFiles([path.join(testDir, 'src', '*.htl'), path.join(testDir, 'src', '*.js')])
+      .withTargetDir(buildDir)
+      .withDirectory(testDir)
+      .withWebRoot(webroot)
+      .withSaveConfig(true)
+      .withHttpPort(0);
+
+    const myDone = (err) => {
+      error = err;
+      return cmd.stop();
+    };
+
+    cmd
+      .on('started', async () => {
+        try {
+          assertFile(path.resolve(testDir, 'helix-config.yaml'));
           myDone();
         } catch (e) {
           myDone(e);
@@ -127,7 +155,6 @@ describe('Integration test for up command', () => {
       .withTargetDir(buildDir)
       .withDirectory(testDir)
       .withWebRoot(webroot)
-      .withStrainName('dev')
       .withHttpPort(0);
 
     const myDone = async (err) => {

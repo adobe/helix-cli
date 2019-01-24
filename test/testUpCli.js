@@ -29,6 +29,7 @@ describe('hlx up', () => {
     mockUp.withTargetDir.returnsThis();
     mockUp.withFiles.returnsThis();
     mockUp.withOpen.returnsThis();
+    mockUp.withSaveConfig.returnsThis();
     mockUp.run.returnsThis();
   });
 
@@ -38,6 +39,7 @@ describe('hlx up', () => {
       .run(['up']);
     sinon.assert.calledWith(mockUp.withCacheEnabled, false);
     sinon.assert.calledWith(mockUp.withMinifyEnabled, false);
+    sinon.assert.calledWith(mockUp.withSaveConfig, false);
     sinon.assert.calledWith(mockUp.withTargetDir, '.hlx/build');
     sinon.assert.calledWith(mockUp.withFiles, ['src/**/*.htl', 'src/**/*.js']);
     sinon.assert.calledOnce(mockUp.run);
@@ -88,6 +90,14 @@ describe('hlx up', () => {
       .withCommandExecutor('up', mockUp)
       .run(['up', '--no-open', 'tmp/build']);
     sinon.assert.calledWith(mockUp.withOpen, false);
+    sinon.assert.calledOnce(mockUp.run);
+  });
+
+  it('hlx up save config', () => {
+    new CLI()
+      .withCommandExecutor('up', mockUp)
+      .run(['up', '--save-config']);
+    sinon.assert.calledWith(mockUp.withSaveConfig, true);
     sinon.assert.calledOnce(mockUp.run);
   });
 

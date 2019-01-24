@@ -15,7 +15,8 @@ const fs = require('fs-extra');
 const sinon = require('sinon');
 const path = require('path');
 const Replay = require('replay');
-const { processSource, createLogger } = require('./utils');
+const { Logger } = require('@adobe/helix-shared');
+const { processSource } = require('./utils');
 
 Replay.mode = 'replay';
 Replay.fixtures = path.resolve(__dirname, 'fixtures');
@@ -117,7 +118,7 @@ describe('Generated Action Tests', () => {
       it('script can be executed', async () => {
         // eslint-disable-next-line import/no-dynamic-require,global-require
         const script = require(distJS);
-        const logger = createLogger();
+        const logger = Logger.getTestLogger();
         const spy = sinon.spy(logger, 'debug');
         const testParams = Object.assign({}, params, {
           __ow_logger: logger,
