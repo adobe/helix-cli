@@ -16,8 +16,8 @@ const Replay = require('replay');
 const fs = require('fs-extra');
 const path = require('path');
 const assert = require('assert');
-const { HelixConfig } = require('@adobe/helix-shared');
-const { createTestRoot, createLogger } = require('./utils.js');
+const { HelixConfig, Logger } = require('@adobe/helix-shared');
+const { createTestRoot } = require('./utils.js');
 const PublishCommand = require('../src/publish.cmd');
 
 // disable replay for this test
@@ -90,7 +90,7 @@ describe('Dynamic Strain (VCL) generation', () => {
 
   it('initFastly generates new backends for defined Proxies', async () => {
     const strainfile = path.resolve(__dirname, 'fixtures/proxystrains.yaml');
-    const cmd = new PublishCommand(createLogger()).withConfigFile(strainfile);
+    const cmd = new PublishCommand(Logger.getTestLogger()).withConfigFile(strainfile);
     try {
       await cmd.init();
       await cmd.initFastly();

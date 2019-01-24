@@ -17,7 +17,6 @@ const http = require('http');
 const Replay = require('replay');
 const uuidv4 = require('uuid/v4');
 const unzip = require('unzip2');
-const winston = require('winston');
 const BuildCommand = require('../src/build.cmd');
 
 // disable replay for this test
@@ -123,15 +122,6 @@ async function createFakeTestRoot() {
     return dir;
   }
   return createFakeTestRoot();
-}
-
-function createLogger() {
-  return winston.createLogger({
-    level: 'silly',
-    silent: true,
-    format: winston.format.simple(),
-    transports: new winston.transports.Console(),
-  });
 }
 
 async function processSource(scriptName, type = 'htl') {
@@ -277,7 +267,6 @@ module.exports = {
   initGit,
   createTestRoot,
   createFakeTestRoot,
-  createLogger,
   processSource,
   perfExample,
   assertZipEntries,
