@@ -113,7 +113,7 @@ class RemotePublishCommand extends AbstractCommand {
     }
   }
 
-  addlogger() {
+  serviceAddLogger() {
     return request.post('https://adobeioruntime.net/api/v1/web/helix/default/addlogger', {
       json: true,
       body: {
@@ -130,7 +130,7 @@ class RemotePublishCommand extends AbstractCommand {
     });
   }
 
-  purge() {
+  purgeFastly() {
     if (this._dryRun) {
       this.tick(1, 'skipping cache purge');
       return false;
@@ -147,7 +147,7 @@ class RemotePublishCommand extends AbstractCommand {
       });
   }
 
-  prepare() {
+  servicePublish() {
     return request.post('https://adobeioruntime.net/api/v1/web/helix/default/publish', {
       json: true,
       body: {
@@ -166,7 +166,7 @@ class RemotePublishCommand extends AbstractCommand {
     });
   }
 
-  async secrets() {
+  async updateFastlySecrets() {
     const jobs = [];
     if (this._wsk_auth) {
       const auth = this._fastly.writeDictItem(this._version, 'secrets', 'OPENWHISK_AUTH', this._wsk_auth);
@@ -196,11 +196,11 @@ class RemotePublishCommand extends AbstractCommand {
     try {
       await this._fastly.transact(async (version) => {
         this._version = version;
-        await this.prepare();
-        await this.addlogger();
-        await this.secrets();
+        await this.servicePublish();
+        await this.serviceAddLogger();
+        await this.updateFastlySecrets();
       }, !this._dryRun);
-      await this.purge();
+      await this.purgeFastly();
       this.showNextStep(this._dryRun);
     } catch (e) {
       const message = 'Error while running the Publish command';
