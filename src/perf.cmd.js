@@ -13,6 +13,7 @@
 'use strict';
 
 const chalk = require('chalk');
+const request = require('request-promise-native');
 const path = require('path');
 const _ = require('lodash/fp');
 const JunitPerformanceReport = require('./junit-utils');
@@ -21,28 +22,28 @@ const AbstractCommand = require('./abstract.cmd.js');
 class PerfCommand extends AbstractCommand {
   constructor(logger) {
     super(logger);
-    this._strains = null;
-    this._auth = null;
-    this._calibre = null;
     this._location = 'London';
     this._device = 'MotorolaMotoG4';
     this._connection = 'regular3G';
     this._junit = null;
+    this._fastly_namespace = null;
+    this._fastly_auth = null;
+  }
+
+  withFastlyNamespace(value) {
+    this._fastly_namespace = value;
+    return this;
+  }
+
+  withFastlyAuth(value) {
+    this._fastly_auth = value;
+    return this;
   }
 
   withJunit(value) {
     if (value && value !== '') {
       this._junit = new JunitPerformanceReport().withOutfile(path.resolve(process.cwd(), value));
     }
-    return this;
-  }
-
-  withCalibreAuth(value) {
-    this._auth = value;
-    process.env.CALIBRE_API_TOKEN = this._auth;
-    // eslint-disable-next-line global-require
-    this._calibre = require('calibre'); // defer loading of calibre
-    // client until env is set
     return this;
   }
 
@@ -61,46 +62,20 @@ class PerfCommand extends AbstractCommand {
     return this;
   }
 
-  loadStrains() {
-    if (this._strains) {
-      return this._strains;
-    }
-    this._strains = Array.from(this.config.strains.values());
-    return this._strains;
-  }
-
   getDefaultParams() {
     const defaultparams = {
       device: this._device,
       location: this._location,
       connection: this._connection,
     };
-
-    const defaults = this.loadStrains().filter(
-      ({ name }) => name === 'default',
-    );
-    if (defaults.length === 1 && defaults[0].perf) {
-      return Object.assign(defaultparams, defaults[0].perf.toJSON({ minimal: true }));
-    }
     return defaultparams;
   }
 
   getStrainParams(strain) {
     if (strain.perf) {
-      return Object.assign(this.getDefaultParams(), strain.perf);
+      return strain.perf;
     }
     return this.getDefaultParams();
-  }
-
-  static getURLs(strain) {
-    if (strain.url && strain.urls) {
-      return [strain.url, ...strain.urls];
-    } if (strain.url) {
-      return [strain.url];
-    } if (strain.urls) {
-      return strain.urls;
-    }
-    return [];
   }
 
   static formatScore(score, limit) {
@@ -160,34 +135,37 @@ class PerfCommand extends AbstractCommand {
     await this.init();
     this.log.info(chalk.green('Testing performance…'));
 
-    const tests = this.loadStrains()
-      .filter(strain => PerfCommand.getURLs(strain).length)
-      .map((strain) => {
-        const params = this.getStrainParams(strain);
-        return PerfCommand.getURLs(strain).map(url => this._calibre.Test.create({
+    const tests = this.config.strains
+      .getByFilter(({urls}) => urls.length)
+      .map(strain => {
+        const { location, device, connection } = this.getStrainParams(strain);
+        return strain.urls.map(url => ({
           url,
-          location: params.location,
-          device: params.device,
-          connection: params.connection,
-          cookies: [{
-            name: 'X-Strain', value: strain.name, secure: true, httpOnly: true,
-          }],
-        })
-          .then(({ uuid }) => this._calibre.Test.waitForTest(uuid))
-          .then((result) => {
-            if (this._junit) {
-              this._junit.appendResults(result, params, strain.name);
-            }
-            return this.formatResponse(result, params, strain.name);
-          })
-          .catch((err) => {
-            this.log.error(err);
-            return null;
-          }));
+          location,
+          device,
+          connection,
+          strain: strain.name
+        }))
       });
+    const flatttests = _.flatten(tests);
 
-    const flattests = _.flatten(tests);
-    Promise.all(flattests).then((results) => {
+    const results = await request.post('https://adobeioruntime.net/api/v1/web/helix/default/perf', {
+      json: true,
+      body: {
+        service: this._fastly_namespace,
+        token: this._fastly_auth,
+        tests: flattests
+      }
+    });
+
+    const formatted = results.map(result => {
+      if (this._junit) {
+        this._junit.appendResults(result, /* params, strain.name */); 
+      }
+      return this.formatResponse(result, /* params, strain.name */);
+    });
+
+    Promise.all(formatted).then((results) => {
       if (this._junit) {
         this._junit.writeResults();
       }
