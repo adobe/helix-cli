@@ -1,7 +1,6 @@
 # This file handles the URL parameter whitelist
 
 
-
 if (req.http.X-Strain == "debug") {
   set req.http.X-Old-Url = req.url;
   set req.url = querystring.regfilter_except(req.url, "^(baz|maz|hlx_.*)$");

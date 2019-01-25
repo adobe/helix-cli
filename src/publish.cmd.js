@@ -484,23 +484,24 @@ set req.url = req.http.X-Old-Url;`
    * Generates VCL for strain resolution from a list of strains
    */
   static getStrainParametersVCL(strains) {
-    let retvcl = '# This file handles the URL parameter whitelist\n\n';
-    const [defaultstrain] = strains.filter(strain => strain.name === 'default');
-    if (defaultstrain && defaultstrain.params && Array.isArray(defaultstrain.params)) {
-      retvcl += '# default parameters, can be overridden per strain\n';
-      retvcl += PublishCommand.makeParamWhitelist(defaultstrain.params);
-    }
-    const otherstrains = strains
-      .filter(strain => strain.name !== 'default')
-      .filter(strain => strain.params && Array.isArray(strain.params));
-
-    retvcl += otherstrains.map(({ name, params }) => `
-
+    let retvcl = '';
+    let defvcl = '# This file handles the URL parameter whitelist\n\n';
+    strains.forEach(({ name, params }) => {
+      if (params.length === 0) {
+        return;
+      }
+      if (name === 'default') {
+        defvcl += '# default parameters, can be overridden per strain\n';
+        defvcl += PublishCommand.makeParamWhitelist(params);
+        defvcl += '\n';
+      } else {
+        retvcl += `
 if (req.http.X-Strain == "${name}") {
 ${PublishCommand.makeParamWhitelist(params, '  ')}
-}
-`);
-    return retvcl;
+}\n`;
+      }
+    });
+    return defvcl + retvcl;
   }
 
   static getXVersionExtensionVCL(configVersion, cliVersion, revision) {
@@ -684,10 +685,7 @@ ${PublishCommand.makeParamWhitelist(params, '  ')}
     const [secretp, ownsp] = dictJobs.splice(0, 2);
 
     this._strainsToPublish.forEach((strain) => {
-      let actionPrefix = `/${this._wsk_namespace}/default/${strain.package}`;
-      if (!actionPrefix.endsWith('--')) {
-        actionPrefix += '--';
-      }
+      const actionPrefix = `/${this._wsk_namespace}/${strain.package}/`;
 
       // content repo
       makeDictJob('strain_owners', strain.name, strain.content.owner, '- Set content owner', 'content owner');

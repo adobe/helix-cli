@@ -1,6 +1,7 @@
-- strain:
-    name: default
-    code: /hlx/default/git-github-com-adobe-helix-cli-git--dirty--
+strains:
+  default:
+    code: https://github.com/adobe/project-helix.io.git#master
+    static: https://github.com/adobe/project-helix.io.git#master
     url: https://www.primordialsoup.life/
     params:
       - foo
@@ -10,9 +11,9 @@
       ref: master
       owner: adobe
 
-- strain:
-    name: debug
-    code: /hlx/default/git-github-com-adobe-helix-cli-git--dirty--
+  debug:
+    code: https://github.com/adobe/project-helix.io.git#master
+    static: https://github.com/adobe/project-helix.io.git#master
     url: https://debug.primordialsoup.life/
     params:
       - baz
@@ -22,9 +23,21 @@
       ref: master
       owner: adobe
 
-- strain:
-    name: path
-    code: /hlx/default/git-github-com-adobe-helix-cli-git--dirty--
+  dev:
+    code: https://github.com/adobe/project-helix.io.git#master
+    static: https://github.com/adobe/project-helix.io.git#master
+    url: https://debug.primordialsoup.life/
+    params:
+      - foo
+      - bar
+    content:
+      repo: helix-cli
+      ref: master
+      owner: adobe
+
+  path:
+    code: https://github.com/adobe/project-helix.io.git#master
+    static: https://github.com/adobe/project-helix.io.git#master
     url: https://debug.primordialsoup.life/foo/bar
     content:
       repo: helix-cli
