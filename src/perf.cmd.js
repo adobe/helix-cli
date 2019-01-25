@@ -136,16 +136,16 @@ class PerfCommand extends AbstractCommand {
     this.log.info(chalk.green('Testing performance…'));
 
     const tests = this.config.strains
-      .getByFilter(({urls}) => urls.length)
-      .map(strain => {
+      .getByFilter(({ urls }) => urls.length)
+      .map((strain) => {
         const { location, device, connection } = this.getStrainParams(strain);
         return strain.urls.map(url => ({
           url,
           location,
           device,
           connection,
-          strain: strain.name
-        }))
+          strain: strain.name,
+        }));
       });
     const flatttests = _.flatten(tests);
 
@@ -154,33 +154,31 @@ class PerfCommand extends AbstractCommand {
       body: {
         service: this._fastly_namespace,
         token: this._fastly_auth,
-        tests: flattests
-      }
+        tests: flatttests,
+      },
     });
 
-    const formatted = results.map(result => {
+    const formatted = results.map((result) => {
       if (this._junit) {
-        this._junit.appendResults(result, /* params, strain.name */); 
+        this._junit.appendResults(result /* params, strain.name */);
       }
-      return this.formatResponse(result, /* params, strain.name */);
+      return this.formatResponse(result /* params, strain.name */);
     });
 
-    Promise.all(formatted).then((results) => {
-      if (this._junit) {
-        this._junit.writeResults();
-      }
-      this.log.info('');
-      const fail = results.filter(result => result === false).length;
-      const succeed = results.filter(result => result === true).length;
-      if (fail && succeed) {
-        this.log.error(chalk.yellow(`all tests completed with ${fail} failures and ${succeed} successes.`));
-      } else if (fail) {
-        this.log.error(chalk.red(`all ${fail} tests failed.`));
-      } else if (succeed) {
-        this.log.log(chalk.green(`all ${succeed} tests succeeded.`));
-      }
-      process.exit(fail);
-    });
+    if (this._junit) {
+      this._junit.writeResults();
+    }
+
+    const fail = formatted.filter(result => result === false).length;
+    const succeed = formatted.filter(result => result === true).length;
+    if (fail && succeed) {
+      this.log.error(chalk.yellow(`all tests completed with ${fail} failures and ${succeed} successes.`));
+    } else if (fail) {
+      this.log.error(chalk.red(`all ${fail} tests failed.`));
+    } else if (succeed) {
+      this.log.log(chalk.green(`all ${succeed} tests succeeded.`));
+    }
+    process.exit(fail);
   }
 }
 
