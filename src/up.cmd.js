@@ -11,6 +11,7 @@
  */
 
 const path = require('path');
+const fse = require('fs-extra');
 const readline = require('readline');
 const opn = require('opn');
 const chokidar = require('chokidar');
@@ -26,7 +27,6 @@ class UpCommand extends BuildCommand {
     super(logger);
     this._httpPort = -1;
     this._open = false;
-    this._strainName = '';
     this._saveConfig = false;
   }
 
@@ -42,12 +42,6 @@ class UpCommand extends BuildCommand {
 
   withSaveConfig(value) {
     this._saveConfig = value;
-    return this;
-  }
-
-  // temporary solution until proper condition evaluation
-  withStrainName(value) {
-    this._strainName = value;
     return this;
   }
 
@@ -107,11 +101,12 @@ class UpCommand extends BuildCommand {
   async run() {
     await super.init();
 
-    // if no config is defined, we use the `dev` strain to ensure localhost as git server
-    let hasConfigFile = await this.config.hasFile();
-    if (!hasConfigFile) {
-      this._strainName = 'dev';
+    // check for git repository
+    if (!await fse.pathExists(path.join(this.directory, '.git'))) {
+      throw Error('hlx up needs local git repository.');
     }
+
+    let hasConfigFile = await this.config.hasFile();
     if (this._saveConfig) {
       if (hasConfigFile) {
         this.log.warn(chalk`Cowardly refusing to overwrite existing {cyan helix-config.yaml}.`);
@@ -128,9 +123,7 @@ class UpCommand extends BuildCommand {
     this._project = new HelixProject()
       .withCwd(this.directory)
       .withBuildDir(this._target)
-      .withWebRootDir(this._webroot)
       .withHelixConfig(this.config)
-      .withStrainName(this._strainName || 'default')
       .withDisplayVersion(pkgJson.version)
       .withRuntimeModulePaths(module.paths);
 
@@ -170,6 +163,15 @@ class UpCommand extends BuildCommand {
         }
 
         await this._project.start();
+
+        // if no config is defined, we use the `dev` strain to ensure localhost as git server
+        if (!hasConfigFile) {
+          this.config.strains.get('dev').urls = [
+            `http://localhost:${this._project.server.port}`,
+            `http://127.0.0.1:${this._project.server.port}`,
+          ];
+        }
+
         this.emit('started', this);
         if (this._open) {
           opn(`http://localhost:${this._project.server.port}/`);

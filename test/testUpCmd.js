@@ -30,14 +30,12 @@ const TEST_DIR = path.resolve('test/integration');
 describe('Integration test for up command', () => {
   let testDir;
   let buildDir;
-  let webroot;
 
   beforeEach(async function before() {
     this.timeout(20000);
     const testRoot = await createTestRoot();
     testDir = path.resolve(testRoot, 'project');
     buildDir = path.resolve(testRoot, '.hlx/build');
-    webroot = path.resolve(testDir, 'webroot');
     await fse.copy(TEST_DIR, testDir);
   });
 
@@ -51,7 +49,7 @@ describe('Integration test for up command', () => {
         .run();
       assert.fail('hlx up without .git should fail.');
     } catch (e) {
-      assert.equal(e.message, 'Unable to start helix: Local README.md or index.md must be inside a valid git repository.');
+      assert.equal(e.message, 'hlx up needs local git repository.');
     }
   });
 
@@ -83,7 +81,6 @@ describe('Integration test for up command', () => {
       .withFiles([path.join(testDir, 'src', '*.htl'), path.join(testDir, 'src', '*.js')])
       .withTargetDir(buildDir)
       .withDirectory(testDir)
-      .withWebRoot(webroot)
       .withHttpPort(0);
 
     const myDone = (err) => {
@@ -117,7 +114,6 @@ describe('Integration test for up command', () => {
       .withFiles([path.join(testDir, 'src', '*.htl'), path.join(testDir, 'src', '*.js')])
       .withTargetDir(buildDir)
       .withDirectory(testDir)
-      .withWebRoot(webroot)
       .withSaveConfig(true)
       .withHttpPort(0);
 
@@ -154,7 +150,6 @@ describe('Integration test for up command', () => {
       .withFiles([path.join(testDir, 'src', '*.htl'), path.join(testDir, 'src', '*.js')])
       .withTargetDir(buildDir)
       .withDirectory(testDir)
-      .withWebRoot(webroot)
       .withHttpPort(0);
 
     const myDone = async (err) => {

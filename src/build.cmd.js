@@ -25,7 +25,6 @@ class BuildCommand extends AbstractCommand {
     this._minify = false;
     this._target = null;
     this._files = null;
-    this._webroot = null;
   }
 
   // eslint-disable-next-line class-methods-use-this
@@ -53,26 +52,11 @@ class BuildCommand extends AbstractCommand {
     return this;
   }
 
-  withWebRoot(root) {
-    this._webroot = root;
-    return this;
-  }
-
   /**
    * @override
    */
   async init() {
     await super.init();
-
-    if (!this._webroot) {
-      const defaultStaticRoot = this.config.strains.get('default').static.path;
-      if (defaultStaticRoot) {
-        this._webroot = path.resolve(this.directory, defaultStaticRoot.replace(/^\/+/, ''));
-      }
-    }
-    if (!this._webroot) {
-      this._webroot = this.directory;
-    }
 
     // ensure target is absolute
     this._target = path.resolve(this.directory, this._target);
