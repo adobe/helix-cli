@@ -88,6 +88,24 @@ describe('Dynamic Strain (VCL) generation', () => {
     assert.equal(vclfile.trim(), PublishCommand.getStrainResolutionVCL(mystrains).trim());
   });
 
+  it('getStrainParametersVCL generates VLC', async () => {
+    const strainfile = path.resolve(__dirname, 'fixtures/some-params.yaml');
+    const config = await new HelixConfig().withConfigPath(strainfile).init();
+    const mystrains = Array.from(config.strains.values());
+
+    const vclfile = fs.readFileSync(path.resolve(__dirname, 'fixtures/some-params.vcl')).toString();
+    assert.equal(PublishCommand.getStrainParametersVCL(mystrains).trim(), vclfile.trim());
+  });
+
+  it('getStrainParametersVCL generates VLC with no default params', async () => {
+    const strainfile = path.resolve(__dirname, 'fixtures/no-default-params.yaml');
+    const config = await new HelixConfig().withConfigPath(strainfile).init();
+    const mystrains = Array.from(config.strains.values());
+
+    const vclfile = fs.readFileSync(path.resolve(__dirname, 'fixtures/no-default-params.vcl')).toString();
+    assert.equal(PublishCommand.getStrainParametersVCL(mystrains).trim(), vclfile.trim());
+  });
+
   it('initFastly generates new backends for defined Proxies', async () => {
     const strainfile = path.resolve(__dirname, 'fixtures/proxystrains.yaml');
     const cmd = new PublishCommand(Logger.getTestLogger()).withConfigFile(strainfile);
