@@ -23,13 +23,11 @@ describe('hlx package (Integration)', () => {
   let testRoot;
   let hlxDir;
   let buildDir;
-  let webroot;
 
   beforeEach(async () => {
     testRoot = await createTestRoot();
     hlxDir = path.resolve(testRoot, '.hlx');
     buildDir = path.resolve(hlxDir, 'build');
-    webroot = path.resolve(testRoot, 'webroot');
   });
 
   afterEach(() => {
@@ -44,7 +42,6 @@ describe('hlx package (Integration)', () => {
         'test/integration/src/helper.js',
       ])
       .withTargetDir(buildDir)
-      .withWebRoot(webroot)
       .withCacheEnabled(false)
       .run();
 
@@ -85,7 +82,6 @@ describe('hlx package (Integration)', () => {
         'test/integration/src/xml.js',
       ])
       .withTargetDir(buildDir)
-      .withWebRoot(webroot)
       .withCacheEnabled(false)
       .run();
 

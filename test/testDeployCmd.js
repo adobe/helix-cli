@@ -279,7 +279,6 @@ describe('hlx deploy (Integration)', () => {
         path.resolve(testRoot, 'src/helper.js'),
       ])
       .withTargetDir(buildDir)
-      .withWebRoot(path.resolve('webroot'))
       .withCacheEnabled(false)
       .run();
 

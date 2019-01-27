@@ -140,7 +140,6 @@ async function processSource(scriptName, type = 'htl') {
   await new BuildCommand()
     .withFiles(files)
     .withTargetDir(buildDir)
-    .withWebRoot('/webroot')
     .withCacheEnabled(false)
     .run();
 
