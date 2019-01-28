@@ -28,6 +28,7 @@ class UpCommand extends BuildCommand {
     this._httpPort = -1;
     this._open = false;
     this._saveConfig = false;
+    this._overrideHost = null;
   }
 
   withHttpPort(p) {
@@ -42,6 +43,11 @@ class UpCommand extends BuildCommand {
 
   withSaveConfig(value) {
     this._saveConfig = value;
+    return this;
+  }
+
+  withOverrideHost(value) {
+    this._overrideHost = value;
     return this;
   }
 
@@ -132,6 +138,13 @@ class UpCommand extends BuildCommand {
 
     if (this._httpPort >= 0) {
       this._project.withHttpPort(this._httpPort);
+    }
+    if (this._overrideHost) {
+      this._project.withRequestOverride({
+        headers: {
+          host: this._overrideHost,
+        },
+      });
     }
 
     try {

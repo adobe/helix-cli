@@ -105,6 +105,29 @@ describe('Integration test for up command', () => {
       .catch(done);
   }).timeout(5000);
 
+  it('up command delivers correct response with different host.', async () => {
+    initGit(testDir, 'https://github.com/adobe/dummy-foo.git');
+    await fse.rename(path.resolve(testDir, 'default-config.yaml'), path.resolve(testDir, 'helix-config.yaml'));
+    const cmd = new UpCommand()
+      .withCacheEnabled(false)
+      .withFiles([path.join(testDir, 'src', '*.htl'), path.join(testDir, 'src', '*.js')])
+      .withTargetDir(buildDir)
+      .withDirectory(testDir)
+      .withOverrideHost('www.project-helix.io')
+      .withHttpPort(0);
+
+    await new Promise((resolve) => {
+      cmd.on('started', resolve);
+      cmd.run();
+    });
+
+    try {
+      await assertHttp(`http://localhost:${cmd.project.server.port}/README.html`, 200, 'simple_response_readme.html');
+    } finally {
+      await cmd.stop();
+    }
+  }).timeout(5000);
+
   it('up command writes default config.', (done) => {
     initGit(testDir, 'https://github.com/adobe/dummy-foo.git');
     assertFile(path.resolve(testDir, 'helix-config.yaml'), true);

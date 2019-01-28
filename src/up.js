@@ -33,6 +33,10 @@ module.exports = function up() {
           type: 'boolean',
           default: true,
         })
+        .option('host', {
+          describe: 'Override request.host',
+          type: 'string',
+        })
         .option('save-config', {
           describe: 'Saves the default config.',
           type: 'boolean',
@@ -52,6 +56,7 @@ module.exports = function up() {
         .withMinifyEnabled(argv.minify)
         .withTargetDir(argv.target)
         .withFiles(argv.files)
+        .withOverrideHost(argv.host)
         .withSaveConfig(argv.saveConfig)
         // only open browser window when executable is `hlx`
         // this prevents the window to be opened during integration tests
