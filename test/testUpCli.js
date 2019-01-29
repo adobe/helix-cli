@@ -30,6 +30,7 @@ describe('hlx up', () => {
     mockUp.withFiles.returnsThis();
     mockUp.withOpen.returnsThis();
     mockUp.withSaveConfig.returnsThis();
+    mockUp.withOverrideHost.returnsThis();
     mockUp.run.returnsThis();
   });
 
@@ -42,6 +43,7 @@ describe('hlx up', () => {
     sinon.assert.calledWith(mockUp.withSaveConfig, false);
     sinon.assert.calledWith(mockUp.withTargetDir, '.hlx/build');
     sinon.assert.calledWith(mockUp.withFiles, ['src/**/*.htl', 'src/**/*.js']);
+    sinon.assert.calledWith(mockUp.withOverrideHost, undefined);
     sinon.assert.calledOnce(mockUp.run);
   });
 
@@ -106,6 +108,14 @@ describe('hlx up', () => {
       .withCommandExecutor('up', mockUp)
       .run(['up', '--files', 'lib/*.htl', 'index.htl']);
     sinon.assert.calledWith(mockUp.withFiles, ['lib/*.htl', 'index.htl']);
+    sinon.assert.calledOnce(mockUp.run);
+  });
+
+  it('hlx up can set override host', () => {
+    new CLI()
+      .withCommandExecutor('up', mockUp)
+      .run(['up', '--host', 'www.project-helix.io']);
+    sinon.assert.calledWith(mockUp.withOverrideHost, 'www.project-helix.io');
     sinon.assert.calledOnce(mockUp.run);
   });
 
