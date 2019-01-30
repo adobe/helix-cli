@@ -42,6 +42,11 @@ module.exports = function up() {
           type: 'boolean',
           default: false,
         })
+        .option('port', {
+          describe: 'Start development server on port',
+          type: 'int',
+          default: 3000,
+        })
         .help();
     },
     handler: async (argv) => {
@@ -58,6 +63,7 @@ module.exports = function up() {
         .withFiles(argv.files)
         .withOverrideHost(argv.host)
         .withSaveConfig(argv.saveConfig)
+        .withHttpPort(argv.port)
         // only open browser window when executable is `hlx`
         // this prevents the window to be opened during integration tests
         .withOpen(argv.open && path.basename(argv.$0) === 'hlx')
