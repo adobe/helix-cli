@@ -29,6 +29,7 @@ describe('hlx up', () => {
     mockUp.withTargetDir.returnsThis();
     mockUp.withFiles.returnsThis();
     mockUp.withOpen.returnsThis();
+    mockUp.withHttpPort.returnsThis();
     mockUp.withSaveConfig.returnsThis();
     mockUp.withOverrideHost.returnsThis();
     mockUp.run.returnsThis();
@@ -133,6 +134,14 @@ describe('hlx up', () => {
       .run(['up', 'lib/*.htl', 'index.htl', '--no-cache']);
     sinon.assert.calledWith(mockUp.withFiles, ['lib/*.htl', 'index.htl']);
     sinon.assert.calledWith(mockUp.withCacheEnabled, false);
+    sinon.assert.calledOnce(mockUp.run);
+  });
+
+  it('hlx up can specify port number to run development server on', () => {
+    new CLI()
+      .withCommandExecutor('up', mockUp)
+      .run(['up', '--port', '3210']);
+    sinon.assert.calledWith(mockUp.withHttpPort, 3210);
     sinon.assert.calledOnce(mockUp.run);
   });
 });
