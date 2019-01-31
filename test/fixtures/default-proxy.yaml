@@ -23,10 +23,5 @@ strains:
       - http://www.project-helix.io
 
   default:
-    code: ssh://git@github.com/adobe/project-foo.io.git#master
-    content: ssh://git@github.com/adobe/project-foo.io.git#master
-    static: ssh://git@github.com/adobe/project-foo.io.git/htdocs#master
-    package: $REF
-
-  myproxy:
-    origin: http://127.0.0.1/foo
+    origin:
+      address: 127.0.0.1

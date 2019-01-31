@@ -128,6 +128,30 @@ describe('Integration test for up command', () => {
     }
   }).timeout(5000);
 
+  it.skip('up command delivers correct response with proxy as default.', async () => {
+    initGit(testDir, 'https://github.com/adobe/dummy-foo.git');
+    const cfg = path.resolve(testDir, 'helix-config.yaml');
+    await fse.copy(path.resolve(__dirname, 'fixtures', 'default-proxy.yaml'), cfg);
+    const cmd = new UpCommand()
+      .withCacheEnabled(false)
+      .withFiles([path.join(testDir, 'src', '*.htl'), path.join(testDir, 'src', '*.js')])
+      .withTargetDir(buildDir)
+      .withDirectory(testDir)
+      .withOverrideHost('www.no-exist.com')
+      .withHttpPort(0);
+
+    await new Promise((resolve) => {
+      cmd.on('started', resolve);
+      cmd.run();
+    });
+
+    try {
+      await assertHttp(`http://localhost:${cmd.project.server.port}/README.html`, 200, 'simple_response_readme.html');
+    } finally {
+      await cmd.stop();
+    }
+  }).timeout(5000);
+
   it('up command writes default config.', (done) => {
     initGit(testDir, 'https://github.com/adobe/dummy-foo.git');
     assertFile(path.resolve(testDir, 'helix-config.yaml'), true);
