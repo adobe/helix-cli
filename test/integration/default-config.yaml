@@ -26,3 +26,6 @@ strains:
     code: *localRepo
     content: *localRepo
     static: *localRepo
+
+  myproxy:
+    origin: http://127.0.0.1/foo

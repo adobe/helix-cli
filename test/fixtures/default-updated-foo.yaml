@@ -27,6 +27,9 @@ strains:
     content: *localRepo
     static: *localRepo
 
+  myproxy:
+    origin: http://127.0.0.1/foo
+
   foo:
     code: ssh://git@github.com/adobe/project-foo.io.git#master
     content: ssh://git@github.com/adobe/project-foo.io.git#master

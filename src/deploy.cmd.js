@@ -20,10 +20,11 @@ const path = require('path');
 const fs = require('fs-extra');
 const uuidv4 = require('uuid/v4');
 const ProgressBar = require('progress');
-const { GitUrl, GitUtils } = require('@adobe/helix-shared');
+const { HelixConfig, GitUrl, GitUtils } = require('@adobe/helix-shared');
 const useragent = require('./user-agent-util');
 const AbstractCommand = require('./abstract.cmd.js');
 const PackageCommand = require('./package.cmd.js');
+const ConfigUtils = require('./config/config-utils.js');
 
 function humanFileSize(size) {
   const i = size === 0 ? 0 : Math.floor(Math.log(size) / Math.log(1024));
@@ -278,6 +279,13 @@ class DeployCommand extends AbstractCommand {
       let newStrain = this._addStrain ? this.config.strains.get(this._addStrain) : null;
       if (!newStrain) {
         newStrain = this.config.strains.get('default');
+        // if default is proxy, fall back to default default
+        if (newStrain.isProxy()) {
+          const hlx = await new HelixConfig()
+            .withSource(await ConfigUtils.createDefaultConfig())
+            .init();
+          newStrain = hlx.strains.get('default');
+        }
         newStrain = newStrain.clone();
         newStrain.name = this._addStrain || uuidv4();
         this.config.strains.add(newStrain);
