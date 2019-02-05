@@ -442,7 +442,7 @@ class PublishCommand extends AbstractCommand {
       const opts = await this.deleteOpts(`/dictionary/${mydict}/item/${key}`);
       await request(opts);
     } catch (e) {
-      this.log.error(`Unknown error when deleting key ${key} from dictionary ${mydict}`, e);
+      this.log.debug(`Unknown error when deleting key ${key} from dictionary ${mydict}`, e);
     }
     return Promise.resolve();
   }
