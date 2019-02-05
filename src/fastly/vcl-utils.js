@@ -17,10 +17,16 @@ function conditions([strain, vcl]) {
     if (uri.path && uri.path !== '/') {
       const pathname = uri.path.replace(/\/$/, '');
       const body = vcl.body || [];
-      body.push(`set req.http.X-Dirname = regsub(req.url.dirname, "^${pathname}", "");`);
+      body.push('if (req.url.ext == "") {');
+      // use X-URL for root directory
+      body.push(` set req.http.X-Dirname = regsub(req.http.X-URL, "^${pathname}", "");`);
+      body.push('} else {');
+      // use dirname for url with file and extensions
+      body.push(` set req.http.X-Dirname = regsub(req.url.dirname, "^${pathname}", "");`);
+      body.push('}');
       return [strain, {
         sticky: false,
-        condition: `req.http.Host == "${uri.host}" && (req.url.dirname ~ "^${pathname}$" || req.url.dirname ~ "^${pathname}/")`,
+        condition: `req.http.Host == "${uri.host}" && (req.http.X-URL ~ "^${pathname}$" || req.http.X-URL ~ "^${pathname}/")`,
         body,
       }];
     }
