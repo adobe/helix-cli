@@ -261,7 +261,7 @@ class DeployCommand extends AbstractCommand {
     await this.init();
     const origin = GitUtils.getOrigin(this.directory);
     if (!origin) {
-      throw Error('hlx cannot deploy without a remote git repository.');
+      throw Error('hlx cannot deploy without a remote git repository. Add one with\n$ git remote add origin <github_repo_url>.git');
     }
     const dirty = GitUtils.isDirty(this.directory);
     if (dirty && !this._enableDirty) {
