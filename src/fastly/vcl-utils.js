@@ -19,10 +19,10 @@ function conditions([strain, vcl]) {
       const body = vcl.body || [];
       body.push('if (req.url.ext == "") {');
       // use X-URL for root directory
-      body.push(` set req.http.X-Dirname = regsub(req.http.X-URL, "^${pathname}", "");`);
+      body.push(`  set req.http.X-Dirname = regsub(req.http.X-URL, "^${pathname}", "");`);
       body.push('} else {');
       // use dirname for url with file and extensions
-      body.push(` set req.http.X-Dirname = regsub(req.url.dirname, "^${pathname}", "");`);
+      body.push(`  set req.http.X-Dirname = regsub(req.url.dirname, "^${pathname}", "");`);
       body.push('}');
       return [strain, {
         sticky: false,

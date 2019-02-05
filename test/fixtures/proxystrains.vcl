@@ -2,8 +2,12 @@
 if (req.http.Host == "www.example.com") {
   set req.http.X-Sticky = "false";
   set req.http.X-Strain = "default";
-} else if (req.http.Host == "www.new-site.com" && (req.url.dirname ~ "^/old-stuff$" || req.url.dirname ~ "^/old-stuff/")) {
-  set req.http.X-Dirname = regsub(req.url.dirname, "^/old-stuff", "");
+} else if (req.http.Host == "www.new-site.com" && (req.http.X-URL ~ "^/old-stuff$" || req.http.X-URL ~ "^/old-stuff/")) {
+  if (req.url.ext == "") {
+    set req.http.X-Dirname = regsub(req.http.X-URL, "^/old-stuff", "");
+  } else {
+    set req.http.X-Dirname = regsub(req.url.dirname, "^/old-stuff", "");
+  }
   
   # Enable passing through of requests
   
