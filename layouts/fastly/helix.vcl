@@ -221,6 +221,7 @@ sub hlx_headers_deliver {
     set resp.http.X-Github-Static-Ref = "@" + req.http.X-Github-Static-Ref;
 
     set resp.http.X-Dirname = req.http.X-Dirname;
+    set resp.http.X-FullDirname = req.http.X-FullDirname;
     set resp.http.X-Index = req.http.X-Index;
     set resp.http.X-Action-Root = req.http.X-Action-Root;
     set resp.http.X-URL = req.http.X-URL;
@@ -506,6 +507,17 @@ sub vcl_recv {
   # set req.http.X-URL = req.url;
   set req.http.X-Host = req.http.Host;
 
+  // compute X-FullDirname which contains the real incoming path of directories
+  if (req.url.ext == "") {
+    // case url = /a/b -> for Fastly, dirname = /a and basename = b
+    set req.http.X-FullDirname = req.url.dirname + "/" + req.url.basename;
+  } else {
+    // case url = /a/b/c.html -> for Fastly, dirname = /a/b which is what we need
+    set req.http.X-FullDirname = req.url.dirname;
+  }
+  // remove potential double slashes 
+  set req.http.X-FullDirname = regsuball(req.http.X-FullDirname, "/+", "/");
+
 
   # Determine the current strain and execute strain-specific code
   call hlx_strain;
@@ -751,6 +763,7 @@ sub vcl_deliver {
     unset resp.http.X-Content-Type;
     unset resp.http.X-Fastly-Request-ID;
     unset resp.http.X-Frame-Options;
+    unset resp.http.X-FullDirname;
     unset resp.http.X-Geo-Block-List;
     unset resp.http.X-GitHub-Request-Id;
     unset resp.http.X-GW-Cache;
