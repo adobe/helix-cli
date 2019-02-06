@@ -34,11 +34,12 @@ describe('Static Delivery Action #unittest', () => {
     assert.equal(index.isBinary('application/octet-stream'), true);
     assert.equal(index.isBinary('image/png'), true);
     assert.equal(index.isBinary('un/known'), true);
+    assert.equal(index.isBinary('image/svg+xml'), true);
 
     assert.equal(index.isBinary('text/html'), false);
+    assert.equal(index.isBinary('text/xml'), false);
     assert.equal(index.isBinary('application/json'), false);
     assert.equal(index.isBinary('application/javascript'), false);
-    assert.equal(index.isBinary('image/svg+xml'), false);
   });
 
   it('staticBase() #unittest', () => {

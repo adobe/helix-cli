@@ -58,7 +58,7 @@ function isBinary(type) {
     return false;
   }
   if (type.match(/.*\/.*xml/)) {
-    return false;
+    return !!type.match(/svg/); // openwshisk treats svg as binary
   }
   return true;
 }
