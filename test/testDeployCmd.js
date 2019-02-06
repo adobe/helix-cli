@@ -99,7 +99,7 @@ describe('hlx deploy (Integration)', () => {
         .run();
       assert.fail('deploy fails if no git remote');
     } catch (e) {
-      assert.equal(e.toString(), 'Error: hlx cannot deploy without a remote git repository.');
+      assert.equal(e.toString(), 'Error: hlx cannot deploy without a remote git repository. Add one with\n$ git remote add origin <github_repo_url>.git');
     }
   });
 
