@@ -32,7 +32,7 @@
     "@adobe/helix-shared": "0.6.1",
     "@adobe/helix-simulator": "2.9.2",
     "@adobe/parcel-plugin-htl": "2.0.1",
-    "@snyk/nodejs-runtime-agent": "1.35.0",
+    "@snyk/nodejs-runtime-agent": "1.39.0",
     "archiver": "3.0.0",
     "calibre": "1.1.1",
     "chalk": "2.4.2",
