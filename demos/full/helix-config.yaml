@@ -1,5 +1,5 @@
 #
-# helix configuration for local development
+# Helix Configuration
 #
 version: 1
 
@@ -7,8 +7,16 @@ definitions:
   defaults:
     # default repository. set to git remote repository before deployment
     - &defaultRepo "http://localhost/local/default.git"
+    # local development repository.
+    - &localRepo "http://localhost/local/default.git"
 
 strains:
+  local-dev:
+    url: http://localhost:3000/
+    code: *localRepo
+    content: *localRepo
+    static: *localRepo
+
   default:
     code: *defaultRepo
     content: *defaultRepo
