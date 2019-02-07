@@ -17,7 +17,7 @@ const fs = require('fs-extra');
 const assert = require('assert');
 const path = require('path');
 const $ = require('shelljs');
-const { GitUtils, Logger } = require('@adobe/helix-shared');
+const { GitUtils, GitUrl, Logger } = require('@adobe/helix-shared');
 const { initGit, createTestRoot } = require('./utils.js');
 const BuildCommand = require('../src/build.cmd.js');
 const DeployCommand = require('../src/deploy.cmd.js');
@@ -27,6 +27,18 @@ const TEST_DIR = path.resolve('test/integration');
 
 Replay.mode = 'bloody';
 Replay.fixtures = `${__dirname}/fixtures/`;
+
+function getSSHGitUrl(url) {
+  const giturl = new GitUrl(url);
+  /* eslint-disable no-underscore-dangle */
+  let auth = giturl._url.username || 'git';
+  if (giturl._url.password) {
+    auth += `:${giturl._url.password}`;
+  }
+  /* eslint-enable no-underscore-dangle */
+  const hash = giturl.ref ? `#${giturl.ref}` : '';
+  return `ssh://${auth}@${giturl.host}/${giturl.owner}/${giturl.repo}.git${giturl.path}${hash}`;
+}
 
 describe('hlx deploy (Integration)', () => {
   let testRoot;
@@ -267,7 +279,9 @@ describe('hlx deploy (Integration)', () => {
     assert.ok(log.indexOf('Affected strains of ssh://git@github.com/adobe/dummy.git#master') >= 0);
     assert.ok(log.indexOf('- new-strain') >= 0);
     await cmd.config.saveConfig(); // trigger manual save because of dry-run
-    const actual = await fs.readFile(cfg, 'utf-8');
+    // rewrite git urls from https to ssh
+    const actual = (await fs.readFile(cfg, 'utf-8')).replace(/[code|content|static].*(https:.*)/gm,
+      (fullMatch, url) => `${fullMatch.substring(0, fullMatch.indexOf(url))}${getSSHGitUrl(url)}`);
     const expected = await fs.readFile(path.resolve(__dirname, 'fixtures', 'default-proxy-updated.yaml'), 'utf-8');
     // eslint-disable-next-line no-underscore-dangle
     assert.equal(actual, expected.replace('$REF', cmd._prefix));
