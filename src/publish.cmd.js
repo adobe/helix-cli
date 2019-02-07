@@ -48,6 +48,7 @@ class PublishCommand extends AbstractCommand {
         Accept: 'application/json',
       },
       json: true,
+      resolveWithFullResponse: true,
     };
 
     this._version = null;
@@ -100,6 +101,14 @@ class PublishCommand extends AbstractCommand {
         max_conn: 200,
         use_ssl: true,
       },
+    };
+
+    this._stats = {
+      missingdicts: 0,
+      dictionaryEntries: 0,
+      requests: 0,
+      strainsPublished: 0,
+      'fastly-ratelimit-remaining': 'N/A',
     };
   }
 
@@ -186,6 +195,19 @@ class PublishCommand extends AbstractCommand {
     return this;
   }
 
+  async requestFastly(options) {
+    return request(options).then((response) => {
+      this._stats.requests = this._stats.requests + 1;
+      if (response.headers['fastly-ratelimit-remaining']) {
+        this._stats['fastly-ratelimit-remaining'] = Math.min(
+          response.headers['fastly-ratelimit-remaining'],
+          this._stats['fastly-ratelimit-remaining'] === 'N/A' ? Number.MAX_SAFE_INTEGER : this._stats['fastly-ratelimit-remaining']
+        );
+      }
+      return Promise.resolve(response.body);
+    });
+  }
+
   /**
    * Prepares a request to the Fastly API for the current service, using a given path extension
    * @param {String} pathext the path extension
@@ -252,9 +274,10 @@ class PublishCommand extends AbstractCommand {
   async getService(refresh) {
     if (!this._service || refresh) {
       try {
-        this._service = await request(this.options(''));
+        this._service = await this.requestFastly(this.options(''));
       } catch (e) {
-        this.log.error('Unable to get service', e);
+        this.progressBar().terminate();
+        this.log.error(`Unable to get service: ${e.message}`);
         throw e;
       }
     }
@@ -279,7 +302,7 @@ class PublishCommand extends AbstractCommand {
     // if there are undefined dictionaries, we have to reload them
     if (Object.values(this._dictionaries).some(e => e == null)) {
       const opts = await this.version('/dictionary');
-      const dicts = await request(opts);
+      const dicts = await this.requestFastly(opts);
       Object.values(dicts).map((dict) => {
         if (!dict.deleted_at) {
           this._dictionaries[dict.name] = dict.id;
@@ -299,7 +322,7 @@ class PublishCommand extends AbstractCommand {
     // been fetched from the service yet
     if (Object.values(this._backends).some(e => e.created_at == null)) {
       const opts = await this.version('/backend');
-      const backs = await request(opts);
+      const backs = await this.requestFastly(opts);
       Object.values(backs).map((back) => {
         if (!back.deleted_at) {
           this._backends[back.name] = back;
@@ -322,6 +345,7 @@ class PublishCommand extends AbstractCommand {
     const existing = Object.entries(dictionaries).length - missingdicts.length;
     this.tick(existing, `Skipping ${existing} existing dictionaries`);
     if (missingdicts.length > 0) {
+      this.stats.missingdicts = missingdicts.length;
       const baseopts = await this.version('/dictionary');
       const fixdicts = missingdicts.map((dict) => {
         const opts = Object.assign({
@@ -331,15 +355,16 @@ class PublishCommand extends AbstractCommand {
             write_only: true,
           },
         }, baseopts);
-        return request(opts).then((r) => {
+        return this.requestFastly(opts).then((r) => {
           this.tick(1, `Dictionary ${dict} created`, dict);
           this._dictionaries[r.name] = r.id;
           return r;
         })
           .catch((e) => {
-            const message = `Dictionary ${dict} could not be created`;
-            this.log.error(message, e);
-            throw new Error(message, e);
+            const message = `Dictionary ${dict} could not be created: ${e.message}`;
+            this.progressBar().terminate();
+            this.log.error(message);
+            throw new Error(message);
           });
       });
 
@@ -369,13 +394,14 @@ class PublishCommand extends AbstractCommand {
         }, baseopts);
         try {
           this.tick(0, `Creating backend ${backend.name}`, true);
-          const r = await request(opts);
+          const r = await this.requestFastly(opts);
           this.tick(1, `Created backend ${backend.name}`, true);
           return r;
         } catch (e) {
-          const message = `Backend ${backend.name} could not be created`;
-          this.log.error(`${message}`, e);
-          throw new Error(message, e);
+          this.progressBar().terminate();
+          const message = `Backend ${backend.name} could not be created: ${e.message}`;
+          this.log.error(message);
+          throw new Error(message);
         }
       }));
     }
@@ -389,15 +415,16 @@ class PublishCommand extends AbstractCommand {
   async cloneVersion() {
     const cloneOpts = await this.putVersionOpts('/clone');
     this.tick(0, 'Cloning Service Config version', 'cloning version');
-    return request(cloneOpts).then((r) => {
+    return this.requestFastly(cloneOpts).then((r) => {
       this._version = r.number;
       this.tick(1, `Cloned Service Config Version ${r.number}`, `cloning version ${r.number}`);
       return Promise.resolve(this);
     })
       .catch((e) => {
-        const message = 'Unable to create new service version';
-        this.log.error(message, e);
-        throw new Error(message, e);
+        this.progressBar().terminate();
+        const message = `Unable to create new service version: ${e.message}`;
+        this.log.error(message);
+        throw new Error(message);
       });
   }
 
@@ -407,7 +434,7 @@ class PublishCommand extends AbstractCommand {
   async publishVersion() {
     const actOpts = await this.putVersionOpts('/activate');
     this.tick(0, 'Activating version', 'activating version');
-    return request(actOpts).then((r) => {
+    return this.requestFastly(actOpts).then((r) => {
       this.tick(1, `Activated version ${r.number}`, `activated version ${r.number}`);
       this._version = r.number;
       return Promise.resolve(this);
@@ -416,7 +443,7 @@ class PublishCommand extends AbstractCommand {
         const message = `Unable to activate new configuration: ${
           e.error && e.error.msg ? e.error.msg : ''} ${
           e.error && e.error.detail ? e.error.detail : ''}`;
-        throw new Error(message, e);
+        throw new Error(message);
       });
   }
 
@@ -434,13 +461,14 @@ class PublishCommand extends AbstractCommand {
       this.log.error(`Dictionary ${dict} does not exist. Try ${Object.keys(this._dictionaries).join(', ')}`);
       return null;
     }
+    this._stats.dictionaryEntries = this._stats.dictionaryEntries + 1;
     if (value) {
       const opts = await this.putOpts(`/dictionary/${mydict}/item/${key}`, value);
-      return request(opts);
+      return this.requestFastly(opts);
     }
     try {
       const opts = await this.deleteOpts(`/dictionary/${mydict}/item/${key}`);
-      await request(opts);
+      await this.requestFastly(opts);
     } catch (e) {
       this.log.debug(`Unknown error when deleting key ${key} from dictionary ${mydict}`, e);
     }
@@ -577,22 +605,23 @@ ${PublishCommand.makeParamWhitelist(params, '  ')}
    */
   async transferVCL(vcl, name, isMain = false) {
     const opts = await this.vclopts(name, vcl);
-    return request(opts)
+    return this.requestFastly(opts)
       .then(async (r) => {
         this.tick(1, `Uploading VCL ${name}`, true);
         if (isMain) {
           const mainbaseopts = await this.version(`/vcl/${name}/main`);
           const mainopts = Object.assign({ method: 'PUT' }, mainbaseopts);
-          return request(mainopts).then(() => {
+          return this.requestFastly(mainopts).then(() => {
             this.tick(1, `Uploaded VCL ${name}`, true);
           });
         }
         return r;
       })
       .catch((e) => {
-        const message = `Unable to update VCL ${name}`;
-        this.log.error(message, e);
-        throw new Error(message, e);
+        this.progressBar().terminate();
+        const message = `Unable to update VCL ${name}: ${e.message}`;
+        this.log.error(message);
+        throw new Error(message);
       });
   }
 
@@ -604,14 +633,15 @@ ${PublishCommand.makeParamWhitelist(params, '  ')}
     const opts = Object.assign({
       method: 'POST',
     }, baseopts);
-    return request(opts).then((r) => {
+    return this.requestFastly(opts).then((r) => {
       this.tick(1, 'Purging entire cache');
       return r;
     })
       .catch((e) => {
-        const message = 'Cache could not be purged';
-        this.log.error(message, e);
-        throw new Error(message, e);
+        this.progressBar().terminate();
+        const message = `Cache could not be purged: ${e.message}`;
+        this.log.error(message);
+        throw new Error(message);
       });
   }
 
@@ -625,6 +655,7 @@ ${PublishCommand.makeParamWhitelist(params, '  ')}
       const content = include(this._vclFile);
       return this.transferVCL(content, 'helix.vcl', true);
     } catch (e) {
+      this.progressBar().terminate();
       this.log.error(`❌  Unable to set ${this._vclFile}`);
       throw e;
     }
@@ -643,6 +674,8 @@ ${PublishCommand.makeParamWhitelist(params, '  ')}
         this.log.info(`- ${strain.name}${url}`);
       }
     });
+
+    this._stats.strainsPublished = this._strains.length;
 
     if (urls.length) {
       this.log.info('\nYou now access your site using:');
@@ -672,8 +705,9 @@ ${PublishCommand.makeParamWhitelist(params, '  ')}
           this.tick(1, message, shortMsg);
         })
         .catch((e) => {
-          const msg = 'Error setting edge dictionary value';
-          this.log.error(message, e);
+          this.progressBar().terminate();
+          const msg = `Error setting edge dictionary value: ${e.message}`;
+          this.log.error(message);
           throw new Error(msg, e);
         });
       dictJobs.push(job);
@@ -781,6 +815,15 @@ ${PublishCommand.makeParamWhitelist(params, '  ')}
     }
   }
 
+  logStats() {
+    this.log.debug('Stats of the publish process:');
+    this.log.debug(` - Number of requests to Fastly API: ${this._stats.requests}`);
+    this.log.debug(` - Final 'fastly-ratelimit-remaining': ${this._stats['fastly-ratelimit-remaining']}`);
+    this.log.debug(` - Number of strains published: ${this._stats.strainsPublished}`);
+    this.log.debug(` - Number of missing dictionaries: ${this._stats.missingdicts}`);
+    this.log.debug(` - Number of dictionary entries processed (created or deleted): ${this._stats.dictionaryEntries}`)
+  }
+
   async run() {
     await this.init();
     try {
@@ -790,10 +833,13 @@ ${PublishCommand.makeParamWhitelist(params, '  ')}
       await this.purgeAll();
 
       this.showNextStep();
+      this.logStats();
     } catch (e) {
+      this.progressBar().terminate();
+      this.logStats();
       const message = 'Error while running the Publish command';
-      this.log.error(`${message}: ${e.stack}`, e);
-      throw new Error(message, e);
+      this.log.error(`${message}: ${e.stack}`);
+      throw new Error(message);
     }
   }
 }
