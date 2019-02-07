@@ -345,7 +345,7 @@ class PublishCommand extends AbstractCommand {
     const existing = Object.entries(dictionaries).length - missingdicts.length;
     this.tick(existing, `Skipping ${existing} existing dictionaries`);
     if (missingdicts.length > 0) {
-      this.stats.missingdicts = missingdicts.length;
+      this._stats.missingdicts = missingdicts.length;
       const baseopts = await this.version('/dictionary');
       const fixdicts = missingdicts.map((dict) => {
         const opts = Object.assign({
