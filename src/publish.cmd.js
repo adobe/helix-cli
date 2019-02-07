@@ -201,7 +201,7 @@ class PublishCommand extends AbstractCommand {
       if (response.headers['fastly-ratelimit-remaining']) {
         this._stats['fastly-ratelimit-remaining'] = Math.min(
           response.headers['fastly-ratelimit-remaining'],
-          this._stats['fastly-ratelimit-remaining'] === 'N/A' ? Number.MAX_SAFE_INTEGER : this._stats['fastly-ratelimit-remaining']
+          this._stats['fastly-ratelimit-remaining'] === 'N/A' ? Number.MAX_SAFE_INTEGER : this._stats['fastly-ratelimit-remaining'],
         );
       }
       return Promise.resolve(response.body);
@@ -821,7 +821,7 @@ ${PublishCommand.makeParamWhitelist(params, '  ')}
     this.log.debug(` - Final 'fastly-ratelimit-remaining': ${this._stats['fastly-ratelimit-remaining']}`);
     this.log.debug(` - Number of strains published: ${this._stats.strainsPublished}`);
     this.log.debug(` - Number of missing dictionaries: ${this._stats.missingdicts}`);
-    this.log.debug(` - Number of dictionary entries processed (created or deleted): ${this._stats.dictionaryEntries}`)
+    this.log.debug(` - Number of dictionary entries processed (created or deleted): ${this._stats.dictionaryEntries}`);
   }
 
   async run() {
