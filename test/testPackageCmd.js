@@ -40,6 +40,7 @@ describe('hlx package (Integration)', () => {
         'test/integration/src/html.htl',
         'test/integration/src/html.pre.js',
         'test/integration/src/helper.js',
+        'test/integration/src/utils/another_helper.js',
       ])
       .withTargetDir(buildDir)
       .withCacheEnabled(false)
