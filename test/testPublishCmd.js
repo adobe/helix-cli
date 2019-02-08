@@ -31,7 +31,7 @@ let WSK_NAMESPACE = '---';
 
 // const SRC_STRAINS = path.resolve(__dirname, 'fixtures/strains.yaml');
 
-describe('hlx strain #unit', () => {
+describe('hlx publish #unit', () => {
   it('makeRegexp() #unit', () => {
     const globs1 = ['*.htl', '*.js'];
     assert.equal(PublishCommand.makeRegexp(globs1), '^.*\\.htl$|^.*\\.js$');
@@ -204,5 +204,21 @@ describe('hlx publish (Integration)', function suite() {
     } catch (e) {
       assert.ok(e.message);
     }
+  });
+
+  it('Stats - requests', async () => {
+    const cmd = new PublishCommand()
+      .withDirectory(testRoot)
+      .withFastlyAuth(FASTLY_AUTH)
+      .withFastlyNamespace(FASTLY_NAMESPACE)
+      .withWskHost('adobeioruntime.net')
+      .withWskAuth(WSK_AUTH)
+      .withWskNamespace(WSK_NAMESPACE);
+    /* eslint-disable no-underscore-dangle */
+    assert.equal(cmd._stats.requests, 0);
+    await cmd._requestFastly(cmd.options(''));
+    assert.equal(cmd._stats.requests, 1);
+    await cmd._requestFastly(cmd.options(''));
+    assert.equal(cmd._stats.requests, 2);
   });
 });

@@ -195,7 +195,7 @@ class PublishCommand extends AbstractCommand {
     return this;
   }
 
-  async requestFastly(options) {
+  async _requestFastly(options) {
     return request(options).then((response) => {
       this._stats.requests = this._stats.requests + 1;
       if (response.headers['fastly-ratelimit-remaining']) {
@@ -274,7 +274,7 @@ class PublishCommand extends AbstractCommand {
   async getService(refresh) {
     if (!this._service || refresh) {
       try {
-        this._service = await this.requestFastly(this.options(''));
+        this._service = await this._requestFastly(this.options(''));
       } catch (e) {
         this.progressBar().terminate();
         this.log.error(`Unable to get service: ${e.message}`);
@@ -302,7 +302,7 @@ class PublishCommand extends AbstractCommand {
     // if there are undefined dictionaries, we have to reload them
     if (Object.values(this._dictionaries).some(e => e == null)) {
       const opts = await this.version('/dictionary');
-      const dicts = await this.requestFastly(opts);
+      const dicts = await this._requestFastly(opts);
       Object.values(dicts).map((dict) => {
         if (!dict.deleted_at) {
           this._dictionaries[dict.name] = dict.id;
@@ -322,7 +322,7 @@ class PublishCommand extends AbstractCommand {
     // been fetched from the service yet
     if (Object.values(this._backends).some(e => e.created_at == null)) {
       const opts = await this.version('/backend');
-      const backs = await this.requestFastly(opts);
+      const backs = await this._requestFastly(opts);
       Object.values(backs).map((back) => {
         if (!back.deleted_at) {
           this._backends[back.name] = back;
@@ -355,7 +355,7 @@ class PublishCommand extends AbstractCommand {
             write_only: true,
           },
         }, baseopts);
-        return this.requestFastly(opts).then((r) => {
+        return this._requestFastly(opts).then((r) => {
           this.tick(1, `Dictionary ${dict} created`, dict);
           this._dictionaries[r.name] = r.id;
           return r;
@@ -394,7 +394,7 @@ class PublishCommand extends AbstractCommand {
         }, baseopts);
         try {
           this.tick(0, `Creating backend ${backend.name}`, true);
-          const r = await this.requestFastly(opts);
+          const r = await this._requestFastly(opts);
           this.tick(1, `Created backend ${backend.name}`, true);
           return r;
         } catch (e) {
@@ -415,7 +415,7 @@ class PublishCommand extends AbstractCommand {
   async cloneVersion() {
     const cloneOpts = await this.putVersionOpts('/clone');
     this.tick(0, 'Cloning Service Config version', 'cloning version');
-    return this.requestFastly(cloneOpts).then((r) => {
+    return this._requestFastly(cloneOpts).then((r) => {
       this._version = r.number;
       this.tick(1, `Cloned Service Config Version ${r.number}`, `cloning version ${r.number}`);
       return Promise.resolve(this);
@@ -434,7 +434,7 @@ class PublishCommand extends AbstractCommand {
   async publishVersion() {
     const actOpts = await this.putVersionOpts('/activate');
     this.tick(0, 'Activating version', 'activating version');
-    return this.requestFastly(actOpts).then((r) => {
+    return this._requestFastly(actOpts).then((r) => {
       this.tick(1, `Activated version ${r.number}`, `activated version ${r.number}`);
       this._version = r.number;
       return Promise.resolve(this);
@@ -464,11 +464,11 @@ class PublishCommand extends AbstractCommand {
     this._stats.dictionaryEntries = this._stats.dictionaryEntries + 1;
     if (value) {
       const opts = await this.putOpts(`/dictionary/${mydict}/item/${key}`, value);
-      return this.requestFastly(opts);
+      return this._requestFastly(opts);
     }
     try {
       const opts = await this.deleteOpts(`/dictionary/${mydict}/item/${key}`);
-      await this.requestFastly(opts);
+      await this._requestFastly(opts);
     } catch (e) {
       this.log.debug(`Unknown error when deleting key ${key} from dictionary ${mydict}`, e);
     }
@@ -605,13 +605,13 @@ ${PublishCommand.makeParamWhitelist(params, '  ')}
    */
   async transferVCL(vcl, name, isMain = false) {
     const opts = await this.vclopts(name, vcl);
-    return this.requestFastly(opts)
+    return this._requestFastly(opts)
       .then(async (r) => {
         this.tick(1, `Uploading VCL ${name}`, true);
         if (isMain) {
           const mainbaseopts = await this.version(`/vcl/${name}/main`);
           const mainopts = Object.assign({ method: 'PUT' }, mainbaseopts);
-          return this.requestFastly(mainopts).then(() => {
+          return this._requestFastly(mainopts).then(() => {
             this.tick(1, `Uploaded VCL ${name}`, true);
           });
         }
@@ -633,7 +633,7 @@ ${PublishCommand.makeParamWhitelist(params, '  ')}
     const opts = Object.assign({
       method: 'POST',
     }, baseopts);
-    return this.requestFastly(opts).then((r) => {
+    return this._requestFastly(opts).then((r) => {
       this.tick(1, 'Purging entire cache');
       return r;
     })
