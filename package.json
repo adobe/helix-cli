@@ -63,7 +63,7 @@
   },
   "devDependencies": {
     "@adobe/helix-testutils": "^0.2.0",
-    "ajv": "6.7.0",
+    "ajv": "6.9.0",
     "codecov": "3.0.2",
     "eslint": "5.4.0",
     "eslint-config-airbnb": "17.1.0",
