@@ -27,4 +27,4 @@ class ConfigUtils {
   }
 }
 
-module.exports = new ConfigUtils();
+module.exports = ConfigUtils;
