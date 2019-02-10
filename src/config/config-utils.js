@@ -16,10 +16,13 @@ const { GitUrl, GitUtils } = require('@adobe/helix-shared');
 const DEFAULT_CONFIG = path.resolve(__dirname, 'default-config.yaml');
 
 class ConfigUtils {
-  // eslint-disable-next-line class-methods-use-this
-  async createDefaultConfig() {
+  /**
+   * Returns a new default config
+   * @param {String} dir The working directory to use (optional)
+   */
+  static async createDefaultConfig(dir) {
     const source = await fs.readFile(DEFAULT_CONFIG, 'utf8');
-    const origin = new GitUrl(GitUtils.getOrigin() || 'http://localhost/local/default.git');
+    const origin = new GitUrl(GitUtils.getOrigin(dir) || 'http://localhost/local/default.git');
     return source.replace(/"\$CURRENT_ORIGIN"/g, `"${origin.toString()}"`);
   }
 }

@@ -279,9 +279,7 @@ describe('hlx deploy (Integration)', () => {
     assert.ok(log.indexOf('Affected strains of ssh://git@github.com/adobe/dummy.git#master') >= 0);
     assert.ok(log.indexOf('- new-strain') >= 0);
     await cmd.config.saveConfig(); // trigger manual save because of dry-run
-    // rewrite git urls from https to ssh
-    const actual = (await fs.readFile(cfg, 'utf-8')).replace(/[code|content|static].*(https:.*)/gm,
-      (fullMatch, url) => `${fullMatch.substring(0, fullMatch.indexOf(url))}${getSSHGitUrl(url)}`);
+    const actual = (await fs.readFile(cfg, 'utf-8'));
     const expected = await fs.readFile(path.resolve(__dirname, 'fixtures', 'default-proxy-updated.yaml'), 'utf-8');
     // eslint-disable-next-line no-underscore-dangle
     assert.equal(actual, expected.replace('$REF', cmd._prefix));

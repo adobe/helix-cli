@@ -28,6 +28,6 @@ strains:
 
   new-strain:
     code: ssh://git@github.com/adobe/dummy.git#master
-    content: ssh://git@github.com/adobe/helix-cli.git
-    static: ssh://git@github.com/adobe/helix-cli.git/htdocs
+    content: ssh://git@github.com/adobe/dummy.git
+    static: ssh://git@github.com/adobe/dummy.git/htdocs
     package: $REF

@@ -282,7 +282,7 @@ class DeployCommand extends AbstractCommand {
         // if default is proxy, fall back to default default
         if (newStrain.isProxy()) {
           const hlx = await new HelixConfig()
-            .withSource(await ConfigUtils.createDefaultConfig())
+            .withSource(await ConfigUtils.createDefaultConfig(this.directory))
             .init();
           newStrain = hlx.strains.get('default');
         }
