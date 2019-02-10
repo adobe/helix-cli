@@ -28,18 +28,6 @@ const TEST_DIR = path.resolve('test/integration');
 Replay.mode = 'bloody';
 Replay.fixtures = `${__dirname}/fixtures/`;
 
-function getSSHGitUrl(url) {
-  const giturl = new GitUrl(url);
-  /* eslint-disable no-underscore-dangle */
-  let auth = giturl._url.username || 'git';
-  if (giturl._url.password) {
-    auth += `:${giturl._url.password}`;
-  }
-  /* eslint-enable no-underscore-dangle */
-  const hash = giturl.ref ? `#${giturl.ref}` : '';
-  return `ssh://${auth}@${giturl.host}/${giturl.owner}/${giturl.repo}.git${giturl.path}${hash}`;
-}
-
 describe('hlx deploy (Integration)', () => {
   let testRoot;
   let hlxDir;
