@@ -12,7 +12,7 @@
 const fs = require('fs-extra');
 const path = require('path');
 const { GitUrl } = require('@adobe/helix-shared');
-const GitUtils = require('../GitUtils');
+const GitUtils = require('../git-utils');
 
 const DEFAULT_CONFIG = path.resolve(__dirname, 'default-config.yaml');
 
