@@ -19,7 +19,7 @@ const path = require('path');
 const $ = require('shelljs');
 const { Logger } = require('@adobe/helix-shared');
 const { initGit, createTestRoot } = require('./utils.js');
-const GitUtils = require('../src/GitUtils');
+const GitUtils = require('../src/git-utils');
 const BuildCommand = require('../src/build.cmd.js');
 const DeployCommand = require('../src/deploy.cmd.js');
 

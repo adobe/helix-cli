@@ -16,7 +16,7 @@ const assert = require('assert');
 const path = require('path');
 const fse = require('fs-extra');
 const Replay = require('replay');
-const GitUtils = require('../src/GitUtils');
+const GitUtils = require('../src/git-utils');
 const DemoCommand = require('../src/demo.cmd');
 
 const TEST_DIR = path.resolve(__dirname, 'tmp');

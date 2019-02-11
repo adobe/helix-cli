@@ -17,7 +17,7 @@ const path = require('path');
 const fse = require('fs-extra');
 const crypto = require('crypto');
 const shell = require('shelljs');
-const GitUtils = require('../src/GitUtils');
+const GitUtils = require('../src/git-utils');
 
 if (!shell.which('git')) {
   shell.echo('Sorry, this tests requires git');
