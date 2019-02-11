@@ -16,7 +16,7 @@ const assert = require('assert');
 const path = require('path');
 const fse = require('fs-extra');
 const Replay = require('replay');
-const { GitUtils } = require('@adobe/helix-shared');
+const GitUtils = require('../src/GitUtils');
 const DemoCommand = require('../src/demo.cmd');
 
 const TEST_DIR = path.resolve(__dirname, 'tmp');
