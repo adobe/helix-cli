@@ -685,7 +685,7 @@ ${PublishCommand.makeParamWhitelist(params, '  ')}
     const [secretp, ownsp] = dictJobs.splice(0, 2);
 
     this._strainsToPublish.forEach((strain) => {
-      const actionPrefix = `/${this._wsk_namespace}/${strain.package}/`;
+      const actionPrefix = `/${strain.package}/`;
 
       // content repo
       makeDictJob('strain_owners', strain.name, strain.content.owner, '- Set content owner', 'content owner');

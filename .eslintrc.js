@@ -32,7 +32,7 @@ module.exports = {
     // allow dangling underscores for 'fields'
     'no-underscore-dangle': ['error', {'allowAfterThis': true}],
 
-    // enforce license header (todo: improve plugin to support patterns for multi-lines)
+    // enforce license header
     'header/header': [2, 'block', ['',
       { pattern: ' * Copyright \\d{4} Adobe\\. All rights reserved\\.', template: ' * Copyright 2019 Adobe. All rights reserved.'},
       ' * This file is licensed to you under the Apache License, Version 2.0 (the "License");',
