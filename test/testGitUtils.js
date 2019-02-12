@@ -80,21 +80,21 @@ describe('Testing GitUtils', () => {
   });
 
   it('isDirty #unit', async () => {
-    assert.equal(GitUtils.isDirty(), false);
+    assert.equal(await GitUtils.isDirty(testRoot), false);
     await fse.writeFile(path.resolve(testRoot, 'README.md'), 'Hello, world.\n', 'utf-8');
-    assert.equal(GitUtils.isDirty(), true);
+    assert.equal(await GitUtils.isDirty(testRoot), true);
 
     shell.cd(pwd);
-    assert.equal(GitUtils.isDirty(testRoot), true);
+    assert.equal(await GitUtils.isDirty(testRoot), true);
   });
 
   it('getBranchFlag #unit', async () => {
-    assert.equal(GitUtils.getBranchFlag(), 'master');
+    assert.equal(await GitUtils.getBranchFlag(testRoot), 'master');
     await fse.writeFile(path.resolve(testRoot, 'README.md'), 'Hello, world.\n', 'utf-8');
-    assert.equal(GitUtils.getBranchFlag(), 'dirty');
+    assert.equal(await GitUtils.getBranchFlag(testRoot), 'dirty');
 
     shell.cd(pwd);
-    assert.equal(GitUtils.getBranchFlag(testRoot), 'dirty');
+    assert.equal(await GitUtils.getBranchFlag(testRoot), 'dirty');
   });
 
   it('getRepository #unit', async () => {

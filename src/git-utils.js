@@ -15,6 +15,8 @@
 const $ = require('shelljs');
 const path = require('path');
 const { GitUrl } = require('@adobe/helix-shared');
+const git = require('isomorphic-git');
+git.plugins.set('fs', require('fs'));
 
 function runIn(dir, fn) {
   const pwd = $.pwd();
@@ -31,13 +33,15 @@ function runIn(dir, fn) {
 }
 
 class GitUtils {
-  static isDirty(dir) {
-    return runIn(dir, () => $
-      .exec('git status --porcelain', {
-        silent: true,
-      })
-      .stdout.replace(/\n/g, '')
-      .replace(/[\W]/g, '-').length > 0);
+  static async isDirty(dir) {
+    // see https://isomorphic-git.org/docs/en/statusMatrix
+    const HEAD = 1;
+    const WORKDIR = 2;
+    const STAGE = 3;
+    const matrix = await git.statusMatrix({ dir });
+    return matrix
+      .filter(row => !(row[HEAD] === row[WORKDIR] && row[WORKDIR] === row[STAGE]))
+      .length !== 0;
   }
 
   static getBranch(dir) {
@@ -64,8 +68,9 @@ class GitUtils {
     });
   }
 
-  static getBranchFlag(dir) {
-    return GitUtils.isDirty(dir) ? 'dirty' : GitUtils.getBranch(dir).replace(/[\W]/g, '-');
+  static async getBranchFlag(dir) {
+    const dirty = await GitUtils.isDirty(dir);
+    return dirty ? 'dirty' : GitUtils.getBranch(dir).replace(/[\W]/g, '-');
   }
 
   static getRepository(dir) {
