@@ -314,9 +314,10 @@ Alternatively you can auto-add one using the {grey --add <name>} option.`);
       this.log.info(chalk`Updated strain {cyan ${newStrain.name}} in helix-config.yaml`);
     }
 
-    this._prefix = GitUtils.getCurrentRevision(this.directory);
     if (dirty) {
-      this._prefix += '-dirty';
+      this._prefix = `${giturl.host.replace(/[\W]/g, '-')}--${giturl.owner.replace(/[\W]/g, '-')}--${giturl.repo.replace(/[\W]/g, '-')}--${giturl.ref.replace(/[\W]/g, '-')}-dirty`;
+    } else {
+      this._prefix = GitUtils.getCurrentRevision(this.directory);
     }
 
     const owoptions = {
@@ -444,12 +445,13 @@ Alternatively you can auto-add one using the {grey --add <name>} option.`);
 
     // update package in affected strains
     this.log.info(`Affected strains of ${giturl}:`);
+    const packageProperty = `${this._wsk_namespace}/${this._prefix}`;
     affected.forEach((strain) => {
       this.log.info(`- ${strain.name}`);
-      if (strain.package !== this._prefix) {
+      if (strain.package !== packageProperty) {
         this.config.modified = true;
         // eslint-disable-next-line no-param-reassign
-        strain.package = this._prefix;
+        strain.package = packageProperty;
       }
     });
 

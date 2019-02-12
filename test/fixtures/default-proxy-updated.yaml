@@ -30,4 +30,4 @@ strains:
     code: ssh://git@github.com/adobe/dummy.git#master
     content: ssh://git@github.com/adobe/dummy.git
     static: ssh://git@github.com/adobe/dummy.git/htdocs
-    package: $REF
+    package: hlx/$REF

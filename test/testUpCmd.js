@@ -78,7 +78,11 @@ describe('Integration test for up command', () => {
     let error = null;
     const cmd = new UpCommand()
       .withCacheEnabled(false)
-      .withFiles([path.join(testDir, 'src', '*.htl'), path.join(testDir, 'src', '*.js')])
+      .withFiles([
+        path.join(testDir, 'src', '*.htl'),
+        path.join(testDir, 'src', '*.js'),
+        path.join(testDir, 'src', 'utils', '*.js'),
+      ])
       .withTargetDir(buildDir)
       .withDirectory(testDir)
       .withHttpPort(0);
@@ -110,7 +114,11 @@ describe('Integration test for up command', () => {
     await fse.rename(path.resolve(testDir, 'default-config.yaml'), path.resolve(testDir, 'helix-config.yaml'));
     const cmd = new UpCommand()
       .withCacheEnabled(false)
-      .withFiles([path.join(testDir, 'src', '*.htl'), path.join(testDir, 'src', '*.js')])
+      .withFiles([
+        path.join(testDir, 'src', '*.htl'),
+        path.join(testDir, 'src', '*.js'),
+        path.join(testDir, 'src', 'utils', '*.js'),
+      ])
       .withTargetDir(buildDir)
       .withDirectory(testDir)
       .withOverrideHost('www.project-helix.io')
@@ -194,7 +202,11 @@ describe('Integration test for up command', () => {
     let error = null;
     const cmd = new UpCommand()
       .withCacheEnabled(false)
-      .withFiles([path.join(testDir, 'src', '*.htl'), path.join(testDir, 'src', '*.js')])
+      .withFiles([
+        path.join(testDir, 'src', '*.htl'),
+        path.join(testDir, 'src', '*.js'),
+        path.join(testDir, 'src', 'utils', '*.js'),
+      ])
       .withTargetDir(buildDir)
       .withDirectory(testDir)
       .withHttpPort(0);
