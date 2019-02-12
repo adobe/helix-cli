@@ -34,4 +34,4 @@ strains:
     code: ssh://git@github.com/adobe/project-foo.io.git#master
     content: ssh://git@github.com/adobe/project-foo.io.git#master
     static: ssh://git@github.com/adobe/project-foo.io.git/htdocs#master
-    package: $REF
+    package: hlx/$REF

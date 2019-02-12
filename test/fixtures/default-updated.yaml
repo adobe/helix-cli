@@ -26,7 +26,7 @@ strains:
     code: ssh://git@github.com/adobe/project-foo.io.git#master
     content: ssh://git@github.com/adobe/project-foo.io.git#master
     static: ssh://git@github.com/adobe/project-foo.io.git/htdocs#master
-    package: $REF
+    package: hlx/github-com--adobe--project-foo-io--master-dirty
 
   myproxy:
     origin: http://127.0.0.1/foo
