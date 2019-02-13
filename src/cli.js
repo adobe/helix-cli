@@ -84,6 +84,7 @@ class CLI {
     Object.values(this._commands).forEach(cmd => argv.command(cmd));
 
     return logArgs(argv)
+      .scriptName('hlx')
       .fail(this._failFn)
       .exitProcess(args.indexOf('--get-yargs-completions') > -1)
       .strict()
