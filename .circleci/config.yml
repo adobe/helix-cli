@@ -1,10 +1,6 @@
 version: 2.1
 executors:
   node8:
-    docker:
-    # use latest node 8 on debian 8 (jessie)
-    # (on debian 9 (stretch) a runtime error occurs: Error: libcrypto.so.1.0.0: cannot open shared object file: No such file or directory)
-    - image: circleci/node:8-jessie
     environment:
       NPM_CONFIG_PREFIX: ~/.npm-global
 
@@ -182,8 +178,6 @@ jobs:
 
   github-release:
     # https://circleci.com/blog/publishing-to-github-releases-via-circleci/
-    docker:
-      - image: cibuilds/github:0.12
     steps:
       - checkout
       - attach_workspace:

@@ -63,9 +63,6 @@ module.exports = function deploy() {
           type: 'string',
           describe: 'Target directory of created action packages.',
         })
-        .option('docker', {
-          describe: 'Docker image for Adobe I/O Runtime function',
-        })
         .option('default', {
           describe: 'Adds a default parameter to the function',
           type: 'string',
@@ -95,7 +92,7 @@ module.exports = function deploy() {
           return Object.assign(res, result);
         }, {}))
         .group(['auto', 'wsk-auth', 'wsk-namespace', 'default', 'dirty'], 'Deployment Options')
-        .group(['wsk-host', 'loggly-host', 'loggly-auth', 'target', 'docker'], 'Advanced Options')
+        .group(['wsk-host', 'loggly-host', 'loggly-auth', 'target'], 'Advanced Options')
         .group(['package', 'target'], 'Package options')
         .check((args) => {
           if (!args.auto) {
@@ -145,7 +142,6 @@ module.exports = function deploy() {
         .withLogglyHost(argv.logglyHost)
         .withLogglyAuth(argv.logglyAuth)
         .withTarget(argv.target)
-        .withDocker(argv.docker)
         .withDefault(argv.default)
         .withDryRun(argv.dryRun)
         .withCircleciAuth(argv.circleciAuth)
