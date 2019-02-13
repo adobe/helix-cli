@@ -292,8 +292,6 @@ class DeployCommand extends AbstractCommand {
       }
       if (newStrain.static.url.isLocal) {
         newStrain.static.url = giturl;
-        // eslint-disable-next-line no-underscore-dangle
-        newStrain._modified('static', newStrain.static);
       }
       if (this._addStrain === null) {
         this.log.error(chalk`Remote repository {cyan ${giturl}} does not affect any strains.
