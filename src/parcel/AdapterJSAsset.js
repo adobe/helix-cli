@@ -50,9 +50,19 @@ class AdapterJSAsset extends JSAsset {
     // return;
     const isRelativeImport = /^[/~.]/.test(name);
     if (isRelativeImport) {
-      // we mark the asset as dynamic so it won't get merged into this source.
-      const resolved = path.resolve(path.dirname(this.name), name);
-      super.addDependency(name, Object.assign({ dynamic: true, resolved }, opts));
+      try {
+        const resolved = require.resolve(name, {
+          paths: [
+            path.dirname(this.name),
+          ],
+        });
+        // we mark the asset as dynamic so it won't get merged into this source.
+        super.addDependency(name, Object.assign({ dynamic: true, resolved }, opts));
+      } catch (e) {
+        // the exact stack trace is not relevant to the end user.
+        e.stack = null;
+        throw e;
+      }
     }
   }
 }

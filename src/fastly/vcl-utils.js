@@ -18,6 +18,7 @@ function conditions([strain, vcl]) {
       const pathname = uri.path.replace(/\/$/, '');
       const body = vcl.body || [];
       body.push(`set req.http.X-Dirname = regsub(req.http.X-FullDirname, "^${pathname}", "");`);
+      body.push(`set req.http.X-Root-Path = "${pathname}";`);
       return [strain, {
         sticky: false,
         condition: `req.http.Host == "${uri.host}" && (req.http.X-FullDirname ~ "^${pathname}$" || req.http.X-FullDirname ~ "^${pathname}/")`,
@@ -86,7 +87,7 @@ function namebody([strain, vcl]) {
 
 function resolve(mystrains) {
   const strains = mystrains instanceof Map ? Array.from(mystrains.values()) : mystrains;
-  let retvcl = '# This file handles the strain resolution\n';
+  let retvcl = '# This file handles the strain resolution\nset req.http.X-Root-Path = "";\n';
   const strainconditions = strains
     .map(strain => [strain, { body: [] }])
     .map(conditions)
