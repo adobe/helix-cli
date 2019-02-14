@@ -58,6 +58,7 @@ class CLI {
       perf: require('./perf.js')(),
       publish: require('./publish.js')(),
       clean: require('./clean.js')(),
+      auth: require('./auth.js')(),
     };
     this._failFn = (message, err, argv) => {
       const msg = err ? err.message : message;
