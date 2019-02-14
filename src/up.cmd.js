@@ -57,7 +57,11 @@ class UpCommand extends BuildCommand {
 
   async stop() {
     if (this._project) {
-      await this._project.stop();
+      try {
+        await this._project.stop();
+      } catch (e) {
+        // ignore
+      }
       this._project = null;
     }
     if (this._watcher) {
@@ -199,7 +203,8 @@ access remote content and to deploy helix. Consider running
 {gray hlx up --save-config} to generate a default config.`);
         }
       } catch (e) {
-        this.log.error(`Internal error: ${e.message}`);
+        this.log.error(`Error: ${e.message}`);
+        await this.stop();
       }
     };
 
