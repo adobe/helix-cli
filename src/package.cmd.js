@@ -144,7 +144,7 @@ class PackageCommand extends AbstractCommand {
     await this.init();
 
     // get the list of scripts from the info files
-    const infos = [...glob.sync(`${this._target}/*.info.json`)];
+    const infos = [...glob.sync(`${this._target}/**/*.info.json`)];
     const scriptInfos = await Promise.all(infos.map(info => fs.readJSON(info)));
 
     // resolve dependencies

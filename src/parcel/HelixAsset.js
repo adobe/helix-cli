@@ -66,7 +66,8 @@ class HelixAsset extends Asset {
 
   getPreprocessor(name, fallback) {
     if (fs.existsSync(name)) {
-      return path.relative(this.name, name).substr(1);
+      // ensure forward slashes (windows)
+      return path.relative(this.name, name).substr(1).replace(/\\/g, '/');
     }
     try {
       if (require.resolve(fallback)) {

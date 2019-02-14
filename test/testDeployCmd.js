@@ -185,11 +185,11 @@ describe('hlx deploy (Integration)', () => {
     assert.equal(actual, expected.replace('$REF', cmd._prefix));
   });
 
-  it('deploy replaces default --add=default', async () => {
+  it('deploy replaces default --add=default with dirty', async () => {
     await fs.copy(TEST_DIR, testRoot);
     const cfg = path.resolve(testRoot, 'helix-config.yaml');
-    await fs.rename(path.resolve(testRoot, 'default-config.yaml'), cfg);
     initGit(testRoot, 'git@github.com:adobe/project-foo.io.git');
+    await fs.rename(path.resolve(testRoot, 'default-config.yaml'), cfg);
     const logger = Logger.getTestLogger();
     const cmd = await new DeployCommand(logger)
       .withDirectory(testRoot)
@@ -197,7 +197,7 @@ describe('hlx deploy (Integration)', () => {
       .withWskAuth('secret-key')
       .withWskNamespace('hlx')
       .withEnableAuto(false)
-      .withEnableDirty(false)
+      .withEnableDirty(true)
       .withDryRun(true)
       .withTarget(buildDir)
       .withFastlyAuth('nope')
@@ -212,8 +212,7 @@ describe('hlx deploy (Integration)', () => {
     await cmd.config.saveConfig(); // trigger manual save because of dry-run
     const actual = await fs.readFile(cfg, 'utf-8');
     const expected = await fs.readFile(path.resolve(__dirname, 'fixtures', 'default-updated.yaml'), 'utf-8');
-    // eslint-disable-next-line no-underscore-dangle
-    assert.equal(actual, expected.replace('$REF', cmd._prefix));
+    assert.equal(actual, expected);
   });
 
   it('deploy reports affected strains', async () => {
@@ -309,6 +308,7 @@ describe('hlx deploy (Integration)', () => {
         path.resolve(testRoot, 'src/html.htl'),
         path.resolve(testRoot, 'src/html.pre.js'),
         path.resolve(testRoot, 'src/helper.js'),
+        path.resolve(testRoot, 'src/utils/another_helper.js'),
       ])
       .withTargetDir(buildDir)
       .withCacheEnabled(false)
@@ -327,7 +327,7 @@ describe('hlx deploy (Integration)', () => {
 
     const ref = GitUtils.getCurrentRevision(testRoot);
     assert.equal(cmd.config.strains.get('default').package, '');
-    assert.equal(cmd.config.strains.get('dev').package, ref);
+    assert.equal(cmd.config.strains.get('dev').package, `hlx/${ref}`);
     // todo: can't test writeback of helix-config.yaml, since it's disabled during dry-run
 
     const log = await logger.getOutput();
