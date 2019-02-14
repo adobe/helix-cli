@@ -31,7 +31,7 @@
     "@adobe/helix-pipeline": "0.11.0",
     "@adobe/helix-shared": "0.6.1",
     "@adobe/helix-simulator": "2.10.1",
-    "@adobe/parcel-plugin-htl": "2.0.1",
+    "@adobe/parcel-plugin-htl": "2.0.2",
     "@snyk/nodejs-runtime-agent": "1.39.0",
     "archiver": "3.0.0",
     "calibre": "1.1.1",
