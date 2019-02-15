@@ -51,7 +51,7 @@
     "parcel-bundler": "1.10.0",
     "progress": "2.0.1",
     "request": "2.87.0",
-    "request-promise-native": "1.0.6",
+    "request-promise-native": "1.0.7",
     "shelljs": "0.8.2",
     "snyk": "1.130.0",
     "source-map": "0.7.3",
