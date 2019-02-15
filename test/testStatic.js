@@ -13,6 +13,10 @@ const assert = require('assert');
 const index = require('../src/openwhisk/static');
 /* eslint-env mocha */
 
+async function callMain(args, cb) {
+  cb(await index.main(args));
+}
+
 describe('Static Delivery Action #unittest', () => {
   it('error() #unittest', () => {
     const error = index.error('Test');
@@ -74,5 +78,42 @@ describe('Static Delivery Action #unittest', () => {
     assert.equal(index.blacklisted('src/html.htl', '^.*\\.htl$|^.*\\.js$', 'foo'), true);
 
     assert.equal(index.blacklisted('foo/html.htl', '^.*\\.htl$|^.*\\.js$', ''), false);
+  });
+
+  it('main() returns static file from GitHub', async () => {
+    await callMain({
+      owner: 'adobe',
+      repo: 'helix-cli',
+      entry: '/demos/simple/htdocs/style.css',
+      plain: true,
+    },
+    (res) => {
+      assert.notEqual(res.statusCode, 404);
+      assert.ok(res.body.indexOf('Arial') > 0, true);
+    });
+  });
+
+  it('main() returns 403 if plain is false', async () => {
+    await callMain({
+      owner: 'adobe',
+      repo: 'helix-cli',
+      entry: '/demos/simple/htdocs/style.css',
+      plain: false,
+    },
+    (res) => {
+      assert.equal(res.statusCode, 403);
+    });
+  });
+
+  it('main() returns 403 in case of backlisted file', async () => {
+    await callMain({
+      owner: 'adobe',
+      repo: 'helix-cli',
+      entry: '/package.json',
+      plain: true,
+    },
+    (res) => {
+      assert.equal(res.statusCode, 403);
+    });
   });
 });
