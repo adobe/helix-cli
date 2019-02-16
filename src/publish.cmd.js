@@ -527,7 +527,7 @@ ${PublishCommand.makeParamWhitelist(params, '  ')}
   async getVersionVCLSection() {
     const configVersion = await this.getCurrentVersion();
     const cliVersion = cli.getVersion();
-    const revision = GitUtils.getCurrentRevision();
+    const revision = await GitUtils.getCurrentRevision(this.directory);
 
     return PublishCommand.getXVersionExtensionVCL(configVersion, cliVersion, revision);
   }

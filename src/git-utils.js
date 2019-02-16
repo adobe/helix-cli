@@ -12,25 +12,10 @@
 
 /* eslint no-console: off */
 
-const $ = require('shelljs');
 const path = require('path');
 const { GitUrl } = require('@adobe/helix-shared');
 const git = require('isomorphic-git');
 git.plugins.set('fs', require('fs'));
-
-function runIn(dir, fn) {
-  const pwd = $.pwd();
-  try {
-    if (dir) {
-      $.cd(dir);
-    }
-    return fn();
-  } finally {
-    if (dir) {
-      $.cd(pwd);
-    }
-  }
-}
 
 class GitUtils {
   static async isDirty(dir) {
@@ -44,73 +29,50 @@ class GitUtils {
       .length !== 0;
   }
 
-  static getBranch(dir) {
-    return runIn(dir, () => {
-      const rev = $
-        .exec('git rev-parse HEAD', {
-          silent: true,
-        })
-        .stdout.replace(/\n/g, '');
+  static async getBranch(dir) {
+    // current branch name
+    const currentBranch = await git.currentBranch({ dir, fullname: false });
+    // current commit sha
+    const rev = await git.resolveRef({ dir, ref: 'HEAD' });
+    // reverse-lookup tag from commit sha
+    const allTags = await git.listTags({ dir });
 
-      const tag = $
-        .exec(`git name-rev --tags --name-only ${rev}`, {
-          silent: true,
-        })
-        .stdout.replace(/\n/g, '');
-
-      const branchname = $
-        .exec('git rev-parse --abbrev-ref HEAD', {
-          silent: true,
-        })
-        .stdout.replace(/\n/g, '');
-
-      return tag !== 'undefined' ? tag : branchname;
-    });
+    const tagCommitShas = await Promise.all(allTags.map(async (tag) => {
+      const oid = await git.resolveRef({ dir, ref: tag });
+      const obj = await git.readObject({ dir, oid });
+      // annotated or lightweight tag?
+      return obj.type === 'tag' ? {
+        tag,
+        sha: await git.resolveRef({ dir, ref: obj.object.object }),
+      } : { tag, sha: oid };
+    }));
+    const tag = tagCommitShas.find(entry => entry.sha === rev);
+    return typeof tag === 'object' ? tag.tag : currentBranch;
   }
 
   static async getBranchFlag(dir) {
     const dirty = await GitUtils.isDirty(dir);
-    return dirty ? 'dirty' : GitUtils.getBranch(dir).replace(/[\W]/g, '-');
+    const branch = await GitUtils.getBranch(dir);
+    return dirty ? 'dirty' : branch.replace(/[\W]/g, '-');
   }
 
-  static getRepository(dir) {
-    return runIn(dir, () => {
-      const repo = GitUtils.getOrigin()
-        .replace(/[\W]/g, '-');
-      if (repo !== '') {
-        return repo;
-      }
-      return `local--${path.basename(process.cwd())}`;
-    });
+  static async getRepository(dir) {
+    const repo = (await GitUtils.getOrigin(dir))
+      .replace(/[\W]/g, '-');
+    return repo !== '' ? repo : `local--${path.basename(process.cwd())}`;
   }
 
-  static getOrigin(dir) {
-    return runIn(dir, () => {
-      try {
-        const origin = $.exec('git config --get remote.origin.url', {
-          silent: true,
-        }).stdout.replace(/\n/g, '');
-        return origin;
-      } catch (e) {
-        return '';
-      }
-    });
+  static async getOrigin(dir) {
+    const rmt = (await git.listRemotes({ dir })).find(entry => entry.remote === 'origin');
+    return typeof rmt === 'object' ? rmt.url : '';
   }
 
-  static getOriginURL(dir) {
-    return new GitUrl(GitUtils.getOrigin(dir));
+  static async getOriginURL(dir) {
+    return new GitUrl(await GitUtils.getOrigin(dir));
   }
 
-  static getCurrentRevision(dir) {
-    return runIn(dir, () => {
-      const rev = $
-        .exec('git rev-parse HEAD', {
-          silent: true,
-        })
-        .stdout.replace(/\n/g, '')
-        .replace(/[\W]/g, '-');
-      return rev;
-    });
+  static async getCurrentRevision(dir) {
+    return git.resolveRef({ dir, ref: 'HEAD' });
   }
 }
 

@@ -180,7 +180,7 @@ class DeployCommand extends AbstractCommand {
       throw new Error(`Cannot automate deployment without ${path.resolve(process.cwd(), '.circleci', 'config.yaml')}`);
     }
 
-    const { owner, repo, ref } = GitUtils.getOriginURL();
+    const { owner, repo, ref } = await GitUtils.getOriginURL(this.directory);
 
     const auth = {
       username: this._circleciAuth,
@@ -260,7 +260,7 @@ class DeployCommand extends AbstractCommand {
 
   async run() {
     await this.init();
-    const origin = GitUtils.getOrigin(this.directory);
+    const origin = await GitUtils.getOrigin(this.directory);
     if (!origin) {
       throw Error('hlx cannot deploy without a remote git repository. Add one with\n$ git remote add origin <github_repo_url>.git');
     }
@@ -273,7 +273,7 @@ class DeployCommand extends AbstractCommand {
     }
 
     // get git coordinates and list affected strains
-    const ref = GitUtils.getBranch(this.directory);
+    const ref = await GitUtils.getBranch(this.directory);
     const giturl = new GitUrl(`${origin}#${ref}`);
     const affected = this.config.strains.filterByCode(giturl);
     if (affected.length === 0) {
@@ -318,7 +318,7 @@ Alternatively you can auto-add one using the {grey --add <name>} option.`);
     if (dirty) {
       this._prefix = `${giturl.host.replace(/[\W]/g, '-')}--${giturl.owner.replace(/[\W]/g, '-')}--${giturl.repo.replace(/[\W]/g, '-')}--${giturl.ref.replace(/[\W]/g, '-')}-dirty`;
     } else {
-      this._prefix = GitUtils.getCurrentRevision(this.directory);
+      this._prefix = await GitUtils.getCurrentRevision(this.directory);
     }
 
     const owoptions = {

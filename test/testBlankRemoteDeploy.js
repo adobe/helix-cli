@@ -43,10 +43,10 @@ describe('Test Deployment in Empty Project', () => {
       });
   });
 
-  it('Get function name', () => {
+  it('Get function name', async () => {
     // eslint-disable-next-line global-require
-    assert.notEqual('', GitUtils.getRepository());
-    assert.equal('local--pulvillar-pantograph', GitUtils.getRepository());
+    assert.notEqual('', await GitUtils.getRepository(process.cwd()));
+    assert.equal('local--pulvillar-pantograph', await GitUtils.getRepository(process.cwd()));
   });
 
   afterEach('Reset working directory', function after() {

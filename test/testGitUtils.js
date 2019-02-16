@@ -17,6 +17,10 @@ const path = require('path');
 const fse = require('fs-extra');
 const crypto = require('crypto');
 const shell = require('shelljs');
+
+const git = require('isomorphic-git');
+git.plugins.set('fs', require('fs'));
+
 const GitUtils = require('../src/git-utils');
 
 if (!shell.which('git')) {
@@ -53,38 +57,26 @@ describe('Testing GitUtils', () => {
     await fse.remove(testRoot);
   });
 
-  it('getOrigin #unit', () => {
+  it('getOrigin #unit', async () => {
     shell.exec('git remote add origin http://github.com/adobe/dummy.git');
-    assert.ok(GitUtils.getOrigin());
-    assert.ok(/dummy/.test(GitUtils.getOrigin()));
-
-    shell.cd(pwd);
-    assert.ok(/dummy/.test(GitUtils.getOrigin(testRoot)));
+    assert.ok(await GitUtils.getOrigin(testRoot));
+    assert.ok(/dummy/.test(await GitUtils.getOrigin(testRoot)));
   });
 
-  it('getOriginURL #unit', () => {
+  it('getOriginURL #unit', async () => {
     shell.exec('git remote add origin http://github.com/adobe/dummy.git');
-    assert.ok(GitUtils.getOriginURL());
-    assert.equal(GitUtils.getOriginURL().toString(), 'http://github.com/adobe/dummy.git');
-
-    shell.cd(pwd);
-    assert.equal(GitUtils.getOriginURL(testRoot).toString(), 'http://github.com/adobe/dummy.git');
+    assert.ok(await GitUtils.getOriginURL(testRoot));
+    assert.equal((await GitUtils.getOriginURL(testRoot)).toString(), 'http://github.com/adobe/dummy.git');
   });
 
-  it('getBranch #unit', () => {
+  it('getBranch #unit', async () => {
     shell.exec('git checkout -b newbranch');
-    assert.equal(GitUtils.getBranch(), 'newbranch');
-
-    shell.cd(pwd);
-    assert.equal(GitUtils.getBranch(testRoot), 'newbranch');
+    assert.equal(await GitUtils.getBranch(testRoot), 'newbranch');
   });
 
   it('isDirty #unit', async () => {
     assert.equal(await GitUtils.isDirty(testRoot), false);
     await fse.writeFile(path.resolve(testRoot, 'README.md'), 'Hello, world.\n', 'utf-8');
-    assert.equal(await GitUtils.isDirty(testRoot), true);
-
-    shell.cd(pwd);
     assert.equal(await GitUtils.isDirty(testRoot), true);
   });
 
@@ -92,30 +84,18 @@ describe('Testing GitUtils', () => {
     assert.equal(await GitUtils.getBranchFlag(testRoot), 'master');
     await fse.writeFile(path.resolve(testRoot, 'README.md'), 'Hello, world.\n', 'utf-8');
     assert.equal(await GitUtils.getBranchFlag(testRoot), 'dirty');
-
-    shell.cd(pwd);
-    assert.equal(await GitUtils.getBranchFlag(testRoot), 'dirty');
   });
 
   it('getRepository #unit', async () => {
     shell.exec('git remote add origin http://github.com/adobe/dummy.git');
-    assert.equal(GitUtils.getRepository(), 'http---github-com-adobe-dummy-git');
-
-    shell.cd(pwd);
-    assert.equal(GitUtils.getRepository(testRoot), 'http---github-com-adobe-dummy-git');
+    assert.equal(await GitUtils.getRepository(testRoot), 'http---github-com-adobe-dummy-git');
   });
 
   it('getRepository (local) #unit', async () => {
-    assert.equal(GitUtils.getRepository(), `local--${path.basename(testRoot)}`);
-
-    shell.cd(pwd);
-    assert.equal(GitUtils.getRepository(testRoot), `local--${path.basename(testRoot)}`);
+    assert.equal(await GitUtils.getRepository(testRoot), `local--${path.basename(testRoot)}`);
   });
 
   it('getCurrentRevision #unit', async () => {
-    assert.ok(/[0-9a-fA-F]+/.test(GitUtils.getCurrentRevision()));
-
-    shell.cd(pwd);
-    assert.ok(/[0-9a-fA-F]+/.test(GitUtils.getCurrentRevision(testRoot)));
+    assert.ok(/[0-9a-fA-F]+/.test(await GitUtils.getCurrentRevision(testRoot)));
   });
 });

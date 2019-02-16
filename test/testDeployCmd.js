@@ -326,7 +326,7 @@ describe('hlx deploy (Integration)', () => {
       .withTarget(buildDir)
       .run();
 
-    const ref = GitUtils.getCurrentRevision(testRoot);
+    const ref = await GitUtils.getCurrentRevision(testRoot);
     assert.equal(cmd.config.strains.get('default').package, '');
     assert.equal(cmd.config.strains.get('dev').package, `hlx/${ref}`);
     // todo: can't test writeback of helix-config.yaml, since it's disabled during dry-run

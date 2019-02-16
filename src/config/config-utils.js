@@ -23,7 +23,7 @@ class ConfigUtils {
    */
   static async createDefaultConfig(dir) {
     const source = await fs.readFile(DEFAULT_CONFIG, 'utf8');
-    const origin = new GitUrl(GitUtils.getOrigin(dir) || 'http://localhost/local/default.git');
+    const origin = new GitUrl(await GitUtils.getOrigin(dir || process.cwd()) || 'http://localhost/local/default.git');
     return source.replace(/"\$CURRENT_ORIGIN"/g, `"${origin.toString()}"`);
   }
 }
