@@ -72,6 +72,8 @@ describe('Testing GitUtils', () => {
   it('getBranch #unit', async () => {
     shell.exec('git checkout -b newbranch');
     assert.equal(await GitUtils.getBranch(testRoot), 'newbranch');
+    shell.exec('git tag v0.0.0');
+    assert.equal(await GitUtils.getBranch(testRoot), 'v0.0.0');
   });
 
   it('isDirty #unit', async () => {

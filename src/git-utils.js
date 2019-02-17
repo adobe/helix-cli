@@ -10,8 +10,6 @@
  * governing permissions and limitations under the License.
  */
 
-/* eslint no-console: off */
-
 const path = require('path');
 const { GitUrl } = require('@adobe/helix-shared');
 const git = require('isomorphic-git');
