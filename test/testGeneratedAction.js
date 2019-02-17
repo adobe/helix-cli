@@ -74,6 +74,7 @@ const TEST_SCRIPTS = [
   { name: 'promise_html', matches: [/Hello, world/, /this is a bar/] },
   { name: 'return_promise_html', matches: [/Hello, world/, /this is a bar/] },
   { name: 'require_html', matches: [/Hello, world/, /this is a bar/] },
+  { name: 'require_noext_html', matches: [/Hello, world/, /this is a bar/] },
   { name: 'simple_html', matches: [/Hello, world/, /this is a bar/] },
   { name: 'return_simple_html', matches: [/Hello, world/, /this is a bar/] },
   { name: 'xml', type: 'js', matches: [/works: bar/] },

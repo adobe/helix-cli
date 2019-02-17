@@ -152,6 +152,7 @@ describe('hlx deploy (Integration)', () => {
     } catch (e) {
       const log = await logger.getOutput();
       assert.ok(log.indexOf('error: Remote repository ssh://git@github.com/adobe/project-foo.io.git#master does not affect any strains.') >= 0);
+      assert.ok(log.indexOf('http://localhost') < 0, true);
     }
   });
 

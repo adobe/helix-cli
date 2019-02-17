@@ -56,7 +56,7 @@ describe('Dynamic Strain (VCL) generation', () => {
     const mystrains = Array.from(config.strains.values());
 
     const vclfile = fs.readFileSync(path.resolve(__dirname, 'fixtures/default.vcl')).toString();
-    assert.equal(vclfile, PublishCommand.getStrainResolutionVCL(mystrains));
+    assert.equal(PublishCommand.getStrainResolutionVCL(mystrains), vclfile);
   });
 
   it('getStrainResolutionVCL generates VLC for simple conditions strains', async () => {

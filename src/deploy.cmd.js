@@ -46,7 +46,6 @@ class DeployCommand extends AbstractCommand {
     this._fastly_namespace = null;
     this._fastly_auth = null;
     this._target = null;
-    this._docker = null;
     this._prefix = null;
     this._default = null;
     this._enableDirty = false;
@@ -106,11 +105,6 @@ class DeployCommand extends AbstractCommand {
 
   withTarget(value) {
     this._target = value;
-    return this;
-  }
-
-  withDocker(value) {
-    this._docker = value;
     return this;
   }
 
@@ -299,6 +293,8 @@ class DeployCommand extends AbstractCommand {
       }
       if (newStrain.static.url.isLocal) {
         newStrain.static.url = giturl;
+        // eslint-disable-next-line no-underscore-dangle
+        newStrain._modified('static', newStrain.static);
       }
       if (this._addStrain === null) {
         this.log.error(chalk`Remote repository {cyan ${giturl}} does not affect any strains.
@@ -409,15 +405,6 @@ Alternatively you can auto-add one using the {grey --add <name>} option.`);
         kind: 'nodejs:10-fat',
         annotations: { 'web-export': true },
       };
-
-      if (this._docker) {
-        this.log.warn(`Using docker image ${this._docker} instead of default nodejs:10-fat container.`);
-        delete actionoptions.kind;
-        actionoptions.exec = {
-          image: this._docker,
-          main: 'module.exports.main',
-        };
-      }
 
       const baseName = path.basename(script.main);
       tick(`deploying ${baseName}`, baseName);

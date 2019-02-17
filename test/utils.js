@@ -135,8 +135,7 @@ async function processSource(scriptName, type = 'htl') {
     path.resolve(__dirname, `specs/parcel/${scriptName}.pre.js`),
     path.resolve(__dirname, 'specs/parcel/helpers.js'),
   ];
-  //
-  // if (await fse.pathExists(pre))
+
   await new BuildCommand()
     .withFiles(files)
     .withTargetDir(buildDir)
