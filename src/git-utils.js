@@ -16,6 +16,12 @@ const git = require('isomorphic-git');
 git.plugins.set('fs', require('fs'));
 
 class GitUtils {
+  /**
+   * Determines whether the working tree directory contains uncommitted or unstaged changes.
+   *
+   * @param {string} dir working tree directory path of the git repo
+   * @returns {Promise<boolean>} `true` if there are uncommitted/unstaged changes; otherwise `false`
+   */
   static async isDirty(dir) {
     // see https://isomorphic-git.org/docs/en/statusMatrix
     const HEAD = 1;
@@ -27,6 +33,13 @@ class GitUtils {
       .length !== 0;
   }
 
+  /**
+   * Returns the name of the current branch. If `HEAD` is at a tag, the name of the tag
+   * will be returned instead.
+   *
+   * @param {string} dir working tree directory path of the git repo
+   * @returns {Promise<string>} current branch or tag
+   */
   static async getBranch(dir) {
     // current branch name
     const currentBranch = await git.currentBranch({ dir, fullname: false });
@@ -48,27 +61,61 @@ class GitUtils {
     return typeof tag === 'object' ? tag.tag : currentBranch;
   }
 
+  /**
+   * Returns `dirty` if the working tree directory contains uncommitted/unstaged changes.
+   * Otherwise returns the encoded (any non word character replaced by `-`)
+   * current branch or tag.
+   *
+   * @param {string} dir working tree directory path of the git repo
+   * @returns {Promise<string>} `dirty` or encoded current branch/tag
+  */
   static async getBranchFlag(dir) {
     const dirty = await GitUtils.isDirty(dir);
     const branch = await GitUtils.getBranch(dir);
     return dirty ? 'dirty' : branch.replace(/[\W]/g, '-');
   }
 
+  /**
+   * Returns the encoded (any non word character replaced by `-`) `origin` remote url.
+   * If no `origin` remote url is defined `local--<basename of current working dir>`
+   * will be returned instead.
+   *
+   * @param {string} dir working tree directory path of the git repo
+   * @returns {Promise<string>} `dirty` or encoded current branch/tag
+   */
   static async getRepository(dir) {
     const repo = (await GitUtils.getOrigin(dir))
       .replace(/[\W]/g, '-');
     return repo !== '' ? repo : `local--${path.basename(process.cwd())}`;
   }
 
+  /**
+   * Returns the `origin` remote url or `''` if none is defined.
+   *
+   * @param {string} dir working tree directory path of the git repo
+   * @returns {Promise<string>} `origin` remote url
+   */
   static async getOrigin(dir) {
     const rmt = (await git.listRemotes({ dir })).find(entry => entry.remote === 'origin');
     return typeof rmt === 'object' ? rmt.url : '';
   }
 
+  /**
+   * Same as #getOrigin()but returns a `GitUrl` instance instead of a string.
+   *
+   * @param {string} dir working tree directory path of the git repo
+   * @returns {Promise<GitUrl>} `origin` remote url
+   */
   static async getOriginURL(dir) {
     return new GitUrl(await GitUtils.getOrigin(dir));
   }
 
+  /**
+   * Returns the sha of the current (i.e. `HEAD`) commit.
+   *
+   * @param {string} dir working tree directory path of the git repo
+   * @returns {Promise<string>} sha of the current (i.e. `HEAD`) commit
+   */
   static async getCurrentRevision(dir) {
     return git.resolveRef({ dir, ref: 'HEAD' });
   }
