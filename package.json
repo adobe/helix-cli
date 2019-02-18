@@ -65,7 +65,7 @@
     "@adobe/helix-testutils": "^0.2.0",
     "ajv": "6.9.1",
     "codecov": "3.2.0",
-    "eslint": "5.14.0",
+    "eslint": "5.14.1",
     "eslint-config-airbnb": "17.1.0",
     "eslint-plugin-header": "3.0.0",
     "eslint-plugin-import": "2.14.0",
