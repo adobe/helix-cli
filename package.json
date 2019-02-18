@@ -73,7 +73,7 @@
     "eslint-plugin-react": "7.12.4",
     "istanbul": "1.1.0-alpha.1",
     "less": "3.8.1",
-    "mocha": "5.2.0",
+    "mocha": "6.0.0",
     "mocha-junit-reporter": "1.17.0",
     "mocha-parallel-tests": "2.0.3",
     "nock": "^10.0.6",
