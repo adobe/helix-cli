@@ -45,7 +45,6 @@ describe('hlx deploy', () => {
     mockDeploy.withLogglyHost.returnsThis();
     mockDeploy.withLogglyAuth.returnsThis();
     mockDeploy.withTarget.returnsThis();
-    mockDeploy.withDocker.returnsThis();
     mockDeploy.withDefault.returnsThis();
     mockDeploy.withEnableDirty.returnsThis();
     mockDeploy.withDryRun.returnsThis();
@@ -131,7 +130,6 @@ Authentication is required. You can pass the key via the HLX_WSK_AUTH environmen
     sinon.assert.calledWith(mockDeploy.withLogglyHost, 'trieloff.loggly.com'); // TODO !!
     sinon.assert.calledWith(mockDeploy.withLogglyAuth, '');
     sinon.assert.calledWith(mockDeploy.withTarget, '.hlx/build');
-    sinon.assert.calledWith(mockDeploy.withDocker, undefined);
     sinon.assert.calledWith(mockDeploy.withDefault, undefined);
     sinon.assert.calledWith(mockDeploy.withCreatePackages, 'auto');
     sinon.assert.calledOnce(mockDeploy.run);
@@ -153,7 +151,6 @@ Authentication is required. You can pass the key via the HLX_WSK_AUTH environmen
     sinon.assert.calledWith(mockDeploy.withLogglyHost, 'trieloff.loggly.com'); // TODO !!
     sinon.assert.calledWith(mockDeploy.withLogglyAuth, '');
     sinon.assert.calledWith(mockDeploy.withTarget, '.hlx/build');
-    sinon.assert.calledWith(mockDeploy.withDocker, undefined);
     sinon.assert.calledWith(mockDeploy.withDefault, undefined);
     sinon.assert.calledOnce(mockDeploy.run);
   });
@@ -248,19 +245,6 @@ Authentication is required. You can pass the key via the HLX_WSK_AUTH environmen
       ]);
 
     sinon.assert.calledWith(mockDeploy.withTarget, 'tmp/build');
-    sinon.assert.calledOnce(mockDeploy.run);
-  });
-
-  it('hlx deploy can set set docker', () => {
-    new CLI()
-      .withCommandExecutor('deploy', mockDeploy)
-      .run(['deploy',
-        '--wsk-auth', 'secret-key',
-        '--wsk-namespace', 'hlx',
-        '--docker', 'example/node8:latest',
-      ]);
-
-    sinon.assert.calledWith(mockDeploy.withDocker, 'example/node8:latest');
     sinon.assert.calledOnce(mockDeploy.run);
   });
 

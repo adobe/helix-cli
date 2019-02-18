@@ -1,4 +1,5 @@
 # This file handles the URL parameter whitelist
+set req.http.X-Root-Path = "";
 
 # default parameters, can be overridden per strain
 set req.http.X-Old-Url = req.url;
