@@ -80,7 +80,7 @@
     "nyc": "13.3.0",
     "proxyquire": "^2.1.0",
     "replay": "2.4.0",
-    "sinon": "6.1.0",
+    "sinon": "7.2.4",
     "unzip2": "0.2.5"
   },
   "snyk": true
