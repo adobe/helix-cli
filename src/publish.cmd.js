@@ -19,7 +19,7 @@ const path = require('path');
 const glob = require('glob-to-regexp');
 const { toBase64 } = require('request/lib/helpers');
 const ProgressBar = require('progress');
-const { GitUtils } = require('@adobe/helix-shared');
+const GitUtils = require('./git-utils');
 const strainconfig = require('./strain-config-utils');
 const include = require('./include-util');
 const useragent = require('./user-agent-util');
@@ -527,7 +527,7 @@ ${PublishCommand.makeParamWhitelist(params, '  ')}
   async getVersionVCLSection() {
     const configVersion = await this.getCurrentVersion();
     const cliVersion = cli.getVersion();
-    const revision = GitUtils.getCurrentRevision();
+    const revision = await GitUtils.getCurrentRevision(this.directory);
 
     return PublishCommand.getXVersionExtensionVCL(configVersion, cliVersion, revision);
   }

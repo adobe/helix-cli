@@ -26,6 +26,9 @@
     "url": "https://github.com/adobe/project-helix/issues"
   },
   "homepage": "https://github.com/adobe/project-helix#readme",
+  "peerDependencies": {
+    "isomorphic-git": "0.x"
+  },
   "dependencies": {
     "@adobe/fastly-native-promises": "^1.3.2",
     "@adobe/helix-pipeline": "0.11.0",

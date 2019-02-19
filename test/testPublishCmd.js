@@ -17,7 +17,7 @@ const fs = require('fs-extra');
 const path = require('path');
 const assert = require('assert');
 const { HelixConfig, Logger } = require('@adobe/helix-shared');
-const { createTestRoot } = require('./utils.js');
+const { initGit, createTestRoot } = require('./utils.js');
 const PublishCommand = require('../src/publish.cmd');
 
 // disable replay for this test
@@ -165,6 +165,8 @@ describe('hlx publish (Integration)', function suite() {
   });
 
   it('Publish Strains on an existing Service Config', async () => {
+    initGit(testRoot);
+
     const cmd = new PublishCommand()
       .withDirectory(testRoot)
       .withFastlyAuth(FASTLY_AUTH)
