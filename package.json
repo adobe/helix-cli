@@ -63,7 +63,7 @@
     "uri-js": "4.2.2",
     "uuid": "3.3.2",
     "webpack": "4.29.5",
-    "yargs": "13.2.0"
+    "yargs": "13.2.1"
   },
   "devDependencies": {
     "@adobe/helix-testutils": "^0.2.0",
