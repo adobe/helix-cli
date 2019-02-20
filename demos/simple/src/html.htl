@@ -25,9 +25,7 @@
 </head>
 <body>
 
-<div data-sly-list="${content.children}">
-    <div class="container">${item}</div>
-</div>
+${content.document.body.innerHTML}
 
 <hr>
 <em>generated at ${content.time}</em>
