@@ -22,7 +22,7 @@ module.exports = function strain() {
     set executor(value) {
       executor = value;
     },
-    command: ['publish', 'strain'],
+    command: ['publish'],
     desc: 'Activate strains in the Fastly CDN and publish the site',
     builder: (yargs) => {
       deployCommon(yargs);
@@ -40,6 +40,11 @@ module.exports = function strain() {
           type: 'boolean',
           default: false,
         })
+        .option('remote', {
+          describe: 'Use the remote publishing service',
+          type: 'boolean',
+          default: false,
+        })
         .demandOption(
           'fastly-auth',
           'Authentication is required. You can pass the key via the HLX_FASTLY_AUTH environment variable, too',
@@ -53,10 +58,14 @@ module.exports = function strain() {
         .help();
     },
     handler: async (argv) => {
-      if (!executor) {
+      if (argv.remote) {
         // eslint-disable-next-line global-require
-        const StrainCommand = require('./publish.cmd'); // lazy load the handler to speed up execution time
-        executor = new StrainCommand(makeLogger(argv));
+        const PublishCommand = require('./remotepublish.cmd'); // lazy load the handler to speed up execution time
+        executor = executor || new PublishCommand(makeLogger(argv));
+      } else {
+        // eslint-disable-next-line global-require
+        const PublishCommand = require('./publish.cmd'); // lazy load the handler to speed up execution time
+        executor = executor || new PublishCommand(makeLogger(argv));
       }
 
       await executor

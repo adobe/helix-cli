@@ -25,11 +25,6 @@ module.exports = function deploy() {
     command: 'deploy',
     desc: 'Deploy packaged functions to Adobe I/O runtime',
     builder: (yargs) => {
-      // eslint-disable-next-line global-require
-      const DeployCommand = require('./deploy.cmd'); // lazy load the handler to speed up execution time
-      // eslint-disable-next-line global-require
-      const { GitUtils } = require('@adobe/helix-shared'); // lazy load the handler to speed up execution time
-
       deployCommon(yargs);
       yargs
         .option('auto', {
@@ -66,15 +61,7 @@ module.exports = function deploy() {
           alias: 'o',
           default: '.hlx/build',
           type: 'string',
-          describe: 'Target directory for compiled JS',
-        })
-        .option('docker', {
-          describe: 'Docker image for Adobe I/O Runtime function',
-        })
-        .option('prefix', {
-          alias: 'p',
-          describe: 'Prefix for the deployed action name.',
-          default: `${GitUtils.getRepository()}--${GitUtils.getBranchFlag()}--`,
+          describe: 'Target directory of created action packages.',
         })
         .option('default', {
           describe: 'Adds a default parameter to the function',
@@ -85,10 +72,15 @@ module.exports = function deploy() {
           type: 'boolean',
           default: false,
         })
-        .option('content', {
-          describe: 'Overrides the GitHub content URL of the default strain',
+        .option('add', {
+          describe: 'Adds missing strains to the config',
           type: 'string',
-          default: DeployCommand.getDefaultContentURL(),
+        })
+        .option('package', {
+          describe: 'Automatically create or update outdated action packages.',
+          type: 'string',
+          choices: ['auto', 'ignore', 'always'],
+          default: 'auto',
         })
         .array('default')
         .nargs('default', 2)
@@ -100,7 +92,8 @@ module.exports = function deploy() {
           return Object.assign(res, result);
         }, {}))
         .group(['auto', 'wsk-auth', 'wsk-namespace', 'default', 'dirty'], 'Deployment Options')
-        .group(['wsk-host', 'loggly-host', 'loggly-auth', 'target', 'docker', 'prefix', 'content'], 'Advanced Options')
+        .group(['wsk-host', 'loggly-host', 'loggly-auth', 'target'], 'Advanced Options')
+        .group(['package', 'target'], 'Package options')
         .check((args) => {
           if (!args.auto) {
             // single-shot deployment is easy
@@ -149,14 +142,13 @@ module.exports = function deploy() {
         .withLogglyHost(argv.logglyHost)
         .withLogglyAuth(argv.logglyAuth)
         .withTarget(argv.target)
-        .withDocker(argv.docker)
-        .withPrefix(argv.prefix)
         .withDefault(argv.default)
         .withDryRun(argv.dryRun)
-        .withContent(argv.content)
         .withCircleciAuth(argv.circleciAuth)
         .withFastlyAuth(argv.fastlyAuth)
         .withFastlyNamespace(argv.fastlyNamespace)
+        .withCreatePackages(argv.package)
+        .withAddStrain(argv.add)
         .run();
     },
 

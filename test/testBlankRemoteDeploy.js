@@ -16,7 +16,7 @@ const assert = require('assert');
 const path = require('path');
 const fse = require('fs-extra');
 const Replay = require('replay');
-const { GitUtils } = require('@adobe/helix-shared');
+const GitUtils = require('../src/git-utils');
 const DemoCommand = require('../src/demo.cmd');
 
 const TEST_DIR = path.resolve(__dirname, 'tmp');
@@ -43,10 +43,10 @@ describe('Test Deployment in Empty Project', () => {
       });
   });
 
-  it('Get function name', () => {
+  it('Get function name', async () => {
     // eslint-disable-next-line global-require
-    assert.notEqual('', GitUtils.getRepository());
-    assert.equal('local--pulvillar-pantograph', GitUtils.getRepository());
+    assert.notEqual('', await GitUtils.getRepository(process.cwd()));
+    assert.equal('local--pulvillar-pantograph', await GitUtils.getRepository(process.cwd()));
   });
 
   afterEach('Reset working directory', function after() {

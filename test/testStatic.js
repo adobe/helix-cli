@@ -10,7 +10,12 @@
  * governing permissions and limitations under the License.
  */
 const assert = require('assert');
+const Replay = require('replay');
 const index = require('../src/openwhisk/static');
+
+Replay.mode = 'replay';
+Replay.fixtures = `${__dirname}/fixtures/`;
+
 /* eslint-env mocha */
 
 describe('Static Delivery Action #unittest', () => {
@@ -34,11 +39,12 @@ describe('Static Delivery Action #unittest', () => {
     assert.equal(index.isBinary('application/octet-stream'), true);
     assert.equal(index.isBinary('image/png'), true);
     assert.equal(index.isBinary('un/known'), true);
+    assert.equal(index.isBinary('image/svg+xml'), true);
 
     assert.equal(index.isBinary('text/html'), false);
+    assert.equal(index.isBinary('text/xml'), false);
     assert.equal(index.isBinary('application/json'), false);
     assert.equal(index.isBinary('application/javascript'), false);
-    assert.equal(index.isBinary('image/svg+xml'), false);
   });
 
   it('staticBase() #unittest', () => {
@@ -73,5 +79,35 @@ describe('Static Delivery Action #unittest', () => {
     assert.equal(index.blacklisted('src/html.htl', '^.*\\.htl$|^.*\\.js$', 'foo'), true);
 
     assert.equal(index.blacklisted('foo/html.htl', '^.*\\.htl$|^.*\\.js$', ''), false);
+  });
+
+  it('main() returns static file from GitHub', async () => {
+    const res = await index.main({
+      owner: 'adobe',
+      repo: 'helix-cli',
+      entry: '/demos/simple/htdocs/style.css',
+      plain: true,
+    });
+    assert.ok(res.body.indexOf('Arial') > 0, true);
+  });
+
+  it('main() returns 403 if plain is false', async () => {
+    const res = await index.main({
+      owner: 'adobe',
+      repo: 'helix-cli',
+      entry: '/demos/simple/htdocs/style.css',
+      plain: false,
+    });
+    assert.equal(res.statusCode, 403);
+  });
+
+  it('main() returns 403 in case of backlisted file', async () => {
+    const res = await index.main({
+      owner: 'adobe',
+      repo: 'helix-cli',
+      entry: '/package.json',
+      plain: true,
+    });
+    assert.equal(res.statusCode, 403);
   });
 });

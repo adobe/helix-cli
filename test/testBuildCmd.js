@@ -24,7 +24,6 @@ const TEST_DIR = path.resolve('test/integration');
 describe('Integration test for build', () => {
   let testRoot;
   let buildDir;
-  let webroot;
 
   beforeEach(async function before() {
     // copying 300 MB can take a while
@@ -32,7 +31,6 @@ describe('Integration test for build', () => {
 
     testRoot = await createTestRoot();
     buildDir = path.resolve(testRoot, '.hlx/build');
-    webroot = path.resolve(testRoot, 'webroot');
     await fs.copy(TEST_DIR, testRoot);
     return true;
   });
@@ -42,7 +40,6 @@ describe('Integration test for build', () => {
     await new BuildCommand()
       .withFiles(['test/integration/src/**/*.htl', 'test/integration/src/**/*.js'])
       .withTargetDir(buildDir)
-      .withWebRoot(webroot)
       .withCacheEnabled(false)
       .run();
 
@@ -58,28 +55,6 @@ describe('Integration test for build', () => {
 
     assertFile(path.resolve(buildDir, 'example_html.js'));
     assertFile(path.resolve(buildDir, 'component', 'html.js'));
-    assertFile(path.resolve(webroot, 'img', 'banner.png'));
-
-    // test if manifest contains correct entries
-    const manifest = await fs.readJson(path.resolve(buildDir, 'manifest.json'));
-    assert.deepStrictEqual(manifest, {
-      'dist/vendor/example.css': {
-        hash: 'f9806776872f8ff4940b806f94923c4d',
-        size: 658,
-      },
-      'img/banner.png': {
-        hash: 'd41d8cd98f00b204e9800998ecf8427e',
-        size: 0,
-      },
-      'welcome.txt': {
-        hash: 'd6fc0d7dfc73e69219b8a3d110b69cb0',
-        size: 24,
-      },
-      'welcome2.txt': {
-        hash: 'a515caa30ad5ad5656b3cc844dd77b42',
-        size: 32,
-      },
-    });
 
     // test if source map contains correct reference
     const htmlJs = await fs.readFile(path.resolve(buildDir, 'html.js'), 'utf-8');

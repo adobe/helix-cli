@@ -10,9 +10,12 @@
  * governing permissions and limitations under the License.
  */
 
-const opn = require('opn');
+const path = require('path');
+const fse = require('fs-extra');
 const readline = require('readline');
+const opn = require('opn');
 const chokidar = require('chokidar');
+const chalk = require('chalk');
 const { HelixProject } = require('@adobe/helix-simulator');
 const BuildCommand = require('./build.cmd');
 const pkgJson = require('../package.json');
@@ -24,6 +27,8 @@ class UpCommand extends BuildCommand {
     super(logger);
     this._httpPort = -1;
     this._open = false;
+    this._saveConfig = false;
+    this._overrideHost = null;
   }
 
   withHttpPort(p) {
@@ -36,13 +41,27 @@ class UpCommand extends BuildCommand {
     return this;
   }
 
+  withSaveConfig(value) {
+    this._saveConfig = value;
+    return this;
+  }
+
+  withOverrideHost(value) {
+    this._overrideHost = value;
+    return this;
+  }
+
   get project() {
     return this._project;
   }
 
   async stop() {
     if (this._project) {
-      await this._project.stop();
+      try {
+        await this._project.stop();
+      } catch (e) {
+        // ignore
+      }
       this._project = null;
     }
     if (this._watcher) {
@@ -92,19 +111,44 @@ class UpCommand extends BuildCommand {
   async run() {
     await super.init();
 
+    // check for git repository
+    if (!await fse.pathExists(path.join(this.directory, '.git'))) {
+      throw Error('hlx up needs local git repository.');
+    }
+
+    let hasConfigFile = await this.config.hasFile();
+    if (this._saveConfig) {
+      if (hasConfigFile) {
+        this.log.warn(chalk`Cowardly refusing to overwrite existing {cyan helix-config.yaml}.`);
+      } else {
+        await this.config.saveConfig();
+        this.log.info(chalk`Wrote new default config to {cyan ${path.relative(process.cwd(), this.config.configPath)}}.`);
+        hasConfigFile = true;
+      }
+    }
+
     // start debugger (#178)
     // https://nodejs.org/en/docs/guides/debugging-getting-started/#enable-inspector
-    process.kill(process.pid, 'SIGUSR1');
+    if (process.platform !== 'win32') {
+      process.kill(process.pid, 'SIGUSR1');
+    }
+
     this._project = new HelixProject()
       .withCwd(this.directory)
       .withBuildDir(this._target)
-      .withWebRootDir(this._webroot)
       .withHelixConfig(this.config)
       .withDisplayVersion(pkgJson.version)
       .withRuntimeModulePaths(module.paths);
 
     if (this._httpPort >= 0) {
       this._project.withHttpPort(this._httpPort);
+    }
+    if (this._overrideHost) {
+      this._project.withRequestOverride({
+        headers: {
+          host: this._overrideHost,
+        },
+      });
     }
 
     try {
@@ -139,12 +183,28 @@ class UpCommand extends BuildCommand {
         }
 
         await this._project.start();
+
+        // if no config is defined, we use the `dev` strain to ensure localhost as git server
+        if (!hasConfigFile) {
+          this.config.strains.get('dev').urls = [
+            `http://localhost:${this._project.server.port}`,
+            `http://127.0.0.1:${this._project.server.port}`,
+          ];
+        }
+
         this.emit('started', this);
         if (this._open) {
           opn(`http://localhost:${this._project.server.port}/`);
         }
+        if (!hasConfigFile) {
+          this.log.info(chalk`{green Note:} 
+The project does not have a {cyan helix-config.yaml} which is necessary to 
+access remote content and to deploy helix. Consider running 
+{gray hlx up --save-config} to generate a default config.`);
+        }
       } catch (e) {
-        this.log.error(`Internal error: ${e.message}`);
+        this.log.error(`Error: ${e.message}`);
+        await this.stop();
       }
     };
 

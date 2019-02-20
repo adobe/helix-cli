@@ -15,9 +15,11 @@
 const assert = require('assert');
 const path = require('path');
 const fse = require('fs-extra');
+
 const {
   initGit,
   assertHttp,
+  assertFile,
   createTestRoot,
 } = require('./utils.js');
 
@@ -28,30 +30,27 @@ const TEST_DIR = path.resolve('test/integration');
 describe('Integration test for up command', () => {
   let testDir;
   let buildDir;
-  let webroot;
 
   beforeEach(async function before() {
     this.timeout(20000);
     const testRoot = await createTestRoot();
     testDir = path.resolve(testRoot, 'project');
     buildDir = path.resolve(testRoot, '.hlx/build');
-    webroot = path.resolve(testDir, 'webroot');
     await fse.copy(TEST_DIR, testDir);
   });
 
-  it('up command fails outside git repository', (done) => {
-    new UpCommand()
-      .withCacheEnabled(false)
-      .withFiles([path.join(testDir, 'src', '*.htl'), path.join(testDir, 'src', '*.js')])
-      .withTargetDir(buildDir)
-      .withDirectory(testDir)
-      .run()
-      .then(() => assert.fail('hlx up without .git should fail.'))
-      .catch((err) => {
-        assert.equal(err.message, 'Unable to start helix: Local README.md or index.md must be inside a valid git repository.');
-        done();
-      })
-      .catch(done);
+  it('up command fails outside git repository', async () => {
+    try {
+      await new UpCommand()
+        .withCacheEnabled(false)
+        .withFiles([path.join(testDir, 'src', '*.htl'), path.join(testDir, 'src', '*.js')])
+        .withTargetDir(buildDir)
+        .withDirectory(testDir)
+        .run();
+      assert.fail('hlx up without .git should fail.');
+    } catch (e) {
+      assert.equal(e.message, 'hlx up needs local git repository.');
+    }
   });
 
   it('up command succeeds and can be stopped', (done) => {
@@ -75,14 +74,17 @@ describe('Integration test for up command', () => {
   }).timeout(5000);
 
   it('up command delivers correct response.', (done) => {
-    initGit(testDir);
+    initGit(testDir, 'https://github.com/adobe/dummy-foo.git');
     let error = null;
     const cmd = new UpCommand()
       .withCacheEnabled(false)
-      .withFiles([path.join(testDir, 'src', '*.htl'), path.join(testDir, 'src', '*.js')])
+      .withFiles([
+        path.join(testDir, 'src', '*.htl'),
+        path.join(testDir, 'src', '*.js'),
+        path.join(testDir, 'src', 'utils', '*.js'),
+      ])
       .withTargetDir(buildDir)
       .withDirectory(testDir)
-      .withWebRoot(webroot)
       .withHttpPort(0);
 
     const myDone = (err) => {
@@ -107,6 +109,90 @@ describe('Integration test for up command', () => {
       .catch(done);
   }).timeout(5000);
 
+  it('up command delivers correct response with different host.', async () => {
+    initGit(testDir, 'https://github.com/adobe/dummy-foo.git');
+    await fse.rename(path.resolve(testDir, 'default-config.yaml'), path.resolve(testDir, 'helix-config.yaml'));
+    const cmd = new UpCommand()
+      .withCacheEnabled(false)
+      .withFiles([
+        path.join(testDir, 'src', '*.htl'),
+        path.join(testDir, 'src', '*.js'),
+        path.join(testDir, 'src', 'utils', '*.js'),
+      ])
+      .withTargetDir(buildDir)
+      .withDirectory(testDir)
+      .withOverrideHost('www.project-helix.io')
+      .withHttpPort(0);
+
+    await new Promise((resolve) => {
+      cmd.on('started', resolve);
+      cmd.run();
+    });
+
+    try {
+      await assertHttp(`http://localhost:${cmd.project.server.port}/README.html`, 200, 'simple_response_readme.html');
+    } finally {
+      await cmd.stop();
+    }
+  }).timeout(5000);
+
+  it.skip('up command delivers correct response with proxy as default.', async () => {
+    initGit(testDir, 'https://github.com/adobe/dummy-foo.git');
+    const cfg = path.resolve(testDir, 'helix-config.yaml');
+    await fse.copy(path.resolve(__dirname, 'fixtures', 'default-proxy.yaml'), cfg);
+    const cmd = new UpCommand()
+      .withCacheEnabled(false)
+      .withFiles([path.join(testDir, 'src', '*.htl'), path.join(testDir, 'src', '*.js')])
+      .withTargetDir(buildDir)
+      .withDirectory(testDir)
+      .withOverrideHost('www.no-exist.com')
+      .withHttpPort(0);
+
+    await new Promise((resolve) => {
+      cmd.on('started', resolve);
+      cmd.run();
+    });
+
+    try {
+      await assertHttp(`http://localhost:${cmd.project.server.port}/README.html`, 200, 'simple_response_readme.html');
+    } finally {
+      await cmd.stop();
+    }
+  }).timeout(5000);
+
+  it('up command writes default config.', (done) => {
+    initGit(testDir, 'https://github.com/adobe/dummy-foo.git');
+    assertFile(path.resolve(testDir, 'helix-config.yaml'), true);
+    let error = null;
+    const cmd = new UpCommand()
+      .withCacheEnabled(false)
+      .withFiles([path.join(testDir, 'src', '*.htl'), path.join(testDir, 'src', '*.js')])
+      .withTargetDir(buildDir)
+      .withDirectory(testDir)
+      .withSaveConfig(true)
+      .withHttpPort(0);
+
+    const myDone = (err) => {
+      error = err;
+      return cmd.stop();
+    };
+
+    cmd
+      .on('started', async () => {
+        try {
+          assertFile(path.resolve(testDir, 'helix-config.yaml'));
+          myDone();
+        } catch (e) {
+          myDone(e);
+        }
+      })
+      .on('stopped', () => {
+        done(error);
+      })
+      .run()
+      .catch(done);
+  }).timeout(5000);
+
   it('up command delivers modified sources and delivers correct response.', (done) => {
     // this test always hangs on the CI, probably due to the parcel workers. ignoring for now.
     const srcFile = path.resolve(testDir, 'src/html2.htl');
@@ -116,10 +202,13 @@ describe('Integration test for up command', () => {
     let error = null;
     const cmd = new UpCommand()
       .withCacheEnabled(false)
-      .withFiles([path.join(testDir, 'src', '*.htl'), path.join(testDir, 'src', '*.js')])
+      .withFiles([
+        path.join(testDir, 'src', '*.htl'),
+        path.join(testDir, 'src', '*.js'),
+        path.join(testDir, 'src', 'utils', '*.js'),
+      ])
       .withTargetDir(buildDir)
       .withDirectory(testDir)
-      .withWebRoot(webroot)
       .withHttpPort(0);
 
     const myDone = async (err) => {

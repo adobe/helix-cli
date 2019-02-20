@@ -30,10 +30,24 @@ module.exports = function up() {
       yargs
         .option('open', {
           describe: 'Open a browser window',
-          boolean: true,
           type: 'boolean',
           default: true,
-        }).help();
+        })
+        .option('host', {
+          describe: 'Override request.host',
+          type: 'string',
+        })
+        .option('save-config', {
+          describe: 'Saves the default config.',
+          type: 'boolean',
+          default: false,
+        })
+        .option('port', {
+          describe: 'Start development server on port',
+          type: 'int',
+          default: 3000,
+        })
+        .help();
     },
     handler: async (argv) => {
       if (!executor) {
@@ -47,7 +61,9 @@ module.exports = function up() {
         .withMinifyEnabled(argv.minify)
         .withTargetDir(argv.target)
         .withFiles(argv.files)
-        // .withBundled(argv.bundled)
+        .withOverrideHost(argv.host)
+        .withSaveConfig(argv.saveConfig)
+        .withHttpPort(argv.port)
         // only open browser window when executable is `hlx`
         // this prevents the window to be opened during integration tests
         .withOpen(argv.open && path.basename(argv.$0) === 'hlx')

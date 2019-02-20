@@ -1,17 +1,23 @@
 #
-# helix configuration for local development
+# Helix Configuration
 #
+version: 1
 
-# title of this project. not really needed
-title: '{{project.name}}'
+definitions:
+  defaults:
+    # default repository. set to git remote repository before deployment
+    - &defaultRepo "http://localhost/local/default.git"
+    # local development repository.
+    - &localRepo "http://localhost/local/default.git"
 
-# Specifies the git url to the content repository. helix will use the local directory if
-# not configured.
-#
-#content: https://github.com/Adobe-Marketing-Cloud/reactor-user-docs
+strains:
+  local-dev:
+    url: http://localhost:3000/
+    code: *localRepo
+    content: *localRepo
+    static: *localRepo
 
-# specifies the directory index
-#directoryIndex: README.html
-
-# location of the webroot
-staticRoot: /webroot
+  default:
+    code: *defaultRepo
+    content: *defaultRepo
+    static: *defaultRepo

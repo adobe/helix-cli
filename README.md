@@ -27,7 +27,7 @@ $ curl -sL http://www.project-helix.io/cli.sh | sh
 
 ## Quick Start
 
-```bash
+```
 $ hlx --help
 hlx <command>
 
@@ -35,27 +35,33 @@ Commands:
   hlx demo <name> [dir]  Create example helix project.
   hlx up [files...]      Run a Helix development server
   hlx build [files..]    Compile the template functions and build package
+  hlx package            Create Adobe I/O runtime packages
   hlx deploy             Deploy packaged functions to Adobe I/O runtime
   hlx perf               Test performance
   hlx publish            Activate strains in the Fastly CDN and publish the site
-                                                               [aliases: strain]
+  hlx clean              Remove generated files and caches.
+  hlx completion         generate bash completion script
 
 Options:
-  --version  Show version number                                       [boolean]
-  --help     Show help                                                 [boolean]
+  --version    Show version number                                     [boolean]
+  --log-file   Log file (use "-" for stdout)              [array] [default: "-"]
+  --log-level  Log level
+        [string] [choices: "silly", "debug", "verbose", "info", "warn", "error"]
+                                                               [default: "info"]
+  --help       Show help                                               [boolean]
 
 for more information, find our manual at https://github.com/adobe/helix-cli
 ```
 
 ## Setting up a project
 
-```bash
+```
 $ hlx demo <my-cool-project>
 ```
 
 ## Starting development
 
-```bash
+```
 $ cd <my-cool-project>
 $ hlx up
 ```
@@ -64,16 +70,9 @@ Just change contents in your project directory and reload `http://localhost:3000
 
 ## (Optional) Build artifacts
 
-```bash
+```
 # In <my-cool-project>
 $ hlx build
-```
-
-## (Optional) Test functions
-
-```bash
-# In <my-cool-project>
-$ hlx test
 ```
 
 ## (Optional) Deploy to Adobe I/O Runtime
@@ -82,7 +81,7 @@ $ hlx test
 
 By default, Helix will set up automated deployment that deploys whenever a new commit has been pushed to your GitHub code repository. In order to do so, you need a [CircleCI](https://circleci.com) account and generate a [personal API Token](https://circleci.com/account/api).
 
-```bash
+```
 # In <my-cool-project>
 $ hlx deploy \
   --circleci-auth <personal-api-token> \
@@ -96,23 +95,23 @@ As always, you can keep all parameters in `HLX_CIRCLECI_AUTH`, `HLX_WSK_AUTH`, a
 
 ### One-Shot Deployment
 
-Alternatively, you can also perfom a one-shot deployment like this:
+Alternatively, you can also perform a one-shot deployment like this:
 
-```bash
+```
 # In <my-cool-project>
 $ hlx deploy --wsk-namespace <your-namespace> --wsk-auth <your-key>
-  
-[==================================================]  0.0s
+[==================================================] analyzing 0.0s
+[==================================================] packaging 0.0s
+✅  packaging completed  
+[==================================================] deploying 0.0s
 ✅  deployment completed
-
-
 ```
 
 Instead of passing `--wsk-auth` as a command line option, you can also set the `HLX_WSK_AUTH` environment variable.
 
 ## (Optional) Publish your Site
 
-```bash
+```
 # In <my-cool-project>
 $ hlx publish --fastly-auth <key> --fastly-namespace <serviceid>
 Publishing [========================================----------]  4.1s
@@ -130,14 +129,12 @@ If you need to pass request parameters, you can whitelist the parameters you nee
 ```yaml
 strains:
   default:
-    code: /hlx/default/git-github-com-adobe-helix-cli-git--dirty--
+    code: https://github.com/adobe/project-helix.io.git#master
+    content: https://github.com/adobe/project-helix.io.git#master
+    static: https://github.com/adobe/project-helix.io.git/htdocs#master
     params:
       - foo
       - bar
-    content:
-      repo: helix-cli
-      ref: master
-      owner: adobe
 ```
 
 In the example above, the parameters `foo` and `bar` have been enabled. A request made to `https://www.example.com/index.html?foo=here&bar=there&baz=everywhere` will enable your application to read the `foo` and `bar` parameters. The `baz` parameter and all other parameters will be filtered out.
@@ -157,100 +154,29 @@ by adding an `index` property:
 ```yaml
 strains:
   default:
-    code: /hlx/default/git-github-com-adobe-helix-cli-git--dirty--
+    code: https://github.com/adobe/project-helix.io.git#master
+    content: https://github.com/adobe/project-helix.io.git#master
+    static: https://github.com/adobe/project-helix.io.git/htdocs#master
     directoryIndex: README.html
-    content:
-      repo: helix-cli
-      ref: master
-      owner: adobe
-```
-
-alternatively you can also the it as default, in the root section of the config. eg:
-
-```yaml
-# defines the directory index file
-directoryIndex: readme.html
 ```
 
 ### Static Content Handling
 
-Static content is delivered from the _code_ repository below the defined `staticRoot`. The default
-is `/`, so any file in the _code_ repository can be delivered. For better separation of content
-and _security_, it is advisable to create a distinct `webroot` or `docroot` (see below)
-
-Static content is served from the code repository of the Helix project. By default, whatever 
-remote `origin` repository is set at the time of running `hlx publish` is used, but this can be 
-overridden in the configuration file:
+Static content is delivered from the `htdocs` directory of the _code_ repository of the Helix project:
 
 ```yaml
 strains:
   default:
-    static:
-      repo: reactor-user-docs
-      ref: master
-      owner: Adobe-Marketing-Cloud
+    code: https://github.com/adobe/project-helix.io.git#master
+    content: https://github.com/adobe/project-helix.io.git#master
+    static: https://github.com/adobe/project-helix.io.git/htdocs#master
 ```
 
 The same core configuration options (`repo`, `ref`, `root`, and `owner`) are supported for `static` as for `content`. 
 
-#### Keeping Your Repository Clean
-
-Although you can just put static content, e.g. an `index.html` loader for your SPA into the root 
-of your repository, this tends to litter the repository with many small files. To keep things clean, create for example a directory `docroot` in the repository and move your 
-static files there. Then the `staticRoot` can be set in the root of the config:
-
-```bash
-# defines the default static root relative to the static repository
-staticRoot: /docroot
-``` 
-
-or individually using the `path` property in the _static_ definition of a strain:
-
-
-```yaml
-strains:
-  default:
-    static:
-      repo: reactor-user-docs
-      ref: master
-      owner: Adobe-Marketing-Cloud
-      path: /docroot
-```
-
 After your next deployment with `hlx publish`, all static content will be served out of the 
-directory `docroot`. None of this will be visible in the URL, so that no visitor will ever see 
-_docroot_ in the URL. `https://example.com/favico.ico` would be served from `$REPO/docroot/favico.ico`.
-
-#### Securing Static Content
-
-Because the code repository may contain sensitive information, static content is protected using a 
-hard-coded blacklist. This blacklist includes `package.json`, `src`, and every hidden file or 
-directory (starting with `.`).
-
-In `helix-config.yaml`, additional white- and blacklists may be specified using the `allow` and `deny` 
-properties underneath `static`. Each `allow` or `deny` is a list of glob expressions such as `"*.js"`. 
-YAML requires you to put quotes around the glob expression.
-
-Examples of a whitelist and blacklist configuration may look like this:
-
-```yaml
-strains:
-  default:
-    static:
-      repo: reactor-user-docs
-      ref: master
-      owner: Adobe-Marketing-Cloud
-      allow:
-        - "/dist/*"
-        - "/static/*"
-      deny:
-        - "*.htl"
-```
-
-If a blacklist is specified, every path matching any of the patterns in the blacklist will be rejected. 
-If a whitelist is specified, only paths matching patterns on the whitelist will be accepted.
-
-A blacklist can block items that have been allowed by the whitelist, but not vice versa.
+directory `htdocs`. None of this will be visible in the URL, so that no visitor will ever see 
+_htdocs_ in the URL. `https://example.com/favico.ico` would be served from `$REPO/htdocs/favico.ico`.
 
 ## Matching Strains to URLs
 
@@ -263,20 +189,16 @@ An example configuration could look like this:
 ```yaml
 strains:
   default:
-    code: /trieloff/default/https---github-com-adobe-helix-helpx-git--master--
+    code: https://github.com/adobe/project-helix.io.git#master
+    content: https://github.com/adobe/project-helix.io.git#master
+    static: https://github.com/adobe/project-helix.io.git/htdocs#master
     url: https://www.primordialsoup.life
-    content:
-      repo: reactor-user-docs
-      ref: master
-      owner: Adobe-Marketing-Cloud
 
   develop:
+    code: https://github.com/adobe/project-helix.io.git#dev
+    content: https://github.com/adobe/project-helix.io.git#master
+    static: https://github.com/adobe/project-helix.io.git/htdocs#master
     url: https://dev.primordialsoup.life/develop/
-    code: /trieloff/default/https---github-com-adobe-helix-helpx-git--develop--
-    content:
-      repo: reactor-user-docs
-      ref: master
-      owner: Adobe-Marketing-Cloud
 ```
 
 ## Mixing old and new Content
@@ -290,9 +212,9 @@ You are still able to set strain `conditions` or assign traffic to a strain base
 ```yaml
 strains:
   default:
-    code: /trieloff/default/git-github-com-trieloff-helix-demo-git--dirty--
-    content: https://github.com/trieloff/helix-demo.git
-    static: https://github.com/trieloff/helix-demo.git
+    code: https://github.com/adobe/project-helix.io.git#master
+    content: https://github.com/adobe/project-helix.io.git#master
+    static: https://github.com/adobe/project-helix.io.git/htdocs#master
   oldcontent:
     origin: https://www.adobe.io
     url: https://www.primordialsoup.life/content/
@@ -321,11 +243,9 @@ An example performance configuration might look like this:
 ```yaml
 strains:
   default:
-    code: /trieloff/default/https---github-com-adobe-helix-helpx-git--master--
-    directoryIndex: README.html
-    static:
-      deny:
-        - "*.md"
+    code: https://github.com/adobe/project-helix.io.git#master
+    content: https://github.com/adobe/project-helix.io.git#master
+    static: https://github.com/adobe/project-helix.io.git/htdocs#master
     url: https://www.primordialsoup.life
     urls:
       - https://www.primordialsoup.life/README.html
@@ -427,13 +347,3 @@ as failed in case metrics are not met.
 
 You can use `npm run check` to run the tests and check whether your code adheres
 to the helix-cli coding style.
-
-## Building on macOS Mojave
-
-Before running `npm install`, make sure that `nodegit` can find all dependencies:
-
-```bash
-$ export LDFLAGS="-L/usr/local/opt/openssl/lib"
-$ export CPPFLAGS="-I/usr/local/opt/openssl/include"
-```
-

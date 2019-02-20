@@ -23,7 +23,7 @@ class ExternalsCollector {
   constructor() {
     this._cwd = process.cwd();
     this._outputFile = '';
-    this._externals = [];
+    this._excludes = new Set();
   }
 
   withDirectory(d) {
@@ -32,7 +32,7 @@ class ExternalsCollector {
   }
 
   withExternals(ext) {
-    this._externals = ext;
+    this._excludes = new Set(ext);
     return this;
   }
 
@@ -58,7 +58,6 @@ class ExternalsCollector {
         modules: [path.resolve(__dirname, '..', '..', 'node_modules'), 'node_modules'],
       },
       devtool: false,
-      externals: this._externals,
     });
 
     const ext = await new Promise((resolve, reject) => {
@@ -70,7 +69,7 @@ class ExternalsCollector {
         stats.compilation.modules.forEach((mod) => {
           if (mod.resource) {
             const m = nodeModulesRegex.exec(mod.resource);
-            if (m) {
+            if (m && !this._excludes.has(m[2])) {
               externals[m[2]] = m[1] + m[2];
             }
           }

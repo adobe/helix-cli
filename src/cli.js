@@ -53,6 +53,7 @@ class CLI {
       demo: require('./demo.js')(),
       up: require('./up.js')(),
       build: require('./build.js')(),
+      package: require('./package.js')(),
       deploy: require('./deploy.js')(),
       perf: require('./perf.js')(),
       publish: require('./publish.js')(),
@@ -83,6 +84,7 @@ class CLI {
     Object.values(this._commands).forEach(cmd => argv.command(cmd));
 
     return logArgs(argv)
+      .scriptName('hlx')
       .fail(this._failFn)
       .exitProcess(args.indexOf('--get-yargs-completions') > -1)
       .strict()

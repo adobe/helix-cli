@@ -17,7 +17,6 @@ const http = require('http');
 const Replay = require('replay');
 const uuidv4 = require('uuid/v4');
 const unzip = require('unzip2');
-const winston = require('winston');
 const BuildCommand = require('../src/build.cmd');
 
 // disable replay for this test
@@ -26,12 +25,15 @@ Replay.mode = 'bloody';
 /**
  * init git in integration so that helix-simulator can run
  */
-function initGit(dir) {
+function initGit(dir, remote) {
   const pwd = shell.pwd();
   shell.cd(dir);
   shell.exec('git init');
   shell.exec('git add -A');
   shell.exec('git commit -m"initial commit."');
+  if (remote) {
+    shell.exec(`git remote add origin ${remote}`);
+  }
   shell.cd(pwd);
 }
 
@@ -43,6 +45,12 @@ function assertFile(p, expectMissing) {
   if (exists && expectMissing) {
     assert.fail(`Unexpected file at ${p} exists`);
   }
+}
+
+async function assertFileEqual(actualFile, expectedFile) {
+  const actual = await fse.readFile(actualFile, 'utf-8');
+  const expected = await fse.readFile(expectedFile, 'utf-8');
+  assert.equal(actual.trim(), expected.trim());
 }
 
 async function assertHttp(url, status, spec, replacements = []) {
@@ -116,15 +124,6 @@ async function createFakeTestRoot() {
   return createFakeTestRoot();
 }
 
-function createLogger() {
-  return winston.createLogger({
-    level: 'silly',
-    silent: true,
-    format: winston.format.simple(),
-    transports: new winston.transports.Console(),
-  });
-}
-
 async function processSource(scriptName, type = 'htl') {
   const testRoot = await createTestRoot();
   const buildDir = path.resolve(testRoot, '.hlx/build');
@@ -136,12 +135,10 @@ async function processSource(scriptName, type = 'htl') {
     path.resolve(__dirname, `specs/parcel/${scriptName}.pre.js`),
     path.resolve(__dirname, 'specs/parcel/helpers.js'),
   ];
-  //
-  // if (await fse.pathExists(pre))
+
   await new BuildCommand()
     .withFiles(files)
     .withTargetDir(buildDir)
-    .withWebRoot('/webroot')
     .withCacheEnabled(false)
     .run();
 
@@ -263,11 +260,11 @@ const perfExample = {
 
 module.exports = {
   assertFile,
+  assertFileEqual,
   assertHttp,
   initGit,
   createTestRoot,
   createFakeTestRoot,
-  createLogger,
   processSource,
   perfExample,
   assertZipEntries,

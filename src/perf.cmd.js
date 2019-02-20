@@ -14,16 +14,13 @@
 
 const chalk = require('chalk');
 const path = require('path');
-const fs = require('fs-extra');
 const _ = require('lodash/fp');
-const strainconfig = require('./strain-config-utils');
 const JunitPerformanceReport = require('./junit-utils');
 const AbstractCommand = require('./abstract.cmd.js');
 
 class PerfCommand extends AbstractCommand {
   constructor(logger) {
     super(logger);
-    this._strainFile = path.resolve(process.cwd(), '.hlx', 'strains.json');
     this._strains = null;
     this._auth = null;
     this._calibre = null;
@@ -37,11 +34,6 @@ class PerfCommand extends AbstractCommand {
     if (value && value !== '') {
       this._junit = new JunitPerformanceReport().withOutfile(path.resolve(process.cwd(), value));
     }
-    return this;
-  }
-
-  withStrainFile(value) {
-    this._strainFile = value;
     return this;
   }
 
@@ -70,14 +62,10 @@ class PerfCommand extends AbstractCommand {
   }
 
   loadStrains() {
-    // todo: Is this correctly based on the .hlx/strains.json or should it rather read the
-    // helix-config.yaml ? performance testing can only be done on published sites, but
-    // modifying .hlx/strains.json is discouraged.
     if (this._strains) {
       return this._strains;
     }
-    const content = fs.readFileSync(this._strainFile, 'utf-8');
-    this._strains = strainconfig.load(content);
+    this._strains = Array.from(this.config.strains.values());
     return this._strains;
   }
 
@@ -92,7 +80,7 @@ class PerfCommand extends AbstractCommand {
       ({ name }) => name === 'default',
     );
     if (defaults.length === 1 && defaults[0].perf) {
-      return Object.assign(defaultparams, defaults[0].perf);
+      return Object.assign(defaultparams, defaults[0].perf.toJSON({ minimal: true }));
     }
     return defaultparams;
   }
@@ -169,6 +157,7 @@ class PerfCommand extends AbstractCommand {
   }
 
   async run() {
+    await this.init();
     this.log.info(chalk.green('Testing performance…'));
 
     const tests = this.loadStrains()

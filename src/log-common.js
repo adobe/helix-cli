@@ -12,10 +12,14 @@
 
 const { Logger } = require('@adobe/helix-shared');
 
-module.exports.makeLogger = function makeLogger({ logLevel = 'info', logFile = ['-'] } = {}) {
+function makeLogger({ logLevel = 'info', logFile = ['-'] } = {}) {
   return Logger.getLogger({
     category: 'cli',
     logFile,
     level: logLevel,
   });
+}
+
+module.exports = {
+  makeLogger,
 };

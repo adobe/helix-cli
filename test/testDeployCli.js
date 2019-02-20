@@ -16,7 +16,7 @@
 
 const assert = require('assert');
 const sinon = require('sinon');
-const { GitUtils } = require('@adobe/helix-shared');
+const GitUtils = require('../src/git-utils');
 const CLI = require('../src/cli.js');
 const DeployCommand = require('../src/deploy.cmd');
 
@@ -36,7 +36,6 @@ describe('hlx deploy', () => {
       return true;
     });
 
-
     mockDeploy = sinon.createStubInstance(DeployCommand);
     mockDeploy.withEnableAuto.returnsThis();
     mockDeploy.withCircleciAuth.returnsThis();
@@ -46,14 +45,13 @@ describe('hlx deploy', () => {
     mockDeploy.withLogglyHost.returnsThis();
     mockDeploy.withLogglyAuth.returnsThis();
     mockDeploy.withTarget.returnsThis();
-    mockDeploy.withDocker.returnsThis();
-    mockDeploy.withPrefix.returnsThis();
     mockDeploy.withDefault.returnsThis();
     mockDeploy.withEnableDirty.returnsThis();
     mockDeploy.withDryRun.returnsThis();
-    mockDeploy.withContent.returnsThis();
     mockDeploy.withFastlyAuth.returnsThis();
     mockDeploy.withFastlyNamespace.returnsThis();
+    mockDeploy.withCreatePackages.returnsThis();
+    mockDeploy.withAddStrain.returnsThis();
     mockDeploy.run.returnsThis();
 
     // disable static functions as well to avoid shelljs executions.
@@ -124,7 +122,6 @@ Authentication is required. You can pass the key via the HLX_WSK_AUTH environmen
         '--wsk-namespace', 'hlx',
       ]);
 
-
     sinon.assert.calledWith(mockDeploy.withEnableAuto, false);
     sinon.assert.calledWith(mockDeploy.withEnableDirty, false);
     sinon.assert.calledWith(mockDeploy.withWskHost, 'adobeioruntime.net');
@@ -133,9 +130,8 @@ Authentication is required. You can pass the key via the HLX_WSK_AUTH environmen
     sinon.assert.calledWith(mockDeploy.withLogglyHost, 'trieloff.loggly.com'); // TODO !!
     sinon.assert.calledWith(mockDeploy.withLogglyAuth, '');
     sinon.assert.calledWith(mockDeploy.withTarget, '.hlx/build');
-    sinon.assert.calledWith(mockDeploy.withDocker, undefined);
-    sinon.assert.calledWith(mockDeploy.withPrefix, 'git-github-com-example-project-helix--master--');
     sinon.assert.calledWith(mockDeploy.withDefault, undefined);
+    sinon.assert.calledWith(mockDeploy.withCreatePackages, 'auto');
     sinon.assert.calledOnce(mockDeploy.run);
   });
 
@@ -155,8 +151,6 @@ Authentication is required. You can pass the key via the HLX_WSK_AUTH environmen
     sinon.assert.calledWith(mockDeploy.withLogglyHost, 'trieloff.loggly.com'); // TODO !!
     sinon.assert.calledWith(mockDeploy.withLogglyAuth, '');
     sinon.assert.calledWith(mockDeploy.withTarget, '.hlx/build');
-    sinon.assert.calledWith(mockDeploy.withDocker, undefined);
-    sinon.assert.calledWith(mockDeploy.withPrefix, 'git-github-com-example-project-helix--master--');
     sinon.assert.calledWith(mockDeploy.withDefault, undefined);
     sinon.assert.calledOnce(mockDeploy.run);
   });
@@ -254,19 +248,6 @@ Authentication is required. You can pass the key via the HLX_WSK_AUTH environmen
     sinon.assert.calledOnce(mockDeploy.run);
   });
 
-  it('hlx deploy can set set docker', () => {
-    new CLI()
-      .withCommandExecutor('deploy', mockDeploy)
-      .run(['deploy',
-        '--wsk-auth', 'secret-key',
-        '--wsk-namespace', 'hlx',
-        '--docker', 'example/node8:latest',
-      ]);
-
-    sinon.assert.calledWith(mockDeploy.withDocker, 'example/node8:latest');
-    sinon.assert.calledOnce(mockDeploy.run);
-  });
-
   it('hlx deploy can set prefix', () => {
     new CLI()
       .withCommandExecutor('deploy', mockDeploy)
@@ -276,7 +257,6 @@ Authentication is required. You can pass the key via the HLX_WSK_AUTH environmen
         '--prefix', '_hlx_',
       ]);
 
-    sinon.assert.calledWith(mockDeploy.withPrefix, '_hlx_');
     sinon.assert.calledOnce(mockDeploy.run);
   });
 
@@ -290,6 +270,71 @@ Authentication is required. You can pass the key via the HLX_WSK_AUTH environmen
       ]);
 
     sinon.assert.calledWith(mockDeploy.withDefault, { FEATURE: 'red, green' });
+    sinon.assert.calledOnce(mockDeploy.run);
+  });
+
+  it('hlx deploy can set package=ignore', () => {
+    new CLI()
+      .withCommandExecutor('deploy', mockDeploy)
+      .run(['deploy',
+        '--wsk-auth', 'secret-key',
+        '--wsk-namespace', 'hlx',
+        '--package', 'ignore',
+      ]);
+
+    sinon.assert.calledWith(mockDeploy.withCreatePackages, 'ignore');
+    sinon.assert.calledOnce(mockDeploy.run);
+  });
+
+  it('hlx deploy can set package=always', () => {
+    new CLI()
+      .withCommandExecutor('deploy', mockDeploy)
+      .run(['deploy',
+        '--wsk-auth', 'secret-key',
+        '--wsk-namespace', 'hlx',
+        '--package', 'always',
+      ]);
+
+    sinon.assert.calledWith(mockDeploy.withCreatePackages, 'always');
+    sinon.assert.calledOnce(mockDeploy.run);
+  });
+
+  it('hlx deploy can set package=auto', () => {
+    new CLI()
+      .withCommandExecutor('deploy', mockDeploy)
+      .run(['deploy',
+        '--wsk-auth', 'secret-key',
+        '--wsk-namespace', 'hlx',
+        '--package', 'auto',
+      ]);
+
+    sinon.assert.calledWith(mockDeploy.withCreatePackages, 'auto');
+    sinon.assert.calledOnce(mockDeploy.run);
+  });
+
+  it('hlx deploy can add strain', () => {
+    new CLI()
+      .withCommandExecutor('deploy', mockDeploy)
+      .run(['deploy',
+        '--wsk-auth', 'secret-key',
+        '--wsk-namespace', 'hlx',
+        '--add', 'foo',
+      ]);
+
+    sinon.assert.calledWith(mockDeploy.withAddStrain, 'foo');
+    sinon.assert.calledOnce(mockDeploy.run);
+  });
+
+  it('hlx deploy can add empty strain', () => {
+    new CLI()
+      .withCommandExecutor('deploy', mockDeploy)
+      .run(['deploy',
+        '--add',
+        '--wsk-auth', 'secret-key',
+        '--wsk-namespace', 'hlx',
+      ]);
+
+    sinon.assert.calledWith(mockDeploy.withAddStrain, '');
     sinon.assert.calledOnce(mockDeploy.run);
   });
 });

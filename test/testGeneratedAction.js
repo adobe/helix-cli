@@ -15,7 +15,8 @@ const fs = require('fs-extra');
 const sinon = require('sinon');
 const path = require('path');
 const Replay = require('replay');
-const { processSource, createLogger } = require('./utils');
+const { Logger } = require('@adobe/helix-shared');
+const { processSource } = require('./utils');
 
 Replay.mode = 'replay';
 Replay.fixtures = path.resolve(__dirname, 'fixtures');
@@ -73,6 +74,7 @@ const TEST_SCRIPTS = [
   { name: 'promise_html', matches: [/Hello, world/, /this is a bar/] },
   { name: 'return_promise_html', matches: [/Hello, world/, /this is a bar/] },
   { name: 'require_html', matches: [/Hello, world/, /this is a bar/] },
+  { name: 'require_noext_html', matches: [/Hello, world/, /this is a bar/] },
   { name: 'simple_html', matches: [/Hello, world/, /this is a bar/] },
   { name: 'return_simple_html', matches: [/Hello, world/, /this is a bar/] },
   { name: 'xml', type: 'js', matches: [/works: bar/] },
@@ -117,7 +119,7 @@ describe('Generated Action Tests', () => {
       it('script can be executed', async () => {
         // eslint-disable-next-line import/no-dynamic-require,global-require
         const script = require(distJS);
-        const logger = createLogger();
+        const logger = Logger.getTestLogger();
         const spy = sinon.spy(logger, 'debug');
         const testParams = Object.assign({}, params, {
           __ow_logger: logger,

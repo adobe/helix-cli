@@ -14,16 +14,16 @@
 const path = require('path');
 const assert = require('assert');
 const fs = require('fs-extra');
+const { Logger } = require('@adobe/helix-shared');
 const PublishCommand = require('../src/publish.cmd');
-const { createLogger } = require('./utils.js');
 const { reset } = require('../src/fastly/vcl-utils');
 
 describe('Test VCL utils', () => {
   it('initFastly generates new backends for defined Proxies', async () => {
     const strainfile = path.resolve(__dirname, 'fixtures/proxystrains.yaml');
-    const cmd = new PublishCommand(createLogger()).withConfigFile(strainfile);
+    const cmd = new PublishCommand(Logger.getTestLogger()).withConfigFile(strainfile);
     try {
-      await cmd.loadStrains();
+      await cmd.init();
       await cmd.initFastly();
     } catch (e) {
       // we expect initFastly to fail
