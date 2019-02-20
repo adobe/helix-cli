@@ -22,7 +22,6 @@ const UpCommand = require('../src/up.cmd');
 const DemoCommand = require('../src/demo.cmd');
 
 describe('Integration test for demo + up command', () => {
-
   ['simple', 'full'].forEach(async (demoType) => {
     it(`up command delivers expected output with ${demoType} demo`, async () => {
       const testRoot = await createTestRoot();
