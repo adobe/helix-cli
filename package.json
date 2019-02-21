@@ -1,6 +1,6 @@
 {
   "name": "@adobe/helix-cli",
-  "version": "0.13.5-pre.3",
+  "version": "0.13.6-pre.3",
   "description": "Project Helix CLI",
   "main": "index.js",
   "bin": {
@@ -38,7 +38,7 @@
     "@parcel/logger": "1.11.0",
     "@snyk/nodejs-runtime-agent": "1.41.0",
     "archiver": "3.0.0",
-    "calibre": "1.2.0",
+    "calibre": "1.2.1",
     "chalk": "2.4.2",
     "chokidar": "^2.0.4",
     "decompress": "4.2.0",
