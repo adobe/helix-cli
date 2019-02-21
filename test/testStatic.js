@@ -24,13 +24,13 @@ describe('Static Delivert Action #integrationtest', () => {
       repo: 'helix-demo',
       ref: 'master',
       entry: '/dist/style.css',
-      plain: true
+      plain: true,
     });
 
     assert.equal(res.headers['Content-Type'], 'text/css');
     assert.equal(res.headers['X-Static'], 'Raw/Static');
     assert.equal(res.headers['Cache-Control'], 's-max-age=300');
-    assert.equal(res.headers['ETag'], `"xSOcRd5oxR4XWFrm4Zmxew=="`);
+    assert.equal(res.headers.ETag, '"xSOcRd5oxR4XWFrm4Zmxew=="');
   });
 
   it('deliver PNG file', async () => {
@@ -39,13 +39,13 @@ describe('Static Delivert Action #integrationtest', () => {
       repo: 'helix-demo',
       ref: 'master',
       entry: 'helix_logo.png',
-      plain: true
+      plain: true,
     });
 
     assert.equal(res.headers['Content-Type'], 'image/png');
     assert.equal(res.headers['X-Static'], 'Raw/Static');
     assert.equal(res.headers['Cache-Control'], 's-max-age=300');
-    assert.equal(res.headers['ETag'], `"xrbxvVvPT1FHg5zrVHcZ7g=="`);
+    assert.equal(res.headers.ETag, '"xrbxvVvPT1FHg5zrVHcZ7g=="');
   });
 
   it('deliver JSON file', async () => {
@@ -54,13 +54,13 @@ describe('Static Delivert Action #integrationtest', () => {
       repo: 'helix-demo',
       ref: 'master',
       entry: 'htdocs/test.json',
-      plain: true
+      plain: true,
     });
 
     assert.equal(res.headers['Content-Type'], 'application/json');
     assert.equal(res.headers['X-Static'], 'Raw/Static');
     assert.equal(res.headers['Cache-Control'], 's-max-age=300');
-    assert.equal(res.headers['ETag'], `"oJWmHG4De8PUYQZFhlujXg=="`);
+    assert.equal(res.headers.ETag, '"oJWmHG4De8PUYQZFhlujXg=="');
   });
 
   it('deliver missing file', async () => {
@@ -69,7 +69,7 @@ describe('Static Delivert Action #integrationtest', () => {
       repo: 'helix-demo',
       ref: 'master',
       entry: 'not-here.png',
-      plain: true
+      plain: true,
     });
 
     assert.equal(res.statusCode, 404);
@@ -81,7 +81,7 @@ describe('Static Delivert Action #integrationtest', () => {
       repo: 'helix-demo',
       ref: 'master',
       entry: '',
-      plain: true
+      plain: true,
     });
 
     assert.equal(res.statusCode, 404);
@@ -94,11 +94,11 @@ describe('Static Delivert Action #integrationtest', () => {
       repo: 'helix-demo',
       ref: 'master',
       entry: 'big-image.jpg',
-      plain: true
+      plain: true,
     });
 
     assert.equal(res.statusCode, 307);
-    assert.equal(res.headers.Location, 'https://raw.githubusercontent.com/trieloff/helix-demo/master/big-image.jpg')
+    assert.equal(res.headers.Location, 'https://raw.githubusercontent.com/trieloff/helix-demo/master/big-image.jpg');
     assert.equal(res.headers['X-Content-Type'], 'image/jpeg');
     assert.equal(res.headers['X-Static'], 'Raw/Static');
   }).timeout(5000);

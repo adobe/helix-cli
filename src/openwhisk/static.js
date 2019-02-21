@@ -19,7 +19,7 @@ const mime = require('mime-types');
 const REDIRECT_LIMIT = 750000;
 
 function errorCode(code) {
-  switch(code) {
+  switch (code) {
     case 400:
       return 404;
     default:
@@ -28,7 +28,7 @@ function errorCode(code) {
 }
 
 function error(message, code = 500) {
-  // treat 
+  // treat
   const statusCode = errorCode(code);
   console.error('delivering error', message, code);
   return {
