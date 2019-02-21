@@ -1,0 +1,25 @@
+GET /trieloff/helix-demo/master/
+host: raw.githubusercontent.com
+
+HTTP/1.1 400 Bad Request
+content-security-policy: default-src 'none'; style-src 'unsafe-inline'; sandbox
+strict-transport-security: max-age=31536000
+x-content-type-options: nosniff
+x-frame-options: deny
+x-xss-protection: 1; mode=block
+x-github-request-id: 9F38:235A:41E103:465432:5C6EBAEA
+accept-ranges: bytes, bytes
+content-length: 21
+date: Thu, 21 Feb 2019 14:51:22 GMT
+via: 1.1 varnish
+connection: close
+x-served-by: cache-hhn1543-HHN
+x-cache: MISS
+x-cache-hits: 0
+x-timer: S1550760682.257378,VS0,VE88
+vary: Authorization,Accept-Encoding
+access-control-allow-origin: *
+x-fastly-request-id: f3bd9b0093f7cc522d550e1878216321558b0b69
+expires: Thu, 21 Feb 2019 14:56:22 GMT
+
+400: Invalid request

@@ -18,10 +18,21 @@ const mime = require('mime-types');
 // one megabyte openwhisk limit + 20% Base64 inflation + safety padding
 const REDIRECT_LIMIT = 750000;
 
+function errorCode(code) {
+  switch(code) {
+    case 400:
+      return 404;
+    default:
+      return code;
+  }
+}
+
 function error(message, code = 500) {
+  // treat 
+  const statusCode = errorCode(code);
   console.error('delivering error', message, code);
   return {
-    statusCode: code,
+    statusCode,
     headers: {
       'Content-Type': 'text/html',
       'X-Static': 'Raw/Static',
