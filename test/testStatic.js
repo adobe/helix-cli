@@ -17,6 +17,92 @@ Replay.mode = 'replay';
 Replay.fixtures = `${__dirname}/fixtures/`;
 
 /* eslint-env mocha */
+describe('Static Delivert Action #integrationtest', () => {
+  it('deliver CSS file', async () => {
+    const res = await index.main({
+      owner: 'trieloff',
+      repo: 'helix-demo',
+      ref: 'master',
+      entry: '/dist/style.css',
+      plain: true,
+    });
+
+    assert.equal(res.headers['Content-Type'], 'text/css');
+    assert.equal(res.headers['X-Static'], 'Raw/Static');
+    assert.equal(res.headers['Cache-Control'], 's-max-age=300');
+    assert.equal(res.headers.ETag, '"xSOcRd5oxR4XWFrm4Zmxew=="');
+  });
+
+  it('deliver PNG file', async () => {
+    const res = await index.main({
+      owner: 'trieloff',
+      repo: 'helix-demo',
+      ref: 'master',
+      entry: 'helix_logo.png',
+      plain: true,
+    });
+
+    assert.equal(res.headers['Content-Type'], 'image/png');
+    assert.equal(res.headers['X-Static'], 'Raw/Static');
+    assert.equal(res.headers['Cache-Control'], 's-max-age=300');
+    assert.equal(res.headers.ETag, '"xrbxvVvPT1FHg5zrVHcZ7g=="');
+  });
+
+  it('deliver JSON file', async () => {
+    const res = await index.main({
+      owner: 'trieloff',
+      repo: 'helix-demo',
+      ref: 'master',
+      entry: 'htdocs/test.json',
+      plain: true,
+    });
+
+    assert.equal(res.headers['Content-Type'], 'application/json');
+    assert.equal(res.headers['X-Static'], 'Raw/Static');
+    assert.equal(res.headers['Cache-Control'], 's-max-age=300');
+    assert.equal(res.headers.ETag, '"oJWmHG4De8PUYQZFhlujXg=="');
+  });
+
+  it('deliver missing file', async () => {
+    const res = await index.main({
+      owner: 'trieloff',
+      repo: 'helix-demo',
+      ref: 'master',
+      entry: 'not-here.png',
+      plain: true,
+    });
+
+    assert.equal(res.statusCode, 404);
+  });
+
+  it('deliver invalid file', async () => {
+    const res = await index.main({
+      owner: 'trieloff',
+      repo: 'helix-demo',
+      ref: 'master',
+      entry: '',
+      plain: true,
+    });
+
+    assert.equal(res.statusCode, 404);
+  });
+
+
+  it('deliver big JPEG file', async () => {
+    const res = await index.main({
+      owner: 'trieloff',
+      repo: 'helix-demo',
+      ref: 'master',
+      entry: 'big-image.jpg',
+      plain: true,
+    });
+
+    assert.equal(res.statusCode, 307);
+    assert.equal(res.headers.Location, 'https://raw.githubusercontent.com/trieloff/helix-demo/master/big-image.jpg');
+    assert.equal(res.headers['X-Content-Type'], 'image/jpeg');
+    assert.equal(res.headers['X-Static'], 'Raw/Static');
+  }).timeout(5000);
+});
 
 describe('Static Delivery Action #unittest', () => {
   it('error() #unittest', () => {
