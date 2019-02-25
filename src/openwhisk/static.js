@@ -124,6 +124,7 @@ function deliverPlain(owner, repo, ref, entry, root) {
       const body = getBody(type, response.body);
       console.log(`delivering file ${cleanentry} type ${type} binary: ${isBinary(type)}`);
       return {
+        statusCode: 200,
         headers: addHeaders({
           'Content-Type': type,
           'X-Static': 'Raw/Static',
