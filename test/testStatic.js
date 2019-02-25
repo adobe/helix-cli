@@ -17,7 +17,7 @@ Replay.mode = 'replay';
 Replay.fixtures = `${__dirname}/fixtures/`;
 
 /* eslint-env mocha */
-describe('Static Delivert Action #integrationtest', () => {
+describe('Static Delivery Action #integrationtest', () => {
   it('deliver CSS file', async () => {
     const res = await index.main({
       owner: 'trieloff',
@@ -27,6 +27,7 @@ describe('Static Delivert Action #integrationtest', () => {
       plain: true,
     });
 
+    assert.equal(res.statusCode, 200);
     assert.equal(res.headers['Content-Type'], 'text/css');
     assert.equal(res.headers['X-Static'], 'Raw/Static');
     assert.equal(res.headers['Cache-Control'], 's-max-age=300');
@@ -42,6 +43,7 @@ describe('Static Delivert Action #integrationtest', () => {
       plain: true,
     });
 
+    assert.equal(res.statusCode, 200);
     assert.equal(res.headers['Content-Type'], 'image/png');
     assert.equal(res.headers['X-Static'], 'Raw/Static');
     assert.equal(res.headers['Cache-Control'], 's-max-age=300');
@@ -57,6 +59,7 @@ describe('Static Delivert Action #integrationtest', () => {
       plain: true,
     });
 
+    assert.equal(res.statusCode, 200);
     assert.equal(res.headers['Content-Type'], 'application/json');
     assert.equal(res.headers['X-Static'], 'Raw/Static');
     assert.equal(res.headers['Cache-Control'], 's-max-age=300');
