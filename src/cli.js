@@ -15,6 +15,7 @@
 'use strict';
 
 const yargs = require('yargs');
+const chalk = require('chalk');
 
 const MIN_MSG = 'You need at least one command.';
 

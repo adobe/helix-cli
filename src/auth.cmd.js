@@ -11,34 +11,28 @@
  */
 
 const readline = require('readline');
-const { Writable } = require('stream');
-const Octokit = require('@octokit/rest');
+const path = require('path');
+const rp = require('request-promise-native');
+const fse = require('fs-extra');
+const chalk = require('chalk');
+const opn = require('opn');
 const AbstractCommand = require('./abstract.cmd.js');
+const LoginServer = require('./auth-login-server.js');
+const cliutils = require('./cli-util');
 
-const mutableStdout = new Writable({
-  write(chunk, encoding, callback) {
-    if (!this.muted) {
-      process.stdout.write(chunk, encoding);
-    }
-    callback();
-  },
-});
+const HELIX_LOGIN_START_URL = 'https://app.project-helix.io/login/start';
 
-async function prompt(rl, question, hide = false) {
-  return new Promise((resolve) => {
-    mutableStdout.muted = false;
-    rl.question(question,resolve);
-    mutableStdout.muted = hide;
-  });
-}
-
-class BuildCommand extends AbstractCommand {
+class AuthCommand extends AbstractCommand {
   constructor(logger) {
     super(logger);
     this._token = '';
-    this._username = '';
-    this._password = '';
-    this._2fa = '';
+    this._showToken = true;
+    this._openBrowser = true;
+    // those are for testing
+    this._stdout = process.stdout;
+    this._stdin = process.stdin;
+    this._askAdd = null;
+    this._askFile = null;
   }
 
   // eslint-disable-next-line class-methods-use-this
@@ -46,23 +40,8 @@ class BuildCommand extends AbstractCommand {
     return false;
   }
 
-  withToken(value) {
-    this._token = value;
-    return this;
-  }
-
-  withUsername(value) {
-    this._username = value;
-    return this;
-  }
-
-  withPassword(value) {
-    this._password = value;
-    return this;
-  }
-
-  with2FA(value) {
-    this._2fa = value;
+  withOpenBrowser(value) {
+    this._openBrowser = value;
     return this;
   }
 
@@ -72,120 +51,107 @@ class BuildCommand extends AbstractCommand {
   async init() {
     await super.init();
 
-    this._rl = readline.createInterface({
-      input: process.stdin,
-      output: mutableStdout,
-      terminal: true,
-    });
+    if (!this._stdout.isTTY) {
+      throw Error('Interactive authentication tool not supported on non interactive consoles.');
+    }
   }
 
-  async initOctoKit() {
-    const auth = async () => {
-      if (this._token) {
-        return `token ${this._token}`;
-      }
+  async receiveToken() {
+    const srv = new LoginServer()
+      .withLogger(this.log);
+    await srv.start();
+    this.emit('server-start', srv.port);
+    this._loginUrl = `${HELIX_LOGIN_START_URL}?p=${srv.port}`;
 
-      if (!this._username) {
-        this._username = await prompt(this._rl, 'Github Username:');
-      }
-      if (!this._password) {
-        this._password = await prompt(this._rl, 'Github Password:', true);
-      }
+    this._stdout.write(`
+Thank you for choosing the automatic Helix Bot Authentication process.
+I will shortly open a browser with the following url. In case the 
+browser doesn't open automatically, please navigate to the url manually:
 
-      return {
-        username: this._username,
-        password: this._password,
-        on2fa: async () => {
-          if (!this._2fa) {
-            this._2fa = await prompt(this._rl, 'Two-factor authentication Code:');
-          }
-          return this._2fa;
-        },
-      };
-    };
+    ${chalk.cyan(this._loginUrl)}
 
-    const octokit = new Octokit({
-      // see "Authentication" section below
-      auth: await auth(),
+Oh, and I started local server, bound to 127.0.0.1:${srv.port} and am 
+awaiting the completion of the process. `);
 
-      // setting a user agent is required: https://developer.github.com/v3/#user-agent-required
-      // v1.2.3 will be current @octokit/rest version
-      userAgent: 'octokit/rest.js v1.2.3',
+    const spinner = cliutils.createSpinner().start();
+    if (this._openBrowser) {
+      setTimeout(() => {
+        opn(this._loginUrl, { wait: false });
+      }, 1000);
+    }
+    this._token = await srv.waitForToken();
+    spinner.stop();
+    await srv.stop();
+    this.emit('server-stop');
+    this._stdout.write(`
 
-      // add list of previews you’d like to enable globally,
-      // see https://developer.github.com/v3/previews/.
-      // Example: ['jean-grey-preview', 'symmetra-preview']
-      previews: [],
+The authentication process has completed. Thank you. 
+You can now close the browser window if it didn't close automatically.
 
-      // set custom URL for on-premise GitHub Enterprise installations
-      baseUrl: 'https://api.github.com',
+I received an access token that I can use to access the Helix Bot on your behalf:
+`);
+  }
 
-      // pass custom methods for debug, info, warn and error
-      log: this.log,
-
-      request: {
-        // Node.js only: advanced request options can be passed as http(s) agent,
-        // such as custom SSL certificate or proxy settings.
-        // See https://nodejs.org/api/http.html#http_class_http_agent
-        agent: undefined,
-
-        // request timeout in ms. 0 means no timeout
-        timeout: 0,
+  async showUserInfo() {
+    // fetch some user info
+    const userInfo = await rp({
+      uri: 'https://api.github.com/user',
+      headers: {
+        'User-Agent': 'HelixBot',
+        Authorization: `token ${this._token}`,
       },
+      json: true,
     });
 
-    if (!this._token) {
-      // check if we have a token for our 'note'
-      const auths = await octokit.oauthAuthorizations.listAuthorizations({
-        per_page: 100,
-      });
-      for (const a of auths.data) {
-        if (a.note === 'Helix Development') {
-          this.log.error('Authorization for helix development already exist. Please provide token or delete in https://github.com/settings/tokens');
-          return octokit;
-        }
-      }
-
-      // create new token
-      try {
-        const result = await octokit.oauthAuthorizations.createAuthorization({
-          scopes: ['repo'],
-          note: 'Helix Development',
-          // note_url,
-          // client_id,
-          // client_secret,
-          // fingerprint
-        });
-        console.log(`New token: ${result.data.token}`);
-      } catch (e) {
-        console.error(e.errors);
-      }
-
-    }
-
-    return octokit;
+    this._stdout.write(`\n${chalk.gray('   Name: ')}${userInfo.name}\n`);
+    this._stdout.write(`${chalk.gray('  Login: ')}${userInfo.login}\n\n`);
   }
 
   async run() {
     await this.init();
 
-    const octokit = await this.initOctoKit();
+    await this.receiveToken();
+    await this.showUserInfo();
 
-    const result = await octokit.issues.list({
-      filter: 'assigned',
-      state: 'open',
+    const rl = readline.createInterface({
+      input: this._stdin,
+      output: this._stdout,
+      terminal: true,
     });
-    // const result = await octokit.repos.list({
-    //   visibility: 'all',
-    //   affiliation: 'owner',
-    // });
 
-    for (const issue of result.data) {
-      console.log(issue.title);
+    const answer = this._askAdd !== null ? this._askAdd : (await cliutils.prompt(rl, 'If you wish, I can add it to a file? [Y/n]: ')).toLowerCase();
+    if (answer === '' || answer === 'y' || answer === 'yes') {
+      const file = this._askFile !== null ? this._askFile : (await cliutils.prompt(rl, 'which file? [.env]: ')) || '.env';
+      const p = path.resolve(this.directory, file);
+      let env = '';
+      if (await fse.pathExists(p)) {
+        env = await fse.readFile(p, 'utf-8');
+      }
+      // check if token is already present
+      if (env.indexOf('HLX_GITHUB_TOKEN') >= 0) {
+        env = env.replace(/HLX_GITHUB_TOKEN\s*=\s*[^\s]+/, `HLX_GITHUB_TOKEN=${this._token}`);
+      } else {
+        if (env && !env.endsWith('\n')) {
+          env += '\n';
+        }
+        env = `${env}HLX_GITHUB_TOKEN=${this._token}\n`;
+      }
+      await fse.writeFile(p, env, 'utf-8');
+      this._showToken = false;
+      this._stdout.write(`\nAdded github token to: ${chalk.cyan(file)}\n\n`);
     }
 
-    this._rl.close();
+    rl.close();
+
+    if (this._showToken) {
+      this._stdout.write(`
+Ok, you can add it manually, then. Here it is:
+
+  ${chalk.grey(`HLX_GITHUB_TOKEN=${this._token}`)}
+
+`);
+    }
   }
 }
 
-module.exports = BuildCommand;
+module.exports = AuthCommand;

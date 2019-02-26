@@ -70,6 +70,5 @@ describe('hlx publish --remote (fail purge)', () => {
     scope.done();
     nock.restore();
     nock.cleanAll();
-    nock.activate();
   });
 });

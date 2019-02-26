@@ -71,6 +71,5 @@ describe('hlx publish --remote (fail log setup)', () => {
     scope.done();
     nock.restore();
     nock.cleanAll();
-    nock.activate();
   });
 });

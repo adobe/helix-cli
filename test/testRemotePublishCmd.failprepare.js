@@ -69,6 +69,5 @@ describe('hlx publish --remote (fail prepare service config)', () => {
     scope.done();
     nock.restore();
     nock.cleanAll();
-    nock.activate();
   });
 });

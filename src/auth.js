@@ -26,22 +26,6 @@ module.exports = function auth() {
     desc: 'Authenticate against 3rd party systems for development and deployment',
     builder: (yargs) => {
       yargs
-        .option('username', {
-          describe: 'Github psername',
-          type: 'string',
-        })
-        .option('password', {
-          describe: 'Github password',
-          type: 'string',
-        })
-        .option('2fa', {
-          describe: 'Github two-factor-authentication value',
-          type: 'string',
-        })
-        .option('token', {
-          describe: 'Github access token',
-          type: 'string',
-        })
         .help();
     },
     handler: async (argv) => {
@@ -52,10 +36,6 @@ module.exports = function auth() {
       }
 
       await executor
-        .withUsername(argv.username)
-        .withPassword(argv.password)
-        .with2FA(argv['2fa'])
-        .withToken(argv.token)
         .run();
     },
   };
