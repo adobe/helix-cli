@@ -459,6 +459,8 @@ sub hlx_recv_pipeline {
       "&strain=" + var.strain +
       "&rootPath=" + var.rootPath +
       "&params=" + req.http.X-Encoded-Params;
+
+    set req.http.X-Trace = req.http.X-Trace + "; " + var.action;
   }
 }
 
