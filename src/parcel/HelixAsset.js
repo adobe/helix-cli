@@ -13,7 +13,7 @@
 const Asset = require('parcel-bundler/src/Asset');
 const fs = require('fs');
 const path = require('path');
-const logger = require('parcel-bundler/src/Logger');
+const logger = require('@parcel/logger');
 const { SourceMapConsumer, SourceMapGenerator } = require('source-map');
 const resolver = require('./resolver');
 

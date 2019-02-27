@@ -10,8 +10,102 @@
  * governing permissions and limitations under the License.
  */
 const assert = require('assert');
+const Replay = require('replay');
 const index = require('../src/openwhisk/static');
+
+Replay.mode = 'replay';
+Replay.fixtures = `${__dirname}/fixtures/`;
+
 /* eslint-env mocha */
+describe('Static Delivery Action #integrationtest', () => {
+  it('deliver CSS file', async () => {
+    const res = await index.main({
+      owner: 'trieloff',
+      repo: 'helix-demo',
+      ref: 'master',
+      entry: '/dist/style.css',
+      plain: true,
+    });
+
+    assert.equal(res.statusCode, 200);
+    assert.equal(res.headers['Content-Type'], 'text/css');
+    assert.equal(res.headers['X-Static'], 'Raw/Static');
+    assert.equal(res.headers['Cache-Control'], 's-max-age=300');
+    assert.equal(res.headers.ETag, '"xSOcRd5oxR4XWFrm4Zmxew=="');
+  });
+
+  it('deliver PNG file', async () => {
+    const res = await index.main({
+      owner: 'trieloff',
+      repo: 'helix-demo',
+      ref: 'master',
+      entry: 'helix_logo.png',
+      plain: true,
+    });
+
+    assert.equal(res.statusCode, 200);
+    assert.equal(res.headers['Content-Type'], 'image/png');
+    assert.equal(res.headers['X-Static'], 'Raw/Static');
+    assert.equal(res.headers['Cache-Control'], 's-max-age=300');
+    assert.equal(res.headers.ETag, '"xrbxvVvPT1FHg5zrVHcZ7g=="');
+  });
+
+  it('deliver JSON file', async () => {
+    const res = await index.main({
+      owner: 'trieloff',
+      repo: 'helix-demo',
+      ref: 'master',
+      entry: 'htdocs/test.json',
+      plain: true,
+    });
+
+    assert.equal(res.statusCode, 200);
+    assert.equal(res.headers['Content-Type'], 'application/json');
+    assert.equal(res.headers['X-Static'], 'Raw/Static');
+    assert.equal(res.headers['Cache-Control'], 's-max-age=300');
+    assert.equal(res.headers.ETag, '"oJWmHG4De8PUYQZFhlujXg=="');
+  });
+
+  it('deliver missing file', async () => {
+    const res = await index.main({
+      owner: 'trieloff',
+      repo: 'helix-demo',
+      ref: 'master',
+      entry: 'not-here.png',
+      plain: true,
+    });
+
+    assert.equal(res.statusCode, 404);
+  });
+
+  it('deliver invalid file', async () => {
+    const res = await index.main({
+      owner: 'trieloff',
+      repo: 'helix-demo',
+      ref: 'master',
+      entry: '',
+      plain: true,
+    });
+
+    assert.equal(res.statusCode, 404);
+  });
+
+
+  it('deliver big JPEG file', async () => {
+    const res = await index.main({
+      owner: 'trieloff',
+      repo: 'helix-demo',
+      ref: 'master',
+      entry: 'big-image.jpg',
+      plain: true,
+    });
+
+    assert.equal(res.statusCode, 307);
+    assert.equal(res.headers.Location, 'https://raw.githubusercontent.com/trieloff/helix-demo/master/big-image.jpg');
+    assert.equal(res.headers['X-Content-Type'], 'image/jpeg');
+    assert.equal(res.headers['X-Static'], 'Raw/Static');
+  }).timeout(5000);
+});
 
 describe('Static Delivery Action #unittest', () => {
   it('error() #unittest', () => {
@@ -74,5 +168,35 @@ describe('Static Delivery Action #unittest', () => {
     assert.equal(index.blacklisted('src/html.htl', '^.*\\.htl$|^.*\\.js$', 'foo'), true);
 
     assert.equal(index.blacklisted('foo/html.htl', '^.*\\.htl$|^.*\\.js$', ''), false);
+  });
+
+  it('main() returns static file from GitHub', async () => {
+    const res = await index.main({
+      owner: 'adobe',
+      repo: 'helix-cli',
+      entry: '/demos/simple/htdocs/style.css',
+      plain: true,
+    });
+    assert.ok(res.body.indexOf('Arial') > 0, true);
+  });
+
+  it('main() returns 403 if plain is false', async () => {
+    const res = await index.main({
+      owner: 'adobe',
+      repo: 'helix-cli',
+      entry: '/demos/simple/htdocs/style.css',
+      plain: false,
+    });
+    assert.equal(res.statusCode, 403);
+  });
+
+  it('main() returns 403 in case of backlisted file', async () => {
+    const res = await index.main({
+      owner: 'adobe',
+      repo: 'helix-cli',
+      entry: '/package.json',
+      plain: true,
+    });
+    assert.equal(res.statusCode, 403);
   });
 });

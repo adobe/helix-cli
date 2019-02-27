@@ -17,8 +17,9 @@ const fs = require('fs-extra');
 const assert = require('assert');
 const path = require('path');
 const $ = require('shelljs');
-const { GitUtils, Logger } = require('@adobe/helix-shared');
+const { Logger } = require('@adobe/helix-shared');
 const { initGit, createTestRoot } = require('./utils.js');
+const GitUtils = require('../src/git-utils');
 const BuildCommand = require('../src/build.cmd.js');
 const DeployCommand = require('../src/deploy.cmd.js');
 
@@ -151,6 +152,7 @@ describe('hlx deploy (Integration)', () => {
     } catch (e) {
       const log = await logger.getOutput();
       assert.ok(log.indexOf('error: Remote repository ssh://git@github.com/adobe/project-foo.io.git#master does not affect any strains.') >= 0);
+      assert.ok(log.indexOf('http://localhost') < 0, true);
     }
   });
 
@@ -325,7 +327,7 @@ describe('hlx deploy (Integration)', () => {
       .withTarget(buildDir)
       .run();
 
-    const ref = GitUtils.getCurrentRevision(testRoot);
+    const ref = await GitUtils.getCurrentRevision(testRoot);
     assert.equal(cmd.config.strains.get('default').package, '');
     assert.equal(cmd.config.strains.get('dev').package, `hlx/${ref}`);
     // todo: can't test writeback of helix-config.yaml, since it's disabled during dry-run

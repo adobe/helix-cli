@@ -1,0 +1,26 @@
+GET /trieloff/helix-demo/master/not-here.png
+host: raw.githubusercontent.com
+
+HTTP/1.1 404 Not Found
+content-security-policy: default-src 'none'; style-src 'unsafe-inline'; sandbox
+strict-transport-security: max-age=31536000
+x-content-type-options: nosniff
+x-frame-options: deny
+x-xss-protection: 1; mode=block
+x-github-request-id: 0A88:1BA8:D9ACE:ECDEC:5C6EB9EF
+content-length: 15
+accept-ranges: bytes
+date: Thu, 21 Feb 2019 14:47:11 GMT
+via: 1.1 varnish
+connection: close
+x-served-by: cache-hhn1521-HHN
+x-cache: MISS
+x-cache-hits: 0
+x-timer: S1550760432.569929,VS0,VE139
+vary: Authorization,Accept-Encoding
+access-control-allow-origin: *
+x-fastly-request-id: 2ce44feab302cc92203b9e024bc2d1cf9f231754
+expires: Thu, 21 Feb 2019 14:52:11 GMT
+source-age: 0
+
+404: Not Found

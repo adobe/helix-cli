@@ -1,0 +1,45 @@
+GET /adobe/helix-cli/master//demos/simple/htdocs/style.css
+host: raw.githubusercontent.com
+
+HTTP/1.1 200 OK
+content-security-policy: default-src 'none'; style-src 'unsafe-inline'; sandbox
+strict-transport-security: max-age=31536000
+x-content-type-options: nosniff
+x-frame-options: deny
+x-xss-protection: 1; mode=block
+etag: "ffb46f86cbf2385c8310afe1a1cc1fc2f81ddf0f"
+content-type: text/plain; charset=utf-8
+cache-control: max-age=300
+x-geo-block-list: 
+x-github-request-id: 3A22:22BF:E82535:F9BF8A:5C6A884F
+content-length: 711
+accept-ranges: bytes
+date: Mon, 18 Feb 2019 10:26:24 GMT
+via: 1.1 varnish
+connection: close
+x-served-by: cache-hhn1534-HHN
+x-cache: MISS
+x-cache-hits: 0
+x-timer: S1550485584.405979,VS0,VE144
+vary: Authorization,Accept-Encoding
+access-control-allow-origin: *
+x-fastly-request-id: cef51c46705bfbad54e542fc1c65040e489914c0
+expires: Mon, 18 Feb 2019 10:31:24 GMT
+source-age: 0
+
+/*
+ * Copyright 2018 Adobe. All rights reserved.
+ * This file is licensed to you under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License. You may obtain a copy
+ * of the License at http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under
+ * the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR REPRESENTATIONS
+ * OF ANY KIND, either express or implied. See the License for the specific language
+ * governing permissions and limitations under the License.
+ */
+body {
+    padding: 8px;
+    background-color: white;
+    font-family: Arial, sans-serif;
+}

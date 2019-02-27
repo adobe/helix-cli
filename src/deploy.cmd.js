@@ -20,7 +20,8 @@ const path = require('path');
 const fs = require('fs-extra');
 const uuidv4 = require('uuid/v4');
 const ProgressBar = require('progress');
-const { HelixConfig, GitUrl, GitUtils } = require('@adobe/helix-shared');
+const { HelixConfig, GitUrl } = require('@adobe/helix-shared');
+const GitUtils = require('./git-utils');
 const useragent = require('./user-agent-util');
 const AbstractCommand = require('./abstract.cmd.js');
 const PackageCommand = require('./package.cmd.js');
@@ -173,7 +174,7 @@ class DeployCommand extends AbstractCommand {
       throw new Error(`Cannot automate deployment without ${path.resolve(process.cwd(), '.circleci', 'config.yaml')}`);
     }
 
-    const { owner, repo, ref } = GitUtils.getOriginURL();
+    const { owner, repo, ref } = await GitUtils.getOriginURL(this.directory);
 
     const auth = {
       username: this._circleciAuth,
@@ -253,11 +254,11 @@ class DeployCommand extends AbstractCommand {
 
   async run() {
     await this.init();
-    const origin = GitUtils.getOrigin(this.directory);
+    const origin = await GitUtils.getOrigin(this.directory);
     if (!origin) {
       throw Error('hlx cannot deploy without a remote git repository. Add one with\n$ git remote add origin <github_repo_url>.git');
     }
-    const dirty = GitUtils.isDirty(this.directory);
+    const dirty = await GitUtils.isDirty(this.directory);
     if (dirty && !this._enableDirty) {
       throw Error('hlx will not deploy a working copy that has uncommitted changes. Re-run with flag --dirty to force.');
     }
@@ -266,7 +267,7 @@ class DeployCommand extends AbstractCommand {
     }
 
     // get git coordinates and list affected strains
-    const ref = GitUtils.getBranch(this.directory);
+    const ref = await GitUtils.getBranch(this.directory);
     const giturl = new GitUrl(`${origin}#${ref}`);
     const affected = this.config.strains.filterByCode(giturl);
     if (affected.length === 0) {
@@ -292,8 +293,6 @@ class DeployCommand extends AbstractCommand {
       }
       if (newStrain.static.url.isLocal) {
         newStrain.static.url = giturl;
-        // eslint-disable-next-line no-underscore-dangle
-        newStrain._modified('static', newStrain.static);
       }
       if (this._addStrain === null) {
         this.log.error(chalk`Remote repository {cyan ${giturl}} does not affect any strains.
@@ -313,7 +312,7 @@ Alternatively you can auto-add one using the {grey --add <name>} option.`);
     if (dirty) {
       this._prefix = `${giturl.host.replace(/[\W]/g, '-')}--${giturl.owner.replace(/[\W]/g, '-')}--${giturl.repo.replace(/[\W]/g, '-')}--${giturl.ref.replace(/[\W]/g, '-')}-dirty`;
     } else {
-      this._prefix = GitUtils.getCurrentRevision(this.directory);
+      this._prefix = await GitUtils.getCurrentRevision(this.directory);
     }
 
     const owoptions = {

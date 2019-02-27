@@ -67,11 +67,21 @@ async function assertHttp(url, status, spec, replacements = []) {
         .on('end', () => {
           try {
             if (spec) {
-              let expected = fse.readFileSync(path.resolve(__dirname, 'specs', spec)).toString();
-              replacements.forEach((r) => {
-                expected = expected.replace(r.pattern, r.with);
-              });
-              assert.equal(data, expected);
+              if (Array.isArray(spec)) {
+                spec.forEach((str) => {
+                  try {
+                    assert.equal(data.indexOf(str) >= 0, true);
+                  } catch (e) {
+                    assert.fail(`response does not contain string "${str}"`);
+                  }
+                });
+              } else {
+                let expected = fse.readFileSync(path.resolve(__dirname, 'specs', spec)).toString();
+                replacements.forEach((r) => {
+                  expected = expected.replace(r.pattern, r.with);
+                });
+                assert.equal(data, expected);
+              }
             }
             resolve();
           } catch (e) {
