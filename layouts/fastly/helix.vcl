@@ -681,6 +681,8 @@ sub vcl_fetch {
     # That was a miss. Let's try to restart.
     set beresp.http.X-Status = beresp.status + "-Restart " + req.restarts;
     set beresp.status = 404;
+    # ensure that 404 from the backends are not cached. otherwise the a potential vlc_hit will not re-fetch the static files.
+    set beresp.cacheable = false;
 
     if (req.http.X-Static == "Static") {
       set req.http.X-Static = "Dynamic";
