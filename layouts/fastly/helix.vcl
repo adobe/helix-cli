@@ -459,6 +459,8 @@ sub hlx_recv_pipeline {
       "&strain=" + var.strain +
       "&rootPath=" + var.rootPath +
       "&params=" + req.http.X-Encoded-Params;
+
+    set req.http.X-Trace = req.http.X-Trace + "; " + var.action;
   }
 }
 
@@ -681,6 +683,8 @@ sub vcl_fetch {
     # That was a miss. Let's try to restart.
     set beresp.http.X-Status = beresp.status + "-Restart " + req.restarts;
     set beresp.status = 404;
+    # ensure that 404 from the backends are not cached. otherwise the a potential vlc_hit will not re-fetch the static files.
+    set beresp.cacheable = false;
 
     if (req.http.X-Static == "Static") {
       set req.http.X-Static = "Dynamic";
