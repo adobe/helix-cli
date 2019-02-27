@@ -19,6 +19,7 @@ class LoginServer extends EventEmitter {
     this._log = null;
     this._srv = null;
     this._token = null;
+    this._isClosing = null;
   }
 
   withLogger(value) {
@@ -45,9 +46,12 @@ class LoginServer extends EventEmitter {
 
   async stop() {
     if (this._srv) {
-      this._srv.close();
-      this._srv = null;
+      return new Promise((resolve) => {
+        this._srv.close(resolve);
+        this._srv = null;
+      });
     }
+    return Promise.resolve();
   }
 
   async start() {
@@ -82,7 +86,6 @@ class LoginServer extends EventEmitter {
           // assume json...
           const data = JSON.parse(body);
           if (data.token) {
-            this.stop();
             this.emit('token', data.token);
           }
         });

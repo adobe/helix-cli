@@ -13,6 +13,10 @@
 /* eslint-disable no-console, no-underscore-dangle */
 /* eslint-env mocha */
 
+// NOTE: The name of this file is choosen in such a way that tests are executed after the
+//       replay tests in `testPublishCmd.js`. it seems impossible to re-init replay after nock
+//       messed with the http request classes.
+
 const stream = require('stream');
 const path = require('path');
 const rp = require('request-promise-native');
@@ -47,9 +51,14 @@ describe('Integration test for auth', () => {
 
   beforeEach(async () => {
     testRoot = await createTestRoot();
+
+    // reset nock. potential conflict with replay
+    nock.restore();
+    nock.cleanAll();
+    nock.activate();
   });
 
-  after(() => {
+  afterEach(() => {
     nock.restore();
     nock.cleanAll();
   });
@@ -91,13 +100,14 @@ describe('Integration test for auth', () => {
         });
       });
 
+    cmd._stdin = new stream.PassThrough();
     cmd._stdout = out;
     cmd._askAdd = 'yes';
     cmd._askFile = '.foo';
 
     await cmd.run();
 
-    assert.ok(githubApi.isDone());
+    githubApi.done();
 
     const file = await fs.readFile(path.resolve(testRoot, '.foo'), 'utf-8');
     const tokenLine = `HLX_GITHUB_TOKEN=${token}\n`;
@@ -107,7 +117,7 @@ describe('Integration test for auth', () => {
     assert.equal(file, tokenLine);
   });
 
-  it('auth create reports the token', async () => {
+  it('auth reports the token', async () => {
     const githubApi = nock('https://api.github.com')
       .get('/user')
       .reply(200, JSON.stringify({
@@ -132,13 +142,14 @@ describe('Integration test for auth', () => {
         });
       });
 
+    cmd._stdin = new stream.PassThrough();
     cmd._stdout = out;
     cmd._askAdd = 'no';
     cmd._askFile = '.foo';
 
     await cmd.run();
 
-    assert.ok(githubApi.isDone());
+    githubApi.done();
 
     assertFile(path.resolve(testRoot, '.foo'), true);
     const tokenLine = `HLX_GITHUB_TOKEN=${token}`;

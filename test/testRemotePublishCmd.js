@@ -36,6 +36,11 @@ describe('hlx publish --remote (default)', () => {
       }),
     });
 
+    // ensure to reset nock. potential conflict with replay
+    nock.restore();
+    nock.cleanAll();
+    nock.activate();
+
     scope = nock('https://adobeioruntime.net')
       .post('/api/v1/web/helix/default/publish')
       .reply(200, {})

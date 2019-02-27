@@ -12,7 +12,6 @@
 
 /* eslint-env mocha */
 
-const assert = require('assert');
 const nock = require('nock');
 const path = require('path');
 const proxyquire = require('proxyquire');
@@ -37,6 +36,11 @@ describe('hlx publish --remote --dry-run (default)', () => {
       }),
     });
 
+    // ensure to reset nock. potential conflict with replay
+    nock.restore();
+    nock.cleanAll();
+    nock.activate();
+
     scope = nock('https://adobeioruntime.net')
       .post('/api/v1/web/helix/default/publish')
       .reply(200, {})
@@ -60,7 +64,7 @@ describe('hlx publish --remote --dry-run (default)', () => {
   });
 
   after('Showing results', () => {
-    assert.ok(scope.isDone());
+    scope.done();
     nock.cleanAll();
     nock.restore();
   });
