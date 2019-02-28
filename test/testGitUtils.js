@@ -14,8 +14,9 @@
 
 const assert = require('assert');
 const path = require('path');
-const fse = require('fs-extra');
 const crypto = require('crypto');
+const net = require('net');
+const fse = require('fs-extra');
 const shell = require('shelljs');
 
 const git = require('isomorphic-git');
@@ -40,6 +41,8 @@ describe('Testing GitUtils', () => {
   beforeEach(async () => {
     testRoot = await createTestRoot();
     await fse.writeFile(path.resolve(testRoot, 'README.md'), 'Hello\n', 'utf-8');
+    await fse.writeFile(path.resolve(testRoot, '.gitignore'), '.env\n', 'utf-8');
+    await fse.writeFile(path.resolve(testRoot, '.env'), 'HLX_BLA=123\n', 'utf-8');
 
     // throw a Javascript error when any shell.js command encounters an error
     shell.config.fatal = true;
@@ -80,6 +83,38 @@ describe('Testing GitUtils', () => {
     assert.equal(await GitUtils.isDirty(testRoot), false);
     await fse.writeFile(path.resolve(testRoot, 'README.md'), 'Hello, world.\n', 'utf-8');
     assert.equal(await GitUtils.isDirty(testRoot), true);
+  });
+
+  it('isDirty #unit with new file', async () => {
+    assert.equal(await GitUtils.isDirty(testRoot), false);
+    await fse.writeFile(path.resolve(testRoot, 'index.md'), 'Hello, world.\n', 'utf-8');
+    assert.equal(await GitUtils.isDirty(testRoot), true);
+  });
+
+  it('isDirty #unit with staged file', async () => {
+    assert.equal(await GitUtils.isDirty(testRoot), false);
+    await fse.writeFile(path.resolve(testRoot, 'index.md'), 'Hello, world.\n', 'utf-8');
+    shell.exec('git add -A');
+    assert.equal(await GitUtils.isDirty(testRoot), true);
+  });
+
+  it('isDirty #unit with deleted file', async () => {
+    assert.equal(await GitUtils.isDirty(testRoot), false);
+    await fse.remove(path.resolve(testRoot, 'README.md'));
+    assert.equal(await GitUtils.isDirty(testRoot), true);
+  });
+
+  it('isDirty #unit with unix socket', async () => {
+    assert.equal(await GitUtils.isDirty(testRoot), false);
+
+    await new Promise((resolve) => {
+      const unixSocketServer = net.createServer();
+      unixSocketServer.listen(path.resolve(testRoot, 'test.sock'), () => {
+        unixSocketServer.close(resolve);
+      });
+    });
+
+    assert.equal(await GitUtils.isDirty(testRoot), false);
   });
 
   it('getBranchFlag #unit', async () => {
