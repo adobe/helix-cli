@@ -311,6 +311,7 @@ describe('hlx deploy (Integration)', () => {
         path.resolve(testRoot, 'src/html.pre.js'),
         path.resolve(testRoot, 'src/helper.js'),
         path.resolve(testRoot, 'src/utils/another_helper.js'),
+        path.resolve(testRoot, 'src/third_helper.js'),
       ])
       .withTargetDir(buildDir)
       .withCacheEnabled(false)
