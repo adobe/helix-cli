@@ -11,6 +11,11 @@
  */
 
 const path = require('path');
+const os = require('os');
+const ignore = require('ignore');
+const ini = require('ini');
+const fse = require('fs-extra');
+
 const { GitUrl } = require('@adobe/helix-shared');
 const git = require('isomorphic-git');
 git.plugins.set('fs', require('fs'));
@@ -20,17 +25,46 @@ class GitUtils {
    * Determines whether the working tree directory contains uncommitted or unstaged changes.
    *
    * @param {string} dir working tree directory path of the git repo
+   * @param {string} [homedir] optional users home directory
    * @returns {Promise<boolean>} `true` if there are uncommitted/unstaged changes; otherwise `false`
    */
-  static async isDirty(dir) {
+  static async isDirty(dir, homedir = os.homedir()) {
     // see https://isomorphic-git.org/docs/en/statusMatrix
     const HEAD = 1;
     const WORKDIR = 2;
     const STAGE = 3;
     const matrix = await git.statusMatrix({ dir });
-    return matrix
-      .filter(row => !(row[HEAD] === row[WORKDIR] && row[WORKDIR] === row[STAGE]))
-      .length !== 0;
+    let modified = matrix
+      .filter(row => !(row[HEAD] === row[WORKDIR] && row[WORKDIR] === row[STAGE]));
+    if (modified.length === 0) {
+      return false;
+    }
+
+    // need to re-check the modified against the globally ignored
+    // see: https://github.com/isomorphic-git/isomorphic-git/issues/444
+    const globalConfig = path.resolve(homedir, '.gitconfig');
+    const config = ini.parse(await fse.readFile(globalConfig, 'utf-8'));
+    const globalIgnore = path.resolve(homedir, (config.core && config.core.excludesfile) || '.gitignore_global');
+    if (await fse.pathExists(globalIgnore)) {
+      const ign = ignore()
+        .add(await fse.readFile(globalIgnore, 'utf-8'));
+      modified = modified.filter(row => !ign.ignores(row[0]));
+      if (modified.length === 0) {
+        return false;
+      }
+    }
+
+    // filter out the deleted ones for the checks below
+    const existing = modified.filter(row => row[WORKDIR] > 0).map(row => row[0]);
+    if (existing.length < modified.length) {
+      return true;
+    }
+
+    // we also need to filter out the non-files and non-symlinks.
+    // see: https://github.com/isomorphic-git/isomorphic-git/issues/705
+    const stats = await Promise.all(existing.map(file => fse.lstat(path.resolve(dir, file))));
+    const files = stats.filter(stat => stat.isFile() || stat.isSymbolicLink());
+    return files.length > 0;
   }
 
   /**
