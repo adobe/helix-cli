@@ -26,6 +26,12 @@ module.exports = function auth() {
     desc: 'Authenticate against 3rd party systems for development and deployment',
     builder: (yargs) => {
       yargs
+        .option('github', {
+          boolean: true,
+          default: true,
+          describe: 'Run authentication wizard for GitHub.',
+        })
+        .group(['github'/* , 'fastly', 'wsk' */], 'Services')
         .help();
     },
     handler: async (argv) => {
