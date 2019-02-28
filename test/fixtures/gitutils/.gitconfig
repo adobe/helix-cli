@@ -1,0 +1,5 @@
+[user]
+	name = Test User
+	email = test@example.com
+[core]
+	excludesfile = .user_gitignore_global

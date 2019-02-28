@@ -24,6 +24,8 @@ git.plugins.set('fs', require('fs'));
 
 const GitUtils = require('../src/git-utils');
 
+const GIT_USER_HOME = path.resolve(__dirname, 'fixtures/gitutils');
+
 if (!shell.which('git')) {
   shell.echo('Sorry, this tests requires git');
   shell.exit(1);
@@ -80,28 +82,34 @@ describe('Testing GitUtils', () => {
   });
 
   it('isDirty #unit', async () => {
-    assert.equal(await GitUtils.isDirty(testRoot), false);
+    assert.equal(await GitUtils.isDirty(testRoot, GIT_USER_HOME), false);
     await fse.writeFile(path.resolve(testRoot, 'README.md'), 'Hello, world.\n', 'utf-8');
-    assert.equal(await GitUtils.isDirty(testRoot), true);
+    assert.equal(await GitUtils.isDirty(testRoot, GIT_USER_HOME), true);
   });
 
   it('isDirty #unit with new file', async () => {
-    assert.equal(await GitUtils.isDirty(testRoot), false);
+    assert.equal(await GitUtils.isDirty(testRoot, GIT_USER_HOME), false);
     await fse.writeFile(path.resolve(testRoot, 'index.md'), 'Hello, world.\n', 'utf-8');
-    assert.equal(await GitUtils.isDirty(testRoot), true);
+    assert.equal(await GitUtils.isDirty(testRoot, GIT_USER_HOME), true);
   });
 
   it('isDirty #unit with staged file', async () => {
-    assert.equal(await GitUtils.isDirty(testRoot), false);
+    assert.equal(await GitUtils.isDirty(testRoot, GIT_USER_HOME), false);
     await fse.writeFile(path.resolve(testRoot, 'index.md'), 'Hello, world.\n', 'utf-8');
     shell.exec('git add -A');
-    assert.equal(await GitUtils.isDirty(testRoot), true);
+    assert.equal(await GitUtils.isDirty(testRoot, GIT_USER_HOME), true);
   });
 
   it('isDirty #unit with deleted file', async () => {
-    assert.equal(await GitUtils.isDirty(testRoot), false);
+    assert.equal(await GitUtils.isDirty(testRoot, GIT_USER_HOME), false);
     await fse.remove(path.resolve(testRoot, 'README.md'));
-    assert.equal(await GitUtils.isDirty(testRoot), true);
+    assert.equal(await GitUtils.isDirty(testRoot, GIT_USER_HOME), true);
+  });
+
+  it('isDirty #unit with globally excluded file', async () => {
+    assert.equal(await GitUtils.isDirty(testRoot, GIT_USER_HOME), false);
+    await fse.writeFile(path.resolve(testRoot, '.global-ignored-file.txt'), 'Hello, world.\n', 'utf-8');
+    assert.equal(await GitUtils.isDirty(testRoot, GIT_USER_HOME), false);
   });
 
   it('isDirty #unit with unix socket', async function socketTest() {
@@ -109,7 +117,7 @@ describe('Testing GitUtils', () => {
       this.skip();
       return;
     }
-    assert.equal(await GitUtils.isDirty(testRoot), false);
+    assert.equal(await GitUtils.isDirty(testRoot, GIT_USER_HOME), false);
 
     await new Promise((resolve) => {
       const unixSocketServer = net.createServer();
@@ -118,7 +126,7 @@ describe('Testing GitUtils', () => {
       });
     });
 
-    assert.equal(await GitUtils.isDirty(testRoot), false);
+    assert.equal(await GitUtils.isDirty(testRoot, GIT_USER_HOME), false);
   });
 
   it('getBranchFlag #unit', async () => {

@@ -25,9 +25,10 @@ class GitUtils {
    * Determines whether the working tree directory contains uncommitted or unstaged changes.
    *
    * @param {string} dir working tree directory path of the git repo
+   * @param {string} [homedir] optional users home directory
    * @returns {Promise<boolean>} `true` if there are uncommitted/unstaged changes; otherwise `false`
    */
-  static async isDirty(dir) {
+  static async isDirty(dir, homedir = os.homedir()) {
     // see https://isomorphic-git.org/docs/en/statusMatrix
     const HEAD = 1;
     const WORKDIR = 2;
@@ -41,10 +42,9 @@ class GitUtils {
 
     // need to re-check the modified against the globally ignored
     // see: https://github.com/isomorphic-git/isomorphic-git/issues/444
-    const globalConfig = path.resolve(os.homedir(), '.gitconfig');
-    const globalIgnoreDefault = path.resolve(os.homedir(), '.gitignore_global');
+    const globalConfig = path.resolve(homedir, '.gitconfig');
     const config = ini.parse(await fse.readFile(globalConfig, 'utf-8'));
-    const globalIgnore = (config.core && config.core.excludesfile) || globalIgnoreDefault;
+    const globalIgnore = path.resolve(homedir, (config.core && config.core.excludesfile) || '.gitignore_global');
     if (await fse.pathExists(globalIgnore)) {
       const ign = ignore()
         .add(await fse.readFile(globalIgnore, 'utf-8'));
