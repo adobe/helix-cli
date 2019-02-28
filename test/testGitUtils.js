@@ -104,7 +104,11 @@ describe('Testing GitUtils', () => {
     assert.equal(await GitUtils.isDirty(testRoot), true);
   });
 
-  it('isDirty #unit with unix socket', async () => {
+  it('isDirty #unit with unix socket', async function socketTest() {
+    if (process.platform === 'win32') {
+      this.skip();
+      return;
+    }
     assert.equal(await GitUtils.isDirty(testRoot), false);
 
     await new Promise((resolve) => {
