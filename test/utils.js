@@ -14,13 +14,13 @@ const path = require('path');
 const shell = require('shelljs');
 const fse = require('fs-extra');
 const http = require('http');
-const Replay = require('replay');
+// const Replay = require('replay');
 const uuidv4 = require('uuid/v4');
 const unzip = require('unzip2');
 const BuildCommand = require('../src/build.cmd');
 
 // disable replay for this test
-Replay.mode = 'bloody';
+// Replay.mode = 'bloody';
 
 /**
  * init git in integration so that helix-simulator can run
