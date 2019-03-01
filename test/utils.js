@@ -12,10 +12,10 @@
 const assert = require('assert');
 const path = require('path');
 const shell = require('shelljs');
+const crypto = require('crypto');
 const fse = require('fs-extra');
 const http = require('http');
 const Replay = require('replay');
-const uuidv4 = require('uuid/v4');
 const unzip = require('unzip2');
 const BuildCommand = require('../src/build.cmd');
 
@@ -121,17 +121,13 @@ async function assertZipEntries(zipPath, entries) {
 }
 
 async function createTestRoot() {
-  const dir = path.resolve(__dirname, 'tmp', uuidv4());
+  const dir = path.resolve(__dirname, 'tmp', crypto.randomBytes(16).toString('hex'));
   await fse.ensureDir(dir);
   return dir;
 }
 
 async function createFakeTestRoot() {
-  const dir = path.resolve(__dirname, 'tmp', uuidv4());
-  if (!await fse.pathExists(dir)) {
-    return dir;
-  }
-  return createFakeTestRoot();
+  return path.resolve(__dirname, 'tmp', crypto.randomBytes(16).toString('hex'));
 }
 
 async function processSource(scriptName, type = 'htl') {
