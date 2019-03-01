@@ -10,14 +10,27 @@
  * governing permissions and limitations under the License.
  */
 const assert = require('assert');
-const Replay = require('replay');
+const path = require('path');
+const NodeHttpAdapter = require('@pollyjs/adapter-node-http');
+const FSPersister = require('@pollyjs/persister-fs');
+const { setupMocha: setupPolly } = require('@pollyjs/core');
 const index = require('../src/openwhisk/static');
-
-Replay.mode = 'replay';
-Replay.fixtures = `${__dirname}/fixtures/`;
 
 /* eslint-env mocha */
 describe('Static Delivery Action #integrationtest', () => {
+  setupPolly({
+    recordFailedRequests: true,
+    recordIfMissing: false,
+    logging: false,
+    adapters: [NodeHttpAdapter],
+    persister: FSPersister,
+    persisterOptions: {
+      fs: {
+        recordingsDir: path.resolve(__dirname, 'fixtures/recordings'),
+      },
+    },
+  });
+
   it('deliver CSS file', async () => {
     const res = await index.main({
       owner: 'trieloff',
@@ -47,7 +60,7 @@ describe('Static Delivery Action #integrationtest', () => {
     assert.equal(res.headers['Content-Type'], 'image/png');
     assert.equal(res.headers['X-Static'], 'Raw/Static');
     assert.equal(res.headers['Cache-Control'], 's-max-age=300');
-    assert.equal(res.headers.ETag, '"xrbxvVvPT1FHg5zrVHcZ7g=="');
+    assert.equal(res.headers.ETag, '"hQQa9WA2n198wTAbYXlO4A=="');
   });
 
   it('deliver JSON file', async () => {
