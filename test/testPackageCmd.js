@@ -41,6 +41,7 @@ describe('hlx package (Integration)', () => {
         'test/integration/src/html.pre.js',
         'test/integration/src/helper.js',
         'test/integration/src/utils/another_helper.js',
+        'test/integration/src/third_helper.js',
       ])
       .withTargetDir(buildDir)
       .withCacheEnabled(false)
@@ -68,7 +69,7 @@ describe('hlx package (Integration)', () => {
 
     await assertZipEntries(
       path.resolve(buildDir, 'html.zip'),
-      ['package.json', 'html.js', 'html.pre.js', 'helper.js'],
+      ['package.json', 'html.js', 'html.pre.js', 'helper.js', 'third_helper.js'],
     );
     await assertZipEntries(
       path.resolve(buildDir, 'static.zip'),
