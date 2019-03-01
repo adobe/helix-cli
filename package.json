@@ -9,7 +9,6 @@
   "scripts": {
     "check": "npm run lint && npm run test",
     "test": "nyc mocha -t 5000",
-    "record": "rm -rf test/fixtures/api.fastly.com-443 && MODE=record mocha test/testPublishCmd.js -g \"Publish Strains on an existing Service Config\"",
     "junit": "mocha -R mocha-junit-reporter -t 5000",
     "lint": "./node_modules/.bin/eslint .",
     "preversion": "npm run junit",
@@ -68,6 +67,10 @@
   },
   "devDependencies": {
     "@adobe/helix-testutils": "^0.2.0",
+    "@pollyjs/adapter-fetch": "^2.3.0",
+    "@pollyjs/adapter-node-http": "^2.3.0",
+    "@pollyjs/core": "^2.3.0",
+    "@pollyjs/persister-fs": "^2.1.0",
     "ajv": "6.9.2",
     "codecov": "3.2.0",
     "eslint": "5.14.1",
@@ -84,7 +87,6 @@
     "nock": "^10.0.6",
     "nyc": "13.3.0",
     "proxyquire": "^2.1.0",
-    "replay": "2.4.0",
     "sinon": "7.2.5",
     "unzip2": "0.2.5"
   },
