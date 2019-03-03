@@ -71,7 +71,7 @@
     "@pollyjs/adapter-node-http": "^2.3.0",
     "@pollyjs/core": "^2.3.0",
     "@pollyjs/persister-fs": "^2.1.0",
-    "ajv": "6.9.2",
+    "ajv": "6.10.0",
     "codecov": "3.2.0",
     "eslint": "5.14.1",
     "eslint-config-airbnb": "17.1.0",
