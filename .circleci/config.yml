@@ -154,6 +154,11 @@ jobs:
         keys:
         - v1-nodec-cache-{{ checksum "~/_cache_key" }}
     - run:
+        name: Remove unnecessary files & folders from checkout before building installer (see #613)
+        working_directory: ~/project
+        command: |
+          rm -rf .circleci .github .vscode .eslint* build test
+    - run:
         name: Build Installer
         working_directory: ~/
         command: |
