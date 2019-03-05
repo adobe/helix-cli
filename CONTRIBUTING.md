@@ -67,8 +67,8 @@ Use `npm version [<newversion> | major | minor | patch ]` to bump the package ve
 The following command will:
 
 * Run `npm test`, abort if tests are failing
-* Increment the patch version (e.g. `1.1.0` -> `1.1.1`) in `package.json`
-* Commit `package.json`
+* Increment the patch version (e.g. `1.1.0` -> `1.1.1`) and update `package.json` & `package-lock.json`
+* Commit `package.json` & `package-lock.json`
 * Tag the commit with the new version
 * Push the changes to github
 * Create a github release containing a change log since the last release and a link to the binary build of `hlx` command line executable.
