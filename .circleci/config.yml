@@ -154,16 +154,21 @@ jobs:
         keys:
         - v1-nodec-cache-{{ checksum "~/_cache_key" }}
     - run:
+        name: Resolve dependencies
+        working_directory: ~/project
+        command: |
+          npm i --production
+    - run:
         name: Remove unnecessary files & folders from checkout before building installer (see #613)
         working_directory: ~/project
         command: |
-          rm -rf .circleci .github .vscode .eslint* test
+          rm -rf .circleci .github .vscode .eslint* test node_modules/calibre/bin
     - run:
         name: Build Installer
         working_directory: ~/
         command: |
           cp ~/project/index.js ~/project/hlx
-          ~/nodec -r ~/project -o ~/project/build/archive/a.out --tmpdir=~/nodec_tmp ~/project/hlx
+          ~/nodec -r ~/project -o ~/project/build/archive/a.out --skip-npm-install --tmpdir=~/nodec_tmp ~/project/hlx
     - save_cache:
         paths:
         - ~/nodec_tmp
