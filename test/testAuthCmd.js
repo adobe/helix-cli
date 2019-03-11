@@ -13,17 +13,13 @@
 /* eslint-disable no-console, no-underscore-dangle */
 /* eslint-env mocha */
 
-// NOTE: The name of this file is choosen in such a way that tests are executed after the
-//       replay tests in `testPublishCmd.js`. it seems impossible to re-init replay after nock
-//       messed with the http request classes.
-
-const stream = require('stream');
-const path = require('path');
-const rp = require('request-promise-native');
-const fs = require('fs-extra');
 const assert = require('assert');
+const crypto = require('crypto');
+const path = require('path');
+const stream = require('stream');
+const fs = require('fs-extra');
 const nock = require('nock');
-const uuidv4 = require('uuid/v4');
+const rp = require('request-promise-native');
 const AuthCommand = require('../src/auth.cmd');
 
 const {
@@ -85,7 +81,7 @@ describe('Integration test for auth', () => {
 
     const out = new TestStream();
     out.isTTY = true;
-    const token = uuidv4();
+    const token = crypto.randomBytes(16).toString('hex');
     const cmd = new AuthCommand()
       .withDirectory(testRoot)
       .withOpenBrowser(false)
@@ -127,7 +123,7 @@ describe('Integration test for auth', () => {
 
     const out = new TestStream();
     out.isTTY = true;
-    const token = uuidv4();
+    const token = crypto.randomBytes(16).toString('hex');
     const cmd = new AuthCommand()
       .withDirectory(testRoot)
       .withOpenBrowser(false)
