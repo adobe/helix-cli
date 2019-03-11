@@ -14,7 +14,7 @@
 
 // CONTENTS
 
-function wrap(main) {
+function helix_wrap_action(main) {
   const { OpenWhiskAction } = require('@adobe/helix-pipeline');
   const { pipe } = require('MOD_PIPE');
   const { pre } = require('MOD_PRE');
@@ -34,4 +34,4 @@ function wrap(main) {
   };
 }
 
-module.exports.main = wrap(module.exports.main);
+module.exports.main = helix_wrap_action(module.exports.main);

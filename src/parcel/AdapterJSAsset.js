@@ -34,16 +34,18 @@ class AdapterJSAsset extends JSAsset {
 
     // if this no, we're done.
     if (!isScript) {
-      gen.type = 'js';
+      return gen;
+    }
+
+    // check if code is already wrapped (there is currently no other way to make this simple,
+    // w/o implementing new extension in parcel).
+    if (gen[0].value.indexOf('function helix_wrap_action') > 0) {
       return gen;
     }
 
     // otherwise it's a pure-JS action and we want to wrap it
-    return [{
-      type: 'helix-js',
-      value: gen.js,
-      sourceMap: gen.map,
-    }];
+    gen[0].type = 'helix-js';
+    return gen;
   }
 
   addDependency(name, opts) {

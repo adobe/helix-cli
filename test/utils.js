@@ -15,12 +15,8 @@ const shell = require('shelljs');
 const crypto = require('crypto');
 const fse = require('fs-extra');
 const http = require('http');
-const Replay = require('replay');
 const unzip = require('unzip2');
 const BuildCommand = require('../src/build.cmd');
-
-// disable replay for this test
-Replay.mode = 'bloody';
 
 /**
  * init git in integration so that helix-simulator can run
