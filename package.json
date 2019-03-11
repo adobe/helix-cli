@@ -1,6 +1,6 @@
 {
   "name": "@adobe/helix-cli",
-  "version": "0.13.8-pre.5",
+  "version": "0.13.9-pre.3",
   "description": "Project Helix CLI",
   "main": "index.js",
   "bin": {
@@ -30,14 +30,14 @@
   },
   "dependencies": {
     "@adobe/fastly-native-promises": "^1.3.2",
-    "@adobe/helix-pipeline": "0.11.0",
+    "@adobe/helix-pipeline": "1.0.2",
     "@adobe/helix-shared": "0.8.0",
-    "@adobe/helix-simulator": "2.10.4",
+    "@adobe/helix-simulator": "2.10.6",
     "@adobe/parcel-plugin-htl": "2.0.3",
     "@parcel/logger": "1.11.0",
-    "@snyk/nodejs-runtime-agent": "1.42.0",
+    "@snyk/nodejs-runtime-agent": "1.42.1",
     "archiver": "3.0.0",
-    "calibre": "1.1.1",
+    "calibre": "1.2.3",
     "chalk": "2.4.2",
     "chokidar": "^2.0.4",
     "decompress": "4.2.0",
