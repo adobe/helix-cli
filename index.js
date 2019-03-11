@@ -12,8 +12,11 @@
  * governing permissions and limitations under the License.
  */
 
-'use strict';
-
 const CLI = require('./src/cli.js');
+const ConfigUtils = require('./src/config/config-utils.js');
+require('dotenv').config();
 
-new CLI().run(process.argv.slice(2));
+(async () => {
+  await ConfigUtils.validateDotEnv();
+  new CLI().run(process.argv.slice(2));
+})();

@@ -14,12 +14,11 @@ const assert = require('assert');
 const fs = require('fs-extra');
 const sinon = require('sinon');
 const path = require('path');
-const Replay = require('replay');
+const NodeHttpAdapter = require('@pollyjs/adapter-node-http');
+const FSPersister = require('@pollyjs/persister-fs');
+const { setupMocha: setupPolly } = require('@pollyjs/core');
 const { Logger } = require('@adobe/helix-shared');
 const { processSource } = require('./utils');
-
-Replay.mode = 'replay';
-Replay.fixtures = path.resolve(__dirname, 'fixtures');
 
 const params = {
   path: '/hello.md',
@@ -88,6 +87,18 @@ describe('Generated Action Tests', () => {
 
     describe(`Testing ${testScript.name}`, function testSuite() {
       this.timeout(10000);
+
+      setupPolly({
+        recordIfMissing: false,
+        logging: false,
+        adapters: [NodeHttpAdapter],
+        persister: FSPersister,
+        persisterOptions: {
+          fs: {
+            recordingsDir: path.resolve(__dirname, 'fixtures/recordings'),
+          },
+        },
+      });
 
       before(`Run Parcel programmatically on ${testScript.name}`, async () => {
         ({ distHtmlJS: distJS, distHtmlHtl: distHtl } = await processSource(

@@ -26,6 +26,11 @@ const ANSI_REGEXP = RegExp([
   '(?:(?:\\d{1,4}(?:;\\d{0,4})*)?[\\dA-PRZcf-ntqry=><~]))',
 ].join('|'), 'g');
 
+const FILENAME_MAPPING = {
+  _gitignore: '.gitignore',
+  _env: '.env',
+};
+
 function execAsync(cmd) {
   return new Promise((resolve, reject) => {
     shell.exec(cmd, (code, stdout, stderr) => {
@@ -142,11 +147,11 @@ See https://git-scm.com/book/en/v2/Getting-Started-First-Time-Git-Setup for more
       nodir: true,
     }).map((f) => {
       const srcFile = path.resolve(root, f);
-      const dstName = f === '_gitignore' ? '.gitignore' : f;
+      const dstName = FILENAME_MAPPING[f] || f;
       const dstFile = path.resolve(projectDir, dstName);
       const filter = f === 'index.md' || f === 'README.md' || f === 'helix-config.yaml';
       return processFile(srcFile, dstFile, filter).then(() => {
-        this.msg(`${msgCreating} ${msgRelPath}/${chalk.cyan(f)}`);
+        this.msg(`${msgCreating} ${msgRelPath}/${chalk.cyan(path.relative(projectDir, dstFile))}`);
       });
     });
 

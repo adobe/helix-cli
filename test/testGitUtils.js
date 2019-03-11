@@ -14,24 +14,21 @@
 
 const assert = require('assert');
 const path = require('path');
+const net = require('net');
 const fse = require('fs-extra');
-const crypto = require('crypto');
 const shell = require('shelljs');
-
 const git = require('isomorphic-git');
+const { createTestRoot } = require('./utils.js');
+
 git.plugins.set('fs', require('fs'));
 
 const GitUtils = require('../src/git-utils');
 
+const GIT_USER_HOME = path.resolve(__dirname, 'fixtures/gitutils');
+
 if (!shell.which('git')) {
   shell.echo('Sorry, this tests requires git');
   shell.exit(1);
-}
-
-async function createTestRoot() {
-  const dir = path.resolve(__dirname, 'tmp', crypto.randomBytes(16).toString('hex'));
-  await fse.ensureDir(dir);
-  return dir;
 }
 
 describe('Testing GitUtils', () => {
@@ -40,6 +37,8 @@ describe('Testing GitUtils', () => {
   beforeEach(async () => {
     testRoot = await createTestRoot();
     await fse.writeFile(path.resolve(testRoot, 'README.md'), 'Hello\n', 'utf-8');
+    await fse.writeFile(path.resolve(testRoot, '.gitignore'), '.env\n', 'utf-8');
+    await fse.writeFile(path.resolve(testRoot, '.env'), 'HLX_BLA=123\n', 'utf-8');
 
     // throw a Javascript error when any shell.js command encounters an error
     shell.config.fatal = true;
@@ -77,9 +76,51 @@ describe('Testing GitUtils', () => {
   });
 
   it('isDirty #unit', async () => {
-    assert.equal(await GitUtils.isDirty(testRoot), false);
+    assert.equal(await GitUtils.isDirty(testRoot, GIT_USER_HOME), false);
     await fse.writeFile(path.resolve(testRoot, 'README.md'), 'Hello, world.\n', 'utf-8');
-    assert.equal(await GitUtils.isDirty(testRoot), true);
+    assert.equal(await GitUtils.isDirty(testRoot, GIT_USER_HOME), true);
+  });
+
+  it('isDirty #unit with new file', async () => {
+    assert.equal(await GitUtils.isDirty(testRoot, GIT_USER_HOME), false);
+    await fse.writeFile(path.resolve(testRoot, 'index.md'), 'Hello, world.\n', 'utf-8');
+    assert.equal(await GitUtils.isDirty(testRoot, GIT_USER_HOME), true);
+  });
+
+  it('isDirty #unit with staged file', async () => {
+    assert.equal(await GitUtils.isDirty(testRoot, GIT_USER_HOME), false);
+    await fse.writeFile(path.resolve(testRoot, 'index.md'), 'Hello, world.\n', 'utf-8');
+    shell.exec('git add -A');
+    assert.equal(await GitUtils.isDirty(testRoot, GIT_USER_HOME), true);
+  });
+
+  it('isDirty #unit with deleted file', async () => {
+    assert.equal(await GitUtils.isDirty(testRoot, GIT_USER_HOME), false);
+    await fse.remove(path.resolve(testRoot, 'README.md'));
+    assert.equal(await GitUtils.isDirty(testRoot, GIT_USER_HOME), true);
+  });
+
+  it('isDirty #unit with globally excluded file', async () => {
+    assert.equal(await GitUtils.isDirty(testRoot, GIT_USER_HOME), false);
+    await fse.writeFile(path.resolve(testRoot, '.global-ignored-file.txt'), 'Hello, world.\n', 'utf-8');
+    assert.equal(await GitUtils.isDirty(testRoot, GIT_USER_HOME), false);
+  });
+
+  it('isDirty #unit with unix socket', async function socketTest() {
+    if (process.platform === 'win32') {
+      this.skip();
+      return;
+    }
+    assert.equal(await GitUtils.isDirty(testRoot, GIT_USER_HOME), false);
+
+    await new Promise((resolve) => {
+      const unixSocketServer = net.createServer();
+      unixSocketServer.listen(path.resolve(testRoot, 'test.sock'), () => {
+        unixSocketServer.close(resolve);
+      });
+    });
+
+    assert.equal(await GitUtils.isDirty(testRoot, GIT_USER_HOME), false);
   });
 
   it('getBranchFlag #unit', async () => {
@@ -99,5 +140,19 @@ describe('Testing GitUtils', () => {
 
   it('getCurrentRevision #unit', async () => {
     assert.ok(/[0-9a-fA-F]+/.test(await GitUtils.getCurrentRevision(testRoot)));
+  });
+
+  it('isIgnored', async () => {
+    await fse.writeFile(path.resolve(testRoot, '.global-ignored-file.txt'), 'Hello, world.\n', 'utf-8');
+    assert.ok(await GitUtils.isIgnored(testRoot, '.env', GIT_USER_HOME));
+    assert.ok(await GitUtils.isIgnored(testRoot, '.global-ignored-file.txt', GIT_USER_HOME));
+    assert.ok(!(await GitUtils.isIgnored(testRoot, 'README.md', GIT_USER_HOME)));
+    assert.ok(await GitUtils.isIgnored(testRoot, 'not-existing.md', GIT_USER_HOME));
+  });
+
+  it('isIgnored works outside git', async () => {
+    const anotherTestRoot = await createTestRoot();
+    await fse.writeFile(path.resolve(anotherTestRoot, '.env'), 'Hello, world.\n', 'utf-8');
+    assert.ok(await GitUtils.isIgnored(anotherTestRoot, '.env', GIT_USER_HOME));
   });
 });

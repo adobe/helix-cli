@@ -62,16 +62,24 @@ Please contact the [Adobe Open Source Advisory Board](https://git.corp.adobe.com
 
 ### Versioning
 
-use `npm version` to set the new package version create the git tag. eg:
+Use `npm version [<newversion> | major | minor | patch ]` to bump the package version, create the git tag & create a github release.
+
+The following command will:
+
+* Run `npm test`, abort if tests are failing
+* Increment the patch version (e.g. `1.1.0` -> `1.1.1`) and update `package.json` & `package-lock.json`
+* Commit `package.json` & `package-lock.json`
+* Tag the commit with the new version
+* Push the changes to github
+* Create a github release containing a change log listing changes since the last release and a link to the binary build of `hlx` command line executable. Please note that the CircleCi job might take a couple of minutes to complete. So please refrain from creating the github release manually as this would interfere with the CircleCi job.
 
 ```bash
-$ npm version 0.2.1
-$ git push --tags
+$ npm version patch
 ```
 
 ### Publishing
 
 ```bash
 $ npm login
-$ npm publish --access public
+$ npm publish --access public --tag latest
 ```

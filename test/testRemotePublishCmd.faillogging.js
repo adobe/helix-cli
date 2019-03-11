@@ -38,7 +38,7 @@ describe('hlx publish --remote (fail log setup)', () => {
       }),
     });
 
-    // ensure to reset nock. potential conflict with replay
+    // ensure to reset nock to avoid conflicts with PollyJS
     nock.restore();
     nock.cleanAll();
     nock.activate();
@@ -75,6 +75,5 @@ describe('hlx publish --remote (fail log setup)', () => {
   after(() => {
     scope.done();
     nock.restore();
-    nock.cleanAll();
   });
 });
