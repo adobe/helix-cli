@@ -11,6 +11,7 @@
  */
 const fs = require('fs-extra');
 const path = require('path');
+const chalk = require('chalk');
 const { GitUrl } = require('@adobe/helix-shared');
 const GitUtils = require('../git-utils');
 
@@ -25,6 +26,23 @@ class ConfigUtils {
     const source = await fs.readFile(DEFAULT_CONFIG, 'utf8');
     const origin = new GitUrl(await GitUtils.getOrigin(dir || process.cwd()) || 'http://localhost/local/default.git');
     return source.replace(/"\$CURRENT_ORIGIN"/g, `"${origin.toString()}"`);
+  }
+
+  /**
+   * Checks if the .env file is ignored by git.
+   * @param dir the current directory
+   * @returns {Promise<void>}
+   */
+  static async validateDotEnv(dir = process.cwd()) {
+    if (await GitUtils.isIgnored(dir, '.env')) {
+      return;
+    }
+    process.stdout.write(`
+${chalk.yellowBright('Warning:')} Your ${chalk.cyan('.env')} file is currently not ignored by git. 
+This is typically not good because it might contain secrets 
+which should never be stored in the git repository.
+
+`);
   }
 }
 

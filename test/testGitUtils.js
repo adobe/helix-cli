@@ -14,12 +14,12 @@
 
 const assert = require('assert');
 const path = require('path');
-const crypto = require('crypto');
 const net = require('net');
 const fse = require('fs-extra');
 const shell = require('shelljs');
-
 const git = require('isomorphic-git');
+const { createTestRoot } = require('./utils.js');
+
 git.plugins.set('fs', require('fs'));
 
 const GitUtils = require('../src/git-utils');
@@ -29,12 +29,6 @@ const GIT_USER_HOME = path.resolve(__dirname, 'fixtures/gitutils');
 if (!shell.which('git')) {
   shell.echo('Sorry, this tests requires git');
   shell.exit(1);
-}
-
-async function createTestRoot() {
-  const dir = path.resolve(__dirname, 'tmp', crypto.randomBytes(16).toString('hex'));
-  await fse.ensureDir(dir);
-  return dir;
 }
 
 describe('Testing GitUtils', () => {
@@ -146,5 +140,19 @@ describe('Testing GitUtils', () => {
 
   it('getCurrentRevision #unit', async () => {
     assert.ok(/[0-9a-fA-F]+/.test(await GitUtils.getCurrentRevision(testRoot)));
+  });
+
+  it('isIgnored', async () => {
+    await fse.writeFile(path.resolve(testRoot, '.global-ignored-file.txt'), 'Hello, world.\n', 'utf-8');
+    assert.ok(await GitUtils.isIgnored(testRoot, '.env', GIT_USER_HOME));
+    assert.ok(await GitUtils.isIgnored(testRoot, '.global-ignored-file.txt', GIT_USER_HOME));
+    assert.ok(!(await GitUtils.isIgnored(testRoot, 'README.md', GIT_USER_HOME)));
+    assert.ok(await GitUtils.isIgnored(testRoot, 'not-existing.md', GIT_USER_HOME));
+  });
+
+  it('isIgnored works outside git', async () => {
+    const anotherTestRoot = await createTestRoot();
+    await fse.writeFile(path.resolve(anotherTestRoot, '.env'), 'Hello, world.\n', 'utf-8');
+    assert.ok(await GitUtils.isIgnored(anotherTestRoot, '.env', GIT_USER_HOME));
   });
 });

@@ -68,6 +68,40 @@ class GitUtils {
   }
 
   /**
+   * Checks if the given file is missing or ignored by git.
+   *
+   * @param {string} dir working tree directory path of the git repo
+   * @param {string} filepath file to check
+   * @param {string} [homedir] optional users home directory
+   * @returns {Promise<boolean>} `true` if the file is ignored.
+   */
+  static async isIgnored(dir, filepath, homedir = os.homedir()) {
+    if (!(await fse.pathExists(path.resolve(dir, filepath)))) {
+      return true;
+    }
+    if (!(await fse.pathExists(path.resolve(dir, '.git')))) {
+      return true;
+    }
+
+    const status = await git.status({ dir, filepath });
+    if (status === 'ignored') {
+      return true;
+    }
+
+    // need to re-check the modified against the globally ignored
+    // see: https://github.com/isomorphic-git/isomorphic-git/issues/444
+    const globalConfig = path.resolve(homedir, '.gitconfig');
+    const config = ini.parse(await fse.readFile(globalConfig, 'utf-8'));
+    const globalIgnore = path.resolve(homedir, (config.core && config.core.excludesfile) || '.gitignore_global');
+    if (await fse.pathExists(globalIgnore)) {
+      const ign = ignore().add(await fse.readFile(globalIgnore, 'utf-8'));
+      return ign.ignores(filepath);
+    }
+
+    return false;
+  }
+
+  /**
    * Returns the name of the current branch. If `HEAD` is at a tag, the name of the tag
    * will be returned instead.
    *
