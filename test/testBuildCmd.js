@@ -44,21 +44,21 @@ describe('Integration test for build', () => {
       .run();
 
     assertFile(path.resolve(buildDir, 'html.js'));
-    assertFile(path.resolve(buildDir, 'html.map'));
+    assertFile(path.resolve(buildDir, 'html.js.map'));
     assertFile(path.resolve(buildDir, 'html.pre.js'));
 
     assertFile(path.resolve(buildDir, 'xml.js'));
-    assertFile(path.resolve(buildDir, 'xml.map'));
+    assertFile(path.resolve(buildDir, 'xml.js.map'));
 
     assertFile(path.resolve(buildDir, 'helper.js'));
-    assertFile(path.resolve(buildDir, 'helper.map'));
+    assertFile(path.resolve(buildDir, 'helper.js.map'));
 
     assertFile(path.resolve(buildDir, 'example_html.js'));
     assertFile(path.resolve(buildDir, 'component', 'html.js'));
 
     // test if source map contains correct reference
     const htmlJs = await fs.readFile(path.resolve(buildDir, 'html.js'), 'utf-8');
-    assert.ok(htmlJs.indexOf('sourceMappingURL=html.map') >= 0);
+    assert.ok(htmlJs.indexOf('sourceMappingURL=html.js.map') >= 0);
 
     // test if xml.js is wrapped
     const xmlJS = await fs.readFile(path.resolve(buildDir, 'xml.js'), 'utf-8');

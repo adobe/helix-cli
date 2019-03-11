@@ -60,7 +60,7 @@ class HelixAsset extends Asset {
     return [{
       type: 'helix-pre-js',
       value: body,
-      sourceMap: this.sourceMap,
+      map: this.sourceMap,
     }];
   }
 
