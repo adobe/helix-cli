@@ -18,13 +18,13 @@
 Helix - {{project.name}}
 =======================
 
-Welcome to Helix. This is a started project to get you going with helix.
+Welcome to Helix. This is a starter project to get you going with Helix.
 You will find some example templates in the `src` directory. 
 
 Quick Start
 -----------
 
-To compile the scripts and start the development server do:
+To build the project and launch the development server open a shell and enter:
 
 ```bash
 $ hlx up
