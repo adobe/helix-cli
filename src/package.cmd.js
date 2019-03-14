@@ -134,10 +134,11 @@ class PackageCommand extends AbstractCommand {
       Object.keys(info.externals).forEach((mod) => {
         // if a package (like request) brings its own node_modules directory, override it
         // so that conflicts with newer versions in the upper-level node_modules are avoided
-        if (mod==='ajv') {
-          info.externals[mod] = info.externals[mod].replace(/\/node_modules\/request\/node_modules\//, '/node_modules/');
+        if (mod === 'ajv') {
+          archive.directory(info.externals[mod].replace(/\/node_modules\/request\/node_modules\//, '/node_modules/')], `node_modules/${mod}`);
+        } else {
+          archive.directory(info.externals[mod], `node_modules/${mod}`);
         }
-        archive.directory(info.externals[mod], `node_modules/${mod}`);
         ticks[`node_modules/${mod}/package.json`] = true;
       });
 
