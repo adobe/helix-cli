@@ -17,7 +17,7 @@
 function helix_wrap_action(main) {
   const { OpenWhiskAction } = require('@adobe/helix-pipeline');
   const { pipe } = require('MOD_PIPE');
-  const { pre } = require('MOD_PRE');
+  const { pre, before, after } = require('MOD_PRE');
 
   // this gets called by openwhisk
   return async function wrapped(params) {
@@ -30,6 +30,14 @@ function helix_wrap_action(main) {
       }
       return invoker(main);
     }
+
+    if (before) {
+      once.before = before;
+    }
+    if (after) {
+      once.after = after;
+    }
+
     return OpenWhiskAction.runPipeline(once, pipe, params);
   };
 }
