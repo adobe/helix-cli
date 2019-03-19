@@ -21,3 +21,15 @@ module.exports.pre = (payload, action) => {
   payload.content.stamp = utils.stamp() + utils2.stamp() + utils3.stamp();
   payload.resourcePath = action.request.params.path;
 };
+
+module.exports.before = {
+  fetch: (payload) => {
+    if (payload.request.path==='/404.html') {
+      return {
+        content: {
+          body: 'This file does not exist.'
+        }
+      }
+    }
+  }
+}
