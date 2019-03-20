@@ -69,12 +69,13 @@ class ExternalsCollector {
         stats.compilation.modules.forEach((mod) => {
           if (mod.resource) {
             const m = nodeModulesRegex.exec(mod.resource);
-            if (m // there is a match
-              && !this._excludes.has(m[2]) // but it's not in externals
-              && !externals[m[2]] // and there is no path already registered
-              && !m[0].match(/\/node_modules\/.*\/node_modules\//) // and it is not a nested node_module
-            ) {
-              externals[m[2]] = m[1] + m[2];
+            const modName = m ? m[2] : null;
+            if (modName && !this._excludes.has(modName)) {
+              const modPath = m[1] + modName;
+              // for duplicate mods, take the "more toplevel" one
+              if (!externals[modName] || modPath.length < externals[modName].length) {
+                externals[modName] = modPath;
+              }
             }
           }
         });
