@@ -20,7 +20,7 @@ const AbstractCommand = require('./abstract.cmd.js');
 const LoginServer = require('./auth-login-server.js');
 const cliutils = require('./cli-util');
 
-const HELIX_LOGIN_START_URL = 'https://app.project-helix.io/login/start';
+const HELIX_APP_HOST = 'https://app.project-helix.io';
 
 class AuthCommand extends AbstractCommand {
   constructor(logger) {
@@ -58,10 +58,11 @@ class AuthCommand extends AbstractCommand {
 
   async receiveToken() {
     const srv = new LoginServer()
-      .withLogger(this.log);
+      .withLogger(this.log)
+      .withOrigin(HELIX_APP_HOST);
     await srv.start();
     this.emit('server-start', srv.port);
-    this._loginUrl = `${HELIX_LOGIN_START_URL}?p=${srv.port}`;
+    this._loginUrl = `${HELIX_APP_HOST}/login?p=${srv.port}`;
 
     this._stdout.write(`
 Thank you for choosing the automatic Helix Bot Authentication process.
