@@ -71,7 +71,7 @@ class ExternalsCollector {
             const m = nodeModulesRegex.exec(mod.resource);
             const modName = m ? m[2] : null;
             if (modName && !this._excludes.has(modName)) {
-              const modPath = m[1] + m[2];
+              const modPath = m[1] + modName;
               // for duplicate mods, take the "more toplevel" one
               if (!externals[modName] || modPath.length < externals[modName].length) {
                 externals[modName] = modPath;
