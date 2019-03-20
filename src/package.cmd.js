@@ -145,10 +145,6 @@ class PackageCommand extends AbstractCommand {
           files.forEach((name) => {
             archive.file(path.resolve(modPath, name), { name: `node_modules/${mod}/${name}` });
           });
-
-          // archive.glob('!(.git|node_modules)', {
-          //   root: `node_modules/${mod}`,
-          // });
         } else {
           archive.directory(modPath, `node_modules/${mod}`);
           ticks[`node_modules/${mod}/package.json`] = true;
