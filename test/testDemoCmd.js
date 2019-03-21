@@ -54,6 +54,7 @@ describe('Integration test for demo command', function suite() {
       .withName('project1')
       .withType('full')
       .run();
+    assertFile(path.resolve(testDir, 'project1', '.env'));
     assertFile(path.resolve(testDir, 'project1', '.gitignore'));
     assertFile(path.resolve(testDir, 'project1', 'src/html.htl'));
     assertFile(path.resolve(testDir, 'project1', 'src/html.pre.js'));

@@ -36,6 +36,11 @@ describe('hlx publish --remote (default)', () => {
       }),
     });
 
+    // ensure to reset nock to avoid conflicts with PollyJS
+    nock.restore();
+    nock.cleanAll();
+    nock.activate();
+
     scope = nock('https://adobeioruntime.net')
       .post('/api/v1/web/helix/default/publish')
       .reply(200, {})
@@ -61,7 +66,5 @@ describe('hlx publish --remote (default)', () => {
   after(() => {
     scope.done();
     nock.restore();
-    nock.cleanAll();
-    nock.activate();
   });
 });

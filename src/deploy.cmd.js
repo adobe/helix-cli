@@ -20,10 +20,12 @@ const path = require('path');
 const fs = require('fs-extra');
 const uuidv4 = require('uuid/v4');
 const ProgressBar = require('progress');
-const { GitUrl, GitUtils } = require('@adobe/helix-shared');
+const { HelixConfig, GitUrl } = require('@adobe/helix-shared');
+const GitUtils = require('./git-utils');
 const useragent = require('./user-agent-util');
 const AbstractCommand = require('./abstract.cmd.js');
 const PackageCommand = require('./package.cmd.js');
+const ConfigUtils = require('./config/config-utils.js');
 
 function humanFileSize(size) {
   const i = size === 0 ? 0 : Math.floor(Math.log(size) / Math.log(1024));
@@ -44,7 +46,6 @@ class DeployCommand extends AbstractCommand {
     this._fastly_namespace = null;
     this._fastly_auth = null;
     this._target = null;
-    this._docker = null;
     this._prefix = null;
     this._default = null;
     this._enableDirty = false;
@@ -104,11 +105,6 @@ class DeployCommand extends AbstractCommand {
 
   withTarget(value) {
     this._target = value;
-    return this;
-  }
-
-  withDocker(value) {
-    this._docker = value;
     return this;
   }
 
@@ -178,7 +174,7 @@ class DeployCommand extends AbstractCommand {
       throw new Error(`Cannot automate deployment without ${path.resolve(process.cwd(), '.circleci', 'config.yaml')}`);
     }
 
-    const { owner, repo, ref } = GitUtils.getOriginURL();
+    const { owner, repo, ref } = await GitUtils.getOriginURL(this.directory);
 
     const auth = {
       username: this._circleciAuth,
@@ -258,11 +254,11 @@ class DeployCommand extends AbstractCommand {
 
   async run() {
     await this.init();
-    const origin = GitUtils.getOrigin(this.directory);
+    const origin = await GitUtils.getOrigin(this.directory);
     if (!origin) {
-      throw Error('hlx cannot deploy without a remote git repository.');
+      throw Error('hlx cannot deploy without a remote git repository. Add one with\n$ git remote add origin <github_repo_url>.git');
     }
-    const dirty = GitUtils.isDirty(this.directory);
+    const dirty = await GitUtils.isDirty(this.directory);
     if (dirty && !this._enableDirty) {
       throw Error('hlx will not deploy a working copy that has uncommitted changes. Re-run with flag --dirty to force.');
     }
@@ -271,13 +267,20 @@ class DeployCommand extends AbstractCommand {
     }
 
     // get git coordinates and list affected strains
-    const ref = GitUtils.getBranch(this.directory);
+    const ref = await GitUtils.getBranch(this.directory);
     const giturl = new GitUrl(`${origin}#${ref}`);
     const affected = this.config.strains.filterByCode(giturl);
     if (affected.length === 0) {
       let newStrain = this._addStrain ? this.config.strains.get(this._addStrain) : null;
       if (!newStrain) {
         newStrain = this.config.strains.get('default');
+        // if default is proxy, fall back to default default
+        if (newStrain.isProxy()) {
+          const hlx = await new HelixConfig()
+            .withSource(await ConfigUtils.createDefaultConfig(this.directory))
+            .init();
+          newStrain = hlx.strains.get('default');
+        }
         newStrain = newStrain.clone();
         newStrain.name = this._addStrain || uuidv4();
         this.config.strains.add(newStrain);
@@ -306,9 +309,10 @@ Alternatively you can auto-add one using the {grey --add <name>} option.`);
       this.log.info(chalk`Updated strain {cyan ${newStrain.name}} in helix-config.yaml`);
     }
 
-    this._prefix = GitUtils.getCurrentRevision(this.directory);
     if (dirty) {
-      this._prefix += '-dirty';
+      this._prefix = `${giturl.host.replace(/[\W]/g, '-')}--${giturl.owner.replace(/[\W]/g, '-')}--${giturl.repo.replace(/[\W]/g, '-')}--${giturl.ref.replace(/[\W]/g, '-')}-dirty`;
+    } else {
+      this._prefix = await GitUtils.getCurrentRevision(this.directory);
     }
 
     const owoptions = {
@@ -400,15 +404,6 @@ Alternatively you can auto-add one using the {grey --add <name>} option.`);
         annotations: { 'web-export': true },
       };
 
-      if (this._docker) {
-        this.log.warn(`Using docker image ${this._docker} instead of default nodejs:10-fat container.`);
-        delete actionoptions.kind;
-        actionoptions.exec = {
-          image: this._docker,
-          main: 'module.exports.main',
-        };
-      }
-
       const baseName = path.basename(script.main);
       tick(`deploying ${baseName}`, baseName);
 
@@ -436,12 +431,13 @@ Alternatively you can auto-add one using the {grey --add <name>} option.`);
 
     // update package in affected strains
     this.log.info(`Affected strains of ${giturl}:`);
+    const packageProperty = `${this._wsk_namespace}/${this._prefix}`;
     affected.forEach((strain) => {
       this.log.info(`- ${strain.name}`);
-      if (strain.package !== this._prefix) {
+      if (strain.package !== packageProperty) {
         this.config.modified = true;
         // eslint-disable-next-line no-param-reassign
-        strain.package = this._prefix;
+        strain.package = packageProperty;
       }
     });
 

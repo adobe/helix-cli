@@ -10,14 +10,18 @@
  * governing permissions and limitations under the License.
  */
 
-/* global describe, it */
+/* eslint-env mocha */
 
 'use strict';
 
 const assert = require('assert');
 const shell = require('shelljs');
 const path = require('path');
+const fse = require('fs-extra');
 const pkgJson = require('../package.json');
+const { createTestRoot } = require('./utils.js');
+
+const cwd = process.cwd();
 
 function runCLI(...args) {
   const cmd = ['node', path.resolve(__dirname, '../index.js'), ...args].join(' ');
@@ -25,6 +29,10 @@ function runCLI(...args) {
 }
 
 describe('hlx command line', () => {
+  afterEach(() => {
+    shell.cd(cwd);
+  });
+
   it('hlx w/o arguments shows help and exits with != 0', () => {
     const cmd = runCLI();
     assert.notEqual(cmd.code, 0);
@@ -47,5 +55,17 @@ describe('hlx command line', () => {
     const cmd = runCLI('build', '--foo=bar');
     assert.notEqual(cmd.code, 0);
     assert.ok(/.*Unknown argument: foo*/.test(cmd.stderr.toString()));
+  });
+
+  it('not-ignored .env should give warning', async () => {
+    const testRoot = await createTestRoot();
+    shell.cd(testRoot);
+    await fse.writeFile(path.resolve(testRoot, '.env'), '# Helix Env\n', 'utf-8');
+    shell.exec('git init');
+    shell.exec('git add -A');
+    shell.exec('git commit -m"initial"');
+    const cmd = runCLI('--version');
+    assert.equal(cmd.code, 0);
+    assert.ok(cmd.stdout.trim().indexOf('This is typically not good because it might contain secrets') >= 0);
   });
 });

@@ -12,24 +12,15 @@
 
 /* eslint-env mocha */
 
-const Replay = require('replay');
 const fs = require('fs-extra');
 const path = require('path');
 const assert = require('assert');
 const { HelixConfig, Logger } = require('@adobe/helix-shared');
-const { createTestRoot } = require('./utils.js');
+const NodeHttpAdapter = require('@pollyjs/adapter-node-http');
+const FSPersister = require('@pollyjs/persister-fs');
+const { setupMocha: setupPolly } = require('@pollyjs/core');
+const { initGit, createTestRoot } = require('./utils.js');
 const PublishCommand = require('../src/publish.cmd');
-
-// disable replay for this test
-Replay.mode = 'bloody';
-Replay.fixtures = path.resolve(__dirname, 'fixtures');
-
-let FASTLY_AUTH = '---';
-const FASTLY_NAMESPACE = '1s45RKXKEjuo2s0GWrF391';
-let WSK_AUTH = 'nope';
-let WSK_NAMESPACE = '---';
-
-// const SRC_STRAINS = path.resolve(__dirname, 'fixtures/strains.yaml');
 
 describe('hlx strain #unit', () => {
   it('makeRegexp() #unit', () => {
@@ -56,7 +47,7 @@ describe('Dynamic Strain (VCL) generation', () => {
     const mystrains = Array.from(config.strains.values());
 
     const vclfile = fs.readFileSync(path.resolve(__dirname, 'fixtures/default.vcl')).toString();
-    assert.equal(vclfile, PublishCommand.getStrainResolutionVCL(mystrains));
+    assert.equal(PublishCommand.getStrainResolutionVCL(mystrains), vclfile);
   });
 
   it('getStrainResolutionVCL generates VLC for simple conditions strains', async () => {
@@ -88,6 +79,24 @@ describe('Dynamic Strain (VCL) generation', () => {
     assert.equal(vclfile.trim(), PublishCommand.getStrainResolutionVCL(mystrains).trim());
   });
 
+  it('getStrainParametersVCL generates VLC', async () => {
+    const strainfile = path.resolve(__dirname, 'fixtures/some-params.yaml');
+    const config = await new HelixConfig().withConfigPath(strainfile).init();
+    const mystrains = Array.from(config.strains.values());
+
+    const vclfile = fs.readFileSync(path.resolve(__dirname, 'fixtures/some-params.vcl')).toString();
+    assert.equal(PublishCommand.getStrainParametersVCL(mystrains).trim(), vclfile.trim());
+  });
+
+  it('getStrainParametersVCL generates VLC with no default params', async () => {
+    const strainfile = path.resolve(__dirname, 'fixtures/no-default-params.yaml');
+    const config = await new HelixConfig().withConfigPath(strainfile).init();
+    const mystrains = Array.from(config.strains.values());
+
+    const vclfile = fs.readFileSync(path.resolve(__dirname, 'fixtures/no-default-params.vcl')).toString();
+    assert.equal(PublishCommand.getStrainParametersVCL(mystrains).trim(), vclfile.trim());
+  });
+
   it('initFastly generates new backends for defined Proxies', async () => {
     const strainfile = path.resolve(__dirname, 'fixtures/proxystrains.yaml');
     const cmd = new PublishCommand(Logger.getTestLogger()).withConfigFile(strainfile);
@@ -104,49 +113,54 @@ describe('Dynamic Strain (VCL) generation', () => {
 });
 
 describe('hlx publish (Integration)', function suite() {
+  const FASTLY_AUTH = '----';
+  const FASTLY_NAMESPACE = '477rh0E5FeeHKlKx5J3QXd';
+  const WSK_AUTH = 'nope';
+  const WSK_NAMESPACE = '---';
+
   this.timeout(50000);
 
-  let replayheaders;
   let testRoot;
 
+  // How to create a new recording:
+  // 1. update the `FASTLY_AUTH` with the correct value
+  // 2. delete the recording.har file in the `fixtures/recordings` directory
+  // 3. set the `recordIfMissing` to `true`
+  // 4. run the test
+  // 5. reset the `FASTLY_AUTH` and `recordIfMissing` to the original values.
+  setupPolly({
+    recordFailedRequests: true,
+    recordIfMissing: false,
+    logging: false,
+    adapters: [NodeHttpAdapter],
+    persister: FSPersister,
+    persisterOptions: {
+      fs: {
+        recordingsDir: path.resolve(__dirname, 'fixtures/recordings'),
+      },
+    },
+  });
+
   beforeEach(async () => {
-    // if you need to re-record the test:
-    // - change the mode in the next line to `record`
-    // - set the FASTLY_AUTH, WSK_AUTH and WSK_NAMESPACE environment vars
-    // - change the FASTLY_NAMESPACE here in the code
-    // - run `npm run record`
-    // - commit the changes
-
-    if (process.env.MODE === 'record') {
-      ({ FASTLY_AUTH, WSK_AUTH, WSK_NAMESPACE } = process.env);
-      if (!FASTLY_AUTH || !FASTLY_NAMESPACE || !WSK_AUTH || !WSK_NAMESPACE) {
-        /* eslint-disable no-console */
-        console.error('FASTLY_AUTH, WSK_AUTH, WSK_NAMESPACE environment vars');
-        console.error('must be set to re-record test.');
-        console.log(FASTLY_AUTH, FASTLY_NAMESPACE, WSK_AUTH, WSK_NAMESPACE);
-        /* eslint-enable no-console */
-        process.exit(1);
-      }
-      Replay.mode = 'record';
-      fs.removeSync(path.resolve(__dirname, 'fixtures/api.fastly.com-443'));
-    } else {
-      Replay.mode = 'replay';
-    }
-
     testRoot = await createTestRoot();
     await fs.copyFile(path.resolve(__dirname, 'fixtures', 'default.yaml'), path.resolve(testRoot, 'helix-config.yaml'));
-
-    // don't record the authorization header
-    replayheaders = Replay.headers;
-    Replay.headers = Replay.headers.filter(e => new RegExp(e).toString() !== new RegExp(/^body/).toString());
   });
 
-  afterEach(async () => {
-    Replay.mode = 'bloody';
-    Replay.headers = replayheaders;
-  });
+  it('Publish Strains on an existing Service Config', async function test() {
+    this.polly.server.any().on('beforeResponse', (req) => {
+      req.removeHeaders(['fastly-key', 'user-agent']);
+    });
+    this.polly.configure({
+      matchRequestsBy: {
+        body: false,
+        headers: {
+          exclude: ['content-length', 'fastly-key', 'user-agent'],
+        },
+      },
+    });
 
-  it('Publish Strains on an existing Service Config', async () => {
+    initGit(testRoot);
+
     const cmd = new PublishCommand()
       .withDirectory(testRoot)
       .withFastlyAuth(FASTLY_AUTH)

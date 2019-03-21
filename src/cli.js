@@ -58,6 +58,7 @@ class CLI {
       perf: require('./perf.js')(),
       publish: require('./publish.js')(),
       clean: require('./clean.js')(),
+      auth: require('./auth.js')(),
     };
     this._failFn = (message, err, argv) => {
       const msg = err ? err.message : message;
@@ -84,6 +85,7 @@ class CLI {
     Object.values(this._commands).forEach(cmd => argv.command(cmd));
 
     return logArgs(argv)
+      .scriptName('hlx')
       .fail(this._failFn)
       .exitProcess(args.indexOf('--get-yargs-completions') > -1)
       .strict()

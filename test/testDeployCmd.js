@@ -12,46 +12,55 @@
 
 /* eslint-env mocha */
 
-const Replay = require('replay');
 const fs = require('fs-extra');
 const assert = require('assert');
 const path = require('path');
 const $ = require('shelljs');
-const { GitUtils, Logger } = require('@adobe/helix-shared');
+const NodeHttpAdapter = require('@pollyjs/adapter-node-http');
+const FSPersister = require('@pollyjs/persister-fs');
+const { setupMocha: setupPolly } = require('@pollyjs/core');
+const { Logger } = require('@adobe/helix-shared');
 const { initGit, createTestRoot } = require('./utils.js');
+const GitUtils = require('../src/git-utils');
 const BuildCommand = require('../src/build.cmd.js');
 const DeployCommand = require('../src/deploy.cmd.js');
 
 const CI_TOKEN = 'nope';
 const TEST_DIR = path.resolve('test/integration');
 
-Replay.mode = 'bloody';
-Replay.fixtures = `${__dirname}/fixtures/`;
-
 describe('hlx deploy (Integration)', () => {
   let testRoot;
   let hlxDir;
   let buildDir;
-  let replayheaders;
   let cwd;
 
-  beforeEach(async () => {
+  setupPolly({
+    recordFailedRequests: true,
+    recordIfMissing: false,
+    logging: true,
+    adapters: [NodeHttpAdapter],
+    persister: FSPersister,
+    persisterOptions: {
+      fs: {
+        recordingsDir: path.resolve(__dirname, 'fixtures/recordings'),
+      },
+    },
+  });
+
+  beforeEach(async function beforeEach() {
     testRoot = await createTestRoot();
     hlxDir = path.resolve(testRoot, '.hlx');
     buildDir = path.resolve(hlxDir, 'build');
 
     cwd = process.cwd();
 
-    Replay.mode = 'replay';
     // don't record the authorization header
-    replayheaders = Replay.headers;
-    Replay.headers = Replay.headers.filter(e => new RegExp(e).toString() !== new RegExp(/^authorization/).toString());
+    this.polly.server.any().on('beforeResponse', (req) => {
+      req.removeHeaders(['authorization']);
+    });
   });
 
   afterEach(() => {
-    // fs.remove(testRoot);
-    Replay.mode = 'bloody';
-    Replay.headers = replayheaders;
     $.cd(cwd);
   });
 
@@ -99,7 +108,7 @@ describe('hlx deploy (Integration)', () => {
         .run();
       assert.fail('deploy fails if no git remote');
     } catch (e) {
-      assert.equal(e.toString(), 'Error: hlx cannot deploy without a remote git repository.');
+      assert.equal(e.toString(), 'Error: hlx cannot deploy without a remote git repository. Add one with\n$ git remote add origin <github_repo_url>.git');
     }
   });
 
@@ -151,6 +160,7 @@ describe('hlx deploy (Integration)', () => {
     } catch (e) {
       const log = await logger.getOutput();
       assert.ok(log.indexOf('error: Remote repository ssh://git@github.com/adobe/project-foo.io.git#master does not affect any strains.') >= 0);
+      assert.ok(log.indexOf('http://localhost') < 0, true);
     }
   });
 
@@ -185,11 +195,11 @@ describe('hlx deploy (Integration)', () => {
     assert.equal(actual, expected.replace('$REF', cmd._prefix));
   });
 
-  it('deploy replaces default --add=default', async () => {
+  it('deploy replaces default --add=default with dirty', async () => {
     await fs.copy(TEST_DIR, testRoot);
     const cfg = path.resolve(testRoot, 'helix-config.yaml');
-    await fs.rename(path.resolve(testRoot, 'default-config.yaml'), cfg);
     initGit(testRoot, 'git@github.com:adobe/project-foo.io.git');
+    await fs.rename(path.resolve(testRoot, 'default-config.yaml'), cfg);
     const logger = Logger.getTestLogger();
     const cmd = await new DeployCommand(logger)
       .withDirectory(testRoot)
@@ -197,7 +207,7 @@ describe('hlx deploy (Integration)', () => {
       .withWskAuth('secret-key')
       .withWskNamespace('hlx')
       .withEnableAuto(false)
-      .withEnableDirty(false)
+      .withEnableDirty(true)
       .withDryRun(true)
       .withTarget(buildDir)
       .withFastlyAuth('nope')
@@ -212,8 +222,7 @@ describe('hlx deploy (Integration)', () => {
     await cmd.config.saveConfig(); // trigger manual save because of dry-run
     const actual = await fs.readFile(cfg, 'utf-8');
     const expected = await fs.readFile(path.resolve(__dirname, 'fixtures', 'default-updated.yaml'), 'utf-8');
-    // eslint-disable-next-line no-underscore-dangle
-    assert.equal(actual, expected.replace('$REF', cmd._prefix));
+    assert.equal(actual, expected);
   });
 
   it('deploy reports affected strains', async () => {
@@ -239,6 +248,38 @@ describe('hlx deploy (Integration)', () => {
     const log = await logger.getOutput();
     assert.ok(log.indexOf('Affected strains of ssh://git@github.com/adobe/project-helix.io.git#master') >= 0);
     assert.ok(log.indexOf('- dev') >= 0);
+  });
+
+  it('deploy reports affected strains with default proxy', async () => {
+    await fs.copy(TEST_DIR, testRoot);
+    const cfg = path.resolve(testRoot, 'helix-config.yaml');
+    await fs.copy(path.resolve(__dirname, 'fixtures', 'default-proxy.yaml'), cfg);
+    initGit(testRoot, 'git@github.com:adobe/dummy.git');
+    const logger = Logger.getTestLogger();
+    const cmd = await new DeployCommand(logger)
+      .withDirectory(testRoot)
+      .withWskHost('adobeioruntime.net')
+      .withWskAuth('secret-key')
+      .withWskNamespace('hlx')
+      .withEnableAuto(false)
+      .withEnableDirty(false)
+      .withDryRun(true)
+      .withTarget(buildDir)
+      .withFastlyAuth('nope')
+      .withFastlyNamespace('justtesting')
+      .withCircleciAuth(CI_TOKEN)
+      .withCreatePackages('ignore')
+      .withAddStrain('new-strain')
+      .run();
+
+    const log = await logger.getOutput();
+    assert.ok(log.indexOf('Affected strains of ssh://git@github.com/adobe/dummy.git#master') >= 0);
+    assert.ok(log.indexOf('- new-strain') >= 0);
+    await cmd.config.saveConfig(); // trigger manual save because of dry-run
+    const actual = await fs.readFile(cfg, 'utf-8');
+    const expected = await fs.readFile(path.resolve(__dirname, 'fixtures', 'default-proxy-updated.yaml'), 'utf-8');
+    // eslint-disable-next-line no-underscore-dangle
+    assert.equal(actual, expected.replace('$REF', cmd._prefix));
   });
 
   it.skip('Auto-Deploy works', (done) => {
@@ -277,9 +318,10 @@ describe('hlx deploy (Integration)', () => {
         path.resolve(testRoot, 'src/html.htl'),
         path.resolve(testRoot, 'src/html.pre.js'),
         path.resolve(testRoot, 'src/helper.js'),
+        path.resolve(testRoot, 'src/utils/another_helper.js'),
+        path.resolve(testRoot, 'src/third_helper.js'),
       ])
       .withTargetDir(buildDir)
-      .withWebRoot(path.resolve('webroot'))
       .withCacheEnabled(false)
       .run();
 
@@ -294,9 +336,9 @@ describe('hlx deploy (Integration)', () => {
       .withTarget(buildDir)
       .run();
 
-    const ref = GitUtils.getCurrentRevision(testRoot);
+    const ref = await GitUtils.getCurrentRevision(testRoot);
     assert.equal(cmd.config.strains.get('default').package, '');
-    assert.equal(cmd.config.strains.get('dev').package, ref);
+    assert.equal(cmd.config.strains.get('dev').package, `hlx/${ref}`);
     // todo: can't test writeback of helix-config.yaml, since it's disabled during dry-run
 
     const log = await logger.getOutput();

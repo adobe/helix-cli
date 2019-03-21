@@ -11,6 +11,7 @@
  */
 
 const path = require('path');
+const fse = require('fs-extra');
 const readline = require('readline');
 const opn = require('opn');
 const chokidar = require('chokidar');
@@ -26,8 +27,8 @@ class UpCommand extends BuildCommand {
     super(logger);
     this._httpPort = -1;
     this._open = false;
-    this._strainName = '';
     this._saveConfig = false;
+    this._overrideHost = null;
   }
 
   withHttpPort(p) {
@@ -45,9 +46,8 @@ class UpCommand extends BuildCommand {
     return this;
   }
 
-  // temporary solution until proper condition evaluation
-  withStrainName(value) {
-    this._strainName = value;
+  withOverrideHost(value) {
+    this._overrideHost = value;
     return this;
   }
 
@@ -57,7 +57,11 @@ class UpCommand extends BuildCommand {
 
   async stop() {
     if (this._project) {
-      await this._project.stop();
+      try {
+        await this._project.stop();
+      } catch (e) {
+        // ignore
+      }
       this._project = null;
     }
     if (this._watcher) {
@@ -107,11 +111,12 @@ class UpCommand extends BuildCommand {
   async run() {
     await super.init();
 
-    // if no config is defined, we use the `dev` strain to ensure localhost as git server
-    let hasConfigFile = await this.config.hasFile();
-    if (!hasConfigFile) {
-      this._strainName = 'dev';
+    // check for git repository
+    if (!await fse.pathExists(path.join(this.directory, '.git'))) {
+      throw Error('hlx up needs local git repository.');
     }
+
+    let hasConfigFile = await this.config.hasFile();
     if (this._saveConfig) {
       if (hasConfigFile) {
         this.log.warn(chalk`Cowardly refusing to overwrite existing {cyan helix-config.yaml}.`);
@@ -124,18 +129,26 @@ class UpCommand extends BuildCommand {
 
     // start debugger (#178)
     // https://nodejs.org/en/docs/guides/debugging-getting-started/#enable-inspector
-    process.kill(process.pid, 'SIGUSR1');
+    if (process.platform !== 'win32') {
+      process.kill(process.pid, 'SIGUSR1');
+    }
+
     this._project = new HelixProject()
       .withCwd(this.directory)
       .withBuildDir(this._target)
-      .withWebRootDir(this._webroot)
       .withHelixConfig(this.config)
-      .withStrainName(this._strainName || 'default')
       .withDisplayVersion(pkgJson.version)
       .withRuntimeModulePaths(module.paths);
 
     if (this._httpPort >= 0) {
       this._project.withHttpPort(this._httpPort);
+    }
+    if (this._overrideHost) {
+      this._project.withRequestOverride({
+        headers: {
+          host: this._overrideHost,
+        },
+      });
     }
 
     try {
@@ -170,6 +183,15 @@ class UpCommand extends BuildCommand {
         }
 
         await this._project.start();
+
+        // if no config is defined, we use the `dev` strain to ensure localhost as git server
+        if (!hasConfigFile) {
+          this.config.strains.get('dev').urls = [
+            `http://localhost:${this._project.server.port}`,
+            `http://127.0.0.1:${this._project.server.port}`,
+          ];
+        }
+
         this.emit('started', this);
         if (this._open) {
           opn(`http://localhost:${this._project.server.port}/`);
@@ -181,7 +203,8 @@ access remote content and to deploy helix. Consider running
 {gray hlx up --save-config} to generate a default config.`);
         }
       } catch (e) {
-        this.log.error(`Internal error: ${e.message}`);
+        this.log.error(`Error: ${e.message}`);
+        await this.stop();
       }
     };
 

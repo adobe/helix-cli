@@ -1,4 +1,5 @@
 # This file handles the strain resolution
+set req.http.X-Root-Path = "";
 if ("http" == "http") {
   set req.http.X-Sticky = "true";
   set req.http.X-Strain = "default";

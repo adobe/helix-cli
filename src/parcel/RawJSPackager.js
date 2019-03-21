@@ -109,7 +109,7 @@ class RawJSPackager extends Packager {
     const mapBundle = this.bundle.siblingBundlesMap.get('map');
     let code = asset.generated.js;
     if (mapBundle) {
-      const mapName = path.basename(mapBundle.name);
+      const mapName = path.relative(this.options.outDir, mapBundle.name);
       code = `${code}\n//# sourceMappingURL=${mapName}`;
     }
 
@@ -120,10 +120,14 @@ class RawJSPackager extends Packager {
     // write info
     const bundleDir = path.dirname(this.bundle.name);
     const info = {
-      main: path.basename(this.bundle.name),
-      requires: Object.keys(deps)
-        .map(dep => path.relative(bundleDir, path.resolve(bundleDir, dep))),
+      main: path.relative(this.options.outDir, this.bundle.name),
+      requires: [],
     };
+    // eslint-disable-next-line no-restricted-syntax
+    for (const dep of asset.depAssets.values()) {
+      info.requires.push(path.relative(bundleDir, path.resolve(bundleDir, dep.id)));
+    }
+
     const infoName = path.resolve(bundleDir, `${path.basename(this.bundle.name, '.js')}.info.json`);
     await fs.writeJSON(infoName, info, { spaces: 2 });
   }

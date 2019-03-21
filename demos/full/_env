@@ -1,0 +1,12 @@
+# helix development environment
+
+# Adobe I/O Runtime
+#HLX_WSK_NAMESPACE=
+#HLX_WSK_AUTH=
+
+# Fastly
+#HLX_FASTLY_AUTH=
+#HLX_FASTLY_NAMESPACE=
+
+# Github Bot
+#HLX_GITHUB_TOKEN=

@@ -14,13 +14,24 @@ strains:
     content: *localRepo
     static: *localRepo
 
+  helix:
+    code: *localRepo
+    content: *localRepo
+    static: *localRepo
+    directoryIndex: /README.html
+    urls:
+      - http://www.project-helix.io
+
   default:
     code: *localRepo
     content: *localRepo
     static: *localRepo
 
+  myproxy:
+    origin: http://127.0.0.1/foo
+
   foo:
     code: ssh://git@github.com/adobe/project-foo.io.git#master
     content: ssh://git@github.com/adobe/project-foo.io.git#master
     static: ssh://git@github.com/adobe/project-foo.io.git/htdocs#master
-    package: $REF
+    package: hlx/$REF

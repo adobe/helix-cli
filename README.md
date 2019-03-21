@@ -19,7 +19,7 @@ Install `hlx` as a global command. You need Node 8 or newer.
 $ npm install -g @adobe/helix-cli
 ```
 
-Alternatively, you can install the latest binary version of `hlx` (not requiring Node) via `curl`
+Alternatively, if you are on `macOS`, you can install the latest binary version of `hlx` (not requiring Node) via `curl`
 :
 ```bash
 $ curl -sL http://www.project-helix.io/cli.sh | sh
@@ -347,13 +347,3 @@ as failed in case metrics are not met.
 
 You can use `npm run check` to run the tests and check whether your code adheres
 to the helix-cli coding style.
-
-## Building on macOS Mojave
-
-Before running `npm install`, make sure that `nodegit` can find all dependencies:
-
-```bash
-$ export LDFLAGS="-L/usr/local/opt/openssl/lib"
-$ export CPPFLAGS="-I/usr/local/opt/openssl/include"
-```
-

@@ -34,25 +34,37 @@ class AdapterJSAsset extends JSAsset {
 
     // if this no, we're done.
     if (!isScript) {
-      gen.type = 'js';
+      return gen;
+    }
+
+    // check if code is already wrapped (there is currently no other way to make this simple,
+    // w/o implementing new extension in parcel).
+    if (gen[0].value.indexOf('function helix_wrap_action') > 0) {
       return gen;
     }
 
     // otherwise it's a pure-JS action and we want to wrap it
-    return [{
-      type: 'helix-js',
-      value: gen.js,
-      sourceMap: gen.map,
-    }];
+    gen[0].type = 'helix-js';
+    return gen;
   }
 
   addDependency(name, opts) {
     // return;
     const isRelativeImport = /^[/~.]/.test(name);
     if (isRelativeImport) {
-      // we mark the asset as dynamic so it won't get merged into this source.
-      const resolved = path.resolve(path.dirname(this.name), name);
-      super.addDependency(name, Object.assign({ dynamic: true, resolved }, opts));
+      try {
+        const resolved = require.resolve(name, {
+          paths: [
+            path.dirname(this.name),
+          ],
+        });
+        // we mark the asset as dynamic so it won't get merged into this source.
+        super.addDependency(name, Object.assign({ dynamic: true, resolved }, opts));
+      } catch (e) {
+        // the exact stack trace is not relevant to the end user.
+        e.stack = null;
+        throw e;
+      }
     }
   }
 }

@@ -13,7 +13,7 @@
 const Asset = require('parcel-bundler/src/Asset');
 const fs = require('fs');
 const path = require('path');
-const logger = require('parcel-bundler/src/Logger');
+const logger = require('@parcel/logger');
 const { SourceMapConsumer, SourceMapGenerator } = require('source-map');
 const resolver = require('./resolver');
 
@@ -60,13 +60,14 @@ class HelixAsset extends Asset {
     return [{
       type: 'helix-pre-js',
       value: body,
-      sourceMap: this.sourceMap,
+      map: this.sourceMap,
     }];
   }
 
   getPreprocessor(name, fallback) {
     if (fs.existsSync(name)) {
-      return path.relative(this.name, name).substr(1);
+      // ensure forward slashes (windows)
+      return path.relative(this.name, name).substr(1).replace(/\\/g, '/');
     }
     try {
       if (require.resolve(fallback)) {

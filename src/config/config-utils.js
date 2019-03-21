@@ -11,17 +11,39 @@
  */
 const fs = require('fs-extra');
 const path = require('path');
-const { GitUrl, GitUtils } = require('@adobe/helix-shared');
+const chalk = require('chalk');
+const { GitUrl } = require('@adobe/helix-shared');
+const GitUtils = require('../git-utils');
 
 const DEFAULT_CONFIG = path.resolve(__dirname, 'default-config.yaml');
 
 class ConfigUtils {
-  // eslint-disable-next-line class-methods-use-this
-  async createDefaultConfig() {
+  /**
+   * Returns a new default config
+   * @param {String} dir The working directory to use (optional)
+   */
+  static async createDefaultConfig(dir) {
     const source = await fs.readFile(DEFAULT_CONFIG, 'utf8');
-    const origin = new GitUrl(GitUtils.getOrigin() || 'http://localhost/local/default.git');
+    const origin = new GitUrl(await GitUtils.getOrigin(dir || process.cwd()) || 'http://localhost/local/default.git');
     return source.replace(/"\$CURRENT_ORIGIN"/g, `"${origin.toString()}"`);
+  }
+
+  /**
+   * Checks if the .env file is ignored by git.
+   * @param dir the current directory
+   * @returns {Promise<void>}
+   */
+  static async validateDotEnv(dir = process.cwd()) {
+    if (await GitUtils.isIgnored(dir, '.env')) {
+      return;
+    }
+    process.stdout.write(`
+${chalk.yellowBright('Warning:')} Your ${chalk.cyan('.env')} file is currently not ignored by git. 
+This is typically not good because it might contain secrets 
+which should never be stored in the git repository.
+
+`);
   }
 }
 
-module.exports = new ConfigUtils();
+module.exports = ConfigUtils;

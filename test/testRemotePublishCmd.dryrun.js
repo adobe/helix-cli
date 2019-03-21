@@ -12,14 +12,13 @@
 
 /* eslint-env mocha */
 
-const assert = require('assert');
-const nock = require('nock');
 const path = require('path');
 const proxyquire = require('proxyquire');
 const sinon = require('sinon');
+const NodeHttpAdapter = require('@pollyjs/adapter-node-http');
+const { setupMocha: setupPolly } = require('@pollyjs/core');
 
 describe('hlx publish --remote --dry-run (default)', () => {
-  let scope;
   let RemotePublishCommand;
   let writeDictItem;
   let purgeAll;
@@ -36,15 +35,17 @@ describe('hlx publish --remote --dry-run (default)', () => {
         purgeAll,
       }),
     });
-
-    scope = nock('https://adobeioruntime.net')
-      .post('/api/v1/web/helix/default/publish')
-      .reply(200, {})
-      .post('/api/v1/web/helix/default/addlogger')
-      .reply(200, {});
   });
 
-  it('publishing makes HTTP requests', async () => {
+  setupPolly({
+    adapters: [NodeHttpAdapter],
+  });
+
+  it('publishing makes HTTP requests', async function test() {
+    const { server } = this.polly;
+    server.post('https://adobeioruntime.net/api/v1/web/helix/default/publish').intercept((req, res) => res.sendStatus(200).json({}));
+    server.post('https://adobeioruntime.net/api/v1/web/helix/default/addlogger').intercept((req, res) => res.sendStatus(200).json({}));
+
     const remote = await new RemotePublishCommand()
       .withWskAuth('fakeauth')
       .withWskNamespace('fakename')
@@ -57,12 +58,5 @@ describe('hlx publish --remote --dry-run (default)', () => {
 
     sinon.assert.calledTwice(writeDictItem);
     sinon.assert.notCalled(purgeAll);
-  });
-
-  after('Showing results', () => {
-    assert.ok(scope.isDone());
-    nock.restore();
-    nock.cleanAll();
-    nock.activate();
   });
 });

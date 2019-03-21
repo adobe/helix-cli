@@ -12,9 +12,12 @@
 const fs = require('fs');
 const _ = require('lodash');
 const { utils } = require('./helper.js');
+const { utils2 } = require('./utils/another_helper.js');
+const { utils3 } = require('./third_helper');
 
-module.exports.pre = (payload, config) => {
-  payload.content.time = new Date() + _.camelCase('hello world.')
+module.exports.pre = (payload, action) => {
+  payload.content.time = new Date() + _.camelCase('hello world.');
   payload.content.pkg = fs.readFileSync('package.json');
-  payload.content.stamp = utils.stamp();
+  payload.content.stamp = utils.stamp() + utils2.stamp() + utils3.stamp();
+  payload.resourcePath = action.request.params.path;
 };

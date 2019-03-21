@@ -19,8 +19,7 @@ const path = require('path');
 const glob = require('glob-to-regexp');
 const { toBase64 } = require('request/lib/helpers');
 const ProgressBar = require('progress');
-const { GitUtils } = require('@adobe/helix-shared');
-const strainconfig = require('./strain-config-utils');
+const GitUtils = require('./git-utils');
 const include = require('./include-util');
 const useragent = require('./user-agent-util');
 const cli = require('./cli-util');
@@ -254,7 +253,7 @@ class PublishCommand extends AbstractCommand {
       try {
         this._service = await request(this.options(''));
       } catch (e) {
-        this.log.error('Unable to get service', e);
+        this.log.error('Unable to get service from fastly', e);
         throw e;
       }
     }
@@ -442,7 +441,7 @@ class PublishCommand extends AbstractCommand {
       const opts = await this.deleteOpts(`/dictionary/${mydict}/item/${key}`);
       await request(opts);
     } catch (e) {
-      this.log.error(`Unknown error when deleting key ${key} from dictionary ${mydict}`, e);
+      this.log.debug(`Unknown error when deleting key ${key} from dictionary ${mydict}`, e);
     }
     return Promise.resolve();
   }
@@ -484,23 +483,24 @@ set req.url = req.http.X-Old-Url;`
    * Generates VCL for strain resolution from a list of strains
    */
   static getStrainParametersVCL(strains) {
-    let retvcl = '# This file handles the URL parameter whitelist\n\n';
-    const [defaultstrain] = strains.filter(strain => strain.name === 'default');
-    if (defaultstrain && defaultstrain.params && Array.isArray(defaultstrain.params)) {
-      retvcl += '# default parameters, can be overridden per strain\n';
-      retvcl += PublishCommand.makeParamWhitelist(defaultstrain.params);
-    }
-    const otherstrains = strains
-      .filter(strain => strain.name !== 'default')
-      .filter(strain => strain.params && Array.isArray(strain.params));
-
-    retvcl += otherstrains.map(({ name, params }) => `
-
+    let retvcl = '';
+    let defvcl = '# This file handles the URL parameter whitelist\n\n';
+    strains.forEach(({ name, params }) => {
+      if (params.length === 0) {
+        return;
+      }
+      if (name === 'default') {
+        defvcl += '# default parameters, can be overridden per strain\n';
+        defvcl += PublishCommand.makeParamWhitelist(params);
+        defvcl += '\n';
+      } else {
+        retvcl += `
 if (req.http.X-Strain == "${name}") {
 ${PublishCommand.makeParamWhitelist(params, '  ')}
-}
-`);
-    return retvcl;
+}\n`;
+      }
+    });
+    return defvcl + retvcl;
   }
 
   static getXVersionExtensionVCL(configVersion, cliVersion, revision) {
@@ -526,7 +526,7 @@ ${PublishCommand.makeParamWhitelist(params, '  ')}
   async getVersionVCLSection() {
     const configVersion = await this.getCurrentVersion();
     const cliVersion = cli.getVersion();
-    const revision = GitUtils.getCurrentRevision();
+    const revision = await GitUtils.getCurrentRevision(this.directory);
 
     return PublishCommand.getXVersionExtensionVCL(configVersion, cliVersion, revision);
   }
@@ -615,7 +615,18 @@ ${PublishCommand.makeParamWhitelist(params, '  ')}
   }
 
   async initFastly() {
-    this._backends = strainconfig.addbackends(this._strains, this._backends);
+    this._backends = this._proxyStrains
+      .map(({ origin }) => origin)
+      .reduce((bes, be) => {
+        const newbackends = bes;
+        if (be.toJSON) {
+          newbackends[be.name] = be.toJSON();
+        } else {
+          newbackends[be.name] = be;
+        }
+        return newbackends;
+      }, this._backends);
+
     return this.initBackends();
   }
 
@@ -684,10 +695,7 @@ ${PublishCommand.makeParamWhitelist(params, '  ')}
     const [secretp, ownsp] = dictJobs.splice(0, 2);
 
     this._strainsToPublish.forEach((strain) => {
-      let actionPrefix = `/${this._wsk_namespace}/default/${strain.package}`;
-      if (!actionPrefix.endsWith('--')) {
-        actionPrefix += '--';
-      }
+      const actionPrefix = `/${strain.package}/`;
 
       // content repo
       makeDictJob('strain_owners', strain.name, strain.content.owner, '- Set content owner', 'content owner');
@@ -758,6 +766,7 @@ ${PublishCommand.makeParamWhitelist(params, '  ')}
   async init() {
     await super.init();
     this._strains = Array.from(this.config.strains.values());
+    this._proxyStrains = Array.from(this.config.strains.getProxyStrains());
     if (!this._vclFile) {
       this._vclFile = path.resolve(this.directory, '.hlx', 'helix.vcl');
     }

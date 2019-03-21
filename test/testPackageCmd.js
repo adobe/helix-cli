@@ -23,13 +23,11 @@ describe('hlx package (Integration)', () => {
   let testRoot;
   let hlxDir;
   let buildDir;
-  let webroot;
 
   beforeEach(async () => {
     testRoot = await createTestRoot();
     hlxDir = path.resolve(testRoot, '.hlx');
     buildDir = path.resolve(hlxDir, 'build');
-    webroot = path.resolve(testRoot, 'webroot');
   });
 
   afterEach(() => {
@@ -42,9 +40,10 @@ describe('hlx package (Integration)', () => {
         'test/integration/src/html.htl',
         'test/integration/src/html.pre.js',
         'test/integration/src/helper.js',
+        'test/integration/src/utils/another_helper.js',
+        'test/integration/src/third_helper.js',
       ])
       .withTargetDir(buildDir)
-      .withWebRoot(webroot)
       .withCacheEnabled(false)
       .run();
 
@@ -70,7 +69,7 @@ describe('hlx package (Integration)', () => {
 
     await assertZipEntries(
       path.resolve(buildDir, 'html.zip'),
-      ['package.json', 'html.js', 'html.pre.js', 'helper.js'],
+      ['package.json', 'html.js', 'html.pre.js', 'helper.js', 'third_helper.js'],
     );
     await assertZipEntries(
       path.resolve(buildDir, 'static.zip'),
@@ -85,7 +84,6 @@ describe('hlx package (Integration)', () => {
         'test/integration/src/xml.js',
       ])
       .withTargetDir(buildDir)
-      .withWebRoot(webroot)
       .withCacheEnabled(false)
       .run();
 

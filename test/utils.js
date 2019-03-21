@@ -12,15 +12,11 @@
 const assert = require('assert');
 const path = require('path');
 const shell = require('shelljs');
+const crypto = require('crypto');
 const fse = require('fs-extra');
 const http = require('http');
-const Replay = require('replay');
-const uuidv4 = require('uuid/v4');
 const unzip = require('unzip2');
 const BuildCommand = require('../src/build.cmd');
-
-// disable replay for this test
-Replay.mode = 'bloody';
 
 /**
  * init git in integration so that helix-simulator can run
@@ -71,11 +67,21 @@ async function assertHttp(url, status, spec, replacements = []) {
         .on('end', () => {
           try {
             if (spec) {
-              let expected = fse.readFileSync(path.resolve(__dirname, 'specs', spec)).toString();
-              replacements.forEach((r) => {
-                expected = expected.replace(r.pattern, r.with);
-              });
-              assert.equal(data, expected);
+              if (Array.isArray(spec)) {
+                spec.forEach((str) => {
+                  try {
+                    assert.equal(data.indexOf(str) >= 0, true);
+                  } catch (e) {
+                    assert.fail(`response does not contain string "${str}"`);
+                  }
+                });
+              } else {
+                let expected = fse.readFileSync(path.resolve(__dirname, 'specs', spec)).toString();
+                replacements.forEach((r) => {
+                  expected = expected.replace(r.pattern, r.with);
+                });
+                assert.equal(data, expected);
+              }
             }
             resolve();
           } catch (e) {
@@ -111,17 +117,13 @@ async function assertZipEntries(zipPath, entries) {
 }
 
 async function createTestRoot() {
-  const dir = path.resolve(__dirname, 'tmp', uuidv4());
+  const dir = path.resolve(__dirname, 'tmp', crypto.randomBytes(16).toString('hex'));
   await fse.ensureDir(dir);
   return dir;
 }
 
 async function createFakeTestRoot() {
-  const dir = path.resolve(__dirname, 'tmp', uuidv4());
-  if (!await fse.pathExists(dir)) {
-    return dir;
-  }
-  return createFakeTestRoot();
+  return path.resolve(__dirname, 'tmp', crypto.randomBytes(16).toString('hex'));
 }
 
 async function processSource(scriptName, type = 'htl') {
@@ -135,12 +137,10 @@ async function processSource(scriptName, type = 'htl') {
     path.resolve(__dirname, `specs/parcel/${scriptName}.pre.js`),
     path.resolve(__dirname, 'specs/parcel/helpers.js'),
   ];
-  //
-  // if (await fse.pathExists(pre))
+
   await new BuildCommand()
     .withFiles(files)
     .withTargetDir(buildDir)
-    .withWebRoot('/webroot')
     .withCacheEnabled(false)
     .run();
 
