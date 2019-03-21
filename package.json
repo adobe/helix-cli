@@ -8,7 +8,7 @@
   },
   "scripts": {
     "check": "npm run lint && npm run test",
-    "test": "nyc mocha -t 5000",
+    "test": "nyc --reporter=text --reporter=lcov mocha -t 5000",
     "junit": "mocha -R mocha-junit-reporter -t 5000",
     "lint": "./node_modules/.bin/eslint .",
     "preversion": "npm run junit",
