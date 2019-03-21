@@ -32,13 +32,6 @@ describe('hlx perf #unittest', () => {
     assert.equal(PerfCommand.formatMeasure(100, 50), '\u001b[31m\u001b[1m100\u001b[22m\u001b[39m\u001b[31m (failed)\u001b[39m');
   });
 
-  it('getURLs() #unittest', () => {
-    assert.deepEqual(PerfCommand.getURLs({}), []);
-    assert.deepEqual(PerfCommand.getURLs({ url: 'http://example.com' }), ['http://example.com']);
-    assert.deepEqual(PerfCommand.getURLs({ urls: ['https://www.adobe.com'] }), ['https://www.adobe.com']);
-    assert.deepEqual(PerfCommand.getURLs({ url: 'http://example.com', urls: ['https://www.adobe.com'] }), ['http://example.com', 'https://www.adobe.com']);
-  });
-
   it('format() #unittest', () => {
     const pc = new PerfCommand();
     assert.equal(pc.format(example.metrics, 'unknown-metric', 100), undefined);
@@ -79,7 +72,7 @@ describe('hlx perf #unittest', () => {
     const perfcmd = await new PerfCommand().withConfigFile(path.resolve(__dirname, 'fixtures/perf.yaml')).init();
 
     assert.equal(defcmd.getDefaultParams().device, 'MotorolaMotoG4');
-    assert.equal(perfcmd.getDefaultParams().device, 'iPhone8');
+    assert.equal(perfcmd.getDefaultParams().device, 'MotorolaMotoG4');
   });
 
   it('getDefaultParams() override #unittest', async () => {
@@ -99,10 +92,5 @@ describe('hlx perf #unittest', () => {
     const defcmd = await new PerfCommand().withConfigFile(path.resolve(__dirname, 'fixtures/default.yaml')).init();
     assert.equal(defcmd.getStrainParams({}).device, 'MotorolaMotoG4');
     assert.equal(defcmd.getStrainParams({ perf: { device: 'iPad' } }).device, 'iPad');
-  });
-
-  it('withCalibreAuth() #unittest', () => {
-    new PerfCommand().withCalibreAuth('foobar');
-    assert.equal(process.env.CALIBRE_API_TOKEN, 'foobar');
   });
 });
