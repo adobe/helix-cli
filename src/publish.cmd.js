@@ -154,6 +154,11 @@ class PublishCommand extends AbstractCommand {
     return this;
   }
 
+  withPublishAPI(value) {
+    // does not do anything here
+    return this;
+  }
+
   withWskAuth(value) {
     this._wsk_auth = value;
     return this;

@@ -43,7 +43,12 @@ module.exports = function strain() {
         .option('remote', {
           describe: 'Use the remote publishing service',
           type: 'boolean',
-          default: false,
+          default: true,
+        })
+        .option('api-publish', {
+          describe: 'API URL for helix-publish service',
+          type: 'string',
+          default: 'https://adobeioruntime.net/api/v1/web/helix/default/publish'
         })
         .demandOption(
           'fastly-auth',
@@ -75,6 +80,7 @@ module.exports = function strain() {
         .withFastlyNamespace(argv.fastlyNamespace)
         .withFastlyAuth(argv.fastlyAuth)
         .withDryRun(argv.dryRun)
+        .withPublishAPI(argv.apiPublish)
         .run();
     },
 

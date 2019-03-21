@@ -40,6 +40,7 @@ describe('hlx publish', () => {
     mockPublish.withFastlyNamespace.returnsThis();
     mockPublish.withFastlyAuth.returnsThis();
     mockPublish.withDryRun.returnsThis();
+    mockPublish.withPublishAPI.returnsThis();
     mockPublish.run.returnsThis();
   });
 
@@ -71,6 +72,7 @@ describe('hlx publish', () => {
         '--wsk-namespace', 'hlx',
         '--fastly-auth', 'secret-key',
         '--fastly-namespace', 'hlx',
+        '--remote', 'false'
       ]);
 
     sinon.assert.calledWith(mockPublish.withWskHost, 'adobeioruntime.net');
@@ -97,6 +99,7 @@ describe('hlx publish', () => {
     sinon.assert.calledWith(mockPublish.withWskNamespace, 'hlx');
     sinon.assert.calledWith(mockPublish.withFastlyNamespace, 'hlx'); // TODO !!
     sinon.assert.calledWith(mockPublish.withFastlyAuth, 'secret-key');
+    sinon.assert.calledWith(mockPublish.withPublishAPI, 'https://adobeioruntime.net/api/v1/web/helix/default/publish');
     sinon.assert.calledOnce(mockPublish.run);
   });
 });
