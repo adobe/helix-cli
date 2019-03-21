@@ -154,7 +154,7 @@ class PublishCommand extends AbstractCommand {
     return this;
   }
 
-  withPublishAPI(value) {
+  withPublishAPI(_) {
     // does not do anything here
     return this;
   }

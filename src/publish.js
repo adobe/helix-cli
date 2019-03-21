@@ -48,7 +48,7 @@ module.exports = function strain() {
         .option('api-publish', {
           describe: 'API URL for helix-publish service',
           type: 'string',
-          default: 'https://adobeioruntime.net/api/v1/web/helix/default/publish'
+          default: 'https://adobeioruntime.net/api/v1/web/helix/default/publish',
         })
         .demandOption(
           'fastly-auth',

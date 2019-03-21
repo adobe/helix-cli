@@ -72,7 +72,7 @@ describe('hlx publish', () => {
         '--wsk-namespace', 'hlx',
         '--fastly-auth', 'secret-key',
         '--fastly-namespace', 'hlx',
-        '--remote', 'false'
+        '--remote', 'false',
       ]);
 
     sinon.assert.calledWith(mockPublish.withWskHost, 'adobeioruntime.net');
