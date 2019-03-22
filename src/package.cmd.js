@@ -132,8 +132,23 @@ class PackageCommand extends AbstractCommand {
 
       // add modules that cause problems when embeded in webpack
       Object.keys(info.externals).forEach((mod) => {
-        archive.directory(info.externals[mod], `node_modules/${mod}`);
-        ticks[`node_modules/${mod}/package.json`] = true;
+        // if the module was linked via `npm link`, then it is a checked-out module, and should
+        // not be included as-is.
+        const modPath = info.externals[mod];
+        if (modPath.indexOf('/node_modules/') < 0) {
+          // todo: async
+          // todo: read .npmignore
+          const files = glob.sync('!(.git|node_modules|logs|docs|coverage)/**', {
+            cwd: modPath,
+            matchBase: false,
+          });
+          files.forEach((name) => {
+            archive.file(path.resolve(modPath, name), { name: `node_modules/${mod}/${name}` });
+          });
+        } else {
+          archive.directory(modPath, `node_modules/${mod}`);
+          ticks[`node_modules/${mod}/package.json`] = true;
+        }
       });
 
       archive.finalize();
