@@ -20,361 +20,644 @@ const example = require('./utils').perfExample;
 const PerfCommand = require('../src/perf.cmd.js');
 
 describe('hlx perf #integrationtest', () => {
-  /*
+  
   setupPolly({
     adapters: [NodeHttpAdapter],
   });
-  */
+  
 
   it('hlx perf --junit', async function test() {
-    /*
     const { server } = this.polly;
-    */
-    /*
+    
+    let reqcounter = 0;
     server
       .post('https://adobeioruntime.net/api/v1/web/helix/default/perf')
-      .intercept((req, res) => res.sendStatus(200).json([
-        {
-          test: {
-            url: 'https://www.project-helix.io',
-            location: 'London',
-            device: 'MotorolaMotoG4',
-            connection: 'regular3G',
-            strain: 'default',
-          },
-          uuid: '79dcdac',
-          result: {
-            uuid: '79dcdac',
-            url: 'https://www.project-helix.io',
-            formattedTestUrl: 'https://calibreapp.com/tests/79dcdac/4369858',
-            status: 'completed',
-            updatedAt: '2019-03-21T13:44:45Z',
-            metrics: [
-              {
-                name: 'lighthouse-seo-score',
-                label: 'Lighthouse SEO Score',
-                value: 89,
-              },
-              {
-                name: 'lighthouse-best-practices-score',
-                label: 'Lighthouse Best Practices Score',
-                value: 100,
-              },
-              {
-                name: 'lighthouse-accessibility-score',
-                label: 'Lighthouse Accessibility Score',
-                value: 59,
-              },
-              {
-                name: 'lighthouse-performance-score',
-                label: 'Lighthouse Performance Score',
-                value: 91,
-              },
-              {
-                name: 'lighthouse-pwa-score',
-                label: 'Lighthouse Progressive Web App Score',
-                value: 56,
-              },
-              {
-                name: 'js-parse-compile',
-                label: 'JS Parse & Compile',
-                value: 0,
-              },
-              { name: 'dom-size', label: 'DOM Element Count', value: 134 },
-              {
-                name: 'visually_complete_85',
-                label: '85% Visually Complete',
-                value: 4232,
-              },
-              {
-                name: 'visually_complete',
-                label: 'Visually Complete',
-                value: 21965,
-              },
-              {
-                name: 'consistently-interactive',
-                label: 'Time to Interactive',
-                value: 2154,
-              },
-              {
-                name: 'first-interactive',
-                label: 'First CPU Idle',
-                value: 4223,
-              },
-              {
-                name: 'time-to-first-byte',
-                label: 'Time to First Byte',
-                value: 314,
-              },
-              {
-                name: 'estimated-input-latency',
-                label: 'Estimated input latency',
-                value: 16,
-              },
-              { name: 'speed_index', label: 'Speed Index', value: 2912 },
-              {
-                name: 'first-meaningful-paint',
-                label: 'First Meaningful Paint',
-                value: 4223,
-              },
-              {
-                name: 'first-contentful-paint',
-                label: 'First Contentful Paint',
-                value: 2154,
-              },
-              { name: 'firstRender', label: 'First Paint', value: 2154 },
-              {
-                name: 'image_body_size_in_bytes',
-                label: 'Total Image size in bytes',
-                value: 1913203,
-              },
-              {
-                name: 'image_size_in_bytes',
-                label: 'Total Image transferred',
-                value: 1918147,
-              },
-              {
-                name: 'font_body_size_in_bytes',
-                label: 'Total Webfont size in bytes',
-                value: 42056,
-              },
-              {
-                name: 'font_size_in_bytes',
-                label: 'Total Webfont transferred',
-                value: 42552,
-              },
-              {
-                name: 'js_body_size_in_bytes',
-                label: 'Total JavaScript size in bytes',
-                value: 53324,
-              },
-              {
-                name: 'js_size_in_bytes',
-                label: 'Total JavaScript Transferred',
-                value: 17708,
-              },
-              {
-                name: 'css_body_size_in_bytes',
-                label: 'Total CSS size in bytes',
-                value: 6797,
-              },
-              {
-                name: 'css_size_in_bytes',
-                label: 'Total CSS transferred',
-                value: 6744,
-              },
-              {
-                name: 'html_body_size_in_bytes',
-                label: 'Total HTML size in bytes',
-                value: 11847,
-              },
-              {
-                name: 'html_size_in_bytes',
-                label: 'Total HTML transferred',
-                value: 12069,
-              },
-              {
-                name: 'page_wait_timing',
-                label: 'Response time',
-                value: 594,
-              },
-              {
-                name: 'page_size_in_bytes',
-                label: 'Total Page transferred',
-                value: 1997220,
-              },
-              {
-                name: 'page_body_size_in_bytes',
-                label: 'Total Page size in bytes',
-                value: 2027227,
-              },
-              { name: 'asset_count', label: 'Number of requests', value: 19 },
-              { name: 'onload', label: 'onLoad', value: 21952 },
-              { name: 'oncontentload', label: 'onContentLoad', value: 2138 },
-            ],
-            device: { title: 'Motorola Moto G4' },
-            connection: { title: 'Regular 3G' },
-            location: { name: 'London, United Kingdom', emoji: '🇬🇧' },
-          },
-        },
-        {
-          test: {
-            url: 'https://www.adobe.io',
-            location: 'London',
-            device: 'MotorolaMotoG4',
-            connection: 'regular3G',
-            strain: 'default',
-          },
-          uuid: '25673b9',
-          result: {
-            uuid: '25673b9',
-            url: 'https://www.adobe.io',
-            formattedTestUrl: 'https://calibreapp.com/tests/25673b9/264ee9c',
-            status: 'completed',
-            updatedAt: '2019-03-21T13:44:38Z',
-            metrics: [
-              {
-                name: 'lighthouse-seo-score',
-                label: 'Lighthouse SEO Score',
-                value: 89,
-              },
-              {
-                name: 'lighthouse-best-practices-score',
-                label: 'Lighthouse Best Practices Score',
-                value: 71,
-              },
-              {
-                name: 'lighthouse-accessibility-score',
-                label: 'Lighthouse Accessibility Score',
-                value: 60,
-              },
-              {
-                name: 'lighthouse-pwa-score',
-                label: 'Lighthouse Progressive Web App Score',
-                value: 28,
-              },
-              {
-                name: 'js-parse-compile',
-                label: 'JS Parse & Compile',
-                value: 2132,
-              },
-              { name: 'dom-size', label: 'DOM Element Count', value: 672 },
-              {
-                name: 'visually_complete_85',
-                label: '85% Visually Complete',
-                value: 10886,
-              },
-              {
-                name: 'visually_complete',
-                label: 'Visually Complete',
-                value: 11069,
-              },
-              {
-                name: 'first-interactive',
-                label: 'First CPU Idle',
-                value: 9840,
-              },
-              {
-                name: 'time-to-first-byte',
-                label: 'Time to First Byte',
-                value: 315,
-              },
-              {
-                name: 'estimated-input-latency',
-                label: 'Estimated input latency',
-                value: 157,
-              },
-              { name: 'speed_index', label: 'Speed Index', value: 8382 },
-              {
-                name: 'first-meaningful-paint',
-                label: 'First Meaningful Paint',
-                value: 6725,
-              },
-              {
-                name: 'first-contentful-paint',
-                label: 'First Contentful Paint',
-                value: 6725,
-              },
-              { name: 'firstRender', label: 'First Paint', value: 6725 },
-              {
-                name: 'json_body_size_in_bytes',
-                label: 'Total JSON size in bytes',
-                value: 12774,
-              },
-              {
-                name: 'json_size_in_bytes',
-                label: 'Total JSON transferred',
-                value: 5256,
-              },
-              {
-                name: 'image_body_size_in_bytes',
-                label: 'Total Image size in bytes',
-                value: 277812,
-              },
-              {
-                name: 'image_size_in_bytes',
-                label: 'Total Image transferred',
-                value: 284235,
-              },
-              {
-                name: 'font_body_size_in_bytes',
-                label: 'Total Webfont size in bytes',
-                value: 116968,
-              },
-              {
-                name: 'font_size_in_bytes',
-                label: 'Total Webfont transferred',
-                value: 111607,
-              },
-              {
-                name: 'js_body_size_in_bytes',
-                label: 'Total JavaScript size in bytes',
-                value: 3227185,
-              },
-              {
-                name: 'js_size_in_bytes',
-                label: 'Total JavaScript Transferred',
-                value: 971846,
-              },
-              {
-                name: 'css_body_size_in_bytes',
-                label: 'Total CSS size in bytes',
-                value: 771753,
-              },
-              {
-                name: 'css_size_in_bytes',
-                label: 'Total CSS transferred',
-                value: 100307,
-              },
-              {
-                name: 'html_body_size_in_bytes',
-                label: 'Total HTML size in bytes',
-                value: 101030,
-              },
-              {
-                name: 'html_size_in_bytes',
-                label: 'Total HTML transferred',
-                value: 48939,
-              },
-              {
-                name: 'page_wait_timing',
-                label: 'Response time',
-                value: 882,
-              },
-              {
-                name: 'page_size_in_bytes',
-                label: 'Total Page transferred',
-                value: 1529757,
-              },
-              {
-                name: 'page_body_size_in_bytes',
-                label: 'Total Page size in bytes',
-                value: 4507620,
-              },
-              {
-                name: 'asset_count',
-                label: 'Number of requests',
-                value: 101,
-              },
-              { name: 'onload', label: 'onLoad', value: 15694 },
-              { name: 'oncontentload', label: 'onContentLoad', value: 7685 },
-            ],
-            device: { title: 'Motorola Moto G4' },
-            connection: { title: 'Regular 3G' },
-            location: { name: 'London, United Kingdom', emoji: '🇬🇧' },
-          },
-        },
-      ]));
-      */
+      .intercept((req, res) => {
+        reqcounter = reqcounter + 1;
+
+        if (reqcounter === 1) {
+          res.sendStatus(200).json(["91af6cd", "5180ab5", "199489d", "0e0c0c3"]);
+        }
+        if (reqcounter === 2) {
+          res.sendStatus(200).json([{
+            "connection": {
+              "title": "Regular 3G"
+            },
+            "device": {
+              "title": "iPhone 8"
+            },
+            "formattedTestUrl": "https://calibreapp.com/tests/91af6cd/ea52f35",
+            "location": {
+              "emoji": "🇬🇧",
+              "name": "London, United Kingdom"
+            },
+            "metrics": [{
+              "label": "Lighthouse SEO Score",
+              "name": "lighthouse-seo-score",
+              "value": 89
+            }, {
+              "label": "Lighthouse Best Practices Score",
+              "name": "lighthouse-best-practices-score",
+              "value": 100
+            }, {
+              "label": "Lighthouse Accessibility Score",
+              "name": "lighthouse-accessibility-score",
+              "value": 59
+            }, {
+              "label": "Lighthouse Performance Score",
+              "name": "lighthouse-performance-score",
+              "value": 92
+            }, {
+              "label": "Lighthouse Progressive Web App Score",
+              "name": "lighthouse-pwa-score",
+              "value": 56
+            }, {
+              "label": "JS Parse & Compile",
+              "name": "js-parse-compile",
+              "value": 0
+            }, {
+              "label": "DOM Element Count",
+              "name": "dom-size",
+              "value": 134
+            }, {
+              "label": "85% Visually Complete",
+              "name": "visually_complete_85",
+              "value": 3793
+            }, {
+              "label": "Visually Complete",
+              "name": "visually_complete",
+              "value": 21859
+            }, {
+              "label": "Time to Interactive",
+              "name": "consistently-interactive",
+              "value": 2106
+            }, {
+              "label": "First CPU Idle",
+              "name": "first-interactive",
+              "value": 3798
+            }, {
+              "label": "Time to First Byte",
+              "name": "time-to-first-byte",
+              "value": 309
+            }, {
+              "label": "Estimated input latency",
+              "name": "estimated-input-latency",
+              "value": 16
+            }, {
+              "label": "Speed Index",
+              "name": "speed_index",
+              "value": 3161
+            }, {
+              "label": "First Meaningful Paint",
+              "name": "first-meaningful-paint",
+              "value": 3798
+            }, {
+              "label": "First Contentful Paint",
+              "name": "first-contentful-paint",
+              "value": 2106
+            }, {
+              "label": "First Paint",
+              "name": "firstRender",
+              "value": 2106
+            }, {
+              "label": "Total Image size in bytes",
+              "name": "image_body_size_in_bytes",
+              "value": 1913203
+            }, {
+              "label": "Total Image transferred",
+              "name": "image_size_in_bytes",
+              "value": 1918146
+            }, {
+              "label": "Total Webfont size in bytes",
+              "name": "font_body_size_in_bytes",
+              "value": 32300
+            }, {
+              "label": "Total Webfont transferred",
+              "name": "font_size_in_bytes",
+              "value": 32797
+            }, {
+              "label": "Total JavaScript size in bytes",
+              "name": "js_body_size_in_bytes",
+              "value": 53324
+            }, {
+              "label": "Total JavaScript Transferred",
+              "name": "js_size_in_bytes",
+              "value": 17701
+            }, {
+              "label": "Total CSS size in bytes",
+              "name": "css_body_size_in_bytes",
+              "value": 13150
+            }, {
+              "label": "Total CSS transferred",
+              "name": "css_size_in_bytes",
+              "value": 7210
+            }, {
+              "label": "Total HTML size in bytes",
+              "name": "html_body_size_in_bytes",
+              "value": 11847
+            }, {
+              "label": "Total HTML transferred",
+              "name": "html_size_in_bytes",
+              "value": 12069
+            }, {
+              "label": "Response time",
+              "name": "page_wait_timing",
+              "value": 539
+            }, {
+              "label": "Total Page transferred",
+              "name": "page_size_in_bytes",
+              "value": 1987923
+            }, {
+              "label": "Total Page size in bytes",
+              "name": "page_body_size_in_bytes",
+              "value": 2023824
+            }, {
+              "label": "Number of requests",
+              "name": "asset_count",
+              "value": 19
+            }, {
+              "label": "onLoad",
+              "name": "onload",
+              "value": 21839
+            }, {
+              "label": "onContentLoad",
+              "name": "oncontentload",
+              "value": 2096
+            }],
+            "status": "completed",
+            "updatedAt": "2019-03-22T16:43:03Z",
+            "url": "https://www.project-helix.io/",
+            "uuid": "91af6cd"
+          }, "5180ab5", "199489d", "0e0c0c3"]);
+        }
+        if (reqcounter > 2) {
+          res.sendStatus(200).json([{
+            "connection": {
+              "title": "Regular 3G"
+            },
+            "device": {
+              "title": "iPhone 8"
+            },
+            "formattedTestUrl": "https://calibreapp.com/tests/91af6cd/ea52f35",
+            "location": {
+              "emoji": "🇬🇧",
+              "name": "London, United Kingdom"
+            },
+            "metrics": [{
+              "label": "Lighthouse SEO Score",
+              "name": "lighthouse-seo-score",
+              "value": 89
+            }, {
+              "label": "Lighthouse Best Practices Score",
+              "name": "lighthouse-best-practices-score",
+              "value": 100
+            }, {
+              "label": "Lighthouse Accessibility Score",
+              "name": "lighthouse-accessibility-score",
+              "value": 59
+            }, {
+              "label": "Lighthouse Performance Score",
+              "name": "lighthouse-performance-score",
+              "value": 92
+            }, {
+              "label": "Lighthouse Progressive Web App Score",
+              "name": "lighthouse-pwa-score",
+              "value": 56
+            }, {
+              "label": "JS Parse & Compile",
+              "name": "js-parse-compile",
+              "value": 0
+            }, {
+              "label": "DOM Element Count",
+              "name": "dom-size",
+              "value": 134
+            }, {
+              "label": "85% Visually Complete",
+              "name": "visually_complete_85",
+              "value": 3793
+            }, {
+              "label": "Visually Complete",
+              "name": "visually_complete",
+              "value": 21859
+            }, {
+              "label": "Time to Interactive",
+              "name": "consistently-interactive",
+              "value": 2106
+            }, {
+              "label": "First CPU Idle",
+              "name": "first-interactive",
+              "value": 3798
+            }, {
+              "label": "Time to First Byte",
+              "name": "time-to-first-byte",
+              "value": 309
+            }, {
+              "label": "Estimated input latency",
+              "name": "estimated-input-latency",
+              "value": 16
+            }, {
+              "label": "Speed Index",
+              "name": "speed_index",
+              "value": 3161
+            }, {
+              "label": "First Meaningful Paint",
+              "name": "first-meaningful-paint",
+              "value": 3798
+            }, {
+              "label": "First Contentful Paint",
+              "name": "first-contentful-paint",
+              "value": 2106
+            }, {
+              "label": "First Paint",
+              "name": "firstRender",
+              "value": 2106
+            }, {
+              "label": "Total Image size in bytes",
+              "name": "image_body_size_in_bytes",
+              "value": 1913203
+            }, {
+              "label": "Total Image transferred",
+              "name": "image_size_in_bytes",
+              "value": 1918146
+            }, {
+              "label": "Total Webfont size in bytes",
+              "name": "font_body_size_in_bytes",
+              "value": 32300
+            }, {
+              "label": "Total Webfont transferred",
+              "name": "font_size_in_bytes",
+              "value": 32797
+            }, {
+              "label": "Total JavaScript size in bytes",
+              "name": "js_body_size_in_bytes",
+              "value": 53324
+            }, {
+              "label": "Total JavaScript Transferred",
+              "name": "js_size_in_bytes",
+              "value": 17701
+            }, {
+              "label": "Total CSS size in bytes",
+              "name": "css_body_size_in_bytes",
+              "value": 13150
+            }, {
+              "label": "Total CSS transferred",
+              "name": "css_size_in_bytes",
+              "value": 7210
+            }, {
+              "label": "Total HTML size in bytes",
+              "name": "html_body_size_in_bytes",
+              "value": 11847
+            }, {
+              "label": "Total HTML transferred",
+              "name": "html_size_in_bytes",
+              "value": 12069
+            }, {
+              "label": "Response time",
+              "name": "page_wait_timing",
+              "value": 539
+            }, {
+              "label": "Total Page transferred",
+              "name": "page_size_in_bytes",
+              "value": 1987923
+            }, {
+              "label": "Total Page size in bytes",
+              "name": "page_body_size_in_bytes",
+              "value": 2023824
+            }, {
+              "label": "Number of requests",
+              "name": "asset_count",
+              "value": 19
+            }, {
+              "label": "onLoad",
+              "name": "onload",
+              "value": 21839
+            }, {
+              "label": "onContentLoad",
+              "name": "oncontentload",
+              "value": 2096
+            }],
+            "status": "completed",
+            "updatedAt": "2019-03-22T16:43:03Z",
+            "url": "https://www.project-helix.io/",
+            "uuid": "91af6cd"
+          }, {
+            "connection": {
+              "title": "Regular 3G"
+            },
+            "device": {
+              "title": "iPhone 8"
+            },
+            "formattedTestUrl": "https://calibreapp.com/tests/5180ab5/fab3d29",
+            "location": {
+              "emoji": "🇬🇧",
+              "name": "London, United Kingdom"
+            },
+            "metrics": [{
+              "label": "Lighthouse SEO Score",
+              "name": "lighthouse-seo-score",
+              "value": 89
+            }, {
+              "label": "Lighthouse Best Practices Score",
+              "name": "lighthouse-best-practices-score",
+              "value": 71
+            }, {
+              "label": "Lighthouse Accessibility Score",
+              "name": "lighthouse-accessibility-score",
+              "value": 60
+            }, {
+              "label": "Lighthouse Progressive Web App Score",
+              "name": "lighthouse-pwa-score",
+              "value": 28
+            }, {
+              "label": "JS Parse & Compile",
+              "name": "js-parse-compile",
+              "value": 269
+            }, {
+              "label": "DOM Element Count",
+              "name": "dom-size",
+              "value": 673
+            }, {
+              "label": "85% Visually Complete",
+              "name": "visually_complete_85",
+              "value": 11009
+            }, {
+              "label": "Visually Complete",
+              "name": "visually_complete",
+              "value": 11009
+            }, {
+              "label": "First CPU Idle",
+              "name": "first-interactive",
+              "value": 7203
+            }, {
+              "label": "Time to First Byte",
+              "name": "time-to-first-byte",
+              "value": 308
+            }, {
+              "label": "Estimated input latency",
+              "name": "estimated-input-latency",
+              "value": 16
+            }, {
+              "label": "Speed Index",
+              "name": "speed_index",
+              "value": 9025
+            }, {
+              "label": "First Meaningful Paint",
+              "name": "first-meaningful-paint",
+              "value": 6482
+            }, {
+              "label": "First Contentful Paint",
+              "name": "first-contentful-paint",
+              "value": 6482
+            }, {
+              "label": "First Paint",
+              "name": "firstRender",
+              "value": 6482
+            }, {
+              "label": "Total JSON size in bytes",
+              "name": "json_body_size_in_bytes",
+              "value": 12774
+            }, {
+              "label": "Total JSON transferred",
+              "name": "json_size_in_bytes",
+              "value": 5256
+            }, {
+              "label": "Total Image size in bytes",
+              "name": "image_body_size_in_bytes",
+              "value": 277812
+            }, {
+              "label": "Total Image transferred",
+              "name": "image_size_in_bytes",
+              "value": 284156
+            }, {
+              "label": "Total Webfont size in bytes",
+              "name": "font_body_size_in_bytes",
+              "value": 106852
+            }, {
+              "label": "Total Webfont transferred",
+              "name": "font_size_in_bytes",
+              "value": 107986
+            }, {
+              "label": "Total JavaScript size in bytes",
+              "name": "js_body_size_in_bytes",
+              "value": 3228155
+            }, {
+              "label": "Total JavaScript Transferred",
+              "name": "js_size_in_bytes",
+              "value": 972207
+            }, {
+              "label": "Total CSS size in bytes",
+              "name": "css_body_size_in_bytes",
+              "value": 771753
+            }, {
+              "label": "Total CSS transferred",
+              "name": "css_size_in_bytes",
+              "value": 100371
+            }, {
+              "label": "Total HTML size in bytes",
+              "name": "html_body_size_in_bytes",
+              "value": 108885
+            }, {
+              "label": "Total HTML transferred",
+              "name": "html_size_in_bytes",
+              "value": 50202
+            }, {
+              "label": "Response time",
+              "name": "page_wait_timing",
+              "value": 836
+            }, {
+              "label": "Total Page transferred",
+              "name": "page_size_in_bytes",
+              "value": 1527831
+            }, {
+              "label": "Total Page size in bytes",
+              "name": "page_body_size_in_bytes",
+              "value": 4506329
+            }, {
+              "label": "Number of requests",
+              "name": "asset_count",
+              "value": 102
+            }, {
+              "label": "onLoad",
+              "name": "onload",
+              "value": 16770
+            }, {
+              "label": "onContentLoad",
+              "name": "oncontentload",
+              "value": 7203
+            }],
+            "status": "completed",
+            "updatedAt": "2019-03-22T16:43:03Z",
+            "url": "https://www.adobe.io/",
+            "uuid": "5180ab5"
+          }, {
+            "connection": {
+              "title": "Regular 3G"
+            },
+            "device": {
+              "title": "iPhone 8"
+            },
+            "formattedTestUrl": "https://calibreapp.com/tests/199489d/c17a5f9",
+            "location": {
+              "emoji": "🇺🇸",
+              "name": "North Virginia, USA"
+            },
+            "metrics": [{
+              "label": "Lighthouse SEO Score",
+              "name": "lighthouse-seo-score",
+              "value": 91
+            }, {
+              "label": "Lighthouse Best Practices Score",
+              "name": "lighthouse-best-practices-score",
+              "value": 100
+            }, {
+              "label": "Lighthouse Accessibility Score",
+              "name": "lighthouse-accessibility-score",
+              "value": 90
+            }, {
+              "label": "Lighthouse Performance Score",
+              "name": "lighthouse-performance-score",
+              "value": 1
+            }, {
+              "label": "Lighthouse Progressive Web App Score",
+              "name": "lighthouse-pwa-score",
+              "value": 28
+            }, {
+              "label": "JS Parse & Compile",
+              "name": "js-parse-compile",
+              "value": 346
+            }, {
+              "label": "DOM Element Count",
+              "name": "dom-size",
+              "value": 1064
+            }, {
+              "label": "85% Visually Complete",
+              "name": "visually_complete_85",
+              "value": 12017
+            }, {
+              "label": "Visually Complete",
+              "name": "visually_complete",
+              "value": 23434
+            }, {
+              "label": "Time to Interactive",
+              "name": "consistently-interactive",
+              "value": 29332
+            }, {
+              "label": "First CPU Idle",
+              "name": "first-interactive",
+              "value": 21216
+            }, {
+              "label": "Time to First Byte",
+              "name": "time-to-first-byte",
+              "value": 318
+            }, {
+              "label": "Estimated input latency",
+              "name": "estimated-input-latency",
+              "value": 16
+            }, {
+              "label": "Speed Index",
+              "name": "speed_index",
+              "value": 14386
+            }, {
+              "label": "First Meaningful Paint",
+              "name": "first-meaningful-paint",
+              "value": 12003
+            }, {
+              "label": "First Contentful Paint",
+              "name": "first-contentful-paint",
+              "value": 12003
+            }, {
+              "label": "First Paint",
+              "name": "firstRender",
+              "value": 12003
+            }, {
+              "label": "Total JSON size in bytes",
+              "name": "json_body_size_in_bytes",
+              "value": 49739
+            }, {
+              "label": "Total JSON transferred",
+              "name": "json_size_in_bytes",
+              "value": 21099
+            }, {
+              "label": "Total Image size in bytes",
+              "name": "image_body_size_in_bytes",
+              "value": 314258
+            }, {
+              "label": "Total Image transferred",
+              "name": "image_size_in_bytes",
+              "value": 338309
+            }, {
+              "label": "Total Webfont size in bytes",
+              "name": "font_body_size_in_bytes",
+              "value": 684376
+            }, {
+              "label": "Total Webfont transferred",
+              "name": "font_size_in_bytes",
+              "value": 688364
+            }, {
+              "label": "Total JavaScript size in bytes",
+              "name": "js_body_size_in_bytes",
+              "value": 5048615
+            }, {
+              "label": "Total JavaScript Transferred",
+              "name": "js_size_in_bytes",
+              "value": 1059351
+            }, {
+              "label": "Total CSS size in bytes",
+              "name": "css_body_size_in_bytes",
+              "value": 3184009
+            }, {
+              "label": "Total CSS transferred",
+              "name": "css_size_in_bytes",
+              "value": 329461
+            }, {
+              "label": "Total HTML size in bytes",
+              "name": "html_body_size_in_bytes",
+              "value": 99973
+            }, {
+              "label": "Total HTML transferred",
+              "name": "html_size_in_bytes",
+              "value": 39115
+            }, {
+              "label": "Response time",
+              "name": "page_wait_timing",
+              "value": 519
+            }, {
+              "label": "Total Page transferred",
+              "name": "page_size_in_bytes",
+              "value": 2504700
+            }, {
+              "label": "Total Page size in bytes",
+              "name": "page_body_size_in_bytes",
+              "value": 9381086
+            }, {
+              "label": "Number of requests",
+              "name": "asset_count",
+              "value": 210
+            }, {
+              "label": "onLoad",
+              "name": "onload",
+              "value": 29332
+            }, {
+              "label": "onContentLoad",
+              "name": "oncontentload",
+              "value": 21216
+            }],
+            "status": "completed",
+            "updatedAt": "2019-03-22T16:43:02Z",
+            "url": "https://www.adobe.com/",
+            "uuid": "199489d"
+          }, "0e0c0c3"]);
+        }
+      });
 
     const perf = await new PerfCommand()
-      .withFastlyAuth('rSKbwCOF8tryeSoaU3v6CpF0lkR1IgpN')
-      .withFastlyNamespace('6E6ge7REhiWetPCqy9jht2')
+      .withFastlyAuth('fake')
+      .withFastlyNamespace('fake')
       .withConfigFile(path.resolve(__dirname, 'fixtures/perf.yaml'))
       .withJunit('junit-results.xml');
 
     await perf.run();
-  }).timeout(1000 * 60 * 5);
+  }).timeout(1000 * 60 * 10);
 });
 
 describe('hlx perf #unittest', () => {

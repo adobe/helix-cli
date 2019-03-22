@@ -7,7 +7,20 @@ strains:
     code: ssh://git@github.com/adobe/helix-cli.git
     static: ssh://git@github.com/adobe/helix-cli.git
     perf:
-      device: MotorolaMotoG4
+      device: iPhone8
       lighthouse-accessibility-score: 50
       lighthouse-performance-score: 50
+  performance:
+    urls:
+      - https://www.adobe.com
+      - http://opensource.adobe.com
+    content: ssh://git@github.com/adobe/helix-cli.git
+    code: ssh://git@github.com/adobe/helix-cli.git
+    static: ssh://git@github.com/adobe/helix-cli.git
+    perf:
+      device: iPhone8
+      location: NorthVirginia
+      lighthouse-accessibility-score: 60
+      lighthouse-performance-score: 60
+      onload: 1000
 

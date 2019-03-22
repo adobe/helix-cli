@@ -73,7 +73,11 @@ class PerfCommand extends AbstractCommand {
 
   getStrainParams(strain) {
     if (strain.perf) {
-      return strain.perf;
+      return {
+        device: strain.perf.device || this._device,
+        location: strain.perf.location || this._location,
+        connection: strain.perf.connection || this._connection
+      }
     }
     return this.getDefaultParams();
   }
@@ -113,7 +117,8 @@ class PerfCommand extends AbstractCommand {
   }
 
   formatResponse(response, params = {}, strainname = 'default') {
-    this.log.info(`\nTesting ${response.url} on ${response.device.title} (${response.connection.title}) from ${response.location.emoji}  ${response.location.name} using ${strainname} strain.\n`);
+    console.log(params);
+    this.log.info(`\nResults for ${response.url} on ${response.device.title} (${response.connection.title}) from ${response.location.emoji}  ${response.location.name} using ${strainname} strain.\n`);
     const strainresults = Object.keys(params).map((key) => {
       const value = params[key];
       if (Number.isInteger(value)) {
@@ -139,17 +144,18 @@ class PerfCommand extends AbstractCommand {
       .getByFilter(({ urls }) => urls.length)
       .map((strain) => {
         const { location, device, connection } = this.getStrainParams(strain);
-        return strain.urls.map(url => ({
+        return strain.urls.map(url => Object.assign({}, {
           url,
           location,
           device,
           connection,
           strain: strain.name,
-        }));
+        }, strain.perf));
       });
     const flatttests = _.flatten(tests);
+    const uri = 'https://adobeioruntime.net/api/v1/web/helix/default/perf';
 
-    const results = await request.post('https://adobeioruntime.net/api/v1/web/helix/default/perf', {
+    const schedule = await request.post(uri, {
       json: true,
       body: {
         service: this._fastly_namespace,
@@ -158,16 +164,45 @@ class PerfCommand extends AbstractCommand {
       },
     });
 
-    const formatted = results.map((result) => {
-      if (this._junit) {
-        this._junit.appendResults(result.result, result.test, result.test.strain);
+    let retries = 0;
+    let results = [];
+    while (retries < 10) {
+      retries = retries + 1;
+      const completed = results.filter(res => typeof res === 'object').length;
+      console.log(chalk.yellow(`Waiting for test results (${completed}/${flatttests.length})`));
+      results = await request.post(uri, {
+        json: true,
+        body: {
+          service: this._fastly_namespace,
+          token: this._fastly_auth,
+          tests: schedule,
+        }
+      });
+
+      if (results.reduce((p, uuid) => p && typeof uuid === 'object', true)) {
+        break;
       }
-      return this.formatResponse(result /* params, strain.name */);
+    }
+
+    let skipped = 0;
+    const formatted = _.zip(results, flatttests).map(([result, test]) => {
+      if (this._junit && typeof result === 'object') {
+        this._junit.appendResults(result, test, test.strain);
+      }
+      if (typeof result === 'object') {
+        return this.formatResponse(result, test, test.strain);
+      } else {
+        skipped = skipped + 1;
+        console.log(chalk.yellow(`\nSkipped test for ${test.url} on ${test.strain}`));
+        return undefined;
+      }
     });
 
     if (this._junit) {
       this._junit.writeResults();
     }
+
+    console.log(formatted);
 
     const fail = formatted.filter(result => result === false).length;
     const succeed = formatted.filter(result => result === true).length;
@@ -177,6 +212,9 @@ class PerfCommand extends AbstractCommand {
       this.log.error(chalk.red(`all ${fail} tests failed.`));
     } else if (succeed) {
       this.log.log(chalk.green(`all ${succeed} tests succeeded.`));
+    }
+    if (skipped) {
+      console.log(chalk.yellow(`${skipped} tests skipped due to 10 minute timeout`));
     }
     process.exit(fail);
   }
