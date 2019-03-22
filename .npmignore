@@ -2,7 +2,8 @@
 .github
 .nyc_output
 .vscode
-.eslint*
+.idea
+.snyk
 *.tgz
 build
 logs

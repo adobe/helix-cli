@@ -60,6 +60,25 @@ class ExternalsCollector {
       devtool: false,
     });
 
+    // todo async
+    const pkgInfos = {};
+    function resolveByPackageJson(resource) {
+      if (!resource || resource === '/') {
+        return [];
+      }
+      let info = pkgInfos[resource];
+      if (!info) {
+        try {
+          const pkgJson = JSON.parse(fs.readFileSync(path.resolve(resource, 'package.json'), 'utf-8'));
+          info = [pkgJson.name, resource];
+        } catch (e) {
+          info = resolveByPackageJson(path.dirname(resource));
+        }
+        pkgInfos[resource] = info;
+      }
+      return info;
+    }
+
     const ext = await new Promise((resolve, reject) => {
       compiler.run((err, stats) => {
         if (err) {
@@ -69,12 +88,23 @@ class ExternalsCollector {
         stats.compilation.modules.forEach((mod) => {
           if (mod.resource) {
             const m = nodeModulesRegex.exec(mod.resource);
-            if (m // there is a match
-              && !this._excludes.has(m[2]) // but it's not in externals
-              && !externals[m[2]] // and there is no path already registered
-              && !m[0].match(/\/node_modules\/.*\/node_modules\//) // and it is not a nested node_module
-            ) {
-              externals[m[2]] = m[1] + m[2];
+            let modName;
+            let modPath;
+            if (!m) {
+              // check if this is a linked package that is not inside a 'node_modules' directory
+              // for this, we try to find a package.json
+              [modName, modPath] = resolveByPackageJson(path.dirname(mod.resource));
+            } else {
+              // eslint-disable-next-line prefer-destructuring
+              modName = m[2];
+              modPath = m[1] + modName;
+            }
+
+            if (modName && !this._excludes.has(modName)) {
+              // for duplicate mods, take the "more toplevel" one
+              if (!externals[modName] || modPath.length < externals[modName].length) {
+                externals[modName] = modPath;
+              }
             }
           }
         });

@@ -20,10 +20,16 @@ class LoginServer extends EventEmitter {
     this._srv = null;
     this._token = null;
     this._isClosing = null;
+    this._origin = null;
   }
 
   withLogger(value) {
     this._log = value;
+    return this;
+  }
+
+  withOrigin(value) {
+    this._origin = value;
     return this;
   }
 
@@ -67,7 +73,7 @@ class LoginServer extends EventEmitter {
         }
         if (req.method === 'OPTIONS') {
           res.writeHead(200, {
-            'Access-Control-Allow-Origin': 'https://app.project-helix.io',
+            'Access-Control-Allow-Origin': this._origin,
             'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
             'Access-Control-Allow-Headers': 'Content-Type',
           });
