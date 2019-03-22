@@ -145,7 +145,9 @@ See https://git-scm.com/book/en/v2/Getting-Started-First-Time-Git-Setup for more
 
         // avoid (directly or indirectly) calling fs.copyFile: it's not (yet)
         // supported by node-packer
-        return fse.ensureDir(path.dirname(dstFile)).then(() => fse.readFile(srcFile)).then(content => fse.writeFile(dstFile, content));
+        return fse.ensureDir(path.dirname(dstFile))
+          .then(() => fse.readFile(srcFile))
+          .then(content => fse.writeFile(dstFile, content));
       }
       return fse.copy(srcFile, dstFile);
     }
