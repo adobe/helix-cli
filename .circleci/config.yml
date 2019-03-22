@@ -142,7 +142,7 @@ jobs:
           # squashfs
           HOMEBREW_NO_AUTO_UPDATE=1 brew install squashfs
           # nodec
-          curl -L http://enclose.io/nodec/nodec-darwin-x64.gz | gunzip > nodec
+          curl -L https://github.com/adobe/node-packer/releases/download/v1.6.0/nodec-darwin-x64.gz | gunzip > nodec
           chmod +x nodec
     - run: 
         name: "Creating cache key file"
