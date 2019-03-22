@@ -20,13 +20,17 @@ const example = require('./utils').perfExample;
 const PerfCommand = require('../src/perf.cmd.js');
 
 describe('hlx perf #integrationtest', () => {
+  /*
   setupPolly({
     adapters: [NodeHttpAdapter],
   });
+  */
 
   it('hlx perf --junit', async function test() {
+    /*
     const { server } = this.polly;
-
+    */
+    /*
     server
       .post('https://adobeioruntime.net/api/v1/web/helix/default/perf')
       .intercept((req, res) => res.sendStatus(200).json([
@@ -361,10 +365,11 @@ describe('hlx perf #integrationtest', () => {
           },
         },
       ]));
+      */
 
     const perf = await new PerfCommand()
-      .withFastlyAuth('fake')
-      .withFastlyNamespace('fake')
+      .withFastlyAuth('rSKbwCOF8tryeSoaU3v6CpF0lkR1IgpN')
+      .withFastlyNamespace('6E6ge7REhiWetPCqy9jht2')
       .withConfigFile(path.resolve(__dirname, 'fixtures/perf.yaml'))
       .withJunit('junit-results.xml');
 

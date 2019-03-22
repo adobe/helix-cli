@@ -160,7 +160,7 @@ class PerfCommand extends AbstractCommand {
 
     const formatted = results.map((result) => {
       if (this._junit) {
-        this._junit.appendResults(result /* params, strain.name */);
+        this._junit.appendResults(result.result, result.test, result.test.strain);
       }
       return this.formatResponse(result /* params, strain.name */);
     });

@@ -2,9 +2,12 @@ strains:
   default:
     urls:
       - https://www.project-helix.io
-      - https://www.project-helix.io/README.html
+      - https://www.adobe.io
     content: ssh://git@github.com/adobe/helix-cli.git
     code: ssh://git@github.com/adobe/helix-cli.git
     static: ssh://git@github.com/adobe/helix-cli.git
     perf:
-      device: iPhone8
+      device: MotorolaMotoG4
+      lighthouse-accessibility-score: 50
+      lighthouse-performance-score: 50
+
