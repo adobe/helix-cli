@@ -65,8 +65,8 @@ module.exports = function strain() {
     handler: async (argv) => {
       if (argv.remote) {
         // eslint-disable-next-line global-require
-        const PublishCommand = require('./remotepublish.cmd'); // lazy load the handler to speed up execution time
-        executor = executor || new PublishCommand(makeLogger(argv));
+        const RemotePublish = require('./remotepublish.cmd'); // lazy load the handler to speed up execution time
+        executor = executor || new RemotePublish(makeLogger(argv));
       } else {
         // eslint-disable-next-line global-require
         const PublishCommand = require('./publish.cmd'); // lazy load the handler to speed up execution time
