@@ -167,6 +167,7 @@ describe('hlx publish (Integration)', function suite() {
       .withFastlyNamespace(FASTLY_NAMESPACE)
       .withWskHost('adobeioruntime.net')
       .withWskAuth(WSK_AUTH)
+      .withPublishAPI('https://adobeioruntime.net/api/v1/web/helix/default/publish')
       .withWskNamespace(WSK_NAMESPACE);
 
     // current version must 1

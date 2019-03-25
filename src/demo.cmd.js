@@ -136,6 +136,19 @@ See https://git-scm.com/book/en/v2/Getting-Started-First-Time-Git-Setup for more
           return fse.outputFile(dstFile, result);
         });
       }
+      if (srcFile.startsWith('/__enclose_io_memfs__/')) {
+        // Temporary workaround for https://github.com/adobe/helix-cli/issues/654
+        // see also https://github.com/adobe/node-packer/issues/1
+
+        // When we're running inside the binary hlx executable (packaged helix-cli
+        // with embedded node runtime):
+
+        // avoid (directly or indirectly) calling fs.copyFile: it's not (yet)
+        // supported by node-packer
+        return fse.ensureDir(path.dirname(dstFile))
+          .then(() => fse.readFile(srcFile))
+          .then(content => fse.writeFile(dstFile, content));
+      }
       return fse.copy(srcFile, dstFile);
     }
 
