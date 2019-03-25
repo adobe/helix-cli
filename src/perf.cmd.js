@@ -76,8 +76,8 @@ class PerfCommand extends AbstractCommand {
       return {
         device: strain.perf.device || this._device,
         location: strain.perf.location || this._location,
-        connection: strain.perf.connection || this._connection
-      }
+        connection: strain.perf.connection || this._connection,
+      };
     }
     return this.getDefaultParams();
   }
@@ -129,7 +129,7 @@ class PerfCommand extends AbstractCommand {
       const perf = this.format(response.metrics, 'lighthouse-performance-score', 80);
       const access = this.format(response.metrics, 'lighthouse-accessibility-score', 80);
       // use the default metrics
-      return  access && perf;
+      return access && perf;
     }
     // make sure all tests have been passed
     return strainresults.every(result => result === true || result === undefined);
@@ -154,68 +154,72 @@ class PerfCommand extends AbstractCommand {
     const flatttests = _.flatten(tests);
     const uri = 'https://adobeioruntime.net/api/v1/web/helix/default/perf';
 
-    const schedule = await request.post(uri, {
-      json: true,
-      body: {
-        service: this._fastly_namespace,
-        token: this._fastly_auth,
-        tests: flatttests,
-      },
-    });
-
-    let retries = 0;
-    let results = [];
-    while (retries < 10) {
-      retries = retries + 1;
-      const completed = results.filter(res => typeof res === 'object').length;
-      console.log(chalk.yellow(`Waiting for test results (${completed}/${flatttests.length})`));
-      results = await request.post(uri, {
+    try {
+      const schedule = await request.post(uri, {
         json: true,
         body: {
           service: this._fastly_namespace,
           token: this._fastly_auth,
-          tests: schedule,
-        }
+          tests: flatttests,
+        },
       });
 
-      if (results.reduce((p, uuid) => p && typeof uuid === 'object', true)) {
-        break;
-      }
-    }
+      let retries = 0;
+      let results = [];
+      while (retries < 10) {
+        retries += 1;
+        const completed = results.filter(res => typeof res === 'object').length;
+        console.log(chalk.yellow(`Waiting for test results (${completed}/${flatttests.length})`));
+        results = await request.post(uri, {
+          json: true,
+          body: {
+            service: this._fastly_namespace,
+            token: this._fastly_auth,
+            tests: schedule,
+          },
+        });
 
-    let skipped = 0;
-    const formatted = _.zip(results, flatttests).map(([result, test]) => {
-      if (this._junit && typeof result === 'object') {
-        this._junit.appendResults(result, test._thresholds, test.strain);
+        if (results.reduce((p, uuid) => p && typeof uuid === 'object', true)) {
+          break;
+        }
       }
-      if (typeof result === 'object') {
-        return this.formatResponse(result, test._thresholds, test.strain);
-      } else {
-        skipped = skipped + 1;
+
+      let skipped = 0;
+      const formatted = _.zip(results, flatttests).map(([result, test]) => {
+        if (this._junit && typeof result === 'object') {
+          this._junit.appendResults(result, test._thresholds, test.strain);
+        }
+        if (typeof result === 'object') {
+          return this.formatResponse(result, test._thresholds, test.strain);
+        }
+        skipped += 1;
         console.log(chalk.yellow(`\nSkipped test for ${test.url} on ${test.strain}`));
         return undefined;
+      });
+
+      if (this._junit) {
+        this._junit.writeResults();
       }
-    });
 
-    if (this._junit) {
-      this._junit.writeResults();
-    }
-
-    const fail = formatted.filter(result => result === false).length;
-    const succeed = formatted.filter(result => result === true).length;
-    if (skipped) {
-      console.log(chalk.yellow(`${skipped} tests skipped due to 10 minute timeout`));
-    }
-    if (fail && succeed) {
-      this.log.error(chalk.yellow(`all tests completed with ${fail} failures and ${succeed} successes.`));
-      throw new Error('Performance test failed partially');
-    } else if (fail) {
-      this.log.error(chalk.red(`all ${fail} tests failed.`));
-      throw new Error('Performance test failed entirely');
-    } else if (succeed) {
-      this.log.info(chalk.green(`all ${succeed} tests succeeded.`));
-    } else if (skipped) {
-      throw new Error('Performance test skipped entirely');
+      const fail = formatted.filter(result => result === false).length;
+      const succeed = formatted.filter(result => result === true).length;
+      if (skipped) {
+        console.log(chalk.yellow(`${skipped} tests skipped due to 10 minute timeout`));
+      }
+      if (fail && succeed) {
+        this.log.error(chalk.yellow(`all tests completed with ${fail} failures and ${succeed} successes.`));
+        throw new Error('Performance test failed partially');
+      } else if (fail) {
+        this.log.error(chalk.red(`all ${fail} tests failed.`));
+        throw new Error('Performance test failed entirely');
+      } else if (succeed) {
+        this.log.info(chalk.green(`all ${succeed} tests succeeded.`));
+      } else if (skipped) {
+        throw new Error('Performance test skipped entirely');
+      }
+    } catch (e) {
+      this.log.error(`Unable to run performance test ${e}`);
+      throw new Error(`Unable to run performance test ${e}`);
     }
   }
 }

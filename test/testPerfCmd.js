@@ -13,7 +13,7 @@
 /* eslint-env mocha */
 
 const assert = require('assert');
-const AssertionError = require('assert').AssertionError;
+const { AssertionError } = require('assert');
 const path = require('path');
 const NodeHttpAdapter = require('@pollyjs/adapter-node-http');
 const { setupMocha: setupPolly } = require('@pollyjs/core');
@@ -23,643 +23,642 @@ const fs = require('fs-extra');
 const PerfCommand = require('../src/perf.cmd.js');
 
 describe('hlx perf #integrationtest', () => {
-  
   setupPolly({
     adapters: [NodeHttpAdapter],
   });
-  
+
 
   it('hlx perf --junit (partial)', async function test() {
     const { server } = this.polly;
-    
+
     let reqcounter = 0;
     server
       .post('https://adobeioruntime.net/api/v1/web/helix/default/perf')
       .intercept((req, res) => {
-        reqcounter = reqcounter + 1;
+        reqcounter += 1;
 
         if (reqcounter === 1) {
-          res.sendStatus(200).json(["91af6cd", "5180ab5", "199489d", "0e0c0c3"]);
+          res.sendStatus(200).json(['91af6cd', '5180ab5', '199489d', '0e0c0c3']);
         }
         if (reqcounter === 2) {
           res.sendStatus(200).json([{
-            "connection": {
-              "title": "Regular 3G"
+            connection: {
+              title: 'Regular 3G',
             },
-            "device": {
-              "title": "iPhone 8"
+            device: {
+              title: 'iPhone 8',
             },
-            "formattedTestUrl": "https://calibreapp.com/tests/91af6cd/ea52f35",
-            "location": {
-              "emoji": "🇬🇧",
-              "name": "London, United Kingdom"
+            formattedTestUrl: 'https://calibreapp.com/tests/91af6cd/ea52f35',
+            location: {
+              emoji: '🇬🇧',
+              name: 'London, United Kingdom',
             },
-            "metrics": [{
-              "label": "Lighthouse SEO Score",
-              "name": "lighthouse-seo-score",
-              "value": 89
+            metrics: [{
+              label: 'Lighthouse SEO Score',
+              name: 'lighthouse-seo-score',
+              value: 89,
             }, {
-              "label": "Lighthouse Best Practices Score",
-              "name": "lighthouse-best-practices-score",
-              "value": 100
+              label: 'Lighthouse Best Practices Score',
+              name: 'lighthouse-best-practices-score',
+              value: 100,
             }, {
-              "label": "Lighthouse Accessibility Score",
-              "name": "lighthouse-accessibility-score",
-              "value": 59
+              label: 'Lighthouse Accessibility Score',
+              name: 'lighthouse-accessibility-score',
+              value: 59,
             }, {
-              "label": "Lighthouse Performance Score",
-              "name": "lighthouse-performance-score",
-              "value": 92
+              label: 'Lighthouse Performance Score',
+              name: 'lighthouse-performance-score',
+              value: 92,
             }, {
-              "label": "Lighthouse Progressive Web App Score",
-              "name": "lighthouse-pwa-score",
-              "value": 56
+              label: 'Lighthouse Progressive Web App Score',
+              name: 'lighthouse-pwa-score',
+              value: 56,
             }, {
-              "label": "JS Parse & Compile",
-              "name": "js-parse-compile",
-              "value": 0
+              label: 'JS Parse & Compile',
+              name: 'js-parse-compile',
+              value: 0,
             }, {
-              "label": "DOM Element Count",
-              "name": "dom-size",
-              "value": 134
+              label: 'DOM Element Count',
+              name: 'dom-size',
+              value: 134,
             }, {
-              "label": "85% Visually Complete",
-              "name": "visually_complete_85",
-              "value": 3793
+              label: '85% Visually Complete',
+              name: 'visually_complete_85',
+              value: 3793,
             }, {
-              "label": "Visually Complete",
-              "name": "visually_complete",
-              "value": 21859
+              label: 'Visually Complete',
+              name: 'visually_complete',
+              value: 21859,
             }, {
-              "label": "Time to Interactive",
-              "name": "consistently-interactive",
-              "value": 2106
+              label: 'Time to Interactive',
+              name: 'consistently-interactive',
+              value: 2106,
             }, {
-              "label": "First CPU Idle",
-              "name": "first-interactive",
-              "value": 3798
+              label: 'First CPU Idle',
+              name: 'first-interactive',
+              value: 3798,
             }, {
-              "label": "Time to First Byte",
-              "name": "time-to-first-byte",
-              "value": 309
+              label: 'Time to First Byte',
+              name: 'time-to-first-byte',
+              value: 309,
             }, {
-              "label": "Estimated input latency",
-              "name": "estimated-input-latency",
-              "value": 16
+              label: 'Estimated input latency',
+              name: 'estimated-input-latency',
+              value: 16,
             }, {
-              "label": "Speed Index",
-              "name": "speed_index",
-              "value": 3161
+              label: 'Speed Index',
+              name: 'speed_index',
+              value: 3161,
             }, {
-              "label": "First Meaningful Paint",
-              "name": "first-meaningful-paint",
-              "value": 3798
+              label: 'First Meaningful Paint',
+              name: 'first-meaningful-paint',
+              value: 3798,
             }, {
-              "label": "First Contentful Paint",
-              "name": "first-contentful-paint",
-              "value": 2106
+              label: 'First Contentful Paint',
+              name: 'first-contentful-paint',
+              value: 2106,
             }, {
-              "label": "First Paint",
-              "name": "firstRender",
-              "value": 2106
+              label: 'First Paint',
+              name: 'firstRender',
+              value: 2106,
             }, {
-              "label": "Total Image size in bytes",
-              "name": "image_body_size_in_bytes",
-              "value": 1913203
+              label: 'Total Image size in bytes',
+              name: 'image_body_size_in_bytes',
+              value: 1913203,
             }, {
-              "label": "Total Image transferred",
-              "name": "image_size_in_bytes",
-              "value": 1918146
+              label: 'Total Image transferred',
+              name: 'image_size_in_bytes',
+              value: 1918146,
             }, {
-              "label": "Total Webfont size in bytes",
-              "name": "font_body_size_in_bytes",
-              "value": 32300
+              label: 'Total Webfont size in bytes',
+              name: 'font_body_size_in_bytes',
+              value: 32300,
             }, {
-              "label": "Total Webfont transferred",
-              "name": "font_size_in_bytes",
-              "value": 32797
+              label: 'Total Webfont transferred',
+              name: 'font_size_in_bytes',
+              value: 32797,
             }, {
-              "label": "Total JavaScript size in bytes",
-              "name": "js_body_size_in_bytes",
-              "value": 53324
+              label: 'Total JavaScript size in bytes',
+              name: 'js_body_size_in_bytes',
+              value: 53324,
             }, {
-              "label": "Total JavaScript Transferred",
-              "name": "js_size_in_bytes",
-              "value": 17701
+              label: 'Total JavaScript Transferred',
+              name: 'js_size_in_bytes',
+              value: 17701,
             }, {
-              "label": "Total CSS size in bytes",
-              "name": "css_body_size_in_bytes",
-              "value": 13150
+              label: 'Total CSS size in bytes',
+              name: 'css_body_size_in_bytes',
+              value: 13150,
             }, {
-              "label": "Total CSS transferred",
-              "name": "css_size_in_bytes",
-              "value": 7210
+              label: 'Total CSS transferred',
+              name: 'css_size_in_bytes',
+              value: 7210,
             }, {
-              "label": "Total HTML size in bytes",
-              "name": "html_body_size_in_bytes",
-              "value": 11847
+              label: 'Total HTML size in bytes',
+              name: 'html_body_size_in_bytes',
+              value: 11847,
             }, {
-              "label": "Total HTML transferred",
-              "name": "html_size_in_bytes",
-              "value": 12069
+              label: 'Total HTML transferred',
+              name: 'html_size_in_bytes',
+              value: 12069,
             }, {
-              "label": "Response time",
-              "name": "page_wait_timing",
-              "value": 539
+              label: 'Response time',
+              name: 'page_wait_timing',
+              value: 539,
             }, {
-              "label": "Total Page transferred",
-              "name": "page_size_in_bytes",
-              "value": 1987923
+              label: 'Total Page transferred',
+              name: 'page_size_in_bytes',
+              value: 1987923,
             }, {
-              "label": "Total Page size in bytes",
-              "name": "page_body_size_in_bytes",
-              "value": 2023824
+              label: 'Total Page size in bytes',
+              name: 'page_body_size_in_bytes',
+              value: 2023824,
             }, {
-              "label": "Number of requests",
-              "name": "asset_count",
-              "value": 19
+              label: 'Number of requests',
+              name: 'asset_count',
+              value: 19,
             }, {
-              "label": "onLoad",
-              "name": "onload",
-              "value": 21839
+              label: 'onLoad',
+              name: 'onload',
+              value: 21839,
             }, {
-              "label": "onContentLoad",
-              "name": "oncontentload",
-              "value": 2096
+              label: 'onContentLoad',
+              name: 'oncontentload',
+              value: 2096,
             }],
-            "status": "completed",
-            "updatedAt": "2019-03-22T16:43:03Z",
-            "url": "https://www.project-helix.io/",
-            "uuid": "91af6cd"
-          }, "5180ab5", "199489d", "0e0c0c3"]);
+            status: 'completed',
+            updatedAt: '2019-03-22T16:43:03Z',
+            url: 'https://www.project-helix.io/',
+            uuid: '91af6cd',
+          }, '5180ab5', '199489d', '0e0c0c3']);
         }
         if (reqcounter > 2) {
           res.sendStatus(200).json([{
-            "connection": {
-              "title": "Regular 3G"
+            connection: {
+              title: 'Regular 3G',
             },
-            "device": {
-              "title": "iPhone 8"
+            device: {
+              title: 'iPhone 8',
             },
-            "formattedTestUrl": "https://calibreapp.com/tests/91af6cd/ea52f35",
-            "location": {
-              "emoji": "🇬🇧",
-              "name": "London, United Kingdom"
+            formattedTestUrl: 'https://calibreapp.com/tests/91af6cd/ea52f35',
+            location: {
+              emoji: '🇬🇧',
+              name: 'London, United Kingdom',
             },
-            "metrics": [{
-              "label": "Lighthouse SEO Score",
-              "name": "lighthouse-seo-score",
-              "value": 89
+            metrics: [{
+              label: 'Lighthouse SEO Score',
+              name: 'lighthouse-seo-score',
+              value: 89,
             }, {
-              "label": "Lighthouse Best Practices Score",
-              "name": "lighthouse-best-practices-score",
-              "value": 100
+              label: 'Lighthouse Best Practices Score',
+              name: 'lighthouse-best-practices-score',
+              value: 100,
             }, {
-              "label": "Lighthouse Accessibility Score",
-              "name": "lighthouse-accessibility-score",
-              "value": 59
+              label: 'Lighthouse Accessibility Score',
+              name: 'lighthouse-accessibility-score',
+              value: 59,
             }, {
-              "label": "Lighthouse Performance Score",
-              "name": "lighthouse-performance-score",
-              "value": 99
+              label: 'Lighthouse Performance Score',
+              name: 'lighthouse-performance-score',
+              value: 99,
             }, {
-              "label": "Lighthouse Progressive Web App Score",
-              "name": "lighthouse-pwa-score",
-              "value": 56
+              label: 'Lighthouse Progressive Web App Score',
+              name: 'lighthouse-pwa-score',
+              value: 56,
             }, {
-              "label": "JS Parse & Compile",
-              "name": "js-parse-compile",
-              "value": 0
+              label: 'JS Parse & Compile',
+              name: 'js-parse-compile',
+              value: 0,
             }, {
-              "label": "DOM Element Count",
-              "name": "dom-size",
-              "value": 134
+              label: 'DOM Element Count',
+              name: 'dom-size',
+              value: 134,
             }, {
-              "label": "85% Visually Complete",
-              "name": "visually_complete_85",
-              "value": 3793
+              label: '85% Visually Complete',
+              name: 'visually_complete_85',
+              value: 3793,
             }, {
-              "label": "Visually Complete",
-              "name": "visually_complete",
-              "value": 21859
+              label: 'Visually Complete',
+              name: 'visually_complete',
+              value: 21859,
             }, {
-              "label": "Time to Interactive",
-              "name": "consistently-interactive",
-              "value": 2106
+              label: 'Time to Interactive',
+              name: 'consistently-interactive',
+              value: 2106,
             }, {
-              "label": "First CPU Idle",
-              "name": "first-interactive",
-              "value": 3798
+              label: 'First CPU Idle',
+              name: 'first-interactive',
+              value: 3798,
             }, {
-              "label": "Time to First Byte",
-              "name": "time-to-first-byte",
-              "value": 309
+              label: 'Time to First Byte',
+              name: 'time-to-first-byte',
+              value: 309,
             }, {
-              "label": "Estimated input latency",
-              "name": "estimated-input-latency",
-              "value": 16
+              label: 'Estimated input latency',
+              name: 'estimated-input-latency',
+              value: 16,
             }, {
-              "label": "Speed Index",
-              "name": "speed_index",
-              "value": 3161
+              label: 'Speed Index',
+              name: 'speed_index',
+              value: 3161,
             }, {
-              "label": "First Meaningful Paint",
-              "name": "first-meaningful-paint",
-              "value": 3798
+              label: 'First Meaningful Paint',
+              name: 'first-meaningful-paint',
+              value: 3798,
             }, {
-              "label": "First Contentful Paint",
-              "name": "first-contentful-paint",
-              "value": 2106
+              label: 'First Contentful Paint',
+              name: 'first-contentful-paint',
+              value: 2106,
             }, {
-              "label": "First Paint",
-              "name": "firstRender",
-              "value": 2106
+              label: 'First Paint',
+              name: 'firstRender',
+              value: 2106,
             }, {
-              "label": "Total Image size in bytes",
-              "name": "image_body_size_in_bytes",
-              "value": 1913203
+              label: 'Total Image size in bytes',
+              name: 'image_body_size_in_bytes',
+              value: 1913203,
             }, {
-              "label": "Total Image transferred",
-              "name": "image_size_in_bytes",
-              "value": 1918146
+              label: 'Total Image transferred',
+              name: 'image_size_in_bytes',
+              value: 1918146,
             }, {
-              "label": "Total Webfont size in bytes",
-              "name": "font_body_size_in_bytes",
-              "value": 32300
+              label: 'Total Webfont size in bytes',
+              name: 'font_body_size_in_bytes',
+              value: 32300,
             }, {
-              "label": "Total Webfont transferred",
-              "name": "font_size_in_bytes",
-              "value": 32797
+              label: 'Total Webfont transferred',
+              name: 'font_size_in_bytes',
+              value: 32797,
             }, {
-              "label": "Total JavaScript size in bytes",
-              "name": "js_body_size_in_bytes",
-              "value": 53324
+              label: 'Total JavaScript size in bytes',
+              name: 'js_body_size_in_bytes',
+              value: 53324,
             }, {
-              "label": "Total JavaScript Transferred",
-              "name": "js_size_in_bytes",
-              "value": 17701
+              label: 'Total JavaScript Transferred',
+              name: 'js_size_in_bytes',
+              value: 17701,
             }, {
-              "label": "Total CSS size in bytes",
-              "name": "css_body_size_in_bytes",
-              "value": 13150
+              label: 'Total CSS size in bytes',
+              name: 'css_body_size_in_bytes',
+              value: 13150,
             }, {
-              "label": "Total CSS transferred",
-              "name": "css_size_in_bytes",
-              "value": 7210
+              label: 'Total CSS transferred',
+              name: 'css_size_in_bytes',
+              value: 7210,
             }, {
-              "label": "Total HTML size in bytes",
-              "name": "html_body_size_in_bytes",
-              "value": 11847
+              label: 'Total HTML size in bytes',
+              name: 'html_body_size_in_bytes',
+              value: 11847,
             }, {
-              "label": "Total HTML transferred",
-              "name": "html_size_in_bytes",
-              "value": 12069
+              label: 'Total HTML transferred',
+              name: 'html_size_in_bytes',
+              value: 12069,
             }, {
-              "label": "Response time",
-              "name": "page_wait_timing",
-              "value": 539
+              label: 'Response time',
+              name: 'page_wait_timing',
+              value: 539,
             }, {
-              "label": "Total Page transferred",
-              "name": "page_size_in_bytes",
-              "value": 1987923
+              label: 'Total Page transferred',
+              name: 'page_size_in_bytes',
+              value: 1987923,
             }, {
-              "label": "Total Page size in bytes",
-              "name": "page_body_size_in_bytes",
-              "value": 2023824
+              label: 'Total Page size in bytes',
+              name: 'page_body_size_in_bytes',
+              value: 2023824,
             }, {
-              "label": "Number of requests",
-              "name": "asset_count",
-              "value": 19
+              label: 'Number of requests',
+              name: 'asset_count',
+              value: 19,
             }, {
-              "label": "onLoad",
-              "name": "onload",
-              "value": 21839
+              label: 'onLoad',
+              name: 'onload',
+              value: 21839,
             }, {
-              "label": "onContentLoad",
-              "name": "oncontentload",
-              "value": 2096
+              label: 'onContentLoad',
+              name: 'oncontentload',
+              value: 2096,
             }],
-            "status": "completed",
-            "updatedAt": "2019-03-22T16:43:03Z",
-            "url": "https://www.project-helix.io/",
-            "uuid": "91af6cd"
+            status: 'completed',
+            updatedAt: '2019-03-22T16:43:03Z',
+            url: 'https://www.project-helix.io/',
+            uuid: '91af6cd',
           }, {
-            "connection": {
-              "title": "Regular 3G"
+            connection: {
+              title: 'Regular 3G',
             },
-            "device": {
-              "title": "iPhone 8"
+            device: {
+              title: 'iPhone 8',
             },
-            "formattedTestUrl": "https://calibreapp.com/tests/5180ab5/fab3d29",
-            "location": {
-              "emoji": "🇬🇧",
-              "name": "London, United Kingdom"
+            formattedTestUrl: 'https://calibreapp.com/tests/5180ab5/fab3d29',
+            location: {
+              emoji: '🇬🇧',
+              name: 'London, United Kingdom',
             },
-            "metrics": [{
-              "label": "Lighthouse SEO Score",
-              "name": "lighthouse-seo-score",
-              "value": 99
+            metrics: [{
+              label: 'Lighthouse SEO Score',
+              name: 'lighthouse-seo-score',
+              value: 99,
             }, {
-              "label": "Lighthouse Best Practices Score",
-              "name": "lighthouse-best-practices-score",
-              "value": 71
+              label: 'Lighthouse Best Practices Score',
+              name: 'lighthouse-best-practices-score',
+              value: 71,
             }, {
-              "label": "Lighthouse Accessibility Score",
-              "name": "lighthouse-accessibility-score",
-              "value": 60
+              label: 'Lighthouse Accessibility Score',
+              name: 'lighthouse-accessibility-score',
+              value: 60,
             }, {
-              "label": "Lighthouse Progressive Web App Score",
-              "name": "lighthouse-pwa-score",
-              "value": 28
+              label: 'Lighthouse Progressive Web App Score',
+              name: 'lighthouse-pwa-score',
+              value: 28,
             }, {
-              "label": "Lighthouse Performance Score",
-              "name": "lighthouse-performance-score",
-              "value": 28
+              label: 'Lighthouse Performance Score',
+              name: 'lighthouse-performance-score',
+              value: 28,
             }, {
-              "label": "JS Parse & Compile",
-              "name": "js-parse-compile",
-              "value": 269
+              label: 'JS Parse & Compile',
+              name: 'js-parse-compile',
+              value: 269,
             }, {
-              "label": "DOM Element Count",
-              "name": "dom-size",
-              "value": 673
+              label: 'DOM Element Count',
+              name: 'dom-size',
+              value: 673,
             }, {
-              "label": "85% Visually Complete",
-              "name": "visually_complete_85",
-              "value": 11009
+              label: '85% Visually Complete',
+              name: 'visually_complete_85',
+              value: 11009,
             }, {
-              "label": "Visually Complete",
-              "name": "visually_complete",
-              "value": 11009
+              label: 'Visually Complete',
+              name: 'visually_complete',
+              value: 11009,
             }, {
-              "label": "First CPU Idle",
-              "name": "first-interactive",
-              "value": 7203
+              label: 'First CPU Idle',
+              name: 'first-interactive',
+              value: 7203,
             }, {
-              "label": "Time to First Byte",
-              "name": "time-to-first-byte",
-              "value": 308
+              label: 'Time to First Byte',
+              name: 'time-to-first-byte',
+              value: 308,
             }, {
-              "label": "Estimated input latency",
-              "name": "estimated-input-latency",
-              "value": 16
+              label: 'Estimated input latency',
+              name: 'estimated-input-latency',
+              value: 16,
             }, {
-              "label": "Speed Index",
-              "name": "speed_index",
-              "value": 9025
+              label: 'Speed Index',
+              name: 'speed_index',
+              value: 9025,
             }, {
-              "label": "First Meaningful Paint",
-              "name": "first-meaningful-paint",
-              "value": 6482
+              label: 'First Meaningful Paint',
+              name: 'first-meaningful-paint',
+              value: 6482,
             }, {
-              "label": "First Contentful Paint",
-              "name": "first-contentful-paint",
-              "value": 6482
+              label: 'First Contentful Paint',
+              name: 'first-contentful-paint',
+              value: 6482,
             }, {
-              "label": "First Paint",
-              "name": "firstRender",
-              "value": 6482
+              label: 'First Paint',
+              name: 'firstRender',
+              value: 6482,
             }, {
-              "label": "Total JSON size in bytes",
-              "name": "json_body_size_in_bytes",
-              "value": 12774
+              label: 'Total JSON size in bytes',
+              name: 'json_body_size_in_bytes',
+              value: 12774,
             }, {
-              "label": "Total JSON transferred",
-              "name": "json_size_in_bytes",
-              "value": 5256
+              label: 'Total JSON transferred',
+              name: 'json_size_in_bytes',
+              value: 5256,
             }, {
-              "label": "Total Image size in bytes",
-              "name": "image_body_size_in_bytes",
-              "value": 277812
+              label: 'Total Image size in bytes',
+              name: 'image_body_size_in_bytes',
+              value: 277812,
             }, {
-              "label": "Total Image transferred",
-              "name": "image_size_in_bytes",
-              "value": 284156
+              label: 'Total Image transferred',
+              name: 'image_size_in_bytes',
+              value: 284156,
             }, {
-              "label": "Total Webfont size in bytes",
-              "name": "font_body_size_in_bytes",
-              "value": 106852
+              label: 'Total Webfont size in bytes',
+              name: 'font_body_size_in_bytes',
+              value: 106852,
             }, {
-              "label": "Total Webfont transferred",
-              "name": "font_size_in_bytes",
-              "value": 107986
+              label: 'Total Webfont transferred',
+              name: 'font_size_in_bytes',
+              value: 107986,
             }, {
-              "label": "Total JavaScript size in bytes",
-              "name": "js_body_size_in_bytes",
-              "value": 3228155
+              label: 'Total JavaScript size in bytes',
+              name: 'js_body_size_in_bytes',
+              value: 3228155,
             }, {
-              "label": "Total JavaScript Transferred",
-              "name": "js_size_in_bytes",
-              "value": 972207
+              label: 'Total JavaScript Transferred',
+              name: 'js_size_in_bytes',
+              value: 972207,
             }, {
-              "label": "Total CSS size in bytes",
-              "name": "css_body_size_in_bytes",
-              "value": 771753
+              label: 'Total CSS size in bytes',
+              name: 'css_body_size_in_bytes',
+              value: 771753,
             }, {
-              "label": "Total CSS transferred",
-              "name": "css_size_in_bytes",
-              "value": 100371
+              label: 'Total CSS transferred',
+              name: 'css_size_in_bytes',
+              value: 100371,
             }, {
-              "label": "Total HTML size in bytes",
-              "name": "html_body_size_in_bytes",
-              "value": 108885
+              label: 'Total HTML size in bytes',
+              name: 'html_body_size_in_bytes',
+              value: 108885,
             }, {
-              "label": "Total HTML transferred",
-              "name": "html_size_in_bytes",
-              "value": 50202
+              label: 'Total HTML transferred',
+              name: 'html_size_in_bytes',
+              value: 50202,
             }, {
-              "label": "Response time",
-              "name": "page_wait_timing",
-              "value": 836
+              label: 'Response time',
+              name: 'page_wait_timing',
+              value: 836,
             }, {
-              "label": "Total Page transferred",
-              "name": "page_size_in_bytes",
-              "value": 1527831
+              label: 'Total Page transferred',
+              name: 'page_size_in_bytes',
+              value: 1527831,
             }, {
-              "label": "Total Page size in bytes",
-              "name": "page_body_size_in_bytes",
-              "value": 4506329
+              label: 'Total Page size in bytes',
+              name: 'page_body_size_in_bytes',
+              value: 4506329,
             }, {
-              "label": "Number of requests",
-              "name": "asset_count",
-              "value": 102
+              label: 'Number of requests',
+              name: 'asset_count',
+              value: 102,
             }, {
-              "label": "onLoad",
-              "name": "onload",
-              "value": 16770
+              label: 'onLoad',
+              name: 'onload',
+              value: 16770,
             }, {
-              "label": "onContentLoad",
-              "name": "oncontentload",
-              "value": 7203
+              label: 'onContentLoad',
+              name: 'oncontentload',
+              value: 7203,
             }],
-            "status": "completed",
-            "updatedAt": "2019-03-22T16:43:03Z",
-            "url": "https://www.adobe.io/",
-            "uuid": "5180ab5"
+            status: 'completed',
+            updatedAt: '2019-03-22T16:43:03Z',
+            url: 'https://www.adobe.io/',
+            uuid: '5180ab5',
           }, {
-            "connection": {
-              "title": "Regular 3G"
+            connection: {
+              title: 'Regular 3G',
             },
-            "device": {
-              "title": "iPhone 8"
+            device: {
+              title: 'iPhone 8',
             },
-            "formattedTestUrl": "https://calibreapp.com/tests/199489d/c17a5f9",
-            "location": {
-              "emoji": "🇺🇸",
-              "name": "North Virginia, USA"
+            formattedTestUrl: 'https://calibreapp.com/tests/199489d/c17a5f9',
+            location: {
+              emoji: '🇺🇸',
+              name: 'North Virginia, USA',
             },
-            "metrics": [{
-              "label": "Lighthouse SEO Score",
-              "name": "lighthouse-seo-score",
-              "value": 91
+            metrics: [{
+              label: 'Lighthouse SEO Score',
+              name: 'lighthouse-seo-score',
+              value: 91,
             }, {
-              "label": "Lighthouse Best Practices Score",
-              "name": "lighthouse-best-practices-score",
-              "value": 100
+              label: 'Lighthouse Best Practices Score',
+              name: 'lighthouse-best-practices-score',
+              value: 100,
             }, {
-              "label": "Lighthouse Accessibility Score",
-              "name": "lighthouse-accessibility-score",
-              "value": 90
+              label: 'Lighthouse Accessibility Score',
+              name: 'lighthouse-accessibility-score',
+              value: 90,
             }, {
-              "label": "Lighthouse Performance Score",
-              "name": "lighthouse-performance-score",
-              "value": 81
+              label: 'Lighthouse Performance Score',
+              name: 'lighthouse-performance-score',
+              value: 81,
             }, {
-              "label": "Lighthouse Progressive Web App Score",
-              "name": "lighthouse-pwa-score",
-              "value": 28
+              label: 'Lighthouse Progressive Web App Score',
+              name: 'lighthouse-pwa-score',
+              value: 28,
             }, {
-              "label": "JS Parse & Compile",
-              "name": "js-parse-compile",
-              "value": 346
+              label: 'JS Parse & Compile',
+              name: 'js-parse-compile',
+              value: 346,
             }, {
-              "label": "DOM Element Count",
-              "name": "dom-size",
-              "value": 1064
+              label: 'DOM Element Count',
+              name: 'dom-size',
+              value: 1064,
             }, {
-              "label": "85% Visually Complete",
-              "name": "visually_complete_85",
-              "value": 12017
+              label: '85% Visually Complete',
+              name: 'visually_complete_85',
+              value: 12017,
             }, {
-              "label": "Visually Complete",
-              "name": "visually_complete",
-              "value": 23434
+              label: 'Visually Complete',
+              name: 'visually_complete',
+              value: 23434,
             }, {
-              "label": "Time to Interactive",
-              "name": "consistently-interactive",
-              "value": 29332
+              label: 'Time to Interactive',
+              name: 'consistently-interactive',
+              value: 29332,
             }, {
-              "label": "First CPU Idle",
-              "name": "first-interactive",
-              "value": 21216
+              label: 'First CPU Idle',
+              name: 'first-interactive',
+              value: 21216,
             }, {
-              "label": "Time to First Byte",
-              "name": "time-to-first-byte",
-              "value": 318
+              label: 'Time to First Byte',
+              name: 'time-to-first-byte',
+              value: 318,
             }, {
-              "label": "Estimated input latency",
-              "name": "estimated-input-latency",
-              "value": 16
+              label: 'Estimated input latency',
+              name: 'estimated-input-latency',
+              value: 16,
             }, {
-              "label": "Speed Index",
-              "name": "speed_index",
-              "value": 14386
+              label: 'Speed Index',
+              name: 'speed_index',
+              value: 14386,
             }, {
-              "label": "First Meaningful Paint",
-              "name": "first-meaningful-paint",
-              "value": 12003
+              label: 'First Meaningful Paint',
+              name: 'first-meaningful-paint',
+              value: 12003,
             }, {
-              "label": "First Contentful Paint",
-              "name": "first-contentful-paint",
-              "value": 12003
+              label: 'First Contentful Paint',
+              name: 'first-contentful-paint',
+              value: 12003,
             }, {
-              "label": "First Paint",
-              "name": "firstRender",
-              "value": 12003
+              label: 'First Paint',
+              name: 'firstRender',
+              value: 12003,
             }, {
-              "label": "Total JSON size in bytes",
-              "name": "json_body_size_in_bytes",
-              "value": 49739
+              label: 'Total JSON size in bytes',
+              name: 'json_body_size_in_bytes',
+              value: 49739,
             }, {
-              "label": "Total JSON transferred",
-              "name": "json_size_in_bytes",
-              "value": 21099
+              label: 'Total JSON transferred',
+              name: 'json_size_in_bytes',
+              value: 21099,
             }, {
-              "label": "Total Image size in bytes",
-              "name": "image_body_size_in_bytes",
-              "value": 314258
+              label: 'Total Image size in bytes',
+              name: 'image_body_size_in_bytes',
+              value: 314258,
             }, {
-              "label": "Total Image transferred",
-              "name": "image_size_in_bytes",
-              "value": 338309
+              label: 'Total Image transferred',
+              name: 'image_size_in_bytes',
+              value: 338309,
             }, {
-              "label": "Total Webfont size in bytes",
-              "name": "font_body_size_in_bytes",
-              "value": 684376
+              label: 'Total Webfont size in bytes',
+              name: 'font_body_size_in_bytes',
+              value: 684376,
             }, {
-              "label": "Total Webfont transferred",
-              "name": "font_size_in_bytes",
-              "value": 688364
+              label: 'Total Webfont transferred',
+              name: 'font_size_in_bytes',
+              value: 688364,
             }, {
-              "label": "Total JavaScript size in bytes",
-              "name": "js_body_size_in_bytes",
-              "value": 5048615
+              label: 'Total JavaScript size in bytes',
+              name: 'js_body_size_in_bytes',
+              value: 5048615,
             }, {
-              "label": "Total JavaScript Transferred",
-              "name": "js_size_in_bytes",
-              "value": 1059351
+              label: 'Total JavaScript Transferred',
+              name: 'js_size_in_bytes',
+              value: 1059351,
             }, {
-              "label": "Total CSS size in bytes",
-              "name": "css_body_size_in_bytes",
-              "value": 3184009
+              label: 'Total CSS size in bytes',
+              name: 'css_body_size_in_bytes',
+              value: 3184009,
             }, {
-              "label": "Total CSS transferred",
-              "name": "css_size_in_bytes",
-              "value": 329461
+              label: 'Total CSS transferred',
+              name: 'css_size_in_bytes',
+              value: 329461,
             }, {
-              "label": "Total HTML size in bytes",
-              "name": "html_body_size_in_bytes",
-              "value": 99973
+              label: 'Total HTML size in bytes',
+              name: 'html_body_size_in_bytes',
+              value: 99973,
             }, {
-              "label": "Total HTML transferred",
-              "name": "html_size_in_bytes",
-              "value": 39115
+              label: 'Total HTML transferred',
+              name: 'html_size_in_bytes',
+              value: 39115,
             }, {
-              "label": "Response time",
-              "name": "page_wait_timing",
-              "value": 519
+              label: 'Response time',
+              name: 'page_wait_timing',
+              value: 519,
             }, {
-              "label": "Total Page transferred",
-              "name": "page_size_in_bytes",
-              "value": 2504700
+              label: 'Total Page transferred',
+              name: 'page_size_in_bytes',
+              value: 2504700,
             }, {
-              "label": "Total Page size in bytes",
-              "name": "page_body_size_in_bytes",
-              "value": 9381086
+              label: 'Total Page size in bytes',
+              name: 'page_body_size_in_bytes',
+              value: 9381086,
             }, {
-              "label": "Number of requests",
-              "name": "asset_count",
-              "value": 210
+              label: 'Number of requests',
+              name: 'asset_count',
+              value: 210,
             }, {
-              "label": "onLoad",
-              "name": "onload",
-              "value": 29332
+              label: 'onLoad',
+              name: 'onload',
+              value: 29332,
             }, {
-              "label": "onContentLoad",
-              "name": "oncontentload",
-              "value": 21216
+              label: 'onContentLoad',
+              name: 'oncontentload',
+              value: 21216,
             }],
-            "status": "completed",
-            "updatedAt": "2019-03-22T16:43:02Z",
-            "url": "https://www.adobe.com/",
-            "uuid": "199489d"
-          }, "0e0c0c3"]);
+            status: 'completed',
+            updatedAt: '2019-03-22T16:43:02Z',
+            url: 'https://www.adobe.com/',
+            uuid: '199489d',
+          }, '0e0c0c3']);
         }
       });
-    
+
     const root = await createTestRoot();
     const junit = path.resolve(root, 'junit-results.xml');
-    
+
 
     const perf = await new PerfCommand()
       .withFastlyAuth('fake')
@@ -675,7 +674,7 @@ describe('hlx perf #integrationtest', () => {
         throw e;
       }
       assert.equal(e.message, 'Performance test failed partially');
-      assertFileEqual(junit, path.resolve(__dirname, 'fixtures', 'junit-partial.xml'))
+      assertFileEqual(junit, path.resolve(__dirname, 'fixtures', 'junit-partial.xml'));
     } finally {
       fs.remove(root);
     }
@@ -683,788 +682,788 @@ describe('hlx perf #integrationtest', () => {
 
   it('hlx perf --junit (success)', async function test() {
     const { server } = this.polly;
-    
+
     let reqcounter = 0;
     server
       .post('https://adobeioruntime.net/api/v1/web/helix/default/perf')
       .intercept((req, res) => {
-        reqcounter = reqcounter + 1;
+        reqcounter += 1;
 
         if (reqcounter === 1) {
-          res.sendStatus(200).json(["91af6cd", "5180ab5", "199489d", "0e0c0c3"]);
+          res.sendStatus(200).json(['91af6cd', '5180ab5', '199489d', '0e0c0c3']);
         }
         if (reqcounter === 2) {
           res.sendStatus(200).json([{
-            "connection": {
-              "title": "Regular 3G"
+            connection: {
+              title: 'Regular 3G',
             },
-            "device": {
-              "title": "iPhone 8"
+            device: {
+              title: 'iPhone 8',
             },
-            "formattedTestUrl": "https://calibreapp.com/tests/91af6cd/ea52f35",
-            "location": {
-              "emoji": "🇬🇧",
-              "name": "London, United Kingdom"
+            formattedTestUrl: 'https://calibreapp.com/tests/91af6cd/ea52f35',
+            location: {
+              emoji: '🇬🇧',
+              name: 'London, United Kingdom',
             },
-            "metrics": [{
-              "label": "Lighthouse SEO Score",
-              "name": "lighthouse-seo-score",
-              "value": 89
+            metrics: [{
+              label: 'Lighthouse SEO Score',
+              name: 'lighthouse-seo-score',
+              value: 89,
             }, {
-              "label": "Lighthouse Best Practices Score",
-              "name": "lighthouse-best-practices-score",
-              "value": 100
+              label: 'Lighthouse Best Practices Score',
+              name: 'lighthouse-best-practices-score',
+              value: 100,
             }, {
-              "label": "Lighthouse Accessibility Score",
-              "name": "lighthouse-accessibility-score",
-              "value": 99
+              label: 'Lighthouse Accessibility Score',
+              name: 'lighthouse-accessibility-score',
+              value: 99,
             }, {
-              "label": "Lighthouse Performance Score",
-              "name": "lighthouse-performance-score",
-              "value": 92
+              label: 'Lighthouse Performance Score',
+              name: 'lighthouse-performance-score',
+              value: 92,
             }, {
-              "label": "Lighthouse Progressive Web App Score",
-              "name": "lighthouse-pwa-score",
-              "value": 56
+              label: 'Lighthouse Progressive Web App Score',
+              name: 'lighthouse-pwa-score',
+              value: 56,
             }, {
-              "label": "JS Parse & Compile",
-              "name": "js-parse-compile",
-              "value": 0
+              label: 'JS Parse & Compile',
+              name: 'js-parse-compile',
+              value: 0,
             }, {
-              "label": "DOM Element Count",
-              "name": "dom-size",
-              "value": 134
+              label: 'DOM Element Count',
+              name: 'dom-size',
+              value: 134,
             }, {
-              "label": "85% Visually Complete",
-              "name": "visually_complete_85",
-              "value": 3793
+              label: '85% Visually Complete',
+              name: 'visually_complete_85',
+              value: 3793,
             }, {
-              "label": "Visually Complete",
-              "name": "visually_complete",
-              "value": 21859
+              label: 'Visually Complete',
+              name: 'visually_complete',
+              value: 21859,
             }, {
-              "label": "Time to Interactive",
-              "name": "consistently-interactive",
-              "value": 2106
+              label: 'Time to Interactive',
+              name: 'consistently-interactive',
+              value: 2106,
             }, {
-              "label": "First CPU Idle",
-              "name": "first-interactive",
-              "value": 3798
+              label: 'First CPU Idle',
+              name: 'first-interactive',
+              value: 3798,
             }, {
-              "label": "Time to First Byte",
-              "name": "time-to-first-byte",
-              "value": 309
+              label: 'Time to First Byte',
+              name: 'time-to-first-byte',
+              value: 309,
             }, {
-              "label": "Estimated input latency",
-              "name": "estimated-input-latency",
-              "value": 16
+              label: 'Estimated input latency',
+              name: 'estimated-input-latency',
+              value: 16,
             }, {
-              "label": "Speed Index",
-              "name": "speed_index",
-              "value": 3161
+              label: 'Speed Index',
+              name: 'speed_index',
+              value: 3161,
             }, {
-              "label": "First Meaningful Paint",
-              "name": "first-meaningful-paint",
-              "value": 3798
+              label: 'First Meaningful Paint',
+              name: 'first-meaningful-paint',
+              value: 3798,
             }, {
-              "label": "First Contentful Paint",
-              "name": "first-contentful-paint",
-              "value": 2106
+              label: 'First Contentful Paint',
+              name: 'first-contentful-paint',
+              value: 2106,
             }, {
-              "label": "First Paint",
-              "name": "firstRender",
-              "value": 2106
+              label: 'First Paint',
+              name: 'firstRender',
+              value: 2106,
             }, {
-              "label": "Total Image size in bytes",
-              "name": "image_body_size_in_bytes",
-              "value": 1913203
+              label: 'Total Image size in bytes',
+              name: 'image_body_size_in_bytes',
+              value: 1913203,
             }, {
-              "label": "Total Image transferred",
-              "name": "image_size_in_bytes",
-              "value": 1918146
+              label: 'Total Image transferred',
+              name: 'image_size_in_bytes',
+              value: 1918146,
             }, {
-              "label": "Total Webfont size in bytes",
-              "name": "font_body_size_in_bytes",
-              "value": 32300
+              label: 'Total Webfont size in bytes',
+              name: 'font_body_size_in_bytes',
+              value: 32300,
             }, {
-              "label": "Total Webfont transferred",
-              "name": "font_size_in_bytes",
-              "value": 32797
+              label: 'Total Webfont transferred',
+              name: 'font_size_in_bytes',
+              value: 32797,
             }, {
-              "label": "Total JavaScript size in bytes",
-              "name": "js_body_size_in_bytes",
-              "value": 53324
+              label: 'Total JavaScript size in bytes',
+              name: 'js_body_size_in_bytes',
+              value: 53324,
             }, {
-              "label": "Total JavaScript Transferred",
-              "name": "js_size_in_bytes",
-              "value": 17701
+              label: 'Total JavaScript Transferred',
+              name: 'js_size_in_bytes',
+              value: 17701,
             }, {
-              "label": "Total CSS size in bytes",
-              "name": "css_body_size_in_bytes",
-              "value": 13150
+              label: 'Total CSS size in bytes',
+              name: 'css_body_size_in_bytes',
+              value: 13150,
             }, {
-              "label": "Total CSS transferred",
-              "name": "css_size_in_bytes",
-              "value": 7210
+              label: 'Total CSS transferred',
+              name: 'css_size_in_bytes',
+              value: 7210,
             }, {
-              "label": "Total HTML size in bytes",
-              "name": "html_body_size_in_bytes",
-              "value": 11847
+              label: 'Total HTML size in bytes',
+              name: 'html_body_size_in_bytes',
+              value: 11847,
             }, {
-              "label": "Total HTML transferred",
-              "name": "html_size_in_bytes",
-              "value": 12069
+              label: 'Total HTML transferred',
+              name: 'html_size_in_bytes',
+              value: 12069,
             }, {
-              "label": "Response time",
-              "name": "page_wait_timing",
-              "value": 539
+              label: 'Response time',
+              name: 'page_wait_timing',
+              value: 539,
             }, {
-              "label": "Total Page transferred",
-              "name": "page_size_in_bytes",
-              "value": 1987923
+              label: 'Total Page transferred',
+              name: 'page_size_in_bytes',
+              value: 1987923,
             }, {
-              "label": "Total Page size in bytes",
-              "name": "page_body_size_in_bytes",
-              "value": 2023824
+              label: 'Total Page size in bytes',
+              name: 'page_body_size_in_bytes',
+              value: 2023824,
             }, {
-              "label": "Number of requests",
-              "name": "asset_count",
-              "value": 19
+              label: 'Number of requests',
+              name: 'asset_count',
+              value: 19,
             }, {
-              "label": "onLoad",
-              "name": "onload",
-              "value": 1839
+              label: 'onLoad',
+              name: 'onload',
+              value: 1839,
             }, {
-              "label": "onContentLoad",
-              "name": "oncontentload",
-              "value": 2096
+              label: 'onContentLoad',
+              name: 'oncontentload',
+              value: 2096,
             }],
-            "status": "completed",
-            "updatedAt": "2019-03-22T16:43:03Z",
-            "url": "https://www.project-helix.io/",
-            "uuid": "91af6cd"
-          }, "5180ab5", "199489d", "0e0c0c3"]);
+            status: 'completed',
+            updatedAt: '2019-03-22T16:43:03Z',
+            url: 'https://www.project-helix.io/',
+            uuid: '91af6cd',
+          }, '5180ab5', '199489d', '0e0c0c3']);
         }
         if (reqcounter > 2) {
           res.sendStatus(200).json([{
-            "connection": {
-              "title": "Regular 3G"
+            connection: {
+              title: 'Regular 3G',
             },
-            "device": {
-              "title": "iPhone 8"
+            device: {
+              title: 'iPhone 8',
             },
-            "formattedTestUrl": "https://calibreapp.com/tests/91af6cd/ea52f35",
-            "location": {
-              "emoji": "🇬🇧",
-              "name": "London, United Kingdom"
+            formattedTestUrl: 'https://calibreapp.com/tests/91af6cd/ea52f35',
+            location: {
+              emoji: '🇬🇧',
+              name: 'London, United Kingdom',
             },
-            "metrics": [{
-              "label": "Lighthouse SEO Score",
-              "name": "lighthouse-seo-score",
-              "value": 89
+            metrics: [{
+              label: 'Lighthouse SEO Score',
+              name: 'lighthouse-seo-score',
+              value: 89,
             }, {
-              "label": "Lighthouse Best Practices Score",
-              "name": "lighthouse-best-practices-score",
-              "value": 100
+              label: 'Lighthouse Best Practices Score',
+              name: 'lighthouse-best-practices-score',
+              value: 100,
             }, {
-              "label": "Lighthouse Accessibility Score",
-              "name": "lighthouse-accessibility-score",
-              "value": 99
+              label: 'Lighthouse Accessibility Score',
+              name: 'lighthouse-accessibility-score',
+              value: 99,
             }, {
-              "label": "Lighthouse Performance Score",
-              "name": "lighthouse-performance-score",
-              "value": 99
+              label: 'Lighthouse Performance Score',
+              name: 'lighthouse-performance-score',
+              value: 99,
             }, {
-              "label": "Lighthouse Progressive Web App Score",
-              "name": "lighthouse-pwa-score",
-              "value": 56
+              label: 'Lighthouse Progressive Web App Score',
+              name: 'lighthouse-pwa-score',
+              value: 56,
             }, {
-              "label": "JS Parse & Compile",
-              "name": "js-parse-compile",
-              "value": 0
+              label: 'JS Parse & Compile',
+              name: 'js-parse-compile',
+              value: 0,
             }, {
-              "label": "DOM Element Count",
-              "name": "dom-size",
-              "value": 134
+              label: 'DOM Element Count',
+              name: 'dom-size',
+              value: 134,
             }, {
-              "label": "85% Visually Complete",
-              "name": "visually_complete_85",
-              "value": 3793
+              label: '85% Visually Complete',
+              name: 'visually_complete_85',
+              value: 3793,
             }, {
-              "label": "Visually Complete",
-              "name": "visually_complete",
-              "value": 21859
+              label: 'Visually Complete',
+              name: 'visually_complete',
+              value: 21859,
             }, {
-              "label": "Time to Interactive",
-              "name": "consistently-interactive",
-              "value": 2106
+              label: 'Time to Interactive',
+              name: 'consistently-interactive',
+              value: 2106,
             }, {
-              "label": "First CPU Idle",
-              "name": "first-interactive",
-              "value": 3798
+              label: 'First CPU Idle',
+              name: 'first-interactive',
+              value: 3798,
             }, {
-              "label": "Time to First Byte",
-              "name": "time-to-first-byte",
-              "value": 309
+              label: 'Time to First Byte',
+              name: 'time-to-first-byte',
+              value: 309,
             }, {
-              "label": "Estimated input latency",
-              "name": "estimated-input-latency",
-              "value": 16
+              label: 'Estimated input latency',
+              name: 'estimated-input-latency',
+              value: 16,
             }, {
-              "label": "Speed Index",
-              "name": "speed_index",
-              "value": 3161
+              label: 'Speed Index',
+              name: 'speed_index',
+              value: 3161,
             }, {
-              "label": "First Meaningful Paint",
-              "name": "first-meaningful-paint",
-              "value": 3798
+              label: 'First Meaningful Paint',
+              name: 'first-meaningful-paint',
+              value: 3798,
             }, {
-              "label": "First Contentful Paint",
-              "name": "first-contentful-paint",
-              "value": 2106
+              label: 'First Contentful Paint',
+              name: 'first-contentful-paint',
+              value: 2106,
             }, {
-              "label": "First Paint",
-              "name": "firstRender",
-              "value": 2106
+              label: 'First Paint',
+              name: 'firstRender',
+              value: 2106,
             }, {
-              "label": "Total Image size in bytes",
-              "name": "image_body_size_in_bytes",
-              "value": 1913203
+              label: 'Total Image size in bytes',
+              name: 'image_body_size_in_bytes',
+              value: 1913203,
             }, {
-              "label": "Total Image transferred",
-              "name": "image_size_in_bytes",
-              "value": 1918146
+              label: 'Total Image transferred',
+              name: 'image_size_in_bytes',
+              value: 1918146,
             }, {
-              "label": "Total Webfont size in bytes",
-              "name": "font_body_size_in_bytes",
-              "value": 32300
+              label: 'Total Webfont size in bytes',
+              name: 'font_body_size_in_bytes',
+              value: 32300,
             }, {
-              "label": "Total Webfont transferred",
-              "name": "font_size_in_bytes",
-              "value": 32797
+              label: 'Total Webfont transferred',
+              name: 'font_size_in_bytes',
+              value: 32797,
             }, {
-              "label": "Total JavaScript size in bytes",
-              "name": "js_body_size_in_bytes",
-              "value": 53324
+              label: 'Total JavaScript size in bytes',
+              name: 'js_body_size_in_bytes',
+              value: 53324,
             }, {
-              "label": "Total JavaScript Transferred",
-              "name": "js_size_in_bytes",
-              "value": 17701
+              label: 'Total JavaScript Transferred',
+              name: 'js_size_in_bytes',
+              value: 17701,
             }, {
-              "label": "Total CSS size in bytes",
-              "name": "css_body_size_in_bytes",
-              "value": 13150
+              label: 'Total CSS size in bytes',
+              name: 'css_body_size_in_bytes',
+              value: 13150,
             }, {
-              "label": "Total CSS transferred",
-              "name": "css_size_in_bytes",
-              "value": 7210
+              label: 'Total CSS transferred',
+              name: 'css_size_in_bytes',
+              value: 7210,
             }, {
-              "label": "Total HTML size in bytes",
-              "name": "html_body_size_in_bytes",
-              "value": 11847
+              label: 'Total HTML size in bytes',
+              name: 'html_body_size_in_bytes',
+              value: 11847,
             }, {
-              "label": "Total HTML transferred",
-              "name": "html_size_in_bytes",
-              "value": 12069
+              label: 'Total HTML transferred',
+              name: 'html_size_in_bytes',
+              value: 12069,
             }, {
-              "label": "Response time",
-              "name": "page_wait_timing",
-              "value": 539
+              label: 'Response time',
+              name: 'page_wait_timing',
+              value: 539,
             }, {
-              "label": "Total Page transferred",
-              "name": "page_size_in_bytes",
-              "value": 1987923
+              label: 'Total Page transferred',
+              name: 'page_size_in_bytes',
+              value: 1987923,
             }, {
-              "label": "Total Page size in bytes",
-              "name": "page_body_size_in_bytes",
-              "value": 2023824
+              label: 'Total Page size in bytes',
+              name: 'page_body_size_in_bytes',
+              value: 2023824,
             }, {
-              "label": "Number of requests",
-              "name": "asset_count",
-              "value": 19
+              label: 'Number of requests',
+              name: 'asset_count',
+              value: 19,
             }, {
-              "label": "onLoad",
-              "name": "onload",
-              "value": 1839
+              label: 'onLoad',
+              name: 'onload',
+              value: 1839,
             }, {
-              "label": "onContentLoad",
-              "name": "oncontentload",
-              "value": 2096
+              label: 'onContentLoad',
+              name: 'oncontentload',
+              value: 2096,
             }],
-            "status": "completed",
-            "updatedAt": "2019-03-22T16:43:03Z",
-            "url": "https://www.project-helix.io/",
-            "uuid": "91af6cd"
+            status: 'completed',
+            updatedAt: '2019-03-22T16:43:03Z',
+            url: 'https://www.project-helix.io/',
+            uuid: '91af6cd',
           }, {
-            "connection": {
-              "title": "Regular 3G"
+            connection: {
+              title: 'Regular 3G',
             },
-            "device": {
-              "title": "iPhone 8"
+            device: {
+              title: 'iPhone 8',
             },
-            "formattedTestUrl": "https://calibreapp.com/tests/5180ab5/fab3d29",
-            "location": {
-              "emoji": "🇬🇧",
-              "name": "London, United Kingdom"
+            formattedTestUrl: 'https://calibreapp.com/tests/5180ab5/fab3d29',
+            location: {
+              emoji: '🇬🇧',
+              name: 'London, United Kingdom',
             },
-            "metrics": [{
-              "label": "Lighthouse SEO Score",
-              "name": "lighthouse-seo-score",
-              "value": 99
+            metrics: [{
+              label: 'Lighthouse SEO Score',
+              name: 'lighthouse-seo-score',
+              value: 99,
             }, {
-              "label": "Lighthouse Best Practices Score",
-              "name": "lighthouse-best-practices-score",
-              "value": 71
+              label: 'Lighthouse Best Practices Score',
+              name: 'lighthouse-best-practices-score',
+              value: 71,
             }, {
-              "label": "Lighthouse Accessibility Score",
-              "name": "lighthouse-accessibility-score",
-              "value": 99
+              label: 'Lighthouse Accessibility Score',
+              name: 'lighthouse-accessibility-score',
+              value: 99,
             }, {
-              "label": "Lighthouse Progressive Web App Score",
-              "name": "lighthouse-pwa-score",
-              "value": 28
+              label: 'Lighthouse Progressive Web App Score',
+              name: 'lighthouse-pwa-score',
+              value: 28,
             }, {
-              "label": "Lighthouse Performance Score",
-              "name": "lighthouse-performance-score",
-              "value": 89
+              label: 'Lighthouse Performance Score',
+              name: 'lighthouse-performance-score',
+              value: 89,
             }, {
-              "label": "JS Parse & Compile",
-              "name": "js-parse-compile",
-              "value": 269
+              label: 'JS Parse & Compile',
+              name: 'js-parse-compile',
+              value: 269,
             }, {
-              "label": "DOM Element Count",
-              "name": "dom-size",
-              "value": 673
+              label: 'DOM Element Count',
+              name: 'dom-size',
+              value: 673,
             }, {
-              "label": "85% Visually Complete",
-              "name": "visually_complete_85",
-              "value": 11009
+              label: '85% Visually Complete',
+              name: 'visually_complete_85',
+              value: 11009,
             }, {
-              "label": "Visually Complete",
-              "name": "visually_complete",
-              "value": 11009
+              label: 'Visually Complete',
+              name: 'visually_complete',
+              value: 11009,
             }, {
-              "label": "First CPU Idle",
-              "name": "first-interactive",
-              "value": 7203
+              label: 'First CPU Idle',
+              name: 'first-interactive',
+              value: 7203,
             }, {
-              "label": "Time to First Byte",
-              "name": "time-to-first-byte",
-              "value": 308
+              label: 'Time to First Byte',
+              name: 'time-to-first-byte',
+              value: 308,
             }, {
-              "label": "Estimated input latency",
-              "name": "estimated-input-latency",
-              "value": 16
+              label: 'Estimated input latency',
+              name: 'estimated-input-latency',
+              value: 16,
             }, {
-              "label": "Speed Index",
-              "name": "speed_index",
-              "value": 9025
+              label: 'Speed Index',
+              name: 'speed_index',
+              value: 9025,
             }, {
-              "label": "First Meaningful Paint",
-              "name": "first-meaningful-paint",
-              "value": 6482
+              label: 'First Meaningful Paint',
+              name: 'first-meaningful-paint',
+              value: 6482,
             }, {
-              "label": "First Contentful Paint",
-              "name": "first-contentful-paint",
-              "value": 6482
+              label: 'First Contentful Paint',
+              name: 'first-contentful-paint',
+              value: 6482,
             }, {
-              "label": "First Paint",
-              "name": "firstRender",
-              "value": 6482
+              label: 'First Paint',
+              name: 'firstRender',
+              value: 6482,
             }, {
-              "label": "Total JSON size in bytes",
-              "name": "json_body_size_in_bytes",
-              "value": 12774
+              label: 'Total JSON size in bytes',
+              name: 'json_body_size_in_bytes',
+              value: 12774,
             }, {
-              "label": "Total JSON transferred",
-              "name": "json_size_in_bytes",
-              "value": 5256
+              label: 'Total JSON transferred',
+              name: 'json_size_in_bytes',
+              value: 5256,
             }, {
-              "label": "Total Image size in bytes",
-              "name": "image_body_size_in_bytes",
-              "value": 277812
+              label: 'Total Image size in bytes',
+              name: 'image_body_size_in_bytes',
+              value: 277812,
             }, {
-              "label": "Total Image transferred",
-              "name": "image_size_in_bytes",
-              "value": 284156
+              label: 'Total Image transferred',
+              name: 'image_size_in_bytes',
+              value: 284156,
             }, {
-              "label": "Total Webfont size in bytes",
-              "name": "font_body_size_in_bytes",
-              "value": 106852
+              label: 'Total Webfont size in bytes',
+              name: 'font_body_size_in_bytes',
+              value: 106852,
             }, {
-              "label": "Total Webfont transferred",
-              "name": "font_size_in_bytes",
-              "value": 107986
+              label: 'Total Webfont transferred',
+              name: 'font_size_in_bytes',
+              value: 107986,
             }, {
-              "label": "Total JavaScript size in bytes",
-              "name": "js_body_size_in_bytes",
-              "value": 3228155
+              label: 'Total JavaScript size in bytes',
+              name: 'js_body_size_in_bytes',
+              value: 3228155,
             }, {
-              "label": "Total JavaScript Transferred",
-              "name": "js_size_in_bytes",
-              "value": 972207
+              label: 'Total JavaScript Transferred',
+              name: 'js_size_in_bytes',
+              value: 972207,
             }, {
-              "label": "Total CSS size in bytes",
-              "name": "css_body_size_in_bytes",
-              "value": 771753
+              label: 'Total CSS size in bytes',
+              name: 'css_body_size_in_bytes',
+              value: 771753,
             }, {
-              "label": "Total CSS transferred",
-              "name": "css_size_in_bytes",
-              "value": 100371
+              label: 'Total CSS transferred',
+              name: 'css_size_in_bytes',
+              value: 100371,
             }, {
-              "label": "Total HTML size in bytes",
-              "name": "html_body_size_in_bytes",
-              "value": 108885
+              label: 'Total HTML size in bytes',
+              name: 'html_body_size_in_bytes',
+              value: 108885,
             }, {
-              "label": "Total HTML transferred",
-              "name": "html_size_in_bytes",
-              "value": 50202
+              label: 'Total HTML transferred',
+              name: 'html_size_in_bytes',
+              value: 50202,
             }, {
-              "label": "Response time",
-              "name": "page_wait_timing",
-              "value": 836
+              label: 'Response time',
+              name: 'page_wait_timing',
+              value: 836,
             }, {
-              "label": "Total Page transferred",
-              "name": "page_size_in_bytes",
-              "value": 1527831
+              label: 'Total Page transferred',
+              name: 'page_size_in_bytes',
+              value: 1527831,
             }, {
-              "label": "Total Page size in bytes",
-              "name": "page_body_size_in_bytes",
-              "value": 4506329
+              label: 'Total Page size in bytes',
+              name: 'page_body_size_in_bytes',
+              value: 4506329,
             }, {
-              "label": "Number of requests",
-              "name": "asset_count",
-              "value": 102
+              label: 'Number of requests',
+              name: 'asset_count',
+              value: 102,
             }, {
-              "label": "onLoad",
-              "name": "onload",
-              "value": 16770
+              label: 'onLoad',
+              name: 'onload',
+              value: 16770,
             }, {
-              "label": "onContentLoad",
-              "name": "oncontentload",
-              "value": 7203
+              label: 'onContentLoad',
+              name: 'oncontentload',
+              value: 7203,
             }],
-            "status": "completed",
-            "updatedAt": "2019-03-22T16:43:03Z",
-            "url": "https://www.adobe.io/",
-            "uuid": "5180ab5"
+            status: 'completed',
+            updatedAt: '2019-03-22T16:43:03Z',
+            url: 'https://www.adobe.io/',
+            uuid: '5180ab5',
           }, {
-            "connection": {
-              "title": "Regular 3G"
+            connection: {
+              title: 'Regular 3G',
             },
-            "device": {
-              "title": "iPhone 8"
+            device: {
+              title: 'iPhone 8',
             },
-            "formattedTestUrl": "https://calibreapp.com/tests/199489d/c17a5f9",
-            "location": {
-              "emoji": "🇺🇸",
-              "name": "North Virginia, USA"
+            formattedTestUrl: 'https://calibreapp.com/tests/199489d/c17a5f9',
+            location: {
+              emoji: '🇺🇸',
+              name: 'North Virginia, USA',
             },
-            "metrics": [{
-              "label": "Lighthouse SEO Score",
-              "name": "lighthouse-seo-score",
-              "value": 91
+            metrics: [{
+              label: 'Lighthouse SEO Score',
+              name: 'lighthouse-seo-score',
+              value: 91,
             }, {
-              "label": "Lighthouse Best Practices Score",
-              "name": "lighthouse-best-practices-score",
-              "value": 100
+              label: 'Lighthouse Best Practices Score',
+              name: 'lighthouse-best-practices-score',
+              value: 100,
             }, {
-              "label": "Lighthouse Accessibility Score",
-              "name": "lighthouse-accessibility-score",
-              "value": 99
+              label: 'Lighthouse Accessibility Score',
+              name: 'lighthouse-accessibility-score',
+              value: 99,
             }, {
-              "label": "Lighthouse Performance Score",
-              "name": "lighthouse-performance-score",
-              "value": 89
+              label: 'Lighthouse Performance Score',
+              name: 'lighthouse-performance-score',
+              value: 89,
             }, {
-              "label": "Lighthouse Progressive Web App Score",
-              "name": "lighthouse-pwa-score",
-              "value": 28
+              label: 'Lighthouse Progressive Web App Score',
+              name: 'lighthouse-pwa-score',
+              value: 28,
             }, {
-              "label": "JS Parse & Compile",
-              "name": "js-parse-compile",
-              "value": 346
+              label: 'JS Parse & Compile',
+              name: 'js-parse-compile',
+              value: 346,
             }, {
-              "label": "DOM Element Count",
-              "name": "dom-size",
-              "value": 1064
+              label: 'DOM Element Count',
+              name: 'dom-size',
+              value: 1064,
             }, {
-              "label": "85% Visually Complete",
-              "name": "visually_complete_85",
-              "value": 12017
+              label: '85% Visually Complete',
+              name: 'visually_complete_85',
+              value: 12017,
             }, {
-              "label": "Visually Complete",
-              "name": "visually_complete",
-              "value": 23434
+              label: 'Visually Complete',
+              name: 'visually_complete',
+              value: 23434,
             }, {
-              "label": "Time to Interactive",
-              "name": "consistently-interactive",
-              "value": 29332
+              label: 'Time to Interactive',
+              name: 'consistently-interactive',
+              value: 29332,
             }, {
-              "label": "First CPU Idle",
-              "name": "first-interactive",
-              "value": 21216
+              label: 'First CPU Idle',
+              name: 'first-interactive',
+              value: 21216,
             }, {
-              "label": "Time to First Byte",
-              "name": "time-to-first-byte",
-              "value": 318
+              label: 'Time to First Byte',
+              name: 'time-to-first-byte',
+              value: 318,
             }, {
-              "label": "Estimated input latency",
-              "name": "estimated-input-latency",
-              "value": 16
+              label: 'Estimated input latency',
+              name: 'estimated-input-latency',
+              value: 16,
             }, {
-              "label": "Speed Index",
-              "name": "speed_index",
-              "value": 14386
+              label: 'Speed Index',
+              name: 'speed_index',
+              value: 14386,
             }, {
-              "label": "First Meaningful Paint",
-              "name": "first-meaningful-paint",
-              "value": 12003
+              label: 'First Meaningful Paint',
+              name: 'first-meaningful-paint',
+              value: 12003,
             }, {
-              "label": "First Contentful Paint",
-              "name": "first-contentful-paint",
-              "value": 12003
+              label: 'First Contentful Paint',
+              name: 'first-contentful-paint',
+              value: 12003,
             }, {
-              "label": "First Paint",
-              "name": "firstRender",
-              "value": 12003
+              label: 'First Paint',
+              name: 'firstRender',
+              value: 12003,
             }, {
-              "label": "Total JSON size in bytes",
-              "name": "json_body_size_in_bytes",
-              "value": 49739
+              label: 'Total JSON size in bytes',
+              name: 'json_body_size_in_bytes',
+              value: 49739,
             }, {
-              "label": "Total JSON transferred",
-              "name": "json_size_in_bytes",
-              "value": 21099
+              label: 'Total JSON transferred',
+              name: 'json_size_in_bytes',
+              value: 21099,
             }, {
-              "label": "Total Image size in bytes",
-              "name": "image_body_size_in_bytes",
-              "value": 314258
+              label: 'Total Image size in bytes',
+              name: 'image_body_size_in_bytes',
+              value: 314258,
             }, {
-              "label": "Total Image transferred",
-              "name": "image_size_in_bytes",
-              "value": 338309
+              label: 'Total Image transferred',
+              name: 'image_size_in_bytes',
+              value: 338309,
             }, {
-              "label": "Total Webfont size in bytes",
-              "name": "font_body_size_in_bytes",
-              "value": 684376
+              label: 'Total Webfont size in bytes',
+              name: 'font_body_size_in_bytes',
+              value: 684376,
             }, {
-              "label": "Total Webfont transferred",
-              "name": "font_size_in_bytes",
-              "value": 688364
+              label: 'Total Webfont transferred',
+              name: 'font_size_in_bytes',
+              value: 688364,
             }, {
-              "label": "Total JavaScript size in bytes",
-              "name": "js_body_size_in_bytes",
-              "value": 5048615
+              label: 'Total JavaScript size in bytes',
+              name: 'js_body_size_in_bytes',
+              value: 5048615,
             }, {
-              "label": "Total JavaScript Transferred",
-              "name": "js_size_in_bytes",
-              "value": 1059351
+              label: 'Total JavaScript Transferred',
+              name: 'js_size_in_bytes',
+              value: 1059351,
             }, {
-              "label": "Total CSS size in bytes",
-              "name": "css_body_size_in_bytes",
-              "value": 3184009
+              label: 'Total CSS size in bytes',
+              name: 'css_body_size_in_bytes',
+              value: 3184009,
             }, {
-              "label": "Total CSS transferred",
-              "name": "css_size_in_bytes",
-              "value": 329461
+              label: 'Total CSS transferred',
+              name: 'css_size_in_bytes',
+              value: 329461,
             }, {
-              "label": "Total HTML size in bytes",
-              "name": "html_body_size_in_bytes",
-              "value": 99973
+              label: 'Total HTML size in bytes',
+              name: 'html_body_size_in_bytes',
+              value: 99973,
             }, {
-              "label": "Total HTML transferred",
-              "name": "html_size_in_bytes",
-              "value": 39115
+              label: 'Total HTML transferred',
+              name: 'html_size_in_bytes',
+              value: 39115,
             }, {
-              "label": "Response time",
-              "name": "page_wait_timing",
-              "value": 519
+              label: 'Response time',
+              name: 'page_wait_timing',
+              value: 519,
             }, {
-              "label": "Total Page transferred",
-              "name": "page_size_in_bytes",
-              "value": 2504700
+              label: 'Total Page transferred',
+              name: 'page_size_in_bytes',
+              value: 2504700,
             }, {
-              "label": "Total Page size in bytes",
-              "name": "page_body_size_in_bytes",
-              "value": 9381086
+              label: 'Total Page size in bytes',
+              name: 'page_body_size_in_bytes',
+              value: 9381086,
             }, {
-              "label": "Number of requests",
-              "name": "asset_count",
-              "value": 210
+              label: 'Number of requests',
+              name: 'asset_count',
+              value: 210,
             }, {
-              "label": "onLoad",
-              "name": "onload",
-              "value": 9332
+              label: 'onLoad',
+              name: 'onload',
+              value: 9332,
             }, {
-              "label": "onContentLoad",
-              "name": "oncontentload",
-              "value": 21216
+              label: 'onContentLoad',
+              name: 'oncontentload',
+              value: 21216,
             }],
-            "status": "completed",
-            "updatedAt": "2019-03-22T16:43:02Z",
-            "url": "https://www.adobe.com/",
-            "uuid": "199489d"
+            status: 'completed',
+            updatedAt: '2019-03-22T16:43:02Z',
+            url: 'https://www.adobe.com/',
+            uuid: '199489d',
           }, {
-            "connection": {
-              "title": "Regular 3G"
+            connection: {
+              title: 'Regular 3G',
             },
-            "device": {
-              "title": "iPhone 8"
+            device: {
+              title: 'iPhone 8',
             },
-            "formattedTestUrl": "https://calibreapp.com/tests/5180ab5/fab3d29",
-            "location": {
-              "emoji": "🇬🇧",
-              "name": "London, United Kingdom"
+            formattedTestUrl: 'https://calibreapp.com/tests/5180ab5/fab3d29',
+            location: {
+              emoji: '🇬🇧',
+              name: 'London, United Kingdom',
             },
-            "metrics": [{
-              "label": "Lighthouse SEO Score",
-              "name": "lighthouse-seo-score",
-              "value": 99
+            metrics: [{
+              label: 'Lighthouse SEO Score',
+              name: 'lighthouse-seo-score',
+              value: 99,
             }, {
-              "label": "Lighthouse Best Practices Score",
-              "name": "lighthouse-best-practices-score",
-              "value": 71
+              label: 'Lighthouse Best Practices Score',
+              name: 'lighthouse-best-practices-score',
+              value: 71,
             }, {
-              "label": "Lighthouse Accessibility Score",
-              "name": "lighthouse-accessibility-score",
-              "value": 99
+              label: 'Lighthouse Accessibility Score',
+              name: 'lighthouse-accessibility-score',
+              value: 99,
             }, {
-              "label": "Lighthouse Progressive Web App Score",
-              "name": "lighthouse-pwa-score",
-              "value": 28
+              label: 'Lighthouse Progressive Web App Score',
+              name: 'lighthouse-pwa-score',
+              value: 28,
             }, {
-              "label": "Lighthouse Performance Score",
-              "name": "lighthouse-performance-score",
-              "value": 89
+              label: 'Lighthouse Performance Score',
+              name: 'lighthouse-performance-score',
+              value: 89,
             }, {
-              "label": "JS Parse & Compile",
-              "name": "js-parse-compile",
-              "value": 269
+              label: 'JS Parse & Compile',
+              name: 'js-parse-compile',
+              value: 269,
             }, {
-              "label": "DOM Element Count",
-              "name": "dom-size",
-              "value": 673
+              label: 'DOM Element Count',
+              name: 'dom-size',
+              value: 673,
             }, {
-              "label": "85% Visually Complete",
-              "name": "visually_complete_85",
-              "value": 11009
+              label: '85% Visually Complete',
+              name: 'visually_complete_85',
+              value: 11009,
             }, {
-              "label": "Visually Complete",
-              "name": "visually_complete",
-              "value": 11009
+              label: 'Visually Complete',
+              name: 'visually_complete',
+              value: 11009,
             }, {
-              "label": "First CPU Idle",
-              "name": "first-interactive",
-              "value": 7203
+              label: 'First CPU Idle',
+              name: 'first-interactive',
+              value: 7203,
             }, {
-              "label": "Time to First Byte",
-              "name": "time-to-first-byte",
-              "value": 308
+              label: 'Time to First Byte',
+              name: 'time-to-first-byte',
+              value: 308,
             }, {
-              "label": "Estimated input latency",
-              "name": "estimated-input-latency",
-              "value": 16
+              label: 'Estimated input latency',
+              name: 'estimated-input-latency',
+              value: 16,
             }, {
-              "label": "Speed Index",
-              "name": "speed_index",
-              "value": 9025
+              label: 'Speed Index',
+              name: 'speed_index',
+              value: 9025,
             }, {
-              "label": "First Meaningful Paint",
-              "name": "first-meaningful-paint",
-              "value": 6482
+              label: 'First Meaningful Paint',
+              name: 'first-meaningful-paint',
+              value: 6482,
             }, {
-              "label": "First Contentful Paint",
-              "name": "first-contentful-paint",
-              "value": 6482
+              label: 'First Contentful Paint',
+              name: 'first-contentful-paint',
+              value: 6482,
             }, {
-              "label": "First Paint",
-              "name": "firstRender",
-              "value": 6482
+              label: 'First Paint',
+              name: 'firstRender',
+              value: 6482,
             }, {
-              "label": "Total JSON size in bytes",
-              "name": "json_body_size_in_bytes",
-              "value": 12774
+              label: 'Total JSON size in bytes',
+              name: 'json_body_size_in_bytes',
+              value: 12774,
             }, {
-              "label": "Total JSON transferred",
-              "name": "json_size_in_bytes",
-              "value": 5256
+              label: 'Total JSON transferred',
+              name: 'json_size_in_bytes',
+              value: 5256,
             }, {
-              "label": "Total Image size in bytes",
-              "name": "image_body_size_in_bytes",
-              "value": 277812
+              label: 'Total Image size in bytes',
+              name: 'image_body_size_in_bytes',
+              value: 277812,
             }, {
-              "label": "Total Image transferred",
-              "name": "image_size_in_bytes",
-              "value": 284156
+              label: 'Total Image transferred',
+              name: 'image_size_in_bytes',
+              value: 284156,
             }, {
-              "label": "Total Webfont size in bytes",
-              "name": "font_body_size_in_bytes",
-              "value": 106852
+              label: 'Total Webfont size in bytes',
+              name: 'font_body_size_in_bytes',
+              value: 106852,
             }, {
-              "label": "Total Webfont transferred",
-              "name": "font_size_in_bytes",
-              "value": 107986
+              label: 'Total Webfont transferred',
+              name: 'font_size_in_bytes',
+              value: 107986,
             }, {
-              "label": "Total JavaScript size in bytes",
-              "name": "js_body_size_in_bytes",
-              "value": 3228155
+              label: 'Total JavaScript size in bytes',
+              name: 'js_body_size_in_bytes',
+              value: 3228155,
             }, {
-              "label": "Total JavaScript Transferred",
-              "name": "js_size_in_bytes",
-              "value": 972207
+              label: 'Total JavaScript Transferred',
+              name: 'js_size_in_bytes',
+              value: 972207,
             }, {
-              "label": "Total CSS size in bytes",
-              "name": "css_body_size_in_bytes",
-              "value": 771753
+              label: 'Total CSS size in bytes',
+              name: 'css_body_size_in_bytes',
+              value: 771753,
             }, {
-              "label": "Total CSS transferred",
-              "name": "css_size_in_bytes",
-              "value": 100371
+              label: 'Total CSS transferred',
+              name: 'css_size_in_bytes',
+              value: 100371,
             }, {
-              "label": "Total HTML size in bytes",
-              "name": "html_body_size_in_bytes",
-              "value": 108885
+              label: 'Total HTML size in bytes',
+              name: 'html_body_size_in_bytes',
+              value: 108885,
             }, {
-              "label": "Total HTML transferred",
-              "name": "html_size_in_bytes",
-              "value": 50202
+              label: 'Total HTML transferred',
+              name: 'html_size_in_bytes',
+              value: 50202,
             }, {
-              "label": "Response time",
-              "name": "page_wait_timing",
-              "value": 836
+              label: 'Response time',
+              name: 'page_wait_timing',
+              value: 836,
             }, {
-              "label": "Total Page transferred",
-              "name": "page_size_in_bytes",
-              "value": 1527831
+              label: 'Total Page transferred',
+              name: 'page_size_in_bytes',
+              value: 1527831,
             }, {
-              "label": "Total Page size in bytes",
-              "name": "page_body_size_in_bytes",
-              "value": 4506329
+              label: 'Total Page size in bytes',
+              name: 'page_body_size_in_bytes',
+              value: 4506329,
             }, {
-              "label": "Number of requests",
-              "name": "asset_count",
-              "value": 102
+              label: 'Number of requests',
+              name: 'asset_count',
+              value: 102,
             }, {
-              "label": "onLoad",
-              "name": "onload",
-              "value": 16770
+              label: 'onLoad',
+              name: 'onload',
+              value: 16770,
             }, {
-              "label": "onContentLoad",
-              "name": "oncontentload",
-              "value": 7203
+              label: 'onContentLoad',
+              name: 'oncontentload',
+              value: 7203,
             }],
-            "status": "completed",
-            "updatedAt": "2019-03-22T16:43:03Z",
-            "url": "https://www.adobe.io/",
-            "uuid": "5180ab5"
+            status: 'completed',
+            updatedAt: '2019-03-22T16:43:03Z',
+            url: 'https://www.adobe.io/',
+            uuid: '5180ab5',
           }]);
         }
       });
-    
+
     const root = await createTestRoot();
     const junit = path.resolve(root, 'junit-results.xml');
-    
+
 
     const perf = await new PerfCommand()
       .withFastlyAuth('fake')
@@ -1472,797 +1471,797 @@ describe('hlx perf #integrationtest', () => {
       .withConfigFile(path.resolve(__dirname, 'fixtures/perf.yaml'))
       .withJunit(junit);
 
-    
-      await perf.run();
-      assertFileEqual(junit, path.resolve(__dirname, 'fixtures', 'junit-succeeded.xml'));
-    
-      fs.remove(root);
+
+    await perf.run();
+    assertFileEqual(junit, path.resolve(__dirname, 'fixtures', 'junit-succeeded.xml'));
+
+    fs.remove(root);
   }).timeout(1000 * 60 * 10);
 
   it('hlx perf --junit (failure)', async function test() {
     const { server } = this.polly;
-    
+
     let reqcounter = 0;
     server
       .post('https://adobeioruntime.net/api/v1/web/helix/default/perf')
       .intercept((req, res) => {
-        reqcounter = reqcounter + 1;
+        reqcounter += 1;
 
         if (reqcounter === 1) {
-          res.sendStatus(200).json(["91af6cd", "5180ab5", "199489d", "0e0c0c3"]);
+          res.sendStatus(200).json(['91af6cd', '5180ab5', '199489d', '0e0c0c3']);
         }
         if (reqcounter === 2) {
           res.sendStatus(200).json([{
-            "connection": {
-              "title": "Regular 3G"
+            connection: {
+              title: 'Regular 3G',
             },
-            "device": {
-              "title": "iPhone 8"
+            device: {
+              title: 'iPhone 8',
             },
-            "formattedTestUrl": "https://calibreapp.com/tests/91af6cd/ea52f35",
-            "location": {
-              "emoji": "🇬🇧",
-              "name": "London, United Kingdom"
+            formattedTestUrl: 'https://calibreapp.com/tests/91af6cd/ea52f35',
+            location: {
+              emoji: '🇬🇧',
+              name: 'London, United Kingdom',
             },
-            "metrics": [{
-              "label": "Lighthouse SEO Score",
-              "name": "lighthouse-seo-score",
-              "value": 89
+            metrics: [{
+              label: 'Lighthouse SEO Score',
+              name: 'lighthouse-seo-score',
+              value: 89,
             }, {
-              "label": "Lighthouse Best Practices Score",
-              "name": "lighthouse-best-practices-score",
-              "value": 100
+              label: 'Lighthouse Best Practices Score',
+              name: 'lighthouse-best-practices-score',
+              value: 100,
             }, {
-              "label": "Lighthouse Accessibility Score",
-              "name": "lighthouse-accessibility-score",
-              "value": 59
+              label: 'Lighthouse Accessibility Score',
+              name: 'lighthouse-accessibility-score',
+              value: 59,
             }, {
-              "label": "Lighthouse Performance Score",
-              "name": "lighthouse-performance-score",
-              "value": 92
+              label: 'Lighthouse Performance Score',
+              name: 'lighthouse-performance-score',
+              value: 92,
             }, {
-              "label": "Lighthouse Progressive Web App Score",
-              "name": "lighthouse-pwa-score",
-              "value": 56
+              label: 'Lighthouse Progressive Web App Score',
+              name: 'lighthouse-pwa-score',
+              value: 56,
             }, {
-              "label": "JS Parse & Compile",
-              "name": "js-parse-compile",
-              "value": 0
+              label: 'JS Parse & Compile',
+              name: 'js-parse-compile',
+              value: 0,
             }, {
-              "label": "DOM Element Count",
-              "name": "dom-size",
-              "value": 134
+              label: 'DOM Element Count',
+              name: 'dom-size',
+              value: 134,
             }, {
-              "label": "85% Visually Complete",
-              "name": "visually_complete_85",
-              "value": 3793
+              label: '85% Visually Complete',
+              name: 'visually_complete_85',
+              value: 3793,
             }, {
-              "label": "Visually Complete",
-              "name": "visually_complete",
-              "value": 21859
+              label: 'Visually Complete',
+              name: 'visually_complete',
+              value: 21859,
             }, {
-              "label": "Time to Interactive",
-              "name": "consistently-interactive",
-              "value": 2106
+              label: 'Time to Interactive',
+              name: 'consistently-interactive',
+              value: 2106,
             }, {
-              "label": "First CPU Idle",
-              "name": "first-interactive",
-              "value": 3798
+              label: 'First CPU Idle',
+              name: 'first-interactive',
+              value: 3798,
             }, {
-              "label": "Time to First Byte",
-              "name": "time-to-first-byte",
-              "value": 309
+              label: 'Time to First Byte',
+              name: 'time-to-first-byte',
+              value: 309,
             }, {
-              "label": "Estimated input latency",
-              "name": "estimated-input-latency",
-              "value": 16
+              label: 'Estimated input latency',
+              name: 'estimated-input-latency',
+              value: 16,
             }, {
-              "label": "Speed Index",
-              "name": "speed_index",
-              "value": 3161
+              label: 'Speed Index',
+              name: 'speed_index',
+              value: 3161,
             }, {
-              "label": "First Meaningful Paint",
-              "name": "first-meaningful-paint",
-              "value": 3798
+              label: 'First Meaningful Paint',
+              name: 'first-meaningful-paint',
+              value: 3798,
             }, {
-              "label": "First Contentful Paint",
-              "name": "first-contentful-paint",
-              "value": 2106
+              label: 'First Contentful Paint',
+              name: 'first-contentful-paint',
+              value: 2106,
             }, {
-              "label": "First Paint",
-              "name": "firstRender",
-              "value": 2106
+              label: 'First Paint',
+              name: 'firstRender',
+              value: 2106,
             }, {
-              "label": "Total Image size in bytes",
-              "name": "image_body_size_in_bytes",
-              "value": 1913203
+              label: 'Total Image size in bytes',
+              name: 'image_body_size_in_bytes',
+              value: 1913203,
             }, {
-              "label": "Total Image transferred",
-              "name": "image_size_in_bytes",
-              "value": 1918146
+              label: 'Total Image transferred',
+              name: 'image_size_in_bytes',
+              value: 1918146,
             }, {
-              "label": "Total Webfont size in bytes",
-              "name": "font_body_size_in_bytes",
-              "value": 32300
+              label: 'Total Webfont size in bytes',
+              name: 'font_body_size_in_bytes',
+              value: 32300,
             }, {
-              "label": "Total Webfont transferred",
-              "name": "font_size_in_bytes",
-              "value": 32797
+              label: 'Total Webfont transferred',
+              name: 'font_size_in_bytes',
+              value: 32797,
             }, {
-              "label": "Total JavaScript size in bytes",
-              "name": "js_body_size_in_bytes",
-              "value": 53324
+              label: 'Total JavaScript size in bytes',
+              name: 'js_body_size_in_bytes',
+              value: 53324,
             }, {
-              "label": "Total JavaScript Transferred",
-              "name": "js_size_in_bytes",
-              "value": 17701
+              label: 'Total JavaScript Transferred',
+              name: 'js_size_in_bytes',
+              value: 17701,
             }, {
-              "label": "Total CSS size in bytes",
-              "name": "css_body_size_in_bytes",
-              "value": 13150
+              label: 'Total CSS size in bytes',
+              name: 'css_body_size_in_bytes',
+              value: 13150,
             }, {
-              "label": "Total CSS transferred",
-              "name": "css_size_in_bytes",
-              "value": 7210
+              label: 'Total CSS transferred',
+              name: 'css_size_in_bytes',
+              value: 7210,
             }, {
-              "label": "Total HTML size in bytes",
-              "name": "html_body_size_in_bytes",
-              "value": 11847
+              label: 'Total HTML size in bytes',
+              name: 'html_body_size_in_bytes',
+              value: 11847,
             }, {
-              "label": "Total HTML transferred",
-              "name": "html_size_in_bytes",
-              "value": 12069
+              label: 'Total HTML transferred',
+              name: 'html_size_in_bytes',
+              value: 12069,
             }, {
-              "label": "Response time",
-              "name": "page_wait_timing",
-              "value": 539
+              label: 'Response time',
+              name: 'page_wait_timing',
+              value: 539,
             }, {
-              "label": "Total Page transferred",
-              "name": "page_size_in_bytes",
-              "value": 1987923
+              label: 'Total Page transferred',
+              name: 'page_size_in_bytes',
+              value: 1987923,
             }, {
-              "label": "Total Page size in bytes",
-              "name": "page_body_size_in_bytes",
-              "value": 2023824
+              label: 'Total Page size in bytes',
+              name: 'page_body_size_in_bytes',
+              value: 2023824,
             }, {
-              "label": "Number of requests",
-              "name": "asset_count",
-              "value": 19
+              label: 'Number of requests',
+              name: 'asset_count',
+              value: 19,
             }, {
-              "label": "onLoad",
-              "name": "onload",
-              "value": 31839
+              label: 'onLoad',
+              name: 'onload',
+              value: 31839,
             }, {
-              "label": "onContentLoad",
-              "name": "oncontentload",
-              "value": 2096
+              label: 'onContentLoad',
+              name: 'oncontentload',
+              value: 2096,
             }],
-            "status": "completed",
-            "updatedAt": "2019-03-22T16:43:03Z",
-            "url": "https://www.project-helix.io/",
-            "uuid": "91af6cd"
-          }, "5180ab5", "199489d", "0e0c0c3"]);
+            status: 'completed',
+            updatedAt: '2019-03-22T16:43:03Z',
+            url: 'https://www.project-helix.io/',
+            uuid: '91af6cd',
+          }, '5180ab5', '199489d', '0e0c0c3']);
         }
         if (reqcounter > 2) {
           res.sendStatus(200).json([{
-            "connection": {
-              "title": "Regular 3G"
+            connection: {
+              title: 'Regular 3G',
             },
-            "device": {
-              "title": "iPhone 8"
+            device: {
+              title: 'iPhone 8',
             },
-            "formattedTestUrl": "https://calibreapp.com/tests/91af6cd/ea52f35",
-            "location": {
-              "emoji": "🇬🇧",
-              "name": "London, United Kingdom"
+            formattedTestUrl: 'https://calibreapp.com/tests/91af6cd/ea52f35',
+            location: {
+              emoji: '🇬🇧',
+              name: 'London, United Kingdom',
             },
-            "metrics": [{
-              "label": "Lighthouse SEO Score",
-              "name": "lighthouse-seo-score",
-              "value": 89
+            metrics: [{
+              label: 'Lighthouse SEO Score',
+              name: 'lighthouse-seo-score',
+              value: 89,
             }, {
-              "label": "Lighthouse Best Practices Score",
-              "name": "lighthouse-best-practices-score",
-              "value": 100
+              label: 'Lighthouse Best Practices Score',
+              name: 'lighthouse-best-practices-score',
+              value: 100,
             }, {
-              "label": "Lighthouse Accessibility Score",
-              "name": "lighthouse-accessibility-score",
-              "value": 59
+              label: 'Lighthouse Accessibility Score',
+              name: 'lighthouse-accessibility-score',
+              value: 59,
             }, {
-              "label": "Lighthouse Performance Score",
-              "name": "lighthouse-performance-score",
-              "value": 99
+              label: 'Lighthouse Performance Score',
+              name: 'lighthouse-performance-score',
+              value: 99,
             }, {
-              "label": "Lighthouse Progressive Web App Score",
-              "name": "lighthouse-pwa-score",
-              "value": 56
+              label: 'Lighthouse Progressive Web App Score',
+              name: 'lighthouse-pwa-score',
+              value: 56,
             }, {
-              "label": "JS Parse & Compile",
-              "name": "js-parse-compile",
-              "value": 0
+              label: 'JS Parse & Compile',
+              name: 'js-parse-compile',
+              value: 0,
             }, {
-              "label": "DOM Element Count",
-              "name": "dom-size",
-              "value": 134
+              label: 'DOM Element Count',
+              name: 'dom-size',
+              value: 134,
             }, {
-              "label": "85% Visually Complete",
-              "name": "visually_complete_85",
-              "value": 3793
+              label: '85% Visually Complete',
+              name: 'visually_complete_85',
+              value: 3793,
             }, {
-              "label": "Visually Complete",
-              "name": "visually_complete",
-              "value": 21859
+              label: 'Visually Complete',
+              name: 'visually_complete',
+              value: 21859,
             }, {
-              "label": "Time to Interactive",
-              "name": "consistently-interactive",
-              "value": 2106
+              label: 'Time to Interactive',
+              name: 'consistently-interactive',
+              value: 2106,
             }, {
-              "label": "First CPU Idle",
-              "name": "first-interactive",
-              "value": 3798
+              label: 'First CPU Idle',
+              name: 'first-interactive',
+              value: 3798,
             }, {
-              "label": "Time to First Byte",
-              "name": "time-to-first-byte",
-              "value": 309
+              label: 'Time to First Byte',
+              name: 'time-to-first-byte',
+              value: 309,
             }, {
-              "label": "Estimated input latency",
-              "name": "estimated-input-latency",
-              "value": 16
+              label: 'Estimated input latency',
+              name: 'estimated-input-latency',
+              value: 16,
             }, {
-              "label": "Speed Index",
-              "name": "speed_index",
-              "value": 3161
+              label: 'Speed Index',
+              name: 'speed_index',
+              value: 3161,
             }, {
-              "label": "First Meaningful Paint",
-              "name": "first-meaningful-paint",
-              "value": 3798
+              label: 'First Meaningful Paint',
+              name: 'first-meaningful-paint',
+              value: 3798,
             }, {
-              "label": "First Contentful Paint",
-              "name": "first-contentful-paint",
-              "value": 2106
+              label: 'First Contentful Paint',
+              name: 'first-contentful-paint',
+              value: 2106,
             }, {
-              "label": "First Paint",
-              "name": "firstRender",
-              "value": 2106
+              label: 'First Paint',
+              name: 'firstRender',
+              value: 2106,
             }, {
-              "label": "Total Image size in bytes",
-              "name": "image_body_size_in_bytes",
-              "value": 1913203
+              label: 'Total Image size in bytes',
+              name: 'image_body_size_in_bytes',
+              value: 1913203,
             }, {
-              "label": "Total Image transferred",
-              "name": "image_size_in_bytes",
-              "value": 1918146
+              label: 'Total Image transferred',
+              name: 'image_size_in_bytes',
+              value: 1918146,
             }, {
-              "label": "Total Webfont size in bytes",
-              "name": "font_body_size_in_bytes",
-              "value": 32300
+              label: 'Total Webfont size in bytes',
+              name: 'font_body_size_in_bytes',
+              value: 32300,
             }, {
-              "label": "Total Webfont transferred",
-              "name": "font_size_in_bytes",
-              "value": 32797
+              label: 'Total Webfont transferred',
+              name: 'font_size_in_bytes',
+              value: 32797,
             }, {
-              "label": "Total JavaScript size in bytes",
-              "name": "js_body_size_in_bytes",
-              "value": 53324
+              label: 'Total JavaScript size in bytes',
+              name: 'js_body_size_in_bytes',
+              value: 53324,
             }, {
-              "label": "Total JavaScript Transferred",
-              "name": "js_size_in_bytes",
-              "value": 17701
+              label: 'Total JavaScript Transferred',
+              name: 'js_size_in_bytes',
+              value: 17701,
             }, {
-              "label": "Total CSS size in bytes",
-              "name": "css_body_size_in_bytes",
-              "value": 13150
+              label: 'Total CSS size in bytes',
+              name: 'css_body_size_in_bytes',
+              value: 13150,
             }, {
-              "label": "Total CSS transferred",
-              "name": "css_size_in_bytes",
-              "value": 7210
+              label: 'Total CSS transferred',
+              name: 'css_size_in_bytes',
+              value: 7210,
             }, {
-              "label": "Total HTML size in bytes",
-              "name": "html_body_size_in_bytes",
-              "value": 11847
+              label: 'Total HTML size in bytes',
+              name: 'html_body_size_in_bytes',
+              value: 11847,
             }, {
-              "label": "Total HTML transferred",
-              "name": "html_size_in_bytes",
-              "value": 12069
+              label: 'Total HTML transferred',
+              name: 'html_size_in_bytes',
+              value: 12069,
             }, {
-              "label": "Response time",
-              "name": "page_wait_timing",
-              "value": 539
+              label: 'Response time',
+              name: 'page_wait_timing',
+              value: 539,
             }, {
-              "label": "Total Page transferred",
-              "name": "page_size_in_bytes",
-              "value": 1987923
+              label: 'Total Page transferred',
+              name: 'page_size_in_bytes',
+              value: 1987923,
             }, {
-              "label": "Total Page size in bytes",
-              "name": "page_body_size_in_bytes",
-              "value": 2023824
+              label: 'Total Page size in bytes',
+              name: 'page_body_size_in_bytes',
+              value: 2023824,
             }, {
-              "label": "Number of requests",
-              "name": "asset_count",
-              "value": 19
+              label: 'Number of requests',
+              name: 'asset_count',
+              value: 19,
             }, {
-              "label": "onLoad",
-              "name": "onload",
-              "value": 31839
+              label: 'onLoad',
+              name: 'onload',
+              value: 31839,
             }, {
-              "label": "onContentLoad",
-              "name": "oncontentload",
-              "value": 2096
+              label: 'onContentLoad',
+              name: 'oncontentload',
+              value: 2096,
             }],
-            "status": "completed",
-            "updatedAt": "2019-03-22T16:43:03Z",
-            "url": "https://www.project-helix.io/",
-            "uuid": "91af6cd"
+            status: 'completed',
+            updatedAt: '2019-03-22T16:43:03Z',
+            url: 'https://www.project-helix.io/',
+            uuid: '91af6cd',
           }, {
-            "connection": {
-              "title": "Regular 3G"
+            connection: {
+              title: 'Regular 3G',
             },
-            "device": {
-              "title": "iPhone 8"
+            device: {
+              title: 'iPhone 8',
             },
-            "formattedTestUrl": "https://calibreapp.com/tests/5180ab5/fab3d29",
-            "location": {
-              "emoji": "🇬🇧",
-              "name": "London, United Kingdom"
+            formattedTestUrl: 'https://calibreapp.com/tests/5180ab5/fab3d29',
+            location: {
+              emoji: '🇬🇧',
+              name: 'London, United Kingdom',
             },
-            "metrics": [{
-              "label": "Lighthouse SEO Score",
-              "name": "lighthouse-seo-score",
-              "value": 99
+            metrics: [{
+              label: 'Lighthouse SEO Score',
+              name: 'lighthouse-seo-score',
+              value: 99,
             }, {
-              "label": "Lighthouse Best Practices Score",
-              "name": "lighthouse-best-practices-score",
-              "value": 71
+              label: 'Lighthouse Best Practices Score',
+              name: 'lighthouse-best-practices-score',
+              value: 71,
             }, {
-              "label": "Lighthouse Accessibility Score",
-              "name": "lighthouse-accessibility-score",
-              "value": 60
+              label: 'Lighthouse Accessibility Score',
+              name: 'lighthouse-accessibility-score',
+              value: 60,
             }, {
-              "label": "Lighthouse Progressive Web App Score",
-              "name": "lighthouse-pwa-score",
-              "value": 28
+              label: 'Lighthouse Progressive Web App Score',
+              name: 'lighthouse-pwa-score',
+              value: 28,
             }, {
-              "label": "Lighthouse Performance Score",
-              "name": "lighthouse-performance-score",
-              "value": 28
+              label: 'Lighthouse Performance Score',
+              name: 'lighthouse-performance-score',
+              value: 28,
             }, {
-              "label": "JS Parse & Compile",
-              "name": "js-parse-compile",
-              "value": 269
+              label: 'JS Parse & Compile',
+              name: 'js-parse-compile',
+              value: 269,
             }, {
-              "label": "DOM Element Count",
-              "name": "dom-size",
-              "value": 673
+              label: 'DOM Element Count',
+              name: 'dom-size',
+              value: 673,
             }, {
-              "label": "85% Visually Complete",
-              "name": "visually_complete_85",
-              "value": 11009
+              label: '85% Visually Complete',
+              name: 'visually_complete_85',
+              value: 11009,
             }, {
-              "label": "Visually Complete",
-              "name": "visually_complete",
-              "value": 11009
+              label: 'Visually Complete',
+              name: 'visually_complete',
+              value: 11009,
             }, {
-              "label": "First CPU Idle",
-              "name": "first-interactive",
-              "value": 7203
+              label: 'First CPU Idle',
+              name: 'first-interactive',
+              value: 7203,
             }, {
-              "label": "Time to First Byte",
-              "name": "time-to-first-byte",
-              "value": 308
+              label: 'Time to First Byte',
+              name: 'time-to-first-byte',
+              value: 308,
             }, {
-              "label": "Estimated input latency",
-              "name": "estimated-input-latency",
-              "value": 16
+              label: 'Estimated input latency',
+              name: 'estimated-input-latency',
+              value: 16,
             }, {
-              "label": "Speed Index",
-              "name": "speed_index",
-              "value": 9025
+              label: 'Speed Index',
+              name: 'speed_index',
+              value: 9025,
             }, {
-              "label": "First Meaningful Paint",
-              "name": "first-meaningful-paint",
-              "value": 6482
+              label: 'First Meaningful Paint',
+              name: 'first-meaningful-paint',
+              value: 6482,
             }, {
-              "label": "First Contentful Paint",
-              "name": "first-contentful-paint",
-              "value": 6482
+              label: 'First Contentful Paint',
+              name: 'first-contentful-paint',
+              value: 6482,
             }, {
-              "label": "First Paint",
-              "name": "firstRender",
-              "value": 6482
+              label: 'First Paint',
+              name: 'firstRender',
+              value: 6482,
             }, {
-              "label": "Total JSON size in bytes",
-              "name": "json_body_size_in_bytes",
-              "value": 12774
+              label: 'Total JSON size in bytes',
+              name: 'json_body_size_in_bytes',
+              value: 12774,
             }, {
-              "label": "Total JSON transferred",
-              "name": "json_size_in_bytes",
-              "value": 5256
+              label: 'Total JSON transferred',
+              name: 'json_size_in_bytes',
+              value: 5256,
             }, {
-              "label": "Total Image size in bytes",
-              "name": "image_body_size_in_bytes",
-              "value": 277812
+              label: 'Total Image size in bytes',
+              name: 'image_body_size_in_bytes',
+              value: 277812,
             }, {
-              "label": "Total Image transferred",
-              "name": "image_size_in_bytes",
-              "value": 284156
+              label: 'Total Image transferred',
+              name: 'image_size_in_bytes',
+              value: 284156,
             }, {
-              "label": "Total Webfont size in bytes",
-              "name": "font_body_size_in_bytes",
-              "value": 106852
+              label: 'Total Webfont size in bytes',
+              name: 'font_body_size_in_bytes',
+              value: 106852,
             }, {
-              "label": "Total Webfont transferred",
-              "name": "font_size_in_bytes",
-              "value": 107986
+              label: 'Total Webfont transferred',
+              name: 'font_size_in_bytes',
+              value: 107986,
             }, {
-              "label": "Total JavaScript size in bytes",
-              "name": "js_body_size_in_bytes",
-              "value": 3228155
+              label: 'Total JavaScript size in bytes',
+              name: 'js_body_size_in_bytes',
+              value: 3228155,
             }, {
-              "label": "Total JavaScript Transferred",
-              "name": "js_size_in_bytes",
-              "value": 972207
+              label: 'Total JavaScript Transferred',
+              name: 'js_size_in_bytes',
+              value: 972207,
             }, {
-              "label": "Total CSS size in bytes",
-              "name": "css_body_size_in_bytes",
-              "value": 771753
+              label: 'Total CSS size in bytes',
+              name: 'css_body_size_in_bytes',
+              value: 771753,
             }, {
-              "label": "Total CSS transferred",
-              "name": "css_size_in_bytes",
-              "value": 100371
+              label: 'Total CSS transferred',
+              name: 'css_size_in_bytes',
+              value: 100371,
             }, {
-              "label": "Total HTML size in bytes",
-              "name": "html_body_size_in_bytes",
-              "value": 108885
+              label: 'Total HTML size in bytes',
+              name: 'html_body_size_in_bytes',
+              value: 108885,
             }, {
-              "label": "Total HTML transferred",
-              "name": "html_size_in_bytes",
-              "value": 50202
+              label: 'Total HTML transferred',
+              name: 'html_size_in_bytes',
+              value: 50202,
             }, {
-              "label": "Response time",
-              "name": "page_wait_timing",
-              "value": 836
+              label: 'Response time',
+              name: 'page_wait_timing',
+              value: 836,
             }, {
-              "label": "Total Page transferred",
-              "name": "page_size_in_bytes",
-              "value": 1527831
+              label: 'Total Page transferred',
+              name: 'page_size_in_bytes',
+              value: 1527831,
             }, {
-              "label": "Total Page size in bytes",
-              "name": "page_body_size_in_bytes",
-              "value": 4506329
+              label: 'Total Page size in bytes',
+              name: 'page_body_size_in_bytes',
+              value: 4506329,
             }, {
-              "label": "Number of requests",
-              "name": "asset_count",
-              "value": 102
+              label: 'Number of requests',
+              name: 'asset_count',
+              value: 102,
             }, {
-              "label": "onLoad",
-              "name": "onload",
-              "value": 16770
+              label: 'onLoad',
+              name: 'onload',
+              value: 16770,
             }, {
-              "label": "onContentLoad",
-              "name": "oncontentload",
-              "value": 7203
+              label: 'onContentLoad',
+              name: 'oncontentload',
+              value: 7203,
             }],
-            "status": "completed",
-            "updatedAt": "2019-03-22T16:43:03Z",
-            "url": "https://www.adobe.io/",
-            "uuid": "5180ab5"
+            status: 'completed',
+            updatedAt: '2019-03-22T16:43:03Z',
+            url: 'https://www.adobe.io/',
+            uuid: '5180ab5',
           }, {
-            "connection": {
-              "title": "Regular 3G"
+            connection: {
+              title: 'Regular 3G',
             },
-            "device": {
-              "title": "iPhone 8"
+            device: {
+              title: 'iPhone 8',
             },
-            "formattedTestUrl": "https://calibreapp.com/tests/199489d/c17a5f9",
-            "location": {
-              "emoji": "🇺🇸",
-              "name": "North Virginia, USA"
+            formattedTestUrl: 'https://calibreapp.com/tests/199489d/c17a5f9',
+            location: {
+              emoji: '🇺🇸',
+              name: 'North Virginia, USA',
             },
-            "metrics": [{
-              "label": "Lighthouse SEO Score",
-              "name": "lighthouse-seo-score",
-              "value": 91
+            metrics: [{
+              label: 'Lighthouse SEO Score',
+              name: 'lighthouse-seo-score',
+              value: 91,
             }, {
-              "label": "Lighthouse Best Practices Score",
-              "name": "lighthouse-best-practices-score",
-              "value": 100
+              label: 'Lighthouse Best Practices Score',
+              name: 'lighthouse-best-practices-score',
+              value: 100,
             }, {
-              "label": "Lighthouse Accessibility Score",
-              "name": "lighthouse-accessibility-score",
-              "value": 90
+              label: 'Lighthouse Accessibility Score',
+              name: 'lighthouse-accessibility-score',
+              value: 90,
             }, {
-              "label": "Lighthouse Performance Score",
-              "name": "lighthouse-performance-score",
-              "value": 81
+              label: 'Lighthouse Performance Score',
+              name: 'lighthouse-performance-score',
+              value: 81,
             }, {
-              "label": "Lighthouse Progressive Web App Score",
-              "name": "lighthouse-pwa-score",
-              "value": 28
+              label: 'Lighthouse Progressive Web App Score',
+              name: 'lighthouse-pwa-score',
+              value: 28,
             }, {
-              "label": "JS Parse & Compile",
-              "name": "js-parse-compile",
-              "value": 346
+              label: 'JS Parse & Compile',
+              name: 'js-parse-compile',
+              value: 346,
             }, {
-              "label": "DOM Element Count",
-              "name": "dom-size",
-              "value": 1064
+              label: 'DOM Element Count',
+              name: 'dom-size',
+              value: 1064,
             }, {
-              "label": "85% Visually Complete",
-              "name": "visually_complete_85",
-              "value": 12017
+              label: '85% Visually Complete',
+              name: 'visually_complete_85',
+              value: 12017,
             }, {
-              "label": "Visually Complete",
-              "name": "visually_complete",
-              "value": 23434
+              label: 'Visually Complete',
+              name: 'visually_complete',
+              value: 23434,
             }, {
-              "label": "Time to Interactive",
-              "name": "consistently-interactive",
-              "value": 29332
+              label: 'Time to Interactive',
+              name: 'consistently-interactive',
+              value: 29332,
             }, {
-              "label": "First CPU Idle",
-              "name": "first-interactive",
-              "value": 21216
+              label: 'First CPU Idle',
+              name: 'first-interactive',
+              value: 21216,
             }, {
-              "label": "Time to First Byte",
-              "name": "time-to-first-byte",
-              "value": 318
+              label: 'Time to First Byte',
+              name: 'time-to-first-byte',
+              value: 318,
             }, {
-              "label": "Estimated input latency",
-              "name": "estimated-input-latency",
-              "value": 16
+              label: 'Estimated input latency',
+              name: 'estimated-input-latency',
+              value: 16,
             }, {
-              "label": "Speed Index",
-              "name": "speed_index",
-              "value": 14386
+              label: 'Speed Index',
+              name: 'speed_index',
+              value: 14386,
             }, {
-              "label": "First Meaningful Paint",
-              "name": "first-meaningful-paint",
-              "value": 12003
+              label: 'First Meaningful Paint',
+              name: 'first-meaningful-paint',
+              value: 12003,
             }, {
-              "label": "First Contentful Paint",
-              "name": "first-contentful-paint",
-              "value": 12003
+              label: 'First Contentful Paint',
+              name: 'first-contentful-paint',
+              value: 12003,
             }, {
-              "label": "First Paint",
-              "name": "firstRender",
-              "value": 12003
+              label: 'First Paint',
+              name: 'firstRender',
+              value: 12003,
             }, {
-              "label": "Total JSON size in bytes",
-              "name": "json_body_size_in_bytes",
-              "value": 49739
+              label: 'Total JSON size in bytes',
+              name: 'json_body_size_in_bytes',
+              value: 49739,
             }, {
-              "label": "Total JSON transferred",
-              "name": "json_size_in_bytes",
-              "value": 21099
+              label: 'Total JSON transferred',
+              name: 'json_size_in_bytes',
+              value: 21099,
             }, {
-              "label": "Total Image size in bytes",
-              "name": "image_body_size_in_bytes",
-              "value": 314258
+              label: 'Total Image size in bytes',
+              name: 'image_body_size_in_bytes',
+              value: 314258,
             }, {
-              "label": "Total Image transferred",
-              "name": "image_size_in_bytes",
-              "value": 338309
+              label: 'Total Image transferred',
+              name: 'image_size_in_bytes',
+              value: 338309,
             }, {
-              "label": "Total Webfont size in bytes",
-              "name": "font_body_size_in_bytes",
-              "value": 684376
+              label: 'Total Webfont size in bytes',
+              name: 'font_body_size_in_bytes',
+              value: 684376,
             }, {
-              "label": "Total Webfont transferred",
-              "name": "font_size_in_bytes",
-              "value": 688364
+              label: 'Total Webfont transferred',
+              name: 'font_size_in_bytes',
+              value: 688364,
             }, {
-              "label": "Total JavaScript size in bytes",
-              "name": "js_body_size_in_bytes",
-              "value": 5048615
+              label: 'Total JavaScript size in bytes',
+              name: 'js_body_size_in_bytes',
+              value: 5048615,
             }, {
-              "label": "Total JavaScript Transferred",
-              "name": "js_size_in_bytes",
-              "value": 1059351
+              label: 'Total JavaScript Transferred',
+              name: 'js_size_in_bytes',
+              value: 1059351,
             }, {
-              "label": "Total CSS size in bytes",
-              "name": "css_body_size_in_bytes",
-              "value": 3184009
+              label: 'Total CSS size in bytes',
+              name: 'css_body_size_in_bytes',
+              value: 3184009,
             }, {
-              "label": "Total CSS transferred",
-              "name": "css_size_in_bytes",
-              "value": 329461
+              label: 'Total CSS transferred',
+              name: 'css_size_in_bytes',
+              value: 329461,
             }, {
-              "label": "Total HTML size in bytes",
-              "name": "html_body_size_in_bytes",
-              "value": 99973
+              label: 'Total HTML size in bytes',
+              name: 'html_body_size_in_bytes',
+              value: 99973,
             }, {
-              "label": "Total HTML transferred",
-              "name": "html_size_in_bytes",
-              "value": 39115
+              label: 'Total HTML transferred',
+              name: 'html_size_in_bytes',
+              value: 39115,
             }, {
-              "label": "Response time",
-              "name": "page_wait_timing",
-              "value": 519
+              label: 'Response time',
+              name: 'page_wait_timing',
+              value: 519,
             }, {
-              "label": "Total Page transferred",
-              "name": "page_size_in_bytes",
-              "value": 2504700
+              label: 'Total Page transferred',
+              name: 'page_size_in_bytes',
+              value: 2504700,
             }, {
-              "label": "Total Page size in bytes",
-              "name": "page_body_size_in_bytes",
-              "value": 9381086
+              label: 'Total Page size in bytes',
+              name: 'page_body_size_in_bytes',
+              value: 9381086,
             }, {
-              "label": "Number of requests",
-              "name": "asset_count",
-              "value": 210
+              label: 'Number of requests',
+              name: 'asset_count',
+              value: 210,
             }, {
-              "label": "onLoad",
-              "name": "onload",
-              "value": 39332
+              label: 'onLoad',
+              name: 'onload',
+              value: 39332,
             }, {
-              "label": "onContentLoad",
-              "name": "oncontentload",
-              "value": 21216
+              label: 'onContentLoad',
+              name: 'oncontentload',
+              value: 21216,
             }],
-            "status": "completed",
-            "updatedAt": "2019-03-22T16:43:02Z",
-            "url": "https://www.adobe.com/",
-            "uuid": "199489d"
+            status: 'completed',
+            updatedAt: '2019-03-22T16:43:02Z',
+            url: 'https://www.adobe.com/',
+            uuid: '199489d',
           }, {
-            "connection": {
-              "title": "Regular 3G"
+            connection: {
+              title: 'Regular 3G',
             },
-            "device": {
-              "title": "iPhone 8"
+            device: {
+              title: 'iPhone 8',
             },
-            "formattedTestUrl": "https://calibreapp.com/tests/5180ab5/fab3d29",
-            "location": {
-              "emoji": "🇬🇧",
-              "name": "London, United Kingdom"
+            formattedTestUrl: 'https://calibreapp.com/tests/5180ab5/fab3d29',
+            location: {
+              emoji: '🇬🇧',
+              name: 'London, United Kingdom',
             },
-            "metrics": [{
-              "label": "Lighthouse SEO Score",
-              "name": "lighthouse-seo-score",
-              "value": 99
+            metrics: [{
+              label: 'Lighthouse SEO Score',
+              name: 'lighthouse-seo-score',
+              value: 99,
             }, {
-              "label": "Lighthouse Best Practices Score",
-              "name": "lighthouse-best-practices-score",
-              "value": 71
+              label: 'Lighthouse Best Practices Score',
+              name: 'lighthouse-best-practices-score',
+              value: 71,
             }, {
-              "label": "Lighthouse Accessibility Score",
-              "name": "lighthouse-accessibility-score",
-              "value": 60
+              label: 'Lighthouse Accessibility Score',
+              name: 'lighthouse-accessibility-score',
+              value: 60,
             }, {
-              "label": "Lighthouse Progressive Web App Score",
-              "name": "lighthouse-pwa-score",
-              "value": 28
+              label: 'Lighthouse Progressive Web App Score',
+              name: 'lighthouse-pwa-score',
+              value: 28,
             }, {
-              "label": "Lighthouse Performance Score",
-              "name": "lighthouse-performance-score",
-              "value": 28
+              label: 'Lighthouse Performance Score',
+              name: 'lighthouse-performance-score',
+              value: 28,
             }, {
-              "label": "JS Parse & Compile",
-              "name": "js-parse-compile",
-              "value": 269
+              label: 'JS Parse & Compile',
+              name: 'js-parse-compile',
+              value: 269,
             }, {
-              "label": "DOM Element Count",
-              "name": "dom-size",
-              "value": 673
+              label: 'DOM Element Count',
+              name: 'dom-size',
+              value: 673,
             }, {
-              "label": "85% Visually Complete",
-              "name": "visually_complete_85",
-              "value": 11009
+              label: '85% Visually Complete',
+              name: 'visually_complete_85',
+              value: 11009,
             }, {
-              "label": "Visually Complete",
-              "name": "visually_complete",
-              "value": 11009
+              label: 'Visually Complete',
+              name: 'visually_complete',
+              value: 11009,
             }, {
-              "label": "First CPU Idle",
-              "name": "first-interactive",
-              "value": 7203
+              label: 'First CPU Idle',
+              name: 'first-interactive',
+              value: 7203,
             }, {
-              "label": "Time to First Byte",
-              "name": "time-to-first-byte",
-              "value": 308
+              label: 'Time to First Byte',
+              name: 'time-to-first-byte',
+              value: 308,
             }, {
-              "label": "Estimated input latency",
-              "name": "estimated-input-latency",
-              "value": 16
+              label: 'Estimated input latency',
+              name: 'estimated-input-latency',
+              value: 16,
             }, {
-              "label": "Speed Index",
-              "name": "speed_index",
-              "value": 9025
+              label: 'Speed Index',
+              name: 'speed_index',
+              value: 9025,
             }, {
-              "label": "First Meaningful Paint",
-              "name": "first-meaningful-paint",
-              "value": 6482
+              label: 'First Meaningful Paint',
+              name: 'first-meaningful-paint',
+              value: 6482,
             }, {
-              "label": "First Contentful Paint",
-              "name": "first-contentful-paint",
-              "value": 6482
+              label: 'First Contentful Paint',
+              name: 'first-contentful-paint',
+              value: 6482,
             }, {
-              "label": "First Paint",
-              "name": "firstRender",
-              "value": 6482
+              label: 'First Paint',
+              name: 'firstRender',
+              value: 6482,
             }, {
-              "label": "Total JSON size in bytes",
-              "name": "json_body_size_in_bytes",
-              "value": 12774
+              label: 'Total JSON size in bytes',
+              name: 'json_body_size_in_bytes',
+              value: 12774,
             }, {
-              "label": "Total JSON transferred",
-              "name": "json_size_in_bytes",
-              "value": 5256
+              label: 'Total JSON transferred',
+              name: 'json_size_in_bytes',
+              value: 5256,
             }, {
-              "label": "Total Image size in bytes",
-              "name": "image_body_size_in_bytes",
-              "value": 277812
+              label: 'Total Image size in bytes',
+              name: 'image_body_size_in_bytes',
+              value: 277812,
             }, {
-              "label": "Total Image transferred",
-              "name": "image_size_in_bytes",
-              "value": 284156
+              label: 'Total Image transferred',
+              name: 'image_size_in_bytes',
+              value: 284156,
             }, {
-              "label": "Total Webfont size in bytes",
-              "name": "font_body_size_in_bytes",
-              "value": 106852
+              label: 'Total Webfont size in bytes',
+              name: 'font_body_size_in_bytes',
+              value: 106852,
             }, {
-              "label": "Total Webfont transferred",
-              "name": "font_size_in_bytes",
-              "value": 107986
+              label: 'Total Webfont transferred',
+              name: 'font_size_in_bytes',
+              value: 107986,
             }, {
-              "label": "Total JavaScript size in bytes",
-              "name": "js_body_size_in_bytes",
-              "value": 3228155
+              label: 'Total JavaScript size in bytes',
+              name: 'js_body_size_in_bytes',
+              value: 3228155,
             }, {
-              "label": "Total JavaScript Transferred",
-              "name": "js_size_in_bytes",
-              "value": 972207
+              label: 'Total JavaScript Transferred',
+              name: 'js_size_in_bytes',
+              value: 972207,
             }, {
-              "label": "Total CSS size in bytes",
-              "name": "css_body_size_in_bytes",
-              "value": 771753
+              label: 'Total CSS size in bytes',
+              name: 'css_body_size_in_bytes',
+              value: 771753,
             }, {
-              "label": "Total CSS transferred",
-              "name": "css_size_in_bytes",
-              "value": 100371
+              label: 'Total CSS transferred',
+              name: 'css_size_in_bytes',
+              value: 100371,
             }, {
-              "label": "Total HTML size in bytes",
-              "name": "html_body_size_in_bytes",
-              "value": 108885
+              label: 'Total HTML size in bytes',
+              name: 'html_body_size_in_bytes',
+              value: 108885,
             }, {
-              "label": "Total HTML transferred",
-              "name": "html_size_in_bytes",
-              "value": 50202
+              label: 'Total HTML transferred',
+              name: 'html_size_in_bytes',
+              value: 50202,
             }, {
-              "label": "Response time",
-              "name": "page_wait_timing",
-              "value": 836
+              label: 'Response time',
+              name: 'page_wait_timing',
+              value: 836,
             }, {
-              "label": "Total Page transferred",
-              "name": "page_size_in_bytes",
-              "value": 1527831
+              label: 'Total Page transferred',
+              name: 'page_size_in_bytes',
+              value: 1527831,
             }, {
-              "label": "Total Page size in bytes",
-              "name": "page_body_size_in_bytes",
-              "value": 4506329
+              label: 'Total Page size in bytes',
+              name: 'page_body_size_in_bytes',
+              value: 4506329,
             }, {
-              "label": "Number of requests",
-              "name": "asset_count",
-              "value": 102
+              label: 'Number of requests',
+              name: 'asset_count',
+              value: 102,
             }, {
-              "label": "onLoad",
-              "name": "onload",
-              "value": 16770
+              label: 'onLoad',
+              name: 'onload',
+              value: 16770,
             }, {
-              "label": "onContentLoad",
-              "name": "oncontentload",
-              "value": 7203
+              label: 'onContentLoad',
+              name: 'oncontentload',
+              value: 7203,
             }],
-            "status": "completed",
-            "updatedAt": "2019-03-22T16:43:03Z",
-            "url": "https://www.adobe.io/",
-            "uuid": "5180ab5"
+            status: 'completed',
+            updatedAt: '2019-03-22T16:43:03Z',
+            url: 'https://www.adobe.io/',
+            uuid: '5180ab5',
           }]);
         }
       });
-    
+
     const root = await createTestRoot();
     const junit = path.resolve(root, 'junit-results.xml');
-    
+
 
     const perf = await new PerfCommand()
       .withFastlyAuth('fake')
@@ -2278,7 +2277,7 @@ describe('hlx perf #integrationtest', () => {
         throw e;
       }
       assert.equal(e.message, 'Performance test failed entirely');
-      assertFileEqual(junit, path.resolve(__dirname, 'fixtures', 'junit-failed.xml'))
+      assertFileEqual(junit, path.resolve(__dirname, 'fixtures', 'junit-failed.xml'));
     } finally {
       fs.remove(root);
     }
@@ -2286,18 +2285,18 @@ describe('hlx perf #integrationtest', () => {
 
   it('hlx perf --junit (skipped)', async function test() {
     const { server } = this.polly;
-    
+
     let reqcounter = 0;
     server
       .post('https://adobeioruntime.net/api/v1/web/helix/default/perf')
       .intercept((req, res) => {
-        reqcounter = reqcounter + 1;
-        res.sendStatus(200).json(["91af6cd", "5180ab5", "199489d", "0e0c0c3"]);
+        reqcounter += 1;
+        res.sendStatus(200).json(['91af6cd', '5180ab5', '199489d', '0e0c0c3']);
       });
-    
+
     const root = await createTestRoot();
     const junit = path.resolve(root, 'junit-results.xml');
-    
+
 
     const perf = await new PerfCommand()
       .withFastlyAuth('fake')
@@ -2313,7 +2312,41 @@ describe('hlx perf #integrationtest', () => {
         throw e;
       }
       assert.equal(e.message, 'Performance test skipped entirely');
-      assertFileEqual(junit, path.resolve(__dirname, 'fixtures', 'junit-skipped.xml'))
+      assertFileEqual(junit, path.resolve(__dirname, 'fixtures', 'junit-skipped.xml'));
+    } finally {
+      fs.remove(root);
+    }
+  }).timeout(1000 * 60 * 10);
+
+  it('hlx perf --junit (boom)', async function test() {
+    const { server } = this.polly;
+
+    let reqcounter = 0;
+    server
+      .post('https://adobeioruntime.net/api/v1/web/helix/default/perf')
+      .intercept((req, res) => {
+        reqcounter += 1;
+        res.sendStatus(500);
+      });
+
+    const root = await createTestRoot();
+    const junit = path.resolve(root, 'junit-results.xml');
+
+
+    const perf = await new PerfCommand()
+      .withFastlyAuth('fake')
+      .withFastlyNamespace('fake')
+      .withConfigFile(path.resolve(__dirname, 'fixtures/perf.yaml'))
+      .withJunit(junit);
+
+    try {
+      await perf.run();
+      assert.fail();
+    } catch (e) {
+      if (e instanceof AssertionError) {
+        throw e;
+      }
+      assert.equal(e.message, 'Unable to run performance test StatusCodeError: 500 - "Internal Server Error"');
     } finally {
       fs.remove(root);
     }
