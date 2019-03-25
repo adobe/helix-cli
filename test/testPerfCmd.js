@@ -17,9 +17,9 @@ const { AssertionError } = require('assert');
 const path = require('path');
 const NodeHttpAdapter = require('@pollyjs/adapter-node-http');
 const { setupMocha: setupPolly } = require('@pollyjs/core');
+const fs = require('fs-extra');
 const example = require('./utils').perfExample;
 const { assertFileEqual, createTestRoot } = require('./utils');
-const fs = require('fs-extra');
 const PerfCommand = require('../src/perf.cmd.js');
 
 describe('hlx perf #integrationtest', () => {
@@ -2286,11 +2286,9 @@ describe('hlx perf #integrationtest', () => {
   it('hlx perf --junit (skipped)', async function test() {
     const { server } = this.polly;
 
-    let reqcounter = 0;
     server
       .post('https://adobeioruntime.net/api/v1/web/helix/default/perf')
       .intercept((req, res) => {
-        reqcounter += 1;
         res.sendStatus(200).json(['91af6cd', '5180ab5', '199489d', '0e0c0c3']);
       });
 
@@ -2321,11 +2319,9 @@ describe('hlx perf #integrationtest', () => {
   it('hlx perf --junit (boom)', async function test() {
     const { server } = this.polly;
 
-    let reqcounter = 0;
     server
       .post('https://adobeioruntime.net/api/v1/web/helix/default/perf')
       .intercept((req, res) => {
-        reqcounter += 1;
         res.sendStatus(500);
       });
 

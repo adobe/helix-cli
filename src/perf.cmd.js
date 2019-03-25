@@ -19,6 +19,12 @@ const _ = require('lodash/fp');
 const JunitPerformanceReport = require('./junit-utils');
 const AbstractCommand = require('./abstract.cmd.js');
 
+class PerformanceError extends Error {
+
+}
+
+// need console outpit for user feedback
+/* eslint-disable no-console */
 class PerfCommand extends AbstractCommand {
   constructor(logger) {
     super(logger);
@@ -123,7 +129,6 @@ class PerfCommand extends AbstractCommand {
       if (Number.isInteger(value)) {
         return this.format(response.metrics, key, value);
       }
-      return undefined;
     });
     if (strainresults.length === 0 || strainresults.every(val => val === undefined)) {
       const perf = this.format(response.metrics, 'lighthouse-performance-score', 80);
@@ -170,6 +175,7 @@ class PerfCommand extends AbstractCommand {
         retries += 1;
         const completed = results.filter(res => typeof res === 'object').length;
         console.log(chalk.yellow(`Waiting for test results (${completed}/${flatttests.length})`));
+        // eslint-disable-next-line no-await-in-loop
         results = await request.post(uri, {
           json: true,
           body: {
@@ -187,9 +193,11 @@ class PerfCommand extends AbstractCommand {
       let skipped = 0;
       const formatted = _.zip(results, flatttests).map(([result, test]) => {
         if (this._junit && typeof result === 'object') {
+          // eslint-disable-next-line no-underscore-dangle
           this._junit.appendResults(result, test._thresholds, test.strain);
         }
         if (typeof result === 'object') {
+          // eslint-disable-next-line no-underscore-dangle
           return this.formatResponse(result, test._thresholds, test.strain);
         }
         skipped += 1;
@@ -208,18 +216,21 @@ class PerfCommand extends AbstractCommand {
       }
       if (fail && succeed) {
         this.log.error(chalk.yellow(`all tests completed with ${fail} failures and ${succeed} successes.`));
-        throw new Error('Performance test failed partially');
+        throw new PerformanceError('Performance test failed partially');
       } else if (fail) {
         this.log.error(chalk.red(`all ${fail} tests failed.`));
-        throw new Error('Performance test failed entirely');
+        throw new PerformanceError('Performance test failed entirely');
       } else if (succeed) {
         this.log.info(chalk.green(`all ${succeed} tests succeeded.`));
       } else if (skipped) {
-        throw new Error('Performance test skipped entirely');
+        throw new PerformanceError('Performance test skipped entirely');
       }
     } catch (e) {
+      if (e instanceof PerformanceError) {
+        throw e;
+      }
       this.log.error(`Unable to run performance test ${e}`);
-      throw new Error(`Unable to run performance test ${e}`);
+      throw new PerformanceError(`Unable to run performance test ${e}`);
     }
   }
 }

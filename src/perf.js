@@ -31,10 +31,14 @@ module.exports = function perf() {
       yargs
         .env('HLX')
         .strict(false)
-        .option('calibre-auth', {
-          describe: 'API token from https://calibreapp.com/',
+        .option('fastly-namespace', {
+          describe: 'CDN Namespace (e.g. Fastly Service ID)',
           type: 'string',
-          demandOption: true,
+
+        })
+        .option('fastly-auth', {
+          describe: 'API Key for Fastly API ($HLX_FASTLY_AUTH)',
+          type: 'string',
         })
         .option('junit', {
           describe: 'Create JUnit report in this file',
@@ -92,6 +96,14 @@ module.exports = function perf() {
             'SaoPaulo',
             'London'],
         })
+        .demandOption(
+          'fastly-auth',
+          'Authentication is required. You can pass the key via the HLX_FASTLY_AUTH environment variable, too',
+        )
+        .demandOption(
+          'fastly-namespace',
+          'Fastly Service ID is required',
+        )
         .help();
     },
     handler: async (argv) => {
@@ -102,7 +114,8 @@ module.exports = function perf() {
       }
 
       await executor
-        .withCalibreAuth(argv.calibreAuth)
+        .withFastlyNamespace(argv.fastlyNamespace)
+        .withFastlyAuth(argv.fastlyAuth)
         .withDevice(argv.device)
         .withConnection(argv.connection)
         .withLocation(argv.location)
