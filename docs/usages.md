@@ -1,4 +1,4 @@
-# Usages
+# Usage
 
 ## Rendering
 
