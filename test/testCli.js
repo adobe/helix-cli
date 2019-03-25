@@ -20,6 +20,7 @@ const path = require('path');
 const fse = require('fs-extra');
 const pkgJson = require('../package.json');
 const { createTestRoot } = require('./utils.js');
+const { checkNodeVersion } = require('../src/config/config-utils.js');
 
 const cwd = process.cwd();
 
@@ -67,5 +68,31 @@ describe('hlx command line', () => {
     const cmd = runCLI('--version');
     assert.equal(cmd.code, 0);
     assert.ok(cmd.stdout.trim().indexOf('This is typically not good because it might contain secrets') >= 0);
+  });
+
+  it('un-supported node version should give warning', async () => {
+    const testVersions = [
+      '1.0.0', 0,
+      '8.8.0', 0,
+      '8.15.0', 1,
+      '9.0.0', 0,
+      '10.0.0', 1,
+      '11.1.0', 0,
+    ];
+    for (let i = 0; i < testVersions.length; i += 2) {
+      let out = '';
+      const nodeVersion = testVersions[i];
+      const supported = testVersions[i + 1];
+      checkNodeVersion(nodeVersion, {
+        write: (msg) => {
+          out += msg;
+        },
+      });
+      if (supported) {
+        assert.equal(out, '');
+      } else {
+        assert.ok(out.indexOf('does not satisfy \nthe supported version range') >= 0);
+      }
+    }
   });
 });
