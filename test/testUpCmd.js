@@ -221,6 +221,7 @@ describe('Integration test for up command', () => {
         try {
           await assertHttp(`http://localhost:${cmd.project.server.port}/index.html`, 200, 'simple_response.html');
           await assertHttp(`http://localhost:${cmd.project.server.port}/welcome.txt`, 200, 'welcome_response.txt');
+          await assertHttp(`http://localhost:${cmd.project.server.port}/index.json`, 200, 'json_response.json');
           await fse.copy(srcFile, dstFile);
         } catch (e) {
           await myDone(e);
