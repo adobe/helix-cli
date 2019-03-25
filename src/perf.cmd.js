@@ -213,7 +213,9 @@ class PerfCommand extends AbstractCommand {
       this.log.error(chalk.red(`all ${fail} tests failed.`));
       throw new Error('Performance test failed entirely');
     } else if (succeed) {
-      this.log.log(chalk.green(`all ${succeed} tests succeeded.`));
+      this.log.info(chalk.green(`all ${succeed} tests succeeded.`));
+    } else if (skipped) {
+      throw new Error('Performance test skipped entirely');
     }
   }
 }
