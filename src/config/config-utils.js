@@ -57,7 +57,8 @@ which should never be stored in the git repository.
     if (!semver.satisfies(version, supported)) {
       stdout.write(`
 ${chalk.yellowBright('Warning:')} The current node version ${chalk.cyan(version)} does not satisfy 
-the supported version range ${chalk.cyan(supported)} and you might encounter unexpected errors.   
+the supported version range ${chalk.cyan(supported)}.
+You might encounter unexpected errors.   
 
 `);
     }
