@@ -13,7 +13,9 @@ const fs = require('fs-extra');
 const path = require('path');
 const chalk = require('chalk');
 const { GitUrl } = require('@adobe/helix-shared');
+const semver = require('semver');
 const GitUtils = require('../git-utils');
+const pkgJson = require('../../package.json');
 
 const DEFAULT_CONFIG = path.resolve(__dirname, 'default-config.yaml');
 
@@ -43,6 +45,23 @@ This is typically not good because it might contain secrets
 which should never be stored in the git repository.
 
 `);
+  }
+
+  /**
+   * Checks if the given version is supported.
+   * @param version {string} current node version
+   * @param stdout {WritableStream} to report the warninf
+   */
+  static checkNodeVersion(version = process.version, stdout = process.stdout) {
+    const supported = pkgJson.engines.node;
+    if (!semver.satisfies(version, supported)) {
+      stdout.write(`
+${chalk.yellowBright('Warning:')} The current node version ${chalk.cyan(version)} does not satisfy 
+the supported version range ${chalk.cyan(supported)}.
+You might encounter unexpected errors.   
+
+`);
+    }
   }
 }
 

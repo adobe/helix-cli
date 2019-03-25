@@ -17,6 +17,7 @@ const ConfigUtils = require('./src/config/config-utils.js');
 require('dotenv').config();
 
 (async () => {
+  await ConfigUtils.checkNodeVersion();
   await ConfigUtils.validateDotEnv();
   new CLI().run(process.argv.slice(2));
 })();
