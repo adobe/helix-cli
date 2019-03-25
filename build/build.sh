@@ -8,7 +8,7 @@ else
   ref=$1
 fi
 
-# nodec packs node v8.4 runtime into the binary
+# nodec packs node v8.9.1 runtime into the binary
 # the installed node version for this build must be v8.*
 req_node_version="8"  
 
@@ -61,7 +61,7 @@ brew install squashfs
 echo
 echo "installing nodec..."
 echo
-curl -L http://enclose.io/nodec/nodec-darwin-x64.gz | gunzip > nodec
+curl -L https://github.com/adobe/node-packer/releases/download/v1.6.0/nodec-darwin-x64.gz | gunzip > nodec
 chmod +x nodec
 
 # clone helix-cli
@@ -82,9 +82,15 @@ fi
 cp index.js hlx
 
 echo
+echo "resolving dependencies and cleanup..."
+echo
+npm i --production
+rm -rf .circleci .github .vscode .eslint* test node_modules/calibre/bin
+
+echo
 echo "running nodec..."
 echo
-../nodec hlx
+../nodec -r . --skip-npm-install hlx
 
 cp a.out ../../archive
 cd ..

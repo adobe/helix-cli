@@ -28,6 +28,7 @@ class RemotePublishCommand extends AbstractCommand {
     this._fastly_namespace = null;
     this._fastly_auth = null;
     this._dryRun = false;
+    this._publishAPI = 'https://adobeioruntime.net/api/v1/web/helix/default/publish';
   }
 
   tick(ticks = 1, message, name) {
@@ -59,6 +60,11 @@ class RemotePublishCommand extends AbstractCommand {
     });
 
     return this._bar;
+  }
+
+  withPublishAPI(value) {
+    this._publishAPI = value;
+    return this;
   }
 
   withWskHost(value) {
@@ -148,7 +154,7 @@ class RemotePublishCommand extends AbstractCommand {
   }
 
   servicePublish() {
-    return request.post('https://adobeioruntime.net/api/v1/web/helix/default/publish', {
+    return request.post(this._publishAPI, {
       json: true,
       body: {
         configuration: this.config.toJSON(),

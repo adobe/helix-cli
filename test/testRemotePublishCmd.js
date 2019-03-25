@@ -55,6 +55,7 @@ describe('hlx publish --remote (default)', () => {
       .withFastlyAuth('fake_auth')
       .withFastlyNamespace('fake_name')
       .withWskHost('doesn.t.matter')
+      .withPublishAPI('https://adobeioruntime.net/api/v1/web/helix/default/publish')
       .withConfigFile(path.resolve(__dirname, 'fixtures/deployed.yaml'))
       .withDryRun(false);
     await remote.run();
