@@ -8,8 +8,6 @@ strains:
     static: ssh://git@github.com/adobe/helix-cli.git
     perf:
       device: iPhone8
-      lighthouse-accessibility-score: 50
-      lighthouse-performance-score: 50
   performance:
     urls:
       - https://www.adobe.com
@@ -22,5 +20,5 @@ strains:
       location: NorthVirginia
       lighthouse-accessibility-score: 60
       lighthouse-performance-score: 60
-      onload: 1000
+      onload: 30000
 

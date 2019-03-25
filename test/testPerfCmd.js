@@ -13,6 +13,7 @@
 /* eslint-env mocha */
 
 const assert = require('assert');
+const AssertionError = require('assert').AssertionError;
 const path = require('path');
 const NodeHttpAdapter = require('@pollyjs/adapter-node-http');
 const { setupMocha: setupPolly } = require('@pollyjs/core');
@@ -218,7 +219,7 @@ describe('hlx perf #integrationtest', () => {
             }, {
               "label": "Lighthouse Performance Score",
               "name": "lighthouse-performance-score",
-              "value": 92
+              "value": 99
             }, {
               "label": "Lighthouse Progressive Web App Score",
               "name": "lighthouse-pwa-score",
@@ -355,7 +356,7 @@ describe('hlx perf #integrationtest', () => {
             "metrics": [{
               "label": "Lighthouse SEO Score",
               "name": "lighthouse-seo-score",
-              "value": 89
+              "value": 99
             }, {
               "label": "Lighthouse Best Practices Score",
               "name": "lighthouse-best-practices-score",
@@ -367,6 +368,10 @@ describe('hlx perf #integrationtest', () => {
             }, {
               "label": "Lighthouse Progressive Web App Score",
               "name": "lighthouse-pwa-score",
+              "value": 28
+            }, {
+              "label": "Lighthouse Performance Score",
+              "name": "lighthouse-performance-score",
               "value": 28
             }, {
               "label": "JS Parse & Compile",
@@ -516,7 +521,7 @@ describe('hlx perf #integrationtest', () => {
             }, {
               "label": "Lighthouse Performance Score",
               "name": "lighthouse-performance-score",
-              "value": 1
+              "value": 81
             }, {
               "label": "Lighthouse Progressive Web App Score",
               "name": "lighthouse-pwa-score",
@@ -656,7 +661,15 @@ describe('hlx perf #integrationtest', () => {
       .withConfigFile(path.resolve(__dirname, 'fixtures/perf.yaml'))
       .withJunit('junit-results.xml');
 
-    await perf.run();
+    try {
+      await perf.run();
+      assert.fail();
+    } catch (e) {
+      if (e instanceof AssertionError) {
+        throw e;
+      }
+      assert.equal(e.message, 'Performance test failed partially');
+    }
   }).timeout(1000 * 60 * 10);
 });
 

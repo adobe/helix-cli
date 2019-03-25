@@ -104,7 +104,7 @@ class PerfCommand extends AbstractCommand {
    * @returns true if successful, false if unsuccessful and undefined if the name isn't valid
    */
   format(metrics, name, limit) {
-    const metric = metrics.filter(m => m.name === name).length === 1
+    const metric = metrics.filter(m => m.name === name).length >= 1
       ? metrics.filter(m => m.name === name)[0] : null;
     if (metric && metric.name.endsWith('-score')) {
       this.log.info(`  ${chalk.gray(`${metric.label}: `)}${PerfCommand.formatScore(metric.value, limit)}`);
@@ -117,7 +117,6 @@ class PerfCommand extends AbstractCommand {
   }
 
   formatResponse(response, params = {}, strainname = 'default') {
-    console.log(params);
     this.log.info(`\nResults for ${response.url} on ${response.device.title} (${response.connection.title}) from ${response.location.emoji}  ${response.location.name} using ${strainname} strain.\n`);
     const strainresults = Object.keys(params).map((key) => {
       const value = params[key];
@@ -130,7 +129,7 @@ class PerfCommand extends AbstractCommand {
       const perf = this.format(response.metrics, 'lighthouse-performance-score', 80);
       const access = this.format(response.metrics, 'lighthouse-accessibility-score', 80);
       // use the default metrics
-      return perf && access;
+      return  access && perf;
     }
     // make sure all tests have been passed
     return strainresults.every(result => result === true || result === undefined);
@@ -187,10 +186,10 @@ class PerfCommand extends AbstractCommand {
     let skipped = 0;
     const formatted = _.zip(results, flatttests).map(([result, test]) => {
       if (this._junit && typeof result === 'object') {
-        this._junit.appendResults(result, test, test.strain);
+        this._junit.appendResults(result, test._thresholds, test.strain);
       }
       if (typeof result === 'object') {
-        return this.formatResponse(result, test, test.strain);
+        return this.formatResponse(result, test._thresholds, test.strain);
       } else {
         skipped = skipped + 1;
         console.log(chalk.yellow(`\nSkipped test for ${test.url} on ${test.strain}`));
@@ -202,21 +201,20 @@ class PerfCommand extends AbstractCommand {
       this._junit.writeResults();
     }
 
-    console.log(formatted);
-
     const fail = formatted.filter(result => result === false).length;
     const succeed = formatted.filter(result => result === true).length;
-    if (fail && succeed) {
-      this.log.error(chalk.yellow(`all tests completed with ${fail} failures and ${succeed} successes.`));
-    } else if (fail) {
-      this.log.error(chalk.red(`all ${fail} tests failed.`));
-    } else if (succeed) {
-      this.log.log(chalk.green(`all ${succeed} tests succeeded.`));
-    }
     if (skipped) {
       console.log(chalk.yellow(`${skipped} tests skipped due to 10 minute timeout`));
     }
-    process.exit(fail);
+    if (fail && succeed) {
+      this.log.error(chalk.yellow(`all tests completed with ${fail} failures and ${succeed} successes.`));
+      throw new Error('Performance test failed partially');
+    } else if (fail) {
+      this.log.error(chalk.red(`all ${fail} tests failed.`));
+      throw new Error('Performance test failed entirely');
+    } else if (succeed) {
+      this.log.log(chalk.green(`all ${succeed} tests succeeded.`));
+    }
   }
 }
 
