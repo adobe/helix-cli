@@ -129,6 +129,7 @@ class PerfCommand extends AbstractCommand {
       if (Number.isInteger(value)) {
         return this.format(response.metrics, key, value);
       }
+      return undefined;
     });
     if (strainresults.length === 0 || strainresults.every(val => val === undefined)) {
       const perf = this.format(response.metrics, 'lighthouse-performance-score', 80);

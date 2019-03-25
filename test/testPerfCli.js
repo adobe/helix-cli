@@ -16,7 +16,6 @@
 
 const sinon = require('sinon');
 const assert = require('assert');
-const { AssertionError } = require('assert');
 const CLI = require('../src/cli.js');
 const PerfCommand = require('../src/perf.cmd');
 

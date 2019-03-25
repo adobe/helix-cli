@@ -2433,6 +2433,16 @@ describe('hlx perf #unittest', () => {
       }),
       false,
     );
+
+    // bogus
+    assert.equal(
+      pc.formatResponse(example, {
+        'lighthouse-seo-score': 0,
+        foo: 'bar',
+        visually_complete: 1000,
+      }),
+      false,
+    );
   });
 
   it('getDefaultParams() #unittest', async () => {
