@@ -23,19 +23,19 @@ One of the usage of the selectors (in combination with ESI - [Edge Server Includ
 The `html.htl` file could look like this:
 
 ```html
-<esi:include src="${payload.dispatch_url}" />
+<esi:include src="${content.dispatch_url}" />
 ```
 
 The `htmp.pre.js` would be responsible to determine which of the `homepage_html.htl` or `others_html.htl` needs to be used for a given request. Here is an example where only the `index.md` file is rendered with the `homepage_html.htl` script:
 
 ```js
-function pre(payload, action) {
-  if (payload.request.path.match('index.html')) {
+function pre(context, action) {
+  if (context.request.path === '/index.html') {
     // home page
-    payload.dispatch_url = payload.request.url.replace(/\.html/, '.homepage.html');
+    context.content.dispatch_url = context.request.url.replace(/\.html/, '.homepage.html');
   } else {
     // others
-    payload.dispatch_url = payload.request.url.replace(/\.html/, '.others.html');
+    context.content.dispatch_url = context.request.url.replace(/\.html/, '.others.html');
   }
 }
 
@@ -47,16 +47,16 @@ module.exports.pre = pre;
 If you to render a Markdown file using `xml` or `json` rendering, a default pipeline is provided for those extensions. You simply need to create a `<extension>.js` file which contains one `main` function export and that sets the `payload.response.body` content. Here is an example of a `json` renderer:
 
 ```js
-module.exports.main = async function main(payload) {
+module.exports.main = async function main(context) {
   return {
     response: {
-      body: payload.content
+      body: context.content
     }
   }
 };
 ```
 
-This will render the full `payload.content` as a `json` response.
+This will render the full `context.content` as a `json` response.
 
 The works because the [`json`](https://github.com/adobe/helix-pipeline/blob/master/src/defaults/json.pipe.js) and the [`xml`](https://github.com/adobe/helix-pipeline/blob/master/src/defaults/xml.pipe.js) are provided out of the box. If you need another extension, you will need to add your own "custom pipeline" too, check the next section.
 
