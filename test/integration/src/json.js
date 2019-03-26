@@ -1,11 +1,11 @@
-module.exports.main = async function main(payload) {
+module.exports.main = async function main(context) {
   return {
     response: {
       body: {
-        body: payload.content.body,
-        meta: payload.content.meta,
-        intro: payload.content.intro,
-        title: payload.content.title,
+        body: context.content.body,
+        meta: context.content.meta,
+        intro: context.content.intro,
+        title: context.content.title,
       }
     }
   }
