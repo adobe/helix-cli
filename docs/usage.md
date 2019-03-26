@@ -44,7 +44,7 @@ module.exports.pre = pre;
 
 ### Custom extension
 
-If you to render a Markdown file using `xml` or `json` rendering, a default pipeline is provided for those extensions. You simply need to create a `<extension>.js` file which contains one `main` function export and that sets the `payload.response.body` content. Here is an example of a `json` renderer:
+If you to render a Markdown file using `xml` or `json` rendering, a default pipeline is provided for those extensions. You simply need to create a `<extension>.js` file which contains one `main` function export and that sets the `context.response.body` content. Here is an example of a `json` renderer:
 
 ```js
 module.exports.main = async function main(context) {
