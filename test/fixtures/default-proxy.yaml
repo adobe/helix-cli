@@ -9,12 +9,12 @@ definitions:
     - &remoteRepo "ssh://git@github.com/adobe/project-helix.io.git#master"
 
 strains:
-  dev:
+  - name: dev
     code: *remoteRepo
     content: *localRepo
     static: *localRepo
 
-  helix:
+  - name: helix
     code: *localRepo
     content: *localRepo
     static: *localRepo
@@ -22,6 +22,6 @@ strains:
     urls:
       - http://www.project-helix.io
 
-  default:
+  - name: default
     origin:
       address: 127.0.0.1
