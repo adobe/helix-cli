@@ -1,1 +1,1 @@
-{"body":"---\ntemplate: homepage\n---\n\n# Soup Demo Test\n\nThis is rendered using ~~Sightly~~ HTL.","meta":{"template":"homepage"},"intro":"This is rendered using Sightly HTL.","title":"Soup Demo Test"}
+{"body":"---\ntemplate: homepage\n---\n\n# Soup Demo Test\n\nThis is rendered using ~~Sightly~~ HTL.\n\n> [!NOTE]\n> This is a note. Who'd have noted?\n\n{% jekyll_embed with params %}","meta":{"template":"homepage"},"intro":"This is rendered using Sightly HTL.","title":"Soup Demo Test"}
