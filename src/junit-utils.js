@@ -25,7 +25,7 @@ class JunitPerformanceReport {
   }
 
   appendResults(result, params = {}, strainname = 'default') {
-    this._suite = this._builder.testSuite().name(`Performance Tests on ${result.device.title} (${result.connection.title}) from ${result.location.name} using ${strainname} strain.`);
+    this._suite = this._builder.testSuite().name(`Performance Tests on ${result.device.title || result.device} (${result.connection.title}) from ${result.location.name} using ${strainname} strain.`);
     this._suite.timestamp(result.updatedAt);
 
     result.metrics.map((metric) => {
