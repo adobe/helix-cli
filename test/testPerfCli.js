@@ -35,8 +35,9 @@ describe('hlx perf (CLI)', () => {
 
     mockPerf = sinon.createStubInstance(PerfCommand);
     mockPerf.run.returnsThis();
-    mockPerf.withCalibreAuth.returnsThis();
     mockPerf.withConnection.returnsThis();
+    mockPerf.withFastlyAuth.returnsThis();
+    mockPerf.withFastlyNamespace.returnsThis();
     mockPerf.withLocation.returnsThis();
     mockPerf.withDevice.returnsThis();
     mockPerf.withJunit.returnsThis();
@@ -51,18 +52,9 @@ describe('hlx perf (CLI)', () => {
     });
   });
 
-  it('hlx perf required auth', (done) => {
-    new CLI()
-      .withCommandExecutor('perf', mockPerf)
-      .onFail((err) => {
-        assert.equal(err, 'Missing required argument: calibre-auth');
-        done();
-      })
-      .run(['perf']);
-  });
-
-  it('hlx perf accepts HLX_CALIBRE_AUTH', () => {
-    process.env.HLX_CALIBRE_AUTH = 'nope-nope-nope';
+  it('hlx perf accepts HLX_FASTLY_AUTH', () => {
+    process.env.HLX_FASTLY_AUTH = 'nope-nope-nope';
+    process.env.HLX_FASTLY_NAMESPACE = 'nope-nope-nope';
     new CLI()
       .withCommandExecutor('perf', mockPerf)
       .onFail((err) => {
@@ -75,7 +67,7 @@ describe('hlx perf (CLI)', () => {
   it('hlx perf works with minimal arguments', () => {
     new CLI()
       .withCommandExecutor('perf', mockPerf)
-      .run(['perf', '--calibre-auth', 'nope-nope-nope']);
+      .run(['perf', '--fastly-auth', 'nope-nope-nope', '--fastly-namespace', 'nope-nope-nope']);
     sinon.assert.calledOnce(mockPerf.run);
     sinon.assert.calledWith(mockPerf.withJunit, '');
   });
@@ -84,7 +76,8 @@ describe('hlx perf (CLI)', () => {
     new CLI()
       .withCommandExecutor('perf', mockPerf)
       .run(['perf',
-        '--calibre-auth', 'nope-nope-nope',
+        '--fastly-auth', 'nope-nope-nope',
+        '--fastly-namespace', 'nope-nope-nope',
         '--location', 'California',
         '--device', 'iPad',
         '--connection', 'cable',
@@ -93,6 +86,8 @@ describe('hlx perf (CLI)', () => {
     sinon.assert.calledWith(mockPerf.withLocation, 'California');
     sinon.assert.calledWith(mockPerf.withConnection, 'cable');
     sinon.assert.calledWith(mockPerf.withJunit, 'test-results.xml');
+    sinon.assert.calledWith(mockPerf.withFastlyAuth, 'nope-nope-nope');
+    sinon.assert.calledWith(mockPerf.withFastlyNamespace, 'nope-nope-nope');
 
     sinon.assert.calledOnce(mockPerf.run);
   });
