@@ -14,5 +14,89 @@
 			<dt>Title</dt>
 			<dd><code>Example Strains</code></dd>
 		</dl>
+<!-- anyway, here's the full content-->
+<main>
+<h1>Example Strains</h1>
+<h2>Default Strain</h2>
+<p>This is the same stuff you would see during development, served from master.</p>
+<pre><code class="language-yaml">- strain:
+    name: default
+    code: /trieloff/default/git-github-com-adobe-helix-cli-git--dirty--
+    content:
+      repo: helix-cli
+      ref: master
+      owner: adobe
+      root: test/integration
+</code></pre>
+<p>Example URLs:</p>
+<ul>
+<li><a href="https://www.primordialsoup.life/index.html">https://www.primordialsoup.life/index.html</a></li>
+</ul>
+<h2>Preview Strain</h2>
+<p>It is just like the default, except that it is using the <code>25-strains</code> branch, which means that <em>this file</em> is accessible, too.</p>
+<p>The <code>condition</code> is that you access it from <code>https://preview.primordialsoup.life</code>.</p>
+<pre><code class="language-yaml">- strain:
+    name: preview
+    code: /trieloff/default/git-github-com-adobe-helix-cli-git--dirty--
+    condition: req.http.host == "preview.primordialsoup.life"
+    content:
+      repo: helix-cli
+      ref: 25-strains
+      owner: adobe
+      root: test/integration
+</code></pre>
+<p>Example URLs:</p>
+<ul>
+<li><a href="https://preview.primordialsoup.life/index.html">https://preview.primordialsoup.life/index.html</a></li>
+<li><a href="https://preview.primordialsoup.life/README.html">https://preview.primordialsoup.life/README.html</a> (<em>this very file</em>)</li>
+</ul>
+<h2>The Original Soupdemo</h2>
+<p>You can use arbitrary content sources for your strains, so this is the original Soupdemo, served from <code>@trieloff</code>’s GitHub repo, access ible under <code>lars.primordialsoup.life</code> </p>
+<pre><code class="language-yaml">- strain:
+    name: soupdemo
+    code: /trieloff/default/git-github-com-adobe-helix-cli-git--dirty--
+    condition: req.http.host == "lars.primordialsoup.life"
+    content:
+      repo: soupdemo
+      ref: master
+      owner: trieloff
+</code></pre>
+<p>Example URLs:</p>
+<ul>
+<li><a href="https://lars.primordialsoup.life/hello.html">https://lars.primordialsoup.life/hello.html</a></li>
+<li><a href="https://lars.primordialsoup.life/moscow/moscow.html">https://lars.primordialsoup.life/moscow/moscow.html</a></li>
+</ul>
+<h2>Adobe XDM</h2>
+<p>Another good test site is the XDM repo, because it has a quite long <code>README.md</code>, but by now you know the drill:</p>
+<pre><code class="language-yaml">- strain:
+    name: xdm
+    code: /trieloff/default/git-github-com-adobe-helix-cli-git--dirty--
+    content:
+      repo: xdm
+      ref: master
+      owner: adobe
+    condition: req.http.host == "xdm.primordialsoup.life"
+</code></pre>
+<ul>
+<li><a href="https://xdm.primordialsoup.life/README.html">https://xdm.primordialsoup.life/README.html</a></li>
+</ul>
+<h2>Launch, by Adobe</h2>
+<p>Finally, we can also access the Launch, by Adobe documentation:</p>
+<pre><code class="language-yaml">- strain:
+    name: db5d4350c13924ad
+    code: /trieloff/default/git-github-com-adobe-helix-cli-git--dirty--
+    condition: req.http.host == "launch.primordialsoup.life"
+    content:
+      repo: reactor-user-docs
+      ref: master
+      owner: Adobe-Marketing-Cloud
+</code></pre>
+<p>Note the name here: if you don’t bother to give your strains a proper name, we generate one ourselves.</p>
+<p>Example URLs:</p>
+<ul>
+<li><a href="https://launch.primordialsoup.life/administration/adapters.html">https://launch.primordialsoup.life/administration/adapters.html</a></li>
+<li><a href="https://launch.primordialsoup.life/README.html">https://launch.primordialsoup.life/README.html</a></li>
+</ul>
+</main>
 	</body>
 </html>
