@@ -1,43 +1,47 @@
 Concepts
 ========
 
-Simplistic Overview of request processing
------------------------------------------
+Overview of request processing
+------------------------------
 
-A request is received on the edge server (fastly) and is associated to a service configuration.
-The configuration contains a varnish cache script (VCL) that extracts processing information from
-the request. those are:
+An HTTP request is received on the edge server (fastly) and is associated to a [service configuration][fastly-services].
+The configuration contains a varnish cache script ([VCL][vcl]) that extracts processing information from
+the request. Those are:
 
 - requested resource
-- selector and extension
-- strain name
+- selector
+- [extension][extension]
+- [strain][strain] name
 
-based on this it looks up:
+Based on this it looks up:
 
 - backend type and url
 - content repository
 - adobeioruntime action or static server url
 
-for dynamic requests, it invokes the adobeioruntime action, passing along content repository
-and resource information. once it retrieves the response it will cache and deliver it back to the
+For dynamic requests, it invokes the adobeioruntime action, passing along content repository
+and resource information. Once it retrieves the response it will cache and deliver it back to the
 client.
+
+Requests to static resources are proxied through a single global `hlx--static`
+action that handles requests to all static resources.
 
 
 Resource processing scripts
 ---------------------------
 
-Typically every **resource type + selector** tuple is handled by 1 pipeline script. With the current
-architecture, every pipeline script is deployed as 1 adobeioruntime action. the pipeline scripts
-are in essence a openwhisk wrapper around the [helix pipeline](https://github.com/adobe/helix-pipeline).
+Typically every **resource type + selector** tuple is handled by 1 pipeline script. Every pipeline
+script is deployed as 1 adobeioruntime action. The pipeline scripts are in essence an openwhisk wrapper
+around the [helix pipeline](https://github.com/adobe/helix-pipeline).
 
 In order to allow for individual versions (strains) of the same pipeline script, the actions are
-name coded with the SHA of the commit during deploy time and the script name. it takes the format:
+name coded with the SHA of the commit during deploy time and the script name. It takes the format:
 
 ```
 /<sha>/<type>
 
 ```
- 
+
 For example:
 
 ```
@@ -65,10 +69,9 @@ using a [plugin](https://github.com/adobe/parcel-plugin-htl) mechanism. The comp
 is turned into a pipeline script and then wrapped with a bit of code to turn the pipeline into an
 openwhisk action. It also ensures that a corresponding `pre.js` is executed before the `once` script.
 
-Scripts can also be provided directly as pipeline scripts (i.e. using kind of a null-template) 
-(**Note**: this is currently not working: see [#334](https://github.com/adobe/helix-cli/issues/334)).
+Scripts can also be provided directly as pipeline scripts (i.e. using kind of a null-template).
 
-for example:
+For example:
 
 ```
 src
@@ -76,8 +79,8 @@ src
 ├── html.pre.js
 └── nav_json.js
 ```
- 
-would be compiled to:
+
+Would be compiled to:
 
 ```
 .hlx/build
@@ -88,9 +91,7 @@ would be compiled to:
 └── nav_json.info.json   // script info
 ```
 
-The script information json contains information needed during deployment. 
-
-for example:
+The `*.info.json` file contains information needed during deployment, for example:
 
 ```
 {
@@ -101,19 +102,61 @@ for example:
 }
 ```
 
-> **Note**: Helix no longer creates a _bundle_ or _webpack_ of the scripts, but  deploys the action 
-            as archive. this simplifies the dependency processing. 
+> **Note**: Helix no longer creates a _bundle_ or _webpack_ of the scripts, but deploys the action
+            as archive. This simplifies the dependency processing.
 
 
 Building the Action
 -------------------
 
 The openwhisk actions needed for deployment are built during the `hlx deploy` step. For that, the
-`*.info.json` files generated during build time are use to package the correct scripts into the 
-archive. essentially, every `*.info.json` results in 1 openwhisk action. 
+`*.info.json` files generated during build time are use to package the correct scripts into the
+archive. essentially, every `*.info.json` results in 1 openwhisk action.
 
 During the deploy step, the javascript files for the action are analyzed to extract all external
-modules needed that are not provided by the openwhisk container. 
+modules needed that are not provided by the openwhisk container.
 
 Finally, the action archive is created by including all external modules and the generated script
-files. 
+files.
+
+Definitions
+-----------
+
+### Strain
+
+A _strain_ is the part of a Helix configuration that maps HTTP requests to a combination
+of GitHub repositories for code, content and static files. In the simplest case,
+a single repository can be used for all three. A Helix configuration consists of
+one or more strains. This results in the deployment of matching OpenWhisk actions
+to Adobe I/O Runtime and configures Fastly which actions to invoke in response
+to HTTP requests.
+
+### Selector
+
+A _selector_ is the URL part between the [resource][resource] and the
+[file extension][extension], e.g. `bar` in `/foo.bar.html`. You can use
+selectors to render different variations of the same underlying resource, e.g.
+you may choose to have an `/index.html` (default/empty selector), and
+`/index.toc.json` for a table of contents of the same content but in JSON
+format, or an `/index.sitemap.xml` for a sitemap in XML format.
+
+### Resource
+
+TBD
+
+### File Extension
+
+[Helix pipelines][pipeline] key on the _file extension_ of the requested
+resource, e.g. `html` in `/foo.bar.html`.
+
+### Helix Pipeline
+
+TBD
+
+[fastly-services]: https://docs.fastly.com/guides/basic-setup/working-with-services
+[vcl]: https://docs.fastly.com/vcl/
+[strain]: #strain
+[selector]: #selector
+[resource]: #resource
+[extension]: #file-extension
+[pipeline]: #helix-pipeline
