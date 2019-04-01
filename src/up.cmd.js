@@ -177,8 +177,7 @@ class UpCommand extends BuildCommand {
         this.log.info(`${buildMessage}done ${buildTime}ms`);
         if (this._project.started) {
           this.emit('build', this);
-          // todo
-          // this._project.invalidateCache();
+          this._project.invalidateCache();
           return;
         }
 

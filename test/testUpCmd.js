@@ -193,7 +193,7 @@ describe('Integration test for up command', () => {
       .catch(done);
   }).timeout(5000);
 
-  it('up command delivers modified sources and delivers correct response.', (done) => {
+  it('up command handles modified sources and delivers correct response.', (done) => {
     // this test always hangs on the CI, probably due to the parcel workers. ignoring for now.
     const srcFile = path.resolve(testDir, 'src/html2.htl');
     const dstFile = path.resolve(testDir, 'src/html.htl');
@@ -242,4 +242,52 @@ describe('Integration test for up command', () => {
       .run()
       .catch(done);
   }).timeout(10000);
+
+  it('up command handles modified includes and delivers correct response.', function test(done) {
+    this.timeout(10000);
+
+    // this test always hangs on the CI, probably due to the parcel workers. ignoring for now.
+    const srcFile = path.resolve(testDir, 'src/third_helper.js');
+    const dstFile = path.resolve(testDir, 'src/helper.js');
+
+    initGit(testDir);
+    let error = null;
+    const cmd = new UpCommand()
+      .withCacheEnabled(false)
+      .withFiles([
+        path.join(testDir, 'src', '*.htl'),
+        path.join(testDir, 'src', '*.js'),
+      ])
+      .withTargetDir(buildDir)
+      .withDirectory(testDir)
+      .withHttpPort(0);
+
+    const myDone = async (err) => {
+      error = err;
+      return cmd.stop();
+    };
+
+    cmd
+      .on('started', async () => {
+        try {
+          await assertHttp(`http://localhost:${cmd.project.server.port}/index.dump.html`, 200, 'dump_response.html');
+          await fse.copy(srcFile, dstFile);
+        } catch (e) {
+          await myDone(e);
+        }
+      })
+      .on('stopped', () => {
+        done(error);
+      })
+      .on('build', async () => {
+        try {
+          await assertHttp(`http://localhost:${cmd.project.server.port}/index.dump.html`, 200, 'dump_response2.html');
+          await myDone();
+        } catch (e) {
+          await myDone(e);
+        }
+      })
+      .run()
+      .catch(done);
+  });
 });
