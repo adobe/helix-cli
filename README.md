@@ -13,16 +13,10 @@ The Helix Command Line Interface allows web developers to create, develop, and d
 
 ## Installation
 
-Install `hlx` as a global command. You need Node 8 or newer.
+Install `hlx` as a global command. You need Node 8.9 or newer.
 
 ```bash
 $ npm install -g @adobe/helix-cli
-```
-
-Alternatively, if you are on `macOS`, you can install the latest binary version of `hlx` (not requiring Node) via `curl`
-:
-```bash
-$ curl -sL http://www.project-helix.io/cli.sh | sh
 ```
 
 ## Quick Start
