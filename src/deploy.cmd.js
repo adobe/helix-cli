@@ -442,7 +442,7 @@ Alternatively you can auto-add one using the {grey --add <name>} option.`);
     });
 
     if (!this._dryRun && this.config.modified) {
-      this.config.saveConfig();
+      await this.config.saveConfig();
       this.log.info(`Updated ${path.relative(this.directory, this.config.configPath)}`);
     }
     return this;
