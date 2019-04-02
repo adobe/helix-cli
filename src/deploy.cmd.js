@@ -417,6 +417,8 @@ Alternatively you can auto-add one using the {grey --add <name>} option.`);
         return true;
       }).catch((e) => {
         this.log.error(`❌  Unable to deploy the action ${script.name}:  ${e.message}`);
+        // eslint-disable-next-line no-param-reassign
+        script.error = true;
         tick();
         return false;
       });
@@ -425,10 +427,20 @@ Alternatively you can auto-add one using the {grey --add <name>} option.`);
     await Promise.all(deployed);
     bar.terminate();
     this.log.info(`✅  deployment of ${scripts.length} actions completed:`);
+    let numErrors = 0;
     scripts.forEach((script) => {
-      this.log.info(`   - ${this._wsk_namespace}/${script.actionName} (${humanFileSize(script.archiveSize)})`);
+      let status = '';
+      if (script.error) {
+        status = chalk.red(' (failed)');
+        numErrors += 1;
+      }
+      this.log.info(`   - ${this._wsk_namespace}/${script.actionName} (${humanFileSize(script.archiveSize)})${status}`);
     });
 
+    if (numErrors) {
+      this.log.error(`${numErrors} occurred while deploying actions. ${chalk.grey(path.relative(this.directory, this.config.configPath))} not updated.`);
+      throw Error();
+    }
     // update package in affected strains
     this.log.info(`Affected strains of ${giturl}:`);
     const packageProperty = `${this._wsk_namespace}/${this._prefix}`;

@@ -370,7 +370,6 @@ describe('hlx deploy (Integration)', () => {
     const ref = await GitUtils.getCurrentRevision(testRoot);
 
     this.polly.server.any().on('beforeResponse', (req, res) => {
-      req.removeHeaders(['fastly-key', 'user-agent']);
       delete req.body;
       delete res.body;
     });
@@ -378,18 +377,18 @@ describe('hlx deploy (Integration)', () => {
       matchRequestsBy: {
         body: false,
         headers: {
-          exclude: ['content-length', 'fastly-key', 'user-agent'],
+          exclude: ['content-length', 'user-agent'],
         },
       },
     });
     this.polly.server.put(`https://adobeioruntime.net/api/v1/namespaces/hlx/packages/${ref}`).intercept((req, res) => {
-      res.status(201);
+      res.sendStatus(201);
     });
     this.polly.server.put('https://adobeioruntime.net/api/v1/namespaces/hlx/actions/hlx--static').intercept((req, res) => {
-      res.status(201);
+      res.sendStatus(201);
     });
     this.polly.server.put(`https://adobeioruntime.net/api/v1/namespaces/hlx/actions/${ref}/html`).intercept((req, res) => {
-      res.status(201);
+      res.sendStatus(201);
     });
 
     const cmd = await new DeployCommand(logger)
@@ -417,6 +416,60 @@ describe('hlx deploy (Integration)', () => {
     await newCfg.init();
     assert.equal(newCfg.strains.get('default').package, '');
     assert.equal(newCfg.strains.get('dev').package, `hlx/${ref}`);
+  });
+
+  it('Failed action deploy throws', async function test() {
+    this.timeout(30000);
+
+    await fs.copy(TEST_DIR, testRoot);
+    await fs.rename(path.resolve(testRoot, 'default-config.yaml'), path.resolve(testRoot, 'helix-config.yaml'));
+    initGit(testRoot, 'git@github.com:adobe/project-helix.io.git');
+    const logger = Logger.getTestLogger();
+
+    const ref = await GitUtils.getCurrentRevision(testRoot);
+
+    this.polly.server.any().on('beforeResponse', (req, res) => {
+      delete req.body;
+      delete res.body;
+    });
+    this.polly.configure({
+      matchRequestsBy: {
+        body: false,
+        headers: {
+          exclude: ['content-length', 'user-agent'],
+        },
+      },
+    });
+    this.polly.server.put(`https://adobeioruntime.net/api/v1/namespaces/hlx/packages/${ref}`).intercept((req, res) => {
+      res.sendStatus(201);
+    });
+    this.polly.server.put('https://adobeioruntime.net/api/v1/namespaces/hlx/actions/hlx--static').intercept((req, res) => {
+      res.sendStatus(500);
+    });
+
+    let error = null;
+    try {
+      await new DeployCommand(logger)
+        .withDirectory(testRoot)
+        .withWskHost('adobeioruntime.net')
+        .withWskAuth('dummy')
+        .withWskNamespace('hlx')
+        .withEnableAuto(false)
+        .withEnableDirty(false)
+        .withDryRun(false)
+        .withTarget(buildDir)
+        .run();
+    } catch (e) {
+      // expected
+      error = e;
+    }
+
+    if (!error) {
+      assert.fail('Expected deploy to fail.');
+    }
+
+    const log = await logger.getOutput();
+    assert.ok(log.indexOf('Unable to deploy the action static') >= 0);
   });
 });
 
