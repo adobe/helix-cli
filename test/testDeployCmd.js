@@ -45,6 +45,12 @@ describe('hlx deploy (Integration)', () => {
         recordingsDir: path.resolve(__dirname, 'fixtures/recordings'),
       },
     },
+    matchRequestsBy: {
+      body: false,
+      headers: {
+        exclude: ['content-length', 'user-agent'],
+      },
+    },
   });
 
   beforeEach(async function beforeEach() {
@@ -54,8 +60,11 @@ describe('hlx deploy (Integration)', () => {
 
     cwd = process.cwd();
 
-    // don't record the authorization header
+    // ignore requests by snyk runtime agent
+    this.polly.server.any('https://homebase.snyk.io/*').passthrough();
+
     this.polly.server.any().on('beforeResponse', (req) => {
+      // don't record the authorization header
       req.removeHeaders(['authorization']);
     });
   });
@@ -373,14 +382,6 @@ describe('hlx deploy (Integration)', () => {
       delete req.body;
       delete res.body;
     });
-    this.polly.configure({
-      matchRequestsBy: {
-        body: false,
-        headers: {
-          exclude: ['content-length', 'user-agent'],
-        },
-      },
-    });
     this.polly.server.put(`https://adobeioruntime.net/api/v1/namespaces/hlx/packages/${ref}`).intercept((req, res) => {
       res.sendStatus(201);
     });
@@ -431,14 +432,6 @@ describe('hlx deploy (Integration)', () => {
     this.polly.server.any().on('beforeResponse', (req, res) => {
       delete req.body;
       delete res.body;
-    });
-    this.polly.configure({
-      matchRequestsBy: {
-        body: false,
-        headers: {
-          exclude: ['content-length', 'user-agent'],
-        },
-      },
     });
     this.polly.server.put(`https://adobeioruntime.net/api/v1/namespaces/hlx/packages/${ref}`).intercept((req, res) => {
       res.sendStatus(201);
