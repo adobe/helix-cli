@@ -46,7 +46,7 @@ jobs:
     # test & get code coverage
     - run:
         name: Running Tests with Snyk Agent
-        command: node build/snykmocha.js
+        command: node snykmocha.js
 
   build:
     executor: node8
