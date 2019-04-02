@@ -124,21 +124,6 @@ jobs:
         command: ~/.npm-global/bin/hlx build && ~/.npm-global/bin/hlx deploy --dirty --wsk-namespace trieloff --wsk-auth $WSK_AUTH --loggly-host trieloff --loggly-auth $LOGGLY_AUTH
         working_directory: test/integration
 
-  github-release:
-    # https://circleci.com/blog/publishing-to-github-releases-via-circleci/
-    docker:
-      - image: cibuilds/github:0.12
-    steps:
-      - checkout
-      - run:
-          name: "Publish Release on GitHub"
-          command: |
-            LATEST_RELEASE_TAG=$(curl -s https://api.github.com/repos/adobe/helix-cli/releases/latest | grep 'tag_name' | cut -d\" -f4)
-            CHANGELOG=$(git log ${LATEST_RELEASE_TAG}...master | fgrep \# | sed -e 's/^    /- /')
-            NEWLINE=$'\n'
-            RELEASE_NOTES="Changes${NEWLINE}--------${NEWLINE}${NEWLINE}${CHANGELOG}${NEWLINE}${NEWLINE}[**TODO** review/edit list of changes]"
-            ghr -t ${GITHUB_API_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -b "${RELEASE_NOTES}" -recreate ${CIRCLE_TAG}     
-
 workflows:
   version: 2
   build:
@@ -152,21 +137,6 @@ workflows:
             only: master
     - build
     - snyk
-
-  build-and-release:
-    jobs:
-      - build:
-          filters:
-            tags:
-              only: /^v\d+\.\d+\.\d+$/
-            branches:
-              ignore: /.*/
-      - github-release:
-          filters:
-            tags:
-              only: /^v\d+\.\d+\.\d+$/
-            branches:
-              ignore: /.*/
 
   smoke:
     jobs:
