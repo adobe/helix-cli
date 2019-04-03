@@ -400,7 +400,7 @@ Alternatively you can auto-add one using the {grey --add <name>} option.`);
         name: script.actionName,
         'User-Agent': useragent,
         action,
-        kind: 'nodejs:10-fat',
+        kind: 'nodejs:10',
         annotations: { 'web-export': true },
       };
 
