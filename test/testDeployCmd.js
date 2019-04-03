@@ -19,7 +19,7 @@ const $ = require('shelljs');
 const NodeHttpAdapter = require('@pollyjs/adapter-node-http');
 const FSPersister = require('@pollyjs/persister-fs');
 const { setupMocha: setupPolly } = require('@pollyjs/core');
-const { Logger } = require('@adobe/helix-shared');
+const { HelixConfig, Logger } = require('@adobe/helix-shared');
 const { initGit, createTestRoot } = require('./utils.js');
 const GitUtils = require('../src/git-utils');
 const BuildCommand = require('../src/build.cmd.js');
@@ -37,12 +37,18 @@ describe('hlx deploy (Integration)', () => {
   setupPolly({
     recordFailedRequests: true,
     recordIfMissing: false,
-    logging: true,
+    logging: false,
     adapters: [NodeHttpAdapter],
     persister: FSPersister,
     persisterOptions: {
       fs: {
         recordingsDir: path.resolve(__dirname, 'fixtures/recordings'),
+      },
+    },
+    matchRequestsBy: {
+      body: false,
+      headers: {
+        exclude: ['content-length', 'user-agent'],
       },
     },
   });
@@ -54,8 +60,11 @@ describe('hlx deploy (Integration)', () => {
 
     cwd = process.cwd();
 
-    // don't record the authorization header
+    // ignore requests by snyk runtime agent
+    this.polly.server.any('https://homebase.snyk.io/*').passthrough();
+
     this.polly.server.any().on('beforeResponse', (req) => {
+      // don't record the authorization header
       req.removeHeaders(['authorization']);
     });
   });
@@ -339,13 +348,122 @@ describe('hlx deploy (Integration)', () => {
     const ref = await GitUtils.getCurrentRevision(testRoot);
     assert.equal(cmd.config.strains.get('default').package, '');
     assert.equal(cmd.config.strains.get('dev').package, `hlx/${ref}`);
-    // todo: can't test writeback of helix-config.yaml, since it's disabled during dry-run
 
     const log = await logger.getOutput();
     assert.ok(log.indexOf('deployment of 2 actions completed') >= 0);
     assert.ok(log.indexOf(`- hlx/${ref}/html`) >= 0);
     assert.ok(log.indexOf('- hlx/hlx--static') >= 0);
   }).timeout(30000);
+
+  it('Deploy works', async function test() {
+    this.timeout(30000);
+
+    await fs.copy(TEST_DIR, testRoot);
+    await fs.rename(path.resolve(testRoot, 'default-config.yaml'), path.resolve(testRoot, 'helix-config.yaml'));
+    initGit(testRoot, 'git@github.com:adobe/project-helix.io.git');
+    const logger = Logger.getTestLogger();
+
+    await new BuildCommand(logger)
+      .withDirectory(testRoot)
+      .withFiles([
+        path.resolve(testRoot, 'src/html.htl'),
+        path.resolve(testRoot, 'src/html.pre.js'),
+        path.resolve(testRoot, 'src/helper.js'),
+        path.resolve(testRoot, 'src/utils/another_helper.js'),
+        path.resolve(testRoot, 'src/third_helper.js'),
+      ])
+      .withTargetDir(buildDir)
+      .withCacheEnabled(false)
+      .run();
+
+    const ref = await GitUtils.getCurrentRevision(testRoot);
+
+    this.polly.server.any().on('beforeResponse', (req, res) => {
+      delete req.body;
+      delete res.body;
+    });
+    this.polly.server.put(`https://adobeioruntime.net/api/v1/namespaces/hlx/packages/${ref}`).intercept((req, res) => {
+      res.sendStatus(201);
+    });
+    this.polly.server.put('https://adobeioruntime.net/api/v1/namespaces/hlx/actions/hlx--static').intercept((req, res) => {
+      res.sendStatus(201);
+    });
+    this.polly.server.put(`https://adobeioruntime.net/api/v1/namespaces/hlx/actions/${ref}/html`).intercept((req, res) => {
+      res.sendStatus(201);
+    });
+
+    const cmd = await new DeployCommand(logger)
+      .withDirectory(testRoot)
+      .withWskHost('adobeioruntime.net')
+      .withWskAuth('dummy')
+      .withWskNamespace('hlx')
+      .withEnableAuto(false)
+      .withEnableDirty(false)
+      .withDryRun(false)
+      .withTarget(buildDir)
+      .run();
+
+    assert.equal(cmd.config.strains.get('default').package, '');
+    assert.equal(cmd.config.strains.get('dev').package, `hlx/${ref}`);
+
+    const log = await logger.getOutput();
+    assert.ok(log.indexOf('deployment of 2 actions completed') >= 0);
+    assert.ok(log.indexOf(`- hlx/${ref}/html`) >= 0);
+    assert.ok(log.indexOf('- hlx/hlx--static') >= 0);
+
+    // check if written helix config contains package ref
+    const newCfg = new HelixConfig()
+      .withConfigPath(path.resolve(testRoot, 'helix-config.yaml'));
+    await newCfg.init();
+    assert.equal(newCfg.strains.get('default').package, '');
+    assert.equal(newCfg.strains.get('dev').package, `hlx/${ref}`);
+  });
+
+  it('Failed action deploy throws', async function test() {
+    this.timeout(30000);
+
+    await fs.copy(TEST_DIR, testRoot);
+    await fs.rename(path.resolve(testRoot, 'default-config.yaml'), path.resolve(testRoot, 'helix-config.yaml'));
+    initGit(testRoot, 'git@github.com:adobe/project-helix.io.git');
+    const logger = Logger.getTestLogger();
+
+    const ref = await GitUtils.getCurrentRevision(testRoot);
+
+    this.polly.server.any().on('beforeResponse', (req, res) => {
+      delete req.body;
+      delete res.body;
+    });
+    this.polly.server.put(`https://adobeioruntime.net/api/v1/namespaces/hlx/packages/${ref}`).intercept((req, res) => {
+      res.sendStatus(201);
+    });
+    this.polly.server.put('https://adobeioruntime.net/api/v1/namespaces/hlx/actions/hlx--static').intercept((req, res) => {
+      res.sendStatus(500);
+    });
+
+    let error = null;
+    try {
+      await new DeployCommand(logger)
+        .withDirectory(testRoot)
+        .withWskHost('adobeioruntime.net')
+        .withWskAuth('dummy')
+        .withWskNamespace('hlx')
+        .withEnableAuto(false)
+        .withEnableDirty(false)
+        .withDryRun(false)
+        .withTarget(buildDir)
+        .run();
+    } catch (e) {
+      // expected
+      error = e;
+    }
+
+    if (!error) {
+      assert.fail('Expected deploy to fail.');
+    }
+
+    const log = await logger.getOutput();
+    assert.ok(log.indexOf('Unable to deploy the action static') >= 0);
+  });
 });
 
 describe('DeployCommand #unittest', () => {

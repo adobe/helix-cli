@@ -25,7 +25,7 @@ const setTimeoutPromise = util.promisify(setTimeout);
 const testDir = './test';
 const mocha = new Mocha();
 
-fs.readdirSync(testDir).filter(file => file.substr(-3) === '.js').forEach((file) => {
+fs.readdirSync(testDir).filter(file => file.endsWith('.js')).forEach((file) => {
   mocha.addFile(
     path.join(testDir, file),
   );
