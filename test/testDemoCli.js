@@ -10,70 +10,89 @@
  * governing permissions and limitations under the License.
  */
 
-/* global describe, it, beforeEach */
+/* eslint-env mocha */
 
 'use strict';
 
 const assert = require('assert');
 const sinon = require('sinon');
+const { clearHelixEnv } = require('./utils.js');
 const CLI = require('../src/cli.js');
 const DemoCommand = require('../src/demo.cmd');
 
 describe('hlx demo', () => {
   // mocked command instance
-  let mockInit;
+  let mockDemo;
 
   beforeEach(() => {
-    mockInit = sinon.createStubInstance(DemoCommand);
-    mockInit.withDirectory.returnsThis();
-    mockInit.withName.returnsThis();
-    mockInit.withType.returnsThis();
-    mockInit.run.returnsThis();
+    clearHelixEnv();
+    mockDemo = sinon.createStubInstance(DemoCommand);
+    mockDemo.withDirectory.returnsThis();
+    mockDemo.withName.returnsThis();
+    mockDemo.withType.returnsThis();
+    mockDemo.run.returnsThis();
+  });
+
+  afterEach(() => {
+    clearHelixEnv();
   });
 
   it('hlx demo accepts name and directory', () => {
     new CLI()
-      .withCommandExecutor('demo', mockInit)
+      .withCommandExecutor('demo', mockDemo)
       .run(['demo', 'name', 'dir']);
 
-    sinon.assert.calledWith(mockInit.withName, 'name');
-    sinon.assert.calledWith(mockInit.withDirectory, 'dir');
-    sinon.assert.calledOnce(mockInit.run);
+    sinon.assert.calledWith(mockDemo.withName, 'name');
+    sinon.assert.calledWith(mockDemo.withDirectory, 'dir');
+    sinon.assert.calledOnce(mockDemo.run);
   });
 
   it('hlx demo directory is optional', () => {
     new CLI()
-      .withCommandExecutor('demo', mockInit)
+      .withCommandExecutor('demo', mockDemo)
       .run(['demo', 'name']);
 
-    sinon.assert.calledWith(mockInit.withName, 'name');
-    sinon.assert.calledWith(mockInit.withDirectory, '.');
-    sinon.assert.calledOnce(mockInit.run);
+    sinon.assert.calledWith(mockDemo.withName, 'name');
+    sinon.assert.calledWith(mockDemo.withDirectory, '.');
+    sinon.assert.calledOnce(mockDemo.run);
   });
 
   it('hlx demo can set type: simple', () => {
     new CLI()
-      .withCommandExecutor('demo', mockInit)
+      .withCommandExecutor('demo', mockDemo)
       .run(['demo', 'name', '--type', 'simple']);
 
-    sinon.assert.calledWith(mockInit.withName, 'name');
-    sinon.assert.calledWith(mockInit.withType, 'simple');
-    sinon.assert.calledOnce(mockInit.run);
+    sinon.assert.calledWith(mockDemo.withName, 'name');
+    sinon.assert.calledWith(mockDemo.withType, 'simple');
+    sinon.assert.calledOnce(mockDemo.run);
   });
 
   it('hlx demo can set type: full', () => {
     new CLI()
-      .withCommandExecutor('demo', mockInit)
+      .withCommandExecutor('demo', mockDemo)
       .run(['demo', 'name', '--type', 'full']);
 
-    sinon.assert.calledWith(mockInit.withName, 'name');
-    sinon.assert.calledWith(mockInit.withType, 'full');
-    sinon.assert.calledOnce(mockInit.run);
+    sinon.assert.calledWith(mockDemo.withName, 'name');
+    sinon.assert.calledWith(mockDemo.withType, 'full');
+    sinon.assert.calledOnce(mockDemo.run);
   });
 
   it('hlx demo fails with no name', (done) => {
     new CLI()
-      .withCommandExecutor('demo', mockInit)
+      .withCommandExecutor('demo', mockDemo)
+      .onFail((err) => {
+        assert.equal(err, 'Not enough non-option arguments: got 0, need at least 1');
+        done();
+      })
+      .run(['demo']);
+
+    assert.fail('demo w/o arguments should fail.');
+  });
+
+  it('hlx demo fails with HLX_NAME set', (done) => {
+    process.env.HLX_NAME = 'foo';
+    new CLI()
+      .withCommandExecutor('demo', mockDemo)
       .onFail((err) => {
         assert.equal(err, 'Not enough non-option arguments: got 0, need at least 1');
         done();
@@ -85,7 +104,7 @@ describe('hlx demo', () => {
 
   it('hlx demo fails with wrong type', (done) => {
     new CLI()
-      .withCommandExecutor('demo', mockInit)
+      .withCommandExecutor('demo', mockDemo)
       .onFail((err) => {
         assert.equal(err, 'Invalid values:\n  Argument: type, Given: "foo", Choices: "simple", "full"');
         done();

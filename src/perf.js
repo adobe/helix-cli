@@ -12,10 +12,6 @@
 
 'use strict';
 
-/* eslint no-console: off */
-// TODO: remove the following line
-/* eslint no-unused-vars: off */
-
 const { makeLogger } = require('./log-common.js');
 
 module.exports = function perf() {
@@ -29,14 +25,14 @@ module.exports = function perf() {
     desc: 'Test performance',
     builder: (yargs) => {
       yargs
-        .env('HLX')
-        .strict(false)
         .option('fastly-namespace', {
+          alias: 'fastlyNamespace',
           describe: 'CDN Namespace (e.g. Fastly Service ID)',
           type: 'string',
 
         })
         .option('fastly-auth', {
+          alias: 'fastlyAuth',
           describe: 'API Key for Fastly API ($HLX_FASTLY_AUTH)',
           type: 'string',
         })

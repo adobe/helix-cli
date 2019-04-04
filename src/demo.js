@@ -40,6 +40,7 @@ module.exports = function demo() {
           describe: 'Parent directory of new project',
           default: '.',
         })
+        .env('NO_HLX_ENV_SUPPORT_FOR_DEMO')
         .strict();
     },
     handler: async (argv) => {

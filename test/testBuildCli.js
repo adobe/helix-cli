@@ -10,11 +10,14 @@
  * governing permissions and limitations under the License.
  */
 
-/* global describe, it, beforeEach */
+/* eslint-env mocha */
 
 'use strict';
 
 const sinon = require('sinon');
+const dotenv = require('dotenv');
+const path = require('path');
+const { clearHelixEnv } = require('./utils.js');
 const CLI = require('../src/cli.js');
 const BuildCommand = require('../src/build.cmd');
 
@@ -23,12 +26,17 @@ describe('hlx build', () => {
   let mockBuild;
 
   beforeEach(() => {
+    clearHelixEnv();
     mockBuild = sinon.createStubInstance(BuildCommand);
     mockBuild.withCacheEnabled.returnsThis();
     mockBuild.withMinifyEnabled.returnsThis();
     mockBuild.withTargetDir.returnsThis();
     mockBuild.withFiles.returnsThis();
     mockBuild.run.returnsThis();
+  });
+
+  afterEach(() => {
+    clearHelixEnv();
   });
 
   it('hlx build runs w/o arguments', () => {
@@ -39,6 +47,18 @@ describe('hlx build', () => {
     sinon.assert.calledWith(mockBuild.withMinifyEnabled, false);
     sinon.assert.calledWith(mockBuild.withTargetDir, '.hlx/build');
     sinon.assert.calledWith(mockBuild.withFiles, ['src/**/*.htl', 'src/**/*.js']);
+    sinon.assert.calledOnce(mockBuild.run);
+  });
+
+  it('hlx build can use env', () => {
+    dotenv.config({ path: path.resolve(__dirname, 'fixtures', 'all.env') });
+    new CLI()
+      .withCommandExecutor('build', mockBuild)
+      .run(['build']);
+    sinon.assert.calledWith(mockBuild.withCacheEnabled, true);
+    sinon.assert.calledWith(mockBuild.withMinifyEnabled, true);
+    sinon.assert.calledWith(mockBuild.withTargetDir, 'foo');
+    sinon.assert.calledWith(mockBuild.withFiles, ['*.htl', '*.js']);
     sinon.assert.calledOnce(mockBuild.run);
   });
 

@@ -15,6 +15,9 @@
 'use strict';
 
 const sinon = require('sinon');
+const dotenv = require('dotenv');
+const path = require('path');
+const { clearHelixEnv } = require('./utils.js');
 const CLI = require('../src/cli.js');
 const PackageCommand = require('../src/package.cmd');
 
@@ -23,10 +26,15 @@ describe('hlx package', () => {
   let mockPackage;
 
   beforeEach(() => {
+    clearHelixEnv();
     mockPackage = sinon.createStubInstance(PackageCommand);
     mockPackage.withTarget.returnsThis();
     mockPackage.withOnlyModified.returnsThis();
     mockPackage.run.returnsThis();
+  });
+
+  afterEach(() => {
+    clearHelixEnv();
   });
 
   it('hlx package works with minimal arguments', () => {
@@ -36,6 +44,16 @@ describe('hlx package', () => {
 
     sinon.assert.calledWith(mockPackage.withOnlyModified, true);
     sinon.assert.calledWith(mockPackage.withTarget, '.hlx/build');
+    sinon.assert.calledOnce(mockPackage.run);
+  });
+
+  it('hlx package can use env', () => {
+    dotenv.config({ path: path.resolve(__dirname, 'fixtures', 'all.env') });
+    new CLI()
+      .withCommandExecutor('package', mockPackage)
+      .run(['package']);
+    sinon.assert.calledWith(mockPackage.withTarget, 'foo');
+    sinon.assert.calledWith(mockPackage.withOnlyModified, false);
     sinon.assert.calledOnce(mockPackage.run);
   });
 

@@ -15,6 +15,7 @@
 'use strict';
 
 const yargs = require('yargs');
+const camelcase = require('camelcase');
 
 const MIN_MSG = 'You need at least one command.';
 
@@ -24,6 +25,37 @@ if (process.env.NODE_OPTIONS) {
     .split(' ')
     .filter(opt => opt.indexOf('--inspect') === -1)
     .join(' ');
+}
+
+function envAwareStrict(args, aliases) {
+  const specialKeys = ['$0', '--', '_'];
+  const illegalEnv = ['saveConfig', 'add', 'default'];
+
+  const hlxEnv = {};
+  Object
+    .keys(process.env)
+    .filter(key => key.startsWith('HLX_'))
+    .forEach((key) => {
+      hlxEnv[camelcase(key.substring(4))] = key;
+    });
+
+  illegalEnv.forEach((key) => {
+    if (key in hlxEnv) {
+      throw new Error(`${hlxEnv[key]} is not allowed in environment.`);
+    }
+  });
+
+  const unknown = [];
+  Object.keys(args).forEach((key) => {
+    if (specialKeys.indexOf(key) === -1 && !(key in hlxEnv) && !(key in aliases)) {
+      unknown.push(key);
+    }
+  });
+
+  if (unknown.length > 0) {
+    return unknown.length === 1 ? `Unknown argument: ${unknown[0]}` : `Unknown arguments: ${unknown.join(', ')}`;
+  }
+  return true;
 }
 
 /**
@@ -61,10 +93,10 @@ class CLI {
       auth: require('./auth.js')(),
     };
     this._failFn = (message, err, argv) => {
-      const msg = err ? err.message : message;
+      const msg = err && err.message ? err.message : message;
       console.error(msg);
       if (msg === MIN_MSG || /.*Unknown argument.*/.test(msg) || /.*Not enough non-option arguments:.*/.test(msg)) {
-        console.error('\nUsage: %s', argv.help());
+        console.error('\n%s', argv.help());
       }
       process.exit(1);
     };
@@ -84,16 +116,28 @@ class CLI {
     const argv = yargs();
     Object.values(this._commands).forEach(cmd => argv.command(cmd));
 
-    return logArgs(argv)
+    const ret = logArgs(argv)
       .scriptName('hlx')
+      .usage('Usage: $0 <command> [options]')
+      .parserConfiguration({ 'camel-case-expansion': false })
+      .env('HLX')
+      .check(envAwareStrict)
+      .showHelpOnFail(true)
       .fail(this._failFn)
       .exitProcess(args.indexOf('--get-yargs-completions') > -1)
-      .strict()
       .demandCommand(1, MIN_MSG)
       .epilogue('for more information, find our manual at https://github.com/adobe/helix-cli')
       .help()
       .completion()
       .parse(args);
+
+    // hack to check if command is valid in non-strict mode
+    const cmd = ret._[0];
+    if (cmd && !(cmd in this._commands)) {
+      console.error('Unknown command: %s\n', cmd);
+      argv.showHelp();
+      process.exit(1);
+    }
   }
 }
 

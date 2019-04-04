@@ -12,7 +12,8 @@
 
 'use strict';
 
-const deployCommon = require('./deploy-common');
+const yargsOpenwhisk = require('./yargs-openwhisk.js');
+const yargsFastly = require('./yargs-fastly.js');
 const { makeLogger } = require('./log-common.js');
 
 module.exports = function strain() {
@@ -25,17 +26,11 @@ module.exports = function strain() {
     command: ['publish'],
     desc: 'Activate strains in the Fastly CDN and publish the site',
     builder: (yargs) => {
-      deployCommon(yargs);
+      yargsOpenwhisk(yargs);
+      yargsFastly(yargs);
       yargs
-        .option('fastly-namespace', {
-          describe: 'CDN Namespace (e.g. Fastly Service ID)',
-          type: 'string',
-        })
-        .option('fastly-auth', {
-          describe: 'API Key for Fastly API ($HLX_FASTLY_AUTH)',
-          type: 'string',
-        })
         .option('dry-run', {
+          alias: 'dryRun',
           describe: 'List the actions that would be created, but do not actually deploy',
           type: 'boolean',
           default: false,
@@ -46,6 +41,7 @@ module.exports = function strain() {
           default: true,
         })
         .option('api-publish', {
+          alias: 'apiPublish',
           describe: 'API URL for helix-publish service',
           type: 'string',
           default: 'https://adobeioruntime.net/api/v1/web/helix/default/publish',

@@ -10,12 +10,15 @@
  * governing permissions and limitations under the License.
  */
 
-/* global describe, it, beforeEach, afterEach */
+/* eslint-env mocha */
 
 'use strict';
 
 const assert = require('assert');
 const sinon = require('sinon');
+const dotenv = require('dotenv');
+const path = require('path');
+const { clearHelixEnv } = require('./utils.js');
 const GitUtils = require('../src/git-utils');
 const CLI = require('../src/cli.js');
 const DeployCommand = require('../src/deploy.cmd');
@@ -24,18 +27,9 @@ describe('hlx deploy', () => {
   // mocked command instance
   let mockDeploy;
   let stubs;
-  let processenv = {};
-
 
   beforeEach(() => {
-    // save environment
-    processenv = Object.assign({}, process.env);
-    // clear environment
-    Object.keys(process.env).filter(key => key.match(/^HLX_.*/)).map((key) => {
-      delete process.env[key];
-      return true;
-    });
-
+    clearHelixEnv();
     mockDeploy = sinon.createStubInstance(DeployCommand);
     mockDeploy.withEnableAuto.returnsThis();
     mockDeploy.withCircleciAuth.returnsThis();
@@ -63,12 +57,7 @@ describe('hlx deploy', () => {
   });
 
   afterEach(() => {
-    // restore environment
-    Object.keys(processenv).filter(key => key.match(/^HLX_.*/)).map((key) => {
-      process.env[key] = processenv[key];
-      return true;
-    });
-
+    clearHelixEnv();
     stubs.forEach((s) => { s.restore(); });
   });
 
@@ -76,9 +65,9 @@ describe('hlx deploy', () => {
     new CLI()
       .withCommandExecutor('deploy', mockDeploy)
       .onFail((err) => {
-        assert.equal(err, `Missing required arguments: wsk-namespace, wsk-auth
-OpenWhisk Namespace is required
-Authentication is required. You can pass the key via the HLX_WSK_AUTH environment variable, too`);
+        assert.equal(err, `Missing required arguments: wsk-auth, wsk-namespace
+Authentication is required. You can pass the key via the HLX_WSK_AUTH environment variable, too
+OpenWhisk Namespace is required`);
         done();
       })
       .run(['deploy']);
@@ -90,9 +79,9 @@ Authentication is required. You can pass the key via the HLX_WSK_AUTH environmen
     new CLI()
       .withCommandExecutor('deploy', mockDeploy)
       .onFail((err) => {
-        assert.equal(err, `Missing required arguments: wsk-namespace, wsk-auth
-OpenWhisk Namespace is required
-Authentication is required. You can pass the key via the HLX_WSK_AUTH environment variable, too`);
+        assert.equal(err, `Missing required arguments: wsk-auth, wsk-namespace
+Authentication is required. You can pass the key via the HLX_WSK_AUTH environment variable, too
+OpenWhisk Namespace is required`);
         done();
       })
       .run(['deploy', '--wsk-auth secret-key']);
@@ -129,30 +118,68 @@ Authentication is required. You can pass the key via the HLX_WSK_AUTH environmen
     sinon.assert.calledWith(mockDeploy.withWskNamespace, 'hlx');
     sinon.assert.calledWith(mockDeploy.withLogglyHost, 'trieloff.loggly.com'); // TODO !!
     sinon.assert.calledWith(mockDeploy.withLogglyAuth, '');
+    sinon.assert.calledWith(mockDeploy.withFastlyAuth, '');
+    sinon.assert.calledWith(mockDeploy.withFastlyNamespace, undefined);
     sinon.assert.calledWith(mockDeploy.withTarget, '.hlx/build');
     sinon.assert.calledWith(mockDeploy.withDefault, undefined);
     sinon.assert.calledWith(mockDeploy.withCreatePackages, 'auto');
+    sinon.assert.calledWith(mockDeploy.withCircleciAuth, '');
+    sinon.assert.calledWith(mockDeploy.withDryRun, false);
     sinon.assert.calledOnce(mockDeploy.run);
   });
 
   it('hlx deploy works with arguments provided in environment', () => {
-    process.env.HLX_WSK_AUTH = 'sekret-key';
+    dotenv.config({ path: path.resolve(__dirname, 'fixtures', 'all.env') });
     new CLI()
       .withCommandExecutor('deploy', mockDeploy)
+      .run(['deploy']);
+
+    sinon.assert.calledWith(mockDeploy.withEnableAuto, true);
+    sinon.assert.calledWith(mockDeploy.withEnableDirty, true);
+    sinon.assert.calledWith(mockDeploy.withWskHost, 'myruntime.net');
+    sinon.assert.calledWith(mockDeploy.withWskAuth, 'foobar');
+    sinon.assert.calledWith(mockDeploy.withWskNamespace, '1234');
+    sinon.assert.calledWith(mockDeploy.withLogglyHost, 'my.loggly.com');
+    sinon.assert.calledWith(mockDeploy.withLogglyAuth, 'foobar');
+    sinon.assert.calledWith(mockDeploy.withFastlyAuth, 'foobar');
+    sinon.assert.calledWith(mockDeploy.withFastlyNamespace, '1234');
+    sinon.assert.calledWith(mockDeploy.withTarget, 'foo');
+    sinon.assert.calledWith(mockDeploy.withDefault, undefined);
+    sinon.assert.calledWith(mockDeploy.withCircleciAuth, 'foobar');
+    sinon.assert.calledWith(mockDeploy.withDryRun, true);
+    sinon.assert.calledOnce(mockDeploy.run);
+  });
+
+  it('hlx deploy fails with HLX_DEFAULT env', () => {
+    process.env.HLX_DEFAULT = true;
+    let failed = false;
+    new CLI()
+      .withCommandExecutor('deploy', mockDeploy)
+      .onFail((e) => {
+        failed = e;
+      })
       .run(['deploy',
+        '--wsk-auth', 'secret-key',
         '--wsk-namespace', 'hlx',
       ]);
-
-    sinon.assert.calledWith(mockDeploy.withEnableAuto, false);
-    sinon.assert.calledWith(mockDeploy.withEnableDirty, false);
-    sinon.assert.calledWith(mockDeploy.withWskHost, 'adobeioruntime.net');
-    sinon.assert.calledWith(mockDeploy.withWskAuth, 'sekret-key');
-    sinon.assert.calledWith(mockDeploy.withWskNamespace, 'hlx');
-    sinon.assert.calledWith(mockDeploy.withLogglyHost, 'trieloff.loggly.com'); // TODO !!
-    sinon.assert.calledWith(mockDeploy.withLogglyAuth, '');
-    sinon.assert.calledWith(mockDeploy.withTarget, '.hlx/build');
-    sinon.assert.calledWith(mockDeploy.withDefault, undefined);
     sinon.assert.calledOnce(mockDeploy.run);
+    sinon.assert.match('HLX_DEFAULT is not allowed in environment.', failed);
+  });
+
+  it('hlx deploy fails with HLX_ADD env', () => {
+    process.env.HLX_ADD = true;
+    let failed = false;
+    new CLI()
+      .withCommandExecutor('deploy', mockDeploy)
+      .onFail((e) => {
+        failed = e;
+      })
+      .run(['deploy',
+        '--wsk-auth', 'secret-key',
+        '--wsk-namespace', 'hlx',
+      ]);
+    sinon.assert.calledOnce(mockDeploy.run);
+    sinon.assert.match('HLX_ADD is not allowed in environment.', failed);
   });
 
   it('hlx deploy tolerates unknown env parameters', () => {
@@ -245,18 +272,6 @@ Authentication is required. You can pass the key via the HLX_WSK_AUTH environmen
       ]);
 
     sinon.assert.calledWith(mockDeploy.withTarget, 'tmp/build');
-    sinon.assert.calledOnce(mockDeploy.run);
-  });
-
-  it('hlx deploy can set prefix', () => {
-    new CLI()
-      .withCommandExecutor('deploy', mockDeploy)
-      .run(['deploy',
-        '--wsk-auth', 'secret-key',
-        '--wsk-namespace', 'hlx',
-        '--prefix', '_hlx_',
-      ]);
-
     sinon.assert.calledOnce(mockDeploy.run);
   });
 

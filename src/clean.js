@@ -29,8 +29,7 @@ module.exports = function demo() {
           alias: 'o',
           default: '.hlx/build',
           describe: 'Target directory for compiled JS',
-        })
-        .strict();
+        });
     },
     handler: async (argv) => {
       if (!executor) {
