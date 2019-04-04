@@ -103,22 +103,22 @@ module.exports = function deploy() {
           }
           const message = 'Auto-deployment requires: ';
           const missing = [];
-          if (!args['circleci-auth']) {
+          if (!args.circleciAuth) {
             missing.push('--circleci-auth');
           }
-          if (!args['fastly-auth']) {
+          if (!args.fastlyAuth) {
             missing.push('--fastly-auth');
           }
-          if (!args['fastly-namespace']) {
+          if (!args.fastlyNamespace) {
             missing.push('--fastly-namespace');
           }
-          if (!args['wsk-auth']) {
+          if (!args.wskAuth) {
             missing.push('--wsk-auth');
           }
-          if (!args['wsk-namespace']) {
+          if (!args.wskNamespace) {
             missing.push('--wsk-namespace');
           }
-          if (!args['wsk-host']) {
+          if (!args.wskHost) {
             missing.push('--wsk-host');
           }
           if (missing.length === 0) {
@@ -138,17 +138,17 @@ module.exports = function deploy() {
       await executor
         .withEnableAuto(argv.auto)
         .withEnableDirty(argv.dirty)
-        .withWskAuth(argv['wsk-auth'])
-        .withWskHost(argv['wsk-host'])
-        .withWskNamespace(argv['wsk-namespace'])
-        .withLogglyHost(argv['loggly-host'])
-        .withLogglyAuth(argv['loggly-auth'])
+        .withWskAuth(argv.wskAuth)
+        .withWskHost(argv.wskHost)
+        .withWskNamespace(argv.wskNamespace)
+        .withLogglyHost(argv.logglyHost)
+        .withLogglyAuth(argv.logglyAuth)
         .withTarget(argv.target)
         .withDefault(argv.default)
         .withDryRun(argv.dryRun)
-        .withCircleciAuth(argv['circleci-auth'])
-        .withFastlyAuth(argv['fastly-auth'])
-        .withFastlyNamespace(argv['fastly-namespace'])
+        .withCircleciAuth(argv.circleciAuth)
+        .withFastlyAuth(argv.fastlyAuth)
+        .withFastlyNamespace(argv.fastlyNamespace)
         .withCreatePackages(argv.package)
         .withAddStrain(argv.add)
         .run();
