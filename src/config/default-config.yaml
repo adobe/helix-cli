@@ -9,7 +9,8 @@ definitions:
     - &defaultRepo "$CURRENT_ORIGIN"
 
 strains:
-  - name: local-dev
+  - name: dev
+    url: http://localhost:3000/
     code: *localRepo
     content: *localRepo
     static: *localRepo
