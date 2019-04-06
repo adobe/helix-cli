@@ -11,13 +11,13 @@ definitions:
     - &localRepo "http://localhost/local/default.git"
 
 strains:
-  local-dev:
+  - name: dev
     url: http://localhost:3000/
     code: *localRepo
     content: *localRepo
     static: *localRepo
 
-  default:
+  - name: default
     code: *defaultRepo
     content: *defaultRepo
     static: *defaultRepo
