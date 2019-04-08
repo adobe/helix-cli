@@ -17,6 +17,7 @@ const opn = require('opn');
 const chokidar = require('chokidar');
 const chalk = require('chalk');
 const { HelixProject } = require('@adobe/helix-simulator');
+const GitUtils = require('./git-utils.js');
 const BuildCommand = require('./build.cmd');
 const pkgJson = require('../package.json');
 
@@ -29,6 +30,7 @@ class UpCommand extends BuildCommand {
     this._open = false;
     this._saveConfig = false;
     this._overrideHost = null;
+    this._localRepos = [];
   }
 
   withHttpPort(p) {
@@ -48,6 +50,15 @@ class UpCommand extends BuildCommand {
 
   withOverrideHost(value) {
     this._overrideHost = value;
+    return this;
+  }
+
+  withLocalRepo(value = []) {
+    if (Array.isArray(value)) {
+      this._localRepos.push(...value.filter(r => !!r));
+    } else if (value) {
+      this._localRepos.push(value);
+    }
     return this;
   }
 
@@ -127,6 +138,30 @@ class UpCommand extends BuildCommand {
       }
     }
 
+    // check for git repository
+    if (!hasConfigFile && this._localRepos.length === 0) {
+      if (!this.config.strains.get('default').content.isLocal) {
+        // ensure local repository will be mounted for default config with origin
+        this._localRepos.push('.');
+      }
+    }
+
+    // check all local repos
+    const localRepos = await Promise.all(this._localRepos.map(async (repo) => {
+      const repoPath = path.resolve(this.directory, repo);
+      if (!await fse.pathExists(path.join(repoPath, '.git'))) {
+        throw Error(`Specified --local-repo = ${repo} is not a git repository.`);
+      }
+      const gitUrl = await GitUtils.getOriginURL(repoPath);
+      if (!gitUrl) {
+        throw Error(`Unable to determine origin url for --local-repo = ${repo}`);
+      }
+      return {
+        gitUrl,
+        repoPath,
+      };
+    }));
+
     // start debugger (#178)
     // https://nodejs.org/en/docs/guides/debugging-getting-started/#enable-inspector
     if (process.platform !== 'win32') {
@@ -157,6 +192,11 @@ class UpCommand extends BuildCommand {
       throw Error(`Unable to start helix: ${e.message}`);
     }
 
+    // register the local repositories
+    localRepos.forEach((repo) => {
+      this._project.registerGitRepository(repo.repoPath, repo.gitUrl);
+    });
+
     let buildStartTime;
     let buildMessage;
     const onBuildStart = async () => {
@@ -182,14 +222,6 @@ class UpCommand extends BuildCommand {
         }
 
         await this._project.start();
-
-        // if no config is defined, we use the `dev` strain to ensure localhost as git server
-        if (!hasConfigFile) {
-          this.config.strains.get('dev').urls = [
-            `http://localhost:${this._project.server.port}`,
-            `http://127.0.0.1:${this._project.server.port}`,
-          ];
-        }
 
         this.emit('started', this);
         if (this._open) {

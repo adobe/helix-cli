@@ -36,6 +36,7 @@ describe('hlx up', () => {
     mockUp.withHttpPort.returnsThis();
     mockUp.withSaveConfig.returnsThis();
     mockUp.withOverrideHost.returnsThis();
+    mockUp.withLocalRepo.returnsThis();
     mockUp.run.returnsThis();
   });
 
@@ -53,6 +54,7 @@ describe('hlx up', () => {
     sinon.assert.calledWith(mockUp.withTargetDir, '.hlx/build');
     sinon.assert.calledWith(mockUp.withFiles, ['src/**/*.htl', 'src/**/*.js']);
     sinon.assert.calledWith(mockUp.withOverrideHost, undefined);
+    sinon.assert.calledWith(mockUp.withLocalRepo, []);
     sinon.assert.calledOnce(mockUp.run);
   });
 
@@ -68,6 +70,7 @@ describe('hlx up', () => {
     sinon.assert.calledWith(mockUp.withOverrideHost, 'www.project-helix.io');
     sinon.assert.calledWith(mockUp.withOpen, false);
     sinon.assert.calledWith(mockUp.withHttpPort, 1234);
+    sinon.assert.calledWith(mockUp.withLocalRepo, ['.', '../foo-content', '../bar-content']);
     sinon.assert.calledOnce(mockUp.run);
   });
 
@@ -190,6 +193,38 @@ describe('hlx up', () => {
       .withCommandExecutor('up', mockUp)
       .run(['up', '--port', '3210']);
     sinon.assert.calledWith(mockUp.withHttpPort, 3210);
+    sinon.assert.calledOnce(mockUp.run);
+  });
+
+  it('hlx up with local repo defaults to .', () => {
+    new CLI()
+      .withCommandExecutor('up', mockUp)
+      .run(['up', '--local-repo', '.']);
+    sinon.assert.calledWith(mockUp.withLocalRepo, ['.']);
+    sinon.assert.calledOnce(mockUp.run);
+  });
+
+  it('hlx up can specify 1 local repo', () => {
+    new CLI()
+      .withCommandExecutor('up', mockUp)
+      .run(['up', '--local-repo', '.']);
+    sinon.assert.calledWith(mockUp.withLocalRepo, ['.']);
+    sinon.assert.calledOnce(mockUp.run);
+  });
+
+  it('hlx up can specify no local repo', () => {
+    new CLI()
+      .withCommandExecutor('up', mockUp)
+      .run(['up', '--no-local-repo']);
+    sinon.assert.calledWith(mockUp.withLocalRepo, []);
+    sinon.assert.calledOnce(mockUp.run);
+  });
+
+  it('hlx up can specify multiple local repos', () => {
+    new CLI()
+      .withCommandExecutor('up', mockUp)
+      .run(['up', '--local-repo', '.', '--local-repo', '../foo', '--local-repo', '../bar']);
+    sinon.assert.calledWith(mockUp.withLocalRepo, ['.', '../foo', '../bar']);
     sinon.assert.calledOnce(mockUp.run);
   });
 });

@@ -65,7 +65,7 @@ class AbstractCommand extends EventEmitter {
           throw Error();
         } else {
           // set default config
-          this._helixConfig.withSource(await ConfigUtils.createDefaultConfig());
+          this._helixConfig.withSource(await ConfigUtils.createDefaultConfig(this.directory));
         }
       }
       await this._helixConfig.init();

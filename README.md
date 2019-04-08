@@ -122,7 +122,7 @@ If you need to pass request parameters, you can whitelist the parameters you nee
 
 ```yaml
 strains:
-  default:
+  - name: default
     code: https://github.com/adobe/project-helix.io.git#master
     content: https://github.com/adobe/project-helix.io.git#master
     static: https://github.com/adobe/project-helix.io.git/htdocs#master
@@ -147,7 +147,7 @@ by adding an `index` property:
 
 ```yaml
 strains:
-  default:
+  - name: default
     code: https://github.com/adobe/project-helix.io.git#master
     content: https://github.com/adobe/project-helix.io.git#master
     static: https://github.com/adobe/project-helix.io.git/htdocs#master
@@ -160,7 +160,7 @@ Static content is delivered from the `htdocs` directory of the _code_ repository
 
 ```yaml
 strains:
-  default:
+  - name: default
     code: https://github.com/adobe/project-helix.io.git#master
     content: https://github.com/adobe/project-helix.io.git#master
     static: https://github.com/adobe/project-helix.io.git/htdocs#master
@@ -182,13 +182,13 @@ An example configuration could look like this:
 
 ```yaml
 strains:
-  default:
+  - name: default
     code: https://github.com/adobe/project-helix.io.git#master
     content: https://github.com/adobe/project-helix.io.git#master
     static: https://github.com/adobe/project-helix.io.git/htdocs#master
     url: https://www.primordialsoup.life
 
-  develop:
+  - name: develop
     code: https://github.com/adobe/project-helix.io.git#dev
     content: https://github.com/adobe/project-helix.io.git#master
     static: https://github.com/adobe/project-helix.io.git/htdocs#master
@@ -205,14 +205,16 @@ You are still able to set strain `conditions` or assign traffic to a strain base
 
 ```yaml
 strains:
-  default:
+  - name: default
     code: https://github.com/adobe/project-helix.io.git#master
     content: https://github.com/adobe/project-helix.io.git#master
     static: https://github.com/adobe/project-helix.io.git/htdocs#master
-  oldcontent:
+
+  - name: oldcontent
     origin: https://www.adobe.io
     url: https://www.primordialsoup.life/content/
-  proxy:
+
+  - name: proxy
     origin: https://www.adobe.io
     condition: req.http.host == "proxy.primordialsoup.life"
 ```
@@ -220,6 +222,119 @@ strains:
 In the example above, there are three strains: `default` serves content from `www.primordialsoup.life` using Helix. But all URLs that start with `https://www.primordialsoup.life/content/` will be served from `www.adobe.io`. This means an image that is referenced as `/content/example.png` will be served from the Adobe I/O website.
 
 Finally, on `proxy.primordialsoup.life`, all content of the old site is being served. This allows you to easily switch back to an old configuration.
+
+## Development - Serving local content
+
+Getting the Helix Development Server to use a local content repository can be done in 2 ways:
+
+### Specify a local content url
+
+This is the out-of-the box setup:
+
+```yaml
+definitions:
+  defaults:
+    - &localRepo "http://localhost/local/default.git"
+
+strains:
+  - name: default
+    url: http://localhost:3000/
+    code: *localRepo
+    content: *localRepo
+    static: *localRepo
+```
+
+The Helix Development server will automatically start a git server that can serve the content from
+the local repository.
+
+### Use the GitHub emulator
+
+When starting the `hlx up` with `--local-repo` argument(s), it instructs the Helix Development Server to
+start a git server that emulates GitHub repositories for a local git repository. All the strains that
+have a _content_ or _static_ url that matches the `origin` of emulated repository are internally reconfigured
+to use the local git server instead.
+
+For the simple case, where only one repository is used for code, content and static just do:
+
+```
+$ hlx up --local-repo
+``` 
+
+#### Multi Strain Example
+
+In the following config, we define 2 repositories:
+
+- `defaultRepo` contains the project's code and the main content
+- `apiRepo` contains additional content; for example the API documentation.
+
+We also define 2 strains, one for each purpose.
+
+```yaml
+definitions:
+  repos:
+    - &defaultRepo https://github.com/helix/welcome.git#master
+    - &apiRepo https://github.com/helix/welcome-api.git#master
+
+strains:
+  - name: api
+    url: https://www.project-helix.io/api
+    code: *defaultRepo
+    content: *apiRepo
+    static: *apiRepo
+
+  - name: default
+    url: https://www.project-helix.io/
+    code: *defaultRepo
+    content: *defaultRepo
+    static: *defaultRepo
+```
+
+Usually, when invoking `hlx up` without any arguments, the Helix Development Server will serve the
+content directly from GitHub. This is not suitable for local development. Also, the `api` strain
+will never be selected, because the `localhost:3000` host header will not match the specified `url` 
+condition.
+
+Starting the server with:  
+
+```
+$ hlx up --host=www.project-helix.io
+```
+
+Solves the latter problem. the `--host` argument internally overrides the `request.header`, so that
+the strain resolution works as desired.
+
+Assume that we also have a local checkout of the `welcome-api`, beside the `welcome` repository:
+
+```
+projects/
+├── welcome/
+│   ├── helix-config.yaml
+│   └── index.md
+└── welcome-api/
+    └── index.md
+```
+
+We can now launch the server with the respective `--local-repo` arguments: 
+
+```
+$ hlx up --host=www.project-helix.io --local-repo=. --local-repo=../welcome-api
+```
+
+Now the server will transiently reconfigure the strains, so that the emulated repositories are used.
+
+> **Note**: If you turn on `--log-level=debug` you should see log entries for the emulated repositories:   
+```
+[hlx] debug: git emulating https://github.com/helix/welcome.git via http://127.0.0.1:52270/helix/github.com--helix--welcome.git#master from './'
+[hlx] debug: git emulating https://github.com/helix/welcome-api.git via http://127.0.0.1:52270/helix/github.com--helix-welcome-api.git#master from '../welcome-api'
+```
+
+For convenience, you can also specify the arguments in an `.env` file:
+
+```dotenv
+HLX_HOST=www.project-helix.io
+HLX_LOCAL_REPO=., ../welcome-api
+HLX_LOG_LEVEL=debug
+```
 
 
 ## (Recommended) Performance Testing
@@ -236,7 +351,7 @@ An example performance configuration might look like this:
 
 ```yaml
 strains:
-  default:
+  - name: default
     code: https://github.com/adobe/project-helix.io.git#master
     content: https://github.com/adobe/project-helix.io.git#master
     static: https://github.com/adobe/project-helix.io.git/htdocs#master

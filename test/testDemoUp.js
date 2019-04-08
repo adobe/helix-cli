@@ -13,18 +13,26 @@
 /* eslint-env mocha */
 const assert = require('assert');
 const path = require('path');
-const {
-  assertHttp,
-  createTestRoot,
-} = require('./utils.js');
+const fse = require('fs-extra');
+
+const { assertHttp, createTestRoot } = require('./utils.js');
 
 const UpCommand = require('../src/up.cmd');
 const DemoCommand = require('../src/demo.cmd');
 
 describe('Integration test for demo + up command', () => {
+  let testRoot;
+
+  beforeEach(async () => {
+    testRoot = await createTestRoot();
+  });
+
+  afterEach(async () => {
+    await fse.remove(testRoot);
+  });
+
   ['simple', 'full'].forEach(async (demoType) => {
     it(`up command delivers expected output with ${demoType} demo`, async () => {
-      const testRoot = await createTestRoot();
       const demoName = `demo-${demoType}`;
       const testDir = `${testRoot}/${demoName}`;
       const buildDir = await path.resolve(testDir, '.hlx/build');

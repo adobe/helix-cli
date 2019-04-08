@@ -164,18 +164,24 @@ class GitUtils {
    * @returns {Promise<string>} `origin` remote url
    */
   static async getOrigin(dir) {
-    const rmt = (await git.listRemotes({ dir })).find(entry => entry.remote === 'origin');
-    return typeof rmt === 'object' ? rmt.url : '';
+    try {
+      const rmt = (await git.listRemotes({ dir })).find(entry => entry.remote === 'origin');
+      return typeof rmt === 'object' ? rmt.url : '';
+    } catch (e) {
+      // don't fail if directory is not a git repository
+      return '';
+    }
   }
 
   /**
-   * Same as #getOrigin()but returns a `GitUrl` instance instead of a string.
+   * Same as #getOrigin() but returns a `GitUrl` instance instead of a string.
    *
    * @param {string} dir working tree directory path of the git repo
-   * @returns {Promise<GitUrl>} `origin` remote url
+   * @returns {Promise<GitUrl>} `origin` remote url ot {@code null} if not available
    */
   static async getOriginURL(dir) {
-    return new GitUrl(await GitUtils.getOrigin(dir));
+    const origin = await GitUtils.getOrigin(dir);
+    return origin ? new GitUrl(origin) : null;
   }
 
   /**
