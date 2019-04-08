@@ -35,7 +35,7 @@
     "@adobe/fastly-native-promises": "^1.3.2",
     "@adobe/helix-shared": "0.10.0",
     "@adobe/helix-pipeline": "1.2.2",
-    "@adobe/helix-simulator": "2.11.0",
+    "@adobe/helix-simulator": "2.11.1",
     "@adobe/parcel-plugin-htl": "2.1.0",
     "@parcel/logger": "1.11.0",
     "@snyk/nodejs-runtime-agent": "1.42.1",
