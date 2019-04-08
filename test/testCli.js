@@ -49,7 +49,7 @@ describe('hlx command line', () => {
   it('hlx with unknown command shows help and exists with != 0', () => {
     const cmd = runCLI('foo');
     assert.notEqual(cmd.code, 0);
-    assert.ok(/.*Unknown argument: foo*/.test(cmd.stderr.toString()));
+    assert.ok(/.*Unknown command: foo*/.test(cmd.stderr.toString()));
   });
 
   it('hlx build with unknown argument shows help and exists with != 0', () => {

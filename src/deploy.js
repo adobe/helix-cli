@@ -12,7 +12,8 @@
 
 'use strict';
 
-const deployCommon = require('./deploy-common');
+const yargsOpenwhisk = require('./yargs-openwhisk.js');
+const yargsFastly = require('./yargs-fastly.js');
 const { makeLogger } = require('./log-common.js');
 
 module.exports = function deploy() {
@@ -25,7 +26,8 @@ module.exports = function deploy() {
     command: 'deploy',
     desc: 'Deploy packaged functions to Adobe I/O runtime',
     builder: (yargs) => {
-      deployCommon(yargs);
+      yargsOpenwhisk(yargs);
+      yargsFastly(yargs);
       yargs
         .option('auto', {
           describe: 'Enable auto-deployment',
@@ -33,26 +35,26 @@ module.exports = function deploy() {
           default: false,
           demandOption: true,
         })
+        .option('dry-run', {
+          alias: 'dryRun',
+          describe: 'List the actions that would be created, but do not actually deploy',
+          type: 'boolean',
+          default: false,
+        })
         .option('loggly-host', {
+          alias: 'logglyHost',
           describe: 'API Host for Log Appender',
           type: 'string',
           default: 'trieloff.loggly.com',
         })
         .option('loggly-auth', {
+          alias: 'logglyAuth',
           describe: 'API Key for Log Appender ($HLX_LOGGLY_AUTH)',
           type: 'string',
           default: '',
         })
-        .option('fastly-namespace', {
-          describe: 'CDN Namespace (e.g. Fastly Service ID)',
-          type: 'string',
-        })
-        .option('fastly-auth', {
-          describe: 'API Key for Fastly API ($HLX_FASTLY_AUTH)',
-          type: 'string',
-          default: '',
-        })
         .option('circleci-auth', {
+          alias: 'circleciAuth',
           describe: 'API Key for CircleCI API ($HLX_CIRCLECI_AUTH)',
           type: 'string',
           default: '',

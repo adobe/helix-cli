@@ -15,24 +15,18 @@
 'use strict';
 
 const sinon = require('sinon');
-const assert = require('assert');
+const dotenv = require('dotenv');
+const path = require('path');
+const { clearHelixEnv } = require('./utils.js');
 const CLI = require('../src/cli.js');
 const PerfCommand = require('../src/perf.cmd');
 
 describe('hlx perf (CLI)', () => {
   // mocked command instance
   let mockPerf;
-  let processenv = {};
 
   beforeEach(() => {
-    // save environment
-    processenv = Object.assign({}, process.env);
-    // clear environment
-    Object.keys(process.env).filter(key => key.match(/^HLX_.*/)).map((key) => {
-      delete process.env[key];
-      return true;
-    });
-
+    clearHelixEnv();
     mockPerf = sinon.createStubInstance(PerfCommand);
     mockPerf.run.returnsThis();
     mockPerf.withConnection.returnsThis();
@@ -43,25 +37,22 @@ describe('hlx perf (CLI)', () => {
     mockPerf.withJunit.returnsThis();
   });
 
-
   afterEach(() => {
-    // restore environment
-    Object.keys(processenv).filter(key => key.match(/^HLX_.*/)).map((key) => {
-      process.env[key] = processenv[key];
-      return true;
-    });
+    clearHelixEnv();
   });
 
-  it('hlx perf accepts HLX_FASTLY_AUTH', () => {
-    process.env.HLX_FASTLY_AUTH = 'nope-nope-nope';
-    process.env.HLX_FASTLY_NAMESPACE = 'nope-nope-nope';
+  it('hlx perf can use env', () => {
+    dotenv.config({ path: path.resolve(__dirname, 'fixtures', 'all.env') });
     new CLI()
       .withCommandExecutor('perf', mockPerf)
-      .onFail((err) => {
-        assert.fail(err);
-      })
       .run(['perf']);
-    assert.ok(true);
+    sinon.assert.calledWith(mockPerf.withDevice, 'iPad');
+    sinon.assert.calledWith(mockPerf.withLocation, 'California');
+    sinon.assert.calledWith(mockPerf.withConnection, 'good2G');
+    sinon.assert.calledWith(mockPerf.withJunit, 'some-results.xml');
+    sinon.assert.calledWith(mockPerf.withFastlyAuth, 'foobar');
+    sinon.assert.calledWith(mockPerf.withFastlyNamespace, '1234');
+    sinon.assert.calledOnce(mockPerf.run);
   });
 
   it('hlx perf works with minimal arguments', () => {

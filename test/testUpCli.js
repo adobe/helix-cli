@@ -10,11 +10,14 @@
  * governing permissions and limitations under the License.
  */
 
-/* global describe, it, beforeEach */
+/* eslint-env mocha */
 
 'use strict';
 
 const sinon = require('sinon');
+const dotenv = require('dotenv');
+const path = require('path');
+const { clearHelixEnv } = require('./utils.js');
 const CLI = require('../src/cli.js');
 const UpCommand = require('../src/up.cmd');
 
@@ -23,6 +26,7 @@ describe('hlx up', () => {
   let mockUp;
 
   beforeEach(() => {
+    clearHelixEnv();
     mockUp = sinon.createStubInstance(UpCommand);
     mockUp.withCacheEnabled.returnsThis();
     mockUp.withMinifyEnabled.returnsThis();
@@ -33,6 +37,10 @@ describe('hlx up', () => {
     mockUp.withSaveConfig.returnsThis();
     mockUp.withOverrideHost.returnsThis();
     mockUp.run.returnsThis();
+  });
+
+  afterEach(() => {
+    clearHelixEnv();
   });
 
   it('hlx up runs w/o arguments', () => {
@@ -46,6 +54,46 @@ describe('hlx up', () => {
     sinon.assert.calledWith(mockUp.withFiles, ['src/**/*.htl', 'src/**/*.js']);
     sinon.assert.calledWith(mockUp.withOverrideHost, undefined);
     sinon.assert.calledOnce(mockUp.run);
+  });
+
+  it('hlx up can use env', () => {
+    dotenv.config({ path: path.resolve(__dirname, 'fixtures', 'all.env') });
+    new CLI()
+      .withCommandExecutor('up', mockUp)
+      .run(['up']);
+    sinon.assert.calledWith(mockUp.withCacheEnabled, true);
+    sinon.assert.calledWith(mockUp.withMinifyEnabled, true);
+    sinon.assert.calledWith(mockUp.withTargetDir, 'foo');
+    sinon.assert.calledWith(mockUp.withFiles, ['*.htl', '*.js']);
+    sinon.assert.calledWith(mockUp.withOverrideHost, 'www.project-helix.io');
+    sinon.assert.calledWith(mockUp.withOpen, false);
+    sinon.assert.calledWith(mockUp.withHttpPort, 1234);
+    sinon.assert.calledOnce(mockUp.run);
+  });
+
+  it('hlx up fails with non env extra argument', () => {
+    let failed = false;
+    new CLI()
+      .withCommandExecutor('up', mockUp)
+      .onFail(() => {
+        failed = true;
+      })
+      .run(['up', '--wsk-auth']);
+    sinon.assert.calledOnce(mockUp.run);
+    sinon.assert.match(true, failed);
+  });
+
+  it('hlx up fails with HLX_SAVE_CONFIG env', () => {
+    process.env.HLX_SAVE_CONFIG = true;
+    let failed = false;
+    new CLI()
+      .withCommandExecutor('up', mockUp)
+      .onFail((e) => {
+        failed = e;
+      })
+      .run(['up']);
+    sinon.assert.calledOnce(mockUp.run);
+    sinon.assert.match('HLX_SAVE_CONFIG is not allowed in environment.', failed);
   });
 
   it('hlx up can enable cache', () => {

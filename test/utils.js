@@ -33,6 +33,12 @@ function initGit(dir, remote) {
   shell.cd(pwd);
 }
 
+function clearHelixEnv() {
+  Object.keys(process.env).filter(key => key.startsWith('HLX_')).forEach((key) => {
+    delete process.env[key];
+  });
+}
+
 function assertFile(p, expectMissing) {
   const exists = fse.pathExistsSync(p);
   if (!exists && !expectMissing) {
@@ -270,4 +276,5 @@ module.exports = {
   processSource,
   perfExample,
   assertZipEntries,
+  clearHelixEnv,
 };

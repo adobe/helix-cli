@@ -14,7 +14,7 @@
 /* eslint global-require: off */
 
 const path = require('path');
-const { defaultArgs } = require('./defaults.js');
+const yargsBuild = require('./yargs-build.js');
 const { makeLogger } = require('./log-common.js');
 
 module.exports = function up() {
@@ -26,7 +26,7 @@ module.exports = function up() {
     command: 'up [files...]',
     description: 'Run a Helix development server',
     builder: (yargs) => {
-      defaultArgs(yargs);
+      yargsBuild(yargs);
       yargs
         .option('open', {
           describe: 'Open a browser window',
@@ -38,6 +38,7 @@ module.exports = function up() {
           type: 'string',
         })
         .option('save-config', {
+          alias: 'saveConfig',
           describe: 'Saves the default config.',
           type: 'boolean',
           default: false,

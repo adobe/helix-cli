@@ -10,37 +10,54 @@
  * governing permissions and limitations under the License.
  */
 
-/* global describe, it, beforeEach */
+/* eslint-env mocha */
 
 'use strict';
 
 const sinon = require('sinon');
+const dotenv = require('dotenv');
+const path = require('path');
+const { clearHelixEnv } = require('./utils.js');
 const CLI = require('../src/cli.js');
 const CleanCommand = require('../src/clean.cmd');
 
 describe('hlx clean', () => {
   // mocked command instance
-  let mockBuild;
+  let mockClean;
 
   beforeEach(() => {
-    mockBuild = sinon.createStubInstance(CleanCommand);
-    mockBuild.withTargetDir.returnsThis();
-    mockBuild.run.returnsThis();
+    clearHelixEnv();
+    mockClean = sinon.createStubInstance(CleanCommand);
+    mockClean.withTargetDir.returnsThis();
+    mockClean.run.returnsThis();
+  });
+
+  afterEach(() => {
+    clearHelixEnv();
   });
 
   it('hlx clean runs w/o arguments', () => {
     new CLI()
-      .withCommandExecutor('clean', mockBuild)
+      .withCommandExecutor('clean', mockClean)
       .run(['clean']);
-    sinon.assert.calledWith(mockBuild.withTargetDir, '.hlx/build');
-    sinon.assert.calledOnce(mockBuild.run);
+    sinon.assert.calledWith(mockClean.withTargetDir, '.hlx/build');
+    sinon.assert.calledOnce(mockClean.run);
+  });
+
+  it('hlx clean can use env', () => {
+    dotenv.config({ path: path.resolve(__dirname, 'fixtures', 'all.env') });
+    new CLI()
+      .withCommandExecutor('clean', mockClean)
+      .run(['clean']);
+    sinon.assert.calledWith(mockClean.withTargetDir, 'foo');
+    sinon.assert.calledOnce(mockClean.run);
   });
 
   it('hlx clean can set target', () => {
     new CLI()
-      .withCommandExecutor('clean', mockBuild)
+      .withCommandExecutor('clean', mockClean)
       .run(['clean', '--target', 'tmp/build']);
-    sinon.assert.calledWith(mockBuild.withTargetDir, 'tmp/build');
-    sinon.assert.calledOnce(mockBuild.run);
+    sinon.assert.calledWith(mockClean.withTargetDir, 'tmp/build');
+    sinon.assert.calledOnce(mockClean.run);
   });
 });

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Adobe. All rights reserved.
+ * Copyright 2019 Adobe. All rights reserved.
  * This file is licensed to you under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License. You may obtain a copy
  * of the License at http://www.apache.org/licenses/LICENSE-2.0
@@ -12,26 +12,21 @@
 
 module.exports = function commonArgs(yargs) {
   return yargs
-    .env('HLX')
-    .strict(false)
     .option('wsk-auth', {
+      alias: 'wskAuth',
       describe: 'Adobe I/O Runtime Authentication key',
       type: 'string',
     })
     .option('wsk-namespace', {
+      alias: 'wskNamespace',
       describe: 'Adobe I/O Runtime Namespace',
       type: 'string',
-      demandOption: true,
     })
     .option('wsk-host', {
+      alias: 'wskHost',
       describe: 'Adobe I/O Runtime API Host',
       type: 'string',
       default: 'adobeioruntime.net',
-    })
-    .option('dry-run', {
-      describe: 'List the actions that would be created, but do not actually deploy',
-      type: 'boolean',
-      default: false,
     })
     .demandOption(
       'wsk-auth',

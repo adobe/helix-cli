@@ -16,23 +16,18 @@
 
 const assert = require('assert');
 const sinon = require('sinon');
+const dotenv = require('dotenv');
+const path = require('path');
+const { clearHelixEnv } = require('./utils.js');
 const CLI = require('../src/cli.js');
 const PublishCommand = require('../src/publish.cmd');
 
 describe('hlx publish', () => {
   // mocked command instance
   let mockPublish;
-  let processenv = {};
 
   beforeEach(() => {
-    // save environment
-    processenv = Object.assign({}, process.env);
-    // clear environment
-    Object.keys(process.env).filter(key => key.match(/^HLX_.*/)).map((key) => {
-      delete process.env[key];
-      return true;
-    });
-
+    clearHelixEnv();
     mockPublish = sinon.createStubInstance(PublishCommand);
     mockPublish.withWskHost.returnsThis();
     mockPublish.withWskAuth.returnsThis();
@@ -45,11 +40,7 @@ describe('hlx publish', () => {
   });
 
   afterEach(() => {
-    // restore environment
-    Object.keys(processenv).filter(key => key.match(/^HLX_.*/)).map((key) => {
-      process.env[key] = processenv[key];
-      return true;
-    });
+    clearHelixEnv();
   });
 
   it('hlx publish requires auth', (done) => {
@@ -62,6 +53,20 @@ describe('hlx publish', () => {
       .run(['publish']);
 
     assert.fail('publish w/o arguments should fail.');
+  });
+
+  it('hlx publish can use env', () => {
+    dotenv.config({ path: path.resolve(__dirname, 'fixtures', 'all.env') });
+    new CLI()
+      .withCommandExecutor('publish', mockPublish)
+      .run(['publish']);
+    sinon.assert.calledWith(mockPublish.withWskHost, 'myruntime.net');
+    sinon.assert.calledWith(mockPublish.withWskAuth, 'foobar');
+    sinon.assert.calledWith(mockPublish.withWskNamespace, '1234');
+    sinon.assert.calledWith(mockPublish.withFastlyNamespace, '1234');
+    sinon.assert.calledWith(mockPublish.withFastlyAuth, 'foobar');
+    sinon.assert.calledWith(mockPublish.withPublishAPI, 'foobar.api');
+    sinon.assert.calledWith(mockPublish.withDryRun, true);
   });
 
   it('hlx publish works with minimal arguments', () => {
