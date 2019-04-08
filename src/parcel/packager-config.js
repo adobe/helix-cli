@@ -19,5 +19,12 @@ module.exports = {
     'cls-hooked': '4.2.2',
     request: '2.88.0',
     'request-promise': '4.2.2',
+
+    // webpack isn't really provided by the container, but it injects itself into the list of
+    // deps, so we exclude it here.
+    webpack: true,
+
+    // helix-cli is never useful as dependency, but it gets drawn in by static.js
+    '@adobe/helix-cli': true,
   },
 };
