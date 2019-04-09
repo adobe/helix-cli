@@ -131,27 +131,26 @@ one or more strains. This results in the deployment of matching OpenWhisk action
 to Adobe I/O Runtime and configures Fastly which actions to invoke in response
 to HTTP requests.
 
+### Resource
+
+The _resource_ is the target of the HTTP request. It typically maps to a markdown 
+document in the content repository, without the [file extension][extension].
+
 ### Selector
 
 A _selector_ is the URL part between the [resource][resource] and the
 [file extension][extension], e.g. `bar` in `/foo.bar.html`. You can use
-selectors to render different variations of the same underlying resource, e.g.
-you may choose to have an `/index.html` (default/empty selector), and
-`/index.toc.json` for a table of contents of the same content but in JSON
-format, or an `/index.sitemap.xml` for a sitemap in XML format.
-
-### Resource
-
-TBD
+selectors to have the [Helix pipeline][pipeline] render different variations 
+of the same underlying resource, e.g. you may choose to have an `/index.html` 
+(default/empty selector), and `/index.toc.json` for a table of contents of the 
+same content but in JSON format, or an `/index.sitemap.xml` for a sitemap in XML 
+format. 
 
 ### File Extension
 
 [Helix pipelines][pipeline] key on the _file extension_ of the requested
 resource, e.g. `html` in `/foo.bar.html`.
 
-### Helix Pipeline
-
-TBD
 
 [fastly-services]: https://docs.fastly.com/guides/basic-setup/working-with-services
 [vcl]: https://docs.fastly.com/vcl/
@@ -159,4 +158,4 @@ TBD
 [selector]: #selector
 [resource]: #resource
 [extension]: #file-extension
-[pipeline]: #helix-pipeline
+[pipeline]: https://github.com/adobe/helix-pipeline/blob/master/README.md
