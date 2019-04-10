@@ -6,6 +6,11 @@
 .snyk
 *.tgz
 build
+coverage
 logs
 test
 test-results.xml
+snykmocha.js
+.releaserc.js
+.eslintignore
+.eslintrc.js

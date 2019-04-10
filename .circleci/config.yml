@@ -66,8 +66,8 @@ jobs:
 
     # test & get code coverage
     - run:
-        name: Getting Code Coverage
-        command: circleci tests glob test/test*.js | circleci tests split --split-by=timings | xargs ./node_modules/.bin/istanbul cover ./node_modules/mocha/bin/_mocha -- -R mocha-junit-reporter --exit && npx codecov
+        name: Test and Code Coverage
+        command: npm run test-ci
         environment:
           MOCHA_FILE: junit/test-results.xml
 
@@ -92,37 +92,8 @@ jobs:
         command: echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" >> ~/.npmrc
 
     - run:
-        name: version pre-release
-        command: npm version prerelease --preid=pre -m "Release %s [ci skip]"
-        environment:
-          MOCHA_FILE: junit/test-results.xml
-
-    - store_test_results:
-        path: junit
-
-    # unfortunately we cannot create a release commit with no tag with `npm version`, so we need to delete it here again
-    - run:
-        name: delete pre-release tag
-        command: npm run delete-git-tag
-
-    - run:
-        name: publish pre-release
-        command: npm publish --tag next --access public
-
-  publish-examples:
-    executor: node8
-    working_directory: ~/repo
-
-    steps:
-    - setup
-    - run:
-        name: Install Globally
-        command: mkdir -p ~/.npm-global && npm link
-
-    - run:
-        name: Deploy Snapshot to Adobe I/O Runtime
-        command: ~/.npm-global/bin/hlx build && ~/.npm-global/bin/hlx deploy --dirty --wsk-namespace trieloff --wsk-auth $WSK_AUTH --loggly-host trieloff --loggly-auth $LOGGLY_AUTH
-        working_directory: test/integration
+        name: Semantic Release
+        command: npm run semantic-release
 
 workflows:
   version: 2
