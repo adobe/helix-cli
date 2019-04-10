@@ -259,6 +259,31 @@ describe('hlx deploy (Integration)', () => {
     assert.ok(log.indexOf('- dev') >= 0);
   });
 
+  it('deploy reports affected strains if no ref is specified', async () => {
+    await fs.copy(TEST_DIR, testRoot);
+    await fs.rename(path.resolve(testRoot, 'default-config-no-master.yaml'), path.resolve(testRoot, 'helix-config.yaml'));
+    initGit(testRoot, 'git@github.com:adobe/project-helix.io.git');
+    const logger = Logger.getTestLogger();
+    await new DeployCommand(logger)
+      .withDirectory(testRoot)
+      .withWskHost('adobeioruntime.net')
+      .withWskAuth('secret-key')
+      .withWskNamespace('hlx')
+      .withEnableAuto(false)
+      .withEnableDirty(false)
+      .withDryRun(true)
+      .withTarget(buildDir)
+      .withFastlyAuth('nope')
+      .withFastlyNamespace('justtesting')
+      .withCircleciAuth(CI_TOKEN)
+      .withCreatePackages('ignore')
+      .run();
+
+    const log = await logger.getOutput();
+    assert.ok(log.indexOf('Affected strains of ssh://git@github.com/adobe/project-helix.io.git#master') >= 0);
+    assert.ok(log.indexOf('- dev') >= 0);
+  });
+
   it('deploy reports affected strains with default proxy', async () => {
     await fs.copy(TEST_DIR, testRoot);
     const cfg = path.resolve(testRoot, 'helix-config.yaml');

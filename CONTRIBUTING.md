@@ -37,18 +37,22 @@ In your pull request, outline:
 
 Lastly, please follow the [pull request template](https://github.com/adobe/helix-cli/blob/master/.github/pull_request_template.md) when submitting a pull request!
 
-Each commit message that is not part of a pull request:
-
-* Should contain the issue ID like `#123`
-* Can contain the tag `[trivial]` for trivial changes that don't relate to an issue
-
-
-
 ## Coding Styleguides
 
 We enforce a coding styleguide using `eslint`. As part of your build, run `npm run lint` to check if your code is conforming to the style guide. We do the same for every PR in our CI, so PRs will get rejected if they don't follow the style guide.
 
 You can fix some of the issues automatically by running `npx eslint . --fix`.
+
+## Commit message format
+
+We use [semantic-release](https://github.com/semantic-release/semantic-release) for release management and require that all commits are properly formatted using the [Angular Commit Message Conventions](https://github.com/angular/angular.js/blob/master/DEVELOPERS.md#-git-commit-guidelines)
+
+In order to help you craft a good commit message, we added [commitizen](https://www.npmjs.com/package/commitizen) as dev dependency, so you can just run 
+
+```
+$ npm run commit
+```
+
 
 # How Contributions get Reviewed
 
@@ -57,35 +61,4 @@ Feedback on the pull request will be given in writing, in GitHub.
 
 # Release Management
 
-The project's committers will release to the [Adobe organization on npmjs.org](https://www.npmjs.com/org/adobe).
-Please contact the [Adobe Open Source Advisory Board](https://git.corp.adobe.com/OpenSourceAdvisoryBoard/discuss/issues) to get access to the npmjs organization.
-
-### Versioning
-
-Use `npm version [<newversion> | major | minor | patch ]` to bump the package version & create the git tag.
-
-The following command will:
-
-* Run `npm test`, abort if tests are failing
-* Increment the patch version (e.g. `1.1.0` -> `1.1.1`) and update `package.json` & `package-lock.json`
-* Commit `package.json` & `package-lock.json`
-* Tag the commit with the new version
-* Push the changes to github
-
-```bash
-$ npm version patch
-```
-
-Create a GitHub Release referencing the new version tag. A (rough) changelog of the new relase can be generated as follows:
-
-```bash
-git log <previous version tag>...master  | fgrep \# | sed -e 's/^    /- /'
-```
-
-
-### Publishing
-
-```bash
-$ npm login
-$ npm publish --access public --tag latest
-```
+Releasing is done using [semantic-release](https://github.com/semantic-release/semantic-release), and every (relevant) commit to the `master` branch gets released automatically. The release will update the version number and add the recent changes to the [CHANGELOG.md](./CHANGELOG.md). It will also create a [release](https://github.com/adobe/helix-cli/releases) in github and finally publish the package to the [Adobe organization on npmjs.org](https://www.npmjs.com/org/adobe).
