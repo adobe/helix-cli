@@ -94,7 +94,9 @@ class CLI {
     };
     this._failFn = (message, err, argv) => {
       const msg = err && err.message ? err.message : message;
-      console.error(msg);
+      if (msg) {
+        console.error(msg);
+      }
       if (msg === MIN_MSG || /.*Unknown argument.*/.test(msg) || /.*Not enough non-option arguments:.*/.test(msg)) {
         console.error('\n%s', argv.help());
       }
