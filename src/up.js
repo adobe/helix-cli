@@ -37,6 +37,24 @@ module.exports = function up() {
           describe: 'Override request.host',
           type: 'string',
         })
+        .option('local-repo', {
+          alias: 'localRepo',
+          describe: 'Emulates a GitHub repository for the specified git repository.',
+          type: 'string',
+          array: true,
+          default: [],
+        })
+        // allow for comma separated values
+        .coerce('localRepo', value => value.reduce((acc, curr) => {
+          if (curr === false) {
+            // do nothing
+          } else if (!curr) {
+            acc.push('.');
+          } else {
+            acc.push(...curr.split(/\s*,\s*/));
+          }
+          return acc;
+        }, []))
         .option('save-config', {
           alias: 'saveConfig',
           describe: 'Saves the default config.',
@@ -48,6 +66,7 @@ module.exports = function up() {
           type: 'int',
           default: 3000,
         })
+        .group(['port', 'open', 'host', 'local-repo'], 'Server options')
         .help();
     },
     handler: async (argv) => {
@@ -65,6 +84,7 @@ module.exports = function up() {
         .withOverrideHost(argv.host)
         .withSaveConfig(argv.saveConfig)
         .withHttpPort(argv.port)
+        .withLocalRepo(argv.localRepo)
         // only open browser window when executable is `hlx`
         // this prevents the window to be opened during integration tests
         .withOpen(argv.open && path.basename(argv.$0) === 'hlx')
