@@ -1,3 +1,10 @@
+## [0.14.1](https://github.com/adobe/helix-cli/compare/v0.14.0...v0.14.1) (2019-04-10)
+
+
+### Bug Fixes
+
+* **deploy:** use latest helix-shared that enforces a defaut for 'ref' in string urls ([#746](https://github.com/adobe/helix-cli/issues/746)) ([bef11ed](https://github.com/adobe/helix-cli/commit/bef11ed)), closes [#741](https://github.com/adobe/helix-cli/issues/741)
+
 # [0.14.0](https://github.com/adobe/helix-cli/compare/v0.13.14...v0.14.0) (2019-04-10)
 
 
