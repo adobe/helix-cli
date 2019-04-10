@@ -6,7 +6,7 @@ version: 1
 definitions:
   defaults:
     - &localRepo "http://localhost/local/default.git"
-    - &remoteRepo "ssh://git@github.com/adobe/project-helix.io.git#master"
+    - &remoteRepo "ssh://git@github.com/adobe/project-helix.io.git"
 
 strains:
   - name: dev
@@ -23,11 +23,9 @@ strains:
       - http://www.project-helix.io
 
   - name: default
-    origin:
-      address: 127.0.0.1
+    code: *localRepo
+    content: *localRepo
+    static: *localRepo
 
-  - name: new-strain
-    code: ssh://git@github.com/adobe/dummy.git#master
-    content: ssh://git@github.com/adobe/dummy.git#master
-    static: ssh://git@github.com/adobe/dummy.git/htdocs#master
-    package: hlx/$REF
+  - name: myproxy
+    origin: http://127.0.0.1/foo
