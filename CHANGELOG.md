@@ -1,3 +1,10 @@
+## [0.14.2](https://github.com/adobe/helix-cli/compare/v0.14.1...v0.14.2) (2019-04-10)
+
+
+### Bug Fixes
+
+* **up:** improve local content repository development ([410b3c5](https://github.com/adobe/helix-cli/commit/410b3c5)), closes [#714](https://github.com/adobe/helix-cli/issues/714)
+
 ## [0.14.1](https://github.com/adobe/helix-cli/compare/v0.14.0...v0.14.1) (2019-04-10)
 
 
