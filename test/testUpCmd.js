@@ -15,6 +15,9 @@
 const assert = require('assert');
 const path = require('path');
 const fse = require('fs-extra');
+const NodeHttpAdapter = require('@pollyjs/adapter-node-http');
+const FSPersister = require('@pollyjs/persister-fs');
+const { setupMocha: setupPolly } = require('@pollyjs/core');
 
 const {
   initGit,
@@ -32,7 +35,24 @@ describe('Integration test for up command', () => {
   let buildDir;
   let testRoot;
 
+  setupPolly({
+    recordFailedRequests: true,
+    recordIfMissing: false,
+    logging: false,
+    adapters: [NodeHttpAdapter],
+    persister: FSPersister,
+    persisterOptions: {
+      fs: {
+        recordingsDir: path.resolve(__dirname, 'fixtures/recordings'),
+      },
+    },
+  });
+
   beforeEach(async function before() {
+    this.polly.server.any()
+      .filter(req => req.headers.host.startsWith('localhost') || req.headers.host.startsWith('127.0.0.1'))
+      .passthrough();
+
     this.timeout(20000);
     testRoot = await createTestRoot();
     testDir = path.resolve(testRoot, 'project');

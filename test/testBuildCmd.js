@@ -35,8 +35,7 @@ describe('Integration test for build', () => {
     return true;
   });
 
-  it('build command succeeds and produces files', async function test() {
-    this.timeout(5000);
+  it('build command succeeds and produces files', async () => {
     await new BuildCommand()
       .withFiles(['test/integration/src/**/*.htl', 'test/integration/src/**/*.js'])
       .withTargetDir(buildDir)

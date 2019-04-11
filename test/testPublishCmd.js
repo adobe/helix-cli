@@ -41,6 +41,19 @@ describe('hlx strain #unit', () => {
 });
 
 describe('Dynamic Strain (VCL) generation', () => {
+  setupPolly({
+    recordFailedRequests: true,
+    recordIfMissing: false,
+    logging: false,
+    adapters: [NodeHttpAdapter],
+    persister: FSPersister,
+    persisterOptions: {
+      fs: {
+        recordingsDir: path.resolve(__dirname, 'fixtures/recordings'),
+      },
+    },
+  });
+
   it('getStrainResolutionVCL generates VLC for non-existing conditions strains', async () => {
     const strainfile = path.resolve(__dirname, 'fixtures/default.yaml');
     const config = await new HelixConfig().withConfigPath(strainfile).init();
@@ -97,7 +110,19 @@ describe('Dynamic Strain (VCL) generation', () => {
     assert.equal(PublishCommand.getStrainParametersVCL(mystrains).trim(), vclfile.trim());
   });
 
-  it('initFastly generates new backends for defined Proxies', async () => {
+  it('initFastly generates new backends for defined Proxies', async function test() {
+    this.polly.server.any().on('beforeResponse', (req) => {
+      req.removeHeaders(['fastly-key', 'user-agent']);
+    });
+    this.polly.configure({
+      matchRequestsBy: {
+        body: false,
+        headers: {
+          exclude: ['content-length', 'fastly-key', 'user-agent'],
+        },
+      },
+    });
+
     const strainfile = path.resolve(__dirname, 'fixtures/proxystrains.yaml');
     const cmd = new PublishCommand(Logger.getTestLogger()).withConfigFile(strainfile);
     try {
@@ -109,7 +134,7 @@ describe('Dynamic Strain (VCL) generation', () => {
     }
     assert.equal(Object.keys(cmd._backends).length, 3);
     assert.ok(cmd._backends.Proxy1921681001f402);
-  }).timeout(50000);
+  });
 });
 
 describe('hlx publish (Integration)', function suite() {
