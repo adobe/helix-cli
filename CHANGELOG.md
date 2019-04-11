@@ -1,3 +1,10 @@
+## [0.14.6](https://github.com/adobe/helix-cli/compare/v0.14.5...v0.14.6) (2019-04-11)
+
+
+### Bug Fixes
+
+* **parcel-plugin-htl dependency:** bumped parcel-plugin-htl dependency since `hlx up` throws a Refer ([290730e](https://github.com/adobe/helix-cli/commit/290730e))
+
 ## [0.14.5](https://github.com/adobe/helix-cli/compare/v0.14.4...v0.14.5) (2019-04-11)
 
 
