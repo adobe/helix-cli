@@ -121,6 +121,19 @@ describe('Static Delivery Action #integrationtest', () => {
 });
 
 describe('Static Delivery Action #unittest', () => {
+  setupPolly({
+    recordFailedRequests: true,
+    recordIfMissing: false,
+    logging: false,
+    adapters: [NodeHttpAdapter],
+    persister: FSPersister,
+    persisterOptions: {
+      fs: {
+        recordingsDir: path.resolve(__dirname, 'fixtures/recordings'),
+      },
+    },
+  });
+
   it('error() #unittest', () => {
     const error = index.error('Test');
     assert.equal(error.statusCode, '500');
