@@ -1,3 +1,10 @@
+## [0.14.7](https://github.com/adobe/helix-cli/compare/v0.14.6...v0.14.7) (2019-04-12)
+
+
+### Bug Fixes
+
+* **cli:** setting --log-level and --log-file  ([80c57b1](https://github.com/adobe/helix-cli/commit/80c57b1)), closes [#756](https://github.com/adobe/helix-cli/issues/756)
+
 ## [0.14.6](https://github.com/adobe/helix-cli/compare/v0.14.5...v0.14.6) (2019-04-11)
 
 
