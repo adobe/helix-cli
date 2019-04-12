@@ -1,3 +1,10 @@
+## [0.14.12](https://github.com/adobe/helix-cli/compare/v0.14.11...v0.14.12) (2019-04-12)
+
+
+### Bug Fixes
+
+* **release:** use adobe-bot for releases ([003e34f](https://github.com/adobe/helix-cli/commit/003e34f))
+
 ## [0.14.11](https://github.com/adobe/helix-cli/compare/v0.14.10...v0.14.11) (2019-04-12)
 
 
