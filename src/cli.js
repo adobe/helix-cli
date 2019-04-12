@@ -66,12 +66,14 @@ function envAwareStrict(args, aliases) {
 function logArgs(argv) {
   return argv
     .option('log-file', {
+      alias: 'logFile',
       describe: 'Log file (use "-" for stdout)',
       type: 'string',
       array: true,
       default: '-',
     })
     .option('log-level', {
+      alias: 'logLevel',
       describe: 'Log level',
       type: 'string',
       choices: ['silly', 'debug', 'verbose', 'info', 'warn', 'error'],

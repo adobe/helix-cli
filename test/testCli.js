@@ -18,7 +18,10 @@ const assert = require('assert');
 const shell = require('shelljs');
 const path = require('path');
 const fse = require('fs-extra');
+const sinon = require('sinon');
 const pkgJson = require('../package.json');
+const CLI = require('../src/cli.js');
+
 const { createTestRoot } = require('./utils.js');
 const { checkNodeVersion } = require('../src/config/config-utils.js');
 
@@ -94,5 +97,27 @@ describe('hlx command line', () => {
         assert.ok(out.indexOf('does not satisfy \nthe supported version range') >= 0);
       }
     }
+  });
+
+  it('can set log-level and log-file', async () => {
+    const testCmd = {
+      command: 'test',
+      desc: 'Test Command.',
+      handler: sinon.spy(),
+    };
+    const cli = new CLI();
+    // eslint-disable-next-line no-underscore-dangle
+    cli._commands = {
+      test: testCmd,
+    };
+    await cli.run(['test', '--log-level', 'silly', '--log-file', 'foo.log']);
+    sinon.assert.calledWith(testCmd.handler, {
+      $0: 'hlx',
+      _: ['test'],
+      'log-file': ['foo.log'],
+      'log-level': 'silly',
+      logFile: ['foo.log'],
+      logLevel: 'silly',
+    });
   });
 });
