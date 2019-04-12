@@ -1,3 +1,10 @@
+## [0.14.8](https://github.com/adobe/helix-cli/compare/v0.14.7...v0.14.8) (2019-04-12)
+
+
+### Bug Fixes
+
+* **package:** update @adobe/helix-pipeline to version 1.3.2 ([a51c802](https://github.com/adobe/helix-cli/commit/a51c802))
+
 ## [0.14.7](https://github.com/adobe/helix-cli/compare/v0.14.6...v0.14.7) (2019-04-12)
 
 
