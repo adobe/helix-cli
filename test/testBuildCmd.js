@@ -21,14 +21,12 @@ const BuildCommand = require('../src/build.cmd');
 
 const TEST_DIR = path.resolve('test/integration');
 
-describe('Integration test for build', () => {
+describe('Integration test for build', function suite() {
+  this.timeout(20000);
   let testRoot;
   let buildDir;
 
-  beforeEach(async function before() {
-    // copying 300 MB can take a while
-    this.timeout(20000);
-
+  beforeEach(async () => {
     testRoot = await createTestRoot();
     buildDir = path.resolve(testRoot, '.hlx/build');
     await fs.copy(TEST_DIR, testRoot);

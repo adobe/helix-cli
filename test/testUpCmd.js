@@ -30,7 +30,8 @@ const UpCommand = require('../src/up.cmd');
 
 const TEST_DIR = path.resolve('test/integration');
 
-describe('Integration test for up command', () => {
+describe('Integration test for up command', function suite() {
+  this.timeout(20000);
   let testDir;
   let buildDir;
   let testRoot;
@@ -53,7 +54,6 @@ describe('Integration test for up command', () => {
       .filter(req => req.headers.host.startsWith('localhost') || req.headers.host.startsWith('127.0.0.1'))
       .passthrough();
 
-    this.timeout(20000);
     testRoot = await createTestRoot();
     testDir = path.resolve(testRoot, 'project');
     buildDir = path.resolve(testRoot, '.hlx/build');
@@ -78,8 +78,7 @@ describe('Integration test for up command', () => {
     }
   });
 
-  it('up command succeeds and can be stopped', function test(done) {
-    this.timeout(5000);
+  it('up command succeeds and can be stopped', (done) => {
     initGit(testDir, 'https://github.com/adobe/dummy-foo.git');
     new UpCommand()
       .withCacheEnabled(false)
@@ -99,8 +98,7 @@ describe('Integration test for up command', () => {
       .catch(done);
   });
 
-  it('up command delivers correct response.', function test(done) {
-    this.timeout(5000);
+  it('up command delivers correct response.', (done) => {
     initGit(testDir, 'https://github.com/adobe/dummy-foo.git');
     let error = null;
     const cmd = new UpCommand()
@@ -161,10 +159,9 @@ describe('Integration test for up command', () => {
     } finally {
       await cmd.stop();
     }
-  }).timeout(5000);
+  });
 
-  it('up command delivers correct response from secondary local repository.', async function test() {
-    this.timeout(10000);
+  it('up command delivers correct response from secondary local repository.', async () => {
     const apiDir = path.resolve(testRoot, 'api-repo');
     await fse.copy(path.resolve(__dirname, 'fixtures', 'api-repo'), apiDir);
     initGit(testDir, 'https://github.com/adobe/dummy-foo.git');
@@ -218,7 +215,7 @@ describe('Integration test for up command', () => {
     } finally {
       await cmd.stop();
     }
-  }).timeout(5000);
+  });
 
   it('up command writes default config.', (done) => {
     initGit(testDir, 'https://github.com/adobe/dummy-foo.git');
@@ -251,10 +248,9 @@ describe('Integration test for up command', () => {
       })
       .run()
       .catch(done);
-  }).timeout(5000);
+  });
 
-  it('up command handles modified sources and delivers correct response.', function test(done) {
-    this.timeout(10000);
+  it('up command handles modified sources and delivers correct response.', (done) => {
     // this test always hangs on the CI, probably due to the parcel workers. ignoring for now.
     const srcFile = path.resolve(testDir, 'src/html2.htl');
     const dstFile = path.resolve(testDir, 'src/html.htl');
@@ -304,9 +300,7 @@ describe('Integration test for up command', () => {
       .catch(done);
   });
 
-  it('up command handles modified includes and delivers correct response.', function test(done) {
-    this.timeout(10000);
-
+  it('up command handles modified includes and delivers correct response.', (done) => {
     // this test always hangs on the CI, probably due to the parcel workers. ignoring for now.
     const srcFile = path.resolve(testDir, 'src/third_helper.js');
     const dstFile = path.resolve(testDir, 'src/helper.js');
