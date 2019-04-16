@@ -1,7 +1,7 @@
-.circleci
-.github
+/.circleci
+/.vscode
+/.github
 .nyc_output
-.vscode
 .idea
 .snyk
 *.tgz
