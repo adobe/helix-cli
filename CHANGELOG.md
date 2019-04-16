@@ -1,3 +1,10 @@
+## [0.14.13](https://github.com/adobe/helix-cli/compare/v0.14.12...v0.14.13) (2019-04-16)
+
+
+### Bug Fixes
+
+* **package:** update @snyk/nodejs-runtime-agent to version 1.43.0 ([4a9615a](https://github.com/adobe/helix-cli/commit/4a9615a))
+
 ## [0.14.12](https://github.com/adobe/helix-cli/compare/v0.14.11...v0.14.12) (2019-04-12)
 
 
