@@ -1,3 +1,10 @@
+## [0.14.15](https://github.com/adobe/helix-cli/compare/v0.14.14...v0.14.15) (2019-04-17)
+
+
+### Bug Fixes
+
+* **GitUtils:** GitUtils.isDirty: ignore git submodules ([fcdc572](https://github.com/adobe/helix-cli/commit/fcdc572)), closes [#614](https://github.com/adobe/helix-cli/issues/614)
+
 ## [0.14.14](https://github.com/adobe/helix-cli/compare/v0.14.13...v0.14.14) (2019-04-17)
 
 
