@@ -81,6 +81,16 @@ describe('Testing GitUtils', () => {
     assert.equal(await GitUtils.isDirty(testRoot, GIT_USER_HOME), true);
   });
 
+  it('isDirty #unit with submodules', async () => {
+    // https://github.com/adobe/helix-cli/issues/614
+    assert.equal(await GitUtils.isDirty(testRoot, GIT_USER_HOME), false);
+    shell.exec('git submodule add https://github.com/adobe/parcel-plugin-jst');
+    assert.equal(await GitUtils.isDirty(testRoot, GIT_USER_HOME), true);
+    shell.exec('git add -A');
+    shell.exec('git commit -m "added submodule"');
+    assert.equal(await GitUtils.isDirty(testRoot, GIT_USER_HOME), false);
+  });
+
   it('isDirty #unit with new file', async () => {
     assert.equal(await GitUtils.isDirty(testRoot, GIT_USER_HOME), false);
     await fse.writeFile(path.resolve(testRoot, 'index.md'), 'Hello, world.\n', 'utf-8');

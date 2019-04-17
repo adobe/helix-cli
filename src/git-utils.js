@@ -40,6 +40,22 @@ class GitUtils {
       return false;
     }
 
+    // ignore submodules
+    // see https://github.com/adobe/helix-cli/issues/614
+    const gitModules = path.resolve(dir, '.gitmodules');
+    if (await fse.pathExists(gitModules)) {
+      const modules = ini.parse(await fse.readFile(gitModules, 'utf-8'));
+      Object.keys(modules).forEach((key) => {
+        const module = modules[key];
+        if (module.path) {
+          modified = modified.filter(row => !row[0].startsWith(module.path));
+        }
+      });
+      if (modified.length === 0) {
+        return false;
+      }
+    }
+
     // need to re-check the modified against the globally ignored
     // see: https://github.com/isomorphic-git/isomorphic-git/issues/444
     const globalConfig = path.resolve(homedir, '.gitconfig');
