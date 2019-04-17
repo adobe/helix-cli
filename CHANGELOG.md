@@ -1,3 +1,10 @@
+## [0.14.14](https://github.com/adobe/helix-cli/compare/v0.14.13...v0.14.14) (2019-04-17)
+
+
+### Bug Fixes
+
+* **package:** update snyk to version 1.151.1 ([e2df83e](https://github.com/adobe/helix-cli/commit/e2df83e))
+
 ## [0.14.13](https://github.com/adobe/helix-cli/compare/v0.14.12...v0.14.13) (2019-04-16)
 
 
