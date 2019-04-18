@@ -1,3 +1,10 @@
+## [0.14.16](https://github.com/adobe/helix-cli/compare/v0.14.15...v0.14.16) (2019-04-18)
+
+
+### Bug Fixes
+
+* **package:** update mime-types to version 2.1.23 ([36ec5f7](https://github.com/adobe/helix-cli/commit/36ec5f7))
+
 ## [0.14.15](https://github.com/adobe/helix-cli/compare/v0.14.14...v0.14.15) (2019-04-17)
 
 
