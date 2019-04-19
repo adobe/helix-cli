@@ -1,3 +1,10 @@
+## [0.14.17](https://github.com/adobe/helix-cli/compare/v0.14.16...v0.14.17) (2019-04-19)
+
+
+### Bug Fixes
+
+* package.json & package-lock.json to reduce vulnerabilities ([#786](https://github.com/adobe/helix-cli/issues/786)) ([40056f0](https://github.com/adobe/helix-cli/commit/40056f0))
+
 ## [0.14.16](https://github.com/adobe/helix-cli/compare/v0.14.15...v0.14.16) (2019-04-18)
 
 
