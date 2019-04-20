@@ -120,6 +120,48 @@ describe('Static Delivery Action #integrationtest', () => {
   }).timeout(5000);
 });
 
+describe('CSS and JS Rewriting', () => {
+  it('Rewrite CSS', async () => {
+    assert.equal(await index.getBody('text/css', '', true), '');
+    assert.equal(await index.getBody('text/css', `.element {
+  background: url('images/../sprite.png?foo=bar');
+}`, true), `.element {
+  background: url('images/../sprite.png?foo=bar');
+}`);
+    assert.equal(await index.getBody('text/css', `.element {
+  background: url('https://example.com/sprite.png?foo=bar');
+}`, true), `.element {
+  background: url('https://example.com/sprite.png?foo=bar');
+}`);
+    assert.equal(await index.getBody('text/css', `.element {
+  background: url('images/../sprite.png');
+}`, true), `.element {
+  background: url('<esi:include src="sprite.png.esi"/><esi:remove>sprite.png</esi:remove>');
+}`);
+    assert.equal(await index.getBody('text/css', `.element {
+  background: url("images/../sprite.png");
+}`, true), `.element {
+  background: url("<esi:include src="sprite.png.esi"/><esi:remove>sprite.png</esi:remove>");
+}`);
+  assert.equal(await index.getBody('text/css',
+    '@import "fineprint.css" print;', true),
+  '@import "<esi:include src="fineprint.css.esi"/><esi:remove>fineprint.css</esi:remove>" print;');
+  assert.equal(await index.getBody('text/css',
+    '@import \'fineprint.css\' print;', true),
+  '@import \'<esi:include src="fineprint.css.esi"/><esi:remove>fineprint.css</esi:remove>\' print;');
+  assert.equal(await index.getBody('text/css',
+      '@import url(\'fineprint.css\') print;', true),
+    '@import url(\'<esi:include src="fineprint.css.esi"/><esi:remove>fineprint.css</esi:remove>\') print;');
+  assert.equal(await index.getBody('text/css',
+      '@import url("fineprint.css") print;', true),
+    '@import url("<esi:include src="fineprint.css.esi"/><esi:remove>fineprint.css</esi:remove>") print;');
+  });
+
+  it('Rewrite JS', async () => {
+    assert.equal(await index.getBody('text/javascript', '', true), '');
+  });
+});
+
 describe('Static Delivery Action #unittest', () => {
   setupPolly({
     recordFailedRequests: true,
