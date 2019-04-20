@@ -38,6 +38,7 @@
     "@adobe/helix-shared": "0.10.3",
     "@adobe/helix-simulator": "2.12.2",
     "@adobe/parcel-plugin-htl": "2.1.4",
+    "@babel/core": "^7.4.3",
     "@parcel/logger": "1.11.0",
     "@snyk/nodejs-runtime-agent": "1.43.0",
     "ajv": "^6.10.0",

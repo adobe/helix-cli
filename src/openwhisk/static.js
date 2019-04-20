@@ -16,6 +16,8 @@ const mime = require('mime-types');
 const postcss = require('postcss');
 const postcssurl = require('postcss-url');
 const parser = require('postcss-value-parser');
+const babel = require('@babel/core');
+const ohash = require('object-hash');
 
 const { space } = postcss.list;
 const uri = require('uri-js');
@@ -47,6 +49,15 @@ function error(message, code = 500) {
   };
 }
 
+
+function isCSS(type) {
+  return type === 'text/css';
+}
+
+function isJavaScript(type) {
+  return type.match(/(text|application)\/(x-)?(javascript|ecmascript)/);
+}
+
 function addHeaders(headers, ref, content) {
   let cacheheaders = {};
   if (ref.match(/[a-f0-9]{40}/)) {
@@ -59,6 +70,12 @@ function addHeaders(headers, ref, content) {
       ETag: `"${hash.digest('base64')}"`,
       'Cache-Control': 's-max-age=300',
     };
+    if (headers['Content-Type'] && (
+      isCSS(headers['Content-Type'])
+      || isJavaScript(headers['Content-Type'])
+    ) && content.toString().match(/<esi:include/)) {
+      cacheheaders['X-ESI'] = true;
+    }
   }
   return Object.assign(headers, cacheheaders);
 }
@@ -78,14 +95,6 @@ function isBinary(type) {
     return !!type.match(/svg/); // openwshisk treats svg as binary
   }
   return true;
-}
-
-function isCSS(type) {
-  return type === 'text/css';
-}
-
-function isJavaScript(type) {
-  return type.match(/(text|application)\/(x-)?(javascript|ecmascript)/);
 }
 
 function rewriteImports(tree) {
@@ -143,7 +152,42 @@ function rewriteCSS(css) {
 }
 
 function rewriteJavaScript(javascript) {
-  return javascript;
+  const importmap = {};
+
+  function rewriteJSImports(bab) {
+    const t = bab.types;
+    return {
+      visitor: {
+        ImportDeclaration(path) {
+          if (path
+            && path.node
+            && path.node.source
+            && path.node.source.value
+            && !importmap[path.node.source.value]) {
+            const srcuri = uri.parse(path.node.source.value);
+            if (srcuri.reference === 'relative' && !srcuri.query) {
+              const { specifiers } = path.node;
+              // console.log(srcuri);
+              const h = ohash(srcuri.path);
+              importmap[h] = `<esi:include src="${srcuri.path}.esi"/><esi:remove>${path.node.source.value}</esi:remove>`;
+              path.replaceWith(t.importDeclaration(specifiers, t.stringLiteral(h)));
+            }
+          }
+          return false;
+        },
+      },
+    };
+  }
+
+  try {
+    const transformed = babel.transformSync(javascript,
+      { plugins: [rewriteJSImports], retainLines: true });
+
+    return Object.keys(importmap)
+      .reduce((src, key) => src.replace(key, importmap[key]), transformed.code);
+  } catch (e) {
+    return javascript;
+  }
 }
 
 function isJSON(type) {

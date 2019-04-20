@@ -143,22 +143,23 @@ describe('CSS and JS Rewriting', () => {
 }`, true), `.element {
   background: url("<esi:include src="sprite.png.esi"/><esi:remove>sprite.png</esi:remove>");
 }`);
-  assert.equal(await index.getBody('text/css',
-    '@import "fineprint.css" print;', true),
-  '@import "<esi:include src="fineprint.css.esi"/><esi:remove>fineprint.css</esi:remove>" print;');
-  assert.equal(await index.getBody('text/css',
-    '@import \'fineprint.css\' print;', true),
-  '@import \'<esi:include src="fineprint.css.esi"/><esi:remove>fineprint.css</esi:remove>\' print;');
-  assert.equal(await index.getBody('text/css',
+    assert.equal(await index.getBody('text/css',
+      '@import "fineprint.css" print;', true),
+    '@import "<esi:include src="fineprint.css.esi"/><esi:remove>fineprint.css</esi:remove>" print;');
+    assert.equal(await index.getBody('text/css',
+      '@import \'fineprint.css\' print;', true),
+    '@import \'<esi:include src="fineprint.css.esi"/><esi:remove>fineprint.css</esi:remove>\' print;');
+    assert.equal(await index.getBody('text/css',
       '@import url(\'fineprint.css\') print;', true),
     '@import url(\'<esi:include src="fineprint.css.esi"/><esi:remove>fineprint.css</esi:remove>\') print;');
-  assert.equal(await index.getBody('text/css',
+    assert.equal(await index.getBody('text/css',
       '@import url("fineprint.css") print;', true),
     '@import url("<esi:include src="fineprint.css.esi"/><esi:remove>fineprint.css</esi:remove>") print;');
   });
 
   it('Rewrite JS', async () => {
-    assert.equal(await index.getBody('text/javascript', '', true), '');
+    assert.equal(await index.getBody('text/javascript', 'import { transform } from "@babel/core";code();', true),
+      'import { transform } from "<esi:include src="@babel/core.esi"/><esi:remove>@babel/core</esi:remove>";code();');
   });
 });
 
