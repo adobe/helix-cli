@@ -14,6 +14,7 @@
 
 const yargsOpenwhisk = require('./yargs-openwhisk.js');
 const yargsFastly = require('./yargs-fastly.js');
+const yargsGithub = require('./yargs-github.js');
 const { makeLogger } = require('./log-common.js');
 
 module.exports = function strain() {
@@ -28,6 +29,7 @@ module.exports = function strain() {
     builder: (yargs) => {
       yargsOpenwhisk(yargs);
       yargsFastly(yargs);
+      yargsGithub(yargs);
       yargs
         .option('dry-run', {
           alias: 'dryRun',
@@ -46,6 +48,17 @@ module.exports = function strain() {
           type: 'string',
           default: 'https://adobeioruntime.net/api/v1/web/helix/default/publish',
         })
+        .option('api-config-purge', {
+          alias: 'apiConfigPurge',
+          describe: 'API URL for helix bot config service',
+          type: 'string',
+          default: 'https://app.project-helix.io/config/purge',
+        })
+        .option('update-bot-config', {
+          alias: 'updateBotConfig',
+          describe: 'Update the helix bot configuration on the affected content repositories.',
+          type: 'boolean',
+        })
         .demandOption(
           'fastly-auth',
           'Authentication is required. You can pass the key via the HLX_FASTLY_AUTH environment variable, too',
@@ -54,8 +67,20 @@ module.exports = function strain() {
           'fastly-namespace',
           'Fastly Service ID is required',
         )
+        .check((args) => {
+          if (args.githubToken && args.updateBotConfig === undefined) {
+            // eslint-disable-next-line no-param-reassign
+            args.updateBotConfig = true;
+          } else if (args.updateBotConfig && !args.githubToken) {
+            return new Error('Github token is required in order to update bot config.\n'
+              + 'Provide one via --github-token or via the HLX_GITHUB_TOKEN environment variable.\n'
+              + 'You can use `hlx auth` to automatically obtain a new token.');
+          }
+          return true;
+        })
         .group(['wsk-auth', 'wsk-namespace', 'fastly-auth', 'fastly-namespace'], 'Deployment Options')
         .group(['wsk-host', 'dry-run'], 'Advanced Options')
+        .group(['github-token', 'update-bot-config'], 'Helix Bot Options')
         .help();
     },
     handler: async (argv) => {
@@ -69,15 +94,23 @@ module.exports = function strain() {
         executor = executor || new PublishCommand(makeLogger(argv));
       }
 
-      await executor
+      const cmd = executor
         .withWskAuth(argv.wskAuth)
         .withWskHost(argv.wskHost)
         .withWskNamespace(argv.wskNamespace)
         .withFastlyNamespace(argv.fastlyNamespace)
         .withFastlyAuth(argv.fastlyAuth)
         .withDryRun(argv.dryRun)
-        .withPublishAPI(argv.apiPublish)
-        .run();
+        .withPublishAPI(argv.apiPublish);
+
+      if (argv.remote) {
+        // only support updating the bot config for remote publish
+        cmd
+          .withGithubToken(argv.githubToken)
+          .withUpdateBotConfig(argv.updateBotConfig)
+          .withConfigPurgeAPI(argv.apiConfigPurge);
+      }
+      await cmd.run();
     },
 
   };
