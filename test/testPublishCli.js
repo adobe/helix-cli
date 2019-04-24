@@ -20,7 +20,7 @@ const dotenv = require('dotenv');
 const path = require('path');
 const { clearHelixEnv } = require('./utils.js');
 const CLI = require('../src/cli.js');
-const PublishCommand = require('../src/publish.cmd');
+const RemotePublishCommand = require('../src/remotepublish.cmd.js');
 
 describe('hlx publish', () => {
   // mocked command instance
@@ -28,7 +28,7 @@ describe('hlx publish', () => {
 
   beforeEach(() => {
     clearHelixEnv();
-    mockPublish = sinon.createStubInstance(PublishCommand);
+    mockPublish = sinon.createStubInstance(RemotePublishCommand);
     mockPublish.withWskHost.returnsThis();
     mockPublish.withWskAuth.returnsThis();
     mockPublish.withWskNamespace.returnsThis();
@@ -36,6 +36,9 @@ describe('hlx publish', () => {
     mockPublish.withFastlyAuth.returnsThis();
     mockPublish.withDryRun.returnsThis();
     mockPublish.withPublishAPI.returnsThis();
+    mockPublish.withConfigPurgeAPI.returnsThis();
+    mockPublish.withUpdateBotConfig.returnsThis();
+    mockPublish.withGithubToken.returnsThis();
     mockPublish.run.returnsThis();
   });
 
@@ -67,6 +70,23 @@ describe('hlx publish', () => {
     sinon.assert.calledWith(mockPublish.withFastlyAuth, 'foobar');
     sinon.assert.calledWith(mockPublish.withPublishAPI, 'foobar.api');
     sinon.assert.calledWith(mockPublish.withDryRun, true);
+  });
+
+  it('hlx publish can use env (remote)', () => {
+    dotenv.config({ path: path.resolve(__dirname, 'fixtures', 'all.env') });
+    new CLI()
+      .withCommandExecutor('publish', mockPublish)
+      .run(['publish', '--remote']);
+    sinon.assert.calledWith(mockPublish.withWskHost, 'myruntime.net');
+    sinon.assert.calledWith(mockPublish.withWskAuth, 'foobar');
+    sinon.assert.calledWith(mockPublish.withWskNamespace, '1234');
+    sinon.assert.calledWith(mockPublish.withFastlyNamespace, '1234');
+    sinon.assert.calledWith(mockPublish.withFastlyAuth, 'foobar');
+    sinon.assert.calledWith(mockPublish.withPublishAPI, 'foobar.api');
+    sinon.assert.calledWith(mockPublish.withDryRun, true);
+    sinon.assert.calledWith(mockPublish.withConfigPurgeAPI, 'purge.api');
+    sinon.assert.calledWith(mockPublish.withGithubToken, 'github-token-foobar');
+    sinon.assert.calledWith(mockPublish.withUpdateBotConfig, true);
   });
 
   it('hlx publish works with minimal arguments', () => {
@@ -105,6 +125,44 @@ describe('hlx publish', () => {
     sinon.assert.calledWith(mockPublish.withFastlyNamespace, 'hlx'); // TODO !!
     sinon.assert.calledWith(mockPublish.withFastlyAuth, 'secret-key');
     sinon.assert.calledWith(mockPublish.withPublishAPI, 'https://adobeioruntime.net/api/v1/web/helix/default/publish');
+    sinon.assert.calledWith(mockPublish.withUpdateBotConfig, undefined);
     sinon.assert.calledOnce(mockPublish.run);
+  });
+
+  it('hlx publish implicit bot config with github token', () => {
+    new CLI()
+      .withCommandExecutor('publish', mockPublish)
+      .run(['publish',
+        '--wsk-auth', 'secret-key',
+        '--wsk-namespace', 'hlx',
+        '--fastly-auth', 'secret-key',
+        '--fastly-namespace', 'hlx',
+        '--remote', 'true',
+        '--github-token', 'foobar',
+      ]);
+
+    sinon.assert.calledWith(mockPublish.withUpdateBotConfig, true);
+    sinon.assert.calledWith(mockPublish.withGithubToken, 'foobar');
+    sinon.assert.calledWith(mockPublish.withConfigPurgeAPI, 'https://app.project-helix.io/config/purge');
+    sinon.assert.calledOnce(mockPublish.run);
+  });
+
+  it('hlx publish requires github token for update config', (done) => {
+    new CLI()
+      .withCommandExecutor('publish', mockPublish)
+      .onFail((err) => {
+        assert.ok(err.indexOf('required'));
+        done();
+      })
+      .run(['publish',
+        '--wsk-auth', 'secret-key',
+        '--wsk-namespace', 'hlx',
+        '--fastly-auth', 'secret-key',
+        '--fastly-namespace', 'hlx',
+        '--remote', 'true',
+        '--update-bot-config',
+      ]);
+
+    assert.fail('publish w/o github token should fail.');
   });
 });
