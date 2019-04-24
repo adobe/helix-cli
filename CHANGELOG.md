@@ -1,3 +1,10 @@
+# [0.15.0](https://github.com/adobe/helix-cli/compare/v0.14.18...v0.15.0) (2019-04-24)
+
+
+### Features
+
+* **publish:** add --update-bot option ([4be9093](https://github.com/adobe/helix-cli/commit/4be9093))
+
 ## [0.14.18](https://github.com/adobe/helix-cli/compare/v0.14.17...v0.14.18) (2019-04-21)
 
 
