@@ -250,6 +250,7 @@ function deliverPlain(owner, repo, ref, entry, root, esi = false) {
         headers: addHeaders({
           'Content-Type': type,
           'X-Static': 'Raw/Static',
+          'X-ESI': esi ? 'enabled' : undefined
         }, ref, response.body),
         body,
       };
