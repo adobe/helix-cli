@@ -328,7 +328,7 @@ async function main({
 
   const file = uri.normalize(entry);
   console.log(file);
-  if (blacklisted(file, allow, deny) || blacklisted(file, allow, deny)) {
+  if (blacklisted(file, allow, deny)) {
     return forbidden();
   }
 
