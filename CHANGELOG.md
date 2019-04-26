@@ -1,3 +1,25 @@
+## [0.15.1](https://github.com/adobe/helix-cli/compare/v0.15.0...v0.15.1) (2019-04-25)
+
+
+### Bug Fixes
+
+* **package:** update @adobe/helix-shared to version 0.10.4 ([cb0af47](https://github.com/adobe/helix-cli/commit/cb0af47))
+
+# [0.15.0](https://github.com/adobe/helix-cli/compare/v0.14.18...v0.15.0) (2019-04-24)
+
+
+### Features
+
+* **publish:** add --update-bot option ([4be9093](https://github.com/adobe/helix-cli/commit/4be9093))
+
+## [0.14.18](https://github.com/adobe/helix-cli/compare/v0.14.17...v0.14.18) (2019-04-21)
+
+
+### Bug Fixes
+
+* **package:** update @adobe/helix-simulator to version 2.12.3 ([6fd9695](https://github.com/adobe/helix-cli/commit/6fd9695))
+* **package:** update snyk to version 1.151.2 ([cedc6e1](https://github.com/adobe/helix-cli/commit/cedc6e1))
+
 ## [0.14.17](https://github.com/adobe/helix-cli/compare/v0.14.16...v0.14.17) (2019-04-19)
 
 

@@ -18,12 +18,11 @@ const proxyquire = require('proxyquire');
 const sinon = require('sinon');
 
 describe('hlx publish --remote (default)', () => {
-  let scope;
   let RemotePublishCommand;
   let writeDictItem;
   let purgeAll;
 
-  before('Setting up Fake Server', function bef() {
+  beforeEach('Setting up Fake Server', function bef() {
     this.timeout(5000);
     writeDictItem = sinon.fake.resolves(true);
     purgeAll = sinon.fake.resolves(true);
@@ -40,15 +39,15 @@ describe('hlx publish --remote (default)', () => {
     nock.restore();
     nock.cleanAll();
     nock.activate();
+  });
 
-    scope = nock('https://adobeioruntime.net')
+  it('publishing makes HTTP requests', async () => {
+    const scope = nock('https://adobeioruntime.net')
       .post('/api/v1/web/helix/default/publish')
       .reply(200, {})
       .post('/api/v1/web/helix/default/addlogger')
       .reply(200, {});
-  });
 
-  it('publishing makes HTTP requests', async () => {
     const remote = await new RemotePublishCommand()
       .withWskAuth('fakeauth')
       .withWskNamespace('fakename')
@@ -62,10 +61,27 @@ describe('hlx publish --remote (default)', () => {
 
     sinon.assert.calledTwice(writeDictItem);
     sinon.assert.calledOnce(purgeAll);
+
+    scope.done();
   });
 
-  after(() => {
-    scope.done();
+  it('publishing stops of no strains with package info', async () => {
+    const remote = await new RemotePublishCommand()
+      .withWskAuth('fakeauth')
+      .withWskNamespace('fakename')
+      .withFastlyAuth('fake_auth')
+      .withFastlyNamespace('fake_name')
+      .withWskHost('doesn.t.matter')
+      .withPublishAPI('https://adobeioruntime.net/api/v1/web/helix/default/publish')
+      .withConfigFile(path.resolve(__dirname, 'fixtures/non-deployed.yaml'))
+      .withDryRun(false);
+    await remote.run();
+
+    sinon.assert.notCalled(writeDictItem);
+    sinon.assert.notCalled(purgeAll);
+  });
+
+  afterEach(() => {
     nock.restore();
   });
 });

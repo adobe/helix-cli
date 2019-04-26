@@ -29,6 +29,9 @@ class RemotePublishCommand extends AbstractCommand {
     this._fastly_auth = null;
     this._dryRun = false;
     this._publishAPI = 'https://adobeioruntime.net/api/v1/web/helix/default/publish';
+    this._githubToken = '';
+    this._updateBotConfig = false;
+    this._configPurgeAPI = 'https://app.project-helix.io/config/purge';
   }
 
   tick(ticks = 1, message, name) {
@@ -49,16 +52,14 @@ class RemotePublishCommand extends AbstractCommand {
   }
 
   progressBar() {
-    if (this._bar) {
-      return this._bar;
+    if (!this._bar) {
+      this._bar = new ProgressBar('Publishing [:bar] :action :etas', {
+        total: 24 + (this._updateBotConfig ? 2 : 0),
+        width: 50,
+        renderThrottle: 1,
+        stream: process.stdout,
+      });
     }
-    this._bar = new ProgressBar('Publishing [:bar] :action :etas', {
-      total: 23,
-      width: 50,
-      renderThrottle: 1,
-      stream: process.stdout,
-    });
-
     return this._bar;
   }
 
@@ -94,6 +95,21 @@ class RemotePublishCommand extends AbstractCommand {
 
   withDryRun(value) {
     this._dryRun = value;
+    return this;
+  }
+
+  withGithubToken(value) {
+    this._githubToken = value;
+    return this;
+  }
+
+  withUpdateBotConfig(value) {
+    this._updateBotConfig = value;
+    return this;
+  }
+
+  withConfigPurgeAPI(value) {
+    this._configPurgeAPI = value;
     return this;
   }
 
@@ -154,6 +170,7 @@ class RemotePublishCommand extends AbstractCommand {
   }
 
   servicePublish() {
+    this.tick(1, 'preparing service config for Helix', true);
     return request.post(this._publishAPI, {
       json: true,
       body: {
@@ -163,10 +180,10 @@ class RemotePublishCommand extends AbstractCommand {
         version: this._version,
       },
     }).then(() => {
-      this.tick(10, 'set service config up for Helix', true);
+      this.tick(9, 'set service config up for Helix', true);
       return true;
     }).catch((e) => {
-      this.tick(10, 'failed to set service config up for Helix', true);
+      this.tick(9, 'failed to set service config up for Helix', true);
       this.log.error(`Remote publish service failed ${e}`);
       throw new Error('Unable to setup service config');
     });
@@ -192,21 +209,149 @@ class RemotePublishCommand extends AbstractCommand {
     });
   }
 
+  async updateBotConfig() {
+    const repos = {};
+    this.tick(1, 'updating helix-bot purge config', true);
+    this._strainsToPublish.forEach((strain) => {
+      const url = strain.content;
+      // todo: respect path
+      const urlString = `${url.protocol}://${url.host}/${url.owner}/${url.repo}.git#${url.ref}`;
+      if (!repos[urlString]) {
+        repos[urlString] = {
+          strains: [],
+          key: `${url.owner}/${url.repo}#${url.ref}`,
+        };
+      }
+      repos[urlString].strains.push(strain.name);
+    });
+    const response = await request.post(this._configPurgeAPI, {
+      json: true,
+      body: {
+        github_token: this._githubToken,
+        content_repositories: Object.keys(repos),
+        fastly_service_id: this._fastly_namespace,
+        fastly_token: this._fastly_auth,
+      },
+    });
+
+    this._botStatus = {
+      repos,
+      response,
+    };
+    this.tick(1, 'updated helix-bot purge config', true);
+  }
+
+  showHelixBotResponse() {
+    if (!this._botStatus) {
+      return;
+    }
+    const { repos, response } = this._botStatus;
+    // create summary
+    const reposNoBot = [];
+    const reposUpdated = [];
+    const reposErrors = [];
+    Object.keys(repos).forEach((repoUrl) => {
+      const repo = repos[repoUrl];
+      const info = response[repo.key];
+      if (!info) {
+        this.log.error(`Internal error: ${repo.key} should be in the service response`);
+        reposErrors.push(repo);
+        return;
+      }
+      if (info.errors) {
+        this.log.error(`${repo.key} update failed: ${info.errors}`);
+        reposErrors.push(repo);
+        return;
+      }
+      if (!info.installation_id) {
+        reposNoBot.push(repo);
+        return;
+      }
+      if (!info.config || !info.config.caches) {
+        this.log.error(`Internal error: ${repo.key} status does not have configuration details.`);
+        reposErrors.push(repo);
+        return;
+      }
+      // find the fastlyId in the cache
+      const cacheInfo = info.config.caches
+        .find(cache => cache.fastlyServiceId === this._fastly_namespace);
+      if (!cacheInfo) {
+        this.log.error(`Internal error: ${repo.key} status does have a configuration entry for given fastly service id.`);
+        reposErrors.push(repo);
+        return;
+      }
+      if (cacheInfo.errors) {
+        this.log.error(`${repo.key} update failed for given fastly service id: ${cacheInfo.errors}`);
+        reposErrors.push(repo);
+        return;
+      }
+      reposUpdated.push(repo);
+    });
+
+    if (reposUpdated.length > 0) {
+      this.log.info('');
+      this.log.info('Updated the purge-configuration of the following repositories:');
+      reposUpdated.forEach((repo) => {
+        this.log.info(chalk`- {cyan ${repo.key}} {grey (${repo.strains.join(', ')})}`);
+      });
+    }
+
+    if (reposErrors.length > 0) {
+      this.log.info('');
+      this.log.info('The purge-configuration of following repositories were not updated due to errors (see log for details):');
+      reposErrors.forEach((repo) => {
+        this.log.info(chalk`- {cyan ${repo.key}} {grey (${repo.strains.join(', ')})}`);
+      });
+    }
+
+    if (reposNoBot.length > 0) {
+      this.log.info('');
+      this.log.info('The following repositories are referenced by strains but don\'t have the helix-bot setup:');
+      reposNoBot.forEach((repo) => {
+        this.log.info(chalk`- {cyan ${repo.key}} {grey (${repo.strains.join(', ')})}`);
+      });
+      this.log.info(chalk`\nVisit {blue https://github.com/apps/helix-bot} to manage the helix bot installations.`);
+    }
+  }
+
   async init() {
     await super.init();
     this._fastly = fastly(this._fastly_auth, this._fastly_namespace);
+
+    // gather all content repositories of the affected strains
+    this._strainsToPublish = this.config.strains.getByFilter((strain) => {
+      if (strain.isProxy()) {
+        this.log.debug(`ignoring proxy strain ${strain.name}`);
+        return false;
+      }
+      // skip the strains where we can't determine the action name
+      if (!strain.package) {
+        this.log.debug(`ignoring unaffected strain ${strain.name}`);
+        return false;
+      }
+      return true;
+    });
   }
 
   async run() {
     await this.init();
+    if (this._strainsToPublish.length === 0) {
+      this.log.warn(chalk`None of the strains contains {cyan package} information. Aborting command.`);
+      return;
+    }
     try {
+      this.tick(1, 'preparing fastly transaction', true);
       await this._fastly.transact(async (version) => {
         this._version = version;
         await this.servicePublish();
         await this.serviceAddLogger();
         await this.updateFastlySecrets();
       }, !this._dryRun);
+      if (this._updateBotConfig) {
+        await this.updateBotConfig();
+      }
       await this.purgeFastly();
+      this.showHelixBotResponse();
       this.showNextStep(this._dryRun);
     } catch (e) {
       const message = 'Error while running the Publish command';
