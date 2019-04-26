@@ -166,7 +166,7 @@ describe('CSS and JS Rewriting', () => {
 describe('Static Delivery Action #unittest', () => {
   setupPolly({
     recordFailedRequests: true,
-    recordIfMissing: false,
+    recordIfMissing: true,
     logging: false,
     adapters: [NodeHttpAdapter],
     persister: FSPersister,
@@ -247,6 +247,54 @@ describe('Static Delivery Action #unittest', () => {
       plain: true,
     });
     assert.ok(res.body.indexOf('Arial') > 0, true);
+  });
+
+  it('main() normalizes URLs', async () => {
+    const res = await index.main({
+      owner: 'adobe',
+      repo: 'helix-cli',
+      entry: './demos/simple/htdocs/style.css',
+      plain: true,
+    });
+    assert.ok(res.body.indexOf('Arial') > 0, true);
+  });
+
+  it('main() normalizes URLs anywhere', async () => {
+    const res = await index.main({
+      owner: 'adobe',
+      repo: 'helix-cli',
+      entry: './demos/simple/test/../htdocs/style.css',
+      plain: true,
+    });
+    assert.ok(res.body.indexOf('Arial') > 0, true);
+  });
+
+  it('main() normalizes URLs in rewritten Javascript', async () => {
+    const res = await index.main({
+      owner: 'trieloff',
+      repo: 'helix-demo',
+      entry: '/index.js',
+      root: '/htdocs',
+      plain: true,
+      esi: true,
+    });
+    assert.equal(res.body, `import barba from "<esi:include src="/web_modules/@barba--core.js.esi"/><esi:remove>./web_modules/@barba--core.js</esi:remove>";import
+prefetch from "<esi:include src="/web_modules/@barba--prefetch.js.esi"/><esi:remove>./web_modules/@barba--prefetch.js</esi:remove>";
+
+// tells barba to use the prefetch module
+barba.use(prefetch);
+
+// Basic default transition, with no rules and minimal hooks…
+barba.init({
+  transitions: [{
+    leave({ current, next, trigger }) {
+      // Do something with \`current.container\` for your leave transition
+      // then return a promise or use \`this.async()\`
+    },
+    enter({ current, next, trigger }) {
+      // Do something with \`next.container\` for your enter transition
+      // then return a promise or use \`this.async()\`
+    } }] });`);
   });
 
   it('main() returns 403 if plain is false', async () => {
