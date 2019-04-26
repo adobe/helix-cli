@@ -37,11 +37,6 @@ module.exports = function strain() {
           type: 'boolean',
           default: false,
         })
-        .option('remote', {
-          describe: 'Use the remote publishing service',
-          type: 'boolean',
-          default: true,
-        })
         .option('api-publish', {
           alias: 'apiPublish',
           describe: 'API URL for helix-publish service',
@@ -84,34 +79,24 @@ module.exports = function strain() {
         .help();
     },
     handler: async (argv) => {
-      if (argv.remote) {
+      if (!executor) {
         // eslint-disable-next-line global-require
         const RemotePublish = require('./remotepublish.cmd'); // lazy load the handler to speed up execution time
-        executor = executor || new RemotePublish(makeLogger(argv));
-      } else {
-        // eslint-disable-next-line global-require
-        const PublishCommand = require('./publish.cmd'); // lazy load the handler to speed up execution time
-        executor = executor || new PublishCommand(makeLogger(argv));
+        executor = new RemotePublish(makeLogger(argv));
       }
 
-      const cmd = executor
+      await executor
         .withWskAuth(argv.wskAuth)
         .withWskHost(argv.wskHost)
         .withWskNamespace(argv.wskNamespace)
         .withFastlyNamespace(argv.fastlyNamespace)
         .withFastlyAuth(argv.fastlyAuth)
         .withDryRun(argv.dryRun)
-        .withPublishAPI(argv.apiPublish);
-
-      if (argv.remote) {
-        // only support updating the bot config for remote publish
-        cmd
-          .withGithubToken(argv.githubToken)
-          .withUpdateBotConfig(argv.updateBotConfig)
-          .withConfigPurgeAPI(argv.apiConfigPurge);
-      }
-      await cmd.run();
+        .withPublishAPI(argv.apiPublish)
+        .withGithubToken(argv.githubToken)
+        .withUpdateBotConfig(argv.updateBotConfig)
+        .withConfigPurgeAPI(argv.apiConfigPurge)
+        .run();
     },
-
   };
 };

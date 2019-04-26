@@ -72,23 +72,6 @@ describe('hlx publish', () => {
     sinon.assert.calledWith(mockPublish.withDryRun, true);
   });
 
-  it('hlx publish can use env (remote)', () => {
-    dotenv.config({ path: path.resolve(__dirname, 'fixtures', 'all.env') });
-    new CLI()
-      .withCommandExecutor('publish', mockPublish)
-      .run(['publish', '--remote']);
-    sinon.assert.calledWith(mockPublish.withWskHost, 'myruntime.net');
-    sinon.assert.calledWith(mockPublish.withWskAuth, 'foobar');
-    sinon.assert.calledWith(mockPublish.withWskNamespace, '1234');
-    sinon.assert.calledWith(mockPublish.withFastlyNamespace, '1234');
-    sinon.assert.calledWith(mockPublish.withFastlyAuth, 'foobar');
-    sinon.assert.calledWith(mockPublish.withPublishAPI, 'foobar.api');
-    sinon.assert.calledWith(mockPublish.withDryRun, true);
-    sinon.assert.calledWith(mockPublish.withConfigPurgeAPI, 'purge.api');
-    sinon.assert.calledWith(mockPublish.withGithubToken, 'github-token-foobar');
-    sinon.assert.calledWith(mockPublish.withUpdateBotConfig, true);
-  });
-
   it('hlx publish works with minimal arguments', () => {
     new CLI()
       .withCommandExecutor('publish', mockPublish)
@@ -97,7 +80,6 @@ describe('hlx publish', () => {
         '--wsk-namespace', 'hlx',
         '--fastly-auth', 'secret-key',
         '--fastly-namespace', 'hlx',
-        '--remote', 'false',
       ]);
 
     sinon.assert.calledWith(mockPublish.withWskHost, 'adobeioruntime.net');
@@ -105,27 +87,6 @@ describe('hlx publish', () => {
     sinon.assert.calledWith(mockPublish.withWskNamespace, 'hlx');
     sinon.assert.calledWith(mockPublish.withFastlyNamespace, 'hlx'); // TODO !!
     sinon.assert.calledWith(mockPublish.withFastlyAuth, 'secret-key');
-    sinon.assert.calledOnce(mockPublish.run);
-  });
-
-  it('hlx publish works with remote arguments', () => {
-    new CLI()
-      .withCommandExecutor('publish', mockPublish)
-      .run(['publish',
-        '--wsk-auth', 'secret-key',
-        '--wsk-namespace', 'hlx',
-        '--fastly-auth', 'secret-key',
-        '--fastly-namespace', 'hlx',
-        '--remote', 'true',
-      ]);
-
-    sinon.assert.calledWith(mockPublish.withWskHost, 'adobeioruntime.net');
-    sinon.assert.calledWith(mockPublish.withWskAuth, 'secret-key');
-    sinon.assert.calledWith(mockPublish.withWskNamespace, 'hlx');
-    sinon.assert.calledWith(mockPublish.withFastlyNamespace, 'hlx'); // TODO !!
-    sinon.assert.calledWith(mockPublish.withFastlyAuth, 'secret-key');
-    sinon.assert.calledWith(mockPublish.withPublishAPI, 'https://adobeioruntime.net/api/v1/web/helix/default/publish');
-    sinon.assert.calledWith(mockPublish.withUpdateBotConfig, undefined);
     sinon.assert.calledOnce(mockPublish.run);
   });
 
@@ -137,7 +98,6 @@ describe('hlx publish', () => {
         '--wsk-namespace', 'hlx',
         '--fastly-auth', 'secret-key',
         '--fastly-namespace', 'hlx',
-        '--remote', 'true',
         '--github-token', 'foobar',
       ]);
 
@@ -159,7 +119,6 @@ describe('hlx publish', () => {
         '--wsk-namespace', 'hlx',
         '--fastly-auth', 'secret-key',
         '--fastly-namespace', 'hlx',
-        '--remote', 'true',
         '--update-bot-config',
       ]);
 
