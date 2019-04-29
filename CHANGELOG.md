@@ -3,6 +3,21 @@
 
 ### Bug Fixes
 
+* **package:** update @adobe/helix-shared to version 0.10.5 ([8efda26](https://github.com/adobe/helix-cli/commit/8efda26))
+* **static:** normalize URLs in rewritten CSS and JS ([25964ba](https://github.com/adobe/helix-cli/commit/25964ba))
+* **static:** turn on ESI processing when ESI flag is set ([8b2436b](https://github.com/adobe/helix-cli/commit/8b2436b))
+
+
+### Features
+
+* **static:** add ESI aliasing support for JavaScript modules ([1fa564d](https://github.com/adobe/helix-cli/commit/1fa564d)), closes [/github.com/adobe/helix-pipeline/issues/224#issuecomment-476690621](https://github.com//github.com/adobe/helix-pipeline/issues/224/issues/issuecomment-476690621)
+* **static:** Rewrite CSS URLs to Static ESI URLs so that better caching can be achieved ([396c55b](https://github.com/adobe/helix-cli/commit/396c55b)), closes [adobe/helix-publish#61](https://github.com/adobe/helix-publish/issues/61) [adobe/helix-pipeline#267](https://github.com/adobe/helix-pipeline/issues/267)
+
+# [1.1.0](https://github.com/adobe/helix-cli/compare/v1.0.0...v1.1.0) (2019-04-29)
+
+
+### Bug Fixes
+
 * **static:** normalize URLs in rewritten CSS and JS ([25964ba](https://github.com/adobe/helix-cli/commit/25964ba))
 * **static:** turn on ESI processing when ESI flag is set ([8b2436b](https://github.com/adobe/helix-cli/commit/8b2436b))
 
