@@ -16,6 +16,8 @@ const crypto = require('crypto');
 const fse = require('fs-extra');
 const http = require('http');
 const unzip = require('unzip2');
+const { JSDOM } = require('jsdom');
+const { dom: { assertEquivalentNode } } = require('@adobe/helix-shared');
 const BuildCommand = require('../src/build.cmd');
 
 /**
@@ -88,6 +90,39 @@ async function assertHttp(url, status, spec, replacements = []) {
                 });
                 assert.equal(data, expected);
               }
+            }
+            resolve();
+          } catch (e) {
+            reject(e);
+          }
+        });
+    }).on('error', (e) => {
+      reject(e);
+    });
+  });
+}
+
+async function assertHttpDom(url, status, spec) {
+  return new Promise((resolve, reject) => {
+    let data = '';
+    http.get(url, (res) => {
+      try {
+        assert.equal(res.statusCode, status);
+      } catch (e) {
+        res.resume();
+        reject(e);
+      }
+
+      res
+        .on('data', (chunk) => {
+          data += chunk;
+        })
+        .on('end', () => {
+          try {
+            if (spec) {
+              const datadom = new JSDOM(data).window.document;
+              const specdom = new JSDOM(fse.readFileSync(path.resolve(__dirname, 'specs', spec)).toString()).window.document;
+              assertEquivalentNode(datadom, specdom);
             }
             resolve();
           } catch (e) {
@@ -270,6 +305,7 @@ module.exports = {
   assertFile,
   assertFileEqual,
   assertHttp,
+  assertHttpDom,
   initGit,
   createTestRoot,
   createFakeTestRoot,

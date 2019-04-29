@@ -22,6 +22,7 @@ const { setupMocha: setupPolly } = require('@pollyjs/core');
 const {
   initGit,
   assertHttp,
+  assertHttpDom,
   assertFile,
   createTestRoot,
 } = require('./utils.js');
@@ -120,7 +121,7 @@ describe('Integration test for up command', function suite() {
     cmd
       .on('started', async () => {
         try {
-          await assertHttp(`http://localhost:${cmd.project.server.port}/index.html`, 200, 'simple_response.html');
+          await assertHttpDom(`http://localhost:${cmd.project.server.port}/index.html`, 200, 'simple_response.html');
           await assertHttp(`http://localhost:${cmd.project.server.port}/welcome.txt`, 200, 'welcome_response.txt');
           myDone();
         } catch (e) {
@@ -155,7 +156,7 @@ describe('Integration test for up command', function suite() {
     });
 
     try {
-      await assertHttp(`http://localhost:${cmd.project.server.port}/README.html`, 200, 'simple_response_readme.html');
+      await assertHttpDom(`http://localhost:${cmd.project.server.port}/README.html`, 200, 'simple_response_readme.html');
     } finally {
       await cmd.stop();
     }
@@ -186,8 +187,8 @@ describe('Integration test for up command', function suite() {
     });
 
     try {
-      await assertHttp(`http://localhost:${cmd.project.server.port}/README.html`, 200, 'simple_response_readme.html');
-      await assertHttp(`http://localhost:${cmd.project.server.port}/api/README.html`, 200, 'api_response_readme.html');
+      await assertHttpDom(`http://localhost:${cmd.project.server.port}/README.html`, 200, 'simple_response_readme.html');
+      await assertHttpDom(`http://localhost:${cmd.project.server.port}/api/README.html`, 200, 'api_response_readme.html');
     } finally {
       await cmd.stop();
     }
@@ -211,7 +212,7 @@ describe('Integration test for up command', function suite() {
     });
 
     try {
-      await assertHttp(`http://localhost:${cmd.project.server.port}/README.html`, 200, 'simple_response_readme.html');
+      await assertHttpDom(`http://localhost:${cmd.project.server.port}/README.html`, 200, 'simple_response_readme.html');
     } finally {
       await cmd.stop();
     }
@@ -276,8 +277,8 @@ describe('Integration test for up command', function suite() {
     cmd
       .on('started', async () => {
         try {
-          await assertHttp(`http://localhost:${cmd.project.server.port}/index.html`, 200, 'simple_response.html');
-          await assertHttp(`http://localhost:${cmd.project.server.port}/404.html`, 200, '404_response.html');
+          await assertHttpDom(`http://localhost:${cmd.project.server.port}/index.html`, 200, 'simple_response.html');
+          await assertHttpDom(`http://localhost:${cmd.project.server.port}/404.html`, 200, '404_response.html');
           await assertHttp(`http://localhost:${cmd.project.server.port}/welcome.txt`, 200, 'welcome_response.txt');
           await assertHttp(`http://localhost:${cmd.project.server.port}/index.json`, 200, 'json_response.json');
           await fse.copy(srcFile, dstFile);
@@ -290,7 +291,7 @@ describe('Integration test for up command', function suite() {
       })
       .on('build', async () => {
         try {
-          await assertHttp(`http://localhost:${cmd.project.server.port}/index.html`, 200, 'simple_response2.html');
+          await assertHttpDom(`http://localhost:${cmd.project.server.port}/index.html`, 200, 'simple_response2.html');
           await myDone();
         } catch (e) {
           await myDone(e);
@@ -325,7 +326,7 @@ describe('Integration test for up command', function suite() {
     cmd
       .on('started', async () => {
         try {
-          await assertHttp(`http://localhost:${cmd.project.server.port}/index.dump.html`, 200, 'dump_response.html');
+          await assertHttpDom(`http://localhost:${cmd.project.server.port}/index.dump.html`, 200, 'dump_response.html');
           await fse.copy(srcFile, dstFile);
         } catch (e) {
           await myDone(e);
@@ -336,7 +337,7 @@ describe('Integration test for up command', function suite() {
       })
       .on('build', async () => {
         try {
-          await assertHttp(`http://localhost:${cmd.project.server.port}/index.dump.html`, 200, 'dump_response2.html');
+          await assertHttpDom(`http://localhost:${cmd.project.server.port}/index.dump.html`, 200, 'dump_response2.html');
           await myDone();
         } catch (e) {
           await myDone(e);
