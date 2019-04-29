@@ -1,3 +1,21 @@
+# [1.0.0](https://github.com/adobe/helix-cli/compare/v0.15.1...v1.0.0) (2019-04-29)
+
+
+### Bug Fixes
+
+* **package:** update snyk to version 1.154.0 ([401d122](https://github.com/adobe/helix-cli/commit/401d122))
+
+
+### Features
+
+* **publish:** remove local publish capability ([16354a9](https://github.com/adobe/helix-cli/commit/16354a9)), closes [#795](https://github.com/adobe/helix-cli/issues/795)
+
+
+### BREAKING CHANGES
+
+* **publish:** The local publish capability is removed and hlx publish completely relies on the
+helix-publish service. the use of the --remote argument in hlx publish will now report an error.
+
 ## [0.15.1](https://github.com/adobe/helix-cli/compare/v0.15.0...v0.15.1) (2019-04-25)
 
 
