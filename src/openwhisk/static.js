@@ -116,7 +116,7 @@ function rewriteCSS(css, base = '') {
           if (importuri.reference === 'relative' && !importuri.query) {
             rule.replaceWith(postcss.atRule({
               name: 'import',
-              params: `url(${quote}<esi:include src="${importuri.path}.esi"/><esi:remove>${importuri.path}</esi:remove>${quote}) ${queries}`,
+              params: `url(${quote}<esi:include src="${importuri.path}.url"/><esi:remove>${importuri.path}</esi:remove>${quote}) ${queries}`,
             }));
           }
         } else if (parsedurl.nodes
@@ -128,7 +128,7 @@ function rewriteCSS(css, base = '') {
           if (importuri.reference === 'relative' && !importuri.query) {
             rule.replaceWith(postcss.atRule({
               name: 'import',
-              params: `${quote}<esi:include src="${uri.resolve(base, importuri.path)}.esi"/><esi:remove>${importuri.path}</esi:remove>${quote} ${queries}`,
+              params: `${quote}<esi:include src="${uri.resolve(base, importuri.path)}.url"/><esi:remove>${importuri.path}</esi:remove>${quote} ${queries}`,
             }));
           }
         }
@@ -144,7 +144,7 @@ function rewriteCSS(css, base = '') {
       url: (asset) => {
         // TODO pass in request URL and make it absolute.
         if (asset.search === '' && asset.absolutePath !== '.' && asset.relativePath !== '.') {
-          return `<esi:include src="${uri.resolve(base, asset.relativePath)}.esi"/><esi:remove>${asset.relativePath}</esi:remove>`;
+          return `<esi:include src="${uri.resolve(base, asset.relativePath)}.url"/><esi:remove>${asset.relativePath}</esi:remove>`;
         }
         return asset.url;
       },
@@ -170,7 +170,7 @@ function rewriteJavaScript(javascript, base = '') {
               const { specifiers } = path.node;
               // console.log(srcuri);
               const h = ohash(srcuri.path);
-              importmap[h] = `<esi:include src="${uri.resolve(base, srcuri.path)}.esi"/><esi:remove>${path.node.source.value}</esi:remove>`;
+              importmap[h] = `<esi:include src="${uri.resolve(base, srcuri.path)}.url"/><esi:remove>${path.node.source.value}</esi:remove>`;
               path.replaceWith(t.importDeclaration(specifiers, t.stringLiteral(h)));
             }
           }

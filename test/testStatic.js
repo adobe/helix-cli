@@ -136,30 +136,30 @@ describe('CSS and JS Rewriting', () => {
     assert.equal(await index.getBody('text/css', `.element {
   background: url('images/../sprite.png');
 }`, true), `.element {
-  background: url('<esi:include src="sprite.png.esi"/><esi:remove>sprite.png</esi:remove>');
+  background: url('<esi:include src="sprite.png.url"/><esi:remove>sprite.png</esi:remove>');
 }`);
     assert.equal(await index.getBody('text/css', `.element {
   background: url("images/../sprite.png");
 }`, true), `.element {
-  background: url("<esi:include src="sprite.png.esi"/><esi:remove>sprite.png</esi:remove>");
+  background: url("<esi:include src="sprite.png.url"/><esi:remove>sprite.png</esi:remove>");
 }`);
     assert.equal(await index.getBody('text/css',
       '@import "fineprint.css" print;', true),
-    '@import "<esi:include src="fineprint.css.esi"/><esi:remove>fineprint.css</esi:remove>" print;');
+    '@import "<esi:include src="fineprint.css.url"/><esi:remove>fineprint.css</esi:remove>" print;');
     assert.equal(await index.getBody('text/css',
       '@import \'fineprint.css\' print;', true),
-    '@import \'<esi:include src="fineprint.css.esi"/><esi:remove>fineprint.css</esi:remove>\' print;');
+    '@import \'<esi:include src="fineprint.css.url"/><esi:remove>fineprint.css</esi:remove>\' print;');
     assert.equal(await index.getBody('text/css',
       '@import url(\'fineprint.css\') print;', true),
-    '@import url(\'<esi:include src="fineprint.css.esi"/><esi:remove>fineprint.css</esi:remove>\') print;');
+    '@import url(\'<esi:include src="fineprint.css.url"/><esi:remove>fineprint.css</esi:remove>\') print;');
     assert.equal(await index.getBody('text/css',
       '@import url("fineprint.css") print;', true),
-    '@import url("<esi:include src="fineprint.css.esi"/><esi:remove>fineprint.css</esi:remove>") print;');
+    '@import url("<esi:include src="fineprint.css.url"/><esi:remove>fineprint.css</esi:remove>") print;');
   });
 
   it('Rewrite JS', async () => {
     assert.equal(await index.getBody('text/javascript', 'import { transform } from "@babel/core";code();', true),
-      'import { transform } from "<esi:include src="@babel/core.esi"/><esi:remove>@babel/core</esi:remove>";code();');
+      'import { transform } from "<esi:include src="@babel/core.url"/><esi:remove>@babel/core</esi:remove>";code();');
   });
 });
 
@@ -278,8 +278,8 @@ describe('Static Delivery Action #unittest', () => {
       plain: true,
       esi: true,
     });
-    assert.equal(res.body, `import barba from "<esi:include src="/web_modules/@barba--core.js.esi"/><esi:remove>./web_modules/@barba--core.js</esi:remove>";import
-prefetch from "<esi:include src="/web_modules/@barba--prefetch.js.esi"/><esi:remove>./web_modules/@barba--prefetch.js</esi:remove>";
+    assert.equal(res.body, `import barba from "<esi:include src="/web_modules/@barba--core.js.url"/><esi:remove>./web_modules/@barba--core.js</esi:remove>";import
+prefetch from "<esi:include src="/web_modules/@barba--prefetch.js.url"/><esi:remove>./web_modules/@barba--prefetch.js</esi:remove>";
 
 // tells barba to use the prefetch module
 barba.use(prefetch);
