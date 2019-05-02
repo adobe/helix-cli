@@ -266,7 +266,7 @@ function deliverPlain(owner, repo, ref, entry, root, esi = false) {
         'X-Static': 'Raw/Static',
       },
     };
-  }).catch(rqerror => {
+  }).catch((rqerror) => {
     if (esi) {
       // the ESI failed, so we simply fall back to the original URL
       // the browser will fetch it again, so let's cache the 404
@@ -275,13 +275,13 @@ function deliverPlain(owner, repo, ref, entry, root, esi = false) {
       return {
         statusCode: 404,
         headers: {
-          'Content-Type': 'text/plain', 
+          'Content-Type': 'text/plain',
           'Cache-Control': 's-max-age=300',
         },
-        body: entry
-      }
+        body: entry,
+      };
     }
-    return error(rqerror.response.body.toString(), rqerror.statusCode)
+    return error(rqerror.response.body.toString(), rqerror.statusCode);
   });
 }
 
