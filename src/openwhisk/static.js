@@ -45,7 +45,7 @@ function error(message, code = 500) {
       'Content-Type': 'text/html',
       'X-Static': 'Raw/Static',
     },
-    body: `Error ${code}: ${message}`,
+    body: `${message}`,
   };
 }
 
@@ -280,6 +280,9 @@ function deliverPlain(owner, repo, ref, entry, root, esi = false) {
         },
         body: entry,
       };
+    }
+    if (rqerror.statusCode==404) {
+      return error(entry, rqerror.statusCode);
     }
     return error(rqerror.response.body.toString(), rqerror.statusCode);
   });

@@ -194,7 +194,7 @@ describe('Static Delivery Action #unittest', () => {
   it('error() #unittest', () => {
     const error = index.error('Test');
     assert.equal(error.statusCode, '500');
-    assert.ok(error.body.match('500'));
+    assert.ok(error.body.match('Test'));
     assert.ok(!error.body.match('404'));
   });
 
