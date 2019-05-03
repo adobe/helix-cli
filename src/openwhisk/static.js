@@ -281,7 +281,7 @@ function deliverPlain(owner, repo, ref, entry, root, esi = false) {
         body: entry,
       };
     }
-    if (rqerror.statusCode===404) {
+    if (rqerror.statusCode === 404 || rqerror.statusCode === '404') {
       return error(entry, rqerror.statusCode);
     }
     return error(rqerror.response.body.toString(), rqerror.statusCode);
