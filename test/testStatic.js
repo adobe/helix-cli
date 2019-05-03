@@ -91,6 +91,20 @@ describe('Static Delivery Action #integrationtest', () => {
     assert.equal(res.statusCode, 404);
   });
 
+  it('deliver missing file with esi', async () => {
+    const res = await index.main({
+      owner: 'trieloff',
+      repo: 'helix-demo',
+      ref: 'master',
+      entry: 'not-here.png',
+      plain: true,
+      esi: true,
+    });
+
+    assert.equal(res.statusCode, 404);
+    assert.equal(res.body, 'not-here.png');
+  });
+
   it('deliver invalid file', async () => {
     const res = await index.main({
       owner: 'trieloff',
