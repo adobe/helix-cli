@@ -18,6 +18,7 @@ const postcssurl = require('postcss-url');
 const parser = require('postcss-value-parser');
 const babel = require('@babel/core');
 const ohash = require('object-hash');
+const sanitizer = require('sanitizer');
 
 const { space } = postcss.list;
 const uri = require('uri-js');
@@ -46,7 +47,7 @@ function error(message, code = 500) {
       'X-Static': 'Raw/Static',
       'Cache-Control': 'max-age=300',
     },
-    body: `${message}`,
+    body: sanitizer.escape(message),
   };
 }
 
