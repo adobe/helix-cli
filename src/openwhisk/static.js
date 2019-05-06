@@ -18,6 +18,7 @@ const postcssurl = require('postcss-url');
 const parser = require('postcss-value-parser');
 const babel = require('@babel/core');
 const ohash = require('object-hash');
+const sanitizer = require('sanitizer');
 
 const { space } = postcss.list;
 const uri = require('uri-js');
@@ -44,8 +45,9 @@ function error(message, code = 500) {
     headers: {
       'Content-Type': 'text/html',
       'X-Static': 'Raw/Static',
+      'Cache-Control': 'max-age=300',
     },
-    body: `Error ${code}: ${message}`,
+    body: sanitizer.escape(message),
   };
 }
 
@@ -266,7 +268,26 @@ function deliverPlain(owner, repo, ref, entry, root, esi = false) {
         'X-Static': 'Raw/Static',
       },
     };
-  }).catch(rqerror => error(rqerror.response.body.toString(), rqerror.statusCode));
+  }).catch((rqerror) => {
+    if (esi) {
+      // the ESI failed, so we simply fall back to the original URL
+      // the browser will fetch it again, so let's cache the 404
+      // for five minutes, in order to prevent the static function
+      // from being called too often
+      return {
+        statusCode: 404,
+        headers: {
+          'Content-Type': 'text/plain',
+          'Cache-Control': 's-max-age=300',
+        },
+        body: entry,
+      };
+    }
+    if (rqerror.statusCode === 404 || rqerror.statusCode === '404') {
+      return error(entry, rqerror.statusCode);
+    }
+    return error(rqerror.response.body.toString(), rqerror.statusCode);
+  });
 }
 
 /**
