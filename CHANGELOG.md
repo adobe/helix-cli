@@ -1,3 +1,7 @@
+# Why 2.0?
+
+Before switching to semantic-release we created a number of GitHub tags with `v1.*.*`, which are now interfering with the semantic release process. Hence 2.0.0 is a purely cosmetic release that does not have any actual breaking changes.
+
 # [1.1.0](https://github.com/adobe/helix-cli/compare/v1.0.0...v1.1.0) (2019-04-29)
 
 
