@@ -79,9 +79,9 @@
   },
   "devDependencies": {
     "@adobe/helix-testutils": "^0.2.0",
-    "@pollyjs/adapter-fetch": "^2.3.0",
-    "@pollyjs/adapter-node-http": "^2.3.0",
-    "@pollyjs/core": "^2.3.0",
+    "@pollyjs/adapter-fetch": "^2.4.0",
+    "@pollyjs/adapter-node-http": "^2.4.0",
+    "@pollyjs/core": "^2.4.0",
     "@pollyjs/persister-fs": "^2.1.0",
     "@semantic-release/changelog": "^3.0.2",
     "@semantic-release/git": "^7.0.8",
