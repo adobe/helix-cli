@@ -25,7 +25,7 @@ strains:
     code: *localRepo
     content: *localRepo
     static: *localRepo
-    directoryIndex: /README.html
+    directoryIndex: README.html
     urls:
       - http://www.project-helix.io
 
