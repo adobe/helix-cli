@@ -1,3 +1,10 @@
+## [2.0.1](https://github.com/adobe/helix-cli/compare/v2.0.0...v2.0.1) (2019-05-07)
+
+
+### Bug Fixes
+
+* **package:** update @adobe/helix-shared to version 1.1.1 ([2e532ba](https://github.com/adobe/helix-cli/commit/2e532ba))
+
 # [2.0.0](https://github.com/adobe/helix-cli/compare/v1.0.0...v2.0.0) (2019-05-06)
 
 
