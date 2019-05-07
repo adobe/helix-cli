@@ -242,7 +242,9 @@ class GitUtils {
    */
   static async getRawContent(dir, ref, pathName) {
     return GitUtils.resolveCommit(dir, ref)
-      .then(oid => git.readObject({ dir, oid, filepath: pathName, format: 'content' }))
+      .then(oid => git.readObject({
+        dir, oid, filepath: pathName, format: 'content',
+      }))
       .then(obj => obj.object);
   }
 }

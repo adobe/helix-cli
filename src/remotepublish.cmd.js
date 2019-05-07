@@ -16,7 +16,10 @@ const request = require('request-promise-native');
 const fastly = require('@adobe/fastly-native-promises');
 const chalk = require('chalk');
 const ProgressBar = require('progress');
+const glob = require('glob-to-regexp');
+const { HelixConfig } = require('@adobe/helix-shared');
 const AbstractCommand = require('./abstract.cmd.js');
+const GitUtils = require('./git-utils.js');
 
 
 class RemotePublishCommand extends AbstractCommand {
@@ -113,6 +116,27 @@ class RemotePublishCommand extends AbstractCommand {
     return this;
   }
 
+  withFilter(only, exclude) {
+    const negate = expr => (only ? !!expr : !expr);
+    const globex = glob(only || exclude);
+    this._filter = (master, current) => {
+      const leftmatch = master && master.name && !negate(globex.test(master.name));
+      const rightmatch = current && current.name && negate(globex.test(current.name));
+      this.logger.debug('matches:', master ? master.name : undefined, leftmatch, current ? current.name : undefined, rightmatch);
+      if (rightmatch) {
+        this.logger.debug('using current');
+        return current;
+      }
+      if (leftmatch) {
+        this.logger.debug('using master');
+        return master;
+      }
+      this.logger.debug('using none');
+      return undefined;
+    };
+    return this;
+  }
+
   showNextStep(dryrun) {
     this.progressBar().terminate();
     if (dryrun) {
@@ -169,8 +193,25 @@ class RemotePublishCommand extends AbstractCommand {
       });
   }
 
-  servicePublish() {
+  async servicePublish() {
     this.tick(1, 'preparing service config for Helix', true);
+
+    if (this._filter) {
+      this.logger.debug('filtering');
+      const content = await GitUtils.getRawContent('.', 'master', 'helix-config.yaml');
+
+      const other = await new HelixConfig()
+        .withSource(content.toString())
+        .init();
+
+      this.logger.debug('this', this.config.strains.keys());
+      this.logger.debug('other', other.strains.keys());
+      const merged = other.merge(this.config, this._filter);
+      this.logger.debug(merged.strains.keys());
+
+      this._config = merged;
+    }
+
     return request.post(this._publishAPI, {
       json: true,
       body: {
