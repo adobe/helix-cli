@@ -91,6 +91,20 @@ describe('Static Delivery Action #integrationtest', () => {
     assert.equal(res.statusCode, 404);
   });
 
+  it('deliver missing file with esi', async () => {
+    const res = await index.main({
+      owner: 'trieloff',
+      repo: 'helix-demo',
+      ref: 'master',
+      entry: 'not-here.png',
+      plain: true,
+      esi: true,
+    });
+
+    assert.equal(res.statusCode, 404);
+    assert.equal(res.body, 'not-here.png');
+  });
+
   it('deliver invalid file', async () => {
     const res = await index.main({
       owner: 'trieloff',
@@ -120,10 +134,53 @@ describe('Static Delivery Action #integrationtest', () => {
   }).timeout(5000);
 });
 
+describe('CSS and JS Rewriting', () => {
+  it('Rewrite CSS', async () => {
+    assert.equal(await index.getBody('text/css', '', true), '');
+    assert.equal(await index.getBody('text/css', `.element {
+  background: url('images/../sprite.png?foo=bar');
+}`, true), `.element {
+  background: url('images/../sprite.png?foo=bar');
+}`);
+    assert.equal(await index.getBody('text/css', `.element {
+  background: url('https://example.com/sprite.png?foo=bar');
+}`, true), `.element {
+  background: url('https://example.com/sprite.png?foo=bar');
+}`);
+    assert.equal(await index.getBody('text/css', `.element {
+  background: url('images/../sprite.png');
+}`, true), `.element {
+  background: url('<esi:include src="sprite.png.url"/><esi:remove>sprite.png</esi:remove>');
+}`);
+    assert.equal(await index.getBody('text/css', `.element {
+  background: url("images/../sprite.png");
+}`, true), `.element {
+  background: url("<esi:include src="sprite.png.url"/><esi:remove>sprite.png</esi:remove>");
+}`);
+    assert.equal(await index.getBody('text/css',
+      '@import "fineprint.css" print;', true),
+    '@import "<esi:include src="fineprint.css.url"/><esi:remove>fineprint.css</esi:remove>" print;');
+    assert.equal(await index.getBody('text/css',
+      '@import \'fineprint.css\' print;', true),
+    '@import \'<esi:include src="fineprint.css.url"/><esi:remove>fineprint.css</esi:remove>\' print;');
+    assert.equal(await index.getBody('text/css',
+      '@import url(\'fineprint.css\') print;', true),
+    '@import url(\'<esi:include src="fineprint.css.url"/><esi:remove>fineprint.css</esi:remove>\') print;');
+    assert.equal(await index.getBody('text/css',
+      '@import url("fineprint.css") print;', true),
+    '@import url("<esi:include src="fineprint.css.url"/><esi:remove>fineprint.css</esi:remove>") print;');
+  });
+
+  it('Rewrite JS', async () => {
+    assert.equal(await index.getBody('text/javascript', 'import { transform } from "@babel/core";code();', true),
+      'import { transform } from "<esi:include src="@babel/core.url"/><esi:remove>@babel/core</esi:remove>";code();');
+  });
+});
+
 describe('Static Delivery Action #unittest', () => {
   setupPolly({
     recordFailedRequests: true,
-    recordIfMissing: false,
+    recordIfMissing: true,
     logging: false,
     adapters: [NodeHttpAdapter],
     persister: FSPersister,
@@ -137,7 +194,7 @@ describe('Static Delivery Action #unittest', () => {
   it('error() #unittest', () => {
     const error = index.error('Test');
     assert.equal(error.statusCode, '500');
-    assert.ok(error.body.match('500'));
+    assert.ok(error.body.match('Test'));
     assert.ok(!error.body.match('404'));
   });
 
@@ -204,6 +261,54 @@ describe('Static Delivery Action #unittest', () => {
       plain: true,
     });
     assert.ok(res.body.indexOf('Arial') > 0, true);
+  });
+
+  it('main() normalizes URLs', async () => {
+    const res = await index.main({
+      owner: 'adobe',
+      repo: 'helix-cli',
+      entry: './demos/simple/htdocs/style.css',
+      plain: true,
+    });
+    assert.ok(res.body.indexOf('Arial') > 0, true);
+  });
+
+  it('main() normalizes URLs anywhere', async () => {
+    const res = await index.main({
+      owner: 'adobe',
+      repo: 'helix-cli',
+      entry: './demos/simple/test/../htdocs/style.css',
+      plain: true,
+    });
+    assert.ok(res.body.indexOf('Arial') > 0, true);
+  });
+
+  it('main() normalizes URLs in rewritten Javascript', async () => {
+    const res = await index.main({
+      owner: 'trieloff',
+      repo: 'helix-demo',
+      entry: '/index.js',
+      root: '/htdocs',
+      plain: true,
+      esi: true,
+    });
+    assert.equal(res.body, `import barba from "<esi:include src="/web_modules/@barba--core.js.url"/><esi:remove>./web_modules/@barba--core.js</esi:remove>";import
+prefetch from "<esi:include src="/web_modules/@barba--prefetch.js.url"/><esi:remove>./web_modules/@barba--prefetch.js</esi:remove>";
+
+// tells barba to use the prefetch module
+barba.use(prefetch);
+
+// Basic default transition, with no rules and minimal hooks…
+barba.init({
+  transitions: [{
+    leave({ current, next, trigger }) {
+      // Do something with \`current.container\` for your leave transition
+      // then return a promise or use \`this.async()\`
+    },
+    enter({ current, next, trigger }) {
+      // Do something with \`next.container\` for your enter transition
+      // then return a promise or use \`this.async()\`
+    } }] });`);
   });
 
   it('main() returns 403 if plain is false', async () => {

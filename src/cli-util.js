@@ -12,11 +12,6 @@
 
 const readline = require('readline');
 const chalk = require('chalk');
-const packagejson = require('../package.json');
-
-function getVersion() {
-  return packagejson.version;
-}
 
 const spinnerFrames = process.platform === 'win32'
   ? ['-', '\\', '|', '/']
@@ -84,7 +79,6 @@ async function prompt(rl, question) {
 }
 
 module.exports = {
-  getVersion,
   createSpinner,
   prompt,
 };

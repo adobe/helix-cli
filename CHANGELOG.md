@@ -1,3 +1,96 @@
+# [2.0.0](https://github.com/adobe/helix-cli/compare/v1.0.0...v2.0.0) (2019-05-06)
+
+
+### Bug Fixes
+
+* **package:** update @adobe/helix-shared to version 0.10.5 ([8efda26](https://github.com/adobe/helix-cli/commit/8efda26))
+* **package:** update @adobe/helix-shared to version 0.11.0 ([0de812b](https://github.com/adobe/helix-cli/commit/0de812b))
+* **package:** update @adobe/helix-shared to version 1.1.0 ([fabb0ab](https://github.com/adobe/helix-cli/commit/fabb0ab))
+* **package:** update chokidar to version 3.0.0 ([4688a0f](https://github.com/adobe/helix-cli/commit/4688a0f))
+* **package:** update dotenv to version 8.0.0 ([0786a94](https://github.com/adobe/helix-cli/commit/0786a94))
+* **package:** update snyk to version 1.154.1 ([3038ec9](https://github.com/adobe/helix-cli/commit/3038ec9))
+* **package:** update snyk to version 1.155.0 ([a8bb6d6](https://github.com/adobe/helix-cli/commit/a8bb6d6))
+* **package:** update snyk to version 1.156.0 ([e321706](https://github.com/adobe/helix-cli/commit/e321706))
+* **package:** update snyk to version 1.159.0 ([adeb477](https://github.com/adobe/helix-cli/commit/adeb477))
+* **package:** update snyk to version 1.161.0 ([79be958](https://github.com/adobe/helix-cli/commit/79be958))
+* **package:** update snyk to version 1.161.1 ([72ad988](https://github.com/adobe/helix-cli/commit/72ad988))
+* **static:** always return entry path for 404 errors ([84fe876](https://github.com/adobe/helix-cli/commit/84fe876))
+* **static:** cache error responses for 5 minutes ([4247842](https://github.com/adobe/helix-cli/commit/4247842))
+* **static:** handle more 404 errors with path ([ed5a887](https://github.com/adobe/helix-cli/commit/ed5a887))
+* **static:** normalize URLs in rewritten CSS and JS ([25964ba](https://github.com/adobe/helix-cli/commit/25964ba))
+* **static:** prevent possible XSS by sanitizing output ([97d6387](https://github.com/adobe/helix-cli/commit/97d6387))
+* **static:** return the original URL in case a static resource cannot get retieved for an ESI include ([3f6b3ff](https://github.com/adobe/helix-cli/commit/3f6b3ff)), closes [#813](https://github.com/adobe/helix-cli/issues/813)
+* **static:** turn on ESI processing when ESI flag is set ([8b2436b](https://github.com/adobe/helix-cli/commit/8b2436b))
+* **static:** use .url instead of .esi as extension for immutable resources ([70b9674](https://github.com/adobe/helix-cli/commit/70b9674))
+
+
+### Documentation
+
+* **changelog:** explain switchover to version 2.0 ([920b39c](https://github.com/adobe/helix-cli/commit/920b39c))
+
+
+### Features
+
+* **static:** add ESI aliasing support for JavaScript modules ([1fa564d](https://github.com/adobe/helix-cli/commit/1fa564d)), closes [/github.com/adobe/helix-pipeline/issues/224#issuecomment-476690621](https://github.com//github.com/adobe/helix-pipeline/issues/224/issues/issuecomment-476690621)
+* **static:** Rewrite CSS URLs to Static ESI URLs so that better caching can be achieved ([396c55b](https://github.com/adobe/helix-cli/commit/396c55b)), closes [adobe/helix-publish#61](https://github.com/adobe/helix-publish/issues/61) [adobe/helix-pipeline#267](https://github.com/adobe/helix-pipeline/issues/267)
+
+
+### BREAKING CHANGES
+
+* **changelog:** not breaking any functionality, bumping to version 2.0 as the v1.* name space for
+git tags has already been polluted
+
+# Why 2.0?
+
+Before switching to semantic-release we created a number of GitHub tags with `v1.*.*`, which are now interfering with the semantic release process. Hence 2.0.0 is a purely cosmetic release that does not have any actual breaking changes.
+
+# [1.1.0](https://github.com/adobe/helix-cli/compare/v1.0.0...v1.1.0) (2019-04-29)
+
+
+### Bug Fixes
+
+* **package:** update @adobe/helix-shared to version 0.10.5 ([8efda26](https://github.com/adobe/helix-cli/commit/8efda26))
+* **static:** normalize URLs in rewritten CSS and JS ([25964ba](https://github.com/adobe/helix-cli/commit/25964ba))
+* **static:** turn on ESI processing when ESI flag is set ([8b2436b](https://github.com/adobe/helix-cli/commit/8b2436b))
+
+
+### Features
+
+* **static:** add ESI aliasing support for JavaScript modules ([1fa564d](https://github.com/adobe/helix-cli/commit/1fa564d)), closes [/github.com/adobe/helix-pipeline/issues/224#issuecomment-476690621](https://github.com//github.com/adobe/helix-pipeline/issues/224/issues/issuecomment-476690621)
+* **static:** Rewrite CSS URLs to Static ESI URLs so that better caching can be achieved ([396c55b](https://github.com/adobe/helix-cli/commit/396c55b)), closes [adobe/helix-publish#61](https://github.com/adobe/helix-publish/issues/61) [adobe/helix-pipeline#267](https://github.com/adobe/helix-pipeline/issues/267)
+
+# [1.1.0](https://github.com/adobe/helix-cli/compare/v1.0.0...v1.1.0) (2019-04-29)
+
+
+### Bug Fixes
+
+* **static:** normalize URLs in rewritten CSS and JS ([25964ba](https://github.com/adobe/helix-cli/commit/25964ba))
+* **static:** turn on ESI processing when ESI flag is set ([8b2436b](https://github.com/adobe/helix-cli/commit/8b2436b))
+
+
+### Features
+
+* **static:** add ESI aliasing support for JavaScript modules ([1fa564d](https://github.com/adobe/helix-cli/commit/1fa564d)), closes [/github.com/adobe/helix-pipeline/issues/224#issuecomment-476690621](https://github.com//github.com/adobe/helix-pipeline/issues/224/issues/issuecomment-476690621)
+* **static:** Rewrite CSS URLs to Static ESI URLs so that better caching can be achieved ([396c55b](https://github.com/adobe/helix-cli/commit/396c55b)), closes [adobe/helix-publish#61](https://github.com/adobe/helix-publish/issues/61) [adobe/helix-pipeline#267](https://github.com/adobe/helix-pipeline/issues/267)
+
+# [1.0.0](https://github.com/adobe/helix-cli/compare/v0.15.1...v1.0.0) (2019-04-29)
+
+
+### Bug Fixes
+
+* **package:** update snyk to version 1.154.0 ([401d122](https://github.com/adobe/helix-cli/commit/401d122))
+
+
+### Features
+
+* **publish:** remove local publish capability ([16354a9](https://github.com/adobe/helix-cli/commit/16354a9)), closes [#795](https://github.com/adobe/helix-cli/issues/795)
+
+
+### BREAKING CHANGES
+
+* **publish:** The local publish capability is removed and hlx publish completely relies on the
+helix-publish service. the use of the --remote argument in hlx publish will now report an error.
+
 ## [0.15.1](https://github.com/adobe/helix-cli/compare/v0.15.0...v0.15.1) (2019-04-25)
 
 
