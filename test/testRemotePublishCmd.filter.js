@@ -85,7 +85,7 @@ describe('hlx publish --remote (with filters)', () => {
     shell.exec('git commit -m"initial commit."');
 
     // set up command
-    remote = await new RemotePublishCommand(makeLogger({ logLevel: 'info' }))
+    remote = await new RemotePublishCommand(makeLogger({ logLevel: 'debug' }))
       .withWskAuth('fakeauth')
       .withWskNamespace('fakename')
       .withFastlyAuth('fake_auth')
@@ -120,6 +120,20 @@ describe('hlx publish --remote (with filters)', () => {
       'master-foo': 'master',
       'master-bar': 'master',
       'only-master': 'master',
+    });
+  });
+
+  it('publishing with exclude selects from master', async () => {
+    remote = remote.withFilter(undefined, 'branch-*');
+    await remote.run();
+
+    assert.deepEqual(publishedstrains, {
+      default: 'branch',
+      'both-api': 'branch',
+      'master-foo': 'master',
+      'master-bar': 'master',
+      'only-master': 'master',
+      'only-branch': 'branch',
     });
   });
 

@@ -117,23 +117,38 @@ class RemotePublishCommand extends AbstractCommand {
   }
 
   withFilter(only, exclude) {
-    const negate = expr => (only ? !!expr : !expr);
     const globex = glob(only || exclude);
-    this._filter = (master, current) => {
-      const leftmatch = master && master.name && !negate(globex.test(master.name));
-      const rightmatch = current && current.name && negate(globex.test(current.name));
-      this.log.debug(['matches: ', master ? master.name : undefined, leftmatch, current ? current.name : undefined, rightmatch].join(' '));
-      if (rightmatch) {
-        this.log.debug('using current');
+
+    const onlyfilter = (master, current) => {
+      const includecurrent = current && current.name && globex.test(current.name);
+      const includemaster = master && master.name && !includecurrent;
+      if (includecurrent) {
         return current;
       }
-      if (leftmatch) {
-        this.log.debug('using master');
+      if (includemaster) {
         return master;
       }
-      this.log.debug('using none');
       return undefined;
     };
+
+    const excludefilter = (master, current) => {
+      const includecurrent = current && current.name && !globex.test(current.name);
+      const includemaster = master && master.name && !includecurrent;
+      if (includecurrent) {
+        return current;
+      }
+      if (includemaster) {
+        return master;
+      }
+      return undefined;
+    };
+
+    if (only) {
+      this._filter = onlyfilter;
+    } else if (exclude) {
+      this._filter = excludefilter;
+    }
+
     return this;
   }
 
