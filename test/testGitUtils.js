@@ -207,7 +207,7 @@ describe('Tests against the helix-cli repo', () => {
     await assert.rejects(async () => GitUtils.resolveCommit(1.0, true), { name: 'TypeError' });
   });
 
-  it('getRawContent gets the correct version', async () => {
+  condit('getRawContent gets the correct version', ishelix, async () => {
     const content = await GitUtils.getRawContent('.', 'v1.0.0', 'package.json');
     assert.equal(JSON.parse(content.toString()).version, '1.0.0');
   });
