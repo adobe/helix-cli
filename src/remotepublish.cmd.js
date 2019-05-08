@@ -122,16 +122,16 @@ class RemotePublishCommand extends AbstractCommand {
     this._filter = (master, current) => {
       const leftmatch = master && master.name && !negate(globex.test(master.name));
       const rightmatch = current && current.name && negate(globex.test(current.name));
-      this.logger.debug('matches:', master ? master.name : undefined, leftmatch, current ? current.name : undefined, rightmatch);
+      this.log.debug('matches:', master ? master.name : undefined, leftmatch, current ? current.name : undefined, rightmatch);
       if (rightmatch) {
-        this.logger.debug('using current');
+        this.log.debug('using current');
         return current;
       }
       if (leftmatch) {
-        this.logger.debug('using master');
+        this.log.debug('using master');
         return master;
       }
-      this.logger.debug('using none');
+      this.log.debug('using none');
       return undefined;
     };
     return this;
@@ -197,17 +197,17 @@ class RemotePublishCommand extends AbstractCommand {
     this.tick(1, 'preparing service config for Helix', true);
 
     if (this._filter) {
-      this.logger.debug('filtering');
+      this.log.debug('filtering');
       const content = await GitUtils.getRawContent('.', 'master', 'helix-config.yaml');
 
       const other = await new HelixConfig()
         .withSource(content.toString())
         .init();
 
-      this.logger.debug('this', this.config.strains.keys());
-      this.logger.debug('other', other.strains.keys());
+      this.log.debug('this', this.config.strains.keys());
+      this.log.debug('other', other.strains.keys());
       const merged = other.merge(this.config, this._filter);
-      this.logger.debug(merged.strains.keys());
+      this.log.debug(merged.strains.keys());
 
       this._config = merged;
     }
