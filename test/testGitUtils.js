@@ -183,8 +183,8 @@ describe('Testing GitUtils', () => {
 
 describe('Tests against the helix-cli repo', () => {
   function ishelix() {
-    if (process.env['CIRCLE_REPOSITORY_URL']) {
-      return !!process.env['CIRCLE_REPOSITORY_URL'].match('helix-cli')
+    if (process.env.CIRCLE_REPOSITORY_URL) {
+      return !!process.env.CIRCLE_REPOSITORY_URL.match('helix-cli');
     }
     return true;
   }
