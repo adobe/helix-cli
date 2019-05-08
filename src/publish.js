@@ -59,7 +59,7 @@ module.exports = function strain() {
           type: 'string',
         })
         .option('exclude', {
-          describe: 'Do publish strains with names following the specified pattern, use config from master branch instead',
+          describe: 'Don\'t publish strains with names following the specified pattern, use config from master branch instead',
           type: 'string',
         })
         .conflicts('only', 'exclude')
