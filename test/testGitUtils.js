@@ -199,4 +199,9 @@ describe('Tests against the helix-cli repo', () => {
       assert.equal(e.message, 'Could not find an object matching "v99.unicorn.foobar".');
     }
   });
+
+  it('getRawContent gets the correct version', async () => {
+    const content = await GitUtils.getRawContent('.', 'v1.0.0', 'package.json');
+    assert.equal(JSON.parse(content.toString()).version, '1.0.0');
+  });
 });
