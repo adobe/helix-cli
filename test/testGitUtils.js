@@ -19,6 +19,7 @@ const net = require('net');
 const fse = require('fs-extra');
 const shell = require('shelljs');
 const git = require('isomorphic-git');
+const { condit } = require('@adobe/helix-testutils');
 const { createTestRoot } = require('./utils.js');
 
 git.plugins.set('fs', require('fs'));
@@ -181,12 +182,19 @@ describe('Testing GitUtils', () => {
 });
 
 describe('Tests against the helix-cli repo', () => {
-  it('resolveCommit resolves the correct commit for tags', async () => {
+  function ishelix() {
+    if (process.env['CIRCLE_REPOSITORY_URL']) {
+      return !!process.env['CIRCLE_REPOSITORY_URL'].match('helix-cli')
+    }
+    return true;
+  }
+
+  condit('resolveCommit resolves the correct commit for tags', ishelix, async () => {
     const commit = await GitUtils.resolveCommit('.', 'v1.0.0');
     assert.equal(commit, 'f9ab59cd2baa2860289d826e270938f2eedb3e59');
   });
 
-  it('resolveCommit throws for unknown objects', async () => {
+  condit('resolveCommit throws for unknown objects', ishelix, async () => {
     try {
       await GitUtils.resolveCommit('.', 'v99.unicorn.foobar');
       assert.fail('expected exception not thrown'); // this throws an AssertionError
