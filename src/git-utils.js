@@ -211,13 +211,13 @@ class GitUtils {
   }
 
   /**
- * Returns the commit oid of the curent commit referenced by `ref`
- *
- * @param {string} dir git repo path
- * @param {string} ref reference (branch, tag or commit sha)
- * @returns {Promise<string>} commit oid of the curent commit referenced by `ref`
- * @throws {GitError} `err.code === 'ResolveRefError'`: invalid reference
- */
+   * Returns the commit oid of the curent commit referenced by `ref`
+   *
+   * @param {string} dir git repo path
+   * @param {string} ref reference (branch, tag or commit sha)
+   * @returns {Promise<string>} commit oid of the curent commit referenced by `ref`
+   * @throws {GitError} `err.code === 'ResolveRefError'`: invalid reference
+   */
   static async resolveCommit(dir, ref) {
     return git.resolveRef({ dir, ref })
       .catch(async (err) => {
