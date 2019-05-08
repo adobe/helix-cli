@@ -13,6 +13,7 @@
 /* eslint-env mocha */
 
 const assert = require('assert');
+const { AssertionError } = require('assert');
 const path = require('path');
 const net = require('net');
 const fse = require('fs-extra');
@@ -176,5 +177,26 @@ describe('Testing GitUtils', () => {
     const anotherTestRoot = await createTestRoot();
     await fse.writeFile(path.resolve(anotherTestRoot, '.env'), 'Hello, world.\n', 'utf-8');
     assert.ok(await GitUtils.isIgnored(anotherTestRoot, '.env', GIT_USER_HOME));
+  });
+});
+
+describe('Tests against the helix-cli repo', () => {
+  it('resolveCommit resolves the correct commit for tags', async () => {
+    const commit = await GitUtils.resolveCommit('.', 'v1.0.0');
+    assert.equal(commit, 'f9ab59cd2baa2860289d826e270938f2eedb3e59');
+  });
+
+  it('resolveCommit throws for unknown objects', async () => {
+    try {
+      await GitUtils.resolveCommit('.', 'v99.unicorn.foobar');
+      assert.fail('expected exception not thrown'); // this throws an AssertionError
+    } catch (e) { // this catches all errors, those thrown by the function under test
+      // and those thrown by assert.fail
+      if (e instanceof AssertionError) {
+        // bubble up the assertion error
+        throw e;
+      }
+      assert.equal(e.message, 'Could not find an object matching "v99.unicorn.foobar".');
+    }
   });
 });
