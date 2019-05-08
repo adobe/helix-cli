@@ -223,7 +223,7 @@ class GitUtils {
       .catch(async (err) => {
         if (err.code === 'ResolveRefError') {
           // fallback: is ref a shortened oid prefix?
-          const oid = await git.expandOid({ dir, oid: ref });
+          const oid = await git.expandOid({ dir, oid: ref }).catch(() => { throw err; });
           return git.resolveRef({ dir, ref: oid });
         }
         // re-throw
@@ -239,6 +239,7 @@ class GitUtils {
    * @param {string} filePath relative path to file
    * @returns {Promise<Buffer>} content of specified file
    * @throws {GitError} `err.code === 'TreeOrBlobNotFoundError'`: resource not found
+   *                    `err.code === 'ResolveRefError'`: invalid reference
    */
   static async getRawContent(dir, ref, pathName) {
     return GitUtils.resolveCommit(dir, ref)

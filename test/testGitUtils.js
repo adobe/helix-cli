@@ -194,18 +194,17 @@ describe('Tests against the helix-cli repo', () => {
     assert.equal(commit, 'f9ab59cd2baa2860289d826e270938f2eedb3e59');
   });
 
-  condit('resolveCommit throws for unknown objects', ishelix, async () => {
-    try {
-      await GitUtils.resolveCommit('.', 'v99.unicorn.foobar');
-      assert.fail('expected exception not thrown'); // this throws an AssertionError
-    } catch (e) { // this catches all errors, those thrown by the function under test
-      // and those thrown by assert.fail
-      if (e instanceof AssertionError) {
-        // bubble up the assertion error
-        throw e;
-      }
-      assert.equal(e.message, 'Could not find an object matching "v99.unicorn.foobar".');
-    }
+  condit('resolveCommit resolves the correct commit for shortened OID', ishelix, async () => {
+    const commit = await GitUtils.resolveCommit('.', 'f9ab59c');
+    assert.equal(commit, 'f9ab59cd2baa2860289d826e270938f2eedb3e59');
+  });
+
+  condit('resolveCommit throws for unknown ref', ishelix, async () => {
+    await assert.rejects(async () => GitUtils.resolveCommit('.', 'v99.unicorn.foobar'), { code: 'ResolveRefError' });
+  });
+
+  it('resolveCommit throws for invalid argument type', async () => {
+    await assert.rejects(async () => GitUtils.resolveCommit(1.0, true), { name: 'TypeError' });
   });
 
   it('getRawContent gets the correct version', async () => {
