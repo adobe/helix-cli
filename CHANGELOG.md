@@ -1,3 +1,19 @@
+# [2.1.0](https://github.com/adobe/helix-cli/compare/v2.0.5...v2.1.0) (2019-05-08)
+
+
+### Bug Fixes
+
+* **package:** update snyk to version 1.163.0 ([3e96915](https://github.com/adobe/helix-cli/commit/3e96915)), closes [#841](https://github.com/adobe/helix-cli/issues/841)
+* **publish:** fix loggers ([1db7669](https://github.com/adobe/helix-cli/commit/1db7669))
+* **publish:** update description of `--exclude` param ([adf486f](https://github.com/adobe/helix-cli/commit/adf486f))
+
+
+### Features
+
+* **git:** helper functions for getting the contents of a file at a ref ([0b349d8](https://github.com/adobe/helix-cli/commit/0b349d8))
+* **publish:** add new --only and --exclude flags for publish command line ([8739ef4](https://github.com/adobe/helix-cli/commit/8739ef4))
+* **publish:** implement filtering with `--only` and `--exclude` ([e94ea52](https://github.com/adobe/helix-cli/commit/e94ea52)), closes [#821](https://github.com/adobe/helix-cli/issues/821)
+
 ## [2.0.5](https://github.com/adobe/helix-cli/compare/v2.0.4...v2.0.5) (2019-05-08)
 
 
