@@ -13,7 +13,6 @@
 /* eslint-env mocha */
 
 const assert = require('assert');
-const { AssertionError } = require('assert');
 const path = require('path');
 const net = require('net');
 const fse = require('fs-extra');
