@@ -122,7 +122,7 @@ class RemotePublishCommand extends AbstractCommand {
     this._filter = (master, current) => {
       const leftmatch = master && master.name && !negate(globex.test(master.name));
       const rightmatch = current && current.name && negate(globex.test(current.name));
-      this.log.debug('matches:', master ? master.name : undefined, leftmatch, current ? current.name : undefined, rightmatch);
+      this.log.debug(['matches: ', master ? master.name : undefined, leftmatch, current ? current.name : undefined, rightmatch].join(' '));
       if (rightmatch) {
         this.log.debug('using current');
         return current;
@@ -204,12 +204,12 @@ class RemotePublishCommand extends AbstractCommand {
         .withSource(content.toString())
         .init();
 
-      this.log.debug('this', this.config.strains.keys());
-      this.log.debug('other', other.strains.keys());
+      this.log.debug(`this: ${Array.from(this.config.strains.keys()).join(', ')}`);
+      this.log.debug(`other: ${Array.from(other.strains.keys()).join(', ')}`);
       const merged = other.merge(this.config, this._filter);
-      this.log.debug(merged.strains.keys());
+      this.log.debug(Array.from(merged.strains.keys()).join(', '));
 
-      this._config = merged;
+      this._helixConfig = merged;
     }
 
     return request.post(this._publishAPI, {

@@ -1,0 +1,19 @@
+strains:
+  - name: default
+    content: ssh://git@github.com/adobe/helix-cli.git
+    code: ssh://git@github.com/adobe/helix-cli.git
+    static: ssh://git@github.com/adobe/helix-cli.git
+    package: master
+    url: https://www.project-helix.io/cli
+
+  - name: both-api
+    origin: https://www.adobe.com
+
+  - name: master-foo
+    origin: https://www.adobe.com
+
+  - name: master-bar
+    origin: https://www.adobe.com
+
+  - name: only-master
+    origin: https://www.adobe.com
