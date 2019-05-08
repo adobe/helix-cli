@@ -54,6 +54,15 @@ module.exports = function strain() {
           describe: 'Update the helix bot configuration on the affected content repositories.',
           type: 'boolean',
         })
+        .option('only', {
+          describe: 'Only publish strains with names following the specified pattern, use config from master branch for all others',
+          type: 'string',
+        })
+        .option('exclude', {
+          describe: 'Don\'t publish strains with names following the specified pattern, use config from master branch instead',
+          type: 'string',
+        })
+        .conflicts('only', 'exclude')
         .demandOption(
           'fastly-auth',
           'Authentication is required. You can pass the key via the HLX_FASTLY_AUTH environment variable, too',
@@ -96,6 +105,7 @@ module.exports = function strain() {
         .withGithubToken(argv.githubToken)
         .withUpdateBotConfig(argv.updateBotConfig)
         .withConfigPurgeAPI(argv.apiConfigPurge)
+        .withFilter(argv.only, argv.exclude)
         .run();
     },
   };

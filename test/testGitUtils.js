@@ -18,6 +18,7 @@ const net = require('net');
 const fse = require('fs-extra');
 const shell = require('shelljs');
 const git = require('isomorphic-git');
+const { condit } = require('@adobe/helix-testutils');
 const { createTestRoot } = require('./utils.js');
 
 git.plugins.set('fs', require('fs'));
@@ -176,5 +177,37 @@ describe('Testing GitUtils', () => {
     const anotherTestRoot = await createTestRoot();
     await fse.writeFile(path.resolve(anotherTestRoot, '.env'), 'Hello, world.\n', 'utf-8');
     assert.ok(await GitUtils.isIgnored(anotherTestRoot, '.env', GIT_USER_HOME));
+  });
+});
+
+describe('Tests against the helix-cli repo', () => {
+  function ishelix() {
+    if (process.env.CIRCLE_REPOSITORY_URL) {
+      return !!process.env.CIRCLE_REPOSITORY_URL.match('helix-cli');
+    }
+    return true;
+  }
+
+  condit('resolveCommit resolves the correct commit for tags', ishelix, async () => {
+    const commit = await GitUtils.resolveCommit('.', 'v1.0.0');
+    assert.equal(commit, 'f9ab59cd2baa2860289d826e270938f2eedb3e59');
+  });
+
+  condit('resolveCommit resolves the correct commit for shortened OID', ishelix, async () => {
+    const commit = await GitUtils.resolveCommit('.', 'f9ab59c');
+    assert.equal(commit, 'f9ab59cd2baa2860289d826e270938f2eedb3e59');
+  });
+
+  condit('resolveCommit throws for unknown ref', ishelix, async () => {
+    await assert.rejects(async () => GitUtils.resolveCommit('.', 'v99.unicorn.foobar'), { code: 'ResolveRefError' });
+  });
+
+  it('resolveCommit throws for invalid argument type', async () => {
+    await assert.rejects(async () => GitUtils.resolveCommit(1.0, true), { name: 'TypeError' });
+  });
+
+  condit('getRawContent gets the correct version', ishelix, async () => {
+    const content = await GitUtils.getRawContent('.', 'v1.0.0', 'package.json');
+    assert.equal(JSON.parse(content.toString()).version, '1.0.0');
   });
 });

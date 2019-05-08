@@ -209,6 +209,45 @@ class GitUtils {
   static async getCurrentRevision(dir) {
     return git.resolveRef({ dir, ref: 'HEAD' });
   }
+
+  /**
+   * Returns the commit oid of the curent commit referenced by `ref`
+   *
+   * @param {string} dir git repo path
+   * @param {string} ref reference (branch, tag or commit sha)
+   * @returns {Promise<string>} commit oid of the curent commit referenced by `ref`
+   * @throws {GitError} `err.code === 'ResolveRefError'`: invalid reference
+   */
+  static async resolveCommit(dir, ref) {
+    return git.resolveRef({ dir, ref })
+      .catch(async (err) => {
+        if (err.code === 'ResolveRefError') {
+          // fallback: is ref a shortened oid prefix?
+          const oid = await git.expandOid({ dir, oid: ref }).catch(() => { throw err; });
+          return git.resolveRef({ dir, ref: oid });
+        }
+        // re-throw
+        throw err;
+      });
+  }
+
+  /**
+   * Returns the contents of the file at revision `ref` and `pathName`
+   *
+   * @param {string} dir git repo path
+   * @param {string} ref reference (branch, tag or commit sha)
+   * @param {string} filePath relative path to file
+   * @returns {Promise<Buffer>} content of specified file
+   * @throws {GitError} `err.code === 'TreeOrBlobNotFoundError'`: resource not found
+   *                    `err.code === 'ResolveRefError'`: invalid reference
+   */
+  static async getRawContent(dir, ref, pathName) {
+    return GitUtils.resolveCommit(dir, ref)
+      .then(oid => git.readObject({
+        dir, oid, filepath: pathName, format: 'content',
+      }))
+      .then(obj => obj.object);
+  }
 }
 
 module.exports = GitUtils;
