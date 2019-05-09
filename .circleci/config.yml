@@ -63,7 +63,7 @@ jobs:
         command: git config --global user.email "you@example.com" && git config --global user.name "Your Name"
     - run:
         name: Lint
-        command: npm run ci-lint
+        command: npm run lint-ci
 
     # test & get code coverage
     - run:
