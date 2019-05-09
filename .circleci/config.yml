@@ -19,7 +19,7 @@ commands:
         command: sudo npm -g install npm@6.4.1
     - run:
         name: Installing Dependencies
-        command: npm install
+        command: npm ci
     - save_cache:
         paths:
         - node_modules
@@ -49,7 +49,7 @@ jobs:
         command: node snykmocha.js
 
   build:
-    parallelism: 2
+    parallelism: 5
     executor: node8
     working_directory: ~/repo
 
