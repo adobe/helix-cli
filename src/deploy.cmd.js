@@ -134,8 +134,12 @@ class DeployCommand extends AbstractCommand {
   }
 
   actionName(script) {
+    console.log(script.main);
     if (script.main.indexOf(path.resolve(__dirname, 'openwhisk')) === 0) {
       return `hlx--${script.name}`;
+    }
+    if (script.main.match(/cgi-bin\//)) {
+      return `${this._prefix}/cgi-bin-${script.name}`;
     }
     return `${this._prefix}/${script.name}`;
   }
@@ -331,7 +335,7 @@ Alternatively you can auto-add one using the {grey --add <name>} option.`);
     }
 
     // get the list of scripts from the info files
-    const infos = [...glob.sync(`${this._target}/*.info.json`)];
+    const infos = [...glob.sync(`${this._target}/**/*.info.json`)];
     const scriptInfos = await Promise.all(infos.map(info => fs.readJSON(info)));
     const scripts = scriptInfos.filter(script => script.zipFile);
 
