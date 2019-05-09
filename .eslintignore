@@ -2,6 +2,7 @@
 logs/*
 demos/*
 test/integration
+test/integration-with-cgi-bin
 test/tmp/*
 tmp/*
 coverage/*
