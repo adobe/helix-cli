@@ -56,6 +56,7 @@ describe('hlx publish --remote (default)', () => {
       .withWskHost('doesn.t.matter')
       .withPublishAPI('https://adobeioruntime.net/api/v1/web/helix/default/publish')
       .withConfigFile(path.resolve(__dirname, 'fixtures/deployed.yaml'))
+      .withFilter()
       .withDryRun(false);
     await remote.run();
 

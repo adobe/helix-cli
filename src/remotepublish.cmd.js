@@ -117,6 +117,9 @@ class RemotePublishCommand extends AbstractCommand {
   }
 
   withFilter(only, exclude) {
+    if (!(only || exclude)) {
+      return this;
+    }
     const globex = glob(only || exclude);
 
     const onlyfilter = (master, current) => {
