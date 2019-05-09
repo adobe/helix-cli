@@ -1,3 +1,10 @@
+## [2.1.4](https://github.com/adobe/helix-cli/compare/v2.1.3...v2.1.4) (2019-05-09)
+
+
+### Bug Fixes
+
+* **publish:** catch error when trying to merge non-existent configuration from master ([a51937e](https://github.com/adobe/helix-cli/commit/a51937e)), closes [#846](https://github.com/adobe/helix-cli/issues/846)
+
 ## [2.1.3](https://github.com/adobe/helix-cli/compare/v2.1.2...v2.1.3) (2019-05-09)
 
 
