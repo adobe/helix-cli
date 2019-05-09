@@ -9,7 +9,7 @@
   "scripts": {
     "check": "npm run lint && npm run test",
     "test": "nyc --reporter=text --reporter=lcov mocha -t 5000",
-    "test-ci": "npm run lint && nyc --reporter=text --reporter=lcov mocha -R mocha-junit-reporter -t 5000 && codecov",
+    "test-ci": "npm run lint && circleci tests glob 'test/test*.js' | circleci tests split | xargs nyc --reporter=text --reporter=lcov mocha -R mocha-junit-reporter -t 5000 && codecov",
     "lint": "./node_modules/.bin/eslint .",
     "semantic-release": "semantic-release",
     "commit": "git-cz",
