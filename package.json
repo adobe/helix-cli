@@ -11,7 +11,7 @@
     "test": "nyc --reporter=text --reporter=lcov mocha -t 5000",
     "test-ci": "circleci tests glob 'test/test*.js' | circleci tests split --split-by=timings | xargs nyc --reporter=text --reporter=lcov mocha -R mocha-junit-reporter -t 5000 && codecov",
     "lint": "./node_modules/.bin/eslint .",
-    "lint-ci": "circleci tests glob '**/*.js' | circleci tests split | xargs eslint",
+    "lint-ci": "circleci tests glob 'src/**/*.js' 'test/**/*.js' | circleci tests split | xargs eslint",
     "semantic-release": "semantic-release",
     "commit": "git-cz",
     "snyk-protect": "snyk protect",
