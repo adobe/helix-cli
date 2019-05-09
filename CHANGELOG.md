@@ -1,3 +1,10 @@
+## [2.1.3](https://github.com/adobe/helix-cli/compare/v2.1.2...v2.1.3) (2019-05-09)
+
+
+### Bug Fixes
+
+* **publish:** fix error when no filters provided ([937a365](https://github.com/adobe/helix-cli/commit/937a365)), closes [#846](https://github.com/adobe/helix-cli/issues/846)
+
 ## [2.1.2](https://github.com/adobe/helix-cli/compare/v2.1.1...v2.1.2) (2019-05-09)
 
 
