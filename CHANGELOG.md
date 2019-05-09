@@ -1,3 +1,10 @@
+## [2.1.5](https://github.com/adobe/helix-cli/compare/v2.1.4...v2.1.5) (2019-05-09)
+
+
+### Bug Fixes
+
+* **package:** update webpack to version 4.31.0 ([1f507a9](https://github.com/adobe/helix-cli/commit/1f507a9))
+
 ## [2.1.4](https://github.com/adobe/helix-cli/compare/v2.1.3...v2.1.4) (2019-05-09)
 
 
