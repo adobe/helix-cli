@@ -49,7 +49,7 @@ jobs:
         command: node snykmocha.js
 
   build:
-    parallelism: 5
+    parallelism: 4
     executor: node8
     working_directory: ~/repo
 
