@@ -134,7 +134,6 @@ class DeployCommand extends AbstractCommand {
   }
 
   actionName(script) {
-    console.log(script.main);
     if (script.main.indexOf(path.resolve(__dirname, 'openwhisk')) === 0) {
       return `hlx--${script.name}`;
     }

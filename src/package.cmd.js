@@ -195,7 +195,6 @@ class PackageCommand extends AbstractCommand {
       /* eslint-disable no-param-reassign */
       script.name = path.basename(script.main, '.js');
       script.dirname = script.isStatic ? '' : path.dirname(script.main);
-      console.log(script.name, script.dirname);
       script.archiveName = `${script.name}.zip`;
       script.zipFile = path.resolve(this._target, script.dirname, script.archiveName);
       script.infoFile = path.resolve(this._target, script.dirname, `${script.name}.info.json`);
