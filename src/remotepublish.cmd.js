@@ -213,18 +213,24 @@ class RemotePublishCommand extends AbstractCommand {
 
     if (this._filter) {
       this.log.debug('filtering');
-      const content = await GitUtils.getRawContent('.', 'master', 'helix-config.yaml');
+      try {
+        const content = await GitUtils.getRawContent('.', 'master', 'helix-config.yaml');
 
-      const other = await new HelixConfig()
-        .withSource(content.toString())
-        .init();
+        const other = await new HelixConfig()
+          .withSource(content.toString())
+          .init();
 
-      this.log.debug(`this: ${Array.from(this.config.strains.keys()).join(', ')}`);
-      this.log.debug(`other: ${Array.from(other.strains.keys()).join(', ')}`);
-      const merged = other.merge(this.config, this._filter);
-      this.log.debug(Array.from(merged.strains.keys()).join(', '));
+        this.log.debug(`this: ${Array.from(this.config.strains.keys()).join(', ')}`);
+        this.log.debug(`other: ${Array.from(other.strains.keys()).join(', ')}`);
+        const merged = other.merge(this.config, this._filter);
+        this.log.debug(Array.from(merged.strains.keys()).join(', '));
 
-      this._helixConfig = merged;
+        this._helixConfig = merged;
+      } catch (e) {
+        this.log.error(`Cannot merge configuration from master. Do you have a helix-config.yaml commited in the master branch?
+${e}`);
+        throw new Error('Unable to merge configurations for selective publishing');
+      }
     }
 
     return request.post(this._publishAPI, {

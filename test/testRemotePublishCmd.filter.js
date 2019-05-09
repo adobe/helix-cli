@@ -145,3 +145,122 @@ describe('hlx publish --remote (with filters)', () => {
     await fse.remove(testRoot);
   });
 });
+
+describe('hlx publish --remote (with filters, but without config)', () => {
+  let RemotePublishCommand;
+  let writeDictItem;
+  let purgeAll;
+  let testRoot;
+  let pwd;
+  let publishedstrains;
+  let remote;
+
+  beforeEach('Setting up Fake Server', async function bef() {
+    this.timeout(5000);
+    writeDictItem = sinon.fake.resolves(true);
+    purgeAll = sinon.fake.resolves(true);
+
+    RemotePublishCommand = proxyquire('../src/remotepublish.cmd', {
+      '@adobe/fastly-native-promises': () => ({
+        transact: fn => fn(3),
+        writeDictItem,
+        purgeAll,
+      }),
+    });
+
+
+    // ensure to reset nock to avoid conflicts with PollyJS
+    nock.restore();
+    nock.cleanAll();
+    nock.activate();
+
+    nock('https://adobeioruntime.net')
+      .post('/api/v1/web/helix/default/publish', (body) => {
+        publishedstrains = body.configuration.strains.reduce((o, strain) => {
+          if (strain.origin) {
+            // eslint-disable-next-line no-param-reassign
+            o[strain.name] = strain.origin.hostname === 'www.adobe.io' ? 'branch' : 'master';
+          }
+          if (strain.package) {
+            // eslint-disable-next-line no-param-reassign
+            o[strain.name] = strain.package;
+          }
+          return o;
+        }, {});
+        return true;
+      })
+      .reply(200, {})
+      .post('/api/v1/web/helix/default/addlogger')
+      .reply(200, {});
+
+    // set up a fake git repo.
+    testRoot = await createTestRoot();
+    await fse.copy(path.resolve(__dirname, 'fixtures/filtered-master.yaml'), path.resolve(testRoot, 'wrong-helix-config.yaml'));
+
+    // throw a Javascript error when any shell.js command encounters an error
+    shell.config.fatal = true;
+
+    // init git repo
+    pwd = shell.pwd();
+    shell.cd(testRoot);
+    shell.exec('git init');
+    shell.exec('git add -A');
+    shell.exec('git commit -m"initial commit."');
+
+    // set up command
+    remote = await new RemotePublishCommand(makeLogger({ logLevel: 'debug' }))
+      .withWskAuth('fakeauth')
+      .withWskNamespace('fakename')
+      .withFastlyAuth('fake_auth')
+      .withFastlyNamespace('fake_name')
+      .withWskHost('doesn.t.matter')
+      .withPublishAPI('https://adobeioruntime.net/api/v1/web/helix/default/publish')
+      .withConfigFile(path.resolve(__dirname, 'fixtures/filtered.yaml'))
+      .withDryRun(false);
+  });
+
+  it('publishing without filters takes everything from branch', async () => {
+    await remote.run();
+
+    assert.deepEqual(publishedstrains, {
+      default: 'branch',
+      'both-api': 'branch',
+      'branch-foo': 'branch',
+      'branch-bar': 'branch',
+      'only-branch': 'branch',
+    });
+  });
+
+  it('publishing with only fails', async () => {
+    remote = remote.withFilter('branch-*', undefined);
+    try {
+      await remote.run();
+      assert.fail('this should fail');
+    } catch (e) {
+      if (e instanceof assert.AssertionError) {
+        throw e;
+      }
+      assert.equal(e.message, 'Error while running the Publish command');
+    }
+  });
+
+  it('publishing with exclude fails', async () => {
+    remote = remote.withFilter(undefined, 'branch-*');
+    try {
+      await remote.run();
+      assert.fail('this should fail');
+    } catch (e) {
+      if (e instanceof assert.AssertionError) {
+        throw e;
+      }
+      assert.equal(e.message, 'Error while running the Publish command');
+    }
+  });
+
+
+  afterEach(async () => {
+    nock.restore();
+    shell.cd(pwd);
+    await fse.remove(testRoot);
+  });
+});
