@@ -450,6 +450,30 @@ For `hlx demo full`, a full CI configuration is created that will run a performa
 test after a completed deployment, report the per-metric results and mark the build
 as failed in case metrics are not met.
 
+## Supported Programming Languages
+
+Helix allows you to develop experiences using a number of languages in different contexts. The most important languages are:
+
+* HTL
+* JavaScript
+* JSX
+
+Please note that these languages are all executed server-side (or serverless-side, as the code is on Adobe I/O Runtime). In some cases this means that you can move code between client and server with moderate changes.
+
+### Creating Things in Helix with HTL
+
+HTL stands for [HTML Template Language and was originally introduced for Adobe Experience Manager](https://docs.adobe.com/content/help/en/experience-manager-htl/using/getting-started/update.html). The implementation in Helix is based on the [HTL Specification](https://github.com/adobe/htl-spec/blob/master/SPECIFICATION.md), but as Helix and the underlying [`htlengine`](https://github.com/adobe/htlengine) are written in JavaScript rather than Java, and as the object model between Helix and AEM is different (check out the [`helix-pipeline` documentation](https://github.com/adobe/helix-pipeline/tree/master/docs) for Helix' domain model), your templates translate roughly rather than directly.
+
+You can use HTL within Helix in exactly one context: to create rendering templates for pages or page fragments. Your HTL templates will be compiled by Helix into a JavaScript function, which you can then invoke on Adobe I/O Runtime (through Fastly) or locally (through the Helix Simulator). Rendering templates operate on the current [`context`](https://github.com/adobe/helix-pipeline/blob/master/docs/content.schema.md) and return a HTML string that will be delivered to the browser.
+
+Because HTL is a pure declarative templating language, you cannot make any modifications within HTL to change the context. To do that, you need to use JavaScript, which is explained in the next section.
+
+### Creating Things in Helix with JavaScript
+
+
+
+### Creating Things in Helix with JSX
+
 # Developing Helix CLI
 
 ## Testing
