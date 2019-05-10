@@ -33,7 +33,7 @@ describe('#unit test AdapterJSAsset', () => {
       'unknown.js',
       'html_invalid.jsx',
     ].forEach((name) => {
-      assert.ok(AdapterJSAsset.isPureScript(name), `${name} should not be a pure script`);
+      assert.ok(!AdapterJSAsset.isPureScript(name), `${name} should not be a pure script`);
     });
   });
 });

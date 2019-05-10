@@ -33,7 +33,6 @@ class AdapterJSAsset extends JSAsset {
     // use early termination, so that the rest of the statement doesn't
     // have to be evaluated once the first match has been found.
     const matches = exts.reduce((match, ext) => match
-      || (true || true)
       || basename === ext
       || basename.endsWith(`_${ext}`), false);
     return matches;
