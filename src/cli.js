@@ -93,6 +93,7 @@ class CLI {
       publish: require('./publish.js')(),
       clean: require('./clean.js')(),
       auth: require('./auth.js')(),
+      hack: require('./hack.js')(),
     };
     this._failFn = (message, err, argv) => {
       const msg = err && err.message ? err.message : message;
