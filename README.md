@@ -544,6 +544,34 @@ to your script. If there are additional helper functions you need in multiple pa
 
 ### Creating Things in Helix with JSX
 
+[JSX is an extension of the ES6 language](https://facebook.github.io/jsx/), originally created by Facebook for the client-side React framework, but, due to its practicality, adopted by [other frameworks](https://mithril.js.org/jsx.html) and is even used [on the server-side](https://nextjs.org).
+
+JSX provides a shorthand syntax for creating DOM elements, which makes it well suited for creating templates using multiple components (really just functions) that are re-usable and re-mixable.
+
+In Helix, JSX is used for serverless-side rendering of HTML pages or HTML page fragments, making it a language choice for Template Functions and an alternative for [JavaScript Template Functions](#javascript-template-functions).
+
+The ability to mix imperative JavaScript code with HTML-generating functions that look almost like real HTML makes JSX an alternative to using HTL with `pre.js`, too, because you can just keep the pre-processing code inside your JSX file.
+
+JSX files im Helix follow the naming pattern `src/${extension}.jsx` or `src/${selector}_${extension}.jsx`, for instance `src/html.jsx` or `src/footer_html.jsx`.
+
+Like [JavaScript Template Functions](#javascript-template-functions), JSX operates on the `context`, produces `context.response.body` and needs a `main` entry point. A minimal JSX example would look like this:
+
+```jsx
+function MyComponent(context) {
+  <div>Hello World</div>
+}
+
+module.exports.main = context => {
+  return {
+    response: {
+      // the response body needs to be a string, so taking the `outerHTML` of
+      // the topmost component is a good choice.
+      body: MyComponent(context).outerHTML
+    }
+  };
+};
+```
+
 # Developing Helix CLI
 
 ## Testing
