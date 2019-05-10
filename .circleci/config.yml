@@ -19,7 +19,7 @@ commands:
         command: sudo npm -g install npm@6.4.1
     - run:
         name: Installing Dependencies
-        command: npm install
+        command: npm ci
     - save_cache:
         paths:
         - node_modules
@@ -49,6 +49,7 @@ jobs:
         command: node snykmocha.js
 
   build:
+    parallelism: 4
     executor: node8
     working_directory: ~/repo
 
@@ -62,7 +63,7 @@ jobs:
         command: git config --global user.email "you@example.com" && git config --global user.name "Your Name"
     - run:
         name: Lint
-        command: npm run lint
+        command: npm run lint-ci
 
     # test & get code coverage
     - run:

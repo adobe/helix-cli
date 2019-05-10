@@ -29,7 +29,7 @@ module.exports = function commonArgs(yargs) {
     })
     .positional('files', {
       describe: 'The template files to compile',
-      default: ['src/**/*.htl', 'src/**/*.js'],
+      default: ['src/**/*.htl', 'src/**/*.js', 'cgi-bin/**/*.js'],
       array: true,
       type: 'string',
     })
