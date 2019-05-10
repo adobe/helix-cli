@@ -1,3 +1,10 @@
+# [2.2.0](https://github.com/adobe/helix-cli/compare/v2.1.6...v2.2.0) (2019-05-10)
+
+
+### Features
+
+* **cgi-bin:** build and deploy JS files from the cgi-bin folder ([b7f0f65](https://github.com/adobe/helix-cli/commit/b7f0f65)), closes [#436](https://github.com/adobe/helix-cli/issues/436)
+
 ## [2.1.6](https://github.com/adobe/helix-cli/compare/v2.1.5...v2.1.6) (2019-05-09)
 
 
