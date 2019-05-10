@@ -50,7 +50,8 @@ describe('Integration test for demo + up command', () => {
           path.join(testDir, 'src', 'utils', '*.js'),
         ])
         .withTargetDir(buildDir)
-        .withDirectory(testDir);
+        .withDirectory(testDir)
+        .withHttpPort(0);
 
       await new Promise((resolve) => {
         cmd
