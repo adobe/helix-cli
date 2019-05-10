@@ -29,7 +29,6 @@ function helix_wrap_action(main) {
     async function once(payload, action) {
       // calls the pre function and then the script's main.
       async function invoker(next) {
-        console.log('invoking', next);
         const ret = await Promise.resolve(pre(payload, action));
         return Promise.resolve(next(ret || payload, action));
       }
