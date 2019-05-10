@@ -27,6 +27,7 @@ const DeployCommand = require('../src/deploy.cmd.js');
 
 const CI_TOKEN = 'nope';
 const TEST_DIR = path.resolve('test/integration');
+const CGI_BIN_TEST_DIR = path.resolve('test/integration-with-cgi-bin');
 
 describe('hlx deploy (Integration)', () => {
   let testRoot;
@@ -377,6 +378,48 @@ describe('hlx deploy (Integration)', () => {
     const log = await logger.getOutput();
     assert.ok(log.indexOf('deployment of 2 actions completed') >= 0);
     assert.ok(log.indexOf(`- hlx/${ref}/html`) >= 0);
+    assert.ok(log.indexOf('- hlx/hlx--static') >= 0);
+  }).timeout(30000);
+
+  it('Dry-Running works with cgi-bin', async () => {
+    await fs.copy(CGI_BIN_TEST_DIR, testRoot);
+    await fs.rename(path.resolve(testRoot, 'default-config.yaml'), path.resolve(testRoot, 'helix-config.yaml'));
+    initGit(testRoot, 'git@github.com:adobe/project-helix.io.git');
+    const logger = Logger.getTestLogger();
+
+    await new BuildCommand(logger)
+      .withDirectory(testRoot)
+      .withFiles([
+        path.resolve(testRoot, 'src/html.htl'),
+        path.resolve(testRoot, 'src/html.pre.js'),
+        path.resolve(testRoot, 'src/helper.js'),
+        path.resolve(testRoot, 'src/utils/another_helper.js'),
+        path.resolve(testRoot, 'src/third_helper.js'),
+        path.resolve(testRoot, 'cgi-bin/hello.js'),
+      ])
+      .withTargetDir(buildDir)
+      .withCacheEnabled(false)
+      .run();
+
+    const cmd = await new DeployCommand(logger)
+      .withDirectory(testRoot)
+      .withWskHost('adobeioruntime.net')
+      .withWskAuth('secret-key')
+      .withWskNamespace('hlx')
+      .withEnableAuto(false)
+      .withEnableDirty(false)
+      .withDryRun(true)
+      .withTarget(buildDir)
+      .run();
+
+    const ref = await GitUtils.getCurrentRevision(testRoot);
+    assert.equal(cmd.config.strains.get('default').package, '');
+    assert.equal(cmd.config.strains.get('dev').package, `hlx/${ref}`);
+
+    const log = await logger.getOutput();
+    assert.ok(log.indexOf('deployment of 3 actions completed') >= 0);
+    assert.ok(log.indexOf(`- hlx/${ref}/html`) >= 0);
+    assert.ok(log.indexOf(`- hlx/${ref}/cgi-bin-hello`) >= 0);
     assert.ok(log.indexOf('- hlx/hlx--static') >= 0);
   }).timeout(30000);
 

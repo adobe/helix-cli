@@ -1,0 +1,17 @@
+<html>
+	<head>
+		<title>Example</title>
+	</head>
+	<body>
+		Something happened! I'm New!
+
+		<h1>Here are a few things I know:</h1>
+		<dl>
+			<dt>Requested path</dt>
+			<dd><code>${payload.resourcePath}</code></dd>
+
+			<dt>Title</dt>
+			<dd><code>${content.title}</code></dd>
+		</dl>
+	</body>
+</html>
