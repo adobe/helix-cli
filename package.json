@@ -100,6 +100,7 @@
     "jsdom": "^15.0.0",
     "less": "3.8.1",
     "lint-staged": "^8.1.5",
+    "micromatch": "^4.0.2",
     "mocha": "6.1.4",
     "mocha-junit-reporter": "1.22.0",
     "mocha-parallel-tests": "2.1.0",
