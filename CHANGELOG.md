@@ -1,3 +1,10 @@
+## [2.4.1](https://github.com/adobe/helix-cli/compare/v2.4.0...v2.4.1) (2019-05-13)
+
+
+### Bug Fixes
+
+* **package:** use correct log output for debug ([#877](https://github.com/adobe/helix-cli/issues/877)) ([de05b9d](https://github.com/adobe/helix-cli/commit/de05b9d)), closes [#870](https://github.com/adobe/helix-cli/issues/870)
+
 # [2.4.0](https://github.com/adobe/helix-cli/compare/v2.3.0...v2.4.0) (2019-05-13)
 
 
