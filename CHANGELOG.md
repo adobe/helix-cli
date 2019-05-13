@@ -1,3 +1,24 @@
+## [2.2.3](https://github.com/adobe/helix-cli/compare/v2.2.2...v2.2.3) (2019-05-13)
+
+
+### Bug Fixes
+
+* **package:** update @adobe/helix-shared to version 1.3.0 ([84f091d](https://github.com/adobe/helix-cli/commit/84f091d))
+
+## [2.2.2](https://github.com/adobe/helix-cli/compare/v2.2.1...v2.2.2) (2019-05-13)
+
+
+### Bug Fixes
+
+* **package:** update @adobe/parcel-plugin-htl to version 2.1.8 ([90c07f9](https://github.com/adobe/helix-cli/commit/90c07f9))
+
+## [2.2.1](https://github.com/adobe/helix-cli/compare/v2.2.0...v2.2.1) (2019-05-10)
+
+
+### Bug Fixes
+
+* **package:** update snyk to version 1.163.2 ([aae07c2](https://github.com/adobe/helix-cli/commit/aae07c2))
+
 # [2.2.0](https://github.com/adobe/helix-cli/compare/v2.1.6...v2.2.0) (2019-05-10)
 
 
