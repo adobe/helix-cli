@@ -61,6 +61,10 @@ class AdapterJSAsset extends JSAsset {
       return gen;
     }
 
+    // inject hyperscript library
+    if (this.basename.endsWith('.jsx')) {
+      gen[0].value = `const h = require('hyperscript');\n${gen[0].value}`;
+    }
     // otherwise it's a pure-JS action and we want to wrap it
     gen[0].type = 'helix-js';
     return gen;

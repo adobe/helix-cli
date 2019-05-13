@@ -12,11 +12,7 @@
 
 /* eslint-disable */
 
-const h = require('hyperscript'); // lgtm [js/unused-local-variable]
-
-
 // CONTENTS
-
 
 function helix_wrap_action(main) {
   const { OpenWhiskAction } = require('@adobe/helix-pipeline');
