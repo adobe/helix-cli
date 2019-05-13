@@ -1,3 +1,15 @@
+# [2.3.0](https://github.com/adobe/helix-cli/compare/v2.2.5...v2.3.0) (2019-05-13)
+
+
+### Bug Fixes
+
+* **package:** update @adobe/parcel-plugin-htl to version 2.1.9 ([9f326f7](https://github.com/adobe/helix-cli/commit/9f326f7))
+
+
+### Features
+
+* **pipeline:** consistently use `context` instead of payload. ([4faf4de](https://github.com/adobe/helix-cli/commit/4faf4de)), closes [#743](https://github.com/adobe/helix-cli/issues/743)
+
 ## [2.2.5](https://github.com/adobe/helix-cli/compare/v2.2.4...v2.2.5) (2019-05-13)
 
 
