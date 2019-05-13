@@ -79,7 +79,7 @@ class PackageCommand extends AbstractCommand {
 
     return new Promise((resolve, reject) => {
       const ticks = {};
-      const archiveName = { info };
+      const archiveName = path.basename(info.zipFile);
       let hadErrors = false;
 
       // create zip file for package
