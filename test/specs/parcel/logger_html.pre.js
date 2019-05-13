@@ -13,13 +13,13 @@
 
 /**
  * The 'pre' function that is executed before the HTML is rendered
- * @param payload The current payload of processing pipeline
- * @param payload.resource The content
+ * @param context The current context of processing pipeline
+ * @param context.resource The content
  */
-function pre(payload, action) {
+function pre(context, action) {
 
   action.logger.debug('pre was here!');
-  payload.content.foo = 'bar';
+  context.content.foo = 'bar';
 
 }
 

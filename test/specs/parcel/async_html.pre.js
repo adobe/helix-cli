@@ -23,10 +23,10 @@ function requestSomething() {
 
 /**
  * Example of an async 'pre' function.
- * @param payload The current payload of processing pipeline
+ * @param context The current context of processing pipeline
  */
-async function pre(payload) {
-  payload.content.foo = await requestSomething();
+async function pre(context) {
+  context.content.foo = await requestSomething();
 }
 
 module.exports.pre = pre;

@@ -15,7 +15,7 @@
  */
 function main(params) {
     var name = params.name || 'World';
-    return {payload:  'Hello, ' + name + '!'};
+    return {context:  'Hello, ' + name + '!'};
 }
 
 module.exports.main = main;

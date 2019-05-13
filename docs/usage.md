@@ -4,7 +4,7 @@
 
 ### Basic HTML rendering
 
-The demo project comes with 2 files `src/html.htl` and `src/html.pre.js` which renders HTML from the requested Markdown file. The `htl` file is the rendering template while the `pre.js` allows to interact with the payload before it gets rendered by the template.
+The demo project comes with 2 files `src/html.htl` and `src/html.pre.js` which renders HTML from the requested Markdown file. The `htl` file is the rendering template while the `pre.js` allows to interact with the context before it gets rendered by the template.
 The These files are named based on the following logic: `<selector>_<extension>.htl` and `<selector>_<extension>.pre.js`. In this case, the `selector` is undefined. They will handle all requests coming to `http://localhost:3000/**/*.html`.
 
 The `htl` file format must respect the HTL spec, check the [htlengine](https://github.com/adobe/htlengine) for more details.

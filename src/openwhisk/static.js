@@ -320,7 +320,7 @@ function blacklisted(path, allow, deny) {
 }
 /**
  *
- * @param {Object} params The OpenWhisk payload
+ * @param {Object} params The OpenWhisk parameters
  * @param {string} params.owner Repository owner on GitHub
  * @param {string} params.repo Repository name on GitHub
  * @param {string} params.ref SHA of a commit or name of a branch or tag on GitHub
