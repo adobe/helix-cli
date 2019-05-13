@@ -1,3 +1,11 @@
+# [2.5.0](https://github.com/adobe/helix-cli/compare/v2.4.1...v2.5.0) (2019-05-13)
+
+
+### Features
+
+* **build:** add basic JSX support ([aec4c8e](https://github.com/adobe/helix-cli/commit/aec4c8e)), closes [#203](https://github.com/adobe/helix-cli/issues/203)
+* **build:** build JSX templates/scripts by default ([2692b49](https://github.com/adobe/helix-cli/commit/2692b49))
+
 ## [2.4.1](https://github.com/adobe/helix-cli/compare/v2.4.0...v2.4.1) (2019-05-13)
 
 
