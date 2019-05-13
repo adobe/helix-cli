@@ -450,6 +450,128 @@ For `hlx demo full`, a full CI configuration is created that will run a performa
 test after a completed deployment, report the per-metric results and mark the build
 as failed in case metrics are not met.
 
+## Supported Programming Languages
+
+Helix allows you to develop experiences using a number of languages in different contexts. The most important languages are:
+
+* HTL
+* JavaScript
+* JSX
+
+Please note that these languages are all executed server-side (or serverless-side, as the code is on Adobe I/O Runtime). In some cases this means that you can move code between client and server with moderate changes.
+
+### Creating Things in Helix with HTL
+
+HTL stands for [HTML Template Language and was originally introduced for Adobe Experience Manager](https://docs.adobe.com/content/help/en/experience-manager-htl/using/getting-started/update.html). The implementation in Helix is based on the [HTL Specification](https://github.com/adobe/htl-spec/blob/master/SPECIFICATION.md), but as Helix and the underlying [`htlengine`](https://github.com/adobe/htlengine) are written in JavaScript rather than Java, and as the object model between Helix and AEM is different (check out the [`helix-pipeline` documentation](https://github.com/adobe/helix-pipeline/tree/master/docs) for Helix' domain model), your templates translate roughly rather than directly.
+
+You can use HTL within Helix in exactly one context: to create rendering templates for pages or page fragments. Your HTL templates will be compiled by Helix into a JavaScript function, which you can then invoke on Adobe I/O Runtime (through Fastly) or locally (through the Helix Simulator). Rendering templates operate on the current [`context`](https://github.com/adobe/helix-pipeline/blob/master/docs/context.schema.md) and return a HTML string that will be delivered to the browser.
+
+HTL templates follow the naming pattern `src/${extension}.htl` or `src/${selector}_${extension}.htl`, for instance `src/html.htl` or `src/footer_html.htl`.
+
+Because HTL is a pure declarative templating language, you cannot make any modifications within HTL to change the context. To do that, you need to use JavaScript, which is explained in the next section.
+
+### Creating Things in Helix with JavaScript
+
+JavaScript is the universal language that powers Helix and you can use it in a wide array of settings in Helix:
+
+1. to create HTML, JSON, Text, XML, or other documents to be served to the browser (as a template function)
+2. to modifify and manipulate the [`context`](https://github.com/adobe/helix-pipeline/blob/master/docs/context.schema.md) before it is handed off to a template function (as `pre.js`)
+3. to handle requests for forms, web applications, and to create small APIs (as `cgi-bin`)
+4. to provide helper functions that can be used elsewhere in Helix (as modules)
+
+#### JavaScript Template Functions
+
+A JavaScript template functions is a step in the Helix rendering Pipeline that takes the current [`context`](https://github.com/adobe/helix-pipeline/blob/master/docs/context.schema.md) and sets the `context`'s [`response.body`](https://github.com/adobe/helix-pipeline/blob/master/docs/response.schema.md#body). It is a full-powered (serverless) JavaScript function, so you can do whatever you want, include any NPM module that's useful, as long as the function is fast enough to be executed within a couple of seconds.
+
+JavaScript template functions are found in files that are follow the naming pattern `src/${extension}.js` or `src/${selector}_${extension}.js`, for instance `src/html.js` or `src/footer_html.js`. Only a number of `extension`s are allowed, including `html`, `json`, `txt`, `xml`, `svg`, and `css`. 
+
+A minimal functional JavaScript template function must export a `main` function and should set the `context`'s [`response.body`](https://github.com/adobe/helix-pipeline/blob/master/docs/response.schema.md#body) property.
+
+```javascript
+// exporting `main` is mandatory
+module.exports.main = (context, action) {
+  return {
+    response: {
+      // setting the body is the purpose of the function
+      body: 'Hello World'
+    }
+  };
+}
+```
+
+#### JavaScript `pre.js`
+
+A JavaScript `pre.js` ("pree-jay-ess") is a collection of JavaScript functions that will be executed by the Helix Pipeline right before the template function gets called. This allows a `pre.js` to prepare the context in a way that makes it easier to use in a template function.
+
+In addition, a `pre.js` can use [additional extension points in the pipeline](https://github.com/adobe/helix-pipeline#extension-points), but the step running right before the template function is the most common extension point that gave the `pre.js` its name.
+
+`pre.js` files follow the naming pattern `src/${extension}.pre.js` or `src/${selector}_${extension}.pre.js`, for instance `src/html.pre.js` or `src/footer_html.pre.js`. They are the companions of the template functions (in HTL, JavaScript or JSX with the same selector and extension).
+
+A minimal `pre.js` must exports a `pre` function and has access to the [`context`](https://github.com/adobe/helix-pipeline/blob/master/docs/context.schema.md) and [`action`](https://github.com/adobe/helix-pipeline/blob/master/docs/action.schema.md) of the pipeline.
+
+```javascript
+module.exports.pre = (context, action) => {
+  console.log('I am here. You can see this log message in the Adobe I/O Runtime console.');
+}
+```
+
+#### JavaScript `cgi-bin`
+
+Template functions and `pre.js` have in common that they have no side effects, i.e. they cannot do anything other than change the `context` and render web experiences. This reflects the fact that they get used only to serve `GET` requests and are heavily cached, so that most visitors coming to your site won't actually run code in the Adobe I/O Runtime (which keeps your costs low), but this also means that you should not rely on them when you want actual work done, databases to be written, or emails to be sent.
+
+For this, Helix provides you with a simple way of creating, deploying, and running serverless actions that **can** have side-effects. In [the spirit of 1997](https://medium.com/adobetech/2017-will-be-the-year-of-the-cgi-bin-err-serverless-f5d99671bc99), we call it the `cgi-bin`, and it is a place for scripts that are running on your behalf in Adobe I/O Runtime. They get deployed using `hlx deploy` with all your other code, they support multiple parallel deployments, CD, and all the best practices of 2019, but at the ease of development of 1997.
+
+In order to create a `cgi-bin` script, all you need to do is to create a `.js` file in the `cgi-bin` directory, such as `hello.js`.
+
+```javascript
+module.exports.main = (params) => {
+  var name = params.name || 'World';
+  return {payload:  'Hello, ' + name + '!'};
+}
+```
+
+This is the ["Hello World" example from Apache OpenWhisk](https://github.com/apache/incubator-openwhisk/blob/master/docs/samples.md#openwhisk-hello-world-example) and it can be used to create a very simple JSON API, which supports POST requests (with a multipart-formdata or JSON body) and GET requests (with URL parameters).
+
+#### JavaScript Modules
+
+In all the JavaScript examples above, you have full access to all NPM modules, all you have to do is to add a statement like:
+
+```javascript
+const request = require('request');
+```
+
+to your script. If there are additional helper functions you need in multiple parts of your project, you can simply put them into a JavaScript module below `src`. Make sure to `export` the functions and objects you want to consume in your `cgi-bin`, `pre.js`, or template functions.
+
+### Creating Things in Helix with JSX
+
+[JSX is an extension of the ES6 language](https://facebook.github.io/jsx/), originally created by Facebook for the client-side React framework, but, due to its practicality, adopted by [other frameworks](https://mithril.js.org/jsx.html) and is even used [on the server-side](https://nextjs.org).
+
+JSX provides a shorthand syntax for creating DOM elements, which makes it well suited for creating templates using multiple components (really just functions) that are re-usable and re-mixable.
+
+In Helix, JSX is used for serverless-side rendering of HTML pages or HTML page fragments, making it a language choice for Template Functions and an alternative for [JavaScript Template Functions](#javascript-template-functions).
+
+The ability to mix imperative JavaScript code with HTML-generating functions that look almost like real HTML makes JSX an alternative to using HTL with `pre.js`, too, because you can just keep the pre-processing code inside your JSX file.
+
+JSX files im Helix follow the naming pattern `src/${extension}.jsx` or `src/${selector}_${extension}.jsx`, for instance `src/html.jsx` or `src/footer_html.jsx`.
+
+Like [JavaScript Template Functions](#javascript-template-functions), JSX operates on the `context`, produces `context.response.body` and needs a `main` entry point. A minimal JSX example would look like this:
+
+```jsx
+function MyComponent(context) {
+  <div>Hello World</div>
+}
+
+module.exports.main = context => {
+  return {
+    response: {
+      // the response body needs to be a string, so taking the `outerHTML` of
+      // the topmost component is a good choice.
+      body: MyComponent(context).outerHTML
+    }
+  };
+};
+```
+
 # Developing Helix CLI
 
 ## Testing
