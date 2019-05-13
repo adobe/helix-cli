@@ -13,16 +13,16 @@
 
 /**
  * The 'pre' function that is executed before the HTML is rendered
- * @param payload The current payload of processing pipeline
- * @param payload.content The content
- * @return the new payload
+ * @param context The current context of processing pipeline
+ * @param context.content The content
+ * @return the new context
  */
-function pre(payload) {
-  const myPayload = JSON.parse(JSON.stringify(payload));
-  payload.content.foo = 'testing - should be ignored';
+function pre(context) {
+  const mycontext = JSON.parse(JSON.stringify(context));
+  context.content.foo = 'testing - should be ignored';
 
-  myPayload.content.foo = 'bar';
-  return myPayload;
+  mycontext.content.foo = 'bar';
+  return mycontext;
 }
 
 module.exports.pre = pre;

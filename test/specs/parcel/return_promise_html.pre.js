@@ -23,16 +23,16 @@ function requestSomething() {
 
 /**
  * Example of the 'pre' function that returns a Promise.
- * @param payload The current payload of processing pipeline
- * @return {Promise} When resolved, continues the rendering pipeline with the resolved payload.
+ * @param context The current context of processing pipeline
+ * @return {Promise} When resolved, continues the rendering pipeline with the resolved context.
  */
-function pre(payload) {
-  const myPayload = JSON.parse(JSON.stringify(payload));
-  payload.content.foo = 'testing - should be ignored';
+function pre(context) {
+  const mycontext = JSON.parse(JSON.stringify(context));
+  context.content.foo = 'testing - should be ignored';
 
   return requestSomething().then((value) => {
-    myPayload.content.foo = value;
-    return myPayload;
+    mycontext.content.foo = value;
+    return mycontext;
   });
 }
 

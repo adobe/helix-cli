@@ -1,3 +1,17 @@
+## [2.2.5](https://github.com/adobe/helix-cli/compare/v2.2.4...v2.2.5) (2019-05-13)
+
+
+### Bug Fixes
+
+* **package:** add micromatch as dev-dependncy to resolve packageer problems ([#875](https://github.com/adobe/helix-cli/issues/875)) ([c659533](https://github.com/adobe/helix-cli/commit/c659533)), closes [#871](https://github.com/adobe/helix-cli/issues/871)
+
+## [2.2.4](https://github.com/adobe/helix-cli/compare/v2.2.3...v2.2.4) (2019-05-13)
+
+
+### Bug Fixes
+
+* **package:** update @adobe/helix-simulator to version 2.12.8 ([c0fc3bd](https://github.com/adobe/helix-cli/commit/c0fc3bd)), closes [#874](https://github.com/adobe/helix-cli/issues/874)
+
 ## [2.2.3](https://github.com/adobe/helix-cli/compare/v2.2.2...v2.2.3) (2019-05-13)
 
 
