@@ -1,3 +1,10 @@
+# [2.4.0](https://github.com/adobe/helix-cli/compare/v2.3.0...v2.4.0) (2019-05-13)
+
+
+### Features
+
+* **script:** sanitize context before returning it to the pipeline ([#862](https://github.com/adobe/helix-cli/issues/862)) ([4861ec8](https://github.com/adobe/helix-cli/commit/4861ec8)), closes [#744](https://github.com/adobe/helix-cli/issues/744) [#861](https://github.com/adobe/helix-cli/issues/861)
+
 # [2.3.0](https://github.com/adobe/helix-cli/compare/v2.2.5...v2.3.0) (2019-05-13)
 
 
