@@ -1,3 +1,10 @@
+## [2.5.1](https://github.com/adobe/helix-cli/compare/v2.5.0...v2.5.1) (2019-05-13)
+
+
+### Bug Fixes
+
+* **package:** update fs-extra to version 8.0.1 ([4b6c833](https://github.com/adobe/helix-cli/commit/4b6c833))
+
 # [2.5.0](https://github.com/adobe/helix-cli/compare/v2.4.1...v2.5.0) (2019-05-13)
 
 
