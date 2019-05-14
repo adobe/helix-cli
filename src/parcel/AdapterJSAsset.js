@@ -70,7 +70,7 @@ class AdapterJSAsset extends JSAsset {
 
   async getPackage() {
     const pack = await super.getPackage();
-    return pack || {}; 
+    return pack || {};
   }
 }
 
