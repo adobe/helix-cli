@@ -39,7 +39,7 @@ class AdapterJSAsset extends JSAsset {
   }
 
   async getPackage() {
-    const pkg = await super.getPackage();
+    const pkg = await super.getPackage() || {};
     const pack = pkg.devDependencies ? pkg : Object.assign(pkg, {
       devDependencies: {
         hyperapp: '*',
