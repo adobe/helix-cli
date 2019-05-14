@@ -14,6 +14,7 @@
 
 const yargsOpenwhisk = require('./yargs-openwhisk.js');
 const yargsFastly = require('./yargs-fastly.js');
+const yargsStatic = require('./yargs-static.js');
 const { makeLogger } = require('./log-common.js');
 
 module.exports = function deploy() {
@@ -28,6 +29,7 @@ module.exports = function deploy() {
     builder: (yargs) => {
       yargsOpenwhisk(yargs);
       yargsFastly(yargs);
+      yargsStatic(yargs);
       yargs
         .option('auto', {
           describe: 'Enable auto-deployment',
@@ -151,6 +153,7 @@ module.exports = function deploy() {
         .withFastlyNamespace(argv.fastlyNamespace)
         .withCreatePackages(argv.package)
         .withAddStrain(argv.add)
+        .withStatic(argv.static)
         .run();
     },
 

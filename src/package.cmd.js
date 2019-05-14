@@ -18,12 +18,12 @@ const path = require('path');
 const fs = require('fs-extra');
 const ProgressBar = require('progress');
 const archiver = require('archiver');
-const AbstractCommand = require('./abstract.cmd.js');
+const StaticCommand = require('./static.cmd.js');
 const packageCfg = require('./parcel/packager-config.js');
 const ExternalsCollector = require('./parcel/ExternalsCollector.js');
 const { flattenDependencies } = require('./packager-utils.js');
 
-class PackageCommand extends AbstractCommand {
+class PackageCommand extends StaticCommand {
   constructor(logger) {
     super(logger);
     this._target = null;

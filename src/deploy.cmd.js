@@ -23,7 +23,7 @@ const ProgressBar = require('progress');
 const { HelixConfig, GitUrl } = require('@adobe/helix-shared');
 const GitUtils = require('./git-utils');
 const useragent = require('./user-agent-util');
-const AbstractCommand = require('./abstract.cmd.js');
+const StaticCommand = require('./static.cmd.js');
 const PackageCommand = require('./package.cmd.js');
 const ConfigUtils = require('./config/config-utils.js');
 
@@ -33,7 +33,7 @@ function humanFileSize(size) {
   return `${(size / p2).toFixed(2)} ${['B', 'KiB', 'MiB', 'GiB', 'TiB'][i]}`;
 }
 
-class DeployCommand extends AbstractCommand {
+class DeployCommand extends StaticCommand {
   constructor(logger) {
     super(logger);
     this._enableAuto = true;
