@@ -39,7 +39,10 @@ class AdapterJSAsset extends JSAsset {
   }
 
   async getPackage() {
-    const pkg = await super.getPackage();
+    const pkg = await super.getPackage() || {};
+    if (!pkg.devDependencies) {
+      pkg.devDependencies = {};
+    }
     pkg.devDependencies.hyperapp = '*';
     return pkg;
   }
