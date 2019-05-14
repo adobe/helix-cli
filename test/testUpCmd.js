@@ -162,6 +162,34 @@ describe('Integration test for up command', function suite() {
     }
   });
 
+  it('up command delivers correct response for JSX templates.', async () => {
+    initGit(testDir, 'https://github.com/adobe/dummy-foo.git');
+    await fse.rename(path.resolve(testDir, 'default-config.yaml'), path.resolve(testDir, 'helix-config.yaml'));
+    const cmd = new UpCommand()
+      .withCacheEnabled(false)
+      .withFiles([
+        path.join(testDir, 'src', '*.htl'),
+        path.join(testDir, 'src', '*.js'),
+        path.join(testDir, 'src', '*.jsx'),
+        path.join(testDir, 'src', 'utils', '*.js'),
+      ])
+      .withTargetDir(buildDir)
+      .withDirectory(testDir)
+      .withOverrideHost('www.project-helix.io')
+      .withHttpPort(0);
+
+    await new Promise((resolve) => {
+      cmd.on('started', resolve);
+      cmd.run();
+    });
+
+    try {
+      await assertHttpDom(`http://localhost:${cmd.project.server.port}/README.footer.html`, 200, 'footer_response_readme.html');
+    } finally {
+      await cmd.stop();
+    }
+  });
+
   it('up command delivers correct response from secondary local repository.', async () => {
     const apiDir = path.resolve(testRoot, 'api-repo');
     await fse.copy(path.resolve(__dirname, 'fixtures', 'api-repo'), apiDir);
