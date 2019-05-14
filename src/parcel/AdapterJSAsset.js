@@ -40,8 +40,13 @@ class AdapterJSAsset extends JSAsset {
 
   async getPackage() {
     const pkg = await super.getPackage();
-    pkg.devDependencies.hyperapp = '*';
-    return pkg;
+    const pack = pkg.devDependencies ? pkg : Object.assign(pkg, {
+      devDependencies: {
+        hyperapp: '*',
+      },
+    });
+    pack.devDependencies.hyperapp = '*';
+    return pack;
   }
 
   async generate() {
@@ -88,11 +93,6 @@ class AdapterJSAsset extends JSAsset {
         throw e;
       }
     }
-  }
-
-  async getPackage() {
-    const pack = await super.getPackage();
-    return pack || { devDependencies: {} };
   }
 }
 
