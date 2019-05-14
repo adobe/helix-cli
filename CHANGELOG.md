@@ -1,3 +1,13 @@
+## [2.5.3](https://github.com/adobe/helix-cli/compare/v2.5.2...v2.5.3) (2019-05-14)
+
+
+### Bug Fixes
+
+* **parcel:** check for empty package ([8c3fe34](https://github.com/adobe/helix-cli/commit/8c3fe34))
+* **parcel:** guard against missing devDependencies and missing package ([042db06](https://github.com/adobe/helix-cli/commit/042db06))
+* **parcel:** make sure devdependencies is initialized ([47db87b](https://github.com/adobe/helix-cli/commit/47db87b))
+* **parcel:** more robust handling of missing package.json ([455a65c](https://github.com/adobe/helix-cli/commit/455a65c)), closes [#881](https://github.com/adobe/helix-cli/issues/881)
+
 ## [2.5.2](https://github.com/adobe/helix-cli/compare/v2.5.1...v2.5.2) (2019-05-14)
 
 
