@@ -166,7 +166,7 @@ class PackageCommand extends StaticCommand {
     let scripts = flattenDependencies(scriptInfos);
 
     // add the static script if missing
-    if (!scripts.find(script => script.isStatic)) {
+    if (!scripts.find(script => script.isStatic) && this._buildStatic) {
       // add static action
       scripts.push({
         main: path.resolve(__dirname, 'openwhisk', 'static.js'),
