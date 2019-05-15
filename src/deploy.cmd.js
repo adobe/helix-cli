@@ -348,7 +348,9 @@ Alternatively you can auto-add one using the {grey --add <name>} option.`);
       .filter(script => this._buildStatic || script.actionName !== 'hlx--static');
 
     const bar = new ProgressBar('[:bar] :action :etas', {
-      total: scripts.length * 2,
+      total: (scripts.length * 2) // two ticks for each script
+       + 1 // one tick for creating the package
+       + (this._bindStatic ? 1 : 0), // optionally one tick when binding static
       width: 50,
       renderThrottle: 1,
       stream: process.stdout,
@@ -398,7 +400,25 @@ Alternatively you can auto-add one using the {grey --add <name>} option.`);
           ],
         },
       });
+      tick(`created package ${this._prefix}`, '');
     }
+
+    // bind helix-services
+    if (this._bindStatic) {
+      openwhisk.packages.update({
+        package: {
+          binding: {
+            namespace: 'helix', // namespace to bind from
+            name: 'helix-services', // package to bind from
+          },
+        },
+        name: 'helix-services', // name of the new package
+      }).then(() => {
+        tick('bound helix-services', '');
+      });
+      // we don't have to wait for this.
+    }
+
 
     // ... and deploy
     const deployed = read.map(p => p.then(({ script, action }) => {
