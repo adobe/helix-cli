@@ -11,26 +11,49 @@
  */
 
 const path = require('path');
+const { flat, into } = require('@adobe/helix-shared').sequence;
 const JSAsset = require('parcel-bundler/src/assets/JSAsset');
 
-const PURE_JS_SCRIPTS = ['html.js', 'json.js', 'xml.js', 'svg.js', 'css.js', 'txt.js'];
+const PURE_EXTENSIONS = ['html', 'json', 'xml', 'svg', 'css', 'txt'];
+const PURE_TEMPLATES = ['js', 'jsx'];
 
 /**
  * Adapts Pure-JS actions to the `helix-js` type so that it can be wrapped via the `HelixAsset.js`.
  */
 class AdapterJSAsset extends JSAsset {
+  /**
+   * Determines if the given file should be treated as an AdapterJSAsset
+   * @param {string} basename
+   */
+  static isPureScript(basename) {
+    // create pairwise combinations of extension and template name
+    const exts = into(flat(PURE_EXTENSIONS
+      .map(ext => PURE_TEMPLATES
+        .map(template => `${ext}.${template}`))), Array);
+    // use early termination, so that the rest of the statement doesn't
+    // have to be evaluated once the first match has been found.
+    const matches = exts.reduce((match, ext) => match
+      || basename === ext
+      || basename.endsWith(`_${ext}`), false);
+    return matches;
+  }
+
+  async getPackage() {
+    const pkg = await super.getPackage() || {};
+    const pack = pkg.devDependencies ? pkg : Object.assign(pkg, {
+      devDependencies: {
+        hyperapp: '*',
+      },
+    });
+    pack.devDependencies.hyperapp = '*';
+    return pack;
+  }
+
   async generate() {
     const gen = await super.generate();
 
     // check if it's a pure-JS action
-    let isScript = false;
-    for (let i = 0; i < PURE_JS_SCRIPTS.length; i += 1) {
-      const ext = PURE_JS_SCRIPTS[i];
-      if (this.basename === ext || this.basename.endsWith(`_${ext}`)) {
-        isScript = true;
-        break;
-      }
-    }
+    const isScript = AdapterJSAsset.isPureScript(this.basename);
 
     // if this no, we're done.
     if (!isScript) {
@@ -43,6 +66,10 @@ class AdapterJSAsset extends JSAsset {
       return gen;
     }
 
+    // inject hyperscript library
+    if (this.basename.endsWith('.jsx')) {
+      gen[0].value = `const h = require('hyperscript');\n${gen[0].value}`;
+    }
     // otherwise it's a pure-JS action and we want to wrap it
     gen[0].type = 'helix-js';
     return gen;

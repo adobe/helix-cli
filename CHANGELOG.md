@@ -1,3 +1,49 @@
+## [2.5.3](https://github.com/adobe/helix-cli/compare/v2.5.2...v2.5.3) (2019-05-14)
+
+
+### Bug Fixes
+
+* **parcel:** check for empty package ([8c3fe34](https://github.com/adobe/helix-cli/commit/8c3fe34))
+* **parcel:** guard against missing devDependencies and missing package ([042db06](https://github.com/adobe/helix-cli/commit/042db06))
+* **parcel:** make sure devdependencies is initialized ([47db87b](https://github.com/adobe/helix-cli/commit/47db87b))
+* **parcel:** more robust handling of missing package.json ([455a65c](https://github.com/adobe/helix-cli/commit/455a65c)), closes [#881](https://github.com/adobe/helix-cli/issues/881)
+
+## [2.5.2](https://github.com/adobe/helix-cli/compare/v2.5.1...v2.5.2) (2019-05-14)
+
+
+### Bug Fixes
+
+* **package:** update @adobe/helix-simulator to version 2.12.9 ([c87473b](https://github.com/adobe/helix-cli/commit/c87473b)), closes [#878](https://github.com/adobe/helix-cli/issues/878)
+
+## [2.5.1](https://github.com/adobe/helix-cli/compare/v2.5.0...v2.5.1) (2019-05-13)
+
+
+### Bug Fixes
+
+* **package:** update fs-extra to version 8.0.1 ([4b6c833](https://github.com/adobe/helix-cli/commit/4b6c833))
+
+# [2.5.0](https://github.com/adobe/helix-cli/compare/v2.4.1...v2.5.0) (2019-05-13)
+
+
+### Features
+
+* **build:** add basic JSX support ([aec4c8e](https://github.com/adobe/helix-cli/commit/aec4c8e)), closes [#203](https://github.com/adobe/helix-cli/issues/203)
+* **build:** build JSX templates/scripts by default ([2692b49](https://github.com/adobe/helix-cli/commit/2692b49))
+
+## [2.4.1](https://github.com/adobe/helix-cli/compare/v2.4.0...v2.4.1) (2019-05-13)
+
+
+### Bug Fixes
+
+* **package:** use correct log output for debug ([#877](https://github.com/adobe/helix-cli/issues/877)) ([de05b9d](https://github.com/adobe/helix-cli/commit/de05b9d)), closes [#870](https://github.com/adobe/helix-cli/issues/870)
+
+# [2.4.0](https://github.com/adobe/helix-cli/compare/v2.3.0...v2.4.0) (2019-05-13)
+
+
+### Features
+
+* **script:** sanitize context before returning it to the pipeline ([#862](https://github.com/adobe/helix-cli/issues/862)) ([4861ec8](https://github.com/adobe/helix-cli/commit/4861ec8)), closes [#744](https://github.com/adobe/helix-cli/issues/744) [#861](https://github.com/adobe/helix-cli/issues/861)
+
 # [2.3.0](https://github.com/adobe/helix-cli/compare/v2.2.5...v2.3.0) (2019-05-13)
 
 

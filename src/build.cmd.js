@@ -87,6 +87,7 @@ class BuildCommand extends AbstractCommand {
     bundler.addAssetType('htl', require.resolve('@adobe/parcel-plugin-htl/src/HTLAsset.js'));
     bundler.addAssetType('helix-js', require.resolve('./parcel/HelixAsset.js'));
     bundler.addAssetType('js', require.resolve('./parcel/AdapterJSAsset.js'));
+    bundler.addAssetType('jsx', require.resolve('./parcel/AdapterJSAsset.js'));
     bundler.addAssetType('helix-pre-js', require.resolve('./parcel/ProxyJSAsset.js'));
     bundler.addPackager('js', RawJSPackager);
     return bundler;
