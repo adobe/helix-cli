@@ -336,13 +336,16 @@ Alternatively you can auto-add one using the {grey --add <name>} option.`);
     // get the list of scripts from the info files
     const infos = [...glob.sync(`${this._target}/**/*.info.json`)];
     const scriptInfos = await Promise.all(infos.map(info => fs.readJSON(info)));
-    const scripts = scriptInfos.filter(script => script.zipFile);
-
-    // generate action names
-    scripts.forEach((script) => {
-      // eslint-disable-next-line no-param-reassign
-      script.actionName = this.actionName(script);
-    });
+    const scripts = scriptInfos
+      .filter(script => script.zipFile)
+      // generate action names
+      .map((script) => {
+        // eslint-disable-next-line no-param-reassign
+        script.actionName = this.actionName(script);
+        return script;
+      })
+      // exclude `hlx--static` when deploying static is disabled
+      .filter(script => this._buildStatic || script.actionName !== 'hlx--static');
 
     const bar = new ProgressBar('[:bar] :action :etas', {
       total: scripts.length * 2,
