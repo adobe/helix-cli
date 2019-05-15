@@ -40,6 +40,8 @@ describe('hlx publish', () => {
     mockPublish.withUpdateBotConfig.returnsThis();
     mockPublish.withGithubToken.returnsThis();
     mockPublish.withFilter.returnsThis();
+    mockPublish.withCustomVCL.returnsThis();
+    mockPublish.withVCL.returnsThis();
     mockPublish.run.returnsThis();
   });
 
@@ -51,7 +53,7 @@ describe('hlx publish', () => {
     new CLI()
       .withCommandExecutor('publish', mockPublish)
       .onFail((err) => {
-        assert.ok(err.indexOf('required'));
+        assert.ok(!err || err.indexOf('required'));
         done();
       })
       .run(['publish']);

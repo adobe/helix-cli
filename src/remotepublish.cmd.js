@@ -172,7 +172,7 @@ class RemotePublishCommand extends AbstractCommand {
           throw error;
         }
       });
-      this.withVCL(vcl);
+      return this.withVCL(vcl);
     }
     return this;
   }
@@ -262,16 +262,20 @@ ${e}`);
         throw new Error('Unable to merge configurations for selective publishing');
       }
     }
+    const body = {
+      configuration: this.config.toJSON(),
+      service: this._fastly_namespace,
+      token: this._fastly_auth,
+      version: this._version,
+    };
+
+    if (this._vcl) {
+      body.vcl = this._vcl;
+    }
 
     return request.post(this._publishAPI, {
       json: true,
-      body: {
-        configuration: this.config.toJSON(),
-        service: this._fastly_namespace,
-        token: this._fastly_auth,
-        version: this._version,
-        vcl: this._vcl,
-      },
+      body,
     }).then(() => {
       this.tick(9, 'set service config up for Helix', true);
       return true;
