@@ -34,7 +34,7 @@ describe('hlx package (Integration)', () => {
     fs.remove(testRoot);
   });
 
-  it('package create correct package', async () => {
+  it('package creates correct package', async () => {
     await new BuildCommand()
       .withFiles([
         'test/integration/src/html.htl',
@@ -53,6 +53,7 @@ describe('hlx package (Integration)', () => {
       .withDirectory(testRoot)
       .withTarget(buildDir)
       .withOnlyModified(false)
+      .withStatic('both')
       .on('create-package', (info) => {
         created[info.name] = true;
       })
