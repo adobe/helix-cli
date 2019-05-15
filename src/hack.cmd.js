@@ -27,7 +27,7 @@ class HackCommand extends AbstractCommand {
   }
 
   withHackathon(value) {
-    this._hackathon = value + (value === '' ? '' : '.html');
+    this._hackathon = value || 'README';
     return this;
   }
 
@@ -38,7 +38,7 @@ class HackCommand extends AbstractCommand {
 
   async run() {
     await this.init();
-    const url = `https://helix-home-adobe.project-helix.page/hackathons/${this._hackathon || ''}`;
+    const url = `https://helix-home-adobe.project-helix.page/hackathons/${this._hackathon}.html`;
     if (this._open) {
       opn(url);
     } else {
