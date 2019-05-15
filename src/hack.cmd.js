@@ -11,24 +11,40 @@
  */
 
 const chalk = require('chalk');
+const opn = require('opn');
 const AbstractCommand = require('./abstract.cmd.js');
 
 class HackCommand extends AbstractCommand {
+  constructor(logger) {
+    super(logger);
+    this._open = false;
+    this._hackathon = '';
+  }
+
   // eslint-disable-next-line class-methods-use-this
   get requireConfigFile() {
     return false;
   }
 
   withHackathon(value) {
-    this._hackathon = value + (value === '' ? '' : '.md');
+    this._hackathon = value || 'README';
+    return this;
+  }
+
+  withOpen(o) {
+    this._open = !!o;
     return this;
   }
 
   async run() {
     await this.init();
-    const url = `https://github.com/adobe/helix-home/tree/master/hackathons/${this._hackathon || ''}`;
-    // eslint-disable-next-line no-console
-    console.log(chalk`Check out the Helix Hackathon at {blue ${url}}`);
+    const url = `https://helix-home-adobe.project-helix.page/hackathons/${this._hackathon}.html`;
+    if (this._open) {
+      opn(url);
+    } else {
+      // eslint-disable-next-line no-console
+      this.log.info(chalk`Check out the Helix Hackathon at {blue ${url}}`);
+    }
   }
 }
 
