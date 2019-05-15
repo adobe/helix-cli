@@ -11,15 +11,26 @@
  */
 /* eslint-env mocha */
 const assert = require('assert');
+const { Logger } = require('@adobe/helix-shared');
 const hack = require('../src/hack');
+const HackCommand = require('../src/hack.cmd');
 const CLI = require('../src/cli');
 
 describe('Test hlx hack', () => {
   it('hlx hack works', async () => {
     assert.equal(typeof hack(), 'object');
-    const result = await new CLI().run(['hack']);
+    const result = await new CLI().run(['hack', '--open=false']);
     assert.equal(result, undefined);
 
     assert.equal(hack().executor = null, undefined);
+
+    const hackathon = '5-bsl';
+    const logger = Logger.getTestLogger();
+    await new HackCommand(logger)
+      .withHackathon(hackathon)
+      .withOpen(false)
+      .run();
+    const log = await logger.getOutput();
+    assert.ok(log.indexOf(`/hackathons/${hackathon}.html`) > 0);
   });
 });

@@ -29,6 +29,11 @@ module.exports = function hack() {
           array: false,
           type: 'string',
         })
+        .option('open', {
+          describe: 'Open a browser window',
+          type: 'boolean',
+          default: true,
+        })
         .help();
     },
     handler: async (argv) => {
@@ -37,6 +42,7 @@ module.exports = function hack() {
         const HackCommand = require('./hack.cmd'); // lazy load the handler to speed up execution time
         executor = new HackCommand(makeLogger(argv));
         executor.withHackathon(argv.hackathon);
+        executor.withOpen(argv.open);
       }
 
       await executor
