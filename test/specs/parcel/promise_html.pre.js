@@ -23,12 +23,12 @@ function requestSomething() {
 
 /**
  * Example of the 'pre' function that returns a Promise.
- * @param payload The current payload of processing pipeline
+ * @param context The current context of processing pipeline
  * @return {Promise} When resolved, continues the rendering pipeline
  */
-function pre(payload) {
+function pre(context) {
   return requestSomething().then((value) => {
-    payload.content.foo = value;
+    context.content.foo = value;
   });
 }
 

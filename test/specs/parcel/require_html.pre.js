@@ -18,12 +18,12 @@ const { foo } = require('./helpers.js');
 
 /**
  * The 'pre' function that is executed before the HTML is rendered.
- * @param payload The current payload of processing pipeline
- * @param payload.content The content content
+ * @param context The current context of processing pipeline
+ * @param context.content The content content
  */
-function pre(payload) {
+function pre(context) {
 
-  payload.content.foo = foo();
+  context.content.foo = foo();
 
 }
 

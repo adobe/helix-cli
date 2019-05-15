@@ -66,23 +66,23 @@ async function extractLastModifiedFromMetadata(meta = [], logger) {
 // the most compact way to write a pre.js:
 //
 // module.exports.pre is a function (taking next as an argument)
-// that returns a function (with payload, secrets, logger as arguments)
-// that calls next (after modifying the payload a bit)
-async function pre(payload, config) {
+// that returns a function (with context, secrets, logger as arguments)
+// that calls next (after modifying the context a bit)
+async function pre(context, config) {
   const { logger } = config;
   try {
-    const myPayload = Object.assign({}, payload);
+    const myContext = Object.assign({}, context);
 
     logger.debug('setting context path');
-    myPayload.content.contextPath = 'myinjectedcontextpath';
+    myContext.content.contextPath = 'myinjectedcontextpath';
 
     logger.debug('collecting metadata');
     const gitmeta = await collectMetadata(config.request, logger);
 
     logger.debug('Metadata has arrived');
-    payload.content.gitmetadata = gitmeta;
-    payload.content.committers = await extractCommittersFromMetadata(gitmeta, logger);
-    payload.content.lastModified = await extractLastModifiedFromMetadata(gitmeta, logger);
+    context.content.gitmetadata = gitmeta;
+    context.content.committers = await extractCommittersFromMetadata(gitmeta, logger);
+    context.content.lastModified = await extractLastModifiedFromMetadata(gitmeta, logger);
   } catch (e) {
     logger.error(e);
     throw e;

@@ -16,16 +16,16 @@ const { utils } = require('./helper.js');
 const { utils2 } = require('./utils/another_helper.js');
 const { utils3 } = require('./third_helper');
 
-module.exports.pre = (payload, action) => {
-  payload.content.time = new Date() + _.camelCase('hello world.');
-  payload.content.pkg = fs.readFileSync('package.json');
-  payload.content.stamp = utils.stamp() + utils2.stamp() + utils3.stamp();
-  payload.resourcePath = action.request.params.path;
+module.exports.pre = (context, action) => {
+  context.content.time = new Date() + _.camelCase('hello world.');
+  context.content.pkg = fs.readFileSync('package.json');
+  context.content.stamp = utils.stamp() + utils2.stamp() + utils3.stamp();
+  context.resourcePath = action.request.params.path;
 };
 
 module.exports.before = {
-  fetch: (payload) => {
-    if (payload.request.path==='/404.html') {
+  fetch: (context) => {
+    if (context.request.path==='/404.html') {
       return {
         content: {
           body: 'This file does not exist.'
@@ -96,8 +96,8 @@ function findliquid(node) {
 }
 
 module.exports.after = {
-  parse: (payload) => {
-    const mdast = payload.content.mdast;
+  parse: (context) => {
+    const mdast = context.content.mdast;
 
     return {
       content: {

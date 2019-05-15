@@ -3,6 +3,6 @@
 		<title>Example</title>
 	</head>
 	<body>
-		${payload.stamp}
+		${context.stamp}
 	</body>
 </html>

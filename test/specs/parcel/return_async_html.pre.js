@@ -23,15 +23,15 @@ function requestSomething() {
 
 /**
  * Example of an async 'pre' function.
- * @param payload The current payload of processing pipeline
- * @return The new payload
+ * @param context The current context of processing pipeline
+ * @return The new context
  */
-async function pre(payload) {
-  const myPayload = JSON.parse(JSON.stringify(payload));
-  payload.content.foo = 'testing - should be ignored';
+async function pre(context) {
+  const mycontext = JSON.parse(JSON.stringify(context));
+  context.content.foo = 'testing - should be ignored';
 
-  myPayload.content.foo = await requestSomething();
-  return myPayload;
+  mycontext.content.foo = await requestSomething();
+  return mycontext;
 }
 
 module.exports.pre = pre;

@@ -1,3 +1,36 @@
+# [2.3.0](https://github.com/adobe/helix-cli/compare/v2.2.5...v2.3.0) (2019-05-13)
+
+
+### Bug Fixes
+
+* **package:** update @adobe/parcel-plugin-htl to version 2.1.9 ([9f326f7](https://github.com/adobe/helix-cli/commit/9f326f7))
+
+
+### Features
+
+* **pipeline:** consistently use `context` instead of payload. ([4faf4de](https://github.com/adobe/helix-cli/commit/4faf4de)), closes [#743](https://github.com/adobe/helix-cli/issues/743)
+
+## [2.2.5](https://github.com/adobe/helix-cli/compare/v2.2.4...v2.2.5) (2019-05-13)
+
+
+### Bug Fixes
+
+* **package:** add micromatch as dev-dependncy to resolve packageer problems ([#875](https://github.com/adobe/helix-cli/issues/875)) ([c659533](https://github.com/adobe/helix-cli/commit/c659533)), closes [#871](https://github.com/adobe/helix-cli/issues/871)
+
+## [2.2.4](https://github.com/adobe/helix-cli/compare/v2.2.3...v2.2.4) (2019-05-13)
+
+
+### Bug Fixes
+
+* **package:** update @adobe/helix-simulator to version 2.12.8 ([c0fc3bd](https://github.com/adobe/helix-cli/commit/c0fc3bd)), closes [#874](https://github.com/adobe/helix-cli/issues/874)
+
+## [2.2.3](https://github.com/adobe/helix-cli/compare/v2.2.2...v2.2.3) (2019-05-13)
+
+
+### Bug Fixes
+
+* **package:** update @adobe/helix-shared to version 1.3.0 ([84f091d](https://github.com/adobe/helix-cli/commit/84f091d))
+
 ## [2.2.2](https://github.com/adobe/helix-cli/compare/v2.2.1...v2.2.2) (2019-05-13)
 
 
