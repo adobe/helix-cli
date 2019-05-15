@@ -13,6 +13,8 @@
 /* eslint no-unused-vars: ["error", { "argsIgnorePattern": "^_" }] */
 
 const request = require('request-promise-native');
+const fs = require('fs-extra');
+const path = require('path');
 const fastly = require('@adobe/fastly-native-promises');
 const chalk = require('chalk');
 const ProgressBar = require('progress');
@@ -35,6 +37,7 @@ class RemotePublishCommand extends AbstractCommand {
     this._githubToken = '';
     this._updateBotConfig = false;
     this._configPurgeAPI = 'https://app.project-helix.io/config/purge';
+    this._vcl = null;
   }
 
   tick(ticks = 1, message, name) {
@@ -155,6 +158,30 @@ class RemotePublishCommand extends AbstractCommand {
     return this;
   }
 
+  withCustomVCL(value) {
+    if (value.length > 0) {
+      const vcl = {};
+      value.forEach((file) => {
+        try {
+          const fullPath = path.resolve(file);
+          const name = path.basename(fullPath, '.vcl');
+          const content = fs.readFileSync(fullPath).toString();
+          vcl[name] = content;
+        } catch (error) {
+          this.log.error(`Cannot read provided custom vcl file ${file}`);
+          throw error;
+        }
+      });
+      this.withVCL(vcl);
+    }
+    return this;
+  }
+
+  withVCL(value) {
+    this._vcl = value;
+    return this;
+  }
+
   showNextStep(dryrun) {
     this.progressBar().terminate();
     if (dryrun) {
@@ -243,6 +270,7 @@ ${e}`);
         service: this._fastly_namespace,
         token: this._fastly_auth,
         version: this._version,
+        vcl: this._vcl,
       },
     }).then(() => {
       this.tick(9, 'set service config up for Helix', true);
