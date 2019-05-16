@@ -72,6 +72,7 @@ describe('hlx publish', () => {
     sinon.assert.calledWith(mockPublish.withFastlyAuth, 'foobar');
     sinon.assert.calledWith(mockPublish.withPublishAPI, 'foobar.api');
     sinon.assert.calledWith(mockPublish.withDryRun, true);
+    sinon.assert.calledWith(mockPublish.withCustomVCLs, []);
   });
 
   it('hlx publish works with minimal arguments', () => {
@@ -89,6 +90,7 @@ describe('hlx publish', () => {
     sinon.assert.calledWith(mockPublish.withWskNamespace, 'hlx');
     sinon.assert.calledWith(mockPublish.withFastlyNamespace, 'hlx'); // TODO !!
     sinon.assert.calledWith(mockPublish.withFastlyAuth, 'secret-key');
+    sinon.assert.calledWith(mockPublish.withCustomVCLs, []);
     sinon.assert.calledOnce(mockPublish.run);
   });
 
