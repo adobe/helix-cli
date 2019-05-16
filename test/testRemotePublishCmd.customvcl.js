@@ -133,6 +133,7 @@ describe('hlx publish --custom-vcl (check requests)', () => {
     remote.withCustomVCLs([e]);
     await remote.run();
 
+    assert.ok(vcl);
     assert.deepEqual(vcl, {
       extensions: fs.readFileSync(e).toString(),
     });
@@ -144,6 +145,7 @@ describe('hlx publish --custom-vcl (check requests)', () => {
     remote.withCustomVCLs([e, a]);
     await remote.run();
 
+    assert.ok(vcl);
     assert.deepEqual(vcl, {
       extensions: fs.readFileSync(e).toString(),
       another: fs.readFileSync(a).toString(),

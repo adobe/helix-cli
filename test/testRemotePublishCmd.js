@@ -94,6 +94,8 @@ describe('hlx publish --remote (default)', () => {
     assert.equal(publishBody.service, 'fake_name');
     assert.equal(publishBody.token, 'fake_auth');
     assert.equal(typeof (publishBody.configuration), 'object');
+    assert.ok(Array.isArray(publishBody.configuration.strains));
+    assert.equal(publishBody.configuration.strains.length, 4);
     assert.equal(publishBody.vcl, undefined);
 
     scope.done();
