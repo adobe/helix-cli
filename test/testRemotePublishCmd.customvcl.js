@@ -27,7 +27,7 @@ const RemotePublishCommand = require('../src/remotepublish.cmd');
 describe('hlx publish --custom-vcl (check params)', () => {
   it('hlx publish (no custom-vcl)', () => {
     const remote = new RemotePublishCommand()
-      .withCustomVCL();
+      .withCustomVCLs();
 
     // eslint-disable-next-line no-underscore-dangle
     assert.equal(remote._vcl, null);
@@ -36,7 +36,7 @@ describe('hlx publish --custom-vcl (check params)', () => {
   it('hlx publish --custom-vcl fixtures/vcl/extensions.vcl', async () => {
     const e = path.resolve(__dirname, 'fixtures/vcl/extensions.vcl');
     const remote = new RemotePublishCommand()
-      .withCustomVCL([e]);
+      .withCustomVCLs([e]);
 
     // eslint-disable-next-line no-underscore-dangle
     assert.deepEqual(remote._vcl, {
@@ -48,7 +48,7 @@ describe('hlx publish --custom-vcl (check params)', () => {
     const e = path.resolve(__dirname, 'fixtures/vcl/extensions.vcl');
     const a = path.resolve(__dirname, 'fixtures/vcl/another.vcl');
     const remote = new RemotePublishCommand()
-      .withCustomVCL([e, a]);
+      .withCustomVCLs([e, a]);
 
     // eslint-disable-next-line no-underscore-dangle
     assert.deepEqual(remote._vcl, {
@@ -130,7 +130,7 @@ describe('hlx publish --custom-vcl (check requests)', () => {
 
   it('hlx publish --custom-vcl fixtures/vcl/extensions.vcl', async () => {
     const e = path.resolve(__dirname, 'fixtures/vcl/extensions.vcl');
-    remote.withCustomVCL([e]);
+    remote.withCustomVCLs([e]);
     await remote.run();
 
     assert.deepEqual(vcl, {
@@ -141,7 +141,7 @@ describe('hlx publish --custom-vcl (check requests)', () => {
   it('hlx publish --custom-vcl fixtures/vcl/extensions.vcl --custom-vcl fixtures/vcl/another.vcl', async () => {
     const e = path.resolve(__dirname, 'fixtures/vcl/extensions.vcl');
     const a = path.resolve(__dirname, 'fixtures/vcl/another.vcl');
-    remote.withCustomVCL([e, a]);
+    remote.withCustomVCLs([e, a]);
     await remote.run();
 
     assert.deepEqual(vcl, {
