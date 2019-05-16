@@ -56,6 +56,14 @@ describe('hlx publish --custom-vcl (check params)', () => {
       another: (await fs.readFile(e, 'utf8')).toString(),
     });
   });
+
+  it('hlx publish --custom-vcl fixtures/vcl/unexisting.vcl', async () => {
+    const e = path.resolve(__dirname, 'fixtures/vcl/unexisting.vcl');
+    function throwsError() {
+      new RemotePublishCommand().withCustomVCLs([e]);
+    }
+    assert.throws(throwsError);
+  });
 });
 
 describe('hlx publish --custom-vcl (check requests)', () => {
