@@ -40,7 +40,7 @@ describe('hlx publish --custom-vcl (check params)', () => {
 
     // eslint-disable-next-line no-underscore-dangle
     assert.deepEqual(remote._vcl, {
-      extensions: fs.readFileSync(e).toString(),
+      extensions: await fs.readFile(e, 'utf8'),
     });
   });
 
