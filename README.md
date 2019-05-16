@@ -490,11 +490,9 @@ A minimal functional JavaScript template function must export a `main` function 
 ```javascript
 // exporting `main` is mandatory
 module.exports.main = (context, action) {
-  return {
-    response: {
-      // setting the body is the purpose of the function
-      body: 'Hello World'
-    }
+  context.response = {
+    // setting the body is the purpose of the function
+    body: 'Hello World'
   };
 }
 ```
@@ -562,12 +560,10 @@ function MyComponent(context) {
 }
 
 module.exports.main = context => {
-  return {
-    response: {
-      // the response body needs to be a string, so taking the `outerHTML` of
-      // the topmost component is a good choice.
-      body: MyComponent(context).outerHTML
-    }
+  context.response: {
+    // the response body needs to be a string, so taking the `outerHTML` of
+    // the topmost component is a good choice.
+    body: MyComponent(context).outerHTML
   };
 };
 ```
