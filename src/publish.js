@@ -113,7 +113,7 @@ module.exports = function strain() {
         .withUpdateBotConfig(argv.updateBotConfig)
         .withConfigPurgeAPI(argv.apiConfigPurge)
         .withFilter(argv.only, argv.exclude)
-        .withCustomVCL(argv.customVCL)
+        .withCustomVCLs(argv.customVCL)
         .run();
     },
   };

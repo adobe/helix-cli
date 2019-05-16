@@ -158,10 +158,16 @@ class RemotePublishCommand extends AbstractCommand {
     return this;
   }
 
-  withCustomVCL(value) {
-    if (value && value.length > 0) {
+  /**
+   * Adds a list of VCL files to the publish command. Each VCL file is represented
+   * by a path relative to the current command (e.g. ['vcl/extensions.vcl']).
+   * @param {array} value List of vcl files to add as vcl extensions
+   * @returns {RemotePublishCommand} the current instance
+   */
+  withCustomVCLs(vcls) {
+    if (vcls && vcls.length > 0) {
       const vcl = {};
-      value.forEach((file) => {
+      vcls.forEach((file) => {
         try {
           const fullPath = path.resolve(file);
           const name = path.basename(fullPath, '.vcl');
@@ -172,13 +178,8 @@ class RemotePublishCommand extends AbstractCommand {
           throw error;
         }
       });
-      return this.withVCL(vcl);
+      this._vcl = vcl;
     }
-    return this;
-  }
-
-  withVCL(value) {
-    this._vcl = value;
     return this;
   }
 

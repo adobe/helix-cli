@@ -33,18 +33,18 @@ describe('hlx publish --custom-vcl (check params)', () => {
     assert.equal(remote._vcl, null);
   });
 
-  it('hlx publish --custom-vcl fixtures/vcl/extensions.vcl', () => {
+  it('hlx publish --custom-vcl fixtures/vcl/extensions.vcl', async () => {
     const e = path.resolve(__dirname, 'fixtures/vcl/extensions.vcl');
     const remote = new RemotePublishCommand()
       .withCustomVCL([e]);
 
     // eslint-disable-next-line no-underscore-dangle
     assert.deepEqual(remote._vcl, {
-      extensions: await fs.readFile(e, 'utf8'),
+      extensions: (await fs.readFile(e, 'utf8')).toString(),
     });
   });
 
-  it('hlx publish --custom-vcl fixtures/vcl/extensions.vcl --custom-vcl fixtures/vcl/another.vcl', () => {
+  it('hlx publish --custom-vcl fixtures/vcl/extensions.vcl --custom-vcl fixtures/vcl/another.vcl', async () => {
     const e = path.resolve(__dirname, 'fixtures/vcl/extensions.vcl');
     const a = path.resolve(__dirname, 'fixtures/vcl/another.vcl');
     const remote = new RemotePublishCommand()
@@ -52,8 +52,8 @@ describe('hlx publish --custom-vcl (check params)', () => {
 
     // eslint-disable-next-line no-underscore-dangle
     assert.deepEqual(remote._vcl, {
-      extensions: fs.readFileSync(e).toString(),
-      another: fs.readFileSync(a).toString(),
+      extensions: (await fs.readFile(e, 'utf8')).toString(),
+      another: (await fs.readFile(e, 'utf8')).toString(),
     });
   });
 });
