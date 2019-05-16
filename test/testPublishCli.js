@@ -40,8 +40,7 @@ describe('hlx publish', () => {
     mockPublish.withUpdateBotConfig.returnsThis();
     mockPublish.withGithubToken.returnsThis();
     mockPublish.withFilter.returnsThis();
-    mockPublish.withCustomVCL.returnsThis();
-    mockPublish.withVCL.returnsThis();
+    mockPublish.withCustomVCLs.returnsThis();
     mockPublish.run.returnsThis();
   });
 
