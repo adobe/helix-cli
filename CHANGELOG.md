@@ -1,3 +1,22 @@
+# [3.0.0](https://github.com/adobe/helix-cli/compare/v2.5.5...v3.0.0) (2019-05-16)
+
+
+### Bug Fixes
+
+* **package:** update @adobe/helix-pipeline to version 2.0.0 ([5cabcf2](https://github.com/adobe/helix-cli/commit/5cabcf2))
+
+
+### Documentation
+
+* **readme:** adjust to pipeline change ([f5a1509](https://github.com/adobe/helix-cli/commit/f5a1509))
+
+
+### BREAKING CHANGES
+
+* **readme:** The new pipeline 2.0.0 no longer merges the return
+  values from pipeline functions. The context needs to manipulated
+  directly.
+
 ## [2.5.5](https://github.com/adobe/helix-cli/compare/v2.5.4...v2.5.5) (2019-05-16)
 
 
