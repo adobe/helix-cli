@@ -12,6 +12,7 @@
 
 /* eslint-env mocha */
 
+const assert = require('assert');
 const nock = require('nock');
 const path = require('path');
 const proxyquire = require('proxyquire');
@@ -62,6 +63,38 @@ describe('hlx publish --remote (default)', () => {
 
     sinon.assert.calledTwice(writeDictItem);
     sinon.assert.calledOnce(purgeAll);
+
+    scope.done();
+  });
+
+  it('publishing sends expected parameters', async () => {
+    let publishBody;
+    const scope = nock('https://adobeioruntime.net')
+      .post('/api/v1/web/helix/default/publish', (body) => {
+        publishBody = body;
+        return true;
+      })
+      .reply(200, {})
+      .post('/api/v1/web/helix/default/addlogger')
+      .reply(200, {});
+
+    const remote = await new RemotePublishCommand()
+      .withWskAuth('fakeauth')
+      .withWskNamespace('fakename')
+      .withFastlyAuth('fake_auth')
+      .withFastlyNamespace('fake_name')
+      .withWskHost('doesn.t.matter')
+      .withPublishAPI('https://adobeioruntime.net/api/v1/web/helix/default/publish')
+      .withConfigFile(path.resolve(__dirname, 'fixtures/deployed.yaml'))
+      .withFilter()
+      .withDryRun(false);
+    await remote.run();
+
+    assert.ok(publishBody);
+    assert.equal(publishBody.service, 'fake_name');
+    assert.equal(publishBody.token, 'fake_auth');
+    assert.equal(typeof (publishBody.configuration), 'object');
+    assert.equal(publishBody.vcl, undefined);
 
     scope.done();
   });
