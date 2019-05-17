@@ -424,7 +424,7 @@ describe('hlx deploy (Integration)', () => {
   }).timeout(30000);
 
   it('Deploy works', async function test() {
-    this.timeout(30000);
+    this.timeout(60000);
 
     await fs.copy(TEST_DIR, testRoot);
     await fs.rename(path.resolve(testRoot, 'default-config.yaml'), path.resolve(testRoot, 'helix-config.yaml'));
@@ -456,7 +456,16 @@ describe('hlx deploy (Integration)', () => {
     this.polly.server.put('https://adobeioruntime.net/api/v1/namespaces/hlx/actions/hlx--static').intercept((req, res) => {
       res.sendStatus(201);
     });
+    this.polly.server.put('https://adobeioruntime.net/api/v1/namespaces/hlx/actions/hlx--static?overwrite=true').intercept((req, res) => {
+      res.sendStatus(201);
+    });
     this.polly.server.put(`https://adobeioruntime.net/api/v1/namespaces/hlx/actions/${ref}/html`).intercept((req, res) => {
+      res.sendStatus(201);
+    });
+    this.polly.server.put(`https://adobeioruntime.net/api/v1/namespaces/hlx/packages/helix-services?overwrite=true`).intercept((req, res) => {
+      res.sendStatus(201);
+    });
+    this.polly.server.put(`https://adobeioruntime.net/api/v1/namespaces/hlx/actions/${ref}/hlx--static?overwrite=true`).intercept((req, res) => {
       res.sendStatus(201);
     });
 
