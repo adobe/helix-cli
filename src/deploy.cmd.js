@@ -406,7 +406,7 @@ Alternatively you can auto-add one using the {grey --add <name>} option.`);
 
     let updatestatic;
     // bind helix-services
-    if (this._bindStatic) {
+    if (this._bindStatic && !this._dryRun) {
       updatestatic = openwhisk.packages.update({
         package: {
           binding: {
@@ -457,7 +457,7 @@ Alternatively you can auto-add one using the {grey --add <name>} option.`);
 
     let numErrors = 0;
     let staticactionname = '/hlx--static';
-    if (this._bindStatic) {
+    if (this._bindStatic && !this._dryRun) {
       // probe Helix Static action for version number
       await request.get('https://adobeioruntime.net/api/v1/web/helix/helix-services/static@latest', {
         resolveWithFullResponse: true,
@@ -471,7 +471,7 @@ Alternatively you can auto-add one using the {grey --add <name>} option.`);
       });
     }
 
-    if (!numErrors) {
+    if (!numErrors && !this._dryRun) {
       await openwhisk.actions.update({
         name: `${this._prefix}/hlx--static`,
         action: {
