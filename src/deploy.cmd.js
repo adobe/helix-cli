@@ -350,7 +350,8 @@ Alternatively you can auto-add one using the {grey --add <name>} option.`);
     const bar = new ProgressBar('[:bar] :action :etas', {
       total: (scripts.length * 2) // two ticks for each script
        + 1 // one tick for creating the package
-       + (this._bindStatic ? 1 : 0), // optionally one tick when binding static
+       + 1 // one tick for creating a sequence from the static action
+       + (this._bindStatic ? 2 : 0), // optionally two ticks when binding static
       width: 50,
       renderThrottle: 1,
       stream: process.stdout,
@@ -403,9 +404,10 @@ Alternatively you can auto-add one using the {grey --add <name>} option.`);
       tick(`created package ${this._prefix}`, '');
     }
 
+    let updatestatic;
     // bind helix-services
     if (this._bindStatic) {
-      openwhisk.packages.update({
+      updatestatic = openwhisk.packages.update({
         package: {
           binding: {
             namespace: 'helix', // namespace to bind from
@@ -450,10 +452,60 @@ Alternatively you can auto-add one using the {grey --add <name>} option.`);
       });
     }));
 
-    await Promise.all(deployed);
+    await Promise.all([...deployed, updatestatic]);
+
+
+    let numErrors = 0;
+    let staticactionname = '/hlx--static';
+    if (this._bindStatic) {
+      // probe Helix Static action for version number
+      await request.get('https://adobeioruntime.net/api/v1/web/helix/helix-services/static@latest', {
+        resolveWithFullResponse: true,
+      }).then((res) => {
+        const version = res.headers['x-version'];
+        tick(` verified static action version ${version}`);
+        staticactionname = `/helix-services/static@${version}`;
+      }).catch((e) => {
+        this.log.error(`❌  Unable to verify the static action: ${e.message}`);
+        numErrors += 1;
+      });
+    }
+
+    if (!numErrors) {
+      await openwhisk.actions.update({
+        name: `${this._prefix}/hlx--static`,
+        action: {
+          namespace: this._wsk_namespace,
+          name: 'hlx--static',
+          exec: {
+            kind: 'sequence',
+            components: [this._wsk_namespace + staticactionname],
+          },
+          annotations: [{
+            key: 'exec',
+            value: 'sequence',
+          }, {
+            key: 'web-export',
+            value: true,
+          }, {
+            key: 'raw-http',
+            value: false,
+          }, {
+            key: 'final',
+            value: true,
+          }],
+        },
+      }).then(() => {
+        tick(` linked static action as sequence ${this._prefix}/hlx--static`);
+      }).catch((e) => {
+        this.log.error(`❌  Unable to link the static action as a sequence: ${e.message}`);
+        numErrors += 1;
+      });
+    }
+
+
     bar.terminate();
     this.log.info(`✅  deployment of ${scripts.length} actions completed:`);
-    let numErrors = 0;
     scripts.forEach((script) => {
       let status = '';
       if (script.error) {
