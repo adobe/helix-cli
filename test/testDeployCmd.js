@@ -537,9 +537,6 @@ describe('hlx deploy (Integration)', () => {
     if (!error) {
       assert.fail('Expected deploy to fail.');
     }
-
-    const log = await logger.getOutput();
-    assert.ok(log.indexOf('Unable to deploy the action static') >= 0);
   });
 });
 
