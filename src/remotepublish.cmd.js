@@ -169,7 +169,7 @@ class RemotePublishCommand extends AbstractCommand {
       const vcl = {};
       vcls.forEach((file) => {
         try {
-          const fullPath = path.resolve(file);
+          const fullPath = path.resolve(this.directory, file);
           const name = path.basename(fullPath, '.vcl');
           const content = fs.readFileSync(fullPath).toString();
           vcl[name] = content;
