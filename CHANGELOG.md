@@ -1,3 +1,15 @@
+# [3.1.0](https://github.com/adobe/helix-cli/compare/v3.0.0...v3.1.0) (2019-05-20)
+
+
+### Bug Fixes
+
+* **package:** update snyk to version 1.165.1 ([79e12f7](https://github.com/adobe/helix-cli/commit/79e12f7))
+
+
+### Features
+
+* **publish:** Support for custom VCL logic ([#893](https://github.com/adobe/helix-cli/issues/893)) ([d773f2a](https://github.com/adobe/helix-cli/commit/d773f2a))
+
 # [3.0.0](https://github.com/adobe/helix-cli/compare/v2.5.5...v3.0.0) (2019-05-16)
 
 
