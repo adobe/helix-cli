@@ -22,6 +22,7 @@ const glob = require('glob-to-regexp');
 const { HelixConfig } = require('@adobe/helix-shared');
 const AbstractCommand = require('./abstract.cmd.js');
 const GitUtils = require('./git-utils.js');
+const cliversion = require('../package.json').version;
 
 
 class RemotePublishCommand extends AbstractCommand {
@@ -212,6 +213,7 @@ class RemotePublishCommand extends AbstractCommand {
         service: this._fastly_namespace,
         token: this._fastly_auth,
         version: this._version,
+        cliversion,
       },
     }).then(() => {
       this.tick(10, 'set up logging', true);

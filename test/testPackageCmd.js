@@ -34,7 +34,7 @@ describe('hlx package (Integration)', () => {
     fs.remove(testRoot);
   });
 
-  it('package create correct package', async () => {
+  it('package creates correct package', async () => {
     await new BuildCommand()
       .withFiles([
         'test/integration/src/html.htl',
@@ -53,6 +53,7 @@ describe('hlx package (Integration)', () => {
       .withDirectory(testRoot)
       .withTarget(buildDir)
       .withOnlyModified(false)
+      .withStatic('both')
       .on('create-package', (info) => {
         created[info.name] = true;
       })
@@ -75,6 +76,46 @@ describe('hlx package (Integration)', () => {
       path.resolve(buildDir, 'static.zip'),
       ['package.json', 'static.js'],
     );
+  }).timeout(60000);
+
+  it.only('package creates correct package (but excludes static)', async () => {
+    await new BuildCommand()
+      .withFiles([
+        'test/integration/src/html.htl',
+        'test/integration/src/html.pre.js',
+        'test/integration/src/helper.js',
+        'test/integration/src/utils/another_helper.js',
+        'test/integration/src/third_helper.js',
+      ])
+      .withTargetDir(buildDir)
+      .withCacheEnabled(false)
+      .run();
+
+    const created = {};
+    const ignored = {};
+    await new PackageCommand()
+      .withDirectory(testRoot)
+      .withTarget(buildDir)
+      .withOnlyModified(false)
+      .withStatic('bind')
+      .on('create-package', (info) => {
+        created[info.name] = true;
+      })
+      .on('ignore-package', (info) => {
+        ignored[info.name] = true;
+      })
+      .run();
+
+    assert.deepEqual(created, {
+      html: true,
+    }, 'created packages');
+    assert.deepEqual(ignored, {}, 'ignored packages');
+
+    await assertZipEntries(
+      path.resolve(buildDir, 'html.zip'),
+      ['package.json', 'html.js', 'html.pre.js', 'helper.js', 'third_helper.js'],
+    );
+    assert.ok(!fs.existsSync(path.resolve(buildDir, 'static.zip')), 'static.zip should not get created');
   }).timeout(60000);
 
   it('package does not recreate existing package', async () => {
