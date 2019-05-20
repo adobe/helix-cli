@@ -1,3 +1,20 @@
+# [3.2.0](https://github.com/adobe/helix-cli/compare/v3.1.0...v3.2.0) (2019-05-20)
+
+
+### Bug Fixes
+
+* **deploy:** do not bind or link static actions when dry running ([8635f26](https://github.com/adobe/helix-cli/commit/8635f26))
+
+
+### Features
+
+* **deploy:** bind and link hlx--static action during deployment ([e43bf28](https://github.com/adobe/helix-cli/commit/e43bf28)), closes [#850](https://github.com/adobe/helix-cli/issues/850)
+* **deploy:** skip deployment of `hlx--static` when `--static=bind` ([b86c5d8](https://github.com/adobe/helix-cli/commit/b86c5d8)), closes [#850](https://github.com/adobe/helix-cli/issues/850)
+* **deploy:** support binding/mounting the helix-services virtual package when `--static!=build` ([e7e87dc](https://github.com/adobe/helix-cli/commit/e7e87dc)), closes [#850](https://github.com/adobe/helix-cli/issues/850)
+* **package:** skip packaging static.zip when `--static=bind` ([e561ac6](https://github.com/adobe/helix-cli/commit/e561ac6)), closes [#850](https://github.com/adobe/helix-cli/issues/850)
+* **publish:** pass CLI version when calling `helix-publish` ([8c64378](https://github.com/adobe/helix-cli/commit/8c64378))
+* **static:** add --static={build|bind|both} option to package and deploy commands ([2df5630](https://github.com/adobe/helix-cli/commit/2df5630)), closes [#850](https://github.com/adobe/helix-cli/issues/850)
+
 # [3.1.0](https://github.com/adobe/helix-cli/compare/v3.0.0...v3.1.0) (2019-05-20)
 
 
