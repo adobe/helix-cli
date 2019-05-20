@@ -62,6 +62,13 @@ module.exports = function strain() {
           describe: 'Don\'t publish strains with names following the specified pattern, use config from master branch instead',
           type: 'string',
         })
+        .option('custom-vcl', {
+          alias: 'customVCL',
+          describe: 'Path(s) to VCL file(s) to override the orginal one(s).',
+          type: 'string',
+          array: true,
+          default: [],
+        })
         .conflicts('only', 'exclude')
         .demandOption(
           'fastly-auth',
@@ -106,6 +113,7 @@ module.exports = function strain() {
         .withUpdateBotConfig(argv.updateBotConfig)
         .withConfigPurgeAPI(argv.apiConfigPurge)
         .withFilter(argv.only, argv.exclude)
+        .withCustomVCLs(argv.customVCL)
         .run();
     },
   };

@@ -13,6 +13,8 @@
 /* eslint no-unused-vars: ["error", { "argsIgnorePattern": "^_" }] */
 
 const request = require('request-promise-native');
+const fs = require('fs-extra');
+const path = require('path');
 const fastly = require('@adobe/fastly-native-promises');
 const chalk = require('chalk');
 const ProgressBar = require('progress');
@@ -35,6 +37,7 @@ class RemotePublishCommand extends AbstractCommand {
     this._githubToken = '';
     this._updateBotConfig = false;
     this._configPurgeAPI = 'https://app.project-helix.io/config/purge';
+    this._vcl = null;
   }
 
   tick(ticks = 1, message, name) {
@@ -155,6 +158,31 @@ class RemotePublishCommand extends AbstractCommand {
     return this;
   }
 
+  /**
+   * Adds a list of VCL files to the publish command. Each VCL file is represented
+   * by a path relative to the current command (e.g. ['vcl/extensions.vcl']).
+   * @param {array} value List of vcl files to add as vcl extensions
+   * @returns {RemotePublishCommand} the current instance
+   */
+  withCustomVCLs(vcls) {
+    if (vcls && vcls.length > 0) {
+      const vcl = {};
+      vcls.forEach((file) => {
+        try {
+          const fullPath = path.resolve(this.directory, file);
+          const name = path.basename(fullPath, '.vcl');
+          const content = fs.readFileSync(fullPath).toString();
+          vcl[name] = content;
+        } catch (error) {
+          this.log.error(`Cannot read provided custom vcl file ${file}`);
+          throw error;
+        }
+      });
+      this._vcl = vcl;
+    }
+    return this;
+  }
+
   showNextStep(dryrun) {
     this.progressBar().terminate();
     if (dryrun) {
@@ -235,15 +263,20 @@ ${e}`);
         throw new Error('Unable to merge configurations for selective publishing');
       }
     }
+    const body = {
+      configuration: this.config.toJSON(),
+      service: this._fastly_namespace,
+      token: this._fastly_auth,
+      version: this._version,
+    };
+
+    if (this._vcl) {
+      body.vcl = this._vcl;
+    }
 
     return request.post(this._publishAPI, {
       json: true,
-      body: {
-        configuration: this.config.toJSON(),
-        service: this._fastly_namespace,
-        token: this._fastly_auth,
-        version: this._version,
-      },
+      body,
     }).then(() => {
       this.tick(9, 'set service config up for Helix', true);
       return true;

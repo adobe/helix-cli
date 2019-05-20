@@ -40,6 +40,7 @@ describe('hlx publish', () => {
     mockPublish.withUpdateBotConfig.returnsThis();
     mockPublish.withGithubToken.returnsThis();
     mockPublish.withFilter.returnsThis();
+    mockPublish.withCustomVCLs.returnsThis();
     mockPublish.run.returnsThis();
   });
 
@@ -51,7 +52,7 @@ describe('hlx publish', () => {
     new CLI()
       .withCommandExecutor('publish', mockPublish)
       .onFail((err) => {
-        assert.ok(err.indexOf('required'));
+        assert.ok(!err || err.indexOf('required'));
         done();
       })
       .run(['publish']);
@@ -71,6 +72,7 @@ describe('hlx publish', () => {
     sinon.assert.calledWith(mockPublish.withFastlyAuth, 'foobar');
     sinon.assert.calledWith(mockPublish.withPublishAPI, 'foobar.api');
     sinon.assert.calledWith(mockPublish.withDryRun, true);
+    sinon.assert.calledWith(mockPublish.withCustomVCLs, []);
   });
 
   it('hlx publish works with minimal arguments', () => {
@@ -88,6 +90,7 @@ describe('hlx publish', () => {
     sinon.assert.calledWith(mockPublish.withWskNamespace, 'hlx');
     sinon.assert.calledWith(mockPublish.withFastlyNamespace, 'hlx'); // TODO !!
     sinon.assert.calledWith(mockPublish.withFastlyAuth, 'secret-key');
+    sinon.assert.calledWith(mockPublish.withCustomVCLs, []);
     sinon.assert.calledOnce(mockPublish.run);
   });
 
