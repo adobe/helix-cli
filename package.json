@@ -61,6 +61,7 @@
     "openwhisk": "3.19.0",
     "opn": "6.0.0",
     "parcel-bundler": "1.12.3",
+    "play-sound": "^1.1.3",
     "postcss": "^7.0.16",
     "postcss-url": "^8.0.0",
     "postcss-value-parser": "^3.3.1",

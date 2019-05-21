@@ -14,6 +14,7 @@
 /* eslint global-require: off */
 
 const path = require('path');
+const player = require('play-sound')();
 const yargsBuild = require('./yargs-build.js');
 const { makeLogger } = require('./log-common.js');
 
@@ -72,6 +73,9 @@ module.exports = function up() {
     handler: async (argv) => {
       if (!executor) {
         // eslint-disable-next-line global-require
+        const sound = path.resolve(path.join(__dirname, '/../assets/o95.wav'));
+        player.play(sound);
+
         const UpCommand = require('./up.cmd'); // lazy load the handler to speed up execution time
         executor = new UpCommand(makeLogger(argv));
       }
