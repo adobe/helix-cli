@@ -63,7 +63,7 @@ class ExternalsCollector {
     // todo async
     const pkgInfos = {};
     function resolveByPackageJson(resource) {
-      if (!resource || resource === '/') {
+      if (!resource || resource === '/' || path.dirname(resource) === resource) {
         return [];
       }
       let info = pkgInfos[resource];
