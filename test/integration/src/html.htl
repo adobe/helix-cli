@@ -16,7 +16,7 @@
 		</dl>
 		<!-- anyway, here's the full content-->
 		<main>
-		${content.document.body.innerHTML @ context='unsafe'}
+		${content.document.body}
 		</main>
 	</body>
 </html>
