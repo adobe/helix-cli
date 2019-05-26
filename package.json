@@ -41,7 +41,7 @@
     "@adobe/parcel-plugin-htl": "2.1.9",
     "@babel/core": "^7.4.5",
     "@parcel/logger": "1.11.0",
-    "@snyk/nodejs-runtime-agent": "1.45.0",
+    "@snyk/nodejs-runtime-agent": "1.45.1",
     "ajv": "^6.10.0",
     "archiver": "3.0.0",
     "camelcase": "^5.3.1",
