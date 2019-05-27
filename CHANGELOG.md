@@ -1,3 +1,11 @@
+## [4.0.2](https://github.com/adobe/helix-cli/compare/v4.0.1...v4.0.2) (2019-05-27)
+
+
+### Bug Fixes
+
+* **package:** ensure file packaged properly on windows ([b34f958](https://github.com/adobe/helix-cli/commit/b34f958))
+* **package:** ensure no endless loop in windows ([f7387ca](https://github.com/adobe/helix-cli/commit/f7387ca))
+
 ## [4.0.1](https://github.com/adobe/helix-cli/compare/v4.0.0...v4.0.1) (2019-05-27)
 
 
