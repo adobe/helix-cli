@@ -78,7 +78,7 @@ describe('hlx package (Integration)', () => {
     );
   }).timeout(60000);
 
-  it.only('package creates correct package (but excludes static)', async () => {
+  it('package creates correct package (but excludes static)', async () => {
     await new BuildCommand()
       .withFiles([
         'test/integration/src/html.htl',
