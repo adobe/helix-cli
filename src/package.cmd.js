@@ -135,7 +135,7 @@ class PackageCommand extends StaticCommand {
         // if the module was linked via `npm link`, then it is a checked-out module, and should
         // not be included as-is.
         const modPath = info.externals[mod];
-        if (modPath.indexOf('/node_modules/') < 0) {
+        if (modPath.indexOf('/node_modules/') < 0 || modPath.indexOf('\\node_modules\\') < 0) {
           // todo: async
           // todo: read .npmignore
           const files = glob.sync('!(.git|node_modules|logs|docs|coverage)/**', {
