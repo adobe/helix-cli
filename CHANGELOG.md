@@ -1,3 +1,31 @@
+## [4.0.2](https://github.com/adobe/helix-cli/compare/v4.0.1...v4.0.2) (2019-05-27)
+
+
+### Bug Fixes
+
+* **package:** ensure file packaged properly on windows ([b34f958](https://github.com/adobe/helix-cli/commit/b34f958))
+* **package:** ensure no endless loop in windows ([f7387ca](https://github.com/adobe/helix-cli/commit/f7387ca))
+
+## [4.0.1](https://github.com/adobe/helix-cli/compare/v4.0.0...v4.0.1) (2019-05-27)
+
+
+### Bug Fixes
+
+* **package:** update @adobe/helix-simulator to version 2.12.10 ([fa6aa6c](https://github.com/adobe/helix-cli/commit/fa6aa6c))
+
+# [4.0.0](https://github.com/adobe/helix-cli/compare/v3.2.2...v4.0.0) (2019-05-27)
+
+
+### Bug Fixes
+
+* **package:** update @adobe/parcel-plugin-htl to version 2.1.10 ([d0b1f3a](https://github.com/adobe/helix-cli/commit/d0b1f3a))
+
+
+### BREAKING CHANGES
+
+* **package:** due to XSS fixes in the htlengine, injecting the DOM now needs `@ context='unsafe'`.
+                 otherwise src and href attrbitues are removed.
+
 ## [3.2.2](https://github.com/adobe/helix-cli/compare/v3.2.1...v3.2.2) (2019-05-22)
 
 

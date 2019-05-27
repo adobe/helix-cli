@@ -14,9 +14,9 @@
 			<dt>Title</dt>
 			<dd><code>${content.title}</code></dd>
 		</dl>
-<!-- anyway, here's the full content-->
-<main>
-${content.document.body.innerHTML}
-</main>
+		<!-- anyway, here's the full content-->
+		<main>
+		${content.document.body.innerHTML @ context='unsafe'}
+		</main>
 	</body>
 </html>
