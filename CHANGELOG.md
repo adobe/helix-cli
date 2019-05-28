@@ -1,3 +1,10 @@
+## [4.0.5](https://github.com/adobe/helix-cli/compare/v4.0.4...v4.0.5) (2019-05-28)
+
+
+### Bug Fixes
+
+* **package:** dependencies are not correctly bundled ([#932](https://github.com/adobe/helix-cli/issues/932)) ([fe59e10](https://github.com/adobe/helix-cli/commit/fe59e10)), closes [#931](https://github.com/adobe/helix-cli/issues/931)
+
 ## [4.0.4](https://github.com/adobe/helix-cli/compare/v4.0.3...v4.0.4) (2019-05-27)
 
 
