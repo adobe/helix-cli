@@ -109,7 +109,8 @@
     "proxyquire": "^2.1.0",
     "semantic-release": "^15.13.12",
     "sinon": "7.3.2",
-    "unzip2": "0.2.5"
+    "unzip2": "0.2.5",
+    "xregexp": "^4.2.4"
   },
   "snyk": true,
   "lint-staged": {

@@ -70,7 +70,7 @@ describe('hlx package (Integration)', () => {
 
     await assertZipEntries(
       path.resolve(buildDir, 'html.zip'),
-      ['package.json', 'html.js', 'html.pre.js', 'helper.js', 'third_helper.js'],
+      ['package.json', 'html.js', 'html.pre.js', 'helper.js', 'third_helper.js', 'node_modules/@adobe/htlengine/package.json'],
     );
     await assertZipEntries(
       path.resolve(buildDir, 'static.zip'),
