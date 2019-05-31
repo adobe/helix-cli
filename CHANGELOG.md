@@ -1,3 +1,10 @@
+## [4.0.6](https://github.com/adobe/helix-cli/compare/v4.0.5...v4.0.6) (2019-05-31)
+
+
+### Bug Fixes
+
+* **package:** add hyperscript as dependency ([#940](https://github.com/adobe/helix-cli/issues/940)) ([f1e35b9](https://github.com/adobe/helix-cli/commit/f1e35b9)), closes [#939](https://github.com/adobe/helix-cli/issues/939)
+
 ## [4.0.5](https://github.com/adobe/helix-cli/compare/v4.0.4...v4.0.5) (2019-05-28)
 
 
