@@ -64,7 +64,7 @@
     "parcel-bundler": "1.12.3",
     "postcss": "^7.0.16",
     "postcss-url": "^8.0.0",
-    "postcss-value-parser": "^3.3.1",
+    "postcss-value-parser": "^4.0.0",
     "progress": "2.0.1",
     "request": "2.87.0",
     "request-promise-native": "1.0.7",
