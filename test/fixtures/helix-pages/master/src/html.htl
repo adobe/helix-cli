@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>${content.title}</title>
+    <link rel="stylesheet" href="/style.css"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
+<script src="https://d6uhzlpot4xwe.cloudfront.net/runtime/1.21/themes/wiper-fonts.gz.js"></script>
+<script src="/scrani.js"></script>
+<script>
+  window.onload = function() {
+    scrani.onload();
+  }
+
+  window.onhashchange = function() {
+    if (window.location.hash === "#menu") {
+      document.querySelector("header .section:nth-child(2)").style="display:block";
+    } else {
+      document.querySelector("header .section:nth-child(2)").style="";
+    }
+  }
+</script>
+
+  </head>
+<body>
+  <!--  header -->
+  <header><esi:include src="/header.plain.html" onerror="continue"/></header>
+  <!--  content -->
+  ${content.document.body.innerHTML @ context = 'unsafe'}
+  <!--  footer -->
+  <footer><esi:include src="/footer.plain.html"  onerror="continue"/></footer>
+</body>
+</html>

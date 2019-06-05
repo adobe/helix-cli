@@ -1,0 +1,38 @@
+<!doctype html><html><head>
+    <title>Soup Demo Test</title>
+    <link rel="stylesheet" href="/style.css">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
+<script src="https://d6uhzlpot4xwe.cloudfront.net/runtime/1.21/themes/wiper-fonts.gz.js"></script>
+<script src="/scrani.js"></script>
+<script>
+  window.onload = function() {
+    scrani.onload();
+  }
+
+  window.onhashchange = function() {
+    if (window.location.hash === "#menu") {
+      document.querySelector("header .section:nth-child(2)").style="display:block";
+    } else {
+      document.querySelector("header .section:nth-child(2)").style="";
+    }
+  }
+</script>
+
+  </head>
+<body>
+  <!--  header -->
+  <header></header>
+  <!--  content -->
+  <div class="section copy"><h1 id="soup-demo-test">Soup Demo Test</h1>
+<p>This is rendered using <del>Sightly</del> HTL.</p>
+<blockquote>
+<p>[!NOTE]
+This is a note. Who’d have noted?</p>
+</blockquote>
+<p>{% jekyll_embed with params %}</p></div>
+  <!--  footer -->
+  <footer></footer>
+
+
+</body></html>

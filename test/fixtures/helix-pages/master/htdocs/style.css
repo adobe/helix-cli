@@ -1,0 +1,296 @@
+/*
+ * Copyright 2018 Adobe. All rights reserved.
+ * This file is licensed to you under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License. You may obtain a copy
+ * of the License at http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under
+ * the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR REPRESENTATIONS
+ * OF ANY KIND, either express or implied. See the License for the specific language
+ * governing permissions and limitations under the License.
+ */
+
+ body {
+    padding: 0;
+    margin: 0;
+    background-color: white;
+    font-family: "source-sans-pro", sans-serif;
+    font-size: 1rem;
+    font-weight: 300;
+    line-height: 1.5;
+}
+
+.title {
+    overflow: hidden;
+    background-color: black;
+}
+
+.title p:first-child {
+    font-size: 1rem;
+    line-height: 1rem;
+    margin: 0;
+    padding: 0;
+}
+
+.title h1 {
+    color: white;
+    text-align: center;
+    text-shadow: 0px 0px 6px #000000;
+    margin-bottom: 0.1em;
+}
+
+.title h1+p {
+    margin-top: 0.1em;
+    text-align: center;
+    color: white;
+    font-size: 1.5rem;
+    font-weight: 300;
+    line-height: 1.1em;
+}
+
+.header {
+    position: absolute;
+    height: 100vh;
+    width: 90vw;
+    top: 0;
+    left: 0;
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    padding: 0 5%;
+}
+
+.title img {
+    height: 100vh;
+    width: 100vw;
+    object-fit: cover;
+}
+
+.copy, footer section {
+    padding: 1rem 2rem;
+}
+
+.image {
+    padding: 0;
+    margin: 0;
+}
+
+.image img {
+    width: 100vw;
+}
+
+
+h1, h2, h3, h4, h5 {
+    font-family: "museo-slab",serif;
+}
+
+h3, h4 {
+    font-weight: 400;
+    line-height: 1.25;
+}
+
+h1, h2 {
+    font-weight: 700;
+    line-height: 1.15;
+}
+
+h1 {
+    font-size: 2.6rem;
+}
+
+h2 {
+    font-size: 2.0rem;
+}
+
+
+h3 {
+    font-size: 1.75rem;
+}
+
+h4 {
+    font-size: 1.25rem;
+}
+
+blockquote {
+    font-family: museo-slab,serif;
+    font-weight: 700;
+    font-size: 1.0rem;
+    line-height: 1.4;
+    padding-left: 3rem;
+    padding-right: 0rem;
+    padding-top: 2rem;
+    margin-left: -3rem;
+    margin-top: -2rem;
+    margin-right: 0;
+    text-transform: uppercase;
+
+    background-repeat: no-repeat;
+    background-image: 
+        url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'><text font-size='250' x='0' y='200' letter-spacing='-35px' fill='lightgrey'>\2018\2018</text></svg>");
+}
+
+pre {
+    background-color: lightgrey;
+    padding: 1em;
+    border-radius: 1em;
+    overflow: hidden;
+}
+
+code {
+    font-size: 1.1em;
+}
+
+h3 code {
+    font-size: 1em;
+    font-family: inherit;
+    background-color: lightgrey;
+}
+
+p code,li code {
+    background-color: lightgrey;
+    padding: 0 2px;
+}
+
+table th, table td {
+    border: 1px solid #dfe2e5;
+    padding: 6px 13px;
+}
+
+table tr:nth-child(2n) {
+    background-color: #f6f8fa;
+}
+
+table th {
+    font-weight: 600;
+}
+
+table {
+    border-collapse: collapse;
+    border-spacing: 0;    
+}
+
+header {
+    position: fixed;
+    background-color: black;
+    color: white;
+    z-index: 1;
+    overflow: hidden;
+    padding: 10px 20px;
+    width: 100vw;
+    box-sizing: border-box;
+}
+
+
+header img {
+    height: 1em;
+    padding-right: 5px;
+    padding-left: 2
+}
+
+header p {
+    font-weight: 700;
+    font-size: 1.1rem;
+    margin: 0;
+    display: inline-block;
+    line-height: 1.5em;
+}
+
+header p:nth-child(2) {
+    display: block;
+    float: right;
+}
+
+header p:nth-child(2) a {
+    display: inline-block;
+}
+
+header a:any-link{
+    color: white;
+    font-size: 1.5em;
+    text-decoration: none;
+    font-weight: 100;
+}
+
+header .section:nth-child(2) {
+    display: none;
+    position: fixed;
+    width: 100vw;
+    height: 100vh;
+    top: 0;
+    left: 0;
+    background-color: #222222;
+    padding: 10px 20px;
+    box-sizing: border-box;
+
+}
+
+header .section:nth-child(2)>p {
+    display: block;
+    float: right;
+    font-size: 1.8em;
+    margin-top: -3px;
+}
+
+header .section:nth-child(2) ul {
+    font-size: 2em;
+    list-style: none;
+}
+
+header:empty {
+    display:none;
+}
+
+
+footer {
+    background-color: #cccccc;
+    padding: 20px 0px;
+    font-size: 0.5em;
+    color: #888888;
+    text-align: center;
+}
+
+footer:empty {
+    display:none;
+}
+
+
+@media (min-width:600px) {
+
+    h1 {
+        font-size: 4.5rem;
+    }
+    
+    .title h1+p {
+        font-size: 2rem;
+        font-weight: 300;
+    }
+
+    h2 {
+        font-size: 3.5rem;
+    }
+
+    h3 {
+        font-size: 2.75rem;
+    }
+    
+    h4 {
+        font-size: 1.75rem;
+    }
+
+    body {
+        font-size: 1.25rem;
+    }
+
+    blockquote {
+        font-size: 1.2rem;
+        line-height: 1.7;    
+    }
+
+}
+
+@media (min-width:900px) {
+    .copy, footer .section {
+        width: 800px;
+        margin: auto;
+    }
+}
