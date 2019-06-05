@@ -1,3 +1,11 @@
+## [4.0.9](https://github.com/adobe/helix-cli/compare/v4.0.8...v4.0.9) (2019-06-05)
+
+
+### Bug Fixes
+
+* **package:** update @adobe/helix-shared to version 1.4.0 ([1c2c155](https://github.com/adobe/helix-cli/commit/1c2c155))
+* **package:** update postcss-value-parser to version 4.0.0 ([55723c1](https://github.com/adobe/helix-cli/commit/55723c1))
+
 ## [4.0.8](https://github.com/adobe/helix-cli/compare/v4.0.7...v4.0.8) (2019-06-05)
 
 
