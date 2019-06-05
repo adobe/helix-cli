@@ -1,3 +1,10 @@
+## [4.0.7](https://github.com/adobe/helix-cli/compare/v4.0.6...v4.0.7) (2019-06-05)
+
+
+### Bug Fixes
+
+* **package:** update @adobe/parcel-plugin-htl to version 2.1.11 ([6a1254b](https://github.com/adobe/helix-cli/commit/6a1254b))
+
 ## [4.0.6](https://github.com/adobe/helix-cli/compare/v4.0.5...v4.0.6) (2019-05-31)
 
 
