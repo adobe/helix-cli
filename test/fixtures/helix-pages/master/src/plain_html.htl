@@ -1,1 +1,0 @@
-${content.document.body.innerHTML @ context = 'unsafe'}
