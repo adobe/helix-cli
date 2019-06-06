@@ -19,11 +19,11 @@ function helix_wrap_action(main) {
   const { pipe } = require('MOD_PIPE');
   const { pre, before, after } = require('MOD_PRE');
 
-  // todo: mode to helix-pipeline
+  // todo: move to helix-pipeline
   const CONTEXT_PROPS = ['error', 'request', 'content', 'response'];
   const CONTENT_PROPS = ['sources', 'body', 'mdast', 'sections', 'document', 'htast' ,'json', 'xml', 'meta', 'title', 'intro', 'image'];
   const REQUEST_PROPS =  ['url', 'path', 'pathInfo', 'rootPath', 'selector', 'extension', 'method', 'headers', 'params'];
-  const RESPONSE_PROPS = ['status', 'body', 'hast', 'headers'];
+  const RESPONSE_PROPS = ['status', 'body', 'hast', 'headers', 'document'];
 
   const filterObject = (obj, allowedProperties) => {
     if (!obj) {
@@ -51,11 +51,20 @@ function helix_wrap_action(main) {
       async function invoker(next) {
         const ret = await Promise.resolve(pre(context, action));
         const res = await Promise.resolve(next(ret || context, action));
-        if (res && res.response && res.response.body) {
-          if (!context.response) {
-            context.response = {};
+        if (!context.response) {
+          context.response = {};
+        }
+        if (typeof res === 'object') {
+          // check for response from direct script
+          if (res.response) {
+            context.response = res.response;
+          } else if (res.type) {
+            context.response.hast = res;
+          } else {
+            context.response.document = res;
           }
-          context.response.body = res.response.body;
+        } else {
+          context.response.body = String(res);
         }
         sanitizeContext(context);
         return context;

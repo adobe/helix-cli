@@ -35,10 +35,10 @@
   },
   "dependencies": {
     "@adobe/fastly-native-promises": "^1.3.2",
-    "@adobe/helix-pipeline": "^2.1.1",
+    "@adobe/helix-pipeline": "3.0.0",
     "@adobe/helix-simulator": "2.12.12",
     "@adobe/helix-shared": "1.4.0",
-    "@adobe/parcel-plugin-htl": "2.1.11",
+    "@adobe/parcel-plugin-htl": "2.2.0",
     "@babel/core": "^7.4.5",
     "@parcel/logger": "1.11.0",
     "@snyk/nodejs-runtime-agent": "1.45.1",
