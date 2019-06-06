@@ -1,3 +1,10 @@
+# [4.2.0](https://github.com/adobe/helix-cli/compare/v4.1.0...v4.2.0) (2019-06-06)
+
+
+### Features
+
+* **pipeline:** use new pipeline and htlengine for full jsdom support ([187287d](https://github.com/adobe/helix-cli/commit/187287d)), closes [#954](https://github.com/adobe/helix-cli/issues/954)
+
 # [4.1.0](https://github.com/adobe/helix-cli/compare/v4.0.9...v4.1.0) (2019-06-06)
 
 
