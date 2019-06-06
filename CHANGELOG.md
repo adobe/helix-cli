@@ -1,3 +1,10 @@
+# [4.1.0](https://github.com/adobe/helix-cli/compare/v4.0.9...v4.1.0) (2019-06-06)
+
+
+### Features
+
+* **up:** checkout and use helix-pages if no source scripts are present ([#946](https://github.com/adobe/helix-cli/issues/946)) ([066e90b](https://github.com/adobe/helix-cli/commit/066e90b)), closes [#929](https://github.com/adobe/helix-cli/issues/929)
+
 ## [4.0.9](https://github.com/adobe/helix-cli/compare/v4.0.8...v4.0.9) (2019-06-05)
 
 
