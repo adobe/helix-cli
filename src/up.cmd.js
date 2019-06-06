@@ -20,6 +20,7 @@ const { HelixProject } = require('@adobe/helix-simulator');
 const GitUtils = require('./git-utils.js');
 const BuildCommand = require('./build.cmd');
 const pkgJson = require('../package.json');
+const HelixPages = require('./helix-pages.js');
 
 const HELIX_CONFIG = 'helix-config.yaml';
 
@@ -31,6 +32,7 @@ class UpCommand extends BuildCommand {
     this._saveConfig = false;
     this._overrideHost = null;
     this._localRepos = [];
+    this._helixPagesRepo = '';
   }
 
   withHttpPort(p) {
@@ -59,6 +61,11 @@ class UpCommand extends BuildCommand {
     } else if (value) {
       this._localRepos.push(value);
     }
+    return this;
+  }
+
+  withHelixPagesRepo(url) {
+    this._helixPagesRepo = url;
     return this;
   }
 
@@ -162,18 +169,57 @@ class UpCommand extends BuildCommand {
       };
     }));
 
+    this._project = new HelixProject()
+      .withCwd(this.directory)
+      .withBuildDir(this._target)
+      .withHelixConfig(this.config)
+      .withRuntimeModulePaths(module.paths);
+
+    // special handling for helix pages project
+    const pages = new HelixPages(this._logger).withDirectory(this.directory);
+    if (await pages.isPagesProject()) {
+      this.log.info('    __ __    ___       ___                  ');
+      this.log.info('   / // /__ / (_)_ __ / _ \\___ ____ ____ ___');
+      this.log.info('  / _  / -_) / /\\ \\ // ___/ _ `/ _ `/ -_|_-<');
+      this.log.info(' /_//_/\\__/_/_//_\\_\\/_/   \\_,_/\\_, /\\__/___/');
+      this.log.info(`                              /___/ v${pkgJson.version}`);
+      this.log.info('');
+
+      if (this._helixPagesRepo) {
+        pages.withRepo(this._helixPagesRepo);
+      }
+
+      await pages.init();
+
+      // use bundled helix-pages sources
+      this.withFiles([`${pages.srcDirectory}/**/*.htl`, `${pages.srcDirectory}/**/*.js`]);
+      this._project.withSourceDir(pages.srcDirectory);
+
+      // use bundled helix-pages htdocs
+      if (!await fse.pathExists(path.join(this.directory, 'htdocs'))) {
+        this.config.strains.get('default').static.url = pages.staticURL;
+        localRepos.push({
+          repoPath: pages.checkoutDirectory,
+          gitUrl: pages.staticURL,
+        });
+        this.config.strains.get('default').static.url = pages.staticURL;
+      }
+
+      // pretend to have config file to suppress message below
+      hasConfigFile = true;
+    } else {
+      this.log.info('    __ __    ___         ');
+      this.log.info('   / // /__ / (_)_ __    ');
+      this.log.info('  / _  / -_) / /\\ \\ / ');
+      this.log.info(` /_//_/\\__/_/_//_\\_\\ v${pkgJson.version}`);
+      this.log.info('                         ');
+    }
+
     // start debugger (#178)
     // https://nodejs.org/en/docs/guides/debugging-getting-started/#enable-inspector
     if (process.platform !== 'win32') {
       process.kill(process.pid, 'SIGUSR1');
     }
-
-    this._project = new HelixProject()
-      .withCwd(this.directory)
-      .withBuildDir(this._target)
-      .withHelixConfig(this.config)
-      .withDisplayVersion(pkgJson.version)
-      .withRuntimeModulePaths(module.paths);
 
     if (this._httpPort >= 0) {
       this._project.withHttpPort(this._httpPort);

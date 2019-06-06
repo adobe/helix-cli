@@ -3,6 +3,7 @@ logs/*
 demos/*
 test/integration
 test/integration-with-cgi-bin
+test/fixtures/helix-pages
 test/tmp/*
 tmp/*
 coverage/*
