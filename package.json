@@ -35,7 +35,7 @@
   },
   "dependencies": {
     "@adobe/fastly-native-promises": "^1.3.2",
-    "@adobe/helix-pipeline": "^2.1.1",
+    "@adobe/helix-pipeline": "3.0.0",
     "@adobe/helix-simulator": "2.12.12",
     "@adobe/helix-shared": "1.4.0",
     "@adobe/parcel-plugin-htl": "2.2.0",
