@@ -88,7 +88,7 @@ async function assertHttp(url, status, spec, replacements = []) {
                 replacements.forEach((r) => {
                   expected = expected.replace(r.pattern, r.with);
                 });
-                assert.equal(data, expected);
+                assert.equal(data.trim(), expected.trim());
               }
             }
             resolve();
@@ -120,9 +120,15 @@ async function assertHttpDom(url, status, spec) {
         .on('end', () => {
           try {
             if (spec) {
-              const datadom = new JSDOM(data).window.document;
-              const specdom = new JSDOM(fse.readFileSync(path.resolve(__dirname, 'specs', spec)).toString()).window.document;
-              assertEquivalentNode(datadom, specdom);
+              const datadom = new JSDOM(data);
+              const specdom = new JSDOM(fse.readFileSync(path.resolve(__dirname, 'specs', spec)).toString());
+              try {
+                assertEquivalentNode(datadom.window.document, specdom.window.document);
+              } catch (e) {
+                e.actual = datadom.serialize();
+                e.expected = specdom.serialize();
+                throw e;
+              }
             }
             resolve();
           } catch (e) {
