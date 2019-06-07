@@ -64,10 +64,10 @@ See [Anatomy of a Pipeline](https://github.com/adobe/helix-pipeline/blob/master/
 To make things even easier for developers, helix supports [htl](https://github.com/adobe/htl-spec) templates
 and turns them into pipeline scripts during build time.
 
-The build process uses [parcel](https://github.com/parcel-bundler/parcel) to process the templates
-using a [plugin](https://github.com/adobe/parcel-plugin-htl) mechanism. The compiled template
-is turned into a pipeline script and then wrapped with a bit of code to turn the pipeline into an
-openwhisk action. It also ensures that a corresponding `pre.js` is executed before the `once` script.
+The build process uses [parcel](https://github.com/parcel-bundler/parcel) to process the templates.
+The compiled template is turned into a pipeline script and then wrapped with a bit of code to turn 
+the pipeline into an openwhisk action. It also ensures that a corresponding `pre.js` is executed 
+before the `once` script.
 
 Scripts can also be provided directly as pipeline scripts (i.e. using kind of a null-template).
 

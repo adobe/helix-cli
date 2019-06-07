@@ -84,7 +84,7 @@ class BuildCommand extends AbstractCommand {
   async createBundler(files) {
     const options = await this.getBundlerOptions();
     const bundler = new Bundler(files, options);
-    bundler.addAssetType('htl', require.resolve('@adobe/parcel-plugin-htl/src/HTLAsset.js'));
+    bundler.addAssetType('htl', require.resolve('./parcel/HTLAsset.js'));
     bundler.addAssetType('helix-js', require.resolve('./parcel/HelixAsset.js'));
     bundler.addAssetType('js', require.resolve('./parcel/AdapterJSAsset.js'));
     bundler.addAssetType('jsx', require.resolve('./parcel/AdapterJSAsset.js'));
