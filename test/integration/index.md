@@ -10,3 +10,7 @@ This is rendered using ~~Sightly~~ HTL.
 > This is a note. Who'd have noted?
 
 {% jekyll_embed with params %}
+
+<script>
+  alert('hello');
+</script>

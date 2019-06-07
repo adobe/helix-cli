@@ -62,7 +62,7 @@ describe('Integration test for up command', function suite() {
   });
 
   afterEach(async () => {
-    await fse.remove(testRoot);
+    // await fse.remove(testRoot);
   });
 
   it('up command fails outside git repository', async () => {
