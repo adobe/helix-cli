@@ -17,7 +17,7 @@ module.exports = {
     openwhisk: '3.18.0',
     'body-parser': '1.18.3',
     'cls-hooked': '4.2.2',
-    // request: '2.88.0',
+    request: '2.88.0',
     'request-promise': '4.2.2',
 
     // webpack isn't really provided by the container, but it injects itself into the list of
