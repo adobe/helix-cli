@@ -9,55 +9,15 @@
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-const fs = require('fs-extra');
-const path = require('path');
-// eslint-disable-next-line import/no-extraneous-dependencies
-const mime = require('mime-types');
-// eslint-disable-next-line import/no-unresolved
-const pipeline = require('./main.js').main;
 
-const DIST_DIR = path.resolve(__dirname, 'dist');
+const { OpenWhiskAction, GithubStore } = require('@adobe/helix-pipeline');
+const { actionConfig, fetchAndRender } = OpenWhiskAction;
 
-async function main(params, ...args) {
-  const urlPath = params.path;
-
-  // normal pipeline request
-  if (!urlPath.startsWith('/dist/')) {
-    return pipeline(params, ...args);
-  }
-
-  const filePath = path.resolve(DIST_DIR, urlPath.substring(6));
-  if (!filePath.startsWith(DIST_DIR)) {
-    // outside dist dir...reject
-    return {
-      statusCode: 404,
-    };
-  }
-  if (!await fs.pathExists(filePath)) {
-    return {
-      statusCode: 404,
-    };
-  }
-  const file = await fs.readFile(filePath);
-  const type = mime.lookup(filePath);
-  let binary = true;
-  if (type.match(/text\/.*/)) {
-    binary = false;
-  } else if (type.match(/.*\/javascript/)) {
-    binary = false;
-  } else if (type.match(/.*\/.*json/)) {
-    binary = false;
-  }
-  // eslint-disable-next-line no-console
-  console.log(`file ${filePath} type ${type} binary ${binary}`);
-  const body = binary ? file.toString('base64') : file.toString();
-  return {
-    headers: {
-      'Content-Type': type,
-      'Cache-Control': 'max-age=1314000',
-    },
-    body,
-  };
+const main = async (req) {
+  const url = new URL(rereq.url);
+  const { githubToken, owner, repo, branch} = await actionConfig();
+  const store = new GithubStore(githubToken, owner, repo, branch);
+  return fetchAndRender(url.path, store, req);
 }
 
-module.exports.main = main;
+module.exports = { main };
