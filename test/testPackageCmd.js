@@ -15,6 +15,7 @@
 const assert = require('assert');
 const fs = require('fs-extra');
 const path = require('path');
+const { Logger } = require('@adobe/helix-shared');
 const { createTestRoot, assertZipEntries } = require('./utils.js');
 const BuildCommand = require('../src/build.cmd.js');
 const PackageCommand = require('../src/package.cmd.js');
@@ -69,12 +70,57 @@ describe('hlx package (Integration)', () => {
 
     await assertZipEntries(
       path.resolve(buildDir, 'html.zip'),
-      ['package.json', 'html.js', 'html.pre.js', 'helper.js', 'third_helper.js', 'node_modules/@adobe/htlengine/package.json'],
+      ['package.json', 'html.js'],
     );
     await assertZipEntries(
       path.resolve(buildDir, 'static.zip'),
       ['package.json', 'static.js'],
     );
+
+    // execute html script
+    {
+      const bundle = path.resolve(buildDir, 'html.bundle.js');
+      // eslint-disable-next-line global-require,import/no-dynamic-require
+      const { main } = require(bundle);
+      const ret = await main({
+        path: '/README.md',
+        content: {
+          body: '# foo',
+        },
+      });
+      delete ret.headers['Server-Timing'];
+      assert.deepEqual(ret, {
+        body: "<!DOCTYPE html><html>\n\t<head>\n\t\t<title>Example</title>\n\t\t<link rel=\"related\" href=\"/welcome.txt\">\n\t</head>\n\t<body>\n\t\tNothing happens here, yet.\n\n\t\t<h1>Here are a few things I know:</h1>\n\t\t<dl>\n\t\t\t<dt>Requested Content</dt>\n\t\t\t<dd><code>/README.md</code></dd>\n\n\t\t\t<dt>Title</dt>\n\t\t\t<dd><code>foo</code></dd>\n\t\t</dl>\n\t\t<!-- anyway, here's the full content-->\n\t\t<main>\n\t\t<h1 id=\"foo\">foo</h1>\n\t\t</main>\n\t</body>\n</html>",
+        headers: {
+          'Cache-Control': 's-maxage=604800',
+          'Content-Type': 'text/html',
+          Link: '</welcome.txt>; rel="related"',
+        },
+        statusCode: 200,
+      });
+      delete require.cache[require.resolve(bundle)];
+    }
+
+    // execute static script
+    {
+      const bundle = path.resolve(buildDir, 'static.bundle.js');
+      // eslint-disable-next-line global-require,import/no-dynamic-require
+      const { main } = require(bundle);
+      const ret = await main({
+        path: '/README.md',
+        repo: 'helix-cli',
+        owner: 'adobe',
+      });
+      assert.deepEqual(ret, {
+        body: 'forbidden.',
+        headers: {
+          'Cache-Control': 'max-age=300',
+          'Content-Type': 'text/plain',
+        },
+        statusCode: 403,
+      });
+      delete require.cache[require.resolve(bundle)];
+    }
   }).timeout(60000);
 
   it('package creates correct package (but excludes static)', async () => {
@@ -96,6 +142,7 @@ describe('hlx package (Integration)', () => {
       .withTarget(buildDir)
       .withOnlyModified(false)
       .withStatic('bind')
+      .withMinify(false)
       .on('create-package', (info) => {
         created[info.name] = true;
       })
@@ -111,7 +158,7 @@ describe('hlx package (Integration)', () => {
 
     await assertZipEntries(
       path.resolve(buildDir, 'html.zip'),
-      ['package.json', 'html.js', 'html.pre.js', 'helper.js', 'third_helper.js'],
+      ['package.json', 'html.js'],
     );
     assert.ok(!fs.existsSync(path.resolve(buildDir, 'static.zip')), 'static.zip should not get created');
   }).timeout(60000);
@@ -129,11 +176,12 @@ describe('hlx package (Integration)', () => {
       .withDirectory(testRoot)
       .withTarget(buildDir)
       .withOnlyModified(true)
+      .withMinify(false)
       .run();
 
     await assertZipEntries(
       path.resolve(buildDir, 'xml.zip'),
-      ['package.json', 'xml.js', 'helper.js'],
+      ['package.json', 'xml.js'],
     );
 
     const created = {};
@@ -142,6 +190,7 @@ describe('hlx package (Integration)', () => {
       .withDirectory(testRoot)
       .withTarget(buildDir)
       .withOnlyModified(true)
+      .withMinify(false)
       .on('create-package', (info) => {
         created[info.name] = true;
       })
@@ -155,5 +204,26 @@ describe('hlx package (Integration)', () => {
       xml: true,
       static: true,
     }, 'ignored packages');
+  }).timeout(60000);
+
+  it('package reports bundling errors and warnings', async () => {
+    const logger = Logger.getTestLogger();
+    await new BuildCommand()
+      .withFiles([
+        'test/integration/src/broken_html.pre.js',
+      ])
+      .withTargetDir(buildDir)
+      .run();
+
+    await new PackageCommand(logger)
+      .withDirectory(testRoot)
+      .withTarget(buildDir)
+      .withOnlyModified(true)
+      .withMinify(false)
+      .run();
+
+    const log = await logger.getOutput();
+    assert.ok(/Module not found: Error: Can't resolve 'does-not-exist'/.test(log));
+    assert.ok(/Critical dependency: the request of a dependency is an expression/.test(log));
   }).timeout(60000);
 });
