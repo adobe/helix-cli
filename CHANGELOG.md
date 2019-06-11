@@ -1,3 +1,10 @@
+## [4.2.5](https://github.com/adobe/helix-cli/compare/v4.2.4...v4.2.5) (2019-06-11)
+
+
+### Bug Fixes
+
+* **package:** revert: add more modules to packager ([3242aab](https://github.com/adobe/helix-cli/commit/3242aab))
+
 ## [4.2.4](https://github.com/adobe/helix-cli/compare/v4.2.3...v4.2.4) (2019-06-10)
 
 
