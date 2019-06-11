@@ -12,6 +12,7 @@
 const path = require('path');
 const fse = require('fs-extra');
 const shell = require('shelljs');
+const chalk = require('chalk');
 const { GitUrl } = require('@adobe/helix-shared');
 
 function execAsync(cmd) {
@@ -83,11 +84,26 @@ class HelixPages {
     this._staticURL = new GitUrl('https://github.com/adobe/helix-pages.git/htdocs');
 
     if (!await fse.pathExists(this.checkoutDirectory)) {
-      this.log.info(`Checking out sources from ${this._repo}#${this._ref}`);
+      this.log.info(chalk`Checking out sources from {cyan ${this._repo}#${this._ref}}`);
       try {
         await execAsync(`git clone --branch ${this._ref} --quiet --depth 1 ${this._repo} ${this.checkoutDirectory}`);
       } catch (e) {
         throw Error(`Unable to checkout helix-pages repository: ${e}`);
+      }
+
+      const pagesPackageJson = path.resolve(this.checkoutDirectory, 'package.json');
+      if (await fse.pathExists(pagesPackageJson)) {
+        const pkgJson = await fse.readJson(pagesPackageJson);
+        this.log.info(chalk`Running {gray npm install} for {yellow ${pkgJson.name}@${pkgJson.version}}...`);
+        const cwd = process.cwd();
+        try {
+          shell.cd(this.checkoutDirectory);
+          await execAsync('npm install --only=prod --ignore-scripts --no-bin-links --no-audit');
+        } catch (e) {
+          throw Error(`Unable to install helix-pages dependencies: ${e}`);
+        } finally {
+          shell.cd(cwd);
+        }
       }
     }
   }

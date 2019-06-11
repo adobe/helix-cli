@@ -205,6 +205,10 @@ class UpCommand extends BuildCommand {
         this.config.strains.get('default').static.url = pages.staticURL;
       }
 
+      // append the pages node_modules to the module path
+      const pagesModules = path.resolve(pages.checkoutDirectory, 'node_modules');
+      this._project.withRuntimeModulePaths([pagesModules, ...module.paths]);
+
       // pretend to have config file to suppress message below
       hasConfigFile = true;
     } else {
