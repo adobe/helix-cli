@@ -11,7 +11,7 @@
  */
 
 const chalk = require('chalk');
-const opn = require('opn');
+const opn = require('open');
 const AbstractCommand = require('./abstract.cmd.js');
 
 class HackCommand extends AbstractCommand {

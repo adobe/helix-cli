@@ -13,7 +13,7 @@
 const path = require('path');
 const fse = require('fs-extra');
 const readline = require('readline');
-const opn = require('opn');
+const opn = require('open');
 const chokidar = require('chokidar');
 const chalk = require('chalk');
 const { HelixProject } = require('@adobe/helix-simulator');
