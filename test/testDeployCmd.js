@@ -368,6 +368,7 @@ describe('hlx deploy (Integration)', () => {
       .withEnableDirty(false)
       .withDryRun(true)
       .withTarget(buildDir)
+      .withMinify(false)
       .run();
 
     const ref = await GitUtils.getCurrentRevision(testRoot);
@@ -378,7 +379,7 @@ describe('hlx deploy (Integration)', () => {
     assert.ok(log.indexOf('deployment of 2 actions completed') >= 0);
     assert.ok(log.indexOf(`- hlx/${ref}/html`) >= 0);
     assert.ok(log.indexOf('- hlx/hlx--static') >= 0);
-  }).timeout(30000);
+  }).timeout(60000);
 
   it('Dry-Running works with cgi-bin', async () => {
     await fs.copy(CGI_BIN_TEST_DIR, testRoot);
@@ -407,6 +408,7 @@ describe('hlx deploy (Integration)', () => {
       .withEnableAuto(false)
       .withEnableDirty(false)
       .withDryRun(true)
+      .withMinify(false)
       .withTarget(buildDir)
       .run();
 
@@ -419,7 +421,7 @@ describe('hlx deploy (Integration)', () => {
     assert.ok(log.indexOf(`- hlx/${ref}/html`) >= 0);
     assert.ok(log.indexOf(`- hlx/${ref}/cgi-bin-hello`) >= 0);
     assert.ok(log.indexOf('- hlx/hlx--static') >= 0);
-  }).timeout(30000);
+  }).timeout(60000);
 
   it('Deploy works', async function test() {
     this.timeout(60000);
@@ -475,6 +477,7 @@ describe('hlx deploy (Integration)', () => {
       .withEnableDirty(false)
       .withDryRun(false)
       .withTarget(buildDir)
+      .withMinify(false)
       .run();
 
     assert.equal(cmd.config.strains.get('default').package, '');
@@ -494,7 +497,7 @@ describe('hlx deploy (Integration)', () => {
   });
 
   it('Failed action deploy throws', async function test() {
-    this.timeout(30000);
+    this.timeout(60000);
 
     await fs.copy(TEST_DIR, testRoot);
     await fs.rename(path.resolve(testRoot, 'default-config.yaml'), path.resolve(testRoot, 'helix-config.yaml'));
@@ -513,8 +516,13 @@ describe('hlx deploy (Integration)', () => {
     this.polly.server.put('https://adobeioruntime.net/api/v1/namespaces/hlx/actions/hlx--static').intercept((req, res) => {
       res.sendStatus(500);
     });
+    this.polly.server.put('https://adobeioruntime.net/api/v1/namespaces/hlx/packages/helix-services?overwrite=true').intercept((req, res) => {
+      res.sendStatus(201);
+    });
+    this.polly.server.get('https://adobeioruntime.net/api/v1/web/helix/helix-services/static@latest').intercept((req, res) => {
+      res.sendStatus(500);
+    });
 
-    let error = null;
     try {
       await new DeployCommand(logger)
         .withDirectory(testRoot)
@@ -524,15 +532,13 @@ describe('hlx deploy (Integration)', () => {
         .withEnableAuto(false)
         .withEnableDirty(false)
         .withDryRun(false)
+        .withMinify(false)
         .withTarget(buildDir)
         .run();
+      assert.fail('Expected deploy to fail.');
     } catch (e) {
       // expected
-      error = e;
-    }
-
-    if (!error) {
-      assert.fail('Expected deploy to fail.');
+      assert.equal(String(e), 'Error');
     }
   });
 });

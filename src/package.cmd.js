@@ -9,9 +9,6 @@
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-
-'use strict';
-
 const chalk = require('chalk');
 const glob = require('glob');
 const path = require('path');
@@ -19,8 +16,7 @@ const fs = require('fs-extra');
 const ProgressBar = require('progress');
 const archiver = require('archiver');
 const StaticCommand = require('./static.cmd.js');
-const packageCfg = require('./parcel/packager-config.js');
-const ExternalsCollector = require('./parcel/ExternalsCollector.js');
+const ActionBundler = require('./parcel/ActionBundler.js');
 const { flattenDependencies } = require('./packager-utils.js');
 
 class PackageCommand extends StaticCommand {
@@ -28,6 +24,7 @@ class PackageCommand extends StaticCommand {
     super(logger);
     this._target = null;
     this._onlyModified = false;
+    this._enableMinify = true;
   }
 
   // eslint-disable-next-line class-methods-use-this
@@ -42,6 +39,11 @@ class PackageCommand extends StaticCommand {
 
   withOnlyModified(value) {
     this._onlyModified = value;
+    return this;
+  }
+
+  withMinify(value) {
+    this._enableMinify = value;
     return this;
   }
 
@@ -78,7 +80,6 @@ class PackageCommand extends StaticCommand {
     };
 
     return new Promise((resolve, reject) => {
-      const ticks = {};
       const archiveName = path.basename(info.zipFile);
       let hadErrors = false;
 
@@ -98,9 +99,7 @@ class PackageCommand extends StaticCommand {
       });
       archive.on('entry', (data) => {
         log.debug(`${archiveName}: A ${data.name}`);
-        if (ticks[data.name]) {
-          tick('', data.name);
-        }
+        tick('', data.name);
       });
       archive.on('warning', (err) => {
         log.error(`${chalk.redBright('[error] ')}Unable to create archive: ${err.message}`);
@@ -112,6 +111,7 @@ class PackageCommand extends StaticCommand {
         hadErrors = true;
         reject(err);
       });
+      archive.pipe(output);
 
       const packageJson = {
         name: info.name,
@@ -121,44 +121,41 @@ class PackageCommand extends StaticCommand {
         license: 'Apache-2.0',
       };
 
-      archive.pipe(output);
       archive.append(JSON.stringify(packageJson, null, '  '), { name: 'package.json' });
-
-      info.files.forEach((file) => {
-        const name = path.basename(file);
-        archive.file(path.resolve(this._target, file), { name });
-        ticks[name] = true;
-      });
-
-      // add modules that cause problems when embeded in webpack
-      Object.keys(info.externals).forEach((mod) => {
-        // if the module was linked via `npm link`, then it is a checked-out module, and should
-        // not be included as-is.
-        const modPath = info.externals[mod];
-        if (modPath.indexOf('/node_modules/') < 0 && modPath.indexOf('\\node_modules\\') < 0) {
-          // todo: async
-          // todo: read .npmignore
-          const files = [
-            ...glob.sync('!(.git|node_modules|logs|docs|coverage)/**', {
-              cwd: modPath,
-              matchBase: false,
-            }),
-            ...glob.sync('*', {
-              cwd: modPath,
-              matchBase: false,
-              nodir: true,
-            })];
-          files.forEach((name) => {
-            archive.file(path.resolve(modPath, name), { name: `node_modules/${mod}/${name}` });
-          });
-        } else {
-          archive.directory(modPath, `node_modules/${mod}`);
-          ticks[`node_modules/${mod}/package.json`] = true;
-        }
-      });
-
+      archive.file(info.bundlePath, { name: path.basename(info.main) });
       archive.finalize();
     });
+  }
+
+  /**
+   * Creates the action bundles
+   * @param {*[]} scripts the scripts information
+   * @param {ProgressBar} bar the progress bar
+   */
+  async createBundles(scripts, bar) {
+    const progressHandler = (percent, msg, ...args) => {
+      const action = msg === 'building' ? `bundling ${args[0]}` : msg;
+      bar.update(percent * 0.8, { action });
+    };
+
+    // create the bundles
+    const bundler = new ActionBundler()
+      .withDirectory(this._target)
+      .withModulePaths(['node_modules', path.resolve(__dirname, '..', 'node_modules')])
+      .withLogger(this.log)
+      .withProgressHandler(progressHandler)
+      .withMinify(this._enableMinify);
+    const files = {};
+    scripts.forEach((script) => {
+      files[script.name] = path.resolve(this._target, script.main);
+    });
+    const stats = await bundler.run(files);
+    if (stats.errors) {
+      stats.errors.forEach(this.log.error);
+    }
+    if (stats.warnings) {
+      stats.warnings.forEach(this.log.warn);
+    }
   }
 
   async run() {
@@ -196,52 +193,38 @@ class PackageCommand extends StaticCommand {
       scripts = scripts.filter(script => !script.zipFile);
     }
 
-    // generate additional infos
-    scripts.forEach((script) => {
-      /* eslint-disable no-param-reassign */
-      script.name = path.basename(script.main, '.js');
-      script.dirname = script.isStatic ? '' : path.dirname(script.main);
-      script.archiveName = `${script.name}.zip`;
-      script.zipFile = path.resolve(this._target, script.dirname, script.archiveName);
-      script.infoFile = path.resolve(this._target, script.dirname, `${script.name}.info.json`);
-      /* eslint-enable no-param-reassign */
-    });
-
-    const bar = new ProgressBar('[:bar] :action :etas', {
-      total: scripts.length * 2,
-      width: 50,
-      renderThrottle: 1,
-      stream: process.stdout,
-    });
-
-    // collect all the external modules of the scripts
-    let steps = 0;
-    await Promise.all(scripts.map(async (script) => {
-      const collector = new ExternalsCollector()
-        .withDirectory(this._target)
-        .withExternals(Object.keys(packageCfg.externals));
-
-      // eslint-disable-next-line no-param-reassign
-      script.files = [script.main, ...script.requires].map(f => path.resolve(this._target, f));
-      bar.tick(1, {
-        action: `analyzing ${path.basename(script.main)}`,
+    if (scripts.length > 0) {
+      // generate additional infos
+      scripts.forEach((script) => {
+        /* eslint-disable no-param-reassign */
+        script.name = path.basename(script.main, '.js');
+        script.bundleName = `${script.name}.bundle.js`;
+        script.bundlePath = path.resolve(this._target, script.bundleName);
+        script.dirname = script.isStatic ? '' : path.dirname(script.main);
+        script.archiveName = `${script.name}.zip`;
+        script.zipFile = path.resolve(this._target, script.dirname, script.archiveName);
+        script.infoFile = path.resolve(this._target, script.dirname, `${script.name}.info.json`);
+        /* eslint-enable no-param-reassign */
       });
-      // eslint-disable-next-line no-param-reassign
-      script.externals = await collector.collectModules(script.files);
-      steps += Object.keys(script.externals).length + script.files.length;
-      bar.tick(1, {
-        action: `analyzing ${path.basename(script.main)}`,
+
+      // we reserve 80% for bundling the scripts and 20% for creating the zip files.
+      const bar = new ProgressBar('[:bar] :action :elapseds', {
+        total: scripts.length * 2 * 5,
+        width: 50,
+        renderThrottle: 1,
+        stream: process.stdout,
       });
-    }));
 
-    // trigger new progress bar
-    bar.total += steps;
+      // create bundles
+      await this.createBundles(scripts, bar);
 
-    // package actions
-    await Promise.all(scripts.map(script => this.createPackage(script, bar)));
+      // package actions
+      await Promise.all(scripts.map(script => this.createPackage(script, bar)));
 
-    // write back the updated infos
-    await Promise.all(scripts.map(script => fs.writeJson(script.infoFile, script, { spaces: 2 })));
+      // write back the updated infos
+      // eslint-disable-next-line max-len
+      await Promise.all(scripts.map(script => fs.writeJson(script.infoFile, script, { spaces: 2 })));
+    }
 
     this.log.info('✅  packaging completed');
     return this;
