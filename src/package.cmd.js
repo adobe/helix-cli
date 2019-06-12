@@ -117,12 +117,13 @@ class PackageCommand extends StaticCommand {
         name: info.name,
         version: '1.0',
         description: `Lambda function of ${info.name}`,
-        main: path.basename(info.main),
+        main: 'server.js',
         license: 'Apache-2.0',
       };
 
       archive.pipe(output);
       archive.append(JSON.stringify(packageJson, null, '  '), { name: 'package.json' });
+      archive.append(fs.createReadStream(path.join(path.dirname(__filename), 'openwhisk/server.js')), { name: 'server.js' });
 
       info.files.forEach((file) => {
         const name = path.basename(file);
