@@ -1,3 +1,10 @@
+# [4.3.0](https://github.com/adobe/helix-cli/compare/v4.2.10...v4.3.0) (2019-06-12)
+
+
+### Features
+
+* **cli:** remove --minify and --cache ([b598041](https://github.com/adobe/helix-cli/commit/b598041)), closes [#986](https://github.com/adobe/helix-cli/issues/986)
+
 ## [4.2.10](https://github.com/adobe/helix-cli/compare/v4.2.9...v4.2.10) (2019-06-12)
 
 
