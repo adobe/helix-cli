@@ -357,7 +357,6 @@ describe('hlx deploy (Integration)', () => {
         path.resolve(testRoot, 'src/third_helper.js'),
       ])
       .withTargetDir(buildDir)
-      .withCacheEnabled(false)
       .run();
 
     const cmd = await new DeployCommand(logger)
@@ -398,7 +397,6 @@ describe('hlx deploy (Integration)', () => {
         path.resolve(testRoot, 'cgi-bin/hello.js'),
       ])
       .withTargetDir(buildDir)
-      .withCacheEnabled(false)
       .run();
 
     const cmd = await new DeployCommand(logger)
@@ -441,7 +439,6 @@ describe('hlx deploy (Integration)', () => {
         path.resolve(testRoot, 'src/third_helper.js'),
       ])
       .withTargetDir(buildDir)
-      .withCacheEnabled(false)
       .run();
 
     const ref = await GitUtils.getCurrentRevision(testRoot);

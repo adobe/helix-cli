@@ -44,7 +44,6 @@ describe('hlx package (Integration)', () => {
         'test/integration/src/third_helper.js',
       ])
       .withTargetDir(buildDir)
-      .withCacheEnabled(false)
       .run();
 
     const created = {};
@@ -88,7 +87,6 @@ describe('hlx package (Integration)', () => {
         'test/integration/src/third_helper.js',
       ])
       .withTargetDir(buildDir)
-      .withCacheEnabled(false)
       .run();
 
     const created = {};
@@ -125,7 +123,6 @@ describe('hlx package (Integration)', () => {
         'test/integration/src/xml.js',
       ])
       .withTargetDir(buildDir)
-      .withCacheEnabled(false)
       .run();
 
     await new PackageCommand()

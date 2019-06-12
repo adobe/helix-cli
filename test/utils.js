@@ -188,7 +188,6 @@ async function processSource(scriptName, type = 'htl') {
   await new BuildCommand()
     .withFiles(files)
     .withTargetDir(buildDir)
-    .withCacheEnabled(false)
     .run();
 
   return {

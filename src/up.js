@@ -77,8 +77,6 @@ module.exports = function up() {
       }
 
       await executor
-        .withCacheEnabled(argv.cache)
-        .withMinifyEnabled(argv.minify)
         .withTargetDir(argv.target)
         .withFiles(argv.files)
         .withOverrideHost(argv.host)
