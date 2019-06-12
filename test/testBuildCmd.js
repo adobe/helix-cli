@@ -37,7 +37,6 @@ describe('Integration test for build', function suite() {
     await new BuildCommand()
       .withFiles(['test/integration/src/**/*.htl', 'test/integration/src/**/*.js'])
       .withTargetDir(buildDir)
-      .withCacheEnabled(false)
       .run();
 
     assertFile(path.resolve(buildDir, 'html.js'));

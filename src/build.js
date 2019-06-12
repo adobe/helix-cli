@@ -37,8 +37,6 @@ module.exports = function build() {
       }
 
       await executor
-        .withCacheEnabled(argv.cache)
-        .withMinifyEnabled(argv.minify)
         .withTargetDir(argv.target)
         .withFiles(argv.files)
         .run();

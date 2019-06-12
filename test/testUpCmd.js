@@ -68,7 +68,6 @@ describe('Integration test for up command', function suite() {
   it('up command fails outside git repository', async () => {
     try {
       await new UpCommand()
-        .withCacheEnabled(false)
         .withFiles([path.join(testDir, 'src', '*.htl'), path.join(testDir, 'src', '*.js')])
         .withTargetDir(buildDir)
         .withDirectory(testDir)
@@ -82,7 +81,6 @@ describe('Integration test for up command', function suite() {
   it('up command succeeds and can be stopped', (done) => {
     initGit(testDir, 'https://github.com/adobe/dummy-foo.git');
     new UpCommand()
-      .withCacheEnabled(false)
       .withFiles([path.join(testDir, 'src', '*.htl'), path.join(testDir, 'src', '*.js')])
       .withTargetDir(buildDir)
       .withDirectory(testDir)
@@ -103,7 +101,6 @@ describe('Integration test for up command', function suite() {
     initGit(testDir, 'https://github.com/adobe/dummy-foo.git');
     let error = null;
     const cmd = new UpCommand()
-      .withCacheEnabled(false)
       .withFiles([
         path.join(testDir, 'src', '*.htl'),
         path.join(testDir, 'src', '*.js'),
@@ -139,7 +136,6 @@ describe('Integration test for up command', function suite() {
     initGit(testDir, 'https://github.com/adobe/dummy-foo.git');
     await fse.rename(path.resolve(testDir, 'default-config.yaml'), path.resolve(testDir, 'helix-config.yaml'));
     const cmd = new UpCommand()
-      .withCacheEnabled(false)
       .withFiles([
         path.join(testDir, 'src', '*.htl'),
         path.join(testDir, 'src', '*.js'),
@@ -166,7 +162,6 @@ describe('Integration test for up command', function suite() {
     initGit(testDir, 'https://github.com/adobe/dummy-foo.git');
     await fse.rename(path.resolve(testDir, 'default-config.yaml'), path.resolve(testDir, 'helix-config.yaml'));
     const cmd = new UpCommand()
-      .withCacheEnabled(false)
       .withFiles([
         path.join(testDir, 'src', '*.htl'),
         path.join(testDir, 'src', '*.js'),
@@ -197,7 +192,6 @@ describe('Integration test for up command', function suite() {
     initGit(apiDir, 'https://github.com/adobe/project-helix-api.git');
     await fse.rename(path.resolve(testDir, 'default-config.yaml'), path.resolve(testDir, 'helix-config.yaml'));
     const cmd = new UpCommand()
-      .withCacheEnabled(false)
       .withFiles([
         path.join(testDir, 'src', '*.htl'),
         path.join(testDir, 'src', '*.js'),
@@ -227,7 +221,6 @@ describe('Integration test for up command', function suite() {
     const cfg = path.resolve(testDir, 'helix-config.yaml');
     await fse.copy(path.resolve(__dirname, 'fixtures', 'default-proxy.yaml'), cfg);
     const cmd = new UpCommand()
-      .withCacheEnabled(false)
       .withFiles([path.join(testDir, 'src', '*.htl'), path.join(testDir, 'src', '*.js')])
       .withTargetDir(buildDir)
       .withDirectory(testDir)
@@ -251,7 +244,6 @@ describe('Integration test for up command', function suite() {
     assertFile(path.resolve(testDir, 'helix-config.yaml'), true);
     let error = null;
     const cmd = new UpCommand()
-      .withCacheEnabled(false)
       .withFiles([path.join(testDir, 'src', '*.htl'), path.join(testDir, 'src', '*.js')])
       .withTargetDir(buildDir)
       .withDirectory(testDir)
@@ -287,7 +279,6 @@ describe('Integration test for up command', function suite() {
     initGit(testDir, 'https://github.com/adobe/dummy-foo.git');
     let error = null;
     const cmd = new UpCommand()
-      .withCacheEnabled(false)
       .withFiles([
         path.join(testDir, 'src', '*.htl'),
         path.join(testDir, 'src', '*.js'),
@@ -338,7 +329,6 @@ describe('Integration test for up command', function suite() {
     initGit(testDir, 'https://github.com/adobe/dummy-foo.git');
     let error = null;
     const cmd = new UpCommand()
-      .withCacheEnabled(false)
       .withFiles([
         path.join(testDir, 'src', '*.htl'),
         path.join(testDir, 'src', '*.js'),

@@ -28,8 +28,6 @@ describe('hlx up', () => {
   beforeEach(() => {
     clearHelixEnv();
     mockUp = sinon.createStubInstance(UpCommand);
-    mockUp.withCacheEnabled.returnsThis();
-    mockUp.withMinifyEnabled.returnsThis();
     mockUp.withTargetDir.returnsThis();
     mockUp.withFiles.returnsThis();
     mockUp.withOpen.returnsThis();
@@ -48,8 +46,6 @@ describe('hlx up', () => {
     new CLI()
       .withCommandExecutor('up', mockUp)
       .run(['up']);
-    sinon.assert.calledWith(mockUp.withCacheEnabled, false);
-    sinon.assert.calledWith(mockUp.withMinifyEnabled, false);
     sinon.assert.calledWith(mockUp.withSaveConfig, false);
     sinon.assert.calledWith(mockUp.withTargetDir, '.hlx/build');
     sinon.assert.calledWith(mockUp.withFiles, ['src/**/*.htl', 'src/**/*.js', 'src/**/*.jsx', 'cgi-bin/**/*.js']);
@@ -63,8 +59,6 @@ describe('hlx up', () => {
     new CLI()
       .withCommandExecutor('up', mockUp)
       .run(['up']);
-    sinon.assert.calledWith(mockUp.withCacheEnabled, true);
-    sinon.assert.calledWith(mockUp.withMinifyEnabled, true);
     sinon.assert.calledWith(mockUp.withTargetDir, 'foo');
     sinon.assert.calledWith(mockUp.withFiles, ['*.htl', '*.js']);
     sinon.assert.calledWith(mockUp.withOverrideHost, 'www.project-helix.io');
@@ -97,30 +91,6 @@ describe('hlx up', () => {
       .run(['up']);
     sinon.assert.calledOnce(mockUp.run);
     sinon.assert.match('HLX_SAVE_CONFIG is not allowed in environment.', failed);
-  });
-
-  it('hlx up can enable cache', () => {
-    new CLI()
-      .withCommandExecutor('up', mockUp)
-      .run(['up', '--cache']);
-    sinon.assert.calledWith(mockUp.withCacheEnabled, true);
-    sinon.assert.calledOnce(mockUp.run);
-  });
-
-  it('hlx up can enable cache with value', () => {
-    new CLI()
-      .withCommandExecutor('up', mockUp)
-      .run(['up', '--cache', 'true']);
-    sinon.assert.calledWith(mockUp.withCacheEnabled, true);
-    sinon.assert.calledOnce(mockUp.run);
-  });
-
-  it('hlx up can enable minify', () => {
-    new CLI()
-      .withCommandExecutor('up', mockUp)
-      .run(['up', '--minify']);
-    sinon.assert.calledWith(mockUp.withMinifyEnabled, true);
-    sinon.assert.calledOnce(mockUp.run);
   });
 
   it('hlx up can set target', () => {
@@ -182,9 +152,9 @@ describe('hlx up', () => {
   it('hlx up can set specify files with no --files option and additionals', () => {
     new CLI()
       .withCommandExecutor('up', mockUp)
-      .run(['up', 'lib/*.htl', 'index.htl', '--no-cache']);
+      .run(['up', 'lib/*.htl', 'index.htl', '--target', 'foo']);
     sinon.assert.calledWith(mockUp.withFiles, ['lib/*.htl', 'index.htl']);
-    sinon.assert.calledWith(mockUp.withCacheEnabled, false);
+    sinon.assert.calledWith(mockUp.withTargetDir, 'foo');
     sinon.assert.calledOnce(mockUp.run);
   });
 

@@ -21,8 +21,6 @@ const AbstractCommand = require('./abstract.cmd.js');
 class BuildCommand extends AbstractCommand {
   constructor(logger) {
     super(logger);
-    this._cache = null;
-    this._minify = false;
     this._target = null;
     this._files = null;
   }
@@ -30,16 +28,6 @@ class BuildCommand extends AbstractCommand {
   // eslint-disable-next-line class-methods-use-this
   get requireConfigFile() {
     return false;
-  }
-
-  withCacheEnabled(cache) {
-    this._cache = cache;
-    return this;
-  }
-
-  withMinifyEnabled(target) {
-    this._minify = target;
-    return this;
   }
 
   withTargetDir(target) {
@@ -69,8 +57,8 @@ class BuildCommand extends AbstractCommand {
       logLevel: 3,
       detailedReport: true,
       watch: false,
-      cache: this._cache,
-      minify: this._minify,
+      cache: false,
+      minify: false,
       outDir: this._target,
       killWorkers: true,
     };

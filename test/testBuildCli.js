@@ -28,8 +28,6 @@ describe('hlx build', () => {
   beforeEach(() => {
     clearHelixEnv();
     mockBuild = sinon.createStubInstance(BuildCommand);
-    mockBuild.withCacheEnabled.returnsThis();
-    mockBuild.withMinifyEnabled.returnsThis();
     mockBuild.withTargetDir.returnsThis();
     mockBuild.withFiles.returnsThis();
     mockBuild.run.returnsThis();
@@ -43,8 +41,6 @@ describe('hlx build', () => {
     new CLI()
       .withCommandExecutor('build', mockBuild)
       .run(['build']);
-    sinon.assert.calledWith(mockBuild.withCacheEnabled, false);
-    sinon.assert.calledWith(mockBuild.withMinifyEnabled, false);
     sinon.assert.calledWith(mockBuild.withTargetDir, '.hlx/build');
     sinon.assert.calledWith(mockBuild.withFiles, ['src/**/*.htl', 'src/**/*.js', 'src/**/*.jsx', 'cgi-bin/**/*.js']);
     sinon.assert.calledOnce(mockBuild.run);
@@ -55,34 +51,8 @@ describe('hlx build', () => {
     new CLI()
       .withCommandExecutor('build', mockBuild)
       .run(['build']);
-    sinon.assert.calledWith(mockBuild.withCacheEnabled, true);
-    sinon.assert.calledWith(mockBuild.withMinifyEnabled, true);
     sinon.assert.calledWith(mockBuild.withTargetDir, 'foo');
     sinon.assert.calledWith(mockBuild.withFiles, ['*.htl', '*.js']);
-    sinon.assert.calledOnce(mockBuild.run);
-  });
-
-  it('hlx build can enable cache', () => {
-    new CLI()
-      .withCommandExecutor('build', mockBuild)
-      .run(['build', '--cache']);
-    sinon.assert.calledWith(mockBuild.withCacheEnabled, true);
-    sinon.assert.calledOnce(mockBuild.run);
-  });
-
-  it('hlx build can enable cache with value', () => {
-    new CLI()
-      .withCommandExecutor('build', mockBuild)
-      .run(['build', '--cache', 'true']);
-    sinon.assert.calledWith(mockBuild.withCacheEnabled, true);
-    sinon.assert.calledOnce(mockBuild.run);
-  });
-
-  it('hlx build can enable minify', () => {
-    new CLI()
-      .withCommandExecutor('build', mockBuild)
-      .run(['build', '--minify']);
-    sinon.assert.calledWith(mockBuild.withMinifyEnabled, true);
     sinon.assert.calledOnce(mockBuild.run);
   });
 
@@ -121,9 +91,9 @@ describe('hlx build', () => {
   it('hlx build can set specify files without option and additional args', () => {
     new CLI()
       .withCommandExecutor('build', mockBuild)
-      .run(['build', 'lib/*.htl', 'index.htl', '--no-cache']);
+      .run(['build', 'lib/*.htl', 'index.htl', '--target', 'foo']);
     sinon.assert.calledWith(mockBuild.withFiles, ['lib/*.htl', 'index.htl']);
-    sinon.assert.calledWith(mockBuild.withCacheEnabled, false);
+    sinon.assert.calledWith(mockBuild.withTargetDir, 'foo');
     sinon.assert.calledOnce(mockBuild.run);
   });
 });

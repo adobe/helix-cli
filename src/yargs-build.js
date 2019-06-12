@@ -17,16 +17,6 @@ module.exports = function commonArgs(yargs) {
       default: '.hlx/build',
       describe: 'Target directory for compiled JS',
     })
-    .option('cache', {
-      describe: 'Enable or disable compile cache',
-      boolean: true,
-      default: false,
-    })
-    .option('minify', {
-      describe: 'Minify JS',
-      boolean: true,
-      default: false,
-    })
     .positional('files', {
       describe: 'The template files to compile',
       default: ['src/**/*.htl', 'src/**/*.js', 'src/**/*.jsx', 'cgi-bin/**/*.js'],
