@@ -38,7 +38,7 @@
     "@adobe/helix-pipeline": "3.4.0",
     "@adobe/helix-shared": "1.4.0",
     "@adobe/helix-simulator": "2.12.12",
-    "@adobe/htlengine": "^3.1.0",
+    "@adobe/htlengine": "3.2.0",
     "@babel/core": "^7.4.5",
     "@parcel/logger": "1.11.0",
     "@snyk/nodejs-runtime-agent": "1.45.1",
