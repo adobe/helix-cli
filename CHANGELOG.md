@@ -1,3 +1,10 @@
+## [4.3.2](https://github.com/adobe/helix-cli/compare/v4.3.1...v4.3.2) (2019-06-13)
+
+
+### Bug Fixes
+
+* **package:** use latest htlengine 3.2.0 ([f14a958](https://github.com/adobe/helix-cli/commit/f14a958))
+
 ## [4.3.1](https://github.com/adobe/helix-cli/compare/v4.3.0...v4.3.1) (2019-06-13)
 
 
