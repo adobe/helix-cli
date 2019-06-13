@@ -1,3 +1,11 @@
+## [4.3.1](https://github.com/adobe/helix-cli/compare/v4.3.0...v4.3.1) (2019-06-13)
+
+
+### Bug Fixes
+
+* **package:** remove unused dependencies ([bc13466](https://github.com/adobe/helix-cli/commit/bc13466))
+* **packager:** implement better way to bundle actions ([c2adb80](https://github.com/adobe/helix-cli/commit/c2adb80)), closes [#966](https://github.com/adobe/helix-cli/issues/966) [#672](https://github.com/adobe/helix-cli/issues/672) [#589](https://github.com/adobe/helix-cli/issues/589)
+
 # [4.3.0](https://github.com/adobe/helix-cli/compare/v4.2.10...v4.3.0) (2019-06-12)
 
 
