@@ -24,7 +24,7 @@ class PackageCommand extends StaticCommand {
     super(logger);
     this._target = null;
     this._onlyModified = false;
-    this._enableMinify = true;
+    this._enableMinify = false;
   }
 
   // eslint-disable-next-line class-methods-use-this
@@ -134,8 +134,16 @@ class PackageCommand extends StaticCommand {
    */
   async createBundles(scripts, bar) {
     const progressHandler = (percent, msg, ...args) => {
-      const action = msg === 'building' ? `bundling ${args[0]}` : msg;
+      /* eslint-disable no-param-reassign */
+      const action = args.length > 0 ? `${msg} ${args[0]}` : msg;
+      const rt = bar.renderThrottle;
+      if (msg !== 'bundling') {
+        // this is kind of a hack to force redraw for non-bundling steps.
+        bar.renderThrottle = 0;
+      }
       bar.update(percent * 0.8, { action });
+      bar.renderThrottle = rt;
+      /* eslint-enable no-param-reassign */
     };
 
     // create the bundles
@@ -211,7 +219,7 @@ class PackageCommand extends StaticCommand {
       const bar = new ProgressBar('[:bar] :action :elapseds', {
         total: scripts.length * 2 * 5,
         width: 50,
-        renderThrottle: 1,
+        renderThrottle: 0,
         stream: process.stdout,
       });
 

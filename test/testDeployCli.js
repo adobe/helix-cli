@@ -47,6 +47,7 @@ describe('hlx deploy', () => {
     mockDeploy.withCreatePackages.returnsThis();
     mockDeploy.withAddStrain.returnsThis();
     mockDeploy.withStatic.returnsThis();
+    mockDeploy.withMinify.returnsThis();
     mockDeploy.run.returnsThis();
 
     // disable static functions as well to avoid shelljs executions.
@@ -126,6 +127,7 @@ OpenWhisk Namespace is required`);
     sinon.assert.calledWith(mockDeploy.withCreatePackages, 'auto');
     sinon.assert.calledWith(mockDeploy.withCircleciAuth, '');
     sinon.assert.calledWith(mockDeploy.withDryRun, false);
+    sinon.assert.calledWith(mockDeploy.withMinify, false);
     sinon.assert.calledOnce(mockDeploy.run);
   });
 
@@ -148,6 +150,7 @@ OpenWhisk Namespace is required`);
     sinon.assert.calledWith(mockDeploy.withDefault, undefined);
     sinon.assert.calledWith(mockDeploy.withCircleciAuth, 'foobar');
     sinon.assert.calledWith(mockDeploy.withDryRun, true);
+    sinon.assert.calledWith(mockDeploy.withMinify, true);
     sinon.assert.calledOnce(mockDeploy.run);
   });
 
@@ -325,6 +328,19 @@ OpenWhisk Namespace is required`);
       ]);
 
     sinon.assert.calledWith(mockDeploy.withCreatePackages, 'auto');
+    sinon.assert.calledOnce(mockDeploy.run);
+  });
+
+  it('hlx deploy can enable minify', () => {
+    new CLI()
+      .withCommandExecutor('deploy', mockDeploy)
+      .run(['deploy',
+        '--wsk-auth', 'secret-key',
+        '--wsk-namespace', 'hlx',
+        '--minify',
+      ]);
+
+    sinon.assert.calledWith(mockDeploy.withMinify, true);
     sinon.assert.calledOnce(mockDeploy.run);
   });
 
