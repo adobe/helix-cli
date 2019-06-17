@@ -1,3 +1,10 @@
+# [4.4.0](https://github.com/adobe/helix-cli/compare/v4.3.2...v4.4.0) (2019-06-17)
+
+
+### Features
+
+* **package:** Make bundle minification configurable ([037e90a](https://github.com/adobe/helix-cli/commit/037e90a)), closes [#998](https://github.com/adobe/helix-cli/issues/998) [#997](https://github.com/adobe/helix-cli/issues/997)
+
 ## [4.3.2](https://github.com/adobe/helix-cli/compare/v4.3.1...v4.3.2) (2019-06-13)
 
 
