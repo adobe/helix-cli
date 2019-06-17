@@ -33,13 +33,18 @@ module.exports = function deploy() {
           type: 'boolean',
           default: false,
         })
+        .option('minify', {
+          describe: 'Enables minification of the final action bundle.',
+          type: 'boolean',
+          default: false,
+        })
         .option('target', {
           alias: 'o',
           default: '.hlx/build',
           type: 'string',
           describe: 'Target directory for packaged actions',
         })
-        .group(['force', 'target'], 'Package options')
+        .group(['force', 'minify', 'target'], 'Package options')
         .help();
     },
     handler: async (argv) => {
@@ -53,6 +58,7 @@ module.exports = function deploy() {
         .withTarget(argv.target)
         .withOnlyModified(!argv.force)
         .withStatic(argv.static)
+        .withMinify(argv.minify)
         .run();
     },
   };

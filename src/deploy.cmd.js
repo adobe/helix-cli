@@ -52,7 +52,7 @@ class DeployCommand extends StaticCommand {
     this._dryRun = false;
     this._createPackages = 'auto';
     this._addStrain = null;
-    this._enableMinify = null;
+    this._enableMinify = false;
   }
 
   get requireConfigFile() {
@@ -335,10 +335,8 @@ Alternatively you can auto-add one using the {grey --add <name>} option.`);
       const pgkCommand = new PackageCommand(this.log)
         .withTarget(this._target)
         .withDirectory(this.directory)
-        .withOnlyModified(this._createPackages === 'auto');
-      if (this._enableMinify !== null) {
-        pgkCommand.withMinify(this._enableMinify);
-      }
+        .withOnlyModified(this._createPackages === 'auto')
+        .withMinify(this._enableMinify);
       await pgkCommand.run();
     }
 

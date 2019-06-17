@@ -54,6 +54,7 @@ describe('hlx package (Integration)', () => {
       .withTarget(buildDir)
       .withOnlyModified(false)
       .withStatic('both')
+      .withMinify(false)
       .on('create-package', (info) => {
         created[info.name] = true;
       })
