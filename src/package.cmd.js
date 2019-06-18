@@ -137,7 +137,7 @@ class PackageCommand extends StaticCommand {
       /* eslint-disable no-param-reassign */
       const action = args.length > 0 ? `${msg} ${args[0]}` : msg;
       const rt = bar.renderThrottle;
-      if (msg !== 'bundling') {
+      if (msg !== 'building') {
         // this is kind of a hack to force redraw for non-bundling steps.
         bar.renderThrottle = 0;
       }
@@ -219,7 +219,7 @@ class PackageCommand extends StaticCommand {
       const bar = new ProgressBar('[:bar] :action :elapseds', {
         total: scripts.length * 2 * 5,
         width: 50,
-        renderThrottle: 0,
+        renderThrottle: 50,
         stream: process.stdout,
       });
 
