@@ -1,3 +1,10 @@
+## [4.4.2](https://github.com/adobe/helix-cli/compare/v4.4.1...v4.4.2) (2019-06-18)
+
+
+### Bug Fixes
+
+* **package:** reduce output during package ([#1001](https://github.com/adobe/helix-cli/issues/1001)) ([811470b](https://github.com/adobe/helix-cli/commit/811470b))
+
 ## [4.4.1](https://github.com/adobe/helix-cli/compare/v4.4.0...v4.4.1) (2019-06-17)
 
 
