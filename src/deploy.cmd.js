@@ -19,11 +19,11 @@ const glob = require('glob');
 const path = require('path');
 const fs = require('fs-extra');
 const uuidv4 = require('uuid/v4');
+const AbstractCommand = require('./abstract.cmd.js');
 const ProgressBar = require('progress');
 const { HelixConfig, GitUrl } = require('@adobe/helix-shared');
 const GitUtils = require('./git-utils');
 const useragent = require('./user-agent-util');
-const StaticCommand = require('./static.cmd.js');
 const PackageCommand = require('./package.cmd.js');
 const ConfigUtils = require('./config/config-utils.js');
 
@@ -33,7 +33,7 @@ function humanFileSize(size) {
   return `${(size / p2).toFixed(2)} ${['B', 'KiB', 'MiB', 'GiB', 'TiB'][i]}`;
 }
 
-class DeployCommand extends StaticCommand {
+class DeployCommand extends AbstractCommand {
   constructor(logger) {
     super(logger);
     this._enableAuto = true;

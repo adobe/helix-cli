@@ -12,14 +12,15 @@
 const chalk = require('chalk');
 const glob = require('glob');
 const path = require('path');
-const fs = require('fs-extra');
+const fs = require('fs');
 const ProgressBar = require('progress');
-const archiver = require('archiver');
-const StaticCommand = require('./static.cmd.js');
+const { ZipFile } = require('yazl');
+const AbstractCommand = require('./abstract.cmd.js');
 const ActionBundler = require('./parcel/ActionBundler.js');
-const { flattenDependencies } = require('./packager-utils.js');
+const { multiline } = require('@adobe/helix-shared').string;
+const { map, join, find, contains } = require('ferrum');
 
-class PackageCommand extends StaticCommand {
+class PackageCommand extends AbstractCommand {
   constructor(logger) {
     super(logger);
     this._target = null;
@@ -53,86 +54,19 @@ class PackageCommand extends StaticCommand {
   }
 
   /**
-   * Creates a .zip package that contains the contents to be deployed to openwhisk.
-   * @param info The action info object
-   * @param info.name Name of the action
-   * @param info.main Main script of the action
-   * @param info.externals External modules
-   * @param info.requires Local dependencies
-   * @param bar progress bar
-   * @returns {Promise<any>} Promise that resolves to the package file {@code path}.
-   */
-  async createPackage(info, bar) {
-    const { log } = this;
-
-    const tick = (message, name) => {
-      const shortname = name.replace(/\/package.json.*/, '').replace(/node_modules\//, '');
-      bar.tick({
-        action: name ? `packaging ${shortname}` : '',
-      });
-      if (message) {
-        this.log.maybe({
-          progress: true,
-          level: 'info',
-          message,
-        });
-      }
-    };
-
-    return new Promise((resolve, reject) => {
-      const archiveName = path.basename(info.zipFile);
-      let hadErrors = false;
-
-      // create zip file for package
-      const output = fs.createWriteStream(info.zipFile);
-      const archive = archiver('zip');
-
-      log.debug(`preparing package ${archiveName}`);
-      output.on('close', () => {
-        if (!hadErrors) {
-          log.debug(`${archiveName}: Created package. ${archive.pointer()} total bytes`);
-          // eslint-disable-next-line no-param-reassign
-          info.archiveSize = archive.pointer();
-          this.emit('create-package', info);
-          resolve(info);
-        }
-      });
-      archive.on('entry', (data) => {
-        log.debug(`${archiveName}: A ${data.name}`);
-        tick('', data.name);
-      });
-      archive.on('warning', (err) => {
-        log.error(`${chalk.redBright('[error] ')}Unable to create archive: ${err.message}`);
-        hadErrors = true;
-        reject(err);
-      });
-      archive.on('error', (err) => {
-        log.error(`${chalk.redBright('[error] ')}Unable to create archive: ${err.message}`);
-        hadErrors = true;
-        reject(err);
-      });
-      archive.pipe(output);
-
-      const packageJson = {
-        name: info.name,
-        version: '1.0',
-        description: `Lambda function of ${info.name}`,
-        main: path.basename(info.main),
-        license: 'Apache-2.0',
-      };
-
-      archive.append(JSON.stringify(packageJson, null, '  '), { name: 'package.json' });
-      archive.file(info.bundlePath, { name: path.basename(info.main) });
-      archive.finalize();
-    });
-  }
-
-  /**
-   * Creates the action bundles
-   * @param {*[]} scripts the scripts information
+   * Uses webpack to bundle each openwhisk action script given.
+   *
+   * This loads the scripts specified by the scripts parameter (usually
+   * all scripts in .hlx/build/), bundles these scripts together with their
+   * dependencies using webpack (yielding a single <name>.bundle.js) and
+   * writes those back to disk.
+   *
+   * @param {*[]} scripts Array containing info about the scripts that
+   *   need bundling. Each entry represents one script in .hlx/build/;
+   *   each entry yields one openwhisk action.
    * @param {ProgressBar} bar the progress bar
    */
-  async createBundles(scripts, bar) {
+  async createBundles(entry, bar) {
     const progressHandler = (percent, msg, ...args) => {
       /* eslint-disable no-param-reassign */
       const action = args.length > 0 ? `${msg} ${args[0]}` : msg;
@@ -153,11 +87,8 @@ class PackageCommand extends StaticCommand {
       .withLogger(this.log)
       .withProgressHandler(progressHandler)
       .withMinify(this._enableMinify);
-    const files = {};
-    scripts.forEach((script) => {
-      files[script.name] = path.resolve(this._target, script.main);
-    });
-    const stats = await bundler.run(files);
+
+    const stats = await bundler.run(entry);
     if (stats.errors) {
       stats.errors.forEach(this.log.error);
     }
@@ -169,70 +100,27 @@ class PackageCommand extends StaticCommand {
   async run() {
     await this.init();
 
-    // get the list of scripts from the info files
-    const infos = [...glob.sync(`${this._target}/**/*.info.json`)];
-    const scriptInfos = await Promise.all(infos.map(info => fs.readJSON(info)));
+    // we reserve 80% for bundling the scripts and 20% for creating the zip files.
+    const bar = new ProgressBar('[:bar] :action :elapseds', {
+      total: 10,
+      width: 50,
+      renderThrottle: 0,
+      stream: process.stdout,
+    });
 
-    // resolve dependencies
-    let scripts = flattenDependencies(scriptInfos);
+    await this.createBundles({static: path.resolve(__dirname, 'openwhisk/static.js')}, bar);
 
-    // add the static script if missing
-    if (!scripts.find(script => script.isStatic) && this._buildStatic) {
-      // add static action
-      scripts.push({
-        main: path.resolve(__dirname, 'openwhisk', 'static.js'),
-        isStatic: true,
-        requires: [],
-      });
-    }
+    // Create the zip file from our js bundle
 
-    // filter out the ones that already have the info and a valid zip file
-    if (this._onlyModified) {
-      await Promise.all(scripts.map(async (script) => {
-        // check if zip exists, and if not, clear the path entry
-        if (!script.zipFile || !(await fs.pathExists(script.zipFile))) {
-          // eslint-disable-next-line no-param-reassign
-          delete script.zipFile;
-        }
-      }));
-      scripts.filter(script => script.zipFile).forEach((script) => {
-        this.emit('ignore-package', script);
-      });
-      scripts = scripts.filter(script => !script.zipFile);
-    }
-
-    if (scripts.length > 0) {
-      // generate additional infos
-      scripts.forEach((script) => {
-        /* eslint-disable no-param-reassign */
-        script.name = path.basename(script.main, '.js');
-        script.bundleName = `${script.name}.bundle.js`;
-        script.bundlePath = path.resolve(this._target, script.bundleName);
-        script.dirname = script.isStatic ? '' : path.dirname(script.main);
-        script.archiveName = `${script.name}.zip`;
-        script.zipFile = path.resolve(this._target, script.dirname, script.archiveName);
-        script.infoFile = path.resolve(this._target, script.dirname, `${script.name}.info.json`);
-        /* eslint-enable no-param-reassign */
-      });
-
-      // we reserve 80% for bundling the scripts and 20% for creating the zip files.
-      const bar = new ProgressBar('[:bar] :action :elapseds', {
-        total: scripts.length * 2 * 5,
-        width: 50,
-        renderThrottle: 0,
-        stream: process.stdout,
-      });
-
-      // create bundles
-      await this.createBundles(scripts, bar);
-
-      // package actions
-      await Promise.all(scripts.map(script => this.createPackage(script, bar)));
-
-      // write back the updated infos
-      // eslint-disable-next-line max-len
-      await Promise.all(scripts.map(script => fs.writeJson(script.infoFile, script, { spaces: 2 })));
-    }
+    const staticJsFile = path.resolve(this._target, 'static.bundle.js');
+    const zip = new ZipFile();
+    zip.addFile(staticJsFile, 'index.js');
+    zip.outputStream.pipe(fs.createWriteStream(staticJsFile + '.zip'));
+    // need to create this promise before end is called, otherwise clouse
+    // could be triggered before the promise is created
+    const done = new Promise((res) => zip.outputStream.on('close', res));
+    zip.end();
+    await done;
 
     this.log.info('✅  packaging completed');
     return this;

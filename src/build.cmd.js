@@ -14,9 +14,11 @@
 
 const Bundler = require('parcel-bundler');
 const glob = require('glob');
+const fs = require('fs-extra');
 const path = require('path');
 const RawJSPackager = require('./parcel/RawJSPackager.js');
 const AbstractCommand = require('./abstract.cmd.js');
+const { each } = require('ferrum');
 
 class BuildCommand extends AbstractCommand {
   constructor(logger) {
@@ -81,12 +83,37 @@ class BuildCommand extends AbstractCommand {
     return bundler;
   }
 
+  async generateBundleIndex(bundle) {
+    const cont = [];
+    const P = x => cont.push(x);
+
+    P('module.exports = {');
+    P('  renderers: {');
+
+    each(bundle.childBundles, (rendererBundle) => {
+      // Stripping the suffix using the replace and using JSON to properly
+      // quote any weird characters in the file
+      const name = JSON.stringify(
+        path.basename(rendererBundle.name).replace(/\.[^.]*$/, ''));
+      // Using a relative path
+      P(`    ${name}: ${name.replace(/^"/, '"./')},`);
+    });
+
+    P('  }');
+    P('}');
+
+    await fs.writeFile(
+      path.join(this._target, 'helix-action-index.js'),
+      cont.join('\n'));
+  }
+
   async build() {
     this.emit('buildStart');
     // expand patterns from command line arguments
     const myfiles = this._files.reduce((a, f) => [...a, ...glob.sync(f)], []);
     const bundler = await this.createBundler(myfiles);
     const bundle = await bundler.bundle();
+    await this.generateBundleIndex(bundle);
     this.emit('buildEnd');
     return bundle;
   }

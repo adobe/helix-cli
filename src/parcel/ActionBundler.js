@@ -62,11 +62,11 @@ class ActionBundler {
       },
       externals: [],
       resolve: {
-        modules: this._modulesPaths,
+        modules: [...this._modulesPaths, this._cwd],
       },
       devtool: false,
       optimization: {
-        minimize: this._minify,
+        minimize: true,
       },
       plugins: [],
     };

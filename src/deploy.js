@@ -158,7 +158,6 @@ module.exports = function deploy() {
         .withFastlyNamespace(argv.fastlyNamespace)
         .withCreatePackages(argv.package)
         .withAddStrain(argv.add)
-        .withStatic(argv.static)
         .withMinify(argv.minify)
         .run();
     },

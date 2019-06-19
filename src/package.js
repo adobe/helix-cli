@@ -57,7 +57,6 @@ module.exports = function deploy() {
       await executor
         .withTarget(argv.target)
         .withOnlyModified(!argv.force)
-        .withStatic(argv.static)
         .withMinify(argv.minify)
         .run();
     },

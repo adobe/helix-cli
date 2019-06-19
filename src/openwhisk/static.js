@@ -20,6 +20,9 @@ const babel = require('@babel/core');
 const ohash = require('object-hash');
 const sanitizer = require('sanitizer');
 
+// This is automatically generated during the build process
+const renderers = require('helix-action-index');
+
 const { space } = postcss.list;
 const uri = require('uri-js');
 /* eslint-disable no-console */

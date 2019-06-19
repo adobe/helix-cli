@@ -105,7 +105,9 @@
     "proxyquire": "^2.1.0",
     "semantic-release": "^15.13.12",
     "sinon": "7.3.2",
-    "unzip2": "0.2.5"
+    "unzip2": "0.2.5",
+    "ferrum": "0.3.2",
+    "yazl": "2.5.1"
   },
   "snyk": true,
   "lint-staged": {
