@@ -450,7 +450,41 @@ describe('hlx deploy (Integration)', () => {
       delete res.body;
     });
     this.polly.server.put(`https://adobeioruntime.net/api/v1/namespaces/hlx/packages/${ref}`).intercept((req, res) => {
-      res.sendStatus(201);
+      const body = JSON.parse(req.body);
+      try {
+        assert.deepEqual(body, {
+          publish: true,
+          parameters: [
+            {
+              key: 'FOO',
+              value: 'bar',
+            },
+            {
+              key: 'LOGGLY_HOST',
+              value: 'loggly-host',
+            },
+            {
+              key: 'LOGGLY_KEY',
+              value: 'loggly-auth',
+            },
+            {
+              key: 'RESOLVE_GITREF_SERVICE',
+              value: 'my-resolver',
+            },
+          ],
+          annotations: [
+            {
+              key: 'hlx-code-origin',
+              value: 'ssh://git@github.com/adobe/project-helix.io.git#master',
+            },
+          ],
+        });
+        res.sendStatus(201);
+      } catch (e) {
+        // eslint-disable-next-line no-console
+        console.error(e);
+        res.sendStatus(500);
+      }
     });
     this.polly.server.put('https://adobeioruntime.net/api/v1/namespaces/hlx/actions/hlx--static').intercept((req, res) => {
       res.sendStatus(201);
@@ -478,6 +512,12 @@ describe('hlx deploy (Integration)', () => {
       .withDryRun(false)
       .withTarget(buildDir)
       .withMinify(false)
+      .withLogglyAuth('loggly-auth')
+      .withLogglyHost('loggly-host')
+      .withDefault({
+        FOO: 'bar',
+      })
+      .withResolveGitRefService('my-resolver')
       .run();
 
     assert.equal(cmd.config.strains.get('default').package, '');

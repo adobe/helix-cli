@@ -48,6 +48,7 @@ describe('hlx deploy', () => {
     mockDeploy.withAddStrain.returnsThis();
     mockDeploy.withStatic.returnsThis();
     mockDeploy.withMinify.returnsThis();
+    mockDeploy.withResolveGitRefService.returnsThis();
     mockDeploy.run.returnsThis();
 
     // disable static functions as well to avoid shelljs executions.
@@ -128,6 +129,7 @@ OpenWhisk Namespace is required`);
     sinon.assert.calledWith(mockDeploy.withCircleciAuth, '');
     sinon.assert.calledWith(mockDeploy.withDryRun, false);
     sinon.assert.calledWith(mockDeploy.withMinify, false);
+    sinon.assert.calledWith(mockDeploy.withResolveGitRefService, 'helix-services/resolve-git-ref@v1');
     sinon.assert.calledOnce(mockDeploy.run);
   });
 
@@ -151,6 +153,7 @@ OpenWhisk Namespace is required`);
     sinon.assert.calledWith(mockDeploy.withCircleciAuth, 'foobar');
     sinon.assert.calledWith(mockDeploy.withDryRun, true);
     sinon.assert.calledWith(mockDeploy.withMinify, true);
+    sinon.assert.calledWith(mockDeploy.withResolveGitRefService, 'resolve.api');
     sinon.assert.calledOnce(mockDeploy.run);
   });
 
@@ -367,6 +370,19 @@ OpenWhisk Namespace is required`);
       ]);
 
     sinon.assert.calledWith(mockDeploy.withAddStrain, '');
+    sinon.assert.calledOnce(mockDeploy.run);
+  });
+
+  it('hlx deploy can set the resolve api', () => {
+    new CLI()
+      .withCommandExecutor('deploy', mockDeploy)
+      .run(['deploy',
+        '--wsk-auth', 'secret-key',
+        '--wsk-namespace', 'hlx',
+        '--svc-resolve-git-ref', 'helix-services/foobar',
+      ]);
+
+    sinon.assert.calledWith(mockDeploy.withResolveGitRefService, 'helix-services/foobar');
     sinon.assert.calledOnce(mockDeploy.run);
   });
 });
