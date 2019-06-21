@@ -1,3 +1,24 @@
+## [4.4.5](https://github.com/adobe/helix-cli/compare/v4.4.4...v4.4.5) (2019-06-21)
+
+
+### Bug Fixes
+
+* **package:** update @adobe/helix-pipeline to version 3.7.0 ([875ca8c](https://github.com/adobe/helix-cli/commit/875ca8c))
+
+## [4.4.4](https://github.com/adobe/helix-cli/compare/v4.4.3...v4.4.4) (2019-06-20)
+
+
+### Bug Fixes
+
+* **package:** update @adobe/helix-simulator to version 2.12.13 ([35750a3](https://github.com/adobe/helix-cli/commit/35750a3))
+
+## [4.4.3](https://github.com/adobe/helix-cli/compare/v4.4.2...v4.4.3) (2019-06-20)
+
+
+### Bug Fixes
+
+* **package:** update @adobe/helix-pipeline to version 3.6.0 ([0709f9e](https://github.com/adobe/helix-cli/commit/0709f9e))
+
 ## [4.4.2](https://github.com/adobe/helix-cli/compare/v4.4.1...v4.4.2) (2019-06-18)
 
 

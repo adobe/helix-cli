@@ -1,6 +1,6 @@
 {
   "name": "@adobe/helix-cli",
-  "version": "4.4.2",
+  "version": "4.4.5",
   "description": "Project Helix CLI",
   "main": "index.js",
   "bin": {
@@ -35,9 +35,9 @@
   },
   "dependencies": {
     "@adobe/fastly-native-promises": "^1.3.2",
-    "@adobe/helix-pipeline": "3.5.0",
-    "@adobe/helix-shared": "1.4.0",
-    "@adobe/helix-simulator": "2.12.12",
+    "@adobe/helix-pipeline": "3.7.0",
+    "@adobe/helix-shared": "1.5.0",
+    "@adobe/helix-simulator": "2.12.13",
     "@adobe/htlengine": "3.2.0",
     "@babel/core": "^7.4.5",
     "@parcel/logger": "1.11.0",
@@ -69,7 +69,7 @@
     "sanitizer": "^0.1.3",
     "semver": "^6.0.0",
     "shelljs": "0.8.2",
-    "snyk": "1.179.0",
+    "snyk": "1.179.1",
     "source-map": "0.7.3",
     "uri-js": "4.2.2",
     "uuid": "3.3.2",
@@ -83,7 +83,7 @@
     "@pollyjs/core": "^2.4.0",
     "@pollyjs/persister-fs": "^2.1.0",
     "@semantic-release/changelog": "^3.0.2",
-    "@semantic-release/git": "^7.0.8",
+    "@semantic-release/git": "^7.0.10",
     "@semantic-release/github": "^5.2.10",
     "codecov": "3.5.0",
     "commitizen": "^3.0.7",
