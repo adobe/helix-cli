@@ -1,3 +1,10 @@
+## [4.4.7](https://github.com/adobe/helix-cli/compare/v4.4.6...v4.4.7) (2019-06-21)
+
+
+### Bug Fixes
+
+* **package:** update @adobe/helix-pipeline to version 3.7.1 ([952dd20](https://github.com/adobe/helix-cli/commit/952dd20))
+
 ## [4.4.6](https://github.com/adobe/helix-cli/compare/v4.4.5...v4.4.6) (2019-06-21)
 
 
