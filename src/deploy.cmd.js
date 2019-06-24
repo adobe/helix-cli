@@ -53,6 +53,7 @@ class DeployCommand extends StaticCommand {
     this._createPackages = 'auto';
     this._addStrain = null;
     this._enableMinify = false;
+    this._resolveGitRefSvc = 'helix-services/resolve-git-ref@v1';
   }
 
   get requireConfigFile() {
@@ -136,6 +137,11 @@ class DeployCommand extends StaticCommand {
 
   withMinify(value) {
     this._enableMinify = value;
+    return this;
+  }
+
+  withResolveGitRefService(value) {
+    this._resolveGitRefSvc = value;
     return this;
   }
 
@@ -389,6 +395,11 @@ Alternatively you can auto-add one using the {grey --add <name>} option.`);
       .map(script => fs.readFile(script.zipFile)
         .then(action => ({ script, action })));
 
+    // get API url of resolve action
+    if (this._resolveGitRefSvc) {
+      params.RESOLVE_GITREF_SERVICE = this._resolveGitRefSvc;
+    }
+
     // create openwhisk package
     if (!this._dryRun) {
       const parameters = Object.keys(params).map((key) => {
@@ -411,10 +422,10 @@ Alternatively you can auto-add one using the {grey --add <name>} option.`);
       tick(`created package ${this._prefix}`, '');
     }
 
-    let updatestatic;
+    let bindHelixServices;
     // bind helix-services
-    if (this._bindStatic && !this._dryRun) {
-      updatestatic = openwhisk.packages.update({
+    if (!this._dryRun) {
+      bindHelixServices = openwhisk.packages.update({
         package: {
           binding: {
             namespace: 'helix', // namespace to bind from
@@ -425,9 +436,7 @@ Alternatively you can auto-add one using the {grey --add <name>} option.`);
       }).then(() => {
         tick('bound helix-services', '');
       });
-      // we don't have to wait for this.
     }
-
 
     // ... and deploy
     const deployed = read.map(p => p.then(({ script, action }) => {
@@ -459,7 +468,7 @@ Alternatively you can auto-add one using the {grey --add <name>} option.`);
       });
     }));
 
-    await Promise.all([...deployed, updatestatic]);
+    await Promise.all([...deployed, bindHelixServices]);
 
 
     let numErrors = 0;

@@ -91,6 +91,12 @@ module.exports = function deploy() {
           type: 'boolean',
           default: false,
         })
+        .option('svc-resolve-git-ref', {
+          alias: 'svcResolveGitRef',
+          describe: 'Service name for git-resolve-ref service',
+          type: 'string',
+          default: 'helix-services/resolve-git-ref@v1',
+        })
         .array('default')
         .nargs('default', 2)
         .coerce('default', arg => arg.reduce((result, value, index, array) => {
@@ -160,6 +166,7 @@ module.exports = function deploy() {
         .withAddStrain(argv.add)
         .withStatic(argv.static)
         .withMinify(argv.minify)
+        .withResolveGitRefService(argv.svcResolveGitRef)
         .run();
     },
 
