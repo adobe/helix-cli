@@ -1,3 +1,10 @@
+# [4.5.0](https://github.com/adobe/helix-cli/compare/v4.4.7...v4.5.0) (2019-06-24)
+
+
+### Features
+
+* **deploy:** Add API_RESOLVE_GIT_REF as action param ([8ffe164](https://github.com/adobe/helix-cli/commit/8ffe164)), closes [#1007](https://github.com/adobe/helix-cli/issues/1007)
+
 ## [4.4.7](https://github.com/adobe/helix-cli/compare/v4.4.6...v4.4.7) (2019-06-21)
 
 
