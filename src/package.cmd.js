@@ -18,7 +18,6 @@ const archiver = require('archiver');
 const AbstractCommand = require('./abstract.cmd.js');
 const BuildCommand = require('./build.cmd.js');
 const ActionBundler = require('./parcel/ActionBundler.js');
-const { flattenDependencies } = require('./packager-utils.js');
 
 /**
  * Information object of an action.
@@ -32,9 +31,6 @@ const { flattenDependencies } = require('./packager-utils.js');
  * @property {string} archiveName - The filename of the zipped action. eg 'html.zip'.
  * @property {number} archiveSize - The size in bytes of the zipped action.
  * @property {string} infoFile - The absolute path to a json file representing this info.
- * @property {string[]} requires - An array of relative paths to scripts that are required by
- *           this one. {@code flattenDependencies} will also resolve all transitive dependencies.
- *           Note that this information is not longer required, and will probably be removed.
  */
 
 /**
@@ -208,10 +204,7 @@ class PackageCommand extends AbstractCommand {
 
     // get the list of scripts from the info files
     const infos = [...glob.sync(`${this._target}/**/*.info.json`)];
-    const scriptInfos = await Promise.all(infos.map(info => fs.readJSON(info)));
-
-    // resolve dependencies
-    let scripts = flattenDependencies(scriptInfos);
+    let scripts = await Promise.all(infos.map(info => fs.readJSON(info)));
 
     // filter out the ones that already have the info and a valid zip file
     if (this._onlyModified) {

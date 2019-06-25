@@ -120,13 +120,8 @@ class RawJSPackager extends Packager {
     // write info
     const bundleDir = path.dirname(this.bundle.name);
     const info = {
-      main: path.relative(this.options.outDir, this.bundle.name),
-      requires: [],
+      main: path.relative(this.options.outDir, this.bundle.name)
     };
-    // eslint-disable-next-line no-restricted-syntax
-    for (const dep of asset.depAssets.values()) {
-      info.requires.push(path.relative(bundleDir, path.resolve(bundleDir, dep.id)));
-    }
 
     const infoName = path.resolve(bundleDir, `${path.basename(this.bundle.name, '.js')}.info.json`);
     await fs.writeJSON(infoName, info, { spaces: 2 });

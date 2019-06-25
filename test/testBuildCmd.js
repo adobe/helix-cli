@@ -68,9 +68,6 @@ describe('Integration test for build', function suite() {
     const xmlInfo = await fs.readJson(path.resolve(buildDir, 'xml.info.json'));
     assert.deepEqual(xmlInfo, {
       main: 'xml.js',
-      requires: [
-        'helper.js',
-      ],
     });
   });
 });
