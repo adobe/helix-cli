@@ -43,7 +43,7 @@ describe('hlx publish --remote --dry-run (default)', () => {
 
   it('publishing makes HTTP requests', async function test() {
     const { server } = this.polly;
-    server.post('https://adobeioruntime.net/api/v1/web/helix/helix-services/publish@v1').intercept((req, res) => res.sendStatus(200).json({}));
+    server.post('https://adobeioruntime.net/api/v1/web/helix/helix-services/publish@v2').intercept((req, res) => res.sendStatus(200).json({}));
     server.post('https://adobeioruntime.net/api/v1/web/helix/default/addlogger').intercept((req, res) => res.sendStatus(200).json({}));
 
     const remote = await new RemotePublishCommand()

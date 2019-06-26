@@ -96,7 +96,7 @@ describe('hlx publish --custom-vcl (check requests)', () => {
     nock.activate();
 
     scope = nock('https://adobeioruntime.net')
-      .post('/api/v1/web/helix/helix-services/publish@v1', (body) => {
+      .post('/api/v1/web/helix/helix-services/publish@v2', (body) => {
         ({ vcl } = body);
         return true;
       })
@@ -126,7 +126,7 @@ describe('hlx publish --custom-vcl (check requests)', () => {
       .withFastlyAuth('fake_auth')
       .withFastlyNamespace('fake_name')
       .withWskHost('doesn.t.matter')
-      .withPublishAPI('https://adobeioruntime.net/api/v1/web/helix/helix-services/publish@v1')
+      .withPublishAPI('https://adobeioruntime.net/api/v1/web/helix/helix-services/publish@v2')
       .withConfigFile(path.resolve(__dirname, 'fixtures/filtered.yaml'))
       .withDryRun(false);
   });
