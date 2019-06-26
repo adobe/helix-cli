@@ -1,6 +1,6 @@
 {
   "name": "@adobe/helix-cli",
-  "version": "4.4.7",
+  "version": "4.6.0",
   "description": "Project Helix CLI",
   "main": "index.js",
   "bin": {
@@ -35,7 +35,7 @@
   },
   "dependencies": {
     "@adobe/fastly-native-promises": "^1.3.2",
-    "@adobe/helix-pipeline": "3.7.1",
+    "@adobe/helix-pipeline": "3.7.2",
     "@adobe/helix-shared": "1.5.0",
     "@adobe/helix-simulator": "2.12.13",
     "@adobe/htlengine": "3.2.0",
@@ -69,7 +69,7 @@
     "sanitizer": "^0.1.3",
     "semver": "^6.0.0",
     "shelljs": "0.8.2",
-    "snyk": "1.180.0",
+    "snyk": "1.180.2",
     "source-map": "0.7.3",
     "uri-js": "4.2.2",
     "uuid": "3.3.2",
