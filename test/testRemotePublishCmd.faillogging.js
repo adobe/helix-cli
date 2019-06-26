@@ -44,7 +44,7 @@ describe('hlx publish --remote (fail log setup)', () => {
     nock.activate();
 
     scope = nock('https://adobeioruntime.net')
-      .post('/api/v1/web/helix/helix-services/publish@v1')
+      .post('/api/v1/web/helix/default/publish')
       .reply(200, {})
       .post('/api/v1/web/helix/default/addlogger')
       .reply(400, {});
