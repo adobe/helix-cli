@@ -1,3 +1,10 @@
+# [4.6.0](https://github.com/adobe/helix-cli/compare/v4.5.0...v4.6.0) (2019-06-26)
+
+
+### Features
+
+* **publish:** use versioned publish API ([5080a9d](https://github.com/adobe/helix-cli/commit/5080a9d))
+
 # [4.5.0](https://github.com/adobe/helix-cli/compare/v4.4.7...v4.5.0) (2019-06-24)
 
 
