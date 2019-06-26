@@ -1,3 +1,10 @@
+## [4.6.1](https://github.com/adobe/helix-cli/compare/v4.6.0...v4.6.1) (2019-06-26)
+
+
+### Bug Fixes
+
+* **publish:** use helix-publish@v2 with new dispatch flow ([a80daf1](https://github.com/adobe/helix-cli/commit/a80daf1))
+
 # [4.6.0](https://github.com/adobe/helix-cli/compare/v4.5.0...v4.6.0) (2019-06-26)
 
 
