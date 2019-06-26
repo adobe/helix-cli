@@ -44,7 +44,7 @@ describe('hlx publish --remote (default)', () => {
 
   it('publishing makes HTTP requests', async () => {
     const scope = nock('https://adobeioruntime.net')
-      .post('/api/v1/web/helix/helix-services/publish@v1')
+      .post('/api/v1/web/helix/default/publish')
       .reply(200, {})
       .post('/api/v1/web/helix/default/addlogger')
       .reply(200, {});
@@ -55,7 +55,7 @@ describe('hlx publish --remote (default)', () => {
       .withFastlyAuth('fake_auth')
       .withFastlyNamespace('fake_name')
       .withWskHost('doesn.t.matter')
-      .withPublishAPI('https://adobeioruntime.net/api/v1/web/helix/helix-services/publish@v1')
+      .withPublishAPI('https://adobeioruntime.net/api/v1/web/helix/default/publish')
       .withConfigFile(path.resolve(__dirname, 'fixtures/deployed.yaml'))
       .withFilter()
       .withDryRun(false);
@@ -70,7 +70,7 @@ describe('hlx publish --remote (default)', () => {
   it('publishing sends expected parameters', async () => {
     let publishBody;
     const scope = nock('https://adobeioruntime.net')
-      .post('/api/v1/web/helix/helix-services/publish@v1', (body) => {
+      .post('/api/v1/web/helix/default/publish', (body) => {
         publishBody = body;
         return true;
       })
@@ -84,7 +84,7 @@ describe('hlx publish --remote (default)', () => {
       .withFastlyAuth('fake_auth')
       .withFastlyNamespace('fake_name')
       .withWskHost('doesn.t.matter')
-      .withPublishAPI('https://adobeioruntime.net/api/v1/web/helix/helix-services/publish@v1')
+      .withPublishAPI('https://adobeioruntime.net/api/v1/web/helix/default/publish')
       .withConfigFile(path.resolve(__dirname, 'fixtures/deployed.yaml'))
       .withFilter()
       .withDryRun(false);
@@ -108,7 +108,7 @@ describe('hlx publish --remote (default)', () => {
       .withFastlyAuth('fake_auth')
       .withFastlyNamespace('fake_name')
       .withWskHost('doesn.t.matter')
-      .withPublishAPI('https://adobeioruntime.net/api/v1/web/helix/helix-services/publish@v1')
+      .withPublishAPI('https://adobeioruntime.net/api/v1/web/helix/default/publish')
       .withConfigFile(path.resolve(__dirname, 'fixtures/non-deployed.yaml'))
       .withDryRun(false);
     await remote.run();
