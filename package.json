@@ -1,6 +1,6 @@
 {
   "name": "@adobe/helix-cli",
-  "version": "4.6.2",
+  "version": "4.6.1",
   "description": "Project Helix CLI",
   "main": "index.js",
   "bin": {
@@ -69,7 +69,7 @@
     "sanitizer": "^0.1.3",
     "semver": "^6.0.0",
     "shelljs": "0.8.2",
-    "snyk": "1.185.1",
+    "snyk": "1.185.2",
     "source-map": "0.7.3",
     "uri-js": "4.2.2",
     "uuid": "3.3.2",
