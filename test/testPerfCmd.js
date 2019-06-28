@@ -33,7 +33,7 @@ describe('hlx perf #integrationtest', () => {
 
     let reqcounter = 0;
     server
-      .post('https://adobeioruntime.net/api/v1/web/helix/default/perf')
+      .post('https://adobeioruntime.net/api/v1/web/helix/helix-services/perf@v1')
       .intercept((req, res) => {
         reqcounter += 1;
 
@@ -685,7 +685,7 @@ describe('hlx perf #integrationtest', () => {
 
     let reqcounter = 0;
     server
-      .post('https://adobeioruntime.net/api/v1/web/helix/default/perf')
+      .post('https://adobeioruntime.net/api/v1/web/helix/helix-services/perf@v1')
       .intercept((req, res) => {
         reqcounter += 1;
 
@@ -1483,7 +1483,7 @@ describe('hlx perf #integrationtest', () => {
 
     let reqcounter = 0;
     server
-      .post('https://adobeioruntime.net/api/v1/web/helix/default/perf')
+      .post('https://adobeioruntime.net/api/v1/web/helix/helix-services/perf@v1')
       .intercept((req, res) => {
         reqcounter += 1;
 
@@ -2287,7 +2287,7 @@ describe('hlx perf #integrationtest', () => {
     const { server } = this.polly;
 
     server
-      .post('https://adobeioruntime.net/api/v1/web/helix/default/perf')
+      .post('https://adobeioruntime.net/api/v1/web/helix/helix-services/perf@v1')
       .intercept((req, res) => {
         res.sendStatus(200).json(['91af6cd', '5180ab5', '199489d', '0e0c0c3']);
       });
@@ -2320,7 +2320,7 @@ describe('hlx perf #integrationtest', () => {
     const { server } = this.polly;
 
     server
-      .post('https://adobeioruntime.net/api/v1/web/helix/default/perf')
+      .post('https://adobeioruntime.net/api/v1/web/helix/helix-services/perf@v1')
       .intercept((req, res) => {
         res.sendStatus(500);
       });
