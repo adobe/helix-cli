@@ -101,7 +101,7 @@ describe('hlx publish --custom-vcl (check requests)', () => {
         return true;
       })
       .reply(200, {})
-      .post('/api/v1/web/helix/default/addlogger')
+      .post('/api/v1/web/helix/helix-services/logging@v1')
       .reply(200, {});
 
     // set up a fake git repo.

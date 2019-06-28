@@ -46,7 +46,7 @@ describe('hlx publish --remote (default)', () => {
     const scope = nock('https://adobeioruntime.net')
       .post('/api/v1/web/helix/helix-services/publish@v2')
       .reply(200, {})
-      .post('/api/v1/web/helix/default/addlogger')
+      .post('/api/v1/web/helix/helix-services/logging@v1')
       .reply(200, {});
 
     const remote = await new RemotePublishCommand()
@@ -75,7 +75,7 @@ describe('hlx publish --remote (default)', () => {
         return true;
       })
       .reply(200, {})
-      .post('/api/v1/web/helix/default/addlogger')
+      .post('/api/v1/web/helix/helix-services/logging@v1')
       .reply(200, {});
 
     const remote = await new RemotePublishCommand()
