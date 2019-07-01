@@ -57,7 +57,7 @@
     "lodash": "4.17.11",
     "mime-types": "2.1.24",
     "object-hash": "1.3.0",
-    "open": "6.3.0",
+    "open": "6.4.0",
     "openwhisk": "3.19.0",
     "parcel-bundler": "1.12.3",
     "postcss": "^7.0.16",
