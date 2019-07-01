@@ -67,7 +67,7 @@ describe('hlx publish --remote (with filters)', () => {
         return true;
       })
       .reply(200, {})
-      .post('/api/v1/web/helix/default/addlogger')
+      .post('/api/v1/web/helix/helix-services/logging@v1')
       .reply(200, {});
 
     // set up a fake git repo.
@@ -190,7 +190,7 @@ describe('hlx publish --remote (with filters, but without config)', () => {
         return true;
       })
       .reply(200, {})
-      .post('/api/v1/web/helix/default/addlogger')
+      .post('/api/v1/web/helix/helix-services/logging@v1')
       .reply(200, {});
 
     // set up a fake git repo.

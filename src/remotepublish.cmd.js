@@ -207,7 +207,7 @@ class RemotePublishCommand extends AbstractCommand {
   }
 
   serviceAddLogger() {
-    return request.post('https://adobeioruntime.net/api/v1/web/helix/default/addlogger', {
+    return request.post('https://adobeioruntime.net/api/v1/web/helix/helix-services/logging@v1', {
       json: true,
       body: {
         service: this._fastly_namespace,
