@@ -1,3 +1,11 @@
+## [4.6.6](https://github.com/adobe/helix-cli/compare/v4.6.5...v4.6.6) (2019-07-01)
+
+
+### Bug Fixes
+
+* **perf:** use versioned performance service ([#1034](https://github.com/adobe/helix-cli/issues/1034)) ([aaee9e2](https://github.com/adobe/helix-cli/commit/aaee9e2))
+* **publish:** use versioned logging service ([#1033](https://github.com/adobe/helix-cli/issues/1033)) ([4dddce6](https://github.com/adobe/helix-cli/commit/4dddce6))
+
 ## [4.6.5](https://github.com/adobe/helix-cli/compare/v4.6.4...v4.6.5) (2019-06-28)
 
 
