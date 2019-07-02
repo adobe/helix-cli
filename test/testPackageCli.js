@@ -30,7 +30,6 @@ describe('hlx package', () => {
     mockPackage = sinon.createStubInstance(PackageCommand);
     mockPackage.withTarget.returnsThis();
     mockPackage.withOnlyModified.returnsThis();
-    mockPackage.withStatic.returnsThis();
     mockPackage.run.returnsThis();
   });
 

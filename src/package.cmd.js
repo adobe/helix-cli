@@ -15,11 +15,11 @@ const path = require('path');
 const fs = require('fs-extra');
 const ProgressBar = require('progress');
 const archiver = require('archiver');
-const StaticCommand = require('./static.cmd.js');
+const AbstractCommand = require('./abstract.cmd.js');
 const ActionBundler = require('./parcel/ActionBundler.js');
 const { flattenDependencies } = require('./packager-utils.js');
 
-class PackageCommand extends StaticCommand {
+class PackageCommand extends AbstractCommand {
   constructor(logger) {
     super(logger);
     this._target = null;
@@ -167,16 +167,6 @@ class PackageCommand extends StaticCommand {
 
     // resolve dependencies
     let scripts = flattenDependencies(scriptInfos);
-
-    // add the static script if missing
-    if (!scripts.find(script => script.isStatic) && this._buildStatic) {
-      // add static action
-      scripts.push({
-        main: path.resolve(__dirname, 'openwhisk', 'static.js'),
-        isStatic: true,
-        requires: [],
-      });
-    }
 
     // filter out the ones that already have the info and a valid zip file
     if (this._onlyModified) {

@@ -11,16 +11,11 @@
  */
 const AbstractCommand = require('./abstract.cmd.js');
 
+/** @deprecated */
 class StaticCommand extends AbstractCommand {
-  constructor(logger) {
-    super(logger);
-    this._buildStatic = true;
-    this._bindStatic = true;
-  }
-
-  withStatic(value) {
-    this._buildStatic = (!value || value === 'both' || value === 'build');
-    this._bindStatic = (!value || value === 'both' || value === 'bind');
+  /** @deprecated */
+  withStatic() {
+    this._logger.warn('Static action deprecated in favor of shared static service.');
     return this;
   }
 }

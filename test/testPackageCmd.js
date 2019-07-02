@@ -53,7 +53,6 @@ describe('hlx package (Integration)', () => {
       .withDirectory(testRoot)
       .withTarget(buildDir)
       .withOnlyModified(false)
-      .withStatic('both')
       .on('create-package', (info) => {
         created[info.name] = true;
       })
@@ -64,17 +63,12 @@ describe('hlx package (Integration)', () => {
 
     assert.deepEqual(created, {
       html: true,
-      static: true,
     }, 'created packages');
     assert.deepEqual(ignored, {}, 'ignored packages');
 
     await assertZipEntries(
       path.resolve(buildDir, 'html.zip'),
       ['package.json', 'html.js'],
-    );
-    await assertZipEntries(
-      path.resolve(buildDir, 'static.zip'),
-      ['package.json', 'static.js'],
     );
 
     // execute html script
@@ -100,111 +94,8 @@ describe('hlx package (Integration)', () => {
       });
       delete require.cache[require.resolve(bundle)];
     }
-
-    // execute static script
-    {
-      const bundle = path.resolve(buildDir, 'static.bundle.js');
-      // eslint-disable-next-line global-require,import/no-dynamic-require
-      const { main } = require(bundle);
-      const ret = await main({
-        path: '/README.md',
-        repo: 'helix-cli',
-        owner: 'adobe',
-      });
-      assert.deepEqual(ret, {
-        body: 'forbidden.',
-        headers: {
-          'Cache-Control': 'max-age=300',
-          'Content-Type': 'text/plain',
-        },
-        statusCode: 403,
-      });
-      delete require.cache[require.resolve(bundle)];
-    }
   }).timeout(60000);
 
-  it('package creates correct package (but excludes static)', async () => {
-    await new BuildCommand()
-      .withFiles([
-        'test/integration/src/html.htl',
-        'test/integration/src/html.pre.js',
-        'test/integration/src/helper.js',
-        'test/integration/src/utils/another_helper.js',
-        'test/integration/src/third_helper.js',
-      ])
-      .withTargetDir(buildDir)
-      .run();
-
-    const created = {};
-    const ignored = {};
-    await new PackageCommand()
-      .withDirectory(testRoot)
-      .withTarget(buildDir)
-      .withOnlyModified(false)
-      .withStatic('bind')
-      .withMinify(false)
-      .on('create-package', (info) => {
-        created[info.name] = true;
-      })
-      .on('ignore-package', (info) => {
-        ignored[info.name] = true;
-      })
-      .run();
-
-    assert.deepEqual(created, {
-      html: true,
-    }, 'created packages');
-    assert.deepEqual(ignored, {}, 'ignored packages');
-
-    await assertZipEntries(
-      path.resolve(buildDir, 'html.zip'),
-      ['package.json', 'html.js'],
-    );
-    assert.ok(!fs.existsSync(path.resolve(buildDir, 'static.zip')), 'static.zip should not get created');
-  }).timeout(60000);
-
-  it('package does not recreate existing package', async () => {
-    await new BuildCommand()
-      .withFiles([
-        'test/integration/src/helper.js',
-        'test/integration/src/xml.js',
-      ])
-      .withTargetDir(buildDir)
-      .run();
-
-    await new PackageCommand()
-      .withDirectory(testRoot)
-      .withTarget(buildDir)
-      .withOnlyModified(true)
-      .withMinify(false)
-      .run();
-
-    await assertZipEntries(
-      path.resolve(buildDir, 'xml.zip'),
-      ['package.json', 'xml.js'],
-    );
-
-    const created = {};
-    const ignored = {};
-    await new PackageCommand()
-      .withDirectory(testRoot)
-      .withTarget(buildDir)
-      .withOnlyModified(true)
-      .withMinify(false)
-      .on('create-package', (info) => {
-        created[info.name] = true;
-      })
-      .on('ignore-package', (info) => {
-        ignored[info.name] = true;
-      })
-      .run();
-
-    assert.deepEqual(created, {}, 'created packages');
-    assert.deepEqual(ignored, {
-      xml: true,
-      static: true,
-    }, 'ignored packages');
-  }).timeout(60000);
 
   it('package reports bundling errors and warnings', async () => {
     const logger = Logger.getTestLogger();
