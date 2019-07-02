@@ -1,3 +1,10 @@
+## [4.6.7](https://github.com/adobe/helix-cli/compare/v4.6.6...v4.6.7) (2019-07-02)
+
+
+### Bug Fixes
+
+* **deploy:** ensure that static action version is valid ([#1051](https://github.com/adobe/helix-cli/issues/1051)) ([7d55da6](https://github.com/adobe/helix-cli/commit/7d55da6)), closes [#1050](https://github.com/adobe/helix-cli/issues/1050)
+
 ## [4.6.6](https://github.com/adobe/helix-cli/compare/v4.6.5...v4.6.6) (2019-07-01)
 
 
