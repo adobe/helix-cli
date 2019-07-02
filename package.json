@@ -92,7 +92,7 @@
     "eslint-config-airbnb": "17.1.1",
     "eslint-plugin-header": "3.0.0",
     "eslint-plugin-import": "2.17.3",
-    "eslint-plugin-jsx-a11y": "6.2.2",
+    "eslint-plugin-jsx-a11y": "6.2.3",
     "eslint-plugin-react": "7.13.0",
     "js-yaml": "3.13.1",
     "jsdom": "^15.0.0",
