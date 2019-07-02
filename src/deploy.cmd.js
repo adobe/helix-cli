@@ -478,8 +478,8 @@ Alternatively you can auto-add one using the {grey --add <name>} option.`);
       await request.get('https://adobeioruntime.net/api/v1/web/helix/helix-services/static@latest', {
         resolveWithFullResponse: true,
       }).then((res) => {
-        const version = res.headers['x-version'];
-        tick(` verified static action version ${version}`);
+        const version = res.headers['x-version'] || 'latest';
+        tick(` verified static action version: ${version}`);
         staticactionname = `/helix-services/static@${version}`;
       }).catch((e) => {
         this.log.error(`❌  Unable to verify the static action: ${e.message}`);
