@@ -421,7 +421,7 @@ describe('hlx deploy (Integration)', () => {
     assert.ok(log.indexOf(`- hlx/${ref}/cgi-bin-hello`) >= 0);
   }).timeout(60000);
 
-  it.only('Deploy works', async function test() {
+  it('Deploy works', async function test() {
     this.timeout(60000);
 
     await fs.copy(TEST_DIR, testRoot);
