@@ -69,6 +69,11 @@ module.exports = function strain() {
           array: true,
           default: [],
         })
+        .option('dispatch-version', {
+          alias: 'dispatchVersion',
+          describe: 'Version of the dispatch action to use.',
+          type: 'string',
+        })
         .conflicts('only', 'exclude')
         .demandOption(
           'fastly-auth',
