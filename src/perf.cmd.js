@@ -158,7 +158,7 @@ class PerfCommand extends AbstractCommand {
         }, strain.perf));
       });
     const flatttests = _.flatten(tests);
-    const uri = 'https://adobeioruntime.net/api/v1/web/helix/default/perf';
+    const uri = 'https://adobeioruntime.net/api/v1/web/helix/helix-services/perf@v1';
 
     try {
       const schedule = await request.post(uri, {

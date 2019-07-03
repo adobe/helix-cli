@@ -1,3 +1,123 @@
+## [4.6.7](https://github.com/adobe/helix-cli/compare/v4.6.6...v4.6.7) (2019-07-02)
+
+
+### Bug Fixes
+
+* **deploy:** ensure that static action version is valid ([#1051](https://github.com/adobe/helix-cli/issues/1051)) ([7d55da6](https://github.com/adobe/helix-cli/commit/7d55da6)), closes [#1050](https://github.com/adobe/helix-cli/issues/1050)
+
+## [4.6.6](https://github.com/adobe/helix-cli/compare/v4.6.5...v4.6.6) (2019-07-01)
+
+
+### Bug Fixes
+
+* **perf:** use versioned performance service ([#1034](https://github.com/adobe/helix-cli/issues/1034)) ([aaee9e2](https://github.com/adobe/helix-cli/commit/aaee9e2))
+* **publish:** use versioned logging service ([#1033](https://github.com/adobe/helix-cli/issues/1033)) ([4dddce6](https://github.com/adobe/helix-cli/commit/4dddce6))
+
+## [4.6.5](https://github.com/adobe/helix-cli/compare/v4.6.4...v4.6.5) (2019-06-28)
+
+
+### Bug Fixes
+
+* **package:** update @adobe/helix-pipeline to version 3.7.3 ([2e9214b](https://github.com/adobe/helix-cli/commit/2e9214b))
+
+## [4.6.4](https://github.com/adobe/helix-cli/compare/v4.6.3...v4.6.4) (2019-06-28)
+
+
+### Bug Fixes
+
+* **package:** update snyk to version 1.185.5 ([b9d3505](https://github.com/adobe/helix-cli/commit/b9d3505))
+
+## [4.6.3](https://github.com/adobe/helix-cli/compare/v4.6.2...v4.6.3) (2019-06-27)
+
+
+### Bug Fixes
+
+* **package:** update snyk to version 1.185.2 ([45aae7a](https://github.com/adobe/helix-cli/commit/45aae7a))
+
+## [4.6.2](https://github.com/adobe/helix-cli/compare/v4.6.1...v4.6.2) (2019-06-27)
+
+
+### Bug Fixes
+
+* **package:** update snyk to version 1.185.1 ([6e13b70](https://github.com/adobe/helix-cli/commit/6e13b70)), closes [#1028](https://github.com/adobe/helix-cli/issues/1028)
+
+## [4.6.1](https://github.com/adobe/helix-cli/compare/v4.6.0...v4.6.1) (2019-06-26)
+
+
+### Bug Fixes
+
+* **publish:** use helix-publish@v2 with new dispatch flow ([a80daf1](https://github.com/adobe/helix-cli/commit/a80daf1))
+
+# [4.6.0](https://github.com/adobe/helix-cli/compare/v4.5.0...v4.6.0) (2019-06-26)
+
+
+### Features
+
+* **publish:** use versioned publish API ([5080a9d](https://github.com/adobe/helix-cli/commit/5080a9d))
+
+# [4.5.0](https://github.com/adobe/helix-cli/compare/v4.4.7...v4.5.0) (2019-06-24)
+
+
+### Features
+
+* **deploy:** Add API_RESOLVE_GIT_REF as action param ([8ffe164](https://github.com/adobe/helix-cli/commit/8ffe164)), closes [#1007](https://github.com/adobe/helix-cli/issues/1007)
+
+## [4.4.7](https://github.com/adobe/helix-cli/compare/v4.4.6...v4.4.7) (2019-06-21)
+
+
+### Bug Fixes
+
+* **package:** update @adobe/helix-pipeline to version 3.7.1 ([952dd20](https://github.com/adobe/helix-cli/commit/952dd20))
+
+## [4.4.6](https://github.com/adobe/helix-cli/compare/v4.4.5...v4.4.6) (2019-06-21)
+
+
+### Bug Fixes
+
+* **package:** update snyk to version 1.180.0 ([57856af](https://github.com/adobe/helix-cli/commit/57856af))
+
+## [4.4.5](https://github.com/adobe/helix-cli/compare/v4.4.4...v4.4.5) (2019-06-21)
+
+
+### Bug Fixes
+
+* **package:** update @adobe/helix-pipeline to version 3.7.0 ([875ca8c](https://github.com/adobe/helix-cli/commit/875ca8c))
+
+## [4.4.4](https://github.com/adobe/helix-cli/compare/v4.4.3...v4.4.4) (2019-06-20)
+
+
+### Bug Fixes
+
+* **package:** update @adobe/helix-simulator to version 2.12.13 ([35750a3](https://github.com/adobe/helix-cli/commit/35750a3))
+
+## [4.4.3](https://github.com/adobe/helix-cli/compare/v4.4.2...v4.4.3) (2019-06-20)
+
+
+### Bug Fixes
+
+* **package:** update @adobe/helix-pipeline to version 3.6.0 ([0709f9e](https://github.com/adobe/helix-cli/commit/0709f9e))
+
+## [4.4.2](https://github.com/adobe/helix-cli/compare/v4.4.1...v4.4.2) (2019-06-18)
+
+
+### Bug Fixes
+
+* **package:** reduce output during package ([#1001](https://github.com/adobe/helix-cli/issues/1001)) ([811470b](https://github.com/adobe/helix-cli/commit/811470b))
+
+## [4.4.1](https://github.com/adobe/helix-cli/compare/v4.4.0...v4.4.1) (2019-06-17)
+
+
+### Bug Fixes
+
+* **package:** update @adobe/helix-pipeline to version 3.5.0 ([64e432f](https://github.com/adobe/helix-cli/commit/64e432f))
+
+# [4.4.0](https://github.com/adobe/helix-cli/compare/v4.3.2...v4.4.0) (2019-06-17)
+
+
+### Features
+
+* **package:** Make bundle minification configurable ([037e90a](https://github.com/adobe/helix-cli/commit/037e90a)), closes [#998](https://github.com/adobe/helix-cli/issues/998) [#997](https://github.com/adobe/helix-cli/issues/997)
+
 ## [4.3.2](https://github.com/adobe/helix-cli/compare/v4.3.1...v4.3.2) (2019-06-13)
 
 

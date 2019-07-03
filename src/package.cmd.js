@@ -19,12 +19,32 @@ const AbstractCommand = require('./abstract.cmd.js');
 const ActionBundler = require('./parcel/ActionBundler.js');
 const { flattenDependencies } = require('./packager-utils.js');
 
+/**
+ * Information object of an action.
+ *
+ * @typedef {object} ActionInfo
+ * @property {string} name - The name of the action. eg 'html'.
+ * @property {string} main - The filename of the entry script. eg 'html.js'.
+ * @property {string} bundleName - The filename of the bundled script. eg 'html.bundle.js'.
+ * @property {string} bundlePath - The absolute path to the bundled script.
+ * @property {string} zipFile - The absolute path to the zipped action.
+ * @property {string} archiveName - The filename of the zipped action. eg 'html.zip'.
+ * @property {number} archiveSize - The size in bytes of the zipped action.
+ * @property {string} infoFile - The absolute path to a json file representing this info.
+ * @property {string[]} requires - An array of relative paths to scripts that are required by
+ *           this one. {@code flattenDependencies} will also resolve all transitive dependencies.
+ *           Note that this information is not longer required, and will probably be removed.
+ */
+
+/**
+ * Uses webpack to bundle each template script and creates an OpenWhisk action for each.
+ */
 class PackageCommand extends AbstractCommand {
   constructor(logger) {
     super(logger);
     this._target = null;
     this._onlyModified = false;
-    this._enableMinify = true;
+    this._enableMinify = false;
   }
 
   // eslint-disable-next-line class-methods-use-this
@@ -54,12 +74,10 @@ class PackageCommand extends AbstractCommand {
 
   /**
    * Creates a .zip package that contains the contents to be deployed to openwhisk.
-   * @param info The action info object
-   * @param info.name Name of the action
-   * @param info.main Main script of the action
-   * @param info.externals External modules
-   * @param info.requires Local dependencies
-   * @param bar progress bar
+   * As a side effect, this method updates the {@code info.archiveSize} after completion.
+   *
+   * @param {ActionInfo} info - The action info object.
+   * @param {ProgressBar} bar - The progress bar.
    * @returns {Promise<any>} Promise that resolves to the package file {@code path}.
    */
   async createPackage(info, bar) {
@@ -128,14 +146,25 @@ class PackageCommand extends AbstractCommand {
   }
 
   /**
-   * Creates the action bundles
-   * @param {*[]} scripts the scripts information
-   * @param {ProgressBar} bar the progress bar
+   * Creates the action bundles from the given scripts. It uses the {@code ActionBundler} which
+   * in turn uses webpack to create individual bundles of each {@code script}. The final bundles
+   * are wirtten to the {@code this._target} directory.
+   *
+   * @param {ActionInfo[]} scripts - the scripts information.
+   * @param {ProgressBar} bar - The progress bar.
    */
   async createBundles(scripts, bar) {
     const progressHandler = (percent, msg, ...args) => {
-      const action = msg === 'building' ? `bundling ${args[0]}` : msg;
+      /* eslint-disable no-param-reassign */
+      const action = args.length > 0 ? `${msg} ${args[0]}` : msg;
+      const rt = bar.renderThrottle;
+      if (msg !== 'building') {
+        // this is kind of a hack to force redraw for non-bundling steps.
+        bar.renderThrottle = 0;
+      }
       bar.update(percent * 0.8, { action });
+      bar.renderThrottle = rt;
+      /* eslint-enable no-param-reassign */
     };
 
     // create the bundles
@@ -158,6 +187,9 @@ class PackageCommand extends AbstractCommand {
     }
   }
 
+  /**
+   * Run this command.
+   */
   async run() {
     await this.init();
 
@@ -201,7 +233,7 @@ class PackageCommand extends AbstractCommand {
       const bar = new ProgressBar('[:bar] :action :elapseds', {
         total: scripts.length * 2 * 5,
         width: 50,
-        renderThrottle: 1,
+        renderThrottle: 50,
         stream: process.stdout,
       });
 

@@ -52,7 +52,8 @@ class DeployCommand extends AbstractCommand {
     this._dryRun = false;
     this._createPackages = 'auto';
     this._addStrain = null;
-    this._enableMinify = null;
+    this._enableMinify = false;
+    this._resolveGitRefSvc = 'helix-services/resolve-git-ref@v1';
   }
 
   get requireConfigFile() {
@@ -136,6 +137,11 @@ class DeployCommand extends AbstractCommand {
 
   withMinify(value) {
     this._enableMinify = value;
+    return this;
+  }
+
+  withResolveGitRefService(value) {
+    this._resolveGitRefSvc = value;
     return this;
   }
 
@@ -335,10 +341,8 @@ Alternatively you can auto-add one using the {grey --add <name>} option.`);
       const pgkCommand = new PackageCommand(this.log)
         .withTarget(this._target)
         .withDirectory(this.directory)
-        .withOnlyModified(this._createPackages === 'auto');
-      if (this._enableMinify !== null) {
-        pgkCommand.withMinify(this._enableMinify);
-      }
+        .withOnlyModified(this._createPackages === 'auto')
+        .withMinify(this._enableMinify);
       await pgkCommand.run();
     }
 
@@ -388,6 +392,11 @@ Alternatively you can auto-add one using the {grey --add <name>} option.`);
       .map(script => fs.readFile(script.zipFile)
         .then(action => ({ script, action })));
 
+    // get API url of resolve action
+    if (this._resolveGitRefSvc) {
+      params.RESOLVE_GITREF_SERVICE = this._resolveGitRefSvc;
+    }
+
     // create openwhisk package
     if (!this._dryRun) {
       const parameters = Object.keys(params).map((key) => {
@@ -410,10 +419,10 @@ Alternatively you can auto-add one using the {grey --add <name>} option.`);
       tick(`created package ${this._prefix}`, '');
     }
 
-    let updatestatic;
+    let bindHelixServices;
     // bind helix-services
     if (!this._dryRun) {
-      updatestatic = openwhisk.packages.update({
+      bindHelixServices = openwhisk.packages.update({
         package: {
           binding: {
             namespace: 'helix', // namespace to bind from
@@ -424,9 +433,7 @@ Alternatively you can auto-add one using the {grey --add <name>} option.`);
       }).then(() => {
         tick('bound helix-services', '');
       });
-      // we don't have to wait for this.
     }
-
 
     // ... and deploy
     const deployed = read.map(p => p.then(({ script, action }) => {
@@ -458,7 +465,7 @@ Alternatively you can auto-add one using the {grey --add <name>} option.`);
       });
     }));
 
-    await Promise.all([...deployed, updatestatic]);
+    await Promise.all([...deployed, bindHelixServices]);
 
 
     let numErrors = 0;
@@ -468,8 +475,8 @@ Alternatively you can auto-add one using the {grey --add <name>} option.`);
       await request.get('https://adobeioruntime.net/api/v1/web/helix/helix-services/static@latest', {
         resolveWithFullResponse: true,
       }).then((res) => {
-        const version = res.headers['x-version'];
-        tick(` verified static action version ${version}`);
+        const version = res.headers['x-version'] || 'latest';
+        tick(` verified static action version: ${version}`);
         staticactionname = `/helix-services/static@${version}`;
       }).catch((e) => {
         this.log.error(`❌  Unable to verify the static action: ${e.message}`);

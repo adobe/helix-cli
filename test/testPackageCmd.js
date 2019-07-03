@@ -53,6 +53,7 @@ describe('hlx package (Integration)', () => {
       .withDirectory(testRoot)
       .withTarget(buildDir)
       .withOnlyModified(false)
+      .withMinify(false)
       .on('create-package', (info) => {
         created[info.name] = true;
       })

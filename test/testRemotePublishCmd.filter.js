@@ -52,7 +52,7 @@ describe('hlx publish --remote (with filters)', () => {
     nock.activate();
 
     scope = nock('https://adobeioruntime.net')
-      .post('/api/v1/web/helix/default/publish', (body) => {
+      .post('/api/v1/web/helix/helix-services/publish@v2', (body) => {
         publishedstrains = body.configuration.strains.reduce((o, strain) => {
           if (strain.origin) {
             // eslint-disable-next-line no-param-reassign
@@ -67,7 +67,7 @@ describe('hlx publish --remote (with filters)', () => {
         return true;
       })
       .reply(200, {})
-      .post('/api/v1/web/helix/default/addlogger')
+      .post('/api/v1/web/helix/helix-services/logging@v1')
       .reply(200, {});
 
     // set up a fake git repo.
@@ -91,7 +91,7 @@ describe('hlx publish --remote (with filters)', () => {
       .withFastlyAuth('fake_auth')
       .withFastlyNamespace('fake_name')
       .withWskHost('doesn.t.matter')
-      .withPublishAPI('https://adobeioruntime.net/api/v1/web/helix/default/publish')
+      .withPublishAPI('https://adobeioruntime.net/api/v1/web/helix/helix-services/publish@v2')
       .withConfigFile(path.resolve(__dirname, 'fixtures/filtered.yaml'))
       .withDryRun(false);
   });
@@ -175,7 +175,7 @@ describe('hlx publish --remote (with filters, but without config)', () => {
     nock.activate();
 
     nock('https://adobeioruntime.net')
-      .post('/api/v1/web/helix/default/publish', (body) => {
+      .post('/api/v1/web/helix/helix-services/publish@v2', (body) => {
         publishedstrains = body.configuration.strains.reduce((o, strain) => {
           if (strain.origin) {
             // eslint-disable-next-line no-param-reassign
@@ -190,7 +190,7 @@ describe('hlx publish --remote (with filters, but without config)', () => {
         return true;
       })
       .reply(200, {})
-      .post('/api/v1/web/helix/default/addlogger')
+      .post('/api/v1/web/helix/helix-services/logging@v1')
       .reply(200, {});
 
     // set up a fake git repo.
@@ -214,7 +214,7 @@ describe('hlx publish --remote (with filters, but without config)', () => {
       .withFastlyAuth('fake_auth')
       .withFastlyNamespace('fake_name')
       .withWskHost('doesn.t.matter')
-      .withPublishAPI('https://adobeioruntime.net/api/v1/web/helix/default/publish')
+      .withPublishAPI('https://adobeioruntime.net/api/v1/web/helix/helix-services/publish@v2')
       .withConfigFile(path.resolve(__dirname, 'fixtures/filtered.yaml'))
       .withDryRun(false);
   });
