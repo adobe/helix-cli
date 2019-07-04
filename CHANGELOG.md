@@ -1,3 +1,10 @@
+# [4.7.0](https://github.com/adobe/helix-cli/compare/v4.6.7...v4.7.0) (2019-07-04)
+
+
+### Features
+
+* **dispatch:** allow custom dispatch version ([#1057](https://github.com/adobe/helix-cli/issues/1057)) ([c5fbc1e](https://github.com/adobe/helix-cli/commit/c5fbc1e))
+
 ## [4.6.7](https://github.com/adobe/helix-cli/compare/v4.6.6...v4.6.7) (2019-07-02)
 
 
