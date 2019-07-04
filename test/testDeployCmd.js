@@ -490,6 +490,9 @@ describe('hlx deploy (Integration)', () => {
     this.polly.server.put('https://adobeioruntime.net/api/v1/namespaces/hlx/packages/helix-services?overwrite=true').intercept((req, res) => {
       res.sendStatus(201);
     });
+    this.polly.server.put(`https://adobeioruntime.net/api/v1/namespaces/hlx/actions/${ref}/hlx--static?overwrite=true`).intercept((req, res) => {
+      res.sendStatus(201);
+    });
 
     const cmd = await new DeployCommand(logger)
       .withDirectory(testRoot)
