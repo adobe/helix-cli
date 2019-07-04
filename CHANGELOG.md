@@ -1,3 +1,11 @@
+## [4.8.1](https://github.com/adobe/helix-cli/compare/v4.8.0...v4.8.1) (2019-07-04)
+
+
+### Bug Fixes
+
+* **dispatch:** dispatchVersion never sent to the publish action ([#1061](https://github.com/adobe/helix-cli/issues/1061)) ([ddbf0cb](https://github.com/adobe/helix-cli/commit/ddbf0cb))
+* **dispatch:** use the dispatchVersion argument ([9e6dad5](https://github.com/adobe/helix-cli/commit/9e6dad5))
+
 # [4.8.0](https://github.com/adobe/helix-cli/compare/v4.7.0...v4.8.0) (2019-07-04)
 
 
