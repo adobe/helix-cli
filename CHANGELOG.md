@@ -1,3 +1,10 @@
+# [4.8.0](https://github.com/adobe/helix-cli/compare/v4.7.0...v4.8.0) (2019-07-04)
+
+
+### Features
+
+* **static:** remove local static action ([a5f6899](https://github.com/adobe/helix-cli/commit/a5f6899)), closes [#1048](https://github.com/adobe/helix-cli/issues/1048)
+
 # [4.7.0](https://github.com/adobe/helix-cli/compare/v4.6.7...v4.7.0) (2019-07-04)
 
 
