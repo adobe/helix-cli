@@ -119,7 +119,6 @@ module.exports = function strain() {
         .withConfigPurgeAPI(argv.apiConfigPurge)
         .withFilter(argv.only, argv.exclude)
         .withCustomVCLs(argv.customVCL)
-        .withDispatchVersion(argv.dispatchVersion)
         .run();
     },
   };
