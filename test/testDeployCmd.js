@@ -376,9 +376,8 @@ describe('hlx deploy (Integration)', () => {
     assert.equal(cmd.config.strains.get('dev').package, `hlx/${ref}`);
 
     const log = await logger.getOutput();
-    assert.ok(log.indexOf('deployment of 2 actions completed') >= 0);
+    assert.ok(log.indexOf('deployment of 1 action completed') >= 0);
     assert.ok(log.indexOf(`- hlx/${ref}/html`) >= 0);
-    assert.ok(log.indexOf('- hlx/hlx--static') >= 0);
   }).timeout(60000);
 
   it('Dry-Running works with cgi-bin', async () => {
@@ -417,10 +416,9 @@ describe('hlx deploy (Integration)', () => {
     assert.equal(cmd.config.strains.get('dev').package, `hlx/${ref}`);
 
     const log = await logger.getOutput();
-    assert.ok(log.indexOf('deployment of 3 actions completed') >= 0);
+    assert.ok(log.indexOf('deployment of 2 actions completed') >= 0);
     assert.ok(log.indexOf(`- hlx/${ref}/html`) >= 0);
     assert.ok(log.indexOf(`- hlx/${ref}/cgi-bin-hello`) >= 0);
-    assert.ok(log.indexOf('- hlx/hlx--static') >= 0);
   }).timeout(60000);
 
   it('Deploy works', async function test() {
@@ -486,12 +484,6 @@ describe('hlx deploy (Integration)', () => {
         res.sendStatus(500);
       }
     });
-    this.polly.server.put('https://adobeioruntime.net/api/v1/namespaces/hlx/actions/hlx--static').intercept((req, res) => {
-      res.sendStatus(201);
-    });
-    this.polly.server.put('https://adobeioruntime.net/api/v1/namespaces/hlx/actions/hlx--static?overwrite=true').intercept((req, res) => {
-      res.sendStatus(201);
-    });
     this.polly.server.put(`https://adobeioruntime.net/api/v1/namespaces/hlx/actions/${ref}/html`).intercept((req, res) => {
       res.sendStatus(201);
     });
@@ -524,9 +516,8 @@ describe('hlx deploy (Integration)', () => {
     assert.equal(cmd.config.strains.get('dev').package, `hlx/${ref}`);
 
     const log = await logger.getOutput();
-    assert.ok(log.indexOf('deployment of 2 actions completed') >= 0);
+    assert.ok(log.indexOf('deployment of 1 action completed') >= 0);
     assert.ok(log.indexOf(`- hlx/${ref}/html`) >= 0);
-    assert.ok(log.indexOf('- hlx/hlx--static') >= 0);
 
     // check if written helix config contains package ref
     const newCfg = new HelixConfig()
@@ -552,9 +543,6 @@ describe('hlx deploy (Integration)', () => {
     });
     this.polly.server.put(`https://adobeioruntime.net/api/v1/namespaces/hlx/packages/${ref}`).intercept((req, res) => {
       res.sendStatus(201);
-    });
-    this.polly.server.put('https://adobeioruntime.net/api/v1/namespaces/hlx/actions/hlx--static').intercept((req, res) => {
-      res.sendStatus(500);
     });
     this.polly.server.put('https://adobeioruntime.net/api/v1/namespaces/hlx/packages/helix-services?overwrite=true').intercept((req, res) => {
       res.sendStatus(201);

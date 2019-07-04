@@ -46,7 +46,6 @@ describe('hlx deploy', () => {
     mockDeploy.withFastlyNamespace.returnsThis();
     mockDeploy.withCreatePackages.returnsThis();
     mockDeploy.withAddStrain.returnsThis();
-    mockDeploy.withStatic.returnsThis();
     mockDeploy.withMinify.returnsThis();
     mockDeploy.withResolveGitRefService.returnsThis();
     mockDeploy.run.returnsThis();
