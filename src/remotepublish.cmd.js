@@ -34,11 +34,12 @@ class RemotePublishCommand extends AbstractCommand {
     this._fastly_namespace = null;
     this._fastly_auth = null;
     this._dryRun = false;
-    this._publishAPI = 'https://adobeioruntime.net/api/v1/web/helix/default/publish';
+    this._publishAPI = 'https://adobeioruntime.net/api/v1/web/helix/helix-services/publish@v2';
     this._githubToken = '';
     this._updateBotConfig = false;
     this._configPurgeAPI = 'https://app.project-helix.io/config/purge';
     this._vcl = null;
+    this._dispatchVersion = null;
   }
 
   tick(ticks = 1, message, name) {
@@ -184,6 +185,15 @@ class RemotePublishCommand extends AbstractCommand {
     return this;
   }
 
+  /**
+   * Sets custom dispatch version.
+   * @param {string} version The custom version
+   */
+  withDispatchVersion(version) {
+    this._dispatchVersion = version;
+    return this;
+  }
+
   showNextStep(dryrun) {
     this.progressBar().terminate();
     if (dryrun) {
@@ -207,7 +217,7 @@ class RemotePublishCommand extends AbstractCommand {
   }
 
   serviceAddLogger() {
-    return request.post('https://adobeioruntime.net/api/v1/web/helix/default/addlogger', {
+    return request.post('https://adobeioruntime.net/api/v1/web/helix/helix-services/logging@v1', {
       json: true,
       body: {
         service: this._fastly_namespace,
@@ -274,6 +284,10 @@ ${e}`);
 
     if (this._vcl) {
       body.vcl = this._vcl;
+    }
+
+    if (this._dispatchVersion) {
+      body.dispatchVersion = this._dispatchVersion;
     }
 
     return request.post(this._publishAPI, {

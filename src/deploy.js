@@ -14,7 +14,6 @@
 
 const yargsOpenwhisk = require('./yargs-openwhisk.js');
 const yargsFastly = require('./yargs-fastly.js');
-const yargsStatic = require('./yargs-static.js');
 const { makeLogger } = require('./log-common.js');
 
 module.exports = function deploy() {
@@ -29,7 +28,6 @@ module.exports = function deploy() {
     builder: (yargs) => {
       yargsOpenwhisk(yargs);
       yargsFastly(yargs);
-      yargsStatic(yargs);
       yargs
         .option('auto', {
           describe: 'Enable auto-deployment',
@@ -86,6 +84,17 @@ module.exports = function deploy() {
           choices: ['auto', 'ignore', 'always'],
           default: 'auto',
         })
+        .option('minify', {
+          describe: 'Enables minification of the final action bundle.',
+          type: 'boolean',
+          default: false,
+        })
+        .option('svc-resolve-git-ref', {
+          alias: 'svcResolveGitRef',
+          describe: 'Service name for git-resolve-ref service',
+          type: 'string',
+          default: 'helix-services/resolve-git-ref@v1',
+        })
         .array('default')
         .nargs('default', 2)
         .coerce('default', arg => arg.reduce((result, value, index, array) => {
@@ -97,7 +106,7 @@ module.exports = function deploy() {
         }, {}))
         .group(['auto', 'wsk-auth', 'wsk-namespace', 'default', 'dirty'], 'Deployment Options')
         .group(['wsk-host', 'loggly-host', 'loggly-auth', 'target'], 'Advanced Options')
-        .group(['package', 'target'], 'Package options')
+        .group(['package', 'minify', 'target'], 'Package options')
         .check((args) => {
           if (!args.auto) {
             // single-shot deployment is easy
@@ -153,7 +162,8 @@ module.exports = function deploy() {
         .withFastlyNamespace(argv.fastlyNamespace)
         .withCreatePackages(argv.package)
         .withAddStrain(argv.add)
-        .withStatic(argv.static)
+        .withMinify(argv.minify)
+        .withResolveGitRefService(argv.svcResolveGitRef)
         .run();
     },
 

@@ -13,7 +13,6 @@
 'use strict';
 
 const { makeLogger } = require('./log-common.js');
-const yargsStatic = require('./yargs-static.js');
 
 module.exports = function deploy() {
   let executor;
@@ -25,11 +24,15 @@ module.exports = function deploy() {
     command: 'package',
     desc: 'Create Adobe I/O runtime packages',
     builder: (yargs) => {
-      yargsStatic(yargs);
       // eslint-disable-next-line global-require
       yargs
         .option('force', {
           describe: 'Forces creation of packages even if the sources are not modified.',
+          type: 'boolean',
+          default: false,
+        })
+        .option('minify', {
+          describe: 'Enables minification of the final action bundle.',
           type: 'boolean',
           default: false,
         })
@@ -39,7 +42,7 @@ module.exports = function deploy() {
           type: 'string',
           describe: 'Target directory for packaged actions',
         })
-        .group(['force', 'target'], 'Package options')
+        .group(['force', 'minify', 'target'], 'Package options')
         .help();
     },
     handler: async (argv) => {
@@ -52,7 +55,7 @@ module.exports = function deploy() {
       await executor
         .withTarget(argv.target)
         .withOnlyModified(!argv.force)
-        .withStatic(argv.static)
+        .withMinify(argv.minify)
         .run();
     },
   };
