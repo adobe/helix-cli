@@ -16,8 +16,7 @@ const assert = require('assert');
 const fs = require('fs-extra');
 const path = require('path');
 const { Logger } = require('@adobe/helix-shared');
-const { createTestRoot, assertZipEntries } = require('./utils.js');
-const BuildCommand = require('../src/build.cmd.js');
+const { createTestRoot, assertFile, assertZipEntries } = require('./utils.js');
 const PackageCommand = require('../src/package.cmd.js');
 
 describe('hlx package (Integration)', () => {
@@ -36,7 +35,11 @@ describe('hlx package (Integration)', () => {
   });
 
   it('package creates correct package', async () => {
-    await new BuildCommand()
+    const created = {};
+    const ignored = {};
+    await new PackageCommand()
+      .withDirectory(testRoot)
+      .withTarget(buildDir)
       .withFiles([
         'test/integration/src/html.htl',
         'test/integration/src/html.pre.js',
@@ -44,14 +47,6 @@ describe('hlx package (Integration)', () => {
         'test/integration/src/utils/another_helper.js',
         'test/integration/src/third_helper.js',
       ])
-      .withTargetDir(buildDir)
-      .run();
-
-    const created = {};
-    const ignored = {};
-    await new PackageCommand()
-      .withDirectory(testRoot)
-      .withTarget(buildDir)
       .withOnlyModified(false)
       .withMinify(false)
       .on('create-package', (info) => {
@@ -61,6 +56,16 @@ describe('hlx package (Integration)', () => {
         ignored[info.name] = true;
       })
       .run();
+
+    // verify build output
+    assertFile(path.resolve(buildDir, 'html.js'));
+    assertFile(path.resolve(buildDir, 'html.js.map'));
+    assertFile(path.resolve(buildDir, 'helper.js'));
+    assertFile(path.resolve(buildDir, 'helper.js.map'));
+    assertFile(path.resolve(buildDir, 'utils/another_helper.js'));
+    assertFile(path.resolve(buildDir, 'utils/another_helper.js.map'));
+    assertFile(path.resolve(buildDir, 'third_helper.js'));
+    assertFile(path.resolve(buildDir, 'third_helper.js.map'));
 
     assert.deepEqual(created, {
       html: true,
@@ -100,16 +105,12 @@ describe('hlx package (Integration)', () => {
 
   it('package reports bundling errors and warnings', async () => {
     const logger = Logger.getTestLogger();
-    await new BuildCommand()
-      .withFiles([
-        'test/integration/src/broken_html.pre.js',
-      ])
-      .withTargetDir(buildDir)
-      .run();
-
     await new PackageCommand(logger)
       .withDirectory(testRoot)
       .withTarget(buildDir)
+      .withFiles([
+        'test/integration/src/broken_html.pre.js',
+      ])
       .withOnlyModified(true)
       .withMinify(false)
       .run();

@@ -29,6 +29,7 @@ describe('hlx package', () => {
     clearHelixEnv();
     mockPackage = sinon.createStubInstance(PackageCommand);
     mockPackage.withTarget.returnsThis();
+    mockPackage.withFiles.returnsThis();
     mockPackage.withOnlyModified.returnsThis();
     mockPackage.withMinify.returnsThis();
     mockPackage.run.returnsThis();
@@ -45,6 +46,7 @@ describe('hlx package', () => {
 
     sinon.assert.calledWith(mockPackage.withOnlyModified, true);
     sinon.assert.calledWith(mockPackage.withTarget, '.hlx/build');
+    sinon.assert.calledWith(mockPackage.withFiles, ['src/**/*.htl', 'src/**/*.js', 'src/**/*.jsx', 'cgi-bin/**/*.js']);
     sinon.assert.calledWith(mockPackage.withMinify, false);
     sinon.assert.calledOnce(mockPackage.run);
   });
@@ -55,6 +57,7 @@ describe('hlx package', () => {
       .withCommandExecutor('package', mockPackage)
       .run(['package']);
     sinon.assert.calledWith(mockPackage.withTarget, 'foo');
+    sinon.assert.calledWith(mockPackage.withFiles, ['*.htl', '*.js']);
     sinon.assert.calledWith(mockPackage.withOnlyModified, false);
     sinon.assert.calledWith(mockPackage.withMinify, true);
     sinon.assert.calledOnce(mockPackage.run);

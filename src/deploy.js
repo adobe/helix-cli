@@ -14,6 +14,7 @@
 
 const yargsOpenwhisk = require('./yargs-openwhisk.js');
 const yargsFastly = require('./yargs-fastly.js');
+const yargsBuild = require('./yargs-build.js');
 const { makeLogger } = require('./log-common.js');
 
 module.exports = function deploy() {
@@ -28,6 +29,7 @@ module.exports = function deploy() {
     builder: (yargs) => {
       yargsOpenwhisk(yargs);
       yargsFastly(yargs);
+      yargsBuild(yargs);
       yargs
         .option('auto', {
           describe: 'Enable auto-deployment',
@@ -155,6 +157,7 @@ module.exports = function deploy() {
         .withLogglyHost(argv.logglyHost)
         .withLogglyAuth(argv.logglyAuth)
         .withTarget(argv.target)
+        .withFiles(argv.files)
         .withDefault(argv.default)
         .withDryRun(argv.dryRun)
         .withCircleciAuth(argv.circleciAuth)
