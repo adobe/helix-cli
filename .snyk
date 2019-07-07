@@ -187,3 +187,5 @@ patch:
         patched: '2019-07-04T01:38:16.735Z'
     - parcel-bundler > @babel/preset-env > @babel/plugin-transform-exponentiation-operator > @babel/helper-builder-binary-assignment-operator-visitor > @babel/helper-explode-assignable-expression > @babel/traverse > @babel/helper-function-name > @babel/template > @babel/types > lodash:
         patched: '2019-07-04T01:38:16.735Z'
+    - '@adobe/helix-pipeline > ferrum > lodash':
+        patched: '2019-07-06T04:33:23.269Z'
