@@ -24,7 +24,7 @@ module.exports = function commonArgs(yargs) {
       type: 'string',
     })
     // allow for comma separated values
-    .coerce('files', value => (typeof value !== 'object' ? [value] : value).reduce((acc, curr) => {
+    .coerce('files', value => (!Array.isArray(value) ? [value] : value).reduce((acc, curr) => {
       acc.push(...curr.split(/\s*,\s*/));
       return acc;
     }, []));
