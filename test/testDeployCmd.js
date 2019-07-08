@@ -22,7 +22,6 @@ const { setupMocha: setupPolly } = require('@pollyjs/core');
 const { HelixConfig, Logger } = require('@adobe/helix-shared');
 const { initGit, createTestRoot } = require('./utils.js');
 const GitUtils = require('../src/git-utils');
-const BuildCommand = require('../src/build.cmd.js');
 const DeployCommand = require('../src/deploy.cmd.js');
 
 const CI_TOKEN = 'nope';
@@ -347,18 +346,6 @@ describe('hlx deploy (Integration)', () => {
     initGit(testRoot, 'git@github.com:adobe/project-helix.io.git');
     const logger = Logger.getTestLogger();
 
-    await new BuildCommand(logger)
-      .withDirectory(testRoot)
-      .withFiles([
-        path.resolve(testRoot, 'src/html.htl'),
-        path.resolve(testRoot, 'src/html.pre.js'),
-        path.resolve(testRoot, 'src/helper.js'),
-        path.resolve(testRoot, 'src/utils/another_helper.js'),
-        path.resolve(testRoot, 'src/third_helper.js'),
-      ])
-      .withTargetDir(buildDir)
-      .run();
-
     const cmd = await new DeployCommand(logger)
       .withDirectory(testRoot)
       .withWskHost('adobeioruntime.net')
@@ -368,6 +355,13 @@ describe('hlx deploy (Integration)', () => {
       .withEnableDirty(false)
       .withDryRun(true)
       .withTarget(buildDir)
+      .withFiles([
+        path.resolve(testRoot, 'src/html.htl'),
+        path.resolve(testRoot, 'src/html.pre.js'),
+        path.resolve(testRoot, 'src/helper.js'),
+        path.resolve(testRoot, 'src/utils/another_helper.js'),
+        path.resolve(testRoot, 'src/third_helper.js'),
+      ])
       .withMinify(false)
       .run();
 
@@ -386,19 +380,6 @@ describe('hlx deploy (Integration)', () => {
     initGit(testRoot, 'git@github.com:adobe/project-helix.io.git');
     const logger = Logger.getTestLogger();
 
-    await new BuildCommand(logger)
-      .withDirectory(testRoot)
-      .withFiles([
-        path.resolve(testRoot, 'src/html.htl'),
-        path.resolve(testRoot, 'src/html.pre.js'),
-        path.resolve(testRoot, 'src/helper.js'),
-        path.resolve(testRoot, 'src/utils/another_helper.js'),
-        path.resolve(testRoot, 'src/third_helper.js'),
-        path.resolve(testRoot, 'cgi-bin/hello.js'),
-      ])
-      .withTargetDir(buildDir)
-      .run();
-
     const cmd = await new DeployCommand(logger)
       .withDirectory(testRoot)
       .withWskHost('adobeioruntime.net')
@@ -409,6 +390,14 @@ describe('hlx deploy (Integration)', () => {
       .withDryRun(true)
       .withMinify(false)
       .withTarget(buildDir)
+      .withFiles([
+        path.resolve(testRoot, 'src/html.htl'),
+        path.resolve(testRoot, 'src/html.pre.js'),
+        path.resolve(testRoot, 'src/helper.js'),
+        path.resolve(testRoot, 'src/utils/another_helper.js'),
+        path.resolve(testRoot, 'src/third_helper.js'),
+        path.resolve(testRoot, 'cgi-bin/hello.js'),
+      ])
       .run();
 
     const ref = await GitUtils.getCurrentRevision(testRoot);
@@ -428,18 +417,6 @@ describe('hlx deploy (Integration)', () => {
     await fs.rename(path.resolve(testRoot, 'default-config.yaml'), path.resolve(testRoot, 'helix-config.yaml'));
     initGit(testRoot, 'git@github.com:adobe/project-helix.io.git');
     const logger = Logger.getTestLogger();
-
-    await new BuildCommand(logger)
-      .withDirectory(testRoot)
-      .withFiles([
-        path.resolve(testRoot, 'src/html.htl'),
-        path.resolve(testRoot, 'src/html.pre.js'),
-        path.resolve(testRoot, 'src/helper.js'),
-        path.resolve(testRoot, 'src/utils/another_helper.js'),
-        path.resolve(testRoot, 'src/third_helper.js'),
-      ])
-      .withTargetDir(buildDir)
-      .run();
 
     const ref = await GitUtils.getCurrentRevision(testRoot);
 
@@ -503,6 +480,13 @@ describe('hlx deploy (Integration)', () => {
       .withEnableDirty(false)
       .withDryRun(false)
       .withTarget(buildDir)
+      .withFiles([
+        path.resolve(testRoot, 'src/html.htl'),
+        path.resolve(testRoot, 'src/html.pre.js'),
+        path.resolve(testRoot, 'src/helper.js'),
+        path.resolve(testRoot, 'src/utils/another_helper.js'),
+        path.resolve(testRoot, 'src/third_helper.js'),
+      ])
       .withMinify(false)
       .withLogglyAuth('loggly-auth')
       .withLogglyHost('loggly-host')
@@ -562,6 +546,13 @@ describe('hlx deploy (Integration)', () => {
         .withDryRun(false)
         .withMinify(false)
         .withTarget(buildDir)
+        .withFiles([
+          path.resolve(testRoot, 'src/html.htl'),
+          path.resolve(testRoot, 'src/html.pre.js'),
+          path.resolve(testRoot, 'src/helper.js'),
+          path.resolve(testRoot, 'src/utils/another_helper.js'),
+          path.resolve(testRoot, 'src/third_helper.js'),
+        ])
         .run();
       assert.fail('Expected deploy to fail.');
     } catch (e) {

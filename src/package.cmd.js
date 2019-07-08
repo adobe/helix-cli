@@ -16,6 +16,7 @@ const fs = require('fs-extra');
 const ProgressBar = require('progress');
 const archiver = require('archiver');
 const AbstractCommand = require('./abstract.cmd.js');
+const BuildCommand = require('./build.cmd.js');
 const ActionBundler = require('./parcel/ActionBundler.js');
 const { flattenDependencies } = require('./packager-utils.js');
 
@@ -43,6 +44,7 @@ class PackageCommand extends AbstractCommand {
   constructor(logger) {
     super(logger);
     this._target = null;
+    this._files = null;
     this._onlyModified = false;
     this._enableMinify = false;
   }
@@ -54,6 +56,11 @@ class PackageCommand extends AbstractCommand {
 
   withTarget(value) {
     this._target = value;
+    return this;
+  }
+
+  withFiles(value) {
+    this._files = value;
     return this;
   }
 
@@ -192,6 +199,12 @@ class PackageCommand extends AbstractCommand {
    */
   async run() {
     await this.init();
+
+    // always run build first to make sure scripts are up to date
+    await new BuildCommand(this.log)
+      .withFiles(this._files)
+      .withTargetDir(this._target)
+      .run();
 
     // get the list of scripts from the info files
     const infos = [...glob.sync(`${this._target}/**/*.info.json`)];

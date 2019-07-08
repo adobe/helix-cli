@@ -46,6 +46,7 @@ class DeployCommand extends AbstractCommand {
     this._fastly_namespace = null;
     this._fastly_auth = null;
     this._target = null;
+    this._files = null;
     this._prefix = null;
     this._default = null;
     this._enableDirty = false;
@@ -107,6 +108,11 @@ class DeployCommand extends AbstractCommand {
 
   withTarget(value) {
     this._target = value;
+    return this;
+  }
+
+  withFiles(value) {
+    this._files = value;
     return this;
   }
 
@@ -340,6 +346,7 @@ Alternatively you can auto-add one using the {grey --add <name>} option.`);
     if (this._createPackages !== 'ignore') {
       const pgkCommand = new PackageCommand(this.log)
         .withTarget(this._target)
+        .withFiles(this._files)
         .withDirectory(this.directory)
         .withOnlyModified(this._createPackages === 'auto')
         .withMinify(this._enableMinify);

@@ -13,8 +13,9 @@
 'use strict';
 
 const { makeLogger } = require('./log-common.js');
+const yargsBuild = require('./yargs-build.js');
 
-module.exports = function deploy() {
+module.exports = function pack() {
   let executor;
 
   return {
@@ -24,6 +25,7 @@ module.exports = function deploy() {
     command: 'package',
     desc: 'Create Adobe I/O runtime packages',
     builder: (yargs) => {
+      yargsBuild(yargs);
       // eslint-disable-next-line global-require
       yargs
         .option('force', {
@@ -54,6 +56,7 @@ module.exports = function deploy() {
 
       await executor
         .withTarget(argv.target)
+        .withFiles(argv.files)
         .withOnlyModified(!argv.force)
         .withMinify(argv.minify)
         .run();
