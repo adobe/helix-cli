@@ -11,7 +11,7 @@
  */
 
 const path = require('path');
-const { flat, into } = require('@adobe/helix-shared').sequence;
+const { flat, into } = require('ferrum');
 const JSAsset = require('parcel-bundler/src/assets/JSAsset');
 
 const PURE_EXTENSIONS = ['html', 'json', 'xml', 'svg', 'css', 'txt'];
