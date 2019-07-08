@@ -1,3 +1,10 @@
+# [4.9.0](https://github.com/adobe/helix-cli/compare/v4.8.1...v4.9.0) (2019-07-08)
+
+
+### Features
+
+* **deploy:** must run hlx build ([#241](https://github.com/adobe/helix-cli/issues/241)) ([3981455](https://github.com/adobe/helix-cli/commit/3981455))
+
 ## [4.8.1](https://github.com/adobe/helix-cli/compare/v4.8.0...v4.8.1) (2019-07-04)
 
 
