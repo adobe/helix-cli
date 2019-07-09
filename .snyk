@@ -189,3 +189,7 @@ patch:
         patched: '2019-07-04T01:38:16.735Z'
     - '@adobe/helix-pipeline > ferrum > lodash':
         patched: '2019-07-06T04:33:23.269Z'
+    - ferrum > npm-check-updates > lodash:
+        patched: '2019-07-09T03:07:53.834Z'
+    - ferrum > npm-check-updates > node-alias > lodash:
+        patched: '2019-07-09T03:07:53.834Z'
