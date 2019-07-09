@@ -189,3 +189,5 @@ patch:
         patched: '2019-07-04T01:38:16.735Z'
     - '@adobe/helix-pipeline > ferrum > lodash':
         patched: '2019-07-06T04:33:23.269Z'
+    - '@adobe/helix-pipeline > @adobe/helix-shared > snyk > snyk-php-plugin > @snyk/composer-lockfile-parser > lodash':
+        patched: '2019-07-09T03:05:01.845Z'
