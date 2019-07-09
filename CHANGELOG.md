@@ -1,3 +1,10 @@
+## [4.9.1](https://github.com/adobe/helix-cli/compare/v4.9.0...v4.9.1) (2019-07-09)
+
+
+### Bug Fixes
+
+* **package:** update webpack to version 4.35.3 ([e857db9](https://github.com/adobe/helix-cli/commit/e857db9))
+
 # [4.9.0](https://github.com/adobe/helix-cli/compare/v4.8.1...v4.9.0) (2019-07-08)
 
 
