@@ -193,3 +193,9 @@ patch:
         patched: '2019-07-09T03:07:53.834Z'
     - ferrum > npm-check-updates > node-alias > lodash:
         patched: '2019-07-09T03:07:53.834Z'
+    - '@adobe/helix-pipeline > @adobe/helix-shared > snyk > snyk-php-plugin > @snyk/composer-lockfile-parser > lodash':
+        patched: '2019-07-09T04:33:22.330Z'
+    - ferrum > npm-check-updates > lodash:
+        patched: '2019-07-09T04:33:22.330Z'
+    - ferrum > npm-check-updates > node-alias > lodash:
+        patched: '2019-07-09T04:33:22.330Z'
