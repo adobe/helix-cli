@@ -1,6 +1,931 @@
 # Snyk (https://snyk.io) policy file, patches or ignores known vulnerabilities.
 version: v1.13.5
-ignore: {}
+# ignores vulnerabilities until expiry date; change duration by modifying expiry date
+ignore:
+  SNYK-JS-LODASH-450202:
+    - snyk > snyk-mvn-plugin > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.109Z'
+    - '@adobe/helix-pipeline > ferrum > lodash':
+        reason: None given
+        expires: '2019-08-09T04:56:17.109Z'
+    - '@adobe/helix-pipeline > snyk > snyk-mvn-plugin > lodash':
+        reason: None given
+        expires: '2019-08-09T04:56:17.109Z'
+    - '@adobe/helix-simulator > snyk > snyk-mvn-plugin > lodash':
+        reason: None given
+        expires: '2019-08-09T04:56:17.109Z'
+    - '@adobe/helix-shared > snyk > snyk-mvn-plugin > lodash':
+        reason: None given
+        expires: '2019-08-09T04:56:17.109Z'
+    - snyk > snyk-php-plugin > @snyk/composer-lockfile-parser > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.109Z'
+    - '@adobe/helix-pipeline > @adobe/helix-shared > snyk > snyk-mvn-plugin > lodash':
+        reason: None given
+        expires: '2019-08-09T04:56:17.109Z'
+    - '@adobe/helix-simulator > @adobe/git-server > snyk > snyk-mvn-plugin > lodash':
+        reason: None given
+        expires: '2019-08-09T04:56:17.109Z'
+    - '@adobe/helix-shared > snyk > snyk-php-plugin > @snyk/composer-lockfile-parser > lodash':
+        reason: None given
+        expires: '2019-08-09T04:56:17.109Z'
+    - '@adobe/helix-pipeline > snyk > snyk-php-plugin > @snyk/composer-lockfile-parser > lodash':
+        reason: None given
+        expires: '2019-08-09T04:56:17.109Z'
+    - '@adobe/helix-simulator > snyk > snyk-php-plugin > @snyk/composer-lockfile-parser > lodash':
+        reason: None given
+        expires: '2019-08-09T04:56:17.109Z'
+    - '@adobe/helix-pipeline > @adobe/helix-shared > snyk > snyk-php-plugin > @snyk/composer-lockfile-parser > lodash':
+        reason: None given
+        expires: '2019-08-09T04:56:17.109Z'
+    - lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.109Z'
+    - junit-report-builder > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.109Z'
+    - '@babel/core > lodash':
+        reason: None given
+        expires: '2019-08-09T04:56:17.109Z'
+    - snyk > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.109Z'
+    - '@adobe/htlengine > lodash':
+        reason: None given
+        expires: '2019-08-09T04:56:17.110Z'
+    - '@adobe/helix-simulator > lodash':
+        reason: None given
+        expires: '2019-08-09T04:56:17.110Z'
+    - '@adobe/helix-shared > lodash':
+        reason: None given
+        expires: '2019-08-09T04:56:17.110Z'
+    - '@adobe/helix-pipeline > lodash':
+        reason: None given
+        expires: '2019-08-09T04:56:17.110Z'
+    - parcel-bundler > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.110Z'
+    - snyk > @snyk/dep-graph > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.110Z'
+    - snyk > inquirer > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.110Z'
+    - request-promise-native > request-promise-core > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.110Z'
+    - snyk > snyk-config > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.110Z'
+    - '@babel/core > @babel/generator > lodash':
+        reason: None given
+        expires: '2019-08-09T04:56:17.110Z'
+    - snyk > snyk-nodejs-lockfile-parser > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.110Z'
+    - parcel-bundler > @babel/core > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.110Z'
+    - snyk > snyk-nuget-plugin > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.110Z'
+    - parcel-bundler > @babel/generator > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.110Z'
+    - '@adobe/helix-shared > snyk > lodash':
+        reason: None given
+        expires: '2019-08-09T04:56:17.110Z'
+    - '@adobe/helix-pipeline > snyk > lodash':
+        reason: None given
+        expires: '2019-08-09T04:56:17.110Z'
+    - '@adobe/helix-simulator > snyk > lodash':
+        reason: None given
+        expires: '2019-08-09T04:56:17.110Z'
+    - '@adobe/helix-simulator > @adobe/git-server > lodash':
+        reason: None given
+        expires: '2019-08-09T04:56:17.110Z'
+    - ferrum > npm-check-updates > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.110Z'
+    - archiver > async > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.110Z'
+    - '@adobe/helix-simulator > @adobe/helix-shared > lodash':
+        reason: None given
+        expires: '2019-08-09T04:56:17.110Z'
+    - parcel-bundler > @babel/traverse > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.110Z'
+    - '@adobe/helix-pipeline > @adobe/helix-shared > lodash':
+        reason: None given
+        expires: '2019-08-09T04:56:17.110Z'
+    - '@adobe/helix-pipeline > @adobe/openwhisk-loggly-wrapper > lodash':
+        reason: None given
+        expires: '2019-08-09T04:56:17.110Z'
+    - '@babel/core > @babel/traverse > lodash':
+        reason: None given
+        expires: '2019-08-09T04:56:17.110Z'
+    - '@babel/core > @babel/types > lodash':
+        reason: None given
+        expires: '2019-08-09T04:56:17.110Z'
+    - '@adobe/fastly-native-promises > request-promise-native > request-promise-core > lodash':
+        reason: None given
+        expires: '2019-08-09T04:56:17.110Z'
+    - '@adobe/helix-shared > snyk > inquirer > lodash':
+        reason: None given
+        expires: '2019-08-09T04:56:17.110Z'
+    - parcel-bundler > @babel/generator > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.110Z'
+    - '@adobe/helix-pipeline > snyk > inquirer > lodash':
+        reason: None given
+        expires: '2019-08-09T04:56:17.110Z'
+    - '@adobe/helix-simulator > snyk > inquirer > lodash':
+        reason: None given
+        expires: '2019-08-09T04:56:17.110Z'
+    - parcel-bundler > @babel/core > @babel/traverse > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.110Z'
+    - snyk > snyk-go-plugin > graphlib > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.110Z'
+    - '@adobe/helix-shared > snyk > snyk-config > lodash':
+        reason: None given
+        expires: '2019-08-09T04:56:17.110Z'
+    - parcel-bundler > @babel/template > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.110Z'
+    - '@adobe/helix-pipeline > snyk > snyk-config > lodash':
+        reason: None given
+        expires: '2019-08-09T04:56:17.110Z'
+    - '@adobe/helix-simulator > snyk > snyk-config > lodash':
+        reason: None given
+        expires: '2019-08-09T04:56:17.110Z'
+    - parcel-bundler > babylon-walk > babel-types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.110Z'
+    - parcel-bundler > @babel/core > @babel/generator > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.110Z'
+    - '@adobe/helix-shared > snyk > snyk-nodejs-lockfile-parser > lodash':
+        reason: None given
+        expires: '2019-08-09T04:56:17.110Z'
+    - '@babel/core > @babel/traverse > @babel/generator > lodash':
+        reason: None given
+        expires: '2019-08-09T04:56:17.110Z'
+    - '@adobe/helix-pipeline > snyk > snyk-nodejs-lockfile-parser > lodash':
+        reason: None given
+        expires: '2019-08-09T04:56:17.110Z'
+    - '@adobe/helix-simulator > snyk > snyk-nodejs-lockfile-parser > lodash':
+        reason: None given
+        expires: '2019-08-09T04:56:17.110Z'
+    - parcel-bundler > @babel/traverse > @babel/generator > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.110Z'
+    - '@adobe/helix-pipeline > request-promise-native > request-promise-core > lodash':
+        reason: None given
+        expires: '2019-08-09T04:56:17.110Z'
+    - '@adobe/helix-shared > snyk > snyk-nuget-plugin > lodash':
+        reason: None given
+        expires: '2019-08-09T04:56:17.110Z'
+    - '@babel/core > @babel/helpers > @babel/types > lodash':
+        reason: None given
+        expires: '2019-08-09T04:56:17.110Z'
+    - '@adobe/helix-pipeline > snyk > snyk-nuget-plugin > lodash':
+        reason: None given
+        expires: '2019-08-09T04:56:17.110Z'
+    - '@adobe/helix-simulator > snyk > snyk-nuget-plugin > lodash':
+        reason: None given
+        expires: '2019-08-09T04:56:17.110Z'
+    - '@babel/core > @babel/traverse > @babel/types > lodash':
+        reason: None given
+        expires: '2019-08-09T04:56:17.110Z'
+    - snyk > snyk-nodejs-lockfile-parser > graphlib > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.110Z'
+    - '@adobe/helix-simulator > request-promise-native > request-promise-core > lodash':
+        reason: None given
+        expires: '2019-08-09T04:56:17.110Z'
+    - '@adobe/helix-pipeline > @adobe/helix-shared > snyk > lodash':
+        reason: None given
+        expires: '2019-08-09T04:56:17.110Z'
+    - ferrum > npm-check-updates > node-alias > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.110Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-transform-block-scoping > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.110Z'
+    - '@adobe/helix-shared > winston > async > lodash':
+        reason: None given
+        expires: '2019-08-09T04:56:17.110Z'
+    - '@babel/core > @babel/template > @babel/types > lodash':
+        reason: None given
+        expires: '2019-08-09T04:56:17.110Z'
+    - '@babel/core > @babel/generator > @babel/types > lodash':
+        reason: None given
+        expires: '2019-08-09T04:56:17.110Z'
+    - '@adobe/helix-pipeline > winston > async > lodash':
+        reason: None given
+        expires: '2019-08-09T04:56:17.110Z'
+    - snyk > @snyk/dep-graph > graphlib > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.110Z'
+    - '@babel/core > @babel/helpers > @babel/traverse > lodash':
+        reason: None given
+        expires: '2019-08-09T04:56:17.110Z'
+    - parcel-bundler > @babel/plugin-transform-modules-commonjs > @babel/helper-module-transforms > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.110Z'
+    - parcel-bundler > @babel/core > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.110Z'
+    - parcel-bundler > htmlnano > uncss > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.110Z'
+    - '@adobe/helix-shared > snyk > @snyk/dep-graph > lodash':
+        reason: None given
+        expires: '2019-08-09T04:56:17.110Z'
+    - parcel-bundler > @babel/traverse > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.110Z'
+    - '@adobe/helix-pipeline > snyk > @snyk/dep-graph > lodash':
+        reason: None given
+        expires: '2019-08-09T04:56:17.110Z'
+    - '@adobe/helix-simulator > snyk > @snyk/dep-graph > lodash':
+        reason: None given
+        expires: '2019-08-09T04:56:17.110Z'
+    - '@adobe/helix-simulator > @adobe/git-server > snyk > lodash':
+        reason: None given
+        expires: '2019-08-09T04:56:17.110Z'
+    - parcel-bundler > @babel/core > @babel/traverse > @babel/generator > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.110Z'
+    - '@adobe/helix-simulator > @adobe/git-server > snyk > snyk-php-plugin > lodash':
+        reason: None given
+        expires: '2019-08-09T04:56:17.111Z'
+    - '@adobe/helix-simulator > @adobe/helix-shared > winston > async > lodash':
+        reason: None given
+        expires: '2019-08-09T04:56:17.111Z'
+    - '@adobe/helix-simulator > @adobe/git-server > winston > async > lodash':
+        reason: None given
+        expires: '2019-08-09T04:56:17.111Z'
+    - parcel-bundler > @babel/traverse > @babel/helper-split-export-declaration > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.111Z'
+    - '@babel/core > @babel/traverse > @babel/generator > @babel/types > lodash':
+        reason: None given
+        expires: '2019-08-09T04:56:17.111Z'
+    - '@adobe/helix-pipeline > @adobe/openwhisk-loggly-wrapper > winston > async > lodash':
+        reason: None given
+        expires: '2019-08-09T04:56:17.111Z'
+    - '@babel/core > @babel/helpers > @babel/template > @babel/types > lodash':
+        reason: None given
+        expires: '2019-08-09T04:56:17.111Z'
+    - '@adobe/helix-pipeline > @adobe/helix-shared > winston > async > lodash':
+        reason: None given
+        expires: '2019-08-09T04:56:17.111Z'
+    - '@babel/core > @babel/helpers > @babel/traverse > @babel/types > lodash':
+        reason: None given
+        expires: '2019-08-09T04:56:17.111Z'
+    - '@adobe/helix-simulator > @adobe/git-server > snyk > snyk-nuget-plugin > lodash':
+        reason: None given
+        expires: '2019-08-09T04:56:17.111Z'
+    - '@adobe/helix-pipeline > @adobe/helix-shared > snyk > snyk-nuget-plugin > lodash':
+        reason: None given
+        expires: '2019-08-09T04:56:17.111Z'
+    - '@adobe/helix-simulator > @adobe/git-server > snyk > snyk-nodejs-lockfile-parser > lodash':
+        reason: None given
+        expires: '2019-08-09T04:56:17.111Z'
+    - '@babel/core > @babel/helpers > @babel/traverse > @babel/generator > lodash':
+        reason: None given
+        expires: '2019-08-09T04:56:17.111Z'
+    - '@adobe/helix-pipeline > @adobe/helix-shared > snyk > snyk-nodejs-lockfile-parser > lodash':
+        reason: None given
+        expires: '2019-08-09T04:56:17.111Z'
+    - '@adobe/helix-simulator > @adobe/git-server > snyk > snyk-config > lodash':
+        reason: None given
+        expires: '2019-08-09T04:56:17.111Z'
+    - parcel-bundler > @babel/core > @babel/helpers > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.111Z'
+    - '@adobe/helix-pipeline > jsdom > request-promise-native > request-promise-core > lodash':
+        reason: None given
+        expires: '2019-08-09T04:56:17.111Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-transform-classes > @babel/helper-define-map > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.111Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-transform-unicode-regex > @babel/helper-regex > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.111Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-transform-sticky-regex > @babel/helper-regex > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.111Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-transform-dotall-regex > @babel/helper-regex > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.111Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-proposal-unicode-property-regex > @babel/helper-regex > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.111Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-transform-modules-umd > @babel/helper-module-transforms > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.111Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-transform-modules-amd > @babel/helper-module-transforms > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.111Z'
+    - parcel-bundler > @babel/plugin-transform-modules-commonjs > @babel/helper-module-transforms > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.111Z'
+    - '@adobe/helix-shared > snyk > @snyk/dep-graph > graphlib > lodash':
+        reason: None given
+        expires: '2019-08-09T04:56:17.111Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-transform-modules-commonjs > @babel/helper-module-transforms > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.111Z'
+    - '@babel/core > @babel/traverse > @babel/helper-split-export-declaration > @babel/types > lodash':
+        reason: None given
+        expires: '2019-08-09T04:56:17.111Z'
+    - parcel-bundler > @babel/plugin-transform-react-jsx > @babel/helper-builder-react-jsx > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.111Z'
+    - parcel-bundler > @babel/plugin-transform-modules-commonjs > @babel/helper-simple-access > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.111Z'
+    - '@adobe/helix-pipeline > snyk > @snyk/dep-graph > graphlib > lodash':
+        reason: None given
+        expires: '2019-08-09T04:56:17.111Z'
+    - '@adobe/helix-simulator > @adobe/git-server > snyk > @snyk/dep-graph > lodash':
+        reason: None given
+        expires: '2019-08-09T04:56:17.111Z'
+    - parcel-bundler > @babel/preset-env > @babel/helper-module-imports > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.111Z'
+    - '@adobe/helix-simulator > snyk > @snyk/dep-graph > graphlib > lodash':
+        reason: None given
+        expires: '2019-08-09T04:56:17.111Z'
+    - '@adobe/helix-pipeline > @adobe/helix-shared > snyk > @snyk/dep-graph > lodash':
+        reason: None given
+        expires: '2019-08-09T04:56:17.111Z'
+    - parcel-bundler > @babel/core > @babel/traverse > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.111Z'
+    - '@adobe/helix-pipeline > @adobe/helix-shared > snyk > inquirer > lodash':
+        reason: None given
+        expires: '2019-08-09T04:56:17.111Z'
+    - parcel-bundler > @babel/core > @babel/generator > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.111Z'
+    - parcel-bundler > @babel/core > @babel/helpers > @babel/traverse > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.111Z'
+    - parcel-bundler > @babel/core > @babel/template > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.111Z'
+    - parcel-bundler > @babel/traverse > @babel/generator > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.111Z'
+    - '@adobe/helix-simulator > snyk > snyk-nodejs-lockfile-parser > graphlib > lodash':
+        reason: None given
+        expires: '2019-08-09T04:56:17.111Z'
+    - '@adobe/helix-shared > snyk > snyk-go-plugin > graphlib > lodash':
+        reason: None given
+        expires: '2019-08-09T04:56:17.111Z'
+    - '@adobe/helix-pipeline > snyk > snyk-nodejs-lockfile-parser > graphlib > lodash':
+        reason: None given
+        expires: '2019-08-09T04:56:17.111Z'
+    - '@adobe/helix-pipeline > @adobe/helix-shared > snyk > snyk-config > lodash':
+        reason: None given
+        expires: '2019-08-09T04:56:17.111Z'
+    - parcel-bundler > @babel/traverse > @babel/helper-function-name > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.111Z'
+    - '@babel/core > @babel/traverse > @babel/helper-function-name > @babel/types > lodash':
+        reason: None given
+        expires: '2019-08-09T04:56:17.111Z'
+    - '@adobe/helix-pipeline > snyk > snyk-go-plugin > graphlib > lodash':
+        reason: None given
+        expires: '2019-08-09T04:56:17.111Z'
+    - '@adobe/helix-simulator > @adobe/git-server > snyk > inquirer > lodash':
+        reason: None given
+        expires: '2019-08-09T04:56:17.111Z'
+    - '@adobe/helix-shared > snyk > snyk-nodejs-lockfile-parser > graphlib > lodash':
+        reason: None given
+        expires: '2019-08-09T04:56:17.112Z'
+    - '@adobe/helix-simulator > @adobe/git-server > archiver > async > lodash':
+        reason: None given
+        expires: '2019-08-09T04:56:17.112Z'
+    - '@adobe/helix-simulator > snyk > snyk-go-plugin > graphlib > lodash':
+        reason: None given
+        expires: '2019-08-09T04:56:17.112Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-transform-async-to-generator > @babel/helper-remap-async-to-generator > @babel/traverse > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.112Z'
+    - parcel-bundler > @babel/core > @babel/traverse > @babel/helper-function-name > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.112Z'
+    - '@babel/core > @babel/helpers > @babel/traverse > @babel/helper-function-name > @babel/types > lodash':
+        reason: None given
+        expires: '2019-08-09T04:56:17.112Z'
+    - '@adobe/helix-pipeline > @adobe/helix-shared > snyk > snyk-go-plugin > graphlib > lodash':
+        reason: None given
+        expires: '2019-08-09T04:56:17.112Z'
+    - parcel-bundler > @babel/plugin-transform-modules-commonjs > @babel/helper-simple-access > @babel/template > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.112Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-transform-classes > @babel/helper-function-name > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.112Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-transform-function-name > @babel/helper-function-name > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.112Z'
+    - parcel-bundler > @babel/core > @babel/traverse > @babel/generator > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.112Z'
+    - '@adobe/helix-simulator > @adobe/git-server > snyk > snyk-nodejs-lockfile-parser > graphlib > lodash':
+        reason: None given
+        expires: '2019-08-09T04:56:17.112Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-transform-parameters > @babel/helper-call-delegate > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.112Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-transform-modules-systemjs > @babel/helper-hoist-variables > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.112Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-transform-object-super > @babel/helper-replace-supers > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.112Z'
+    - parcel-bundler > @babel/core > @babel/helpers > @babel/traverse > @babel/generator > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.112Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-transform-classes > @babel/helper-replace-supers > @babel/traverse > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.112Z'
+    - parcel-bundler > @babel/traverse > @babel/helper-function-name > @babel/template > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.112Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-transform-object-super > @babel/helper-replace-supers > @babel/traverse > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.112Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-transform-classes > @babel/helper-replace-supers > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.112Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-transform-classes > @babel/helper-define-map > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.112Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-transform-modules-umd > @babel/helper-module-transforms > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.112Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-transform-parameters > @babel/helper-call-delegate > @babel/traverse > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.113Z'
+    - '@adobe/helix-simulator > @adobe/git-server > snyk > snyk-go-plugin > graphlib > lodash':
+        reason: None given
+        expires: '2019-08-09T04:56:17.113Z'
+    - parcel-bundler > @babel/plugin-transform-modules-commonjs > @babel/helper-module-transforms > @babel/helper-module-imports > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.113Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-transform-async-to-generator > @babel/helper-module-imports > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.113Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-proposal-async-generator-functions > @babel/helper-remap-async-to-generator > @babel/traverse > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.113Z'
+    - '@adobe/helix-pipeline > @adobe/helix-shared > snyk > snyk-nodejs-lockfile-parser > graphlib > lodash':
+        reason: None given
+        expires: '2019-08-09T04:56:17.113Z'
+    - parcel-bundler > @babel/plugin-transform-modules-commonjs > @babel/helper-module-transforms > @babel/helper-simple-access > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.113Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-transform-modules-commonjs > @babel/helper-simple-access > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.113Z'
+    - '@babel/core > @babel/traverse > @babel/helper-function-name > @babel/template > @babel/types > lodash':
+        reason: None given
+        expires: '2019-08-09T04:56:17.113Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-transform-parameters > @babel/helper-get-function-arity > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.113Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-transform-classes > @babel/helper-annotate-as-pure > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.113Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-transform-template-literals > @babel/helper-annotate-as-pure > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.113Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-proposal-async-generator-functions > @babel/helper-remap-async-to-generator > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.113Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-transform-async-to-generator > @babel/helper-remap-async-to-generator > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.113Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-transform-classes > @babel/helper-optimise-call-expression > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.113Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-transform-exponentiation-operator > @babel/helper-builder-binary-assignment-operator-visitor > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.113Z'
+    - '@adobe/helix-simulator > @adobe/git-server > snyk > @snyk/dep-graph > graphlib > lodash':
+        reason: None given
+        expires: '2019-08-09T04:56:17.113Z'
+    - parcel-bundler > @babel/core > @babel/helpers > @babel/template > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.113Z'
+    - parcel-bundler > @babel/plugin-transform-modules-commonjs > @babel/helper-module-transforms > @babel/template > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.113Z'
+    - '@babel/core > @babel/helpers > @babel/traverse > @babel/helper-split-export-declaration > @babel/types > lodash':
+        reason: None given
+        expires: '2019-08-09T04:56:17.113Z'
+    - '@adobe/helix-pipeline > @adobe/helix-shared > snyk > @snyk/dep-graph > graphlib > lodash':
+        reason: None given
+        expires: '2019-08-09T04:56:17.113Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-transform-modules-amd > @babel/helper-module-transforms > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.113Z'
+    - parcel-bundler > @babel/traverse > @babel/helper-function-name > @babel/helper-get-function-arity > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.113Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-transform-modules-commonjs > @babel/helper-module-transforms > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.113Z'
+    - parcel-bundler > @babel/core > @babel/traverse > @babel/helper-split-export-declaration > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.113Z'
+    - '@babel/core > @babel/traverse > @babel/helper-function-name > @babel/helper-get-function-arity > @babel/types > lodash':
+        reason: None given
+        expires: '2019-08-09T04:56:17.113Z'
+    - parcel-bundler > @babel/core > @babel/helpers > @babel/traverse > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.113Z'
+    - '@babel/core > @babel/helpers > @babel/traverse > @babel/generator > @babel/types > lodash':
+        reason: None given
+        expires: '2019-08-09T04:56:17.113Z'
+    - parcel-bundler > @babel/plugin-transform-modules-commonjs > @babel/helper-module-transforms > @babel/helper-split-export-declaration > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.113Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-transform-classes > @babel/helper-split-export-declaration > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.113Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-transform-parameters > @babel/helper-call-delegate > @babel/traverse > @babel/generator > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.113Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-transform-modules-amd > @babel/helper-module-transforms > @babel/helper-module-imports > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.113Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-transform-modules-umd > @babel/helper-module-transforms > @babel/helper-module-imports > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.113Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-transform-classes > @babel/helper-function-name > @babel/template > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.113Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-transform-function-name > @babel/helper-function-name > @babel/template > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.113Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-transform-modules-commonjs > @babel/helper-module-transforms > @babel/helper-simple-access > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.113Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-transform-object-super > @babel/helper-replace-supers > @babel/traverse > @babel/generator > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.114Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-transform-modules-amd > @babel/helper-module-transforms > @babel/helper-simple-access > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.114Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-transform-modules-umd > @babel/helper-module-transforms > @babel/helper-simple-access > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.114Z'
+    - parcel-bundler > @babel/plugin-transform-modules-commonjs > @babel/helper-module-transforms > @babel/helper-simple-access > @babel/template > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.114Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-transform-classes > @babel/helper-replace-supers > @babel/traverse > @babel/generator > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.114Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-transform-classes > @babel/helper-define-map > @babel/helper-function-name > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.114Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-proposal-async-generator-functions > @babel/helper-remap-async-to-generator > @babel/helper-annotate-as-pure > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.114Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-transform-async-to-generator > @babel/helper-remap-async-to-generator > @babel/helper-annotate-as-pure > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.114Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-transform-classes > @babel/helper-function-name > @babel/helper-get-function-arity > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.114Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-transform-modules-commonjs > @babel/helper-simple-access > @babel/template > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.114Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-proposal-async-generator-functions > @babel/helper-remap-async-to-generator > @babel/helper-wrap-function > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.114Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-transform-async-to-generator > @babel/helper-remap-async-to-generator > @babel/helper-wrap-function > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.114Z'
+    - parcel-bundler > @babel/core > @babel/traverse > @babel/helper-function-name > @babel/template > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.114Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-transform-async-to-generator > @babel/helper-remap-async-to-generator > @babel/helper-wrap-function > @babel/traverse > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.114Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-transform-classes > @babel/helper-replace-supers > @babel/helper-optimise-call-expression > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.114Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-transform-object-super > @babel/helper-replace-supers > @babel/helper-optimise-call-expression > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.114Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-proposal-async-generator-functions > @babel/helper-remap-async-to-generator > @babel/helper-wrap-function > @babel/traverse > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.114Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-transform-classes > @babel/helper-replace-supers > @babel/helper-member-expression-to-functions > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.114Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-transform-object-super > @babel/helper-replace-supers > @babel/helper-member-expression-to-functions > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.114Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-transform-exponentiation-operator > @babel/helper-builder-binary-assignment-operator-visitor > @babel/helper-explode-assignable-expression > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.114Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-transform-parameters > @babel/helper-call-delegate > @babel/helper-hoist-variables > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.114Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-proposal-async-generator-functions > @babel/helper-remap-async-to-generator > @babel/template > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.114Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-transform-async-to-generator > @babel/helper-remap-async-to-generator > @babel/template > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.114Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-transform-modules-commonjs > @babel/helper-module-transforms > @babel/template > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.114Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-transform-function-name > @babel/helper-function-name > @babel/helper-get-function-arity > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.114Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-transform-modules-amd > @babel/helper-module-transforms > @babel/template > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.114Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-transform-modules-umd > @babel/helper-module-transforms > @babel/template > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.114Z'
+    - parcel-bundler > htmlnano > uncss > jsdom > request-promise-native > request-promise-core > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.114Z'
+    - '@babel/core > @babel/helpers > @babel/traverse > @babel/helper-function-name > @babel/template > @babel/types > lodash':
+        reason: None given
+        expires: '2019-08-09T04:56:17.114Z'
+    - parcel-bundler > @babel/core > @babel/helpers > @babel/traverse > @babel/helper-split-export-declaration > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.114Z'
+    - parcel-bundler > @babel/core > @babel/helpers > @babel/traverse > @babel/helper-function-name > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.114Z'
+    - '@babel/core > @babel/helpers > @babel/traverse > @babel/helper-function-name > @babel/helper-get-function-arity > @babel/types > lodash':
+        reason: None given
+        expires: '2019-08-09T04:56:17.114Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-transform-async-to-generator > @babel/helper-remap-async-to-generator > @babel/traverse > @babel/generator > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.114Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-proposal-async-generator-functions > @babel/helper-remap-async-to-generator > @babel/traverse > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.114Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-transform-async-to-generator > @babel/helper-remap-async-to-generator > @babel/traverse > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.114Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-transform-parameters > @babel/helper-call-delegate > @babel/traverse > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.114Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-transform-object-super > @babel/helper-replace-supers > @babel/traverse > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.114Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-transform-classes > @babel/helper-replace-supers > @babel/traverse > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.114Z'
+    - parcel-bundler > @babel/core > @babel/traverse > @babel/helper-function-name > @babel/helper-get-function-arity > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.114Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-transform-exponentiation-operator > @babel/helper-builder-binary-assignment-operator-visitor > @babel/helper-explode-assignable-expression > @babel/traverse > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.114Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-transform-modules-commonjs > @babel/helper-module-transforms > @babel/helper-split-export-declaration > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.114Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-proposal-async-generator-functions > @babel/helper-remap-async-to-generator > @babel/traverse > @babel/generator > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.114Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-transform-modules-amd > @babel/helper-module-transforms > @babel/helper-split-export-declaration > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.114Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-transform-modules-umd > @babel/helper-module-transforms > @babel/helper-split-export-declaration > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.114Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-transform-modules-commonjs > @babel/helper-module-transforms > @babel/helper-module-imports > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.114Z'
+    - parcel-bundler > @babel/core > @babel/helpers > @babel/traverse > @babel/generator > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.115Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-transform-classes > @babel/helper-replace-supers > @babel/traverse > @babel/helper-function-name > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.115Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-transform-classes > @babel/helper-replace-supers > @babel/traverse > @babel/generator > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.115Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-transform-parameters > @babel/helper-call-delegate > @babel/traverse > @babel/generator > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.115Z'
+    - parcel-bundler > @babel/core > @babel/helpers > @babel/traverse > @babel/helper-function-name > @babel/helper-get-function-arity > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.115Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-transform-async-to-generator > @babel/helper-remap-async-to-generator > @babel/traverse > @babel/helper-split-export-declaration > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.115Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-proposal-async-generator-functions > @babel/helper-remap-async-to-generator > @babel/traverse > @babel/helper-split-export-declaration > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.115Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-transform-classes > @babel/helper-define-map > @babel/helper-function-name > @babel/helper-get-function-arity > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.115Z'
+    - parcel-bundler > @babel/core > @babel/helpers > @babel/traverse > @babel/helper-function-name > @babel/template > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.115Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-transform-parameters > @babel/helper-call-delegate > @babel/traverse > @babel/helper-split-export-declaration > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.115Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-transform-object-super > @babel/helper-replace-supers > @babel/traverse > @babel/helper-split-export-declaration > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.115Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-transform-classes > @babel/helper-replace-supers > @babel/traverse > @babel/helper-split-export-declaration > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.115Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-transform-exponentiation-operator > @babel/helper-builder-binary-assignment-operator-visitor > @babel/helper-explode-assignable-expression > @babel/traverse > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.115Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-transform-async-to-generator > @babel/helper-remap-async-to-generator > @babel/helper-wrap-function > @babel/traverse > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.115Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-proposal-async-generator-functions > @babel/helper-remap-async-to-generator > @babel/helper-wrap-function > @babel/traverse > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.115Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-transform-classes > @babel/helper-define-map > @babel/helper-function-name > @babel/template > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.115Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-transform-async-to-generator > @babel/helper-remap-async-to-generator > @babel/traverse > @babel/generator > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.115Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-proposal-async-generator-functions > @babel/helper-remap-async-to-generator > @babel/traverse > @babel/generator > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.115Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-transform-modules-commonjs > @babel/helper-module-transforms > @babel/helper-simple-access > @babel/template > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.115Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-transform-modules-amd > @babel/helper-module-transforms > @babel/helper-simple-access > @babel/template > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.115Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-transform-async-to-generator > @babel/helper-remap-async-to-generator > @babel/helper-wrap-function > @babel/helper-function-name > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.115Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-proposal-async-generator-functions > @babel/helper-remap-async-to-generator > @babel/helper-wrap-function > @babel/helper-function-name > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.115Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-transform-modules-umd > @babel/helper-module-transforms > @babel/helper-simple-access > @babel/template > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.115Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-transform-async-to-generator > @babel/helper-remap-async-to-generator > @babel/traverse > @babel/helper-function-name > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.115Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-proposal-async-generator-functions > @babel/helper-remap-async-to-generator > @babel/traverse > @babel/helper-function-name > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.115Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-proposal-async-generator-functions > @babel/helper-remap-async-to-generator > @babel/helper-wrap-function > @babel/template > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.115Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-proposal-async-generator-functions > @babel/helper-remap-async-to-generator > @babel/helper-wrap-function > @babel/traverse > @babel/generator > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.115Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-transform-async-to-generator > @babel/helper-remap-async-to-generator > @babel/helper-wrap-function > @babel/traverse > @babel/generator > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.115Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-transform-async-to-generator > @babel/helper-remap-async-to-generator > @babel/helper-wrap-function > @babel/template > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.115Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-transform-object-super > @babel/helper-replace-supers > @babel/traverse > @babel/helper-function-name > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.115Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-transform-exponentiation-operator > @babel/helper-builder-binary-assignment-operator-visitor > @babel/helper-explode-assignable-expression > @babel/traverse > @babel/generator > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.115Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-transform-object-super > @babel/helper-replace-supers > @babel/traverse > @babel/generator > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.115Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-transform-parameters > @babel/helper-call-delegate > @babel/traverse > @babel/helper-function-name > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.115Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-proposal-async-generator-functions > @babel/helper-remap-async-to-generator > @babel/helper-wrap-function > @babel/traverse > @babel/helper-function-name > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.115Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-transform-exponentiation-operator > @babel/helper-builder-binary-assignment-operator-visitor > @babel/helper-explode-assignable-expression > @babel/traverse > @babel/helper-function-name > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.115Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-proposal-async-generator-functions > @babel/helper-remap-async-to-generator > @babel/helper-wrap-function > @babel/traverse > @babel/generator > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.115Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-transform-async-to-generator > @babel/helper-remap-async-to-generator > @babel/helper-wrap-function > @babel/traverse > @babel/generator > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.115Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-transform-exponentiation-operator > @babel/helper-builder-binary-assignment-operator-visitor > @babel/helper-explode-assignable-expression > @babel/traverse > @babel/generator > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.115Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-transform-async-to-generator > @babel/helper-remap-async-to-generator > @babel/helper-wrap-function > @babel/helper-function-name > @babel/template > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.115Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-proposal-async-generator-functions > @babel/helper-remap-async-to-generator > @babel/helper-wrap-function > @babel/helper-function-name > @babel/template > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.115Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-transform-exponentiation-operator > @babel/helper-builder-binary-assignment-operator-visitor > @babel/helper-explode-assignable-expression > @babel/traverse > @babel/helper-split-export-declaration > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.115Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-transform-async-to-generator > @babel/helper-remap-async-to-generator > @babel/traverse > @babel/helper-function-name > @babel/template > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.115Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-proposal-async-generator-functions > @babel/helper-remap-async-to-generator > @babel/traverse > @babel/helper-function-name > @babel/template > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.116Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-transform-classes > @babel/helper-replace-supers > @babel/traverse > @babel/helper-function-name > @babel/helper-get-function-arity > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.116Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-transform-object-super > @babel/helper-replace-supers > @babel/traverse > @babel/helper-function-name > @babel/helper-get-function-arity > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.116Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-transform-parameters > @babel/helper-call-delegate > @babel/traverse > @babel/helper-function-name > @babel/template > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.116Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-transform-object-super > @babel/helper-replace-supers > @babel/traverse > @babel/helper-function-name > @babel/template > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.116Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-transform-async-to-generator > @babel/helper-remap-async-to-generator > @babel/helper-wrap-function > @babel/traverse > @babel/helper-function-name > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.116Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-proposal-async-generator-functions > @babel/helper-remap-async-to-generator > @babel/helper-wrap-function > @babel/traverse > @babel/helper-split-export-declaration > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.116Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-transform-async-to-generator > @babel/helper-remap-async-to-generator > @babel/helper-wrap-function > @babel/traverse > @babel/helper-split-export-declaration > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.116Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-transform-async-to-generator > @babel/helper-remap-async-to-generator > @babel/helper-wrap-function > @babel/helper-function-name > @babel/helper-get-function-arity > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.116Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-proposal-async-generator-functions > @babel/helper-remap-async-to-generator > @babel/helper-wrap-function > @babel/helper-function-name > @babel/helper-get-function-arity > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.116Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-transform-parameters > @babel/helper-call-delegate > @babel/traverse > @babel/helper-function-name > @babel/helper-get-function-arity > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.116Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-transform-async-to-generator > @babel/helper-remap-async-to-generator > @babel/traverse > @babel/helper-function-name > @babel/helper-get-function-arity > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.116Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-proposal-async-generator-functions > @babel/helper-remap-async-to-generator > @babel/traverse > @babel/helper-function-name > @babel/helper-get-function-arity > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.116Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-transform-classes > @babel/helper-replace-supers > @babel/traverse > @babel/helper-function-name > @babel/template > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.116Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-transform-async-to-generator > @babel/helper-remap-async-to-generator > @babel/helper-wrap-function > @babel/traverse > @babel/helper-function-name > @babel/helper-get-function-arity > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.116Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-proposal-async-generator-functions > @babel/helper-remap-async-to-generator > @babel/helper-wrap-function > @babel/traverse > @babel/helper-function-name > @babel/helper-get-function-arity > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.116Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-transform-exponentiation-operator > @babel/helper-builder-binary-assignment-operator-visitor > @babel/helper-explode-assignable-expression > @babel/traverse > @babel/helper-function-name > @babel/helper-get-function-arity > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.116Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-proposal-async-generator-functions > @babel/helper-remap-async-to-generator > @babel/helper-wrap-function > @babel/traverse > @babel/helper-function-name > @babel/template > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.116Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-transform-async-to-generator > @babel/helper-remap-async-to-generator > @babel/helper-wrap-function > @babel/traverse > @babel/helper-function-name > @babel/template > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.116Z'
+    - parcel-bundler > @babel/preset-env > @babel/plugin-transform-exponentiation-operator > @babel/helper-builder-binary-assignment-operator-visitor > @babel/helper-explode-assignable-expression > @babel/traverse > @babel/helper-function-name > @babel/template > @babel/types > lodash:
+        reason: None given
+        expires: '2019-08-09T04:56:17.116Z'
+  'npm:shelljs:20140723':
+    - shelljs:
+        reason: None given
+        expires: '2019-08-09T04:56:17.116Z'
+  'snyk:lic:npm:mdn-data:MPL-2.0':
+    - parcel-bundler > htmlnano > svgo > css-tree > mdn-data:
+        reason: None given
+        expires: '2019-08-09T04:56:17.116Z'
+    - parcel-bundler > htmlnano > svgo > csso > css-tree > mdn-data:
+        reason: None given
+        expires: '2019-08-09T04:56:17.116Z'
+    - parcel-bundler > cssnano > cssnano-preset-default > postcss-svgo > svgo > css-tree > mdn-data:
+        reason: None given
+        expires: '2019-08-09T04:56:17.116Z'
+    - parcel-bundler > htmlnano > cssnano > cssnano-preset-default > postcss-svgo > svgo > css-tree > mdn-data:
+        reason: None given
+        expires: '2019-08-09T04:56:17.116Z'
+    - parcel-bundler > cssnano > cssnano-preset-default > postcss-svgo > svgo > csso > css-tree > mdn-data:
+        reason: None given
+        expires: '2019-08-09T04:56:17.116Z'
+    - parcel-bundler > htmlnano > cssnano > cssnano-preset-default > postcss-svgo > svgo > csso > css-tree > mdn-data:
+        reason: None given
+        expires: '2019-08-09T04:56:17.116Z'
 # patches apply the minimum changes required to fix a vulnerability
 patch:
   'npm:hoek:20180212':
