@@ -41,7 +41,7 @@
     "@adobe/htlengine": "3.2.0",
     "@babel/core": "^7.5.4",
     "@parcel/logger": "1.11.0",
-    "@snyk/nodejs-runtime-agent": "1.45.1",
+    "@snyk/nodejs-runtime-agent": "1.46.0",
     "archiver": "3.0.0",
     "camelcase": "^5.3.1",
     "chalk": "2.4.2",
