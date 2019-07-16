@@ -1,3 +1,11 @@
+## [4.9.3](https://github.com/adobe/helix-cli/compare/v4.9.2...v4.9.3) (2019-07-16)
+
+
+### Bug Fixes
+
+* **package:** update @adobe/helix-simulator to version 2.12.15 ([49ea31b](https://github.com/adobe/helix-cli/commit/49ea31b))
+* **tests:** use correct polly intercept to avoid warning ([#1083](https://github.com/adobe/helix-cli/issues/1083)) ([17669eb](https://github.com/adobe/helix-cli/commit/17669eb)), closes [#1082](https://github.com/adobe/helix-cli/issues/1082)
+
 ## [4.9.2](https://github.com/adobe/helix-cli/compare/v4.9.1...v4.9.2) (2019-07-12)
 
 
