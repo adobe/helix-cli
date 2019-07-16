@@ -1,3 +1,10 @@
+## [4.9.5](https://github.com/adobe/helix-cli/compare/v4.9.4...v4.9.5) (2019-07-16)
+
+
+### Bug Fixes
+
+* **package:** get rid of ExperimentalWarning ([#1085](https://github.com/adobe/helix-cli/issues/1085)) ([bdae405](https://github.com/adobe/helix-cli/commit/bdae405)), closes [#1053](https://github.com/adobe/helix-cli/issues/1053)
+
 ## [4.9.4](https://github.com/adobe/helix-cli/compare/v4.9.3...v4.9.4) (2019-07-16)
 
 
