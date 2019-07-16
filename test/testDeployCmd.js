@@ -528,6 +528,9 @@ describe('hlx deploy (Integration)', () => {
     this.polly.server.put(`https://adobeioruntime.net/api/v1/namespaces/hlx/packages/${ref}`).intercept((req, res) => {
       res.sendStatus(201);
     });
+    this.polly.server.put(`https://adobeioruntime.net/api/v1/namespaces/hlx/actions/${ref}/html?overwrite=true`).intercept((req, res) => {
+      res.sendStatus(201);
+    });
     this.polly.server.put('https://adobeioruntime.net/api/v1/namespaces/hlx/packages/helix-services?overwrite=true').intercept((req, res) => {
       res.sendStatus(201);
     });
