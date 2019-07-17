@@ -1,3 +1,10 @@
+## [4.9.6](https://github.com/adobe/helix-cli/compare/v4.9.5...v4.9.6) (2019-07-17)
+
+
+### Bug Fixes
+
+* **package:** update @adobe/helix-simulator to version 2.12.17 ([4131317](https://github.com/adobe/helix-cli/commit/4131317))
+
 ## [4.9.5](https://github.com/adobe/helix-cli/compare/v4.9.4...v4.9.5) (2019-07-16)
 
 
