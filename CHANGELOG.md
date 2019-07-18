@@ -1,3 +1,10 @@
+## [4.9.8](https://github.com/adobe/helix-cli/compare/v4.9.7...v4.9.8) (2019-07-18)
+
+
+### Bug Fixes
+
+* **cli:** positional file arguments for deploy and publish not respected ([#1091](https://github.com/adobe/helix-cli/issues/1091)) ([e139db5](https://github.com/adobe/helix-cli/commit/e139db5)), closes [#1090](https://github.com/adobe/helix-cli/issues/1090)
+
 ## [4.9.7](https://github.com/adobe/helix-cli/compare/v4.9.6...v4.9.7) (2019-07-18)
 
 
