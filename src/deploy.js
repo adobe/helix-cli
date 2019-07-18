@@ -24,13 +24,12 @@ module.exports = function deploy() {
     set executor(value) {
       executor = value;
     },
-    command: 'deploy',
+    command: 'deploy [files..]',
     desc: 'Deploy packaged functions to Adobe I/O runtime',
     builder: (yargs) => {
       yargsOpenwhisk(yargs);
       yargsFastly(yargs);
-      yargsBuild(yargs);
-      yargs
+      yargsBuild(yargs)
         .option('auto', {
           describe: 'Enable auto-deployment',
           type: 'boolean',

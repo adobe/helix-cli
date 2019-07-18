@@ -387,4 +387,28 @@ OpenWhisk Namespace is required`);
     sinon.assert.calledWith(mockDeploy.withResolveGitRefService, 'helix-services/foobar');
     sinon.assert.calledOnce(mockDeploy.run);
   });
+
+  it('hlx deploy can set specify files', () => {
+    new CLI()
+      .withCommandExecutor('deploy', mockDeploy)
+      .run(['deploy',
+        '--files', 'lib/*.htl', 'index.htl',
+        '--wsk-auth', 'secret-key',
+        '--wsk-namespace', 'hlx',
+      ]);
+    sinon.assert.calledWith(mockDeploy.withFiles, ['lib/*.htl', 'index.htl']);
+    sinon.assert.calledOnce(mockDeploy.run);
+  });
+
+  it('hlx deploy can set specify files without option', () => {
+    new CLI()
+      .withCommandExecutor('deploy', mockDeploy)
+      .run(['deploy',
+        'lib/*.htl', 'index.htl',
+        '--wsk-auth', 'secret-key',
+        '--wsk-namespace', 'hlx',
+      ]);
+    sinon.assert.calledWith(mockDeploy.withFiles, ['lib/*.htl', 'index.htl']);
+    sinon.assert.calledOnce(mockDeploy.run);
+  });
 });
