@@ -88,4 +88,29 @@ describe('hlx package', () => {
     sinon.assert.calledWith(mockPackage.withMinify, true);
     sinon.assert.calledOnce(mockPackage.run);
   });
+
+  it('hlx package can set specify files', () => {
+    new CLI()
+      .withCommandExecutor('package', mockPackage)
+      .run(['package', '--files', 'lib/*.htl', 'index.htl']);
+    sinon.assert.calledWith(mockPackage.withFiles, ['lib/*.htl', 'index.htl']);
+    sinon.assert.calledOnce(mockPackage.run);
+  });
+
+  it('hlx package can set specify files without option', () => {
+    new CLI()
+      .withCommandExecutor('package', mockPackage)
+      .run(['package', 'lib/*.htl', 'index.htl']);
+    sinon.assert.calledWith(mockPackage.withFiles, ['lib/*.htl', 'index.htl']);
+    sinon.assert.calledOnce(mockPackage.run);
+  });
+
+  it('hlx package can set specify files without option and additional args', () => {
+    new CLI()
+      .withCommandExecutor('package', mockPackage)
+      .run(['package', 'lib/*.htl', 'index.htl', '--target', 'foo']);
+    sinon.assert.calledWith(mockPackage.withFiles, ['lib/*.htl', 'index.htl']);
+    sinon.assert.calledWith(mockPackage.withTarget, 'foo');
+    sinon.assert.calledOnce(mockPackage.run);
+  });
 });

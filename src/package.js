@@ -22,12 +22,10 @@ module.exports = function pack() {
     set executor(value) {
       executor = value;
     },
-    command: 'package',
+    command: 'package [files..]',
     desc: 'Create Adobe I/O runtime packages',
     builder: (yargs) => {
-      yargsBuild(yargs);
-      // eslint-disable-next-line global-require
-      yargs
+      yargsBuild(yargs)
         .option('force', {
           describe: 'Forces creation of packages even if the sources are not modified.',
           type: 'boolean',
