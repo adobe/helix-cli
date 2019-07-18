@@ -3,26 +3,13 @@ version: v1.13.5
 # ignores vulnerabilities until expiry date; change duration by modifying expiry date
 ignore:
   'snyk:lic:npm:mdn-data:MPL-2.0':
-    - parcel-bundler > htmlnano > svgo > css-tree > mdn-data:
-        reason: None given
-        expires: '2019-08-11T05:47:07.181Z'
     - parcel-bundler > htmlnano > svgo > csso > css-tree > mdn-data:
         reason: None given
-        expires: '2019-08-11T05:47:07.181Z'
-    - parcel-bundler > cssnano > cssnano-preset-default > postcss-svgo > svgo > css-tree > mdn-data:
-        reason: None given
-        expires: '2019-08-11T05:47:07.181Z'
-    - parcel-bundler > htmlnano > cssnano > cssnano-preset-default > postcss-svgo > svgo > css-tree > mdn-data:
-        reason: None given
-        expires: '2019-08-11T05:47:07.181Z'
+        expires: '2019-08-17T02:27:18.580Z'
     - parcel-bundler > cssnano > cssnano-preset-default > postcss-svgo > svgo > csso > css-tree > mdn-data:
         reason: None given
-        expires: '2019-08-11T05:47:07.181Z'
+        expires: '2019-08-17T02:27:18.580Z'
     - parcel-bundler > htmlnano > cssnano > cssnano-preset-default > postcss-svgo > svgo > csso > css-tree > mdn-data:
         reason: None given
-        expires: '2019-08-11T05:47:07.181Z'
-# patches apply the minimum changes required to fix a vulnerability
-patch:
-  SNYK-JS-LODASH-450202:
-    - '@adobe/helix-simulator > @adobe/git-server > snyk > snyk-mvn-plugin > lodash':
-        patched: '2019-07-12T05:45:53.720Z'
+        expires: '2019-08-17T02:27:18.580Z'
+patch: {}
