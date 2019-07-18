@@ -1,3 +1,10 @@
+## [4.9.7](https://github.com/adobe/helix-cli/compare/v4.9.6...v4.9.7) (2019-07-18)
+
+
+### Bug Fixes
+
+* **package:** update dependencies ([653baed](https://github.com/adobe/helix-cli/commit/653baed)), closes [#1086](https://github.com/adobe/helix-cli/issues/1086)
+
 ## [4.9.6](https://github.com/adobe/helix-cli/compare/v4.9.5...v4.9.6) (2019-07-17)
 
 
