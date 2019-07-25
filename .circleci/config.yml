@@ -34,7 +34,7 @@ orbs:
 
 jobs:
   build_win:
-    parallelism: 4
+    parallelism: 1
     executor: win/preview-default
     steps:
       - run: git config --global core.autocrlf false
