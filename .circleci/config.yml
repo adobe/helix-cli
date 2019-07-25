@@ -38,6 +38,9 @@ jobs:
     executor: win/preview-default
     steps:
       - run: git config --global core.autocrlf false
+      - run:
+          name: prepare test git user
+          command: git config --global user.email "circleci@project-helix.io" && git config --global user.name "CircleCi Build"
       - checkout
       - run: choco install nodejs --version 10.16.0
       - run: npm install
