@@ -39,7 +39,7 @@ jobs:
     steps:
       - run: git config --global core.autocrlf false
       - checkout
-      - run: choco install nodejs
+      - run: choco install nodejs --version 10.16.0
       - run: npm install
       - run: mkdir junit
 
