@@ -119,5 +119,18 @@
     "ghooks": {
       "pre-commit": "npx lint-staged"
     }
+  },
+  "renovate": {
+    "extends": [
+      "config:base"
+    ],
+    "schedule": "at 07:00 pm on Monday",
+    "timezone": "Europe/Zurich",
+    "packageRules": [
+      {
+        "packagePatterns": [".*"],
+        "groupName": "any"
+      }
+    ]
   }
 }
