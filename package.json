@@ -128,9 +128,7 @@
     "timezone": "Europe/Zurich",
     "packageRules": [
       {
-        "packagePatterns": [
-          ".*"
-        ],
+        "packagePatterns": [".*"],
         "groupName": "any"
       }
     ]
