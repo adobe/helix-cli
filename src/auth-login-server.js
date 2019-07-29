@@ -47,7 +47,7 @@ class LoginServer extends EventEmitter {
   }
 
   get port() {
-    return this._srv.address().port;
+    return this._srv ? this._srv.address().port : 0;
   }
 
   async stop() {
