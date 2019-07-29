@@ -155,7 +155,7 @@ class DeployCommand extends AbstractCommand {
     if (script.main.indexOf(path.resolve(__dirname, 'openwhisk')) === 0) {
       return `hlx--${script.name}`;
     }
-    if (script.main.match(/cgi-bin\//)) {
+    if (script.main.match(/cgi-bin/)) {
       return `${this._prefix}/cgi-bin-${script.name}`;
     }
     return `${this._prefix}/${script.name}`;

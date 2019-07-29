@@ -1,3 +1,11 @@
+## [4.9.10](https://github.com/adobe/helix-cli/compare/v4.9.9...v4.9.10) (2019-07-29)
+
+
+### Bug Fixes
+
+* **auth:** fix hanging auth tests on windows ([b6ae193](https://github.com/adobe/helix-cli/commit/b6ae193))
+* **windows:** ensure that cgi-bin is detected ([836dfeb](https://github.com/adobe/helix-cli/commit/836dfeb))
+
 ## [4.9.9](https://github.com/adobe/helix-cli/compare/v4.9.8...v4.9.9) (2019-07-24)
 
 

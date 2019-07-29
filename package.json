@@ -1,6 +1,6 @@
 {
   "name": "@adobe/helix-cli",
-  "version": "4.9.9",
+  "version": "4.9.10",
   "description": "Project Helix CLI",
   "main": "index.js",
   "bin": {
@@ -55,7 +55,7 @@
     "hyperscript": "^2.0.2",
     "ignore": "^5.1.2",
     "ini": "^1.3.5",
-    "junit-report-builder": "1.3.1",
+    "junit-report-builder": "1.3.2",
     "lodash": "^4.17.15",
     "mime-types": "^2.1.24",
     "object-hash": "^1.3.1",
@@ -79,35 +79,35 @@
     "yargs": "^13.2.4"
   },
   "devDependencies": {
-    "@adobe/helix-testutils": "^0.2.0",
-    "@pollyjs/adapter-fetch": "^2.6.0",
-    "@pollyjs/adapter-node-http": "^2.6.0",
-    "@pollyjs/core": "^2.6.0",
-    "@pollyjs/persister-fs": "^2.6.0",
-    "@semantic-release/changelog": "^3.0.4",
-    "@semantic-release/git": "^7.0.16",
-    "@semantic-release/github": "^5.4.2",
-    "codecov": "^3.5.0",
-    "commitizen": "^4.0.1",
-    "cz-conventional-changelog": "^3.0.2",
-    "eslint": "^6.1.0",
-    "eslint-config-airbnb": "^17.1.1",
-    "eslint-plugin-header": "^3.0.0",
-    "eslint-plugin-import": "^2.18.2",
-    "eslint-plugin-jsx-a11y": "^6.2.3",
-    "eslint-plugin-react": "^7.14.2",
-    "js-yaml": "^3.13.1",
-    "jsdom": "^15.1.1",
-    "lint-staged": "^9.2.0",
-    "mocha": "^6.2.0",
-    "mocha-junit-reporter": "^1.23.0",
-    "mocha-parallel-tests": "^2.2.1",
-    "nock": "^10.0.6",
-    "nyc": "^14.1.1",
-    "proxyquire": "^2.1.0",
-    "semantic-release": "^15.13.19",
-    "sinon": "^7.3.2",
-    "unzip2": "^0.2.5"
+    "@adobe/helix-testutils": "0.2.0",
+    "@pollyjs/adapter-fetch": "2.6.0",
+    "@pollyjs/adapter-node-http": "2.6.0",
+    "@pollyjs/core": "2.6.0",
+    "@pollyjs/persister-fs": "2.6.0",
+    "@semantic-release/changelog": "3.0.4",
+    "@semantic-release/git": "7.0.16",
+    "@semantic-release/github": "5.4.2",
+    "codecov": "3.5.0",
+    "commitizen": "4.0.3",
+    "cz-conventional-changelog": "3.0.2",
+    "eslint": "6.1.0",
+    "eslint-config-airbnb": "17.1.1",
+    "eslint-plugin-header": "3.0.0",
+    "eslint-plugin-import": "2.18.2",
+    "eslint-plugin-jsx-a11y": "6.2.3",
+    "eslint-plugin-react": "7.14.3",
+    "js-yaml": "3.13.1",
+    "jsdom": "15.1.1",
+    "lint-staged": "9.2.1",
+    "mocha": "6.2.0",
+    "mocha-junit-reporter": "1.23.1",
+    "mocha-parallel-tests": "2.2.1",
+    "nock": "10.0.6",
+    "nyc": "14.1.1",
+    "proxyquire": "2.1.1",
+    "semantic-release": "15.13.19",
+    "sinon": "7.3.2",
+    "unzip2": "0.2.5"
   },
   "snyk": true,
   "lint-staged": {
@@ -120,5 +120,20 @@
     "ghooks": {
       "pre-commit": "npx lint-staged"
     }
+  },
+  "renovate": {
+    "extends": [
+      "config:base"
+    ],
+    "schedule": "at 07:00 pm on Monday",
+    "timezone": "Europe/Zurich",
+    "packageRules": [
+      {
+        "packagePatterns": [
+          ".*"
+        ],
+        "groupName": "any"
+      }
+    ]
   }
 }
