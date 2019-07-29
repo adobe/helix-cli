@@ -74,12 +74,12 @@ browser doesn't open automatically, please navigate to the url manually:
 Oh, and I started local server, bound to 127.0.0.1:${srv.port} and am 
 awaiting the completion of the process. `);
 
-    const spinner = cliutils.createSpinner().start();
     if (this._openBrowser) {
       setTimeout(() => {
         opn(this._loginUrl, { wait: false });
       }, 1000);
     }
+    const spinner = cliutils.createSpinner().start();
     this._token = await srv.waitForToken();
     spinner.stop();
     await srv.stop();

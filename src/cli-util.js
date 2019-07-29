@@ -10,7 +10,6 @@
  * governing permissions and limitations under the License.
  */
 
-const readline = require('readline');
 const chalk = require('chalk');
 
 const spinnerFrames = process.platform === 'win32'
@@ -18,16 +17,13 @@ const spinnerFrames = process.platform === 'win32'
   : ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'];
 
 const createSpinner = (msg) => {
-  const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout,
-  });
-
-  rl.on('SIGINT', () => {
+  const hideCursor = () => {
+    this.running = false;
     // ensure we quit after ctrl+c and show cursor again
     process.stdout.write('\u001b[?25h');
-    process.exit(-1);
-  });
+    process.exit(0);
+  };
+  process.once('SIGINT', hideCursor);
 
   return {
     i: 0,
@@ -66,7 +62,7 @@ const createSpinner = (msg) => {
       if (this.written) {
         this.s.clearLine(1);
       }
-      rl.close();
+      process.removeListener('SIGINT', hideCursor);
       return this;
     },
   };
