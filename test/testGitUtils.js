@@ -82,7 +82,12 @@ describe('Testing GitUtils', () => {
     assert.equal(await GitUtils.isDirty(testRoot, GIT_USER_HOME), true);
   });
 
-  it('isDirty #unit with submodules', async () => {
+  it('isDirty #unit with submodules', async function test() {
+    if (process.platform === 'win32') {
+      // windows has somehow problems wit adding file:// submodules. so we skip for now.
+      this.skip();
+      return;
+    }
     // https://github.com/adobe/helix-cli/issues/614
     const moduleRoot = await createTestRoot();
 
