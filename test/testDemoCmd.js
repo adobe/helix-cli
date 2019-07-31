@@ -30,8 +30,9 @@ describe('Integration test for demo command', function suite() {
     testDir = await createTestRoot();
   });
 
-  afterEach('Change back to original working dir', () => {
+  afterEach('Change back to original working dir', async () => {
     process.chdir(pwd);
+    await fs.remove(testDir);
   });
 
   it('demo type simple creates all files', async () => {

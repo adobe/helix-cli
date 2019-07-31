@@ -30,8 +30,8 @@ describe('hlx package (Integration)', () => {
     buildDir = path.resolve(hlxDir, 'build');
   });
 
-  afterEach(() => {
-    fs.remove(testRoot);
+  afterEach(async () => {
+    await fs.remove(testRoot);
   });
 
   it('package creates correct package', async () => {

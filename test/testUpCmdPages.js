@@ -46,7 +46,7 @@ describe('Integration test for up command with helix pages', function suite() {
   });
 
   afterEach(async () => {
-    // await fse.remove(testRoot);
+    await fse.remove(testRoot);
   });
 
   it('up command delivers correct response.', (done) => {

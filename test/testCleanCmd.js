@@ -40,6 +40,10 @@ describe('Integration test for clean', () => {
     return true;
   });
 
+  afterEach(async () => {
+    await fs.remove(testRoot);
+  });
+
   it('clean command succeeds and removes files', async () => {
     // add some files to the directories
     const testFile1 = path.resolve(buildDir, 'html.htl');
@@ -86,12 +90,10 @@ describe('Integration test for clean', () => {
     await fs.copy(path.resolve(testRoot, 'src', 'html.htl'), testFile1);
     const stub = sinon.stub(fs, 'remove')
       .throws(new Error('oops'));
-    assert.doesNotThrow(async () => {
-      await new CleanCommand()
+    await new CleanCommand()
         .withDirectory(testRoot)
         .withTargetDir(buildDir)
         .run();
-      stub.restore();
-    });
+    stub.restore();
   });
 });

@@ -676,7 +676,7 @@ describe('hlx perf #integrationtest', () => {
       assert.equal(e.message, 'Performance test failed partially');
       assertFileEqual(junit, path.resolve(__dirname, 'fixtures', 'junit-partial.xml'));
     } finally {
-      fs.remove(root);
+      await fs.remove(root);
     }
   }).timeout(1000 * 60 * 10);
 
@@ -1475,7 +1475,7 @@ describe('hlx perf #integrationtest', () => {
     await perf.run();
     assertFileEqual(junit, path.resolve(__dirname, 'fixtures', 'junit-succeeded.xml'));
 
-    fs.remove(root);
+    await fs.remove(root);
   }).timeout(1000 * 60 * 10);
 
   it('hlx perf --junit (failure)', async function test() {
@@ -2279,7 +2279,7 @@ describe('hlx perf #integrationtest', () => {
       assert.equal(e.message, 'Performance test failed entirely');
       assertFileEqual(junit, path.resolve(__dirname, 'fixtures', 'junit-failed.xml'));
     } finally {
-      fs.remove(root);
+      await fs.remove(root);
     }
   }).timeout(1000 * 60 * 10);
 
@@ -2312,7 +2312,7 @@ describe('hlx perf #integrationtest', () => {
       assert.equal(e.message, 'Performance test skipped entirely');
       assertFileEqual(junit, path.resolve(__dirname, 'fixtures', 'junit-skipped.xml'));
     } finally {
-      fs.remove(root);
+      await fs.remove(root);
     }
   }).timeout(1000 * 60 * 10);
 
@@ -2344,7 +2344,7 @@ describe('hlx perf #integrationtest', () => {
       }
       assert.equal(e.message, 'Unable to run performance test StatusCodeError: 500 - "Internal Server Error"');
     } finally {
-      fs.remove(root);
+      await fs.remove(root);
     }
   }).timeout(1000 * 60 * 10);
 });
