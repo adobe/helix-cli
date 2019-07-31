@@ -186,6 +186,8 @@ describe('Testing GitUtils', () => {
 });
 
 describe('Tests against the helix-cli repo', () => {
+  const repoDir = path.resolve(__dirname, '..');
+
   function ishelix() {
     if (process.env.CIRCLE_REPOSITORY_URL) {
       return !!process.env.CIRCLE_REPOSITORY_URL.match('helix-cli');
@@ -194,17 +196,17 @@ describe('Tests against the helix-cli repo', () => {
   }
 
   condit('resolveCommit resolves the correct commit for tags', ishelix, async () => {
-    const commit = await GitUtils.resolveCommit('.', 'v1.0.0');
+    const commit = await GitUtils.resolveCommit(repoDir, 'v1.0.0');
     assert.equal(commit, 'f9ab59cd2baa2860289d826e270938f2eedb3e59');
   });
 
   condit('resolveCommit resolves the correct commit for shortened OID', ishelix, async () => {
-    const commit = await GitUtils.resolveCommit('.', 'f9ab59c');
+    const commit = await GitUtils.resolveCommit(repoDir, 'f9ab59c');
     assert.equal(commit, 'f9ab59cd2baa2860289d826e270938f2eedb3e59');
   });
 
   condit('resolveCommit throws for unknown ref', ishelix, async () => {
-    await assert.rejects(async () => GitUtils.resolveCommit('.', 'v99.unicorn.foobar'), { code: 'ResolveRefError' });
+    await assert.rejects(async () => GitUtils.resolveCommit(repoDir, 'v99.unicorn.foobar'), { code: 'ResolveRefError' });
   });
 
   it('resolveCommit throws for invalid argument type', async () => {
@@ -212,7 +214,7 @@ describe('Tests against the helix-cli repo', () => {
   });
 
   condit('getRawContent gets the correct version', ishelix, async () => {
-    const content = await GitUtils.getRawContent('.', 'v1.0.0', 'package.json');
+    const content = await GitUtils.getRawContent(repoDir, 'v1.0.0', 'package.json');
     assert.equal(JSON.parse(content.toString()).version, '1.0.0');
   });
 });
