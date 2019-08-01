@@ -2350,41 +2350,44 @@ describe('hlx perf #integrationtest', () => {
 });
 
 describe('hlx perf #unittest', () => {
+  // eslint-disable-next-line no-control-regex
+  const ansiRegexp = /[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g;
+
   it('formatScore() #unittest', () => {
     assert.equal(
-      PerfCommand.formatScore(49, 50),
-      '\u001b[31m\u001b[1m49\u001b[22m\u001b[39m\u001b[31m (failed)\u001b[39m',
+      PerfCommand.formatScore(49, 50).replace(ansiRegexp, ''),
+      '49 (failed)',
     );
     assert.equal(
-      PerfCommand.formatScore(0, 50),
-      '\u001b[31m\u001b[1m0\u001b[22m\u001b[39m\u001b[31m (failed)\u001b[39m',
+      PerfCommand.formatScore(0, 50).replace(ansiRegexp, ''),
+      '0 (failed)',
     );
     assert.equal(
-      PerfCommand.formatScore(50, 50),
-      '\u001b[32m\u001b[1m50\u001b[22m\u001b[39m',
+      PerfCommand.formatScore(50, 50).replace(ansiRegexp, ''),
+      '50',
     );
     assert.equal(
-      PerfCommand.formatScore(100, 50),
-      '\u001b[32m\u001b[1m100\u001b[22m\u001b[39m',
+      PerfCommand.formatScore(100, 50).replace(ansiRegexp, ''),
+      '100',
     );
   });
 
   it('formatMeasure() #unittest', () => {
     assert.equal(
-      PerfCommand.formatMeasure(49, 50),
-      '\u001b[32m\u001b[1m49\u001b[22m\u001b[39m',
+      PerfCommand.formatMeasure(49, 50).replace(ansiRegexp, ''),
+      '49',
     );
     assert.equal(
-      PerfCommand.formatMeasure(0, 50),
-      '\u001b[32m\u001b[1m0\u001b[22m\u001b[39m',
+      PerfCommand.formatMeasure(0, 50).replace(ansiRegexp, ''),
+      '0',
     );
     assert.equal(
-      PerfCommand.formatMeasure(50, 50),
-      '\u001b[32m\u001b[1m50\u001b[22m\u001b[39m',
+      PerfCommand.formatMeasure(50, 50).replace(ansiRegexp, ''),
+      '50',
     );
     assert.equal(
-      PerfCommand.formatMeasure(100, 50),
-      '\u001b[31m\u001b[1m100\u001b[22m\u001b[39m\u001b[31m (failed)\u001b[39m',
+      PerfCommand.formatMeasure(100, 50).replace(ansiRegexp, ''),
+      '100 (failed)',
     );
   });
 
