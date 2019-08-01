@@ -25,7 +25,9 @@ git.plugins.set('fs', require('fs'));
 
 const GitUtils = require('../src/git-utils');
 
-const GIT_USER_HOME = path.resolve(__dirname, 'fixtures/gitutils');
+const GIT_USER_HOME = path.resolve(__dirname, 'fixtures', 'gitutils');
+
+const isNotWindows = () => (process.platform !== 'win32');
 
 if (!shell.which('git')) {
   shell.echo('Sorry, this tests requires git');
@@ -82,7 +84,8 @@ describe('Testing GitUtils', () => {
     assert.equal(await GitUtils.isDirty(testRoot, GIT_USER_HOME), true);
   });
 
-  it('isDirty #unit with submodules', async () => {
+  // windows has somehow problems wit adding file:// submodules. so we skip for now.
+  condit('isDirty #unit with submodules', isNotWindows, async () => {
     // https://github.com/adobe/helix-cli/issues/614
     const moduleRoot = await createTestRoot();
 
@@ -129,11 +132,7 @@ describe('Testing GitUtils', () => {
     assert.equal(await GitUtils.isDirty(testRoot, GIT_USER_HOME), false);
   });
 
-  it('isDirty #unit with unix socket', async function socketTest() {
-    if (process.platform === 'win32') {
-      this.skip();
-      return;
-    }
+  condit('isDirty #unit with unix socket', isNotWindows, async () => {
     assert.equal(await GitUtils.isDirty(testRoot, GIT_USER_HOME), false);
 
     await new Promise((resolve) => {
@@ -181,6 +180,8 @@ describe('Testing GitUtils', () => {
 });
 
 describe('Tests against the helix-cli repo', () => {
+  const repoDir = path.resolve(__dirname, '..');
+
   function ishelix() {
     if (process.env.CIRCLE_REPOSITORY_URL) {
       return !!process.env.CIRCLE_REPOSITORY_URL.match('helix-cli');
@@ -189,17 +190,17 @@ describe('Tests against the helix-cli repo', () => {
   }
 
   condit('resolveCommit resolves the correct commit for tags', ishelix, async () => {
-    const commit = await GitUtils.resolveCommit('.', 'v1.0.0');
+    const commit = await GitUtils.resolveCommit(repoDir, 'v1.0.0');
     assert.equal(commit, 'f9ab59cd2baa2860289d826e270938f2eedb3e59');
   });
 
   condit('resolveCommit resolves the correct commit for shortened OID', ishelix, async () => {
-    const commit = await GitUtils.resolveCommit('.', 'f9ab59c');
+    const commit = await GitUtils.resolveCommit(repoDir, 'f9ab59c');
     assert.equal(commit, 'f9ab59cd2baa2860289d826e270938f2eedb3e59');
   });
 
   condit('resolveCommit throws for unknown ref', ishelix, async () => {
-    await assert.rejects(async () => GitUtils.resolveCommit('.', 'v99.unicorn.foobar'), { code: 'ResolveRefError' });
+    await assert.rejects(async () => GitUtils.resolveCommit(repoDir, 'v99.unicorn.foobar'), { code: 'ResolveRefError' });
   });
 
   it('resolveCommit throws for invalid argument type', async () => {
@@ -207,7 +208,7 @@ describe('Tests against the helix-cli repo', () => {
   });
 
   condit('getRawContent gets the correct version', ishelix, async () => {
-    const content = await GitUtils.getRawContent('.', 'v1.0.0', 'package.json');
+    const content = await GitUtils.getRawContent(repoDir, 'v1.0.0', 'package.json');
     assert.equal(JSON.parse(content.toString()).version, '1.0.0');
   });
 });

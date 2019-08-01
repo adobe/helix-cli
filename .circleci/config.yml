@@ -30,23 +30,37 @@ commands:
 
 orbs:
   helix-smoke-tests: adobe/helix-smoke-tests@0.0.7
+  win: circleci/windows-tools@0.0.4
 
 jobs:
-  snyk:
-    executor: node8
-    working_directory: ~/repo
-
+  build_win:
+    parallelism: 1
+    executor: win/preview-default
     steps:
-    - setup
+      - run: git config --global core.autocrlf false
+      - run:
+          name: prepare test git user
+          command: git config --global user.email "circleci@project-helix.io"
+      - run:
+          name: prepare test git user
+          command: git config --global user.name "CircleCi Build"
+      - checkout
+      - run: choco install nodejs --version 10.16.0
+      - run: npm install
+      - run: mkdir junit
 
-    - run:
-        name: prepare test git user
-        command: git config --global user.email "you@example.com" && git config --global user.name "Your Name"
+      # test & get code coverage
+      - run:
+          name: Test and Code Coverage
+          command: npm run test-ci-win
+          environment:
+            MOCHA_FILE: junit/test-results.xml
 
-    # test & get code coverage
-    - run:
-        name: Running Tests with Snyk Agent
-        command: node snykmocha.js
+      - store_test_results:
+          path: junit
+
+      - store_artifacts:
+          path: junit  
 
   build:
     parallelism: 4
@@ -104,11 +118,12 @@ workflows:
     - publish-pre-release:
         requires:
         - build
+        - build_win
         filters:
           branches:
             only: master
     - build
-    - snyk
+    - build_win
 
   smoke:
     jobs:

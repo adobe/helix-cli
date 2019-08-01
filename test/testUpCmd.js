@@ -62,7 +62,7 @@ describe('Integration test for up command', function suite() {
   });
 
   afterEach(async () => {
-    // await fse.remove(testRoot);
+    await fse.remove(testRoot);
   });
 
   it('up command fails outside git repository', async () => {
@@ -120,9 +120,9 @@ describe('Integration test for up command', function suite() {
         try {
           await assertHttpDom(`http://localhost:${cmd.project.server.port}/index.html`, 200, 'simple_response.html');
           await assertHttp(`http://localhost:${cmd.project.server.port}/welcome.txt`, 200, 'welcome_response.txt');
-          myDone();
+          return myDone();
         } catch (e) {
-          myDone(e);
+          return myDone(e);
         }
       })
       .on('stopped', () => {

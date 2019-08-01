@@ -24,8 +24,8 @@ describe('Test Junit Report Builder', () => {
     root = await createTestRoot();
   });
 
-  afterEach(() => {
-    // fs.removeSync(root);
+  afterEach(async () => {
+    await fs.remove(root);
   });
 
   it('Responses can be appended', () => {

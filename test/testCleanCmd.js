@@ -14,7 +14,6 @@
 
 const path = require('path');
 const fs = require('fs-extra');
-const assert = require('assert');
 const sinon = require('sinon');
 
 const {
@@ -38,6 +37,10 @@ describe('Integration test for clean', () => {
     cacheDir = path.resolve(testRoot, '.hlx/cache');
     await fs.copy(TEST_DIR, testRoot);
     return true;
+  });
+
+  afterEach(async () => {
+    await fs.remove(testRoot);
   });
 
   it('clean command succeeds and removes files', async () => {
@@ -86,12 +89,10 @@ describe('Integration test for clean', () => {
     await fs.copy(path.resolve(testRoot, 'src', 'html.htl'), testFile1);
     const stub = sinon.stub(fs, 'remove')
       .throws(new Error('oops'));
-    assert.doesNotThrow(async () => {
-      await new CleanCommand()
-        .withDirectory(testRoot)
-        .withTargetDir(buildDir)
-        .run();
-      stub.restore();
-    });
+    await new CleanCommand()
+      .withDirectory(testRoot)
+      .withTargetDir(buildDir)
+      .run();
+    stub.restore();
   });
 });

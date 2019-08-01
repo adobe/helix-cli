@@ -69,8 +69,9 @@ describe('hlx deploy (Integration)', () => {
     });
   });
 
-  afterEach(() => {
+  afterEach(async () => {
     $.cd(cwd);
+    await fs.remove(testRoot);
   });
 
   it('deploy fails if no helix-config is present.', async () => {

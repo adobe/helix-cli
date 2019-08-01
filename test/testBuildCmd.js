@@ -33,6 +33,10 @@ describe('Integration test for build', function suite() {
     return true;
   });
 
+  afterEach(async () => {
+    await fs.remove(testRoot);
+  });
+
   it('build command succeeds and produces files', async () => {
     await new BuildCommand()
       .withFiles(['test/integration/src/**/*.htl', 'test/integration/src/**/*.js'])
