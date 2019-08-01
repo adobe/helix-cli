@@ -14,7 +14,6 @@
 
 const path = require('path');
 const fs = require('fs-extra');
-const assert = require('assert');
 const sinon = require('sinon');
 
 const {
@@ -91,9 +90,9 @@ describe('Integration test for clean', () => {
     const stub = sinon.stub(fs, 'remove')
       .throws(new Error('oops'));
     await new CleanCommand()
-        .withDirectory(testRoot)
-        .withTargetDir(buildDir)
-        .run();
+      .withDirectory(testRoot)
+      .withTargetDir(buildDir)
+      .run();
     stub.restore();
   });
 });

@@ -25,7 +25,9 @@ git.plugins.set('fs', require('fs'));
 
 const GitUtils = require('../src/git-utils');
 
-const GIT_USER_HOME = path.resolve(__dirname, 'fixtures/gitutils');
+const GIT_USER_HOME = path.resolve(__dirname, 'fixtures', 'gitutils');
+
+const isNotWindows = () => (process.platform !== 'win32');
 
 if (!shell.which('git')) {
   shell.echo('Sorry, this tests requires git');
@@ -82,12 +84,8 @@ describe('Testing GitUtils', () => {
     assert.equal(await GitUtils.isDirty(testRoot, GIT_USER_HOME), true);
   });
 
-  it('isDirty #unit with submodules', async function test() {
-    if (process.platform === 'win32') {
-      // windows has somehow problems wit adding file:// submodules. so we skip for now.
-      this.skip();
-      return;
-    }
+  // windows has somehow problems wit adding file:// submodules. so we skip for now.
+  condit('isDirty #unit with submodules', isNotWindows, async () => {
     // https://github.com/adobe/helix-cli/issues/614
     const moduleRoot = await createTestRoot();
 
@@ -134,11 +132,7 @@ describe('Testing GitUtils', () => {
     assert.equal(await GitUtils.isDirty(testRoot, GIT_USER_HOME), false);
   });
 
-  it('isDirty #unit with unix socket', async function socketTest() {
-    if (process.platform === 'win32') {
-      this.skip();
-      return;
-    }
+  condit('isDirty #unit with unix socket', isNotWindows, async () => {
     assert.equal(await GitUtils.isDirty(testRoot, GIT_USER_HOME), false);
 
     await new Promise((resolve) => {
