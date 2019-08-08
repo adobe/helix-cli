@@ -1,3 +1,10 @@
+## [4.9.11](https://github.com/adobe/helix-cli/compare/v4.9.10...v4.9.11) (2019-08-08)
+
+
+### Bug Fixes
+
+* **deps:** update any ([998500f](https://github.com/adobe/helix-cli/commit/998500f))
+
 ## [4.9.10](https://github.com/adobe/helix-cli/compare/v4.9.9...v4.9.10) (2019-07-29)
 
 
