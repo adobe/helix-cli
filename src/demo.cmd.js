@@ -34,12 +34,15 @@ const FILENAME_MAPPING = {
 function execAsync(cmd) {
   return new Promise((resolve, reject) => {
     shell.exec(cmd, (code, stdout, stderr) => {
+
       if (code === 0) {
-        resolve(0);
-      } else {
-        reject(stderr);
+        resolve(code);
+      }else if (code === 127){
+        resolve(127);
+      }else{
+        reject(stderr)
       }
-    });
+    })
   });
 }
 
@@ -100,12 +103,26 @@ class InitCommand {
     }
 
     // #181 cover edge case: make sure git is properly configured
-    if (!await fse.pathExists(`${os.homedir()}/.gitconfig`)) {
-      throw new Error(`
-It seems like Git has not yet been setup on this system. 
-
-See https://git-scm.com/book/en/v2/Getting-Started-First-Time-Git-Setup for more information.  
-`);
+    try{
+      if (await execAsync('git --version') === 0){
+        if (!await fse.pathExists(`${os.homedir()}/.gitconfig`)) {
+          throw new Error(
+            `
+            Git installed, but .gitconfig file not detected; try running git config
+            `
+          );
+        }
+      }
+      else{
+        throw new Error(
+        `          It seems like Git has not yet been setup on this system. 
+        See https://git-scm.com/book/en/v2/Getting-Started-First-Time-Git-Setup for more information.
+        `
+        );
+      }
+    }
+    catch(e){
+      throw e
     }
 
     this._padding = this._name.length + 45;
