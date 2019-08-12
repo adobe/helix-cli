@@ -16,9 +16,11 @@ const assert = require('assert');
 const path = require('path');
 const fs = require('fs-extra');
 const $ = require('shelljs');
+const sinon = require('sinon');
 const { assertFile, createTestRoot } = require('./utils.js');
 
 const DemoCommand = require('../src/demo.cmd');
+const execAsync = require('../src/demo.cmd').execAsync
 
 const pwd = process.cwd();
 
@@ -66,6 +68,12 @@ describe('Integration test for demo command', function suite() {
     assertFile(path.resolve(testDir, 'project1', 'htdocs/favicon.ico'));
   });
 
+  
+  it('execAsync returns correctctly in every case', async () =>{
+    assert.equal(0, await execAsync('git --version'));
+    assert.equal(127, await execAsync('fakecommanddummy'));
+  });
+  
   it('demo does not leave any files not checked in', async () => {
     await new DemoCommand()
       .withDirectory(testDir)
@@ -129,6 +137,8 @@ describe('Integration test for demo command', function suite() {
       const status = $.exec('git status --porcelain', { silent: true });
       assert.equal('', status.stdout);
     });
+
+    //it('demo checks for existence of git command')
 
     after(async () => {
       // cleanup
