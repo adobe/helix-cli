@@ -37,30 +37,31 @@ describe('Integration test for demo command', function suite() {
   });
 
   it('demo execAsync if/else branching correct', async () => {
-    var demoInstance = new DemoCommand();
+    const demoInstance = new DemoCommand();
     assert.equal(0, await demoInstance.execAsync('git --version'));
     assert.equal(127, await demoInstance.execAsync('falseCommandDummy'));
   });
 
   it('test for resolve upon finding Git', async () => {
-    var demoInstance = new DemoCommand();
-    var stub = sinon.stub(demoInstance, 'execAsync').returns(0);
+    const demoInstance = new DemoCommand();
+    // eslint-disable-next-line no-unused-vars
+    sinon.stub(demoInstance, 'execAsync').returns(0);
 
     assert.doesNotReject(demoInstance
-    .withDirectory(testDir)
-    .withName('project1')
-    .withType('full')
-    .run());
+      .withDirectory(testDir)
+      .withName('project1')
+      .withType('full')
+      .run());
   });
 
   it('test for failure, when Git is not installed', async () => {
-    var demoInstance = new DemoCommand();
-    var stubs = sinon.stub(demoInstance, 'execAsync').returns(127);
+    const demoInstance = new DemoCommand();
+    sinon.stub(demoInstance, 'execAsync').returns(127);
 
     assert.rejects(demoInstance.withDirectory(testDir)
-    .withName('project1')
-    .withType('full')
-    .run());
+      .withName('project1')
+      .withType('full')
+      .run());
   });
 
   it('demo type simple creates all files', async () => {
