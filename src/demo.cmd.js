@@ -31,18 +31,6 @@ const FILENAME_MAPPING = {
   _env: '.env',
 };
 
-function execAsync(cmd) {
-  return new Promise((resolve, reject) => {
-    shell.exec(cmd, (code, stdout, stderr) => {
-      if (code === 0) {
-        resolve(0);
-      } else {
-        reject(stderr);
-      }
-    });
-  });
-}
-
 class InitCommand {
   constructor(logger = makeLogger()) {
     this._logger = logger;
@@ -50,6 +38,20 @@ class InitCommand {
     this._dir = process.cwd();
     this._padding = 50;
     this._type = 'simple';
+  }
+
+  execAsync(cmd) {
+    return new Promise((resolve, reject) => {
+      shell.exec(cmd, (code, stdout, stderr) => {
+        if (code === 0) {
+          resolve(code);
+        } else if (code === 127) {
+          resolve(code);
+        } else {
+          reject(stderr);
+        }
+      });
+    });
   }
 
   withName(name) {
@@ -78,11 +80,11 @@ class InitCommand {
     const pwd = shell.pwd();
     try {
       shell.cd(dir);
-      await execAsync('git init -q');
-      await execAsync('git add -A');
+      await this.execAsync('git init -q');
+      await this.execAsync('git add -A');
       // https://github.com/adobe/helix-cli/issues/280
       // bypass pre-commit and commit-msg hooks when doing initial commit (-n,--no-verify)
-      await execAsync('git commit -q -n -m"Initial commit."');
+      await this.execAsync('git commit -q -n -m"Initial commit."');
       this.msg(chalk.yellow('initializing git repository'));
     } catch (e) {
       throw Error(`Unable to initialize git repository: ${e}`);
@@ -100,12 +102,26 @@ class InitCommand {
     }
 
     // #181 cover edge case: make sure git is properly configured
-    if (!await fse.pathExists(`${os.homedir()}/.gitconfig`)) {
-      throw new Error(`
-It seems like Git has not yet been setup on this system. 
-
-See https://git-scm.com/book/en/v2/Getting-Started-First-Time-Git-Setup for more information.  
-`);
+    try{
+      if (await this.execAsync('git --version') === 0){
+        if (!await fse.pathExists(`${os.homedir()}/.gitconfig`)) {
+          throw new Error(
+            `
+            Git installed, but .gitconfig file not detected; try running git config
+            `
+          );
+        }
+      }
+      else{
+        throw new Error(
+        `          It seems like Git has not yet been setup on this system. 
+        See https://git-scm.com/book/en/v2/Getting-Started-First-Time-Git-Setup for more information.
+        `
+        );
+      }
+    }
+    catch(e){
+      throw e
     }
 
     this._padding = this._name.length + 45;
@@ -180,5 +196,4 @@ Next Step: start the development server and test the generated site with:
 {grey $ hlx up}`);
   }
 }
-
 module.exports = InitCommand;
