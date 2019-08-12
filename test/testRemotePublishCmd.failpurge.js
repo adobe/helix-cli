@@ -30,7 +30,7 @@ describe('hlx publish --remote (fail purge)', () => {
 
     RemotePublishCommand = proxyquire('../src/remotepublish.cmd', {
       '@adobe/fastly-native-promises': () => ({
-        transact: fn => fn(3),
+        transact: (fn) => fn(3),
         writeDictItem,
         purgeAll: async () => {
           throw new Error('Cannot purge.');

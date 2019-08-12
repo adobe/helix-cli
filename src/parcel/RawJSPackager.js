@@ -147,7 +147,7 @@ class RawJSPackager extends Packager {
     // cannot rely *only* on generated JS for deduplication because paths like
     // `../` can cause 2 identical JS files to behave differently depending on
     // where they are located on the filesystem
-    const deps = Array.from(asset.depAssets.values(), dep => dep.name).sort();
+    const deps = Array.from(asset.depAssets.values(), (dep) => dep.name).sort();
     return objectHash([asset.generated.js, deps]);
   }
 

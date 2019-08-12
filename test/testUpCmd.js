@@ -52,7 +52,7 @@ describe('Integration test for up command', function suite() {
 
   beforeEach(async function before() {
     this.polly.server.any()
-      .filter(req => req.headers.host.startsWith('localhost') || req.headers.host.startsWith('127.0.0.1'))
+      .filter((req) => req.headers.host.startsWith('localhost') || req.headers.host.startsWith('127.0.0.1'))
       .passthrough();
 
     testRoot = await createTestRoot();

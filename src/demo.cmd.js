@@ -147,7 +147,7 @@ See https://git-scm.com/book/en/v2/Getting-Started-First-Time-Git-Setup for more
         // supported by node-packer
         return fse.ensureDir(path.dirname(dstFile))
           .then(() => fse.readFile(srcFile))
-          .then(content => fse.writeFile(dstFile, content));
+          .then((content) => fse.writeFile(dstFile, content));
       }
       return fse.copy(srcFile, dstFile);
     }

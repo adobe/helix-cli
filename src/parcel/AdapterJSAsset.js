@@ -28,8 +28,8 @@ class AdapterJSAsset extends JSAsset {
   static isPureScript(basename) {
     // create pairwise combinations of extension and template name
     const exts = into(flat(PURE_EXTENSIONS
-      .map(ext => PURE_TEMPLATES
-        .map(template => `${ext}.${template}`))), Array);
+      .map((ext) => PURE_TEMPLATES
+        .map((template) => `${ext}.${template}`))), Array);
     // use early termination, so that the rest of the statement doesn't
     // have to be evaluated once the first match has been found.
     const matches = exts.reduce((match, ext) => match
@@ -86,7 +86,7 @@ class AdapterJSAsset extends JSAsset {
           ],
         });
         // we mark the asset as dynamic so it won't get merged into this source.
-        super.addDependency(name, Object.assign({ dynamic: true, resolved }, opts));
+        super.addDependency(name, { dynamic: true, resolved, ...opts });
       } catch (e) {
         // the exact stack trace is not relevant to the end user.
         e.stack = null;

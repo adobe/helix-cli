@@ -72,6 +72,7 @@
     "yargs": "^13.2.4"
   },
   "devDependencies": {
+    "@adobe/eslint-config-helix": "^1.0.0",
     "@adobe/helix-testutils": "0.2.0",
     "@pollyjs/adapter-fetch": "2.6.2",
     "@pollyjs/adapter-node-http": "2.6.2",
@@ -84,11 +85,8 @@
     "commitizen": "4.0.3",
     "cz-conventional-changelog": "3.0.2",
     "eslint": "6.1.0",
-    "eslint-config-airbnb": "18.0.0",
     "eslint-plugin-header": "3.0.0",
     "eslint-plugin-import": "2.18.2",
-    "eslint-plugin-jsx-a11y": "6.2.3",
-    "eslint-plugin-react": "7.14.3",
     "js-yaml": "3.13.1",
     "jsdom": "15.1.1",
     "lint-staged": "9.2.1",

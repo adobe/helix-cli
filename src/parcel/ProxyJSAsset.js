@@ -24,7 +24,7 @@ class ProxyJSAsset extends JSAsset {
     if (isRelativeImport) {
       // we mark the asset as dynamic so it won't get merged into this source.
       const resolved = path.resolve(path.dirname(this.name), name);
-      super.addDependency(name, Object.assign({ dynamic: true, resolved }, opts));
+      super.addDependency(name, { dynamic: true, resolved, ...opts });
     }
   }
 }

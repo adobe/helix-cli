@@ -83,7 +83,7 @@ describe('hlx publish --custom-vcl (check requests)', () => {
 
     ProxiedRemotePublishCommand = proxyquire('../src/remotepublish.cmd', {
       '@adobe/fastly-native-promises': () => ({
-        transact: fn => fn(3),
+        transact: (fn) => fn(3),
         writeDictItem,
         purgeAll,
       }),

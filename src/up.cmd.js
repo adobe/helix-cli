@@ -57,7 +57,7 @@ class UpCommand extends BuildCommand {
 
   withLocalRepo(value = []) {
     if (Array.isArray(value)) {
-      this._localRepos.push(...value.filter(r => !!r));
+      this._localRepos.push(...value.filter((r) => !!r));
     } else if (value) {
       this._localRepos.push(value);
     }

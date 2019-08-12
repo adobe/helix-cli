@@ -61,7 +61,9 @@ describe('hlx deploy', () => {
 
   afterEach(() => {
     clearHelixEnv();
-    stubs.forEach((s) => { s.restore(); });
+    stubs.forEach((s) => {
+      s.restore();
+    });
   });
 
   it('hlx deploy required auth', (done) => {

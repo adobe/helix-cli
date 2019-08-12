@@ -200,10 +200,12 @@ class RemotePublishCommand extends AbstractCommand {
       this.log.info(`✅  A new version has been prepared, but not activated. See version ${this._version} in the Fastly UI at:`);
       this.log.info(chalk.grey(`https://manage.fastly.com/configure/services/${this._fastly_namespace}/versions/${this._version}/domains`));
     } else {
-      const urls = this.config.strains.getByFilter(strain => strain.url).map(strain => strain.url);
+      const urls = this.config.strains
+        .getByFilter((strain) => strain.url)
+        .map((strain) => strain.url);
 
       this.log.info(`✅  The following strains have been published and version ${this._version} is now online:`);
-      this.config.strains.getByFilter(strain => !!strain.url).forEach((strain) => {
+      this.config.strains.getByFilter((strain) => !!strain.url).forEach((strain) => {
         const { url } = strain;
         urls.push(url);
         this.log.info(`- ${strain.name}: ${url}`);
@@ -388,7 +390,7 @@ ${e}`);
       }
       // find the fastlyId in the cache
       const cacheInfo = info.config.caches
-        .find(cache => cache.fastlyServiceId === this._fastly_namespace);
+        .find((cache) => cache.fastlyServiceId === this._fastly_namespace);
       if (!cacheInfo) {
         this.log.error(`Internal error: ${repo.key} status does have a configuration entry for given fastly service id.`);
         reposErrors.push(repo);
