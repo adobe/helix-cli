@@ -34,15 +34,14 @@ const FILENAME_MAPPING = {
 function execAsync(cmd) {
   return new Promise((resolve, reject) => {
     shell.exec(cmd, (code, stdout, stderr) => {
-
       if (code === 0) {
         resolve(code);
-      }else if (code === 127){
+      } else if (code === 127) {
         resolve(127);
-      }else{
-        reject(stderr)
+      } else {
+        reject(stderr);
       }
-    })
+    });
   });
 }
 
@@ -103,26 +102,21 @@ class InitCommand {
     }
 
     // #181 cover edge case: make sure git is properly configured
-    try{
-      if (await execAsync('git --version') === 0){
+    try {
+      if (await execAsync('git --version') === 0) {
         if (!await fse.pathExists(`${os.homedir()}/.gitconfig`)) {
           throw new Error(
-            `
-            Git installed, but .gitconfig file not detected; try running git config
-            `
+            'Git installed but .gitconfig file. not detected try running git config.',
           );
         }
-      }
-      else{
+      } else {
         throw new Error(
-        `          It seems like Git has not yet been setup on this system. 
-        See https://git-scm.com/book/en/v2/Getting-Started-First-Time-Git-Setup for more information.
-        `
+          `It seems like Git has not yet been setup on this system. 
+        See https://git-scm.com/book/en/v2/Getting-Started-First-Time-Git-Setup for more information.`,
         );
       }
-    }
-    catch(e){
-      throw e
+    } catch (e) {
+      throw e;
     }
 
     this._padding = this._name.length + 45;
@@ -198,4 +192,7 @@ Next Step: start the development server and test the generated site with:
   }
 }
 
-module.exports = InitCommand;
+module.exports = InitCommand
+module.exports.execAsync = function (param1){
+    return execAsync(param1);
+}
