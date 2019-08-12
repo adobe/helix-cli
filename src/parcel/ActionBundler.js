@@ -105,7 +105,7 @@ class ActionBundler {
       resource: '/jsdom/lib/jsdom/utils.js',
     }];
 
-    const matchWarning = rules => (w) => {
+    const matchWarning = (rules) => (w) => {
       const msg = w.message;
       const res = w.module.resource;
       return !rules.find((r) => {

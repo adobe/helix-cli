@@ -208,7 +208,7 @@ class PackageCommand extends AbstractCommand {
 
     // get the list of scripts from the info files
     const infos = [...glob.sync(`${this._target}/**/*.info.json`)];
-    const scriptInfos = await Promise.all(infos.map(info => fs.readJSON(info)));
+    const scriptInfos = await Promise.all(infos.map((info) => fs.readJSON(info)));
 
     // resolve dependencies
     let scripts = flattenDependencies(scriptInfos);
@@ -222,10 +222,10 @@ class PackageCommand extends AbstractCommand {
           delete script.zipFile;
         }
       }));
-      scripts.filter(script => script.zipFile).forEach((script) => {
+      scripts.filter((script) => script.zipFile).forEach((script) => {
         this.emit('ignore-package', script);
       });
-      scripts = scripts.filter(script => !script.zipFile);
+      scripts = scripts.filter((script) => !script.zipFile);
     }
 
     if (scripts.length > 0) {
@@ -254,11 +254,11 @@ class PackageCommand extends AbstractCommand {
       await this.createBundles(scripts, bar);
 
       // package actions
-      await Promise.all(scripts.map(script => this.createPackage(script, bar)));
+      await Promise.all(scripts.map((script) => this.createPackage(script, bar)));
 
       // write back the updated infos
       // eslint-disable-next-line max-len
-      await Promise.all(scripts.map(script => fs.writeJson(script.infoFile, script, { spaces: 2 })));
+      await Promise.all(scripts.map((script) => fs.writeJson(script.infoFile, script, { spaces: 2 })));
     }
 
     this.log.info('✅  packaging completed');

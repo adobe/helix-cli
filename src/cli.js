@@ -23,7 +23,7 @@ const MIN_MSG = 'You need at least one command.';
 if (process.env.NODE_OPTIONS) {
   process.env.NODE_OPTIONS = process.env.NODE_OPTIONS
     .split(' ')
-    .filter(opt => opt.indexOf('--inspect') === -1)
+    .filter((opt) => opt.indexOf('--inspect') === -1)
     .join(' ');
 }
 
@@ -34,7 +34,7 @@ function envAwareStrict(args, aliases) {
   const hlxEnv = {};
   Object
     .keys(process.env)
-    .filter(key => key.startsWith('HLX_'))
+    .filter((key) => key.startsWith('HLX_'))
     .forEach((key) => {
       hlxEnv[camelcase(key.substring(4))] = key;
     });
@@ -119,7 +119,7 @@ class CLI {
 
   run(args) {
     const argv = yargs();
-    Object.values(this._commands).forEach(cmd => argv.command(cmd));
+    Object.values(this._commands).forEach((cmd) => argv.command(cmd));
 
     const ret = logArgs(argv)
       .scriptName('hlx')

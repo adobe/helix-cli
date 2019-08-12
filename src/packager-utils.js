@@ -60,7 +60,7 @@ function flattenDependencies(infos) {
   });
 
   // return the top level ones
-  return infos.filter(info => !info.processed);
+  return infos.filter((info) => !info.processed);
 }
 
 module.exports = {

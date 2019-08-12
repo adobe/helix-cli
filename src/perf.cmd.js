@@ -9,9 +9,7 @@
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-
-'use strict';
-
+/* eslint-disable max-classes-per-file */
 const chalk = require('chalk');
 const request = require('request-promise-native');
 const path = require('path');
@@ -110,12 +108,13 @@ class PerfCommand extends AbstractCommand {
    * @returns true if successful, false if unsuccessful and undefined if the name isn't valid
    */
   format(metrics, name, limit) {
-    const metric = metrics.filter(m => m.name === name).length >= 1
-      ? metrics.filter(m => m.name === name)[0] : null;
+    const metric = metrics.filter((m) => m.name === name).length >= 1
+      ? metrics.filter((m) => m.name === name)[0] : null;
     if (metric && metric.name.endsWith('-score')) {
       this.log.info(`  ${chalk.gray(`${metric.label}: `)}${PerfCommand.formatScore(metric.value, limit)}`);
       return PerfCommand.formatScore(metric.value, limit).indexOf('(failed)') === -1;
-    } if (metric) {
+    }
+    if (metric) {
       this.log.info(`  ${chalk.gray(`${metric.label}: `)}${PerfCommand.formatMeasure(metric.value, limit)}`);
       return PerfCommand.formatMeasure(metric.value, limit).indexOf('(failed)') === -1;
     }
@@ -131,14 +130,14 @@ class PerfCommand extends AbstractCommand {
       }
       return undefined;
     });
-    if (strainresults.length === 0 || strainresults.every(val => val === undefined)) {
+    if (strainresults.length === 0 || strainresults.every((val) => val === undefined)) {
       const perf = this.format(response.metrics, 'lighthouse-performance-score', 80);
       const access = this.format(response.metrics, 'lighthouse-accessibility-score', 80);
       // use the default metrics
       return access && perf;
     }
     // make sure all tests have been passed
-    return strainresults.every(result => result === true || result === undefined);
+    return strainresults.every((result) => result === true || result === undefined);
   }
 
   async run() {
@@ -149,13 +148,14 @@ class PerfCommand extends AbstractCommand {
       .getByFilter(({ urls }) => urls.length)
       .map((strain) => {
         const { location, device, connection } = this.getStrainParams(strain);
-        return strain.urls.map(url => Object.assign({}, {
+        return strain.urls.map((url) => ({
           url,
           location,
           device,
           connection,
           strain: strain.name,
-        }, strain.perf));
+          ...strain.perf,
+        }));
       });
     const flatttests = _.flatten(tests);
     const uri = 'https://adobeioruntime.net/api/v1/web/helix/helix-services/perf@v1';
@@ -174,7 +174,7 @@ class PerfCommand extends AbstractCommand {
       let results = [];
       while (retries < 10) {
         retries += 1;
-        const completed = results.filter(res => typeof res === 'object').length;
+        const completed = results.filter((res) => typeof res === 'object').length;
         console.log(chalk.yellow(`Waiting for test results (${completed}/${flatttests.length})`));
         // eslint-disable-next-line no-await-in-loop
         results = await request.post(uri, {
@@ -210,8 +210,8 @@ class PerfCommand extends AbstractCommand {
         this._junit.writeResults();
       }
 
-      const fail = formatted.filter(result => result === false).length;
-      const succeed = formatted.filter(result => result === true).length;
+      const fail = formatted.filter((result) => result === false).length;
+      const succeed = formatted.filter((result) => result === true).length;
       if (skipped) {
         console.log(chalk.yellow(`${skipped} tests skipped due to 10 minute timeout`));
       }

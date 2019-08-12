@@ -45,8 +45,8 @@ function collectMetadata(req, logger) {
  */
 function extractCommittersFromMetadata(meta) {
   const res = Object.values(meta)
-    .filter(commit => !!commit.author)
-    .map(commit => ({
+    .filter((commit) => !!commit.author)
+    .map((commit) => ({
       avatar_url: commit.author.avatar_url,
       display: `${commit.commit.author.name} | ${commit.commit.author.email}`,
     }));

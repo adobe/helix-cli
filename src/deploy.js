@@ -98,7 +98,7 @@ module.exports = function deploy() {
         })
         .array('default')
         .nargs('default', 2)
-        .coerce('default', arg => arg.reduce((result, value, index, array) => {
+        .coerce('default', (arg) => arg.reduce((result, value, index, array) => {
           const res = {};
           if (index % 2 === 0) {
             res[value.toUpperCase()] = array[index + 1];

@@ -39,7 +39,7 @@ describe('hlx publish --remote (with filters)', () => {
 
     RemotePublishCommand = proxyquire('../src/remotepublish.cmd', {
       '@adobe/fastly-native-promises': () => ({
-        transact: fn => fn(3),
+        transact: (fn) => fn(3),
         writeDictItem,
         purgeAll,
       }),
@@ -162,7 +162,7 @@ describe('hlx publish --remote (with filters, but without config)', () => {
 
     RemotePublishCommand = proxyquire('../src/remotepublish.cmd', {
       '@adobe/fastly-native-promises': () => ({
-        transact: fn => fn(3),
+        transact: (fn) => fn(3),
         writeDictItem,
         purgeAll,
       }),

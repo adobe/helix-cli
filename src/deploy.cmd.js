@@ -355,9 +355,9 @@ Alternatively you can auto-add one using the {grey --add <name>} option.`);
 
     // get the list of scripts from the info files
     const infos = [...glob.sync(`${this._target}/**/*.info.json`)];
-    const scriptInfos = await Promise.all(infos.map(info => fs.readJSON(info)));
+    const scriptInfos = await Promise.all(infos.map((info) => fs.readJSON(info)));
     const scripts = scriptInfos
-      .filter(script => script.zipFile)
+      .filter((script) => script.zipFile)
       // generate action names
       .map((script) => {
         // eslint-disable-next-line no-param-reassign
@@ -395,9 +395,9 @@ Alternatively you can auto-add one using the {grey --add <name>} option.`);
 
     // read files ...
     const read = scripts
-      .filter(script => script.zipFile) // skip empty zip files
-      .map(script => fs.readFile(script.zipFile)
-        .then(action => ({ script, action })));
+      .filter((script) => script.zipFile) // skip empty zip files
+      .map((script) => fs.readFile(script.zipFile)
+        .then((action) => ({ script, action })));
 
     // get API url of resolve action
     if (this._resolveGitRefSvc) {
@@ -443,7 +443,7 @@ Alternatively you can auto-add one using the {grey --add <name>} option.`);
     }
 
     // ... and deploy
-    const deployed = read.map(p => p.then(({ script, action }) => {
+    const deployed = read.map((p) => p.then(({ script, action }) => {
       const actionoptions = {
         name: script.actionName,
         'User-Agent': useragent,

@@ -45,7 +45,7 @@ module.exports = function up() {
           default: [],
         })
         // allow for comma separated values
-        .coerce('localRepo', value => value.reduce((acc, curr) => {
+        .coerce('localRepo', (value) => value.reduce((acc, curr) => {
           if (curr === false) {
             // do nothing
           } else if (!curr) {

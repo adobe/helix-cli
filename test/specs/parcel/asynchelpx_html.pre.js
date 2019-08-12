@@ -42,8 +42,8 @@ async function collectMetadata(req, logger) {
 
 async function extractCommittersFromMetadata(meta) {
   const res = Object.values(meta)
-    .filter(commit => !!commit.author)
-    .map(commit => ({
+    .filter((commit) => !!commit.author)
+    .map((commit) => ({
       avatar_url: commit.author.avatar_url,
       display: `${commit.commit.author.name} | ${commit.commit.author.email}`,
     }));
@@ -71,7 +71,7 @@ async function extractLastModifiedFromMetadata(meta = [], logger) {
 async function pre(context, config) {
   const { logger } = config;
   try {
-    const myContext = Object.assign({}, context);
+    const myContext = { ...context };
 
     logger.debug('setting context path');
     myContext.content.contextPath = 'myinjectedcontextpath';

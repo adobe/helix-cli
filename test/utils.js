@@ -36,7 +36,7 @@ function initGit(dir, remote) {
 }
 
 function clearHelixEnv() {
-  Object.keys(process.env).filter(key => key.startsWith('HLX_')).forEach((key) => {
+  Object.keys(process.env).filter((key) => key.startsWith('HLX_')).forEach((key) => {
     delete process.env[key];
   });
 }

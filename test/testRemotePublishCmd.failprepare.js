@@ -32,7 +32,7 @@ describe('hlx publish --remote (fail prepare service config)', () => {
 
     RemotePublishCommand = proxyquire('../src/remotepublish.cmd', {
       '@adobe/fastly-native-promises': () => ({
-        transact: fn => fn(3),
+        transact: (fn) => fn(3),
         writeDictItem,
         purgeAll,
       }),

@@ -35,7 +35,7 @@ class GitUtils {
     const STAGE = 3;
     const matrix = await git.statusMatrix({ dir });
     let modified = matrix
-      .filter(row => !(row[HEAD] === row[WORKDIR] && row[WORKDIR] === row[STAGE]));
+      .filter((row) => !(row[HEAD] === row[WORKDIR] && row[WORKDIR] === row[STAGE]));
     if (modified.length === 0) {
       return false;
     }
@@ -48,7 +48,7 @@ class GitUtils {
       Object.keys(modules).forEach((key) => {
         const module = modules[key];
         if (module.path) {
-          modified = modified.filter(row => !row[0].startsWith(module.path));
+          modified = modified.filter((row) => !row[0].startsWith(module.path));
         }
       });
       if (modified.length === 0) {
@@ -64,22 +64,22 @@ class GitUtils {
     if (await fse.pathExists(globalIgnore)) {
       const ign = ignore()
         .add(await fse.readFile(globalIgnore, 'utf-8'));
-      modified = modified.filter(row => !ign.ignores(row[0]));
+      modified = modified.filter((row) => !ign.ignores(row[0]));
       if (modified.length === 0) {
         return false;
       }
     }
 
     // filter out the deleted ones for the checks below
-    const existing = modified.filter(row => row[WORKDIR] > 0).map(row => row[0]);
+    const existing = modified.filter((row) => row[WORKDIR] > 0).map((row) => row[0]);
     if (existing.length < modified.length) {
       return true;
     }
 
     // we also need to filter out the non-files and non-symlinks.
     // see: https://github.com/isomorphic-git/isomorphic-git/issues/705
-    const stats = await Promise.all(existing.map(file => fse.lstat(path.resolve(dir, file))));
-    const files = stats.filter(stat => stat.isFile() || stat.isSymbolicLink());
+    const stats = await Promise.all(existing.map((file) => fse.lstat(path.resolve(dir, file))));
+    const files = stats.filter((stat) => stat.isFile() || stat.isSymbolicLink());
     return files.length > 0;
   }
 
@@ -141,7 +141,7 @@ class GitUtils {
         sha: await git.resolveRef({ dir, ref: obj.object.object }),
       } : { tag, sha: oid };
     }));
-    const tag = tagCommitShas.find(entry => entry.sha === rev);
+    const tag = tagCommitShas.find((entry) => entry.sha === rev);
     return typeof tag === 'object' ? tag.tag : currentBranch;
   }
 
@@ -181,7 +181,7 @@ class GitUtils {
    */
   static async getOrigin(dir) {
     try {
-      const rmt = (await git.listRemotes({ dir })).find(entry => entry.remote === 'origin');
+      const rmt = (await git.listRemotes({ dir })).find((entry) => entry.remote === 'origin');
       return typeof rmt === 'object' ? rmt.url : '';
     } catch (e) {
       // don't fail if directory is not a git repository
@@ -223,7 +223,8 @@ class GitUtils {
       .catch(async (err) => {
         if (err.code === 'ResolveRefError') {
           // fallback: is ref a shortened oid prefix?
-          const oid = await git.expandOid({ dir, oid: ref }).catch(() => { throw err; });
+          const oid = await git.expandOid({ dir, oid: ref })
+            .catch(() => { throw err; });
           return git.resolveRef({ dir, ref: oid });
         }
         // re-throw
@@ -243,10 +244,10 @@ class GitUtils {
    */
   static async getRawContent(dir, ref, pathName) {
     return GitUtils.resolveCommit(dir, ref)
-      .then(oid => git.readObject({
+      .then((oid) => git.readObject({
         dir, oid, filepath: pathName, format: 'content',
       }))
-      .then(obj => obj.object);
+      .then((obj) => obj.object);
   }
 }
 

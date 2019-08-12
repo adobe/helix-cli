@@ -50,16 +50,18 @@ class JunitPerformanceReport {
   }
 
   static hasCustomLimits(params = {}) {
-    return Object.values(params).some(v => Number.isInteger(v));
+    return Object.values(params).some((v) => Number.isInteger(v));
   }
 
   static getLimit(params = {}, name) {
     const value = params[name];
     if (Number.isInteger(value)) {
       return value;
-    } if (name === 'lighthouse-performance-score' && !JunitPerformanceReport.hasCustomLimits(params)) {
+    }
+    if (name === 'lighthouse-performance-score' && !JunitPerformanceReport.hasCustomLimits(params)) {
       return 80;
-    } if (name === 'lighthouse-accessibility-score' && !JunitPerformanceReport.hasCustomLimits(params)) {
+    }
+    if (name === 'lighthouse-accessibility-score' && !JunitPerformanceReport.hasCustomLimits(params)) {
       return 80;
     }
     return undefined;
@@ -69,7 +71,8 @@ class JunitPerformanceReport {
     const limit = JunitPerformanceReport.getLimit(params, name);
     if (!limit) {
       return { status: 'skipped', message: `No limit set for ${name}. Value ${value} not considered.` };
-    } if (/-score/.test(name)) {
+    }
+    if (/-score/.test(name)) {
       if (value >= limit) {
         return { status: 'passed', message: `Score ${name} of ${value} meets lower bound of ${limit}` };
       }
