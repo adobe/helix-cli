@@ -138,8 +138,6 @@ describe('Integration test for demo command', function suite() {
       assert.equal('', status.stdout);
     });
 
-    //it('demo checks for existence of git command')
-
     after(async () => {
       // cleanup
       await fs.remove(templateDir);
