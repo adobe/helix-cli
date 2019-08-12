@@ -39,12 +39,11 @@ describe('Integration test for demo command', function suite() {
   it('demo execAsync if/else branching correct', async () => {
     const demoInstance = new DemoCommand();
     assert.equal(0, await demoInstance.execAsync('git --version'));
-    assert.equal(127, await demoInstance.execAsync('falseCommandDummy'));
+    assert.equal(127, await demoInstance.execAsync('falseCommandDummy').catch(() => 127));
   });
 
   it('test for resolve upon finding Git', async () => {
     const demoInstance = new DemoCommand();
-    // eslint-disable-next-line no-unused-vars
     sinon.stub(demoInstance, 'execAsync').returns(0);
 
     assert.doesNotReject(demoInstance
