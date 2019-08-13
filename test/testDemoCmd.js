@@ -11,7 +11,6 @@
  */
 
 /* eslint-env mocha */
-
 const assert = require('assert');
 const path = require('path');
 const fs = require('fs-extra');
@@ -53,9 +52,19 @@ describe('Integration test for demo command', function suite() {
       .run());
   });
 
-  it('test for failure, when Git is not installed and causes error', async () => {
+  it('test for failure, when Git is not installed', async () => {
     const demoInstance = new DemoCommand();
     sinon.stub(demoInstance, 'execAsync').returns(new Error('Dummy Error'));
+
+    assert.rejects(demoInstance.withDirectory(testDir)
+      .withName('project1')
+      .withType('full')
+      .run());
+  });
+
+  it('test for failure, when Git is installed but no .gitconfig', async () => {
+    const demoInstance = new DemoCommand();
+    sinon.stub(demoInstance, 'pExists').returns(false);
 
     assert.rejects(demoInstance.withDirectory(testDir)
       .withName('project1')

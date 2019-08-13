@@ -92,6 +92,11 @@ class InitCommand {
     }
   }
 
+  // eslint-disable-next-line class-methods-use-this
+  async pExists(filename) {
+    return fse.pathExists(filename);
+  }
+
   async run() {
     if (!this._name) {
       throw new Error('init needs name.');
@@ -111,7 +116,7 @@ class InitCommand {
         `,
       );
     }
-    if (!await fse.pathExists(path.resolve(os.homedir(), '.gitconfig'))) {
+    if (!await this.pExists(path.resolve(os.homedir(), '.gitconfig'))) {
       throw new Error(
         `
         Git installed, but .gitconfig file not detected; try running git config
@@ -122,7 +127,7 @@ class InitCommand {
     this._padding = this._name.length + 45;
     const projectDir = path.resolve(path.join(this._dir, this._name));
     const relPath = path.relative(process.cwd(), projectDir);
-    if (await fse.pathExists(projectDir)) {
+    if (await this.pExists(projectDir)) {
       throw new Error(`cowardly rejecting to re-initialize project: ./${relPath}`);
     }
 
