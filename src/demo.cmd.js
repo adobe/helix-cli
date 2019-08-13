@@ -46,8 +46,6 @@ class InitCommand {
       shell.exec(cmd, (code, stdout, stderr) => {
         if (code === 0) {
           resolve(code);
-        } else if (code === 127) {
-          resolve(code);
         } else {
           reject(stderr);
         }
@@ -104,23 +102,21 @@ class InitCommand {
 
     // #181 cover edge case: make sure git is properly configured
     try {
-      if (await this.execAsync('git --version') === 0) {
-        if (!await fse.pathExists(`${os.homedir()}/.gitconfig`)) {
-          throw new Error(
-            `
-            Git installed, but .gitconfig file not detected; try running git config
-            `,
-          );
-        }
-      } else {
-        throw new Error(
-          `          It seems like Git has not yet been setup on this system. 
-        See https://git-scm.com/book/en/v2/Getting-Started-First-Time-Git-Setup for more information.
-        `,
-        );
-      }
+      await this.execAsync('git --version');
     } catch (e) {
-      throw e;
+      throw new Error(
+        `
+      It seems like Git has not yet been setup on this system. 
+      See https://git-scm.com/book/en/v2/Getting-Started-First-Time-Git-Setup for more information.
+        `,
+      );
+    }
+    if (!await fse.pathExists(path.resolve(os.homedir(), '.gitconfig'))) {
+      throw new Error(
+        `
+        Git installed, but .gitconfig file not detected; try running git config
+        `,
+      );
     }
 
     this._padding = this._name.length + 45;

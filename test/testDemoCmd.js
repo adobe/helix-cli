@@ -39,7 +39,7 @@ describe('Integration test for demo command', function suite() {
   it('demo execAsync if/else branching correct', async () => {
     const demoInstance = new DemoCommand();
     assert.equal(0, await demoInstance.execAsync('git --version'));
-    assert.equal(127, await demoInstance.execAsync('falseCommandDummy').catch(() => 127));
+    assert.rejects(await demoInstance.execAsync('falseCommandDummy').catch(result => result));
   });
 
   it('test for resolve upon finding Git', async () => {
@@ -53,9 +53,9 @@ describe('Integration test for demo command', function suite() {
       .run());
   });
 
-  it('test for failure, when Git is not installed', async () => {
+  it('test for failure, when Git is not installed and causes error', async () => {
     const demoInstance = new DemoCommand();
-    sinon.stub(demoInstance, 'execAsync').returns(127);
+    sinon.stub(demoInstance, 'execAsync').returns(new Error('Dummy Error'));
 
     assert.rejects(demoInstance.withDirectory(testDir)
       .withName('project1')
