@@ -35,13 +35,13 @@ describe('Integration test for demo command', function suite() {
     await fs.remove(testDir);
   });
 
-  it('demo execAsync if/else branching correct', async () => {
+  it('execAsync if/else branching correct', async () => {
     const demoInstance = new DemoCommand();
     assert.equal(0, await demoInstance.execAsync('git --version'));
     assert.rejects(await demoInstance.execAsync('falseCommandDummy').catch(result => result));
   });
 
-  it('test for resolve upon finding Git', async () => {
+  it('resolve upon finding Git', async () => {
     const demoInstance = new DemoCommand();
     sinon.stub(demoInstance, 'execAsync').returns(0);
 
@@ -52,7 +52,7 @@ describe('Integration test for demo command', function suite() {
       .run());
   });
 
-  it('test for failure, when Git is not installed', async () => {
+  it('fail when Git is not installed', async () => {
     const demoInstance = new DemoCommand();
     sinon.stub(demoInstance, 'execAsync').returns(new Error('Dummy Error'));
 
@@ -62,7 +62,7 @@ describe('Integration test for demo command', function suite() {
       .run());
   });
 
-  it('test for failure, when Git is installed but no .gitconfig', async () => {
+  it('fail, when Git is installed but no .gitconfig', async () => {
     const demoInstance = new DemoCommand();
     sinon.stub(demoInstance, 'pExists').returns(false);
 
