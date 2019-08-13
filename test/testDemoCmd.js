@@ -11,10 +11,10 @@
  */
 
 /* eslint-env mocha */
-
 const assert = require('assert');
 const path = require('path');
 const fs = require('fs-extra');
+const sinon = require('sinon');
 const $ = require('shelljs');
 const { assertFile, createTestRoot } = require('./utils.js');
 
@@ -33,6 +33,43 @@ describe('Integration test for demo command', function suite() {
   afterEach('Change back to original working dir', async () => {
     process.chdir(pwd);
     await fs.remove(testDir);
+  });
+
+  it('execAsync if/else branching correct', async () => {
+    const demoInstance = new DemoCommand();
+    assert.equal(0, await demoInstance.execAsync('git --version'));
+    assert.rejects(await demoInstance.execAsync('falseCommandDummy').catch(result => result));
+  });
+
+  it('resolve upon finding Git', async () => {
+    const demoInstance = new DemoCommand();
+    sinon.stub(demoInstance, 'execAsync').returns(0);
+
+    assert.doesNotReject(demoInstance
+      .withDirectory(testDir)
+      .withName('project1')
+      .withType('full')
+      .run());
+  });
+
+  it('fail when Git is not installed', async () => {
+    const demoInstance = new DemoCommand();
+    sinon.stub(demoInstance, 'execAsync').returns(new Error('Dummy Error'));
+
+    assert.rejects(demoInstance.withDirectory(testDir)
+      .withName('project1')
+      .withType('full')
+      .run());
+  });
+
+  it('fail, when Git is installed but no .gitconfig', async () => {
+    const demoInstance = new DemoCommand();
+    sinon.stub(demoInstance, 'pExists').returns(false);
+
+    assert.rejects(demoInstance.withDirectory(testDir)
+      .withName('project1')
+      .withType('full')
+      .run());
   });
 
   it('demo type simple creates all files', async () => {
