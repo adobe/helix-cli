@@ -13,7 +13,6 @@
 'use strict';
 
 const yargsOpenwhisk = require('./yargs-openwhisk.js');
-const yargsFastly = require('./yargs-fastly.js');
 const yargsGithub = require('./yargs-github.js');
 const { makeLogger } = require('./log-common.js');
 
@@ -28,24 +27,23 @@ module.exports = function strain() {
     desc: 'Activate strains in the Fastly CDN and publish the site',
     builder: (yargs) => {
       yargsOpenwhisk(yargs);
-      yargsFastly(yargs);
       yargsGithub(yargs);
       yargs
         .option('dry-run', {
           alias: 'dryRun',
-          describe: 'List the actions that would be created, but do not actually deploy',
+          describe: 'List the actions that would be created, but do not actually deploy.',
           type: 'boolean',
           default: false,
         })
         .option('api-publish', {
           alias: 'apiPublish',
-          describe: 'API URL for helix-publish service',
+          describe: 'API URL for helix-publish service.',
           type: 'string',
           default: 'https://adobeioruntime.net/api/v1/web/helix/helix-services/publish@v2',
         })
         .option('api-config-purge', {
           alias: 'apiConfigPurge',
-          describe: 'API URL for helix bot config service',
+          describe: 'API URL for helix bot config service.',
           type: 'string',
           default: 'https://app.project-helix.io/config/purge',
         })
@@ -55,11 +53,11 @@ module.exports = function strain() {
           type: 'boolean',
         })
         .option('only', {
-          describe: 'Only publish strains with names following the specified pattern, use config from master branch for all others',
+          describe: 'Only publish strains with names following the specified pattern, use config from master branch for all others.',
           type: 'string',
         })
         .option('exclude', {
-          describe: 'Don\'t publish strains with names following the specified pattern, use config from master branch instead',
+          describe: 'Don\'t publish strains with names following the specified pattern, use config from master branch instead.',
           type: 'string',
         })
         .option('custom-vcl', {
@@ -74,14 +72,25 @@ module.exports = function strain() {
           describe: 'Version of the dispatch action to use.',
           type: 'string',
         })
+        .option('fastly-serviceid', {
+          alias: ['fastly-namespace', 'fastlyNamespace'],
+          describe: 'Service ID of Fastly service that will be written to.',
+          type: 'string',
+        })
+        .option('fastly-auth', {
+          alias: 'fastlyAuth',
+          describe: 'API Key for Fastly API ($HLX_FASTLY_AUTH).',
+          type: 'string',
+          default: '',
+        })
         .conflicts('only', 'exclude')
         .demandOption(
           'fastly-auth',
-          'Authentication is required. You can pass the key via the HLX_FASTLY_AUTH environment variable, too',
+          'Authentication is required. You can pass the key via the HLX_FASTLY_AUTH environment variable, too.',
         )
         .demandOption(
-          'fastly-namespace',
-          'Fastly Service ID is required',
+          'fastly-serviceid',
+          'Fastly Service ID is required.',
         )
         .check((args) => {
           if (args.githubToken && args.updateBotConfig === undefined) {
@@ -94,7 +103,7 @@ module.exports = function strain() {
           }
           return true;
         })
-        .group(['wsk-auth', 'wsk-namespace', 'fastly-auth', 'fastly-namespace'], 'Deployment Options')
+        .group(['wsk-auth', 'wsk-namespace', 'fastly-auth', 'fastly-serviceid'], 'Deployment Options')
         .group(['wsk-host', 'dry-run'], 'Advanced Options')
         .group(['github-token', 'update-bot-config'], 'Helix Bot Options')
         .help();
