@@ -38,7 +38,7 @@ describe('Integration test for demo command', function suite() {
   it('execAsync if/else branching correct', async () => {
     const demoInstance = new DemoCommand();
     assert.equal(0, await demoInstance.execAsync('git --version'));
-    assert.rejects(await demoInstance.execAsync('falseCommandDummy').catch(result => result));
+    assert.rejects(await demoInstance.execAsync('falseCommandDummy').catch((result) => result));
   });
 
   it('resolve upon finding Git', async () => {
