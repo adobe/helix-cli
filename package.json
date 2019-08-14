@@ -36,7 +36,7 @@
     "@adobe/fastly-native-promises": "^1.10.0",
     "@adobe/helix-pipeline": "4.1.0",
     "@adobe/helix-shared": "2.1.1",
-    "@adobe/helix-simulator": "2.12.19",
+    "@adobe/helix-simulator": "2.12.20",
     "@adobe/htlengine": "3.2.1",
     "@babel/core": "^7.5.5",
     "@parcel/logger": "^1.11.0",
