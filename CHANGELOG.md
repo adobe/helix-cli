@@ -1,3 +1,10 @@
+## [4.9.12](https://github.com/adobe/helix-cli/compare/v4.9.11...v4.9.12) (2019-08-15)
+
+
+### Bug Fixes
+
+* **package:** force release ([159cc63](https://github.com/adobe/helix-cli/commit/159cc63))
+
 ## [4.9.11](https://github.com/adobe/helix-cli/compare/v4.9.10...v4.9.11) (2019-08-08)
 
 
