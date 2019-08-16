@@ -13,7 +13,7 @@
 module.exports = function commonArgs(yargs) {
   return yargs
     .option('fastly-serviceid', {
-      alias: ['fastlyNamespace', 'fastly-namespace'],
+      alias: ['fastlyNamespace', 'fastly-namespace', 'fastlyServiceid'],
       describe: 'CDN Namespace (e.g. Fastly Service ID).',
       type: 'string',
     })
