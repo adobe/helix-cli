@@ -1,3 +1,10 @@
+## [4.9.13](https://github.com/adobe/helix-cli/compare/v4.9.12...v4.9.13) (2019-08-16)
+
+
+### Bug Fixes
+
+* **htl:** use latest htlengine and update other deps ([#1121](https://github.com/adobe/helix-cli/issues/1121)) ([a1882d0](https://github.com/adobe/helix-cli/commit/a1882d0))
+
 ## [4.9.12](https://github.com/adobe/helix-cli/compare/v4.9.11...v4.9.12) (2019-08-15)
 
 
