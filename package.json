@@ -72,7 +72,7 @@
     "yargs": "^13.2.4"
   },
   "devDependencies": {
-    "@adobe/eslint-config-helix": "^1.0.0",
+    "@adobe/eslint-config-helix": "1.0.0",
     "@adobe/helix-testutils": "0.2.0",
     "@pollyjs/adapter-fetch": "2.6.2",
     "@pollyjs/adapter-node-http": "2.6.2",
