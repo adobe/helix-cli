@@ -1,3 +1,10 @@
+## [4.9.14](https://github.com/adobe/helix-cli/compare/v4.9.13...v4.9.14) (2019-08-20)
+
+
+### Bug Fixes
+
+* **publish:** fix publish failure for unpublished service configs ([b185bda](https://github.com/adobe/helix-cli/commit/b185bda)), closes [#1127](https://github.com/adobe/helix-cli/issues/1127)
+
 ## [4.9.13](https://github.com/adobe/helix-cli/compare/v4.9.12...v4.9.13) (2019-08-16)
 
 
