@@ -29,7 +29,7 @@ commands:
         command: git config --global user.email "circleci@project-helix.io" && git config --global user.name "CircleCi Build"
 
 orbs:
-  helix-smoke-tests: adobe/helix-smoke-tests@dev:0.0.8.19
+  helix-smoke-tests: adobe/helix-smoke-tests@dev:0.0.8
   win: circleci/windows-tools@0.0.5
 
 jobs:
@@ -129,4 +129,3 @@ workflows:
     jobs:
     - helix-smoke-tests/run:
         remote_repo: adobe/helix-continuous
-        remote_branch: paralle-jobs
