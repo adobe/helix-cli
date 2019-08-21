@@ -1,3 +1,10 @@
+# [4.10.0](https://github.com/adobe/helix-cli/compare/v4.9.14...v4.10.0) (2019-08-21)
+
+
+### Features
+
+* **parcel:** support replacing steps in pipeline ([#1125](https://github.com/adobe/helix-cli/issues/1125)) ([0fea61c](https://github.com/adobe/helix-cli/commit/0fea61c))
+
 ## [4.9.14](https://github.com/adobe/helix-cli/compare/v4.9.13...v4.9.14) (2019-08-20)
 
 
