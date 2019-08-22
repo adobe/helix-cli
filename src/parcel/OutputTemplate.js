@@ -17,7 +17,7 @@
 function helix_wrap_action(main) {
   const { OpenWhiskAction } = require('@adobe/helix-pipeline');
   const { pipe } = require('MOD_PIPE');
-  const { pre, before, after } = require('MOD_PRE');
+  const { pre, before, after, replace } = require('MOD_PRE');
 
   // todo: move to helix-pipeline
   const CONTEXT_PROPS = ['error', 'request', 'content', 'response'];
@@ -78,7 +78,9 @@ function helix_wrap_action(main) {
     if (after) {
       once.after = after;
     }
-
+    if (replace) {
+      once.replace = replace;
+    }
     return OpenWhiskAction.runPipeline(once, pipe, params);
   };
 }

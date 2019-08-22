@@ -1,3 +1,17 @@
+# [4.10.0](https://github.com/adobe/helix-cli/compare/v4.9.14...v4.10.0) (2019-08-21)
+
+
+### Features
+
+* **parcel:** support replacing steps in pipeline ([#1125](https://github.com/adobe/helix-cli/issues/1125)) ([0fea61c](https://github.com/adobe/helix-cli/commit/0fea61c))
+
+## [4.9.14](https://github.com/adobe/helix-cli/compare/v4.9.13...v4.9.14) (2019-08-20)
+
+
+### Bug Fixes
+
+* **publish:** fix publish failure for unpublished service configs ([b185bda](https://github.com/adobe/helix-cli/commit/b185bda)), closes [#1127](https://github.com/adobe/helix-cli/issues/1127)
+
 ## [4.9.13](https://github.com/adobe/helix-cli/compare/v4.9.12...v4.9.13) (2019-08-16)
 
 
