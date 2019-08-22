@@ -12,13 +12,13 @@
 
 'use strict';
 
-const os = require('os');
 const path = require('path');
 
 const fse = require('fs-extra');
 const chalk = require('chalk');
 const shell = require('shelljs');
 const glob = require('glob');
+
 const { makeLogger } = require('./log-common');
 
 const ANSI_REGEXP = RegExp([
@@ -31,6 +31,18 @@ const FILENAME_MAPPING = {
   _env: '.env',
 };
 
+function execAsync(cmd) {
+  return new Promise((resolve, reject) => {
+    shell.exec(cmd, (code, stdout, stderr) => {
+      if (code === 0) {
+        resolve(code);
+      } else {
+        reject(stderr);
+      }
+    });
+  });
+}
+
 class InitCommand {
   constructor(logger = makeLogger()) {
     this._logger = logger;
@@ -40,17 +52,18 @@ class InitCommand {
     this._type = 'simple';
   }
 
-  // eslint-disable-next-line class-methods-use-this
-  execAsync(cmd) {
-    return new Promise((resolve, reject) => {
-      shell.exec(cmd, (code, stdout, stderr) => {
-        if (code === 0) {
-          resolve(code);
-        } else {
-          reject(stderr);
-        }
-      });
-    });
+  /**
+   * Returns true if git is installed, otherwise false.
+   */
+  static gitInstalled() {
+    return !!shell.which('git');
+  }
+
+  /**
+   * Returns true if git `user.name` and `user.email` have been configured, otherwise false.
+   */
+  static gitConfigured() {
+    return !!(shell.exec('git config --get user.name').stdout && shell.exec('git config --get user.email').stdout);
   }
 
   withName(name) {
@@ -79,22 +92,17 @@ class InitCommand {
     const pwd = shell.pwd();
     try {
       shell.cd(dir);
-      await this.execAsync('git init -q');
-      await this.execAsync('git add -A');
+      await execAsync('git init -q');
+      await execAsync('git add -A');
       // https://github.com/adobe/helix-cli/issues/280
       // bypass pre-commit and commit-msg hooks when doing initial commit (-n,--no-verify)
-      await this.execAsync('git commit -q -n -m"Initial commit."');
+      await execAsync('git commit -q -n -m"Initial commit."');
       this.msg(chalk.yellow('initializing git repository'));
     } catch (e) {
       throw Error(`Unable to initialize git repository: ${e}`);
     } finally {
       shell.cd(pwd);
     }
-  }
-
-  // eslint-disable-next-line class-methods-use-this
-  async pExists(filename) {
-    return fse.pathExists(filename);
   }
 
   async run() {
@@ -105,29 +113,26 @@ class InitCommand {
       throw new Error('init needs directory.');
     }
 
-    // #181 cover edge case: make sure git is properly configured
-    try {
-      await this.execAsync('git --version');
-    } catch (e) {
-      throw new Error(
-        `
-      It seems like Git has not yet been setup on this system. 
-      See https://git-scm.com/book/en/v2/Getting-Started-First-Time-Git-Setup for more information.
-        `,
-      );
+    // git installed?
+    if (!InitCommand.gitInstalled()) {
+      throw new Error(`
+It seems like Git has not yet been installed on this system. 
+See https://git-scm.com/book/en/v2/Getting-Started-Installing-Git for more information.
+`);
     }
-    if (!await this.pExists(path.resolve(os.homedir(), '.gitconfig'))) {
-      throw new Error(
-        `
-        Git installed, but .gitconfig file not detected; try running git config
-        `,
-      );
+
+    // #181 cover edge case: make sure git is properly configured
+    if (!InitCommand.gitConfigured()) {
+      throw new Error(`
+It seems like Git has not yet been setup on this system. 
+See https://git-scm.com/book/en/v2/Getting-Started-First-Time-Git-Setup for more information.
+`);
     }
 
     this._padding = this._name.length + 45;
     const projectDir = path.resolve(path.join(this._dir, this._name));
     const relPath = path.relative(process.cwd(), projectDir);
-    if (await this.pExists(projectDir)) {
+    if (await fse.pathExists(projectDir)) {
       throw new Error(`cowardly rejecting to re-initialize project: ./${relPath}`);
     }
 
