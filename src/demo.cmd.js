@@ -43,7 +43,7 @@ function execAsync(cmd) {
   });
 }
 
-class InitCommand {
+class DemoCommand {
   constructor(logger = makeLogger()) {
     this._logger = logger;
     this._name = '';
@@ -114,7 +114,7 @@ class InitCommand {
     }
 
     // git installed?
-    if (!InitCommand.gitInstalled()) {
+    if (!DemoCommand.gitInstalled()) {
       throw new Error(`
 It seems like Git has not yet been installed on this system. 
 See https://git-scm.com/book/en/v2/Getting-Started-Installing-Git for more information.
@@ -122,7 +122,7 @@ See https://git-scm.com/book/en/v2/Getting-Started-Installing-Git for more infor
     }
 
     // #181 cover edge case: make sure git is properly configured
-    if (!InitCommand.gitConfigured()) {
+    if (!DemoCommand.gitConfigured()) {
       throw new Error(`
 It seems like Git has not yet been setup on this system. 
 See https://git-scm.com/book/en/v2/Getting-Started-First-Time-Git-Setup for more information.
@@ -201,4 +201,4 @@ Next Step: start the development server and test the generated site with:
 {grey $ hlx up}`);
   }
 }
-module.exports = InitCommand;
+module.exports = DemoCommand;
