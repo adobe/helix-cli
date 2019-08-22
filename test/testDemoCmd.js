@@ -39,7 +39,7 @@ describe('Integration test for demo command', function suite() {
     const demoInstance = new DemoCommand();
     const stub = sinon.stub(DemoCommand, 'gitInstalled').returns(false);
 
-    await assert.rejects(demoInstance.withDirectory(testDir)
+    await assert.rejects(async () => demoInstance.withDirectory(testDir)
       .withName('project1')
       .withType('full')
       .run()
@@ -50,7 +50,7 @@ describe('Integration test for demo command', function suite() {
     const demoInstance = new DemoCommand();
     const stub = sinon.stub(DemoCommand, 'gitConfigured').returns(false);
 
-    await assert.rejects(demoInstance.withDirectory(testDir)
+    await assert.rejects(async () => demoInstance.withDirectory(testDir)
       .withName('project1')
       .withType('full')
       .run()
