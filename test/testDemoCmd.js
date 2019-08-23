@@ -35,41 +35,26 @@ describe('Integration test for demo command', function suite() {
     await fs.remove(testDir);
   });
 
-  it('execAsync if/else branching correct', async () => {
-    const demoInstance = new DemoCommand();
-    assert.equal(0, await demoInstance.execAsync('git --version'));
-    assert.rejects(await demoInstance.execAsync('falseCommandDummy').catch((result) => result));
-  });
-
-  it('resolve upon finding Git', async () => {
-    const demoInstance = new DemoCommand();
-    sinon.stub(demoInstance, 'execAsync').returns(0);
-
-    assert.doesNotReject(demoInstance
-      .withDirectory(testDir)
-      .withName('project1')
-      .withType('full')
-      .run());
-  });
-
   it('fail when Git is not installed', async () => {
     const demoInstance = new DemoCommand();
-    sinon.stub(demoInstance, 'execAsync').returns(new Error('Dummy Error'));
+    const stub = sinon.stub(DemoCommand, 'gitInstalled').returns(false);
 
-    assert.rejects(demoInstance.withDirectory(testDir)
+    await assert.rejects(async () => demoInstance.withDirectory(testDir)
       .withName('project1')
       .withType('full')
-      .run());
+      .run()
+      .finally(() => stub.restore()));
   });
 
-  it('fail, when Git is installed but no .gitconfig', async () => {
+  it('fail when Git is installed but not configured', async () => {
     const demoInstance = new DemoCommand();
-    sinon.stub(demoInstance, 'pExists').returns(false);
+    const stub = sinon.stub(DemoCommand, 'gitConfigured').returns(false);
 
-    assert.rejects(demoInstance.withDirectory(testDir)
+    await assert.rejects(async () => demoInstance.withDirectory(testDir)
       .withName('project1')
       .withType('full')
-      .run());
+      .run()
+      .finally(() => stub.restore()));
   });
 
   it('demo type simple creates all files', async () => {
