@@ -15,6 +15,7 @@
 const yargsOpenwhisk = require('./yargs-openwhisk.js');
 const yargsFastly = require('./yargs-fastly.js');
 const yargsBuild = require('./yargs-build.js');
+const yargsParams = require('./yargs-params.js');
 const { makeLogger } = require('./log-common.js');
 
 module.exports = function deploy() {
@@ -29,7 +30,13 @@ module.exports = function deploy() {
     builder: (yargs) => {
       yargsOpenwhisk(yargs);
       yargsFastly(yargs);
-      yargsBuild(yargs)
+      yargsBuild(yargs);
+      yargsParams(yargs, {
+        name: 'default',
+        describe: 'Adds a default parameter to the function',
+        type: 'array',
+      });
+      yargs
         .option('auto', {
           describe: 'Enable auto-deployment',
           type: 'boolean',
@@ -66,10 +73,6 @@ module.exports = function deploy() {
           type: 'string',
           describe: 'Target directory of created action packages.',
         })
-        .option('default', {
-          describe: 'Adds a default parameter to the function',
-          type: 'string',
-        })
         .option('dirty', {
           describe: 'Allows deploying a working copy with uncommitted changes (dangerous)',
           type: 'boolean',
@@ -96,15 +99,6 @@ module.exports = function deploy() {
           type: 'string',
           default: 'helix-services/resolve-git-ref@v1',
         })
-        .array('default')
-        .nargs('default', 2)
-        .coerce('default', (arg) => arg.reduce((result, value, index, array) => {
-          const res = {};
-          if (index % 2 === 0) {
-            res[value.toUpperCase()] = array[index + 1];
-          }
-          return Object.assign(res, result);
-        }, {}))
         .group(['auto', 'wsk-auth', 'wsk-namespace', 'default', 'dirty'], 'Deployment Options')
         .group(['wsk-host', 'loggly-host', 'loggly-auth', 'target'], 'Advanced Options')
         .group(['package', 'minify', 'target'], 'Package options')

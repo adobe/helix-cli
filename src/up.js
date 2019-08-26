@@ -15,6 +15,7 @@
 
 const path = require('path');
 const yargsBuild = require('./yargs-build.js');
+const yargsParams = require('./yargs-params.js');
 const { makeLogger } = require('./log-common.js');
 
 module.exports = function up() {
@@ -27,6 +28,13 @@ module.exports = function up() {
     description: 'Run a Helix development server',
     builder: (yargs) => {
       yargsBuild(yargs);
+      yargsParams(yargs, {
+        name: 'dev-default',
+        describe: 'Additional action parameters',
+        alias: ['devDefault'],
+        type: 'array',
+        default: [],
+      });
       yargs
         .option('open', {
           describe: 'Open a browser window',
@@ -83,6 +91,7 @@ module.exports = function up() {
         .withSaveConfig(argv.saveConfig)
         .withHttpPort(argv.port)
         .withLocalRepo(argv.localRepo)
+        .withDevDefault(argv.devDefault)
         // only open browser window when executable is `hlx`
         // this prevents the window to be opened during integration tests
         .withOpen(argv.open && path.basename(argv.$0) === 'hlx')

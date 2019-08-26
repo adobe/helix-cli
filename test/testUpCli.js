@@ -35,6 +35,7 @@ describe('hlx up', () => {
     mockUp.withSaveConfig.returnsThis();
     mockUp.withOverrideHost.returnsThis();
     mockUp.withLocalRepo.returnsThis();
+    mockUp.withDevDefault.returnsThis();
     mockUp.run.returnsThis();
   });
 
@@ -171,6 +172,16 @@ describe('hlx up', () => {
       .withCommandExecutor('up', mockUp)
       .run(['up', '--local-repo', '.']);
     sinon.assert.calledWith(mockUp.withLocalRepo, ['.']);
+    sinon.assert.calledOnce(mockUp.run);
+  });
+
+  it('hlx up can set parameter defaults', () => {
+    const answer = { HTTP_TIMEOUT: '2000' };
+    new CLI()
+      .withCommandExecutor('up', mockUp)
+      .run(['up', '--dev-default', 'HTTP_TIMEOUT', 2000]);
+
+    sinon.assert.calledWith(mockUp.withDevDefault, answer);
     sinon.assert.calledOnce(mockUp.run);
   });
 
