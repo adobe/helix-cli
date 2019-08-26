@@ -34,7 +34,7 @@
   },
   "dependencies": {
     "@adobe/fastly-native-promises": "^1.12.0",
-    "@adobe/helix-pipeline": "4.1.0",
+    "@adobe/helix-pipeline": "5.0.0",
     "@adobe/helix-shared": "2.1.1",
     "@adobe/helix-simulator": "2.12.20",
     "@adobe/htlengine": "3.2.2",
@@ -69,7 +69,7 @@
     "uri-js": "^4.2.2",
     "uuid": "^3.3.2",
     "webpack": "^4.39.2",
-    "yargs": "^13.2.4"
+    "yargs": "^14.0.0"
   },
   "devDependencies": {
     "@adobe/eslint-config-helix": "1.0.0",
