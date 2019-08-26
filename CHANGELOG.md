@@ -1,3 +1,15 @@
+# [5.0.0](https://github.com/adobe/helix-cli/compare/v4.10.0...v5.0.0) (2019-08-26)
+
+
+### Bug Fixes
+
+* **deps:** update any ([#1133](https://github.com/adobe/helix-cli/issues/1133)) ([4fc44d0](https://github.com/adobe/helix-cli/commit/4fc44d0))
+
+
+### BREAKING CHANGES
+
+* **deps:** helix-pipeline API change in 5.0.0, see https://github.com/adobe/helix-pipeline/releases/tag/v5.0.0
+
 # [4.10.0](https://github.com/adobe/helix-cli/compare/v4.9.14...v4.10.0) (2019-08-21)
 
 
