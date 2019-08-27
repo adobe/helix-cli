@@ -84,10 +84,7 @@ module.exports = function strain() {
           'Fastly Service ID is required.',
         )
         .check((args) => {
-          if (args.githubToken && args.updateBotConfig === undefined) {
-            // eslint-disable-next-line no-param-reassign
-            args.updateBotConfig = true;
-          } else if (args.updateBotConfig && !args.githubToken) {
+          if (args.updateBotConfig && !args.githubToken) {
             return new Error('Github token is required in order to update bot config.\n'
               + 'Provide one via --github-token or via the HLX_GITHUB_TOKEN environment variable.\n'
               + 'You can use `hlx auth` to automatically obtain a new token.');
