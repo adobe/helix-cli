@@ -29,7 +29,7 @@ module.exports = function commonArgs(yargs, options) {
           }
           return p;
         }, {});
-      } else {
+      } else if (length) {
         throw new Error(`${options.name} needs an even number of parameters, think key-value pairs`);
       }
     });
