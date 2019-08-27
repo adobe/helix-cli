@@ -18,6 +18,7 @@ const proxyquire = require('proxyquire');
 const sinon = require('sinon');
 const assert = require('assert');
 const { Logger } = require('@adobe/helix-shared');
+const { clearHelixEnv } = require('./utils.js');
 
 const EXPECTED_BODY = {
   content_repositories: [
@@ -37,6 +38,7 @@ describe('hlx publish --remote (default)', () => {
   let purgeAll;
 
   beforeEach('Setting up Fake Server', function bef() {
+    clearHelixEnv();
     this.timeout(5000);
     writeDictItem = sinon.fake.resolves(true);
     purgeAll = sinon.fake.resolves(true);

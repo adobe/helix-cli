@@ -21,6 +21,7 @@ const fse = require('fs-extra');
 const assert = require('assert');
 const { createTestRoot } = require('./utils.js');
 const { makeLogger } = require('../src/log-common');
+const { clearHelixEnv } = require('./utils.js');
 
 describe('hlx publish --remote (with filters)', () => {
   let RemotePublishCommand;
@@ -33,6 +34,7 @@ describe('hlx publish --remote (with filters)', () => {
   let remote;
 
   beforeEach('Setting up Fake Server', async function bef() {
+    clearHelixEnv();
     this.timeout(5000);
     writeDictItem = sinon.fake.resolves(true);
     purgeAll = sinon.fake.resolves(true);

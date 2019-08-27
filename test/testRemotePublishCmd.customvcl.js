@@ -21,6 +21,7 @@ const sinon = require('sinon');
 const shell = require('shelljs');
 const { Logger } = require('@adobe/helix-shared');
 const { createTestRoot } = require('./utils.js');
+const { clearHelixEnv } = require('./utils.js');
 
 const RemotePublishCommand = require('../src/remotepublish.cmd');
 
@@ -77,6 +78,7 @@ describe('hlx publish --custom-vcl (check requests)', () => {
   let remote;
 
   beforeEach('Setting up Fake Server', async function bef() {
+    clearHelixEnv();
     this.timeout(5000);
     writeDictItem = sinon.fake.resolves(true);
     purgeAll = sinon.fake.resolves(true);

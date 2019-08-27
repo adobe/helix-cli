@@ -17,6 +17,7 @@ const proxyquire = require('proxyquire');
 const sinon = require('sinon');
 const NodeHttpAdapter = require('@pollyjs/adapter-node-http');
 const { setupMocha: setupPolly } = require('@pollyjs/core');
+const { clearHelixEnv } = require('./utils.js');
 
 describe('hlx publish --remote --dry-run (default)', () => {
   let RemotePublishCommand;
@@ -24,6 +25,7 @@ describe('hlx publish --remote --dry-run (default)', () => {
   let purgeAll;
 
   before('Setting up Fake Server', function bef() {
+    clearHelixEnv();
     this.timeout(5000);
     writeDictItem = sinon.fake.resolves(true);
     purgeAll = sinon.fake.resolves(true);

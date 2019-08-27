@@ -18,6 +18,7 @@ const path = require('path');
 const proxyquire = require('proxyquire');
 const { AssertionError } = require('assert');
 const sinon = require('sinon');
+const { clearHelixEnv } = require('./utils.js');
 
 describe('hlx publish --remote (fail purge)', () => {
   let scope;
@@ -25,6 +26,7 @@ describe('hlx publish --remote (fail purge)', () => {
   let writeDictItem;
 
   before('Setting up Fake Server', function bef() {
+    clearHelixEnv();
     this.timeout(5000);
     writeDictItem = sinon.fake.resolves(true);
 
