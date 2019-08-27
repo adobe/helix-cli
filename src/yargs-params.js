@@ -21,15 +21,16 @@ module.exports = function commonArgs(yargs, options) {
     .coerce((options.name), (argv) => {
       // Check Length is Multiple of 2 these are KV pairs.
       const { length } = argv;
-      const retMap = {};
       if (length > 0 && length % 2 === 0) {
-        const numberOfArgs = length / 2;
-        for (let idx = 0; idx < numberOfArgs; idx += 1) {
-          const key = argv[2 * idx].toUpperCase();
-          const value = argv[2 * idx + 1];
-          retMap[key] = value;
-        }
+        return argv.reduce((p, c, i) => {
+          if (i % 2 === 0) {
+            // eslint-disable-next-line no-param-reassign
+            p[c] = argv[i + 1];
+          }
+          return p;
+        }, {});
+      } else {
+        throw new Error(`${options.name} needs an even number of parameters, think key-value pairs`);
       }
-      return retMap;
     });
 };

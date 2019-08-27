@@ -17,6 +17,7 @@
 const sinon = require('sinon');
 const dotenv = require('dotenv');
 const path = require('path');
+const assert = require('assert');
 const { clearHelixEnv } = require('./utils.js');
 const CLI = require('../src/cli.js');
 const UpCommand = require('../src/up.cmd');
@@ -176,13 +177,28 @@ describe('hlx up', () => {
   });
 
   it('hlx up can set parameter defaults', () => {
-    const answer = { HTTP_TIMEOUT: '2000' };
+    const answer = { HTTP_TIMEOUT: '2000', HTTP_PIMEOUT: '2000', HTTP_QIMEOUT: '2000' };
     new CLI()
       .withCommandExecutor('up', mockUp)
-      .run(['up', '--dev-default', 'HTTP_TIMEOUT', 2000]);
+      .run(['up',
+        '--dev-default', 'HTTP_TIMEOUT', 2000,
+        '--dev-default', 'HTTP_PIMEOUT', 2000, 'HTTP_QIMEOUT', 2000]);
 
     sinon.assert.calledWith(mockUp.withDevDefault, answer);
     sinon.assert.calledOnce(mockUp.run);
+  });
+
+  it('hlx up fails if parameter defaults is uneven', (done) => {
+    new CLI()
+      .withCommandExecutor('up', mockUp)
+      .onFail((e) => {
+        assert.equal(e, 'dev-default needs an even number of parameters, think key-value pairs');
+        done();
+      })
+      .run(['up',
+        '--dev-default', 'HTTP_TIMEOUT', 2000,
+        '--dev-default', 'HTTP_PIMEOUT', 2000, 'HTTP_QIMEOUT']);
+    assert.fail('hlx up should fail when called with an uneven number of arguments');
   });
 
   it('hlx up can specify 1 local repo', () => {
