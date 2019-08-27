@@ -113,9 +113,9 @@
   },
   "renovate": {
     "extends": [
-      "config:base"
+      "config:base",
+	    "schedule:earlyMondays"
     ],
-    "schedule": "at 07:00 pm on Monday",
     "timezone": "Europe/Zurich",
     "packageRules": [
       {
