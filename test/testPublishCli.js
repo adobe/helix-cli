@@ -97,7 +97,7 @@ describe('hlx publish', () => {
     sinon.assert.calledOnce(mockPublish.run);
   });
 
-  it('hlx publish works with minimal arguments with serviceid', () => {
+  it('hlx publish handles serviceid', () => {
     new CLI()
       .withCommandExecutor('publish', mockPublish)
       .run(['publish',
@@ -107,34 +107,10 @@ describe('hlx publish', () => {
         '--fastly-serviceid', 'hlx',
       ]);
 
-    sinon.assert.calledWith(mockPublish.withWskHost, 'adobeioruntime.net');
-    sinon.assert.calledWith(mockPublish.withWskAuth, 'secret-key');
-    sinon.assert.calledWith(mockPublish.withWskNamespace, 'hlx');
-    sinon.assert.calledWith(mockPublish.withFastlyNamespace, 'hlx'); // TODO !!
-    sinon.assert.calledWith(mockPublish.withFastlyAuth, 'secret-key');
-    sinon.assert.calledWith(mockPublish.withCustomVCLs, []);
-    sinon.assert.calledWith(mockPublish.withDispatchVersion, undefined);
-    sinon.assert.calledOnce(mockPublish.run);
+    sinon.assert.calledWith(mockPublish.withFastlyNamespace, 'hlx');
   });
 
-  it('hlx publish implicit bot config with github token', () => {
-    new CLI()
-      .withCommandExecutor('publish', mockPublish)
-      .run(['publish',
-        '--wsk-auth', 'secret-key',
-        '--wsk-namespace', 'hlx',
-        '--fastly-auth', 'secret-key',
-        '--fastly-namespace', 'hlx',
-        '--github-token', 'foobar',
-      ]);
-
-    sinon.assert.calledWith(mockPublish.withUpdateBotConfig, true);
-    sinon.assert.calledWith(mockPublish.withGithubToken, 'foobar');
-    sinon.assert.calledWith(mockPublish.withConfigPurgeAPI, 'https://app.project-helix.io/config/purge');
-    sinon.assert.calledOnce(mockPublish.run);
-  });
-
-  it('hlx publish implicit bot config with github token with serviceid', () => {
+  it('hlx publish handles github token', () => {
     new CLI()
       .withCommandExecutor('publish', mockPublish)
       .run(['publish',
@@ -145,10 +121,7 @@ describe('hlx publish', () => {
         '--github-token', 'foobar',
       ]);
 
-    sinon.assert.calledWith(mockPublish.withUpdateBotConfig, true);
     sinon.assert.calledWith(mockPublish.withGithubToken, 'foobar');
-    sinon.assert.calledWith(mockPublish.withConfigPurgeAPI, 'https://app.project-helix.io/config/purge');
-    sinon.assert.calledOnce(mockPublish.run);
   });
 
   it('hlx publish requires github token for update config', (done) => {
@@ -201,7 +174,7 @@ describe('hlx publish', () => {
     sinon.assert.calledWith(mockPublish.withDispatchVersion, 'ci1');
   });
 
-  it('hlx publish handles dispatch-version with serviceid', () => {
+  it('hlx publish handles fastly-serviceid', () => {
     new CLI()
       .withCommandExecutor('publish', mockPublish)
       .run(['publish',
@@ -209,9 +182,8 @@ describe('hlx publish', () => {
         '--wsk-namespace', 'hlx',
         '--fastly-auth', 'secret-key',
         '--fastly-serviceid', 'hlx',
-        '--dispatch-version', 'ci1',
       ]);
 
-    sinon.assert.calledWith(mockPublish.withDispatchVersion, 'ci1');
+    sinon.assert.calledWith(mockPublish.withFastlyNamespace, 'hlx');
   });
 });

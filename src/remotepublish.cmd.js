@@ -315,6 +315,10 @@ ${e}`);
       const namespace = this._fastly.writeDictItem(this._version, 'secrets', 'OPENWHISK_NAMESPACE', this._wsk_namespace);
       jobs.push(namespace);
     }
+    if (this._githubToken) {
+      const token = this._fastly.writeDictItem(this._version, 'secrets', 'GITHUB_TOKEN', this._githubToken);
+      jobs.push(token);
+    }
     return Promise.all(jobs).then(() => {
       this.tick(2, 'enabled authentication', true);
       return true;
