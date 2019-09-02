@@ -132,7 +132,7 @@ describe('hlx publish --remote (default)', () => {
       .withDryRun(false);
     await remote.run();
 
-    sinon.assert.calledTwice(writeDictItem);
+    sinon.assert.calledThrice(writeDictItem);
     sinon.assert.calledOnce(purgeAll);
 
     const log = await logger.getOutput();
@@ -185,7 +185,7 @@ describe('hlx publish --remote (default)', () => {
       .withDryRun(false);
     await remote.run();
 
-    sinon.assert.calledTwice(writeDictItem);
+    sinon.assert.calledThrice(writeDictItem);
     sinon.assert.calledOnce(purgeAll);
 
     const log = await logger.getOutput();
@@ -226,7 +226,7 @@ describe('hlx publish --remote (default)', () => {
       .withDryRun(false);
     await remote.run();
 
-    sinon.assert.calledTwice(writeDictItem);
+    sinon.assert.calledThrice(writeDictItem);
     sinon.assert.calledOnce(purgeAll);
 
     const log = await logger.getOutput();
@@ -286,7 +286,7 @@ describe('hlx publish --remote (default)', () => {
       .withDryRun(false);
     await remote.run();
 
-    sinon.assert.calledTwice(writeDictItem);
+    sinon.assert.calledThrice(writeDictItem);
     sinon.assert.calledOnce(purgeAll);
 
     const log = await logger.getOutput();
@@ -336,7 +336,7 @@ describe('hlx publish --remote (default)', () => {
       .withDryRun(false);
     await remote.run();
 
-    sinon.assert.calledTwice(writeDictItem);
+    sinon.assert.calledThrice(writeDictItem);
     sinon.assert.calledOnce(purgeAll);
 
     const log = await logger.getOutput();
@@ -410,7 +410,7 @@ describe('hlx publish --remote (default)', () => {
       .withDryRun(false);
     await remote.run();
 
-    sinon.assert.calledTwice(writeDictItem);
+    sinon.assert.calledThrice(writeDictItem);
     sinon.assert.calledOnce(purgeAll);
 
     const log = await logger.getOutput();
