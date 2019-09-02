@@ -8,5 +8,5 @@
 #HLX_FASTLY_AUTH=
 #HLX_FASTLY_NAMESPACE=
 
-# Github Bot & private repo support
+# Github Bot & authenticated GitHub access
 #HLX_GITHUB_TOKEN=
