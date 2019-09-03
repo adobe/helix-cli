@@ -15,11 +15,15 @@ module.exports = function commonArgs(yargs) {
     .option('wsk-auth', {
       alias: 'wskAuth',
       describe: 'Adobe I/O Runtime Authentication key',
+      default: '',
+      coerce: (v) => (v.trim() ? v.trim() : undefined),
       type: 'string',
     })
     .option('wsk-namespace', {
       alias: 'wskNamespace',
       describe: 'Adobe I/O Runtime Namespace',
+      default: '',
+      coerce: (v) => (v.trim() ? v.trim() : undefined),
       type: 'string',
     })
     .option('wsk-host', {

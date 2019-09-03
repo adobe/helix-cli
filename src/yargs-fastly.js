@@ -15,12 +15,15 @@ module.exports = function commonArgs(yargs) {
     .option('fastly-serviceid', {
       alias: ['fastlyNamespace', 'fastly-namespace', 'fastlyServiceid'],
       describe: 'CDN Namespace (e.g. Fastly Service ID).',
+      default: '',
+      coerce: (v) => (v.trim() ? v.trim() : undefined),
       type: 'string',
     })
     .option('fastly-auth', {
       alias: 'fastlyAuth',
       describe: 'API Key for Fastly API ($HLX_FASTLY_AUTH)',
-      type: 'string',
       default: '',
+      coerce: (v) => (v.trim() ? v.trim() : undefined),
+      type: 'string',
     });
 };
