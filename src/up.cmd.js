@@ -33,6 +33,7 @@ class UpCommand extends BuildCommand {
     this._overrideHost = null;
     this._localRepos = [];
     this._helixPagesRepo = '';
+    this._devDefault = {};
   }
 
   withHttpPort(p) {
@@ -66,6 +67,11 @@ class UpCommand extends BuildCommand {
 
   withHelixPagesRepo(url) {
     this._helixPagesRepo = url;
+    return this;
+  }
+
+  withDevDefault(value) {
+    this._devDefault = value;
     return this;
   }
 
@@ -128,7 +134,6 @@ class UpCommand extends BuildCommand {
 
   async run() {
     await super.init();
-
     // check for git repository
     if (!await fse.pathExists(path.join(this.directory, '.git'))) {
       throw Error('hlx up needs local git repository.');
@@ -173,6 +178,7 @@ class UpCommand extends BuildCommand {
       .withCwd(this.directory)
       .withBuildDir(this._target)
       .withHelixConfig(this.config)
+      .withActionParams(this._devDefault)
       .withRuntimeModulePaths(module.paths);
 
     // special handling for helix pages project

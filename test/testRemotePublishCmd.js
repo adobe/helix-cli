@@ -17,6 +17,7 @@ const nock = require('nock');
 const path = require('path');
 const proxyquire = require('proxyquire');
 const sinon = require('sinon');
+const { clearHelixEnv } = require('./utils.js');
 
 describe('hlx publish --remote (default)', () => {
   let RemotePublishCommand;
@@ -24,6 +25,7 @@ describe('hlx publish --remote (default)', () => {
   let purgeAll;
 
   beforeEach('Setting up Fake Server', function bef() {
+    clearHelixEnv();
     this.timeout(5000);
     writeDictItem = sinon.fake.resolves(true);
     purgeAll = sinon.fake.resolves(true);
