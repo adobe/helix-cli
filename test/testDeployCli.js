@@ -123,7 +123,7 @@ OpenWhisk Namespace is required`);
     sinon.assert.calledWith(mockDeploy.withWskNamespace, 'hlx');
     sinon.assert.calledWith(mockDeploy.withLogglyHost, 'trieloff.loggly.com'); // TODO !!
     sinon.assert.calledWith(mockDeploy.withLogglyAuth, '');
-    sinon.assert.calledWith(mockDeploy.withFastlyAuth, '');
+    sinon.assert.calledWith(mockDeploy.withFastlyAuth, undefined);
     sinon.assert.calledWith(mockDeploy.withFastlyNamespace, undefined);
     sinon.assert.calledWith(mockDeploy.withTarget, '.hlx/build');
     sinon.assert.calledWith(mockDeploy.withFiles, ['src/**/*.htl', 'src/**/*.js', 'src/**/*.jsx', 'cgi-bin/**/*.js']);

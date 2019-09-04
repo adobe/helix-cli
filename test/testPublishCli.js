@@ -220,4 +220,72 @@ describe('hlx publish', () => {
 
     sinon.assert.calledWith(mockPublish.withFastlyNamespace, 'hlx');
   });
+
+  it('hlx publish fails with empty fastly-serviceid', (done) => {
+    new CLI()
+      .withCommandExecutor('publish', mockPublish)
+      .onFail((err) => {
+        assert.ok(!err || err.indexOf('required'));
+        done();
+      })
+      .run(['publish',
+        '--wsk-auth', 'secret-key',
+        '--wsk-namespace', 'hlx',
+        '--fastly-auth', 'secret-key',
+        '--fastly-serviceid', '',
+      ]);
+
+    sinon.assert.fail('hlx publish should fail with empty fastly-serviceid');
+  });
+
+  it('hlx publish fails with empty fastly-auth', (done) => {
+    new CLI()
+      .withCommandExecutor('publish', mockPublish)
+      .onFail((err) => {
+        assert.ok(!err || err.indexOf('required'));
+        done();
+      })
+      .run(['publish',
+        '--wsk-auth', 'secret-key',
+        '--wsk-namespace', 'hlx',
+        '--fastly-auth', '',
+        '--fastly-serviceid', 'hlx',
+      ]);
+
+    sinon.assert.fail('hlx publish should fail with empty fastly-auth');
+  });
+
+  it('hlx publish fails with empty wsk-namespace', (done) => {
+    new CLI()
+      .withCommandExecutor('publish', mockPublish)
+      .onFail((err) => {
+        assert.ok(!err || err.indexOf('required'));
+        done();
+      })
+      .run(['publish',
+        '--wsk-auth', 'secret-key',
+        '--wsk-namespace', '',
+        '--fastly-auth', 'secret-key',
+        '--fastly-serviceid', 'hlx',
+      ]);
+
+    sinon.assert.fail('hlx publish should fail with empty wsk-namespace');
+  });
+
+  it('hlx publish fails with empty wsk-auth', (done) => {
+    new CLI()
+      .withCommandExecutor('publish', mockPublish)
+      .onFail((err) => {
+        assert.ok(!err || err.indexOf('required'));
+        done();
+      })
+      .run(['publish',
+        '--wsk-auth', '',
+        '--wsk-namespace', 'hlx',
+        '--fastly-auth', 'secret-key',
+        '--fastly-serviceid', 'hlx',
+      ]);
+
+    sinon.assert.fail('hlx publish should fail with empty wsk-auth');
+  });
 });
