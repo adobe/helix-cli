@@ -1,6 +1,6 @@
 {
   "name": "@adobe/helix-cli",
-  "version": "5.0.1",
+  "version": "5.0.2",
   "description": "Project Helix CLI",
   "main": "index.js",
   "bin": {
@@ -114,7 +114,7 @@
   "renovate": {
     "extends": [
       "config:base",
-	    "schedule:earlyMondays"
+      "schedule:earlyMondays"
     ],
     "timezone": "Europe/Zurich",
     "packageRules": [

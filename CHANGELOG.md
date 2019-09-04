@@ -1,3 +1,10 @@
+## [5.0.2](https://github.com/adobe/helix-cli/compare/v5.0.1...v5.0.2) (2019-09-04)
+
+
+### Bug Fixes
+
+* **cli:** fixes Fastly Error from empty string passing ([#1137](https://github.com/adobe/helix-cli/issues/1137)) ([3c34c41](https://github.com/adobe/helix-cli/commit/3c34c41)), closes [#1135](https://github.com/adobe/helix-cli/issues/1135)
+
 ## [5.0.1](https://github.com/adobe/helix-cli/compare/v5.0.0...v5.0.1) (2019-08-27)
 
 
