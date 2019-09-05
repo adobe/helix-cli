@@ -119,12 +119,18 @@
     "timezone": "Europe/Zurich",
     "packageRules": [
       {
-        "packagePatterns": ["^@adobe/"],
+        "packagePatterns": [
+          "^@adobe/"
+        ],
         "groupName": "@adobe",
-        "schedule": ["at any time"]
+        "schedule": [
+          "at any time"
+        ]
       },
       {
-        "packagePatterns": [".*"],
+        "packagePatterns": [
+          ".*"
+        ],
         "groupName": "any"
       }
     ]
