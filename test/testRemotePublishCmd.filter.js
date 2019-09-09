@@ -32,18 +32,21 @@ describe('hlx publish --remote (with filters)', () => {
   let publishedstrains;
   let scope;
   let remote;
+  let softPurgeKey;
 
   beforeEach('Setting up Fake Server', async function bef() {
     clearHelixEnv();
     this.timeout(5000);
     writeDictItem = sinon.fake.resolves(true);
     purgeAll = sinon.fake.resolves(true);
+    softPurgeKey = sinon.fake.resolves(true);
 
     RemotePublishCommand = proxyquire('../src/remotepublish.cmd', {
       '@adobe/fastly-native-promises': () => ({
         transact: (fn) => fn(3),
         writeDictItem,
         purgeAll,
+        softPurgeKey,
       }),
     });
 
@@ -156,17 +159,20 @@ describe('hlx publish --remote (with filters, but without config)', () => {
   let pwd;
   let publishedstrains;
   let remote;
+  let softPurgeKey;
 
   beforeEach('Setting up Fake Server', async function bef() {
     this.timeout(5000);
     writeDictItem = sinon.fake.resolves(true);
     purgeAll = sinon.fake.resolves(true);
+    softPurgeKey = sinon.fake.resolves(true);
 
     RemotePublishCommand = proxyquire('../src/remotepublish.cmd', {
       '@adobe/fastly-native-promises': () => ({
         transact: (fn) => fn(3),
         writeDictItem,
         purgeAll,
+        softPurgeKey,
       }),
     });
 
