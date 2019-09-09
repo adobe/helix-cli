@@ -42,6 +42,7 @@ describe('hlx publish', () => {
     mockPublish.withFilter.returnsThis();
     mockPublish.withCustomVCLs.returnsThis();
     mockPublish.withDispatchVersion.returnsThis();
+    mockPublish.withPurge.returnsThis();
     mockPublish.run.returnsThis();
   });
 
@@ -85,6 +86,7 @@ describe('hlx publish', () => {
         '--wsk-namespace', 'hlx',
         '--fastly-auth', 'secret-key',
         '--fastly-namespace', 'hlx',
+        '--purge', 'hard',
       ]);
 
     sinon.assert.calledWith(mockPublish.withWskHost, 'adobeioruntime.net');
@@ -94,6 +96,7 @@ describe('hlx publish', () => {
     sinon.assert.calledWith(mockPublish.withFastlyAuth, 'secret-key');
     sinon.assert.calledWith(mockPublish.withCustomVCLs, []);
     sinon.assert.calledWith(mockPublish.withDispatchVersion, undefined);
+    sinon.assert.calledWith(mockPublish.withPurge, 'hard');
     sinon.assert.calledOnce(mockPublish.run);
   });
 
