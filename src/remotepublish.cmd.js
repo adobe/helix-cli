@@ -475,8 +475,15 @@ ${e}`);
       this.showNextStep(this._dryRun);
     } catch (e) {
       const message = 'Error while running the Publish command';
-      this.log.error(`${message}: ${e.stack}`, e);
-      throw new Error(message, e);
+      if (e.statusCode === 403) {
+        throw new Error(`${message}:
+The provided GITHUB_TOKEN is not authorized to act on behalf 
+of the Helix Bot and can therefore not be used to update the purge config. 
+You can generate a new token by running 'hlx auth'`);
+      } else {
+        this.log.error(`${message}: ${e.stack}`);
+        throw new Error(message, e);
+      }
     }
   }
 }
