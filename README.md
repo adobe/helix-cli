@@ -112,6 +112,14 @@ Publishing [========================================----------]  4.1s
 ✅  All strains have been published and version 89 is now online.
 ```
 
+### Purging the Cache upon Publishing
+
+Whenever you run `hlx publish`, a new version of your site, with potentially changed code will be made available to visitors. For visitors to see the changes, the Fastly cache needs to be purged. By default, `hlx publish` uses a "Soft purge", which means that the entire content of your website will be marked as outdated (or stale), but not actually removed from the cache. When a request for a cached file that has been marked outdated hits Fastly, Fastly will serve the old version, but fetch a new version in the background. As a result, your site is still as fast as before, *but in order for changes to show up, two requests are needed*.
+
+If you want to see your changes faster, at the expense of slower load times right after publishing, use the command `hlx publish --purge hard`, which triggers a hard purge, i.e. removes all cached objects from the Fastly CDN. Doing this on a site with substantial traffic is unwise, but it can be a useful option during development.
+
+Finally, if you do not want the cache to be purged at all, run `hlx publish --skip`. Your changes will only become visible when the cached objects expire or the cache is cleared in some other way, for instance from the Fastly console or using an API call as part of a more compex continuous deployment set-up.
+
 ### Passing Request Parameters
 
 Every request parameter is a potential cache-buster and given that modern web application practices liberally append request parameters for tracking purposes or to manage state for client-side applications, **Helix filters out all request parameters by default**.
