@@ -124,6 +124,7 @@ class RemotePublishCommand extends AbstractCommand {
 
   withPurge(value) {
     this._purge = value;
+    return this;
   }
 
   withFilter(only, exclude) {
