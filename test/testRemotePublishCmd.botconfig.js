@@ -244,39 +244,6 @@ describe('hlx publish --remote (default)', () => {
     scopeBot.done();
   });
 
-  it('publishing reports error if given bad github_token', async () => {
-    const scopeBot = nock('https://app.project-helix.io')
-      .post('/config/purge')
-      .reply((uri, requestBody) => {
-        assert.deepEqual(requestBody, EXPECTED_BODY);
-        return [
-          JSON.stringify({
-            statusCode: 403,
-          }),
-        ];
-      });
-    const logger = Logger.getTestLogger();
-    const remote = await new RemotePublishCommand(logger)
-      .withWskAuth('fakeauth')
-      .withWskNamespace('fakename')
-      .withFastlyAuth('fake_auth')
-      .withFastlyNamespace('fake_name')
-      .withWskHost('doesn.t.matter')
-      .withPublishAPI('https://adobeioruntime.net/api/v1/web/helix/helix-services/publish@v2')
-      .withConfigFile(path.resolve(__dirname, 'fixtures/deployed.yaml'))
-      .withUpdateBotConfig(true)
-      .withGithubToken('github-token-foobar')
-      .withDryRun(false);
-    try {
-      await remote.run();
-    } catch (err) {
-      assert.fail(`The provided GITHUB_TOKEN is not authorized to act on behalf 
-        of the Helix Bot and can therefore not be used to update the purge config. 
-        You can generate a new token by running 'hlx auth'`, err);
-    }
-    scopeBot.done();
-  });
-
   it('publishing update bot config reports error if fastly service is not in response', async () => {
     const scopeBot = nock('https://app.project-helix.io')
       .post('/config/purge')
@@ -335,6 +302,43 @@ describe('hlx publish --remote (default)', () => {
     assert.ok(idx3 > idx1);
     assert.ok(log.indexOf('Internal error: adobe/helix-cli#master status does have a configuration entry for given fastly service id.') > 0);
     scopeBot.done();
+  });
+
+  it('publishing with bad github_token fails with err message', async () => {
+    const scopeBot = nock('https://app.project-helix.io')
+      .post('/config/purge')
+      .reply((uri, requestBody) => {
+        assert.deepEqual(requestBody, EXPECTED_BODY);
+        return [
+          403,
+          JSON.stringify({
+            statusCode: 403,
+            error: Error(),
+          }),
+        ];
+      });
+    const logger = Logger.getTestLogger();
+    const remote = await new RemotePublishCommand(logger)
+      .withWskAuth('fakeauth')
+      .withWskNamespace('fakename')
+      .withFastlyAuth('fake_auth')
+      .withFastlyNamespace('fake_name')
+      .withWskHost('doesn.t.matter')
+      .withPublishAPI('https://adobeioruntime.net/api/v1/web/helix/helix-services/publish@v2')
+      .withConfigFile(path.resolve(__dirname, 'fixtures/deployed.yaml'))
+      .withUpdateBotConfig(true)
+      .withGithubToken('github-token-foobar')
+      .withDryRun(false);
+
+    try {
+      assert.fail(await remote.run());
+    } catch (err) {
+      assert.equal(
+        "Error while running the Publish command:The provided GITHUB_TOKEN is not authorized to act on behalf of the Helix Bot and can therefore not be used to update the purge config. You can generate a new token by running 'hlx auth'",
+        err.message.replace(/[\n\r]+/g, ''),
+      );
+      scopeBot.done();
+    }
   });
 
   it('publishing update bot config reports error if fastly service has error', async () => {

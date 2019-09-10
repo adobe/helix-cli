@@ -344,6 +344,7 @@ ${e}`);
       }
       repos[urlString].strains.push(strain.name);
     });
+
     const response = await request.post(this._configPurgeAPI, {
       json: true,
       body: {
