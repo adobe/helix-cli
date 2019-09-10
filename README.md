@@ -118,7 +118,7 @@ Whenever you run `hlx publish`, a new version of your site, with potentially cha
 
 If you want to see your changes faster, at the expense of slower load times right after publishing, use the command `hlx publish --purge hard`, which triggers a hard purge, i.e. removes all cached objects from the Fastly CDN. Doing this on a site with substantial traffic is unwise, but it can be a useful option during development.
 
-Finally, if you do not want the cache to be purged at all, run `hlx publish --skip`. Your changes will only become visible when the cached objects expire or the cache is cleared in some other way, for instance from the Fastly console or using an API call as part of a more compex continuous deployment set-up.
+Finally, if you do not want the cache to be purged at all, run `hlx publish --purge skip`. Your changes will only become visible when the cached objects expire or the cache is cleared in some other way, for instance from the Fastly console or using an API call as part of a more compex continuous deployment set-up.
 
 ### Passing Request Parameters
 
