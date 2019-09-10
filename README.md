@@ -254,11 +254,19 @@ start a git server that emulates GitHub repositories for a local git repository.
 have a _content_ or _static_ url that matches the `origin` of emulated repository are internally reconfigured
 to use the local git server instead.
 
-For the simple case, where only one repository is used for code, content and static just do:
+`--local-repo .` is the implicit default. For the simple case, where only one repository is used for code, content and static just do:
 
 ```
-$ hlx up --local-repo
-``` 
+$ hlx up
+```
+
+which is equivalent to `hlx up --local-repo .`.
+
+If you want to explicitly always fetch from GitHub, i.e. ignore the local checkout in the current working directory (or any other checkout specified with `--local-repo`), use `--no-local-repo`:
+
+```
+$ hlx up --no-local-repo
+```
 
 #### Multi Strain Example
 
