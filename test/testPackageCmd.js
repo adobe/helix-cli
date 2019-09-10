@@ -89,10 +89,10 @@ describe('hlx package (Integration)', () => {
         },
       });
       delete ret.headers['Server-Timing'];
+      delete ret.headers['Cache-Control'];
       assert.deepEqual(ret, {
         body: "<!DOCTYPE html><html>\n\t<head>\n\t\t<title>Example</title>\n\t\t<link rel=\"related\" href=\"/welcome.txt\">\n\t</head>\n\t<body>\n\t\tNothing happens here, yet.\n\n\t\t<h1>Here are a few things I know:</h1>\n\t\t<dl>\n\t\t\t<dt>Requested Content</dt>\n\t\t\t<dd><code>/README.md</code></dd>\n\n\t\t\t<dt>Title</dt>\n\t\t\t<dd><code>foo</code></dd>\n\t\t</dl>\n\t\t<!-- anyway, here's the full content-->\n\t\t<main>\n\t\t<h1 id=\"foo\">foo</h1>\n\t\t</main>\n\t</body>\n</html>",
         headers: {
-          'Cache-Control': 's-maxage=604800',
           'Content-Type': 'text/html',
           Link: '</welcome.txt>; rel="related"',
         },
