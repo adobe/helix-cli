@@ -41,6 +41,13 @@ module.exports = function up() {
           type: 'boolean',
           default: true,
         })
+        .option('no-open', {
+          // negation of the open option (resets open default)
+          // see https://github.com/yargs/yargs/blob/master/docs/tricks.md#negating-boolean-arguments
+          alias: 'noOpen',
+          describe: 'Disable automatic opening of browser window',
+          type: 'boolean',
+        })
         .option('host', {
           describe: 'Override request.host',
           type: 'string',
@@ -81,7 +88,7 @@ module.exports = function up() {
           type: 'int',
           default: 3000,
         })
-        .group(['port', 'open', 'host', 'local-repo', 'no-local-repo'], 'Server options')
+        .group(['port', 'open', 'no-open', 'host', 'local-repo', 'no-local-repo'], 'Server options')
         .help();
     },
     handler: async (argv) => {
