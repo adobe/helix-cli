@@ -63,13 +63,6 @@ module.exports = function up() {
           }
           return acc;
         }, []))
-        .option('no-local-repo', {
-          // negation of the local-repo option (resets local-repo default)
-          // see https://github.com/yargs/yargs/blob/master/docs/tricks.md#negating-boolean-arguments
-          alias: 'noLocalRepo',
-          describe: 'Ignore local checkout, always fetch from GitHub',
-          type: 'boolean',
-        })
         .option('save-config', {
           alias: 'saveConfig',
           describe: 'Saves the default config.',
@@ -81,7 +74,7 @@ module.exports = function up() {
           type: 'int',
           default: 3000,
         })
-        .group(['port', 'open', 'host', 'local-repo', 'no-local-repo'], 'Server options')
+        .group(['port', 'open', 'host', 'local-repo'], 'Server options')
         .help();
     },
     handler: async (argv) => {
