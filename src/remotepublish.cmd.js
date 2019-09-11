@@ -40,6 +40,7 @@ class RemotePublishCommand extends AbstractCommand {
     this._configPurgeAPI = 'https://app.project-helix.io/config/purge';
     this._vcl = null;
     this._dispatchVersion = null;
+    this._purge = 'soft';
   }
 
   tick(ticks = 1, message, name) {
@@ -118,6 +119,11 @@ class RemotePublishCommand extends AbstractCommand {
 
   withConfigPurgeAPI(value) {
     this._configPurgeAPI = value;
+    return this;
+  }
+
+  withPurge(value) {
+    this._purge = value;
     return this;
   }
 
@@ -237,20 +243,26 @@ class RemotePublishCommand extends AbstractCommand {
   }
 
   purgeFastly() {
-    if (this._dryRun) {
+    if (this._dryRun || this._purge === 'skip') {
       this.tick(1, 'skipping cache purge');
       return false;
     }
-    return this._fastly.purgeAll()
-      .then(() => {
-        this.tick(1, 'purged cache', true);
-        return true;
-      })
-      .catch((e) => {
-        this.tick(1, 'failed to purge cache', true);
-        this.log.error(`Cache could not get purged ${e}`);
-        throw new Error('Unable to purge cache: ');
-      });
+
+    const ok = () => {
+      this.tick(1, 'purged cache', true);
+      return true;
+    };
+
+    const err = (e) => {
+      this.tick(1, 'failed to purge cache', true);
+      this.log.error(`Cache could not get purged ${e}`);
+      throw new Error('Unable to purge cache: ');
+    };
+
+    if (this._purge === 'hard') {
+      return this._fastly.purgeAll().then(ok).catch(err);
+    }
+    return this._fastly.softPurgeKey('all').then(ok).catch(err);
   }
 
   async servicePublish() {

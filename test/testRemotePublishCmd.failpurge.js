@@ -59,6 +59,7 @@ describe('hlx publish --remote (fail purge)', () => {
       .withFastlyAuth('fake_auth')
       .withFastlyNamespace('fake_name')
       .withWskHost('doesn.t.matter')
+      .withPurge('hard')
       .withConfigFile(path.resolve(__dirname, 'fixtures/deployed.yaml'))
       .withDryRun(false);
 

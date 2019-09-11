@@ -74,6 +74,11 @@ module.exports = function strain() {
           describe: 'Version of the dispatch action to use.',
           type: 'string',
         })
+        .option('purge', {
+          describe: 'How to purge the cache after deployment',
+          choices: ['soft', 'hard', 'skip'],
+          default: 'soft',
+        })
         .conflicts('only', 'exclude')
         .demandOption(
           'fastly-auth',
@@ -120,6 +125,7 @@ module.exports = function strain() {
         .withFilter(argv.only, argv.exclude)
         .withCustomVCLs(argv.customVCL)
         .withDispatchVersion(argv.dispatchVersion)
+        .withPurge(argv.purge)
         .run();
     },
   };

@@ -63,7 +63,7 @@ describe('hlx publish --remote (default)', () => {
       .reply(200, {});
   });
 
-  it('publishing update bot config', async () => {
+  it('publishing updates bot config', async () => {
     const scopeBot = nock('https://app.project-helix.io')
       .post('/config/purge')
       .reply((uri, requestBody) => {
@@ -131,6 +131,7 @@ describe('hlx publish --remote (default)', () => {
       .withUpdateBotConfig(true)
       .withGithubToken('github-token-foobar')
       .withConfigPurgeAPI('https://app.project-helix.io/config/purge')
+      .withPurge('hard')
       .withDryRun(false);
     await remote.run();
 
@@ -184,6 +185,7 @@ describe('hlx publish --remote (default)', () => {
       .withConfigFile(path.resolve(__dirname, 'fixtures/deployed.yaml'))
       .withUpdateBotConfig(true)
       .withGithubToken('github-token-foobar')
+      .withPurge('hard')
       .withDryRun(false);
     await remote.run();
 
@@ -225,6 +227,7 @@ describe('hlx publish --remote (default)', () => {
       .withConfigFile(path.resolve(__dirname, 'fixtures/deployed.yaml'))
       .withUpdateBotConfig(true)
       .withGithubToken('github-token-foobar')
+      .withPurge('hard')
       .withDryRun(false);
     await remote.run();
 
@@ -285,6 +288,7 @@ describe('hlx publish --remote (default)', () => {
       .withConfigFile(path.resolve(__dirname, 'fixtures/deployed.yaml'))
       .withUpdateBotConfig(true)
       .withGithubToken('github-token-foobar')
+      .withPurge('hard')
       .withDryRun(false);
     await remote.run();
 
@@ -372,6 +376,7 @@ describe('hlx publish --remote (default)', () => {
       .withConfigFile(path.resolve(__dirname, 'fixtures/deployed.yaml'))
       .withUpdateBotConfig(true)
       .withGithubToken('github-token-foobar')
+      .withPurge('hard')
       .withDryRun(false);
     await remote.run();
 
@@ -446,6 +451,7 @@ describe('hlx publish --remote (default)', () => {
       .withConfigFile(path.resolve(__dirname, 'fixtures/deployed.yaml'))
       .withUpdateBotConfig(true)
       .withGithubToken('github-token-foobar')
+      .withPurge('hard')
       .withDryRun(false);
     await remote.run();
 

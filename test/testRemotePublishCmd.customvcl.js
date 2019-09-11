@@ -76,18 +76,21 @@ describe('hlx publish --custom-vcl (check requests)', () => {
   let vcl;
   let scope;
   let remote;
+  let softPurgeKey;
 
   beforeEach('Setting up Fake Server', async function bef() {
     clearHelixEnv();
     this.timeout(5000);
     writeDictItem = sinon.fake.resolves(true);
     purgeAll = sinon.fake.resolves(true);
+    softPurgeKey = sinon.fake.resolves(true);
 
     ProxiedRemotePublishCommand = proxyquire('../src/remotepublish.cmd', {
       '@adobe/fastly-native-promises': () => ({
         transact: (fn) => fn(3),
         writeDictItem,
         purgeAll,
+        softPurgeKey,
       }),
     });
 
