@@ -243,7 +243,7 @@ class RemotePublishCommand extends AbstractCommand {
   }
 
   purgeFastly() {
-    if (this._dryRun || !(this._purge === 'soft' || this._purge === 'hard')) {
+    if (this._dryRun || this._purge === 'skip') {
       this.tick(1, 'skipping cache purge');
       return false;
     }
