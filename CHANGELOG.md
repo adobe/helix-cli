@@ -1,3 +1,16 @@
+# [5.1.0](https://github.com/adobe/helix-cli/compare/v5.0.2...v5.1.0) (2019-09-11)
+
+
+### Bug Fixes
+
+* **publish:** make withPurge return this ([710d4a9](https://github.com/adobe/helix-cli/commit/710d4a9))
+* **publish:** only skip purging when asked explicitly ([ee3603e](https://github.com/adobe/helix-cli/commit/ee3603e))
+
+
+### Features
+
+* **publish:** enable a choice between soft (new default) and hard purges ([b9aecd3](https://github.com/adobe/helix-cli/commit/b9aecd3))
+
 ## [5.0.2](https://github.com/adobe/helix-cli/compare/v5.0.1...v5.0.2) (2019-09-04)
 
 
