@@ -1,3 +1,10 @@
+# [5.2.0](https://github.com/adobe/helix-cli/compare/v5.1.0...v5.2.0) (2019-09-12)
+
+
+### Features
+
+* **up:** hlx up defaults to local repo ([#1149](https://github.com/adobe/helix-cli/issues/1149)) ([62affcb](https://github.com/adobe/helix-cli/commit/62affcb))
+
 # [5.1.0](https://github.com/adobe/helix-cli/compare/v5.0.2...v5.1.0) (2019-09-11)
 
 
