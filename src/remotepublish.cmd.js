@@ -32,6 +32,7 @@ class RemotePublishCommand extends AbstractCommand {
     this._wsk_namespace = null;
     this._wsk_host = null;
     this._fastly_namespace = null;
+    this._debug_key = null;
     this._fastly_auth = null;
     this._dryRun = false;
     this._publishAPI = 'https://adobeioruntime.net/api/v1/web/helix/helix-services/publish@v2';
@@ -124,6 +125,11 @@ class RemotePublishCommand extends AbstractCommand {
 
   withPurge(value) {
     this._purge = value;
+    return this;
+  }
+
+  withDebugKey(value) {
+    this._debug_key = value;
     return this;
   }
 
@@ -293,6 +299,7 @@ ${e}`);
       configuration: this.config.toJSON(),
       service: this._fastly_namespace,
       token: this._fastly_auth,
+      debugKey: this._debug_key || this._fastly_namespace,
       version: this._version,
     };
 
