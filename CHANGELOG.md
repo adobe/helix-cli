@@ -1,3 +1,10 @@
+## [5.2.1](https://github.com/adobe/helix-cli/compare/v5.2.0...v5.2.1) (2019-09-16)
+
+
+### Bug Fixes
+
+* **deps:** update any ([2efd21b](https://github.com/adobe/helix-cli/commit/2efd21b))
+
 # [5.2.0](https://github.com/adobe/helix-cli/compare/v5.1.0...v5.2.0) (2019-09-12)
 
 
