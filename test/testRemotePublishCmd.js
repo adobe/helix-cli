@@ -61,12 +61,13 @@ describe('hlx publish --remote (default)', () => {
       .withFastlyNamespace('fake_name')
       .withWskHost('doesn.t.matter')
       .withPublishAPI('https://adobeioruntime.net/api/v1/web/helix/helix-services/publish@v2')
+      .withDebugKey('something')
       .withConfigFile(path.resolve(__dirname, 'fixtures/deployed.yaml'))
       .withFilter()
       .withDryRun(false);
     await remote.run();
 
-    sinon.assert.calledTwice(writeDictItem);
+    sinon.assert.calledThrice(writeDictItem);
     sinon.assert.calledOnce(softPurgeKey);
 
     scope.done();
