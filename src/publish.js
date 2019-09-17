@@ -79,6 +79,11 @@ module.exports = function strain() {
           choices: ['soft', 'hard', 'skip'],
           default: 'soft',
         })
+        .option('debug-key', {
+          alias: 'debugKey',
+          describe: 'The key to enable the X-Debug header (default is the fastly service id)',
+          type: 'string',
+        })
         .conflicts('only', 'exclude')
         .demandOption(
           'fastly-auth',
@@ -116,6 +121,7 @@ module.exports = function strain() {
         .withWskHost(argv.wskHost)
         .withWskNamespace(argv.wskNamespace)
         .withFastlyNamespace(argv.fastlyNamespace)
+        .withDebugKey(argv.debugKey)
         .withFastlyAuth(argv.fastlyAuth)
         .withDryRun(argv.dryRun)
         .withPublishAPI(argv.apiPublish)
