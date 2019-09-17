@@ -1,3 +1,18 @@
+# [5.3.0](https://github.com/adobe/helix-cli/compare/v5.2.1...v5.3.0) (2019-09-17)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @adobe/helix-pipeline to v5.5.2 ([869b490](https://github.com/adobe/helix-cli/commit/869b490))
+
+
+### Features
+
+* **pub:** fix tests ([2a3d5fb](https://github.com/adobe/helix-cli/commit/2a3d5fb))
+* **pub:** fix tests and remove yargs-debug.js ([6fd1e42](https://github.com/adobe/helix-cli/commit/6fd1e42))
+* **pub:** protect X-Debug with key ([518060d](https://github.com/adobe/helix-cli/commit/518060d))
+* **pub:** support for debug key added ([ff3e7fb](https://github.com/adobe/helix-cli/commit/ff3e7fb))
+
 ## [5.2.1](https://github.com/adobe/helix-cli/compare/v5.2.0...v5.2.1) (2019-09-16)
 
 
