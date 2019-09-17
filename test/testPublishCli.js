@@ -43,6 +43,7 @@ describe('hlx publish', () => {
     mockPublish.withCustomVCLs.returnsThis();
     mockPublish.withDispatchVersion.returnsThis();
     mockPublish.withPurge.returnsThis();
+    mockPublish.withDebugKey.returnsThis();
     mockPublish.run.returnsThis();
   });
 
