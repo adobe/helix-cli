@@ -292,4 +292,19 @@ describe('hlx publish', () => {
 
     sinon.assert.fail('hlx publish should fail with empty wsk-auth');
   });
+
+  it('hlx publish handles debug-key', () => {
+    new CLI()
+      .withCommandExecutor('publish', mockPublish)
+      .run(['publish',
+        '--wsk-auth', 'secret-key',
+        '--wsk-namespace', 'hlx',
+        '--fastly-auth', 'secret-key',
+        '--fastly-namespace', 'hlx',
+        '--dispatch-version', 'ci1',
+        '--debug-key', 'something',
+      ]);
+
+    sinon.assert.calledWith(mockPublish.withDebugKey, 'something');
+  });
 });

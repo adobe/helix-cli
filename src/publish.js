@@ -14,7 +14,6 @@
 
 const yargsOpenwhisk = require('./yargs-openwhisk.js');
 const yargsFastly = require('./yargs-fastly.js');
-const yargsDebug = require('./yargs-debug.js');
 const yargsGithub = require('./yargs-github.js');
 const { makeLogger } = require('./log-common.js');
 
@@ -30,7 +29,6 @@ module.exports = function strain() {
     builder: (yargs) => {
       yargsOpenwhisk(yargs);
       yargsFastly(yargs);
-      yargsDebug(yargs);
       yargsGithub(yargs);
       yargs
         .option('dry-run', {
@@ -80,6 +78,11 @@ module.exports = function strain() {
           describe: 'How to purge the cache after deployment',
           choices: ['soft', 'hard', 'skip'],
           default: 'soft',
+        })
+        .option('debug-key', {
+          alias: 'debugKey',
+          describe: 'The key to enable the X-Debug header (default is the fastly service id)',
+          type: 'string',
         })
         .conflicts('only', 'exclude')
         .demandOption(
