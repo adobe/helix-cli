@@ -1,3 +1,10 @@
+# [5.4.0](https://github.com/adobe/helix-cli/compare/v5.3.0...v5.4.0) (2019-09-18)
+
+
+### Features
+
+* **pub:** defaults debugKey to serviceid ([#1153](https://github.com/adobe/helix-cli/issues/1153)) ([d32fc46](https://github.com/adobe/helix-cli/commit/d32fc46))
+
 # [5.3.0](https://github.com/adobe/helix-cli/compare/v5.2.1...v5.3.0) (2019-09-17)
 
 
