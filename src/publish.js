@@ -82,6 +82,7 @@ module.exports = function strain() {
         .option('debug-key', {
           alias: 'debugKey',
           describe: 'The key to enable the X-Debug header (default is the fastly service id)',
+          default: '',
           type: 'string',
         })
         .conflicts('only', 'exclude')

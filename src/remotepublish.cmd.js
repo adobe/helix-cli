@@ -337,10 +337,8 @@ ${e}`);
       const token = this._fastly.writeDictItem(this._version, 'secrets', 'GITHUB_TOKEN', this._githubToken);
       jobs.push(token);
     }
-    if (this._debug_key) {
-      const debugKey = this._fastly.writeDictItem(this._version, 'secrets', 'DEBUG_KEY', this._debug_key);
-      jobs.push(debugKey);
-    }
+    const debugKey = this._fastly.writeDictItem(this._version, 'secrets', 'DEBUG_KEY', this._debug_key || this._fastly_namespace);
+    jobs.push(debugKey);
     return Promise.all(jobs).then(() => {
       this.tick(2, 'enabled authentication', true);
       return true;
