@@ -30,7 +30,7 @@ commands:
 
 orbs:
   helix-smoke-tests: adobe/helix-smoke-tests@0.0.10
-  win: circleci/windows-tools@0.0.5
+  win: circleci/windows-tools@0.1.0
 
 jobs:
   build_win:
