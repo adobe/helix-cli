@@ -1,3 +1,10 @@
+## [5.4.2](https://github.com/adobe/helix-cli/compare/v5.4.1...v5.4.2) (2019-09-30)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @adobe/helix-pipeline to v5.5.3 ([08f18ee](https://github.com/adobe/helix-cli/commit/08f18ee))
+
 ## [5.4.1](https://github.com/adobe/helix-cli/compare/v5.4.0...v5.4.1) (2019-09-30)
 
 
