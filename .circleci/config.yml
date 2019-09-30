@@ -30,12 +30,12 @@ commands:
 
 orbs:
   helix-smoke-tests: adobe/helix-smoke-tests@0.0.10
-  win: circleci/windows-tools@0.0.5
+  win: circleci/windows-tools@0.1.0
 
 jobs:
   build_win:
     parallelism: 1
-    executor: win/preview-default
+    executor: win/default
     steps:
       - run: git config --global core.autocrlf false
       - run:
@@ -60,7 +60,7 @@ jobs:
           path: junit
 
       - store_artifacts:
-          path: junit  
+          path: junit
 
   build:
     parallelism: 4
