@@ -15,7 +15,7 @@ const shell = require('shelljs');
 const crypto = require('crypto');
 const fse = require('fs-extra');
 const http = require('http');
-const unzip = require('unzip2');
+const yauzl = require('yauzl');
 const { JSDOM } = require('jsdom');
 const { dom: { assertEquivalentNode } } = require('@adobe/helix-shared');
 const BuildCommand = require('../src/build.cmd');
@@ -147,16 +147,20 @@ async function assertZipEntries(zipPath, entries) {
   // check zip
   const result = await new Promise((resolve, reject) => {
     const es = [];
-    const srcStream = fse.createReadStream(zipPath);
-    srcStream.pipe(unzip.Parse())
-      .on('entry', (entry) => {
-        es.push(entry.path);
-        entry.autodrain();
-      })
-      .on('close', () => {
+    yauzl.open(zipPath, (err, zipfile) => {
+      if (err) {
+        reject(err);
+      }
+      zipfile.on('entry', (entry) => {
+        es.push(entry.fileName);
+      });
+
+      zipfile.on('close', () => {
         resolve(es);
-      })
-      .on('error', reject);
+      });
+
+      zipfile.on('error', reject);
+    });
   });
   entries.forEach((s) => {
     assert.ok(result.indexOf(s) >= 0, `${s} must be included in ${zipPath}`);
