@@ -1,3 +1,11 @@
+## [5.4.3](https://github.com/adobe/helix-cli/compare/v5.4.2...v5.4.3) (2019-10-01)
+
+
+### Bug Fixes
+
+* **deps:** npm audit fix dependencies ([5eb3a8d](https://github.com/adobe/helix-cli/commit/5eb3a8d))
+* **deps:** update any ([#1160](https://github.com/adobe/helix-cli/issues/1160)) ([61cbf4a](https://github.com/adobe/helix-cli/commit/61cbf4a))
+
 ## [5.4.2](https://github.com/adobe/helix-cli/compare/v5.4.1...v5.4.2) (2019-09-30)
 
 
