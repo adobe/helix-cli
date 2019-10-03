@@ -1,3 +1,10 @@
+## [5.4.5](https://github.com/adobe/helix-cli/compare/v5.4.4...v5.4.5) (2019-10-03)
+
+
+### Bug Fixes
+
+* **deps:** update any ([#1164](https://github.com/adobe/helix-cli/issues/1164)) ([168feeb](https://github.com/adobe/helix-cli/commit/168feeb))
+
 ## [5.4.4](https://github.com/adobe/helix-cli/compare/v5.4.3...v5.4.4) (2019-10-02)
 
 
