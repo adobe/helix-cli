@@ -1,3 +1,10 @@
+## [5.4.6](https://github.com/adobe/helix-cli/compare/v5.4.5...v5.4.6) (2019-10-03)
+
+
+### Bug Fixes
+
+* **publish:** clear GITHUB_TOKEN from edge dictionary if given ([#1163](https://github.com/adobe/helix-cli/issues/1163)) ([74d470a](https://github.com/adobe/helix-cli/commit/74d470a)), closes [#1162](https://github.com/adobe/helix-cli/issues/1162)
+
 ## [5.4.5](https://github.com/adobe/helix-cli/compare/v5.4.4...v5.4.5) (2019-10-03)
 
 
