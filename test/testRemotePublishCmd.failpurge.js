@@ -70,7 +70,7 @@ describe('hlx publish --remote (fail purge)', () => {
       if (e instanceof AssertionError) {
         assert.fail(e);
       }
-      sinon.assert.calledThrice(writeDictItem);
+      sinon.assert.callCount(writeDictItem, 4);
     }
   });
 

@@ -333,10 +333,8 @@ ${e}`);
       const namespace = this._fastly.writeDictItem(this._version, 'secrets', 'OPENWHISK_NAMESPACE', this._wsk_namespace);
       jobs.push(namespace);
     }
-    if (this._githubToken) {
-      const token = this._fastly.writeDictItem(this._version, 'secrets', 'GITHUB_TOKEN', this._githubToken);
-      jobs.push(token);
-    }
+    const token = this._fastly.writeDictItem(this._version, 'secrets', 'GITHUB_TOKEN', this._githubToken);
+    jobs.push(token);
     const debugKey = this._fastly.writeDictItem(this._version, 'secrets', 'DEBUG_KEY', this._debug_key || this._fastly_namespace);
     jobs.push(debugKey);
     return Promise.all(jobs).then(() => {

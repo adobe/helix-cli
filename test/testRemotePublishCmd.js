@@ -67,7 +67,7 @@ describe('hlx publish --remote (default)', () => {
       .withDryRun(false);
     await remote.run();
 
-    sinon.assert.calledThrice(writeDictItem);
+    sinon.assert.callCount(writeDictItem, 4);
     sinon.assert.calledOnce(softPurgeKey);
 
     scope.done();
