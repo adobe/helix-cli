@@ -58,7 +58,7 @@ describe('hlx publish --remote --dry-run (default)', () => {
       .withDryRun(true);
     await remote.run();
 
-    sinon.assert.calledThrice(writeDictItem);
+    sinon.assert.callCount(writeDictItem, 4);
     sinon.assert.notCalled(purgeAll);
   });
 });
