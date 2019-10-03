@@ -34,7 +34,7 @@
   },
   "dependencies": {
     "@adobe/fastly-native-promises": "^1.12.0",
-    "@adobe/helix-pipeline": "5.5.4",
+    "@adobe/helix-pipeline": "5.5.5",
     "@adobe/helix-shared": "3.0.1",
     "@adobe/helix-simulator": "2.13.6",
     "@adobe/htlengine": "3.2.2",
@@ -81,7 +81,7 @@
     "@pollyjs/persister-fs": "2.6.3",
     "@semantic-release/changelog": "3.0.4",
     "@semantic-release/git": "7.0.16",
-    "@semantic-release/github": "5.4.3",
+    "@semantic-release/github": "5.5.0",
     "codecov": "3.6.1",
     "commitizen": "4.0.3",
     "cz-conventional-changelog": "3.0.2",
