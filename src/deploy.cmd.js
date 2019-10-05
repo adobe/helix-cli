@@ -18,6 +18,7 @@ const ow = require('openwhisk');
 const glob = require('glob');
 const path = require('path');
 const fs = require('fs-extra');
+const semver = require('semver');
 const uuidv4 = require('uuid/v4');
 const ProgressBar = require('progress');
 const { HelixConfig, GitUrl } = require('@adobe/helix-shared');
@@ -482,7 +483,12 @@ Alternatively you can auto-add one using the {grey --add <name>} option.`);
       await request.get('https://adobeioruntime.net/api/v1/web/helix/helix-services/static@latest', {
         resolveWithFullResponse: true,
       }).then((res) => {
-        const version = res.headers['x-version'] || 'latest';
+        let version = 'latest';
+        try {
+          version = `v${semver.major(res.headers['x-version'])}`;
+        } catch (e) {
+          // ignore
+        }
         tick(` verified static action version: ${version}`);
         staticactionname = `/helix-services/static@${version}`;
       }).catch((e) => {
