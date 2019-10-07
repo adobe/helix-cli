@@ -1,3 +1,10 @@
+## [5.4.7](https://github.com/adobe/helix-cli/compare/v5.4.6...v5.4.7) (2019-10-07)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @adobe/htlengine to v3.2.3 ([#1171](https://github.com/adobe/helix-cli/issues/1171)) ([f41c06c](https://github.com/adobe/helix-cli/commit/f41c06c))
+
 ## [5.4.6](https://github.com/adobe/helix-cli/compare/v5.4.5...v5.4.6) (2019-10-03)
 
 
