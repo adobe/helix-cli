@@ -112,7 +112,7 @@ jobs:
         
   forkwarning:
     steps:
-    - run: echo "Warning: this PR is coming from a fork repository, no smoke tests will be run".
+    - run: echo "Warning - this PR is coming from a fork repository, no smoke tests will be run".
 
 workflows:
   version: 2
