@@ -1,3 +1,15 @@
+# [5.5.0](https://github.com/adobe/helix-cli/compare/v5.4.8...v5.5.0) (2019-10-07)
+
+
+### Bug Fixes
+
+* **security:** high severity vulnerability in deps ([05ba7ea](https://github.com/adobe/helix-cli/commit/05ba7ea))
+
+
+### Features
+
+* reduce `WARN`s during `npm install` ([897ca6e](https://github.com/adobe/helix-cli/commit/897ca6e)), closes [#973](https://github.com/adobe/helix-cli/issues/973)
+
 ## [5.4.8](https://github.com/adobe/helix-cli/compare/v5.4.7...v5.4.8) (2019-10-07)
 
 

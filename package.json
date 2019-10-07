@@ -1,6 +1,6 @@
 {
   "name": "@adobe/helix-cli",
-  "version": "5.4.8",
+  "version": "5.5.0",
   "description": "Project Helix CLI",
   "main": "index.js",
   "bin": {
@@ -115,7 +115,8 @@
       "schedule:earlyMondays"
     ],
     "timezone": "Europe/Zurich",
-    "packageRules": [{
+    "packageRules": [
+      {
         "packagePatterns": [
           "^@adobe/"
         ],
