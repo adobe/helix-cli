@@ -1,3 +1,10 @@
+# [5.6.0](https://github.com/adobe/helix-cli/compare/v5.5.0...v5.6.0) (2019-10-07)
+
+
+### Features
+
+* **ci:** No smoke tests for PR from forks ([671636f](https://github.com/adobe/helix-cli/commit/671636f))
+
 # [5.5.0](https://github.com/adobe/helix-cli/compare/v5.4.8...v5.5.0) (2019-10-07)
 
 
