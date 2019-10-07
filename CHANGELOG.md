@@ -1,3 +1,10 @@
+## [5.4.8](https://github.com/adobe/helix-cli/compare/v5.4.7...v5.4.8) (2019-10-07)
+
+
+### Bug Fixes
+
+* **deploy:** use major version for helix-statix fixes [#1165](https://github.com/adobe/helix-cli/issues/1165) ([#1166](https://github.com/adobe/helix-cli/issues/1166)) ([8598e36](https://github.com/adobe/helix-cli/commit/8598e36))
+
 ## [5.4.7](https://github.com/adobe/helix-cli/compare/v5.4.6...v5.4.7) (2019-10-07)
 
 
