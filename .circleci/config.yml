@@ -109,6 +109,13 @@ jobs:
     - run:
         name: Semantic Release
         command: npm run semantic-release
+        
+  forkwarning:
+    executor: node8
+    working_directory: ~/repo
+
+    steps:
+    - run: echo "Warning - this PR is coming from a fork repository, no smoke tests will be run".
 
 workflows:
   version: 2
@@ -128,4 +135,13 @@ workflows:
   smoke:
     jobs:
     - helix-smoke-tests/run:
+        filters:
+          branches:
+            # Forked pull requests have CIRCLE_BRANCH set to pull/XXX
+            ignore: /pull\/[0-9]+/
         remote_repo: adobe/helix-continuous
+    - forkwarning:
+        filters:
+          branches:
+            # Forked pull requests have CIRCLE_BRANCH set to pull/XXX
+            only: /pull\/[0-9]+/
