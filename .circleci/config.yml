@@ -111,6 +111,9 @@ jobs:
         command: npm run semantic-release
         
   forkwarning:
+    executor: node8
+    working_directory: ~/repo
+
     steps:
     - run: echo "Warning - this PR is coming from a fork repository, no smoke tests will be run".
 
