@@ -118,7 +118,7 @@ Whenever you run `hlx publish`, a new version of your site, with potentially cha
 
 If you want to see your changes faster, at the expense of slower load times right after publishing, use the command `hlx publish --purge hard`, which triggers a hard purge, i.e. removes all cached objects from the Fastly CDN. Doing this on a site with substantial traffic is unwise, but it can be a useful option during development.
 
-Finally, if you do not want the cache to be purged at all, run `hlx publish --purge skip`. Your changes will only become visible when the cached objects expire or the cache is cleared in some other way, for instance from the Fastly console or using an API call as part of a more compex continuous deployment set-up.
+Finally, if you do not want the cache to be purged at all, run `hlx publish --purge skip`. Your changes will only become visible when the cached objects expire or the cache is cleared in some other way, for instance from the Fastly console or using an API call as part of a more complex continuous deployment set-up.
 
 ### Passing Request Parameters
 
@@ -491,7 +491,7 @@ Because HTL is a pure declarative templating language, you cannot make any modif
 JavaScript is the universal language that powers Helix and you can use it in a wide array of settings in Helix:
 
 1. to create HTML, JSON, Text, XML, or other documents to be served to the browser (as a template function)
-2. to modifify and manipulate the [`context`](https://github.com/adobe/helix-pipeline/blob/master/docs/context.schema.md) before it is handed off to a template function (as `pre.js`)
+2. to modify and manipulate the [`context`](https://github.com/adobe/helix-pipeline/blob/master/docs/context.schema.md) before it is handed off to a template function (as `pre.js`)
 3. to handle requests for forms, web applications, and to create small APIs (as `cgi-bin`)
 4. to provide helper functions that can be used elsewhere in Helix (as modules)
 
