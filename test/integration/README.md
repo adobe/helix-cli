@@ -44,7 +44,7 @@ Example URLs:
 
 ## The Original Soupdemo
 
-You can use arbitrary content sources for your strains, so this is the original Soupdemo, served from `@trieloff`'s GitHub repo, access ible under `lars.primordialsoup.life` 
+You can use arbitrary content sources for your strains, so this is the original Soupdemo, served from `@trieloff`'s GitHub repo, accessible under `lars.primordialsoup.life` 
 
 ```yaml
 - strain:
