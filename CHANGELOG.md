@@ -1,3 +1,11 @@
+## [5.6.1](https://github.com/adobe/helix-cli/compare/v5.6.0...v5.6.1) (2019-10-08)
+
+
+### Bug Fixes
+
+* **deps:** update any ([#1175](https://github.com/adobe/helix-cli/issues/1175)) ([58c7fa0](https://github.com/adobe/helix-cli/commit/58c7fa0))
+* **deps:** update dependency @adobe/helix-simulator to v2.13.7 ([#1177](https://github.com/adobe/helix-cli/issues/1177)) ([e3016e0](https://github.com/adobe/helix-cli/commit/e3016e0))
+
 # [5.6.0](https://github.com/adobe/helix-cli/compare/v5.5.0...v5.6.0) (2019-10-07)
 
 
