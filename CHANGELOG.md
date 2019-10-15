@@ -1,3 +1,10 @@
+## [5.6.3](https://github.com/adobe/helix-cli/compare/v5.6.2...v5.6.3) (2019-10-15)
+
+
+### Bug Fixes
+
+* **deps:** update dependency object-hash to v2 ([#1181](https://github.com/adobe/helix-cli/issues/1181)) ([b5c4db8](https://github.com/adobe/helix-cli/commit/b5c4db8))
+
 ## [5.6.2](https://github.com/adobe/helix-cli/compare/v5.6.1...v5.6.2) (2019-10-08)
 
 
