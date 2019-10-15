@@ -17,6 +17,7 @@ const nock = require('nock');
 const path = require('path');
 const proxyquire = require('proxyquire');
 const sinon = require('sinon');
+const { Logger } = require('@adobe/helix-shared');
 const { clearHelixEnv } = require('./utils.js');
 
 describe('hlx publish --remote (default)', () => {
@@ -121,6 +122,34 @@ describe('hlx publish --remote (default)', () => {
 
     sinon.assert.notCalled(writeDictItem);
     sinon.assert.notCalled(purgeAll);
+  });
+
+  it('publishing warns if remote logging fails', async () => {
+    const scope = nock('https://adobeioruntime.net')
+      .post('/api/v1/web/helix/helix-services/publish@v2')
+      .reply(200, {});
+
+    const logger = Logger.getTestLogger();
+    const remote = await new RemotePublishCommand(logger)
+      .withWskAuth('fakeauth')
+      .withWskNamespace('fakename')
+      .withFastlyAuth('fake_auth')
+      .withFastlyNamespace('fake_name')
+      .withWskHost('doesn.t.matter')
+      .withPublishAPI('https://adobeioruntime.net/api/v1/web/helix/helix-services/publish@v2')
+      .withConfigFile(path.resolve(__dirname, 'fixtures/deployed.yaml'))
+      .withFilter()
+      .withDryRun(false);
+    await remote.run();
+
+    sinon.assert.callCount(writeDictItem, 4);
+    sinon.assert.calledOnce(softPurgeKey);
+
+    const log = await logger.getOutput();
+    assert.ok(/Remote addlogger service failed/.test(log));
+    assert.ok(/Unable to set up remote logging/.test(log));
+
+    scope.done();
   });
 
   afterEach(() => {
