@@ -1,3 +1,10 @@
+## [5.6.5](https://github.com/adobe/helix-cli/compare/v5.6.4...v5.6.5) (2019-10-16)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @adobe/helix-simulator to v2.13.9 ([#1185](https://github.com/adobe/helix-cli/issues/1185)) ([faff2df](https://github.com/adobe/helix-cli/commit/faff2df))
+
 ## [5.6.4](https://github.com/adobe/helix-cli/compare/v5.6.3...v5.6.4) (2019-10-16)
 
 
