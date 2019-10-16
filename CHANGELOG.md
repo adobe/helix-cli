@@ -1,3 +1,10 @@
+## [5.6.4](https://github.com/adobe/helix-cli/compare/v5.6.3...v5.6.4) (2019-10-16)
+
+
+### Bug Fixes
+
+* **deps:** update any ([#1184](https://github.com/adobe/helix-cli/issues/1184)) ([a4c862f](https://github.com/adobe/helix-cli/commit/a4c862f))
+
 ## [5.6.3](https://github.com/adobe/helix-cli/compare/v5.6.2...v5.6.3) (2019-10-15)
 
 
