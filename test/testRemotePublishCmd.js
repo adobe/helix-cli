@@ -147,7 +147,6 @@ describe('hlx publish --remote (default)', () => {
 
     const log = await logger.getOutput();
     assert.ok(/Remote addlogger service failed/.test(log));
-    assert.ok(/Unable to set up remote logging/.test(log));
 
     scope.done();
   });
