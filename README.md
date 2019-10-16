@@ -11,6 +11,44 @@
 
 The Helix Command Line Interface allows web developers to create, develop, and deploy digital experiences using Project Helix
 
+Table of Contents
+=================
+   * [Helix Command Line Interface (hlx)](#helix-command-line-interface-hlx)
+      * [Installation](#installation)
+      * [Quick Start](#quick-start)
+      * [Setting up a project](#setting-up-a-project)
+      * [Starting development](#starting-development)
+      * [(Optional) Build artifacts](#optional-build-artifacts)
+      * [(Optional) Deploy to Adobe I/O Runtime](#optional-deploy-to-adobe-io-runtime)
+         * [Automatic Deployment](#automatic-deployment)
+         * [One-Shot Deployment](#one-shot-deployment)
+      * [(Optional) Publish your Site](#optional-publish-your-site)
+         * [Purging the Cache upon Publishing](#purging-the-cache-upon-publishing)
+         * [Passing Request Parameters](#passing-request-parameters)
+            * [Helix-Internal Request Parameters](#helix-internal-request-parameters)
+         * [Directory Index](#directory-index)
+         * [Static Content Handling](#static-content-handling)
+      * [Matching Strains to URLs](#matching-strains-to-urls)
+      * [Mixing old and new Content](#mixing-old-and-new-content)
+      * [Development - Serving local content](#development---serving-local-content)
+         * [Specify a local content url](#specify-a-local-content-url)
+         * [Use the GitHub emulator](#use-the-github-emulator)
+            * [Multi Strain Example](#multi-strain-example)
+      * [(Recommended) Performance Testing](#recommended-performance-testing)
+         * [Testing Environment](#testing-environment)
+         * [Performance Metrics](#performance-metrics)
+            * [Structured (JUnit) Performance Reporting](#structured-junit-performance-reporting)
+      * [Supported Programming Languages](#supported-programming-languages)
+         * [Creating Things in Helix with HTL](#creating-things-in-helix-with-htl)
+         * [Creating Things in Helix with JavaScript](#creating-things-in-helix-with-javascript)
+            * [JavaScript Template Functions](#javascript-template-functions)
+            * [JavaScript pre.js](#javascript-prejs)
+            * [JavaScript cgi-bin](#javascript-cgi-bin)
+            * [JavaScript Modules](#javascript-modules)
+         * [Creating Things in Helix with JSX](#creating-things-in-helix-with-jsx)
+   * [Developing Helix CLI](#developing-helix-cli)
+      * [Testing](#testing)
+      
 ## Installation
 
 Install `hlx` as a global command. You need Node 8.9 or newer.
