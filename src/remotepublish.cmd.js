@@ -243,8 +243,7 @@ class RemotePublishCommand extends AbstractCommand {
       this.tick(10, 'set up logging', true);
     }).catch((e) => {
       this.tick(10, 'failed to set up logging', true);
-      this.log.error(`Remote addlogger service failed ${e}`);
-      throw new Error('Unable to set up remote logging');
+      this.log.warn(`Remote addlogger service failed ${e}`);
     });
   }
 
