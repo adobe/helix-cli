@@ -1,6 +1,5 @@
 # [5.7.0](https://github.com/adobe/helix-cli/compare/v5.6.5...v5.7.0) (2019-10-17)
 
-
 ### Features
 
 * **publish:** warn if remote logging fails ([#1183](https://github.com/adobe/helix-cli/issues/1183)) ([05afe3a](https://github.com/adobe/helix-cli/commit/05afe3a))
