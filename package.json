@@ -31,7 +31,7 @@
   },
   "dependencies": {
     "@adobe/fastly-native-promises": "^1.12.0",
-    "@adobe/helix-pipeline": "5.6.0",
+    "@adobe/helix-pipeline": "5.6.1",
     "@adobe/helix-shared": "3.0.4",
     "@adobe/helix-simulator": "2.13.9",
     "@adobe/htlengine": "3.2.3",
