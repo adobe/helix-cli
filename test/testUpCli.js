@@ -201,7 +201,7 @@ describe('hlx up', () => {
   });
 
   it('hlx up can set parameter defaults', () => {
-    const answer = { HTTP_TIMEOUT: '2000', HTTP_PIMEOUT: '2000', HTTP_QIMEOUT: '2000' };
+    const answer = { HTTP_TIMEOUT: 2000, HTTP_PIMEOUT: 2000, HTTP_QIMEOUT: 2000 };
     new CLI()
       .withCommandExecutor('up', mockUp)
       .run(['up',
