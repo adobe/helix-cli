@@ -1,3 +1,10 @@
+## [5.7.3](https://github.com/adobe/helix-cli/compare/v5.7.2...v5.7.3) (2019-10-24)
+
+
+### Bug Fixes
+
+* **package:** use latest pipeline ([#1194](https://github.com/adobe/helix-cli/issues/1194)) ([a41f269](https://github.com/adobe/helix-cli/commit/a41f26937dc09fc70429dcc1d33ba7042c47950d))
+
 ## [5.7.2](https://github.com/adobe/helix-cli/compare/v5.7.1...v5.7.2) (2019-10-24)
 
 
