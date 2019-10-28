@@ -1,5 +1,25 @@
-# [5.7.0](https://github.com/adobe/helix-cli/compare/v5.6.5...v5.7.0) (2019-10-17)
+## [5.7.3](https://github.com/adobe/helix-cli/compare/v5.7.2...v5.7.3) (2019-10-24)
 
+
+### Bug Fixes
+
+* **package:** use latest pipeline ([#1194](https://github.com/adobe/helix-cli/issues/1194)) ([a41f269](https://github.com/adobe/helix-cli/commit/a41f26937dc09fc70429dcc1d33ba7042c47950d))
+
+## [5.7.2](https://github.com/adobe/helix-cli/compare/v5.7.1...v5.7.2) (2019-10-24)
+
+
+### Bug Fixes
+
+* **package:** use latest pipeline ([2494acb](https://github.com/adobe/helix-cli/commit/2494acb))
+
+## [5.7.1](https://github.com/adobe/helix-cli/compare/v5.7.0...v5.7.1) (2019-10-23)
+
+
+### Bug Fixes
+
+* **deps:** update to @adobe/helix-pipeline 5.6.0 ([bcfa693](https://github.com/adobe/helix-cli/commit/bcfa693))
+
+# [5.7.0](https://github.com/adobe/helix-cli/compare/v5.6.5...v5.7.0) (2019-10-17)
 
 ### Features
 
