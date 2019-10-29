@@ -92,7 +92,7 @@ jobs:
     - store_artifacts:
         path: junit
 
-  publish-pre-release:
+  release:
     executor: node8
     working_directory: ~/repo
 
@@ -101,10 +101,6 @@ jobs:
     - run:
         name: revert changes to package-lock.json
         command: git checkout -- package-lock.json
-
-    - run:
-        name: configure npm registry
-        command: echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" >> ~/.npmrc
 
     - run:
         name: Semantic Release
@@ -121,8 +117,8 @@ workflows:
   version: 2
   build:
     jobs:
-    # publish pre-releases on master
-    - publish-pre-release:
+    # publish releases on master
+    - release:
         requires:
         - build
         - build_win
