@@ -281,7 +281,7 @@ class UpCommand extends BuildCommand {
 
         this.emit('started', this);
         if (this._open) {
-          opn(`http://localhost:${this._project.server.port}/`);
+          opn(`http://localhost:${this._project.server.port}/`, { url: true });
         }
         if (!hasConfigFile) {
           this.log.info(chalk`{green Note:} 

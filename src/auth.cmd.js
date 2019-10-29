@@ -76,7 +76,7 @@ awaiting the completion of the process. `);
 
     if (this._openBrowser) {
       setTimeout(() => {
-        opn(this._loginUrl, { wait: false });
+        opn(this._loginUrl, { wait: false, url: true });
       }, 1000);
     }
     const spinner = cliutils.createSpinner().start();

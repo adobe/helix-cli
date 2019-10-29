@@ -40,7 +40,7 @@ class HackCommand extends AbstractCommand {
     await this.init();
     const url = `https://helix-home-adobe.project-helix.page/hackathons/${this._hackathon}.html`;
     if (this._open) {
-      opn(url);
+      opn(url, { url: true });
     } else {
       // eslint-disable-next-line no-console
       this.log.info(chalk`Check out the Helix Hackathon at {blue ${url}}`);

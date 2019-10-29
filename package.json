@@ -54,7 +54,7 @@
     "lodash": "^4.17.15",
     "mime-types": "^2.1.24",
     "object-hash": "^2.0.0",
-    "open": "^6.4.0",
+    "open": "^7.0.0",
     "openwhisk": "^3.19.0",
     "parcel-bundler": "^1.12.4",
     "progress": "^2.0.3",
