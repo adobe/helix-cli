@@ -1,3 +1,12 @@
+## [5.7.4](https://github.com/adobe/helix-cli/compare/v5.7.3...v5.7.4) (2019-10-29)
+
+
+### Bug Fixes
+
+* **deps:** reset failing isomorphic-git dependency ([c912d8e](https://github.com/adobe/helix-cli/commit/c912d8e8a287d864d946cb3594d4bd6460982a96)), closes [#1187](https://github.com/adobe/helix-cli/issues/1187)
+* **deps:** update any ([c79b95e](https://github.com/adobe/helix-cli/commit/c79b95ebf9a42d1f99c563413b6ec20efb6907fc))
+* **deps:** update dependency open to v7 ([#1188](https://github.com/adobe/helix-cli/issues/1188)) ([f68f1c2](https://github.com/adobe/helix-cli/commit/f68f1c261447591b05e36051e0d2b39c1f8472f8))
+
 ## [5.7.3](https://github.com/adobe/helix-cli/compare/v5.7.2...v5.7.3) (2019-10-24)
 
 
