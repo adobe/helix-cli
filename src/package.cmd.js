@@ -17,25 +17,7 @@ const ProgressBar = require('progress');
 const archiver = require('archiver');
 const AbstractCommand = require('./abstract.cmd.js');
 const BuildCommand = require('./build.cmd.js');
-const ActionBundler = require('./parcel/ActionBundler.js');
-const { flattenDependencies } = require('./packager-utils.js');
-
-/**
- * Information object of an action.
- *
- * @typedef {object} ActionInfo
- * @property {string} name - The name of the action. eg 'html'.
- * @property {string} main - The filename of the entry script. eg 'html.js'.
- * @property {string} bundleName - The filename of the bundled script. eg 'html.bundle.js'.
- * @property {string} bundlePath - The absolute path to the bundled script.
- * @property {string} zipFile - The absolute path to the zipped action.
- * @property {string} archiveName - The filename of the zipped action. eg 'html.zip'.
- * @property {number} archiveSize - The size in bytes of the zipped action.
- * @property {string} infoFile - The absolute path to a json file representing this info.
- * @property {string[]} requires - An array of relative paths to scripts that are required by
- *           this one. {@code flattenDependencies} will also resolve all transitive dependencies.
- *           Note that this information is not longer required, and will probably be removed.
- */
+const ActionBundler = require('./builder/ActionBundler.js');
 
 /**
  * Uses webpack to bundle each template script and creates an OpenWhisk action for each.
@@ -181,11 +163,7 @@ class PackageCommand extends AbstractCommand {
       .withLogger(this.log)
       .withProgressHandler(progressHandler)
       .withMinify(this._enableMinify);
-    const files = {};
-    scripts.forEach((script) => {
-      files[script.name] = path.resolve(this._target, script.main);
-    });
-    const stats = await bundler.run(files);
+    const stats = await bundler.run(scripts);
     if (stats.errors) {
       stats.errors.forEach(this.log.error);
     }
@@ -208,10 +186,7 @@ class PackageCommand extends AbstractCommand {
 
     // get the list of scripts from the info files
     const infos = [...glob.sync(`${this._target}/**/*.info.json`)];
-    const scriptInfos = await Promise.all(infos.map((info) => fs.readJSON(info)));
-
-    // resolve dependencies
-    let scripts = flattenDependencies(scriptInfos);
+    let scripts = await Promise.all(infos.map((info) => fs.readJSON(info)));
 
     // filter out the ones that already have the info and a valid zip file
     if (this._onlyModified) {
@@ -234,11 +209,10 @@ class PackageCommand extends AbstractCommand {
         /* eslint-disable no-param-reassign */
         script.name = path.basename(script.main, '.js');
         script.bundleName = `${script.name}.bundle.js`;
-        script.bundlePath = path.resolve(this._target, script.bundleName);
+        script.bundlePath = path.resolve(script.buildDir, script.bundleName);
         script.dirname = script.isStatic ? '' : path.dirname(script.main);
         script.archiveName = `${script.name}.zip`;
-        script.zipFile = path.resolve(this._target, script.dirname, script.archiveName);
-        script.infoFile = path.resolve(this._target, script.dirname, `${script.name}.info.json`);
+        script.zipFile = path.resolve(script.buildDir, script.archiveName);
         /* eslint-enable no-param-reassign */
       });
 
