@@ -31,10 +31,10 @@
   },
   "dependencies": {
     "@adobe/fastly-native-promises": "^1.12.0",
-    "@adobe/helix-pipeline": "5.6.2",
+    "@adobe/helix-pipeline": "5.6.3",
     "@adobe/helix-shared": "3.1.0",
-    "@adobe/helix-simulator": "2.13.10",
-    "@adobe/htlengine": "3.2.3",
+    "@adobe/helix-simulator": "2.16.0",
+    "@adobe/htlengine": "3.2.4",
     "@babel/core": "^7.5.5",
     "@parcel/logger": "^1.11.0",
     "archiver": "^3.1.1",
