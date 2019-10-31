@@ -159,20 +159,24 @@ class UpCommand extends BuildCommand {
     }
 
     // check all local repos
-    const localRepos = await Promise.all(this._localRepos.map(async (repo) => {
+    const localRepos = (await Promise.all(this._localRepos.map(async (repo) => {
       const repoPath = path.resolve(this.directory, repo);
       if (!await fse.pathExists(path.join(repoPath, '.git'))) {
         throw Error(`Specified --local-repo = ${repo} is not a git repository.`);
       }
       const gitUrl = await GitUtils.getOriginURL(repoPath);
       if (!gitUrl) {
+        if (repo === '.') {
+          // local git repo without remote, skip
+          return null;
+        }
         throw Error(`Unable to determine origin url for --local-repo = ${repo}`);
       }
       return {
         gitUrl,
         repoPath,
       };
-    }));
+    }))).filter((entry) => !!entry);
 
     this._project = new HelixProject()
       .withCwd(this.directory)

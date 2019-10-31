@@ -27,6 +27,7 @@ const {
   createTestRoot,
 } = require('./utils.js');
 
+const DemoCommand = require('../src/demo.cmd');
 const UpCommand = require('../src/up.cmd');
 
 const TEST_DIR = path.resolve('test/integration');
@@ -76,6 +77,17 @@ describe('Integration test for up command', function suite() {
     } catch (e) {
       assert.equal(e.message, 'hlx up needs local git repository.');
     }
+  });
+
+  it('up command with local repo without configured origin succeeds', async () => {
+    initGit(testDir);
+    const cmd = new UpCommand()
+      .withFiles([path.join(testDir, 'src', '*.htl'), path.join(testDir, 'src', '*.js')])
+      .withTargetDir(buildDir)
+      .withDirectory(testDir)
+      .withLocalRepo(['.']) // default
+      .withHttpPort(0);
+    await cmd.run();
   });
 
   it('up command succeeds and can be stopped', (done) => {
