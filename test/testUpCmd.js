@@ -78,15 +78,22 @@ describe('Integration test for up command', function suite() {
     }
   });
 
-  it('up command with local repo without configured origin succeeds', async () => {
+  it('up command with local repo without configured origin succeeds and can be stopped', (done) => {
     initGit(testDir);
-    const cmd = new UpCommand()
+    new UpCommand()
       .withFiles([path.join(testDir, 'src', '*.htl'), path.join(testDir, 'src', '*.js')])
       .withTargetDir(buildDir)
       .withDirectory(testDir)
       .withLocalRepo(['.']) // default
-      .withHttpPort(0);
-    await cmd.run();
+      .withHttpPort(0)
+      .on('started', (cmd) => {
+        cmd.stop();
+      })
+      .on('stopped', () => {
+        done();
+      })
+      .run()
+      .catch(done);
   });
 
   it('up command succeeds and can be stopped', (done) => {
