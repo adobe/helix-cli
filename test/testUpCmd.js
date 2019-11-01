@@ -84,7 +84,6 @@ describe('Integration test for up command', function suite() {
       .withFiles([path.join(testDir, 'src', '*.htl'), path.join(testDir, 'src', '*.js')])
       .withTargetDir(buildDir)
       .withDirectory(testDir)
-      .withLocalRepo(['.']) // default
       .withHttpPort(0)
       .on('started', (cmd) => {
         cmd.stop();

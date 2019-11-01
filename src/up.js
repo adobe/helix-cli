@@ -57,7 +57,7 @@ module.exports = function up() {
           describe: 'Emulates a GitHub repository for the specified local git repository.',
           type: 'string',
           array: true,
-          default: '.',
+          default: '',
         })
         // allow for comma separated values
         .coerce('localRepo', (value) => value.reduce((acc, curr) => {

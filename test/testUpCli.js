@@ -52,7 +52,6 @@ describe('hlx up', () => {
     sinon.assert.calledWith(mockUp.withTargetDir, '.hlx/build');
     sinon.assert.calledWith(mockUp.withFiles, ['src/**/*.htl', 'src/**/*.js', 'src/**/*.jsx', 'cgi-bin/**/*.js']);
     sinon.assert.calledWith(mockUp.withOverrideHost, undefined);
-    sinon.assert.calledWith(mockUp.withLocalRepo, ['.']);
     sinon.assert.calledOnce(mockUp.run);
   });
 
