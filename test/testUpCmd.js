@@ -27,7 +27,6 @@ const {
   createTestRoot,
 } = require('./utils.js');
 
-const DemoCommand = require('../src/demo.cmd');
 const UpCommand = require('../src/up.cmd');
 
 const TEST_DIR = path.resolve('test/integration');
