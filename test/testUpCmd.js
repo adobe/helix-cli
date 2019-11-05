@@ -78,6 +78,23 @@ describe('Integration test for up command', function suite() {
     }
   });
 
+  it('up command with local repo without configured origin succeeds and can be stopped', (done) => {
+    initGit(testDir);
+    new UpCommand()
+      .withFiles([path.join(testDir, 'src', '*.htl'), path.join(testDir, 'src', '*.js')])
+      .withTargetDir(buildDir)
+      .withDirectory(testDir)
+      .withHttpPort(0)
+      .on('started', (cmd) => {
+        cmd.stop();
+      })
+      .on('stopped', () => {
+        done();
+      })
+      .run()
+      .catch(done);
+  });
+
   it('up command succeeds and can be stopped', (done) => {
     initGit(testDir, 'https://github.com/adobe/dummy-foo.git');
     new UpCommand()
