@@ -1,3 +1,10 @@
+## [5.7.8](https://github.com/adobe/helix-cli/compare/v5.7.7...v5.7.8) (2019-11-05)
+
+
+### Bug Fixes
+
+* **up.cmd:** support `hlx up` in local repo checkout without configured origin ([#1201](https://github.com/adobe/helix-cli/issues/1201)) ([991ce5e](https://github.com/adobe/helix-cli/commit/991ce5ee0eaf7d2a0b031e3206d23988b5751f15)), closes [#1189](https://github.com/adobe/helix-cli/issues/1189)
+
 ## [5.7.7](https://github.com/adobe/helix-cli/compare/v5.7.6...v5.7.7) (2019-11-05)
 
 
