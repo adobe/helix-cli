@@ -1,3 +1,10 @@
+## [5.7.7](https://github.com/adobe/helix-cli/compare/v5.7.6...v5.7.7) (2019-11-05)
+
+
+### Bug Fixes
+
+* **deps:** update any ([#1204](https://github.com/adobe/helix-cli/issues/1204)) ([a57b18e](https://github.com/adobe/helix-cli/commit/a57b18e2c12dd58a49e50e08ed1c55c2200f8414))
+
 ## [5.7.6](https://github.com/adobe/helix-cli/compare/v5.7.5...v5.7.6) (2019-11-04)
 
 
