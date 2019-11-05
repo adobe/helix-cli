@@ -37,6 +37,7 @@ describe('hlx up', () => {
     mockUp.withOverrideHost.returnsThis();
     mockUp.withLocalRepo.returnsThis();
     mockUp.withDevDefault.returnsThis();
+    mockUp.withGithubToken.returnsThis();
     mockUp.run.returnsThis();
   });
 
@@ -197,6 +198,14 @@ describe('hlx up', () => {
       .withCommandExecutor('up', mockUp)
       .run(['up', '--no-local-repo']);
     sinon.assert.calledWith(mockUp.withLocalRepo, []);
+    sinon.assert.calledOnce(mockUp.run);
+  });
+
+  it('hlx up with --github-token works', () => {
+    new CLI()
+      .withCommandExecutor('up', mockUp)
+      .run(['up', '--github-token', 'foo']);
+    sinon.assert.calledWith(mockUp.withGithubToken, 'foo');
     sinon.assert.calledOnce(mockUp.run);
   });
 

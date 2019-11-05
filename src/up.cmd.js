@@ -34,6 +34,7 @@ class UpCommand extends BuildCommand {
     this._localRepos = [];
     this._helixPagesRepo = '';
     this._devDefault = {};
+    this._githubToken = '';
   }
 
   withHttpPort(p) {
@@ -72,6 +73,11 @@ class UpCommand extends BuildCommand {
 
   withDevDefault(value) {
     this._devDefault = value;
+    return this;
+  }
+
+  withGithubToken(value) {
+    this._githubToken = value;
     return this;
   }
 
@@ -173,6 +179,11 @@ class UpCommand extends BuildCommand {
         repoPath,
       };
     }));
+
+    // add github token to action params
+    if (this._githubToken && !this._devDefault.GITHUB_TOKEN) {
+      this._devDefault.GITHUB_TOKEN = this._githubToken;
+    }
 
     this._project = new HelixProject()
       .withCwd(this.directory)
