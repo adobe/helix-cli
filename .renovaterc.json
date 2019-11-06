@@ -16,7 +16,7 @@
     },
     {
       "packagePatterns": [
-        ".*"
+        "^((?!@adobe.*).)+"
       ],
       "groupName": "any"
     }
