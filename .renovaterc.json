@@ -11,6 +11,10 @@
         "^@adobe/"
       ],
       "groupName": "@adobe",
+      "automerge": true,
+      "major": {
+        "automerge": false
+      },
       "schedule": [
         "at any time"
       ]
