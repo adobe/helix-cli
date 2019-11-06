@@ -1,3 +1,10 @@
+# [5.8.0](https://github.com/adobe/helix-cli/compare/v5.7.8...v5.8.0) (2019-11-06)
+
+
+### Features
+
+* **up:** automatically add GITHUB_TOKEN to dev params. ([#1206](https://github.com/adobe/helix-cli/issues/1206)) ([42689a1](https://github.com/adobe/helix-cli/commit/42689a1a71495a8efbccbc7c70c81af8cd286635)), closes [#1199](https://github.com/adobe/helix-cli/issues/1199)
+
 ## [5.7.8](https://github.com/adobe/helix-cli/compare/v5.7.7...v5.7.8) (2019-11-05)
 
 
