@@ -59,13 +59,11 @@ module.exports = function up() {
           describe: 'Emulates a GitHub repository for the specified local git repository.',
           type: 'string',
           array: true,
+          default: '.',
         })
         // allow for comma separated values
         .coerce('localRepo', (value) => value.reduce((acc, curr) => {
-          if (curr === false) {
-            // --no-local-repo specified: add a dummy entry
-            acc.push(null);
-          } else {
+          if (curr) {
             acc.push(...curr.split(/\s*,\s*/));
           }
           return acc;
@@ -98,23 +96,13 @@ module.exports = function up() {
         executor = new UpCommand(makeLogger(argv));
       }
 
-      const { localRepo } = argv;
-      if (Array.isArray(localRepo)) {
-        if (!localRepo.length) {
-          // --local-repo option has been specified without value: use ['.'] as default
-          localRepo.push('.');
-        } else if (localRepo.length === 1 && localRepo[0] === null) {
-          // --no-local-repo option has been specified: remove dummy entry
-          localRepo.pop();
-        }
-      }
       await executor
         .withTargetDir(argv.target)
         .withFiles(argv.files)
         .withOverrideHost(argv.host)
         .withSaveConfig(argv.saveConfig)
         .withHttpPort(argv.port)
-        .withLocalRepo(localRepo)
+        .withLocalRepo(argv.localRepo)
         .withDevDefault(argv.devDefault)
         .withGithubToken(argv.githubToken)
         // only open browser window when executable is `hlx`

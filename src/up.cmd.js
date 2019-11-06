@@ -165,20 +165,23 @@ class UpCommand extends BuildCommand {
     }
 
     // check all local repos
-    const localRepos = await Promise.all(this._localRepos.map(async (repo) => {
+    const localRepos = (await Promise.all(this._localRepos.map(async (repo) => {
       const repoPath = path.resolve(this.directory, repo);
       if (!await fse.pathExists(path.join(repoPath, '.git'))) {
-        throw Error(`Specified --local-repo = ${repo} is not a git repository.`);
+        throw Error(`Specified --local-repo=${repo} is not a git repository.`);
       }
       const gitUrl = await GitUtils.getOriginURL(repoPath);
       if (!gitUrl) {
-        throw Error(`Unable to determine origin url for --local-repo = ${repo}`);
+        if (repoPath !== this.directory) {
+          this.log.warn(`Ignoring --local-repo=${repo}. No remote 'origin' defined.`);
+        }
+        return null;
       }
       return {
         gitUrl,
         repoPath,
       };
-    }));
+    }))).filter((e) => !!e);
 
     // add github token to action params
     if (this._githubToken && !this._devDefault.GITHUB_TOKEN) {
