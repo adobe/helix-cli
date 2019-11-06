@@ -1,3 +1,10 @@
+## [5.8.4](https://github.com/adobe/helix-cli/compare/v5.8.3...v5.8.4) (2019-11-06)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @adobe/helix-simulator to v2.17.1 ([41e81c2](https://github.com/adobe/helix-cli/commit/41e81c2764511504eb12c277aa701b4507e0cc84))
+
 ## [5.8.3](https://github.com/adobe/helix-cli/compare/v5.8.2...v5.8.3) (2019-11-06)
 
 
