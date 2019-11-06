@@ -19,7 +19,10 @@
       "packagePatterns": [
         "^((?!@adobe.*).)+"
       ],
-      "groupName": "external"
+      "groupName": "external",
+      "patch": {
+        "automerge": true
+      }
     }
   ]
 }
