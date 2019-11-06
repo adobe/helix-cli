@@ -21,7 +21,10 @@
     },
     {
       "packagePatterns": [
-        "^((?!@adobe.*).)+"
+        "^.+"
+      ],
+      "excludePackagePatterns": [
+        "^@adobe/"
       ],
       "groupName": "external",
       "patch": {
