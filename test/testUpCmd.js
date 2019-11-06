@@ -175,6 +175,47 @@ describe('Integration test for up command', function suite() {
     }
   });
 
+  it('up command delivers correct response from private repo.', async function test() {
+    // override poly recorder to send readme.md for authenticated requests.
+    const readmeMd = await fse.readFile(path.resolve(TEST_DIR, 'README.md'), 'utf-8');
+    const { server } = this.polly;
+    const privateHandler = () => {
+      server.get('/Adobe-Marketing-Cloud/reactor-user-docs/master/README.md').intercept((req, res) => {
+        if (req.headers.authorization === 'Bearer 1234' || req.headers.authorization === 'token 1234') {
+          res.sendStatus(200).send(readmeMd);
+        } else {
+          res.sendStatus(401);
+        }
+      });
+    };
+    server.host('https://raw.githubusercontent.com', privateHandler);
+    server.host('https://raw.github.com', privateHandler);
+
+    initGit(testDir, 'https://github.com/adobe/dummy-foo.git');
+    await fse.rename(path.resolve(testDir, 'default-config-private.yaml'), path.resolve(testDir, 'helix-config.yaml'));
+    const cmd = new UpCommand()
+      .withFiles([
+        path.join(testDir, 'src', '*.htl'),
+        path.join(testDir, 'src', '*.js'),
+        path.join(testDir, 'src', 'utils', '*.js'),
+      ])
+      .withTargetDir(buildDir)
+      .withDirectory(testDir)
+      .withGithubToken('1234')
+      .withHttpPort(0);
+
+    await new Promise((resolve) => {
+      cmd.on('started', resolve);
+      cmd.run();
+    });
+
+    try {
+      await assertHttpDom(`http://localhost:${cmd.project.server.port}/README.html`, 200, 'simple_response_readme.html');
+    } finally {
+      await cmd.stop();
+    }
+  });
+
   it('up command delivers correct response for JSX templates.', async () => {
     initGit(testDir, 'https://github.com/adobe/dummy-foo.git');
     await fse.rename(path.resolve(testDir, 'default-config.yaml'), path.resolve(testDir, 'helix-config.yaml'));
