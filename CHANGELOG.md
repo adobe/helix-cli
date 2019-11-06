@@ -1,3 +1,10 @@
+## [5.8.1](https://github.com/adobe/helix-cli/compare/v5.8.0...v5.8.1) (2019-11-06)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @adobe/helix-shared to v3.1.2 ([#1207](https://github.com/adobe/helix-cli/issues/1207)) ([31d9ed6](https://github.com/adobe/helix-cli/commit/31d9ed653724ff188876c282916ceb0b49a68525))
+
 # [5.8.0](https://github.com/adobe/helix-cli/compare/v5.7.8...v5.8.0) (2019-11-06)
 
 
