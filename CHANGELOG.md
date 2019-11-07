@@ -1,3 +1,10 @@
+## [5.8.5](https://github.com/adobe/helix-cli/compare/v5.8.4...v5.8.5) (2019-11-07)
+
+
+### Bug Fixes
+
+* **up:** default to --local-repo=. ([#1209](https://github.com/adobe/helix-cli/issues/1209)) ([a5a024e](https://github.com/adobe/helix-cli/commit/a5a024ebd586ac253b42bcf59061b4684e2908b6)), closes [#913](https://github.com/adobe/helix-cli/issues/913)
+
 ## [5.8.4](https://github.com/adobe/helix-cli/compare/v5.8.3...v5.8.4) (2019-11-06)
 
 
