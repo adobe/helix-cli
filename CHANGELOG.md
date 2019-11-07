@@ -1,3 +1,10 @@
+## [5.9.2](https://github.com/adobe/helix-cli/compare/v5.9.1...v5.9.2) (2019-11-07)
+
+
+### Bug Fixes
+
+* **renovatebot:** avoid using unsupported regex syntax in packagePatterns ([57e64a4](https://github.com/adobe/helix-cli/commit/57e64a42566cdd3984d7e86cdcc398d15048b8dc))
+
 ## [5.9.1](https://github.com/adobe/helix-cli/compare/v5.9.0...v5.9.1) (2019-11-07)
 
 
