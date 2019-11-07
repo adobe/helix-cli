@@ -110,13 +110,13 @@ class Builder {
       .withRuntimeGlobalName('global')
       .withCodeTemplate(codeTemplate)
       .withDefaultMarkupContext(null)
+      .withSourceFile(info.entryFile)
       .withSourceMap(true);
 
     // eslint-disable-next-line prefer-const
     let { template, sourceMap } = await compiler.compile(source, path.dirname(info.entryFile));
     if (sourceMap) {
       info.sourceMap = `${scriptFile}.map`;
-      sourceMap.sources = [path.relative(info.buildDir, info.entryFile)];
       await fse.writeFile(info.sourceMap, JSON.stringify(sourceMap), 'utf-8');
       // eslint-disable-next-line no-param-reassign
       template += `//# sourceMappingURL=${info.name}.script.js.map\n`;
