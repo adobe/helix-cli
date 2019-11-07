@@ -100,29 +100,5 @@
     "ghooks": {
       "pre-commit": "npx lint-staged"
     }
-  },
-  "renovate": {
-    "extends": [
-      "config:base",
-      "schedule:earlyMondays"
-    ],
-    "timezone": "Europe/Zurich",
-    "packageRules": [
-      {
-        "packagePatterns": [
-          "^@adobe/"
-        ],
-        "groupName": "@adobe",
-        "schedule": [
-          "at any time"
-        ]
-      },
-      {
-        "packagePatterns": [
-          ".*"
-        ],
-        "groupName": "any"
-      }
-    ]
   }
 }
