@@ -1,3 +1,10 @@
+## [5.9.1](https://github.com/adobe/helix-cli/compare/v5.9.0...v5.9.1) (2019-11-07)
+
+
+### Bug Fixes
+
+* **dev:** use correct sourcemap information from htlengine ([#1213](https://github.com/adobe/helix-cli/issues/1213)) ([63df557](https://github.com/adobe/helix-cli/commit/63df557d36997249e1439fd3b73ec1dbeace7795))
+
 # [5.9.0](https://github.com/adobe/helix-cli/compare/v5.8.5...v5.9.0) (2019-11-07)
 
 
