@@ -1,3 +1,10 @@
+# [5.9.0](https://github.com/adobe/helix-cli/compare/v5.8.5...v5.9.0) (2019-11-07)
+
+
+### Features
+
+* **build:** create transparent builds ([#1198](https://github.com/adobe/helix-cli/issues/1198)) ([6fbb1f1](https://github.com/adobe/helix-cli/commit/6fbb1f167b7e7b1c538289bc6a403f00ee9c7cbb)), closes [#1197](https://github.com/adobe/helix-cli/issues/1197)
+
 ## [5.8.5](https://github.com/adobe/helix-cli/compare/v5.8.4...v5.8.5) (2019-11-07)
 
 
