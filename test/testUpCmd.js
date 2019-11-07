@@ -18,6 +18,7 @@ const fse = require('fs-extra');
 const NodeHttpAdapter = require('@pollyjs/adapter-node-http');
 const FSPersister = require('@pollyjs/persister-fs');
 const { setupMocha: setupPolly } = require('@pollyjs/core');
+const { Logger } = require('@adobe/helix-shared');
 
 const {
   initGit,
@@ -272,6 +273,53 @@ describe('Integration test for up command', function suite() {
     } finally {
       await cmd.stop();
     }
+  });
+
+  it('up command fails if secondary local repository is not valid.', async () => {
+    initGit(testDir, 'https://github.com/adobe/dummy-foo.git');
+    const localRepo = path.resolve(testDir, 'foo');
+    const cmd = new UpCommand()
+      .withFiles([
+        path.join(testDir, 'src', '*.htl'),
+        path.join(testDir, 'src', '*.js'),
+        path.join(testDir, 'src', 'utils', '*.js'),
+      ])
+      .withTargetDir(buildDir)
+      .withDirectory(testDir)
+      .withLocalRepo(localRepo);
+    try {
+      await cmd.run();
+      assert.fail('hlx up without .git should fail.');
+    } catch (e) {
+      const expected = `Specified --local-repo=${localRepo} is not a git repository.`;
+      assert.equal(e.message, expected);
+    }
+  });
+
+  it('up command shows warning if secondary local repository is not valid.', async () => {
+    const apiDir = path.resolve(testRoot, 'api-repo');
+    await fse.copy(path.resolve(__dirname, 'fixtures', 'api-repo'), apiDir);
+    initGit(apiDir);
+    initGit(testDir, 'https://github.com/adobe/dummy-foo.git');
+    const logger = Logger.getTestLogger();
+    const cmd = new UpCommand(logger)
+      .withFiles([
+        path.join(testDir, 'src', '*.htl'),
+        path.join(testDir, 'src', '*.js'),
+        path.join(testDir, 'src', 'utils', '*.js'),
+      ])
+      .withTargetDir(buildDir)
+      .withDirectory(testDir)
+      .withLocalRepo(apiDir);
+    try {
+      await cmd.run();
+    } catch (e) {
+      // ignore
+    } finally {
+      await cmd.stop();
+    }
+    const log = await logger.getOutput();
+    assert.ok(log.indexOf(`Ignoring --local-repo=${apiDir}. No remote 'origin' defined.`) >= 0);
   });
 
   it.skip('up command delivers correct response with proxy as default.', async () => {

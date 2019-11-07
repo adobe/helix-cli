@@ -53,6 +53,7 @@ describe('hlx up', () => {
     sinon.assert.calledWith(mockUp.withTargetDir, '.hlx/build');
     sinon.assert.calledWith(mockUp.withFiles, ['src/**/*.htl', 'src/**/*.js', 'src/**/*.jsx', 'cgi-bin/**/*.js']);
     sinon.assert.calledWith(mockUp.withOverrideHost, undefined);
+    sinon.assert.calledWith(mockUp.withLocalRepo, ['.']);
     sinon.assert.calledOnce(mockUp.run);
   });
 
@@ -176,7 +177,7 @@ describe('hlx up', () => {
     sinon.assert.calledOnce(mockUp.run);
   });
 
-  it('hlx up with "--local-repo <repo>" works', () => {
+  it('hlx up with "--local-repo foo" works', () => {
     new CLI()
       .withCommandExecutor('up', mockUp)
       .run(['up', '--local-repo', 'foo']);
@@ -231,13 +232,5 @@ describe('hlx up', () => {
         '--dev-default', 'HTTP_TIMEOUT', 2000,
         '--dev-default', 'HTTP_PIMEOUT', 2000, 'HTTP_QIMEOUT']);
     assert.fail('hlx up should fail when called with an uneven number of arguments');
-  });
-
-  it('hlx up can specify 1 local repo', () => {
-    new CLI()
-      .withCommandExecutor('up', mockUp)
-      .run(['up', '--local-repo', 'foo']);
-    sinon.assert.calledWith(mockUp.withLocalRepo, ['foo']);
-    sinon.assert.calledOnce(mockUp.run);
   });
 });
