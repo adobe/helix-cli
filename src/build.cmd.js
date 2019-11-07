@@ -12,17 +12,16 @@
 
 'use strict';
 
-const Bundler = require('parcel-bundler');
-const glob = require('glob');
 const path = require('path');
-const RawJSPackager = require('./parcel/RawJSPackager.js');
 const AbstractCommand = require('./abstract.cmd.js');
+const Builder = require('./builder/Builder.js');
 
 class BuildCommand extends AbstractCommand {
   constructor(logger) {
     super(logger);
     this._target = null;
     this._files = null;
+    this._sourceRoot = './';
   }
 
   // eslint-disable-next-line class-methods-use-this
@@ -40,6 +39,11 @@ class BuildCommand extends AbstractCommand {
     return this;
   }
 
+  withSourceRoot(value) {
+    this._sourceRoot = value;
+    return this;
+  }
+
   /**
    * @override
    */
@@ -48,47 +52,23 @@ class BuildCommand extends AbstractCommand {
 
     // ensure target is absolute
     this._target = path.resolve(this.directory, this._target);
+    this._sourceRoot = path.resolve(this.directory, this._sourceRoot);
   }
 
-  async getBundlerOptions() {
-    return {
-      cacheDir: path.resolve(this.directory, '.hlx', 'cache'),
-      target: 'node',
-      logLevel: 3,
-      detailedReport: true,
-      watch: false,
-      cache: false,
-      minify: false,
-      outDir: this._target,
-      killWorkers: true,
-    };
-  }
-
-  /**
-   * Initializes the parcel bundler.
-   * @param files entry files
-   * @return {Bundler} the bundler
-   */
-  async createBundler(files) {
-    const options = await this.getBundlerOptions();
-    const bundler = new Bundler(files, options);
-    bundler.addAssetType('htl', require.resolve('./parcel/HTLAsset.js'));
-    bundler.addAssetType('helix-js', require.resolve('./parcel/HelixAsset.js'));
-    bundler.addAssetType('js', require.resolve('./parcel/AdapterJSAsset.js'));
-    bundler.addAssetType('jsx', require.resolve('./parcel/AdapterJSAsset.js'));
-    bundler.addAssetType('helix-pre-js', require.resolve('./parcel/ProxyJSAsset.js'));
-    bundler.addPackager('js', RawJSPackager);
-    return bundler;
+  createBuilder() {
+    return new Builder()
+      .withDirectory(this._sourceRoot)
+      .withBuildDir(this._target)
+      .withLogger(this.log)
+      .withFiles(this._files)
+      .withShowReport(true);
   }
 
   async build() {
     this.emit('buildStart');
-    // expand patterns from command line arguments
-    const myfiles = this._files.reduce((a, f) => [...a, ...glob.sync(f)], []);
-    const bundler = await this.createBundler(myfiles);
-    const bundle = await bundler.bundle();
+    const builder = this.createBuilder();
+    await builder.run();
     this.emit('buildEnd');
-    return bundle;
   }
 
   async run() {

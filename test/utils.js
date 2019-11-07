@@ -184,17 +184,19 @@ async function processSource(scriptName, type = 'htl') {
   const distHtmlHtl = path.resolve(buildDir, `${scriptName}.${type}`);
 
   const files = [
-    path.resolve(__dirname, `specs/parcel/${scriptName}.${type}`),
-    path.resolve(__dirname, `specs/parcel/${scriptName}.pre.js`),
-    path.resolve(__dirname, 'specs/parcel/helpers.js'),
+    path.resolve(__dirname, `specs/builder/${scriptName}.${type}`),
+    path.resolve(__dirname, `specs/builder/${scriptName}.pre.js`),
+    path.resolve(__dirname, 'specs/builder/helpers.js'),
   ];
 
   await new BuildCommand()
     .withFiles(files)
+    .withDirectory(path.resolve(__dirname, 'specs/builder'))
     .withTargetDir(buildDir)
     .run();
 
   return {
+    testRoot,
     distHtmlHtl,
     distHtmlJS,
   };

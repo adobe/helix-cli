@@ -82,10 +82,11 @@ const TEST_SCRIPTS = [
 
 describe('Generated Action Tests', () => {
   TEST_SCRIPTS.forEach((testScript) => {
-    let distJS;
-    let distHtl;
-
     describe(`Testing ${testScript.name}`, function testSuite() {
+      let distJS;
+      let distHtl;
+      let testRoot;
+
       this.timeout(10000);
 
       setupPolly({
@@ -100,11 +101,15 @@ describe('Generated Action Tests', () => {
         },
       });
 
-      before(`Run Parcel programmatically on ${testScript.name}`, async () => {
-        ({ distHtmlJS: distJS, distHtmlHtl: distHtl } = await processSource(
+      before(`Run builder programmatically on ${testScript.name}`, async () => {
+        ({ distHtmlJS: distJS, distHtmlHtl: distHtl, testRoot } = await processSource(
           testScript.name,
           testScript.type,
         ));
+      });
+
+      after(async () => {
+        await fs.remove(testRoot);
       });
 
       it('correct output files have been generated', () => {

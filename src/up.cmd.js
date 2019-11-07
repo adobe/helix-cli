@@ -110,7 +110,7 @@ class UpCommand extends BuildCommand {
     let timer = null;
     let modifiedFiles = {};
 
-    this._watcher = chokidar.watch(['src', HELIX_CONFIG], {
+    this._watcher = chokidar.watch(['src', 'cgi-bin', HELIX_CONFIG], {
       ignored: /(.*\.swx|.*\.swp|.*~)/,
       persistent: true,
       ignoreInitial: true,
@@ -132,10 +132,8 @@ class UpCommand extends BuildCommand {
     });
   }
 
-  async getBundlerOptions() {
-    const opts = await super.getBundlerOptions();
-    opts.logLevel = 2; // we don't want reports to be generated at all.
-    return opts;
+  createBuilder() {
+    return super.createBuilder().withShowReport(false);
   }
 
   async run() {
@@ -212,7 +210,8 @@ class UpCommand extends BuildCommand {
       await pages.init();
 
       // use bundled helix-pages sources
-      this.withFiles([`${pages.srcDirectory}/**/*.htl`, `${pages.srcDirectory}/**/*.js`]);
+      this.withFiles(['src/**/*.htl', 'src/**/*.js']);
+      this.withSourceRoot(pages.checkoutDirectory);
       this._project.withSourceDir(pages.srcDirectory);
 
       // use bundled helix-pages htdocs

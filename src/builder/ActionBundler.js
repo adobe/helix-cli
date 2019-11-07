@@ -9,6 +9,7 @@
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
+const path = require('path');
 const webpack = require('webpack');
 
 /**
@@ -48,7 +49,13 @@ class ActionBundler {
     return this;
   }
 
-  async run(files) {
+  async run(scripts) {
+    const files = {};
+    scripts.forEach((s) => {
+      const moduleName = path.relative(this._cwd, s.bundlePath);
+      files[moduleName] = s.main;
+    });
+
     const options = {
       target: 'node',
       mode: 'none',
@@ -56,7 +63,7 @@ class ActionBundler {
       cache: true,
       output: {
         path: this._cwd,
-        filename: '[name].bundle.js',
+        filename: '[name]',
         library: 'main',
         libraryTarget: 'umd',
       },
