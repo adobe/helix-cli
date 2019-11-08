@@ -75,11 +75,11 @@ describe('hlx command line', () => {
     await fse.remove(testRoot);
   });
 
-  it('un-supported node version should give warning', async () => {
+  it.only('un-supported node version should give warning', async () => {
     const testVersions = [
       '1.0.0', 0,
       '8.8.0', 0,
-      '8.15.0', 1,
+      '8.15.0', 0,
       '9.0.0', 0,
       '10.0.0', 1,
       '11.1.0', 0,
