@@ -1,3 +1,15 @@
+# [6.0.0](https://github.com/adobe/helix-cli/compare/v5.9.3...v6.0.0) (2019-11-11)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @adobe/helix-pipeline to v6 ([#1218](https://github.com/adobe/helix-cli/issues/1218)) ([1818c0c](https://github.com/adobe/helix-cli/commit/1818c0c59b2cf6b9aa2733858b191d20a00f1395))
+
+
+### BREAKING CHANGES
+
+* **deps:** **@adobe/helix-pipeline@6.0.0:** icons are now rendered as `<svg>` instead of `<img>` tags. If icons are used in a project, CSS changes will be required.
+
 ## [5.9.3](https://github.com/adobe/helix-cli/compare/v5.9.2...v5.9.3) (2019-11-11)
 
 
