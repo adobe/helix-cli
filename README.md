@@ -586,6 +586,12 @@ module.exports.main = context => {
 
 # Developing Helix CLI
 
+## Passing action parameters
+
+You can use `hlx up --dev-default param1 value1 param2 value2` to pass additional
+action parameters as needed. For example: `hlx up --dev-default HTTP_TIMEOUT 2000`
+will enable a Helix project developer to configure request timeouts.
+
 ## Testing
 
 You can use `npm run check` to run the tests and check whether your code adheres
