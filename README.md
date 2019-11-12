@@ -276,6 +276,15 @@ If you want to explicitly always fetch from GitHub, i.e. ignore the local checko
 $ hlx up --no-local-repo
 ```
 
+### Passing action parameters
+
+You can use `hlx up --dev-default param1 value1 param2 value2` to pass additional
+action parameters as needed. For example, to configure request timeouts:
+
+```
+$ hlx up --dev-default HTTP_TIMEOUT 2000
+```
+
 #### Multi Strain Example
 
 In the following config, we define 2 repositories:
@@ -585,12 +594,6 @@ module.exports.main = context => {
 ```
 
 # Developing Helix CLI
-
-## Passing action parameters
-
-You can use `hlx up --dev-default param1 value1 param2 value2` to pass additional
-action parameters as needed. For example: `hlx up --dev-default HTTP_TIMEOUT 2000`
-will enable a Helix project developer to configure request timeouts.
 
 ## Testing
 
