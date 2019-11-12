@@ -276,6 +276,17 @@ If you want to explicitly always fetch from GitHub, i.e. ignore the local checko
 $ hlx up --no-local-repo
 ```
 
+### Passing action parameters
+
+You can use `hlx up --dev-default param1 value1 param2 value2` to pass additional
+action parameters as needed. For example, to configure request timeouts:
+
+```
+$ hlx up --dev-default HTTP_TIMEOUT 2000
+```
+
+For a list of known parameters, see [the Helix Pipeline Configuration Parameters documentation](https://github.com/adobe/helix-pipeline/blob/master/docs/secrets.schema.md#secrets-properties)
+
 #### Multi Strain Example
 
 In the following config, we define 2 repositories:
