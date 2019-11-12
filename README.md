@@ -285,7 +285,7 @@ action parameters as needed. For example, to configure request timeouts:
 $ hlx up --dev-default HTTP_TIMEOUT 2000
 ```
 
-For a list of known parameters, see [the Helix Pipeline Configuration Parameters documentation](https://github.com/adobe/helix-pipeline/blob/master/docs/secrets.schema.md#secrets-properties)
+For a list of known parameters, see [the Helix Pipeline Configuration Parameters documentation](https://github.com/adobe/helix-pipeline/blob/master/docs/secrets.schema.md#secrets-properties).
 
 #### Multi Strain Example
 
