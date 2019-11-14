@@ -1,3 +1,10 @@
+## [6.0.2](https://github.com/adobe/helix-cli/compare/v6.0.1...v6.0.2) (2019-11-14)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @adobe/helix-pipeline to v6.0.2 ([4c3f68f](https://github.com/adobe/helix-cli/commit/4c3f68fb2edc754083fe07c02a34a478dd2079f1))
+
 ## [6.0.1](https://github.com/adobe/helix-cli/compare/v6.0.0...v6.0.1) (2019-11-11)
 
 
