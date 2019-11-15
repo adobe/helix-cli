@@ -69,6 +69,8 @@ class ActionBundler {
       },
       externals: [],
       resolve: {
+        mainFields: ['main', 'module'],
+        extensions: ['.wasm', '.js', '.mjs', '.json'],
         modules: this._modulesPaths,
       },
       devtool: false,
