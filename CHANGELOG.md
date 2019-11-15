@@ -1,3 +1,10 @@
+## [6.0.3](https://github.com/adobe/helix-cli/compare/v6.0.2...v6.0.3) (2019-11-15)
+
+
+### Bug Fixes
+
+* **package:** ensure correct module resolution order ([#1229](https://github.com/adobe/helix-cli/issues/1229)) ([ad59326](https://github.com/adobe/helix-cli/commit/ad59326100abdcff08cf23137aadf01bb1a880cc)), closes [#1228](https://github.com/adobe/helix-cli/issues/1228)
+
 ## [6.0.2](https://github.com/adobe/helix-cli/compare/v6.0.1...v6.0.2) (2019-11-14)
 
 
