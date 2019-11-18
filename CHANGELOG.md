@@ -1,3 +1,10 @@
+## [6.0.5](https://github.com/adobe/helix-cli/compare/v6.0.4...v6.0.5) (2019-11-18)
+
+
+### Bug Fixes
+
+* **deps:** update external ([#1230](https://github.com/adobe/helix-cli/issues/1230)) ([4165259](https://github.com/adobe/helix-cli/commit/41652592bd2e5f971e49d134446005e956cdc26c))
+
 ## [6.0.4](https://github.com/adobe/helix-cli/compare/v6.0.3...v6.0.4) (2019-11-17)
 
 
