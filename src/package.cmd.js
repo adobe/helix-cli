@@ -27,6 +27,8 @@ class PackageCommand extends AbstractCommand {
     super(logger);
     this._target = null;
     this._files = null;
+    this._modulePaths = [];
+    this._requiredModules = null;
     this._onlyModified = false;
     this._enableMinify = false;
   }
@@ -53,6 +55,16 @@ class PackageCommand extends AbstractCommand {
 
   withMinify(value) {
     this._enableMinify = value;
+    return this;
+  }
+
+  withModulePaths(value) {
+    this._modulePaths = value;
+    return this;
+  }
+
+  withRequiredModules(mods) {
+    this._requiredModules = mods;
     return this;
   }
 
@@ -155,11 +167,10 @@ class PackageCommand extends AbstractCommand {
       bar.renderThrottle = rt;
       /* eslint-enable no-param-reassign */
     };
-
     // create the bundles
     const bundler = new ActionBundler()
       .withDirectory(this._target)
-      .withModulePaths(['node_modules', path.resolve(__dirname, '..', 'node_modules')])
+      .withModulePaths(['node_modules', ...this._modulePaths, path.resolve(__dirname, '..', 'node_modules')])
       .withLogger(this.log)
       .withProgressHandler(progressHandler)
       .withMinify(this._enableMinify);
@@ -179,10 +190,13 @@ class PackageCommand extends AbstractCommand {
     await this.init();
 
     // always run build first to make sure scripts are up to date
-    await new BuildCommand(this.log)
+    const build = new BuildCommand(this.log)
       .withFiles(this._files)
-      .withTargetDir(this._target)
-      .run();
+      .withModulePaths(this._modulePaths)
+      .withRequiredModules(this._requiredModules)
+      .withTargetDir(this._target);
+    await build.run();
+    this._modulePaths = build.modulePaths;
 
     // get the list of scripts from the info files
     const infos = [...glob.sync(`${this._target}/**/*.info.json`)];

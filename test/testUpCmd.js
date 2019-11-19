@@ -26,6 +26,7 @@ const {
   assertHttpDom,
   assertFile,
   createTestRoot,
+  getTestModules,
 } = require('./utils.js');
 
 const UpCommand = require('../src/up.cmd');
@@ -37,6 +38,7 @@ describe('Integration test for up command', function suite() {
   let testDir;
   let buildDir;
   let testRoot;
+  let testModules;
 
   setupPolly({
     recordFailedRequests: true,
@@ -51,7 +53,12 @@ describe('Integration test for up command', function suite() {
     },
   });
 
-  beforeEach(async function before() {
+  before(async function beforeAll() {
+    this.timeout(60000); // ensure enough time for installing modules on slow machines
+    testModules = [await getTestModules(), ...module.paths];
+  });
+
+  beforeEach(async function beforeEach() {
     this.polly.server.any()
       .filter((req) => req.headers.host.startsWith('localhost') || req.headers.host.startsWith('127.0.0.1'))
       .passthrough();
@@ -71,6 +78,7 @@ describe('Integration test for up command', function suite() {
       await new UpCommand()
         .withFiles([path.join(testDir, 'src', '*.htl'), path.join(testDir, 'src', '*.js')])
         .withTargetDir(buildDir)
+        .withModulePaths(testModules)
         .withDirectory(testDir)
         .run();
       assert.fail('hlx up without .git should fail.');
@@ -84,6 +92,7 @@ describe('Integration test for up command', function suite() {
     new UpCommand()
       .withFiles([path.join(testDir, 'src', '*.htl'), path.join(testDir, 'src', '*.js')])
       .withTargetDir(buildDir)
+      .withModulePaths(testModules)
       .withDirectory(testDir)
       .withHttpPort(0)
       .on('started', (cmd) => {
@@ -101,6 +110,7 @@ describe('Integration test for up command', function suite() {
     new UpCommand()
       .withFiles([path.join(testDir, 'src', '*.htl'), path.join(testDir, 'src', '*.js')])
       .withTargetDir(buildDir)
+      .withModulePaths(testModules)
       .withDirectory(testDir)
       .withHttpPort(0)
       .on('started', (cmd) => {
@@ -125,6 +135,7 @@ describe('Integration test for up command', function suite() {
         path.join(testDir, 'src', 'utils', '*.js'),
       ])
       .withTargetDir(buildDir)
+      .withModulePaths(testModules)
       .withDirectory(testDir)
       .withHttpPort(0);
 
@@ -160,6 +171,7 @@ describe('Integration test for up command', function suite() {
         path.join(testDir, 'src', 'utils', '*.js'),
       ])
       .withTargetDir(buildDir)
+      .withModulePaths(testModules)
       .withDirectory(testDir)
       .withOverrideHost('www.project-helix.io')
       .withHttpPort(0);
@@ -201,6 +213,7 @@ describe('Integration test for up command', function suite() {
         path.join(testDir, 'src', 'utils', '*.js'),
       ])
       .withTargetDir(buildDir)
+      .withModulePaths(testModules)
       .withDirectory(testDir)
       .withGithubToken('1234')
       .withHttpPort(0);
@@ -228,6 +241,7 @@ describe('Integration test for up command', function suite() {
         path.join(testDir, 'src', 'utils', '*.js'),
       ])
       .withTargetDir(buildDir)
+      .withModulePaths(testModules)
       .withDirectory(testDir)
       .withOverrideHost('www.project-helix.io')
       .withHttpPort(0);
@@ -257,6 +271,7 @@ describe('Integration test for up command', function suite() {
         path.join(testDir, 'src', 'utils', '*.js'),
       ])
       .withTargetDir(buildDir)
+      .withModulePaths(testModules)
       .withDirectory(testDir)
       .withOverrideHost('www.project-helix.io')
       .withLocalRepo(apiDir)
@@ -285,6 +300,7 @@ describe('Integration test for up command', function suite() {
         path.join(testDir, 'src', 'utils', '*.js'),
       ])
       .withTargetDir(buildDir)
+      .withModulePaths(testModules)
       .withDirectory(testDir)
       .withLocalRepo(localRepo);
     try {
@@ -309,6 +325,7 @@ describe('Integration test for up command', function suite() {
         path.join(testDir, 'src', 'utils', '*.js'),
       ])
       .withTargetDir(buildDir)
+      .withModulePaths(testModules)
       .withDirectory(testDir)
       .withLocalRepo(apiDir);
     try {
@@ -329,6 +346,7 @@ describe('Integration test for up command', function suite() {
     const cmd = new UpCommand()
       .withFiles([path.join(testDir, 'src', '*.htl'), path.join(testDir, 'src', '*.js')])
       .withTargetDir(buildDir)
+      .withModulePaths(testModules)
       .withDirectory(testDir)
       .withOverrideHost('www.no-exist.com')
       .withHttpPort(0);
@@ -352,6 +370,7 @@ describe('Integration test for up command', function suite() {
     const cmd = new UpCommand()
       .withFiles([path.join(testDir, 'src', '*.htl'), path.join(testDir, 'src', '*.js')])
       .withTargetDir(buildDir)
+      .withModulePaths(testModules)
       .withDirectory(testDir)
       .withSaveConfig(true)
       .withHttpPort(0);
@@ -391,6 +410,7 @@ describe('Integration test for up command', function suite() {
         path.join(testDir, 'src', 'utils', '*.js'),
       ])
       .withTargetDir(buildDir)
+      .withModulePaths(testModules)
       .withDirectory(testDir)
       .withHttpPort(0);
 
@@ -440,6 +460,7 @@ describe('Integration test for up command', function suite() {
         path.join(testDir, 'src', '*.js'),
       ])
       .withTargetDir(buildDir)
+      .withModulePaths(testModules)
       .withDirectory(testDir)
       .withHttpPort(0);
 

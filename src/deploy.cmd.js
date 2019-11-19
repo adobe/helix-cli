@@ -49,6 +49,8 @@ class DeployCommand extends AbstractCommand {
     this._target = null;
     this._files = null;
     this._prefix = null;
+    this._modulePaths = [];
+    this._requiredModules = null;
     this._default = null;
     this._enableDirty = false;
     this._dryRun = false;
@@ -114,6 +116,16 @@ class DeployCommand extends AbstractCommand {
 
   withFiles(value) {
     this._files = value;
+    return this;
+  }
+
+  withModulePaths(value) {
+    this._modulePaths = value;
+    return this;
+  }
+
+  withRequiredModules(mods) {
+    this._requiredModules = mods;
     return this;
   }
 
@@ -348,6 +360,8 @@ Alternatively you can auto-add one using the {grey --add <name>} option.`);
       const pgkCommand = new PackageCommand(this.log)
         .withTarget(this._target)
         .withFiles(this._files)
+        .withModulePaths(this._modulePaths)
+        .withRequiredModules(this._requiredModules)
         .withDirectory(this.directory)
         .withOnlyModified(this._createPackages === 'auto')
         .withMinify(this._enableMinify);

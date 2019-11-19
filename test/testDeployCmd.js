@@ -20,7 +20,7 @@ const NodeHttpAdapter = require('@pollyjs/adapter-node-http');
 const FSPersister = require('@pollyjs/persister-fs');
 const { setupMocha: setupPolly } = require('@pollyjs/core');
 const { HelixConfig, Logger } = require('@adobe/helix-shared');
-const { initGit, createTestRoot } = require('./utils.js');
+const { initGit, createTestRoot, getTestModules } = require('./utils.js');
 const GitUtils = require('../src/git-utils');
 const DeployCommand = require('../src/deploy.cmd.js');
 
@@ -33,6 +33,12 @@ describe('hlx deploy (Integration)', () => {
   let hlxDir;
   let buildDir;
   let cwd;
+  let testModules;
+
+  before(async function beforeAll() {
+    this.timeout(60000); // ensure enough time for installing modules on slow machines
+    testModules = [await getTestModules(), ...module.paths];
+  });
 
   setupPolly({
     recordFailedRequests: true,
@@ -85,6 +91,7 @@ describe('hlx deploy (Integration)', () => {
         .withWskNamespace('hlx')
         .withEnableAuto(false)
         .withEnableDirty(true)
+        .withModulePaths(testModules)
         .withDryRun(true)
         .withTarget(buildDir)
         .withFastlyAuth('nope')
@@ -110,6 +117,7 @@ describe('hlx deploy (Integration)', () => {
         .withWskNamespace('hlx')
         .withEnableAuto(false)
         .withEnableDirty(true)
+        .withModulePaths(testModules)
         .withDryRun(true)
         .withTarget(buildDir)
         .withFastlyAuth('nope')
@@ -135,6 +143,7 @@ describe('hlx deploy (Integration)', () => {
         .withWskNamespace('hlx')
         .withEnableAuto(false)
         .withEnableDirty(false)
+        .withModulePaths(testModules)
         .withDryRun(true)
         .withTarget(buildDir)
         .withFastlyAuth('nope')
@@ -160,6 +169,7 @@ describe('hlx deploy (Integration)', () => {
         .withWskNamespace('hlx')
         .withEnableAuto(false)
         .withEnableDirty(false)
+        .withModulePaths(testModules)
         .withDryRun(true)
         .withTarget(buildDir)
         .withFastlyAuth('nope')
@@ -187,6 +197,7 @@ describe('hlx deploy (Integration)', () => {
       .withWskNamespace('hlx')
       .withEnableAuto(false)
       .withEnableDirty(false)
+      .withModulePaths(testModules)
       .withDryRun(true)
       .withTarget(buildDir)
       .withFastlyAuth('nope')
@@ -218,6 +229,7 @@ describe('hlx deploy (Integration)', () => {
       .withWskNamespace('hlx')
       .withEnableAuto(false)
       .withEnableDirty(true)
+      .withModulePaths(testModules)
       .withDryRun(true)
       .withTarget(buildDir)
       .withFastlyAuth('nope')
@@ -247,6 +259,7 @@ describe('hlx deploy (Integration)', () => {
       .withWskNamespace('hlx')
       .withEnableAuto(false)
       .withEnableDirty(false)
+      .withModulePaths(testModules)
       .withDryRun(true)
       .withTarget(buildDir)
       .withFastlyAuth('nope')
@@ -272,6 +285,7 @@ describe('hlx deploy (Integration)', () => {
       .withWskNamespace('hlx')
       .withEnableAuto(false)
       .withEnableDirty(false)
+      .withModulePaths(testModules)
       .withDryRun(true)
       .withTarget(buildDir)
       .withFastlyAuth('nope')
@@ -298,6 +312,7 @@ describe('hlx deploy (Integration)', () => {
       .withWskNamespace('hlx')
       .withEnableAuto(false)
       .withEnableDirty(false)
+      .withModulePaths(testModules)
       .withDryRun(true)
       .withTarget(buildDir)
       .withFastlyAuth('nope')
@@ -329,6 +344,7 @@ describe('hlx deploy (Integration)', () => {
         .withWskNamespace('hlx')
         .withEnableAuto(true)
         .withEnableDirty(true)
+        .withModulePaths(testModules)
         .withDryRun(true)
         .withTarget(buildDir)
         .withFastlyAuth('nope')
@@ -354,6 +370,7 @@ describe('hlx deploy (Integration)', () => {
       .withWskNamespace('hlx')
       .withEnableAuto(false)
       .withEnableDirty(false)
+      .withModulePaths(testModules)
       .withDryRun(true)
       .withTarget(buildDir)
       .withFiles([
@@ -388,6 +405,7 @@ describe('hlx deploy (Integration)', () => {
       .withWskNamespace('hlx')
       .withEnableAuto(false)
       .withEnableDirty(false)
+      .withModulePaths(testModules)
       .withDryRun(true)
       .withMinify(false)
       .withTarget(buildDir)
@@ -479,6 +497,7 @@ describe('hlx deploy (Integration)', () => {
       .withWskNamespace('hlx')
       .withEnableAuto(false)
       .withEnableDirty(false)
+      .withModulePaths(testModules)
       .withDryRun(false)
       .withTarget(buildDir)
       .withFiles([
@@ -547,6 +566,7 @@ describe('hlx deploy (Integration)', () => {
         .withWskNamespace('hlx')
         .withEnableAuto(false)
         .withEnableDirty(false)
+        .withModulePaths(testModules)
         .withDryRun(false)
         .withMinify(false)
         .withTarget(buildDir)
