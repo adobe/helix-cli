@@ -15,13 +15,21 @@ const assert = require('assert');
 const path = require('path');
 const fse = require('fs-extra');
 
-const { assertHttp, createTestRoot } = require('./utils.js');
+const {
+  assertHttp, createTestRoot, getTestModules,
+} = require('./utils.js');
 
 const UpCommand = require('../src/up.cmd');
 const DemoCommand = require('../src/demo.cmd');
 
 describe('Integration test for demo + up command', () => {
   let testRoot;
+  let testModules;
+
+  before(async function beforeAll() {
+    this.timeout(60000); // ensure enough time for installing modules on slow machines
+    testModules = [await getTestModules(), ...module.paths];
+  });
 
   beforeEach(async () => {
     testRoot = await createTestRoot();
@@ -50,6 +58,7 @@ describe('Integration test for demo + up command', () => {
           path.join(testDir, 'src', 'utils', '*.js'),
         ])
         .withTargetDir(buildDir)
+        .withModulePaths(testModules)
         .withDirectory(testDir)
         .withHttpPort(0);
 

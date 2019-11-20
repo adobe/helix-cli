@@ -12,7 +12,6 @@
 
 const path = require('path');
 const fse = require('fs-extra');
-const readline = require('readline');
 const opn = require('open');
 const chokidar = require('chokidar');
 const chalk = require('chalk');
@@ -20,7 +19,6 @@ const { HelixProject } = require('@adobe/helix-simulator');
 const GitUtils = require('./git-utils.js');
 const BuildCommand = require('./build.cmd');
 const pkgJson = require('../package.json');
-const HelixPages = require('./helix-pages.js');
 
 const HELIX_CONFIG = 'helix-config.yaml';
 
@@ -32,7 +30,6 @@ class UpCommand extends BuildCommand {
     this._saveConfig = false;
     this._overrideHost = null;
     this._localRepos = [];
-    this._helixPagesRepo = '';
     this._devDefault = {};
     this._githubToken = '';
   }
@@ -194,8 +191,7 @@ class UpCommand extends BuildCommand {
       .withRuntimeModulePaths(module.paths);
 
     // special handling for helix pages project
-    const pages = new HelixPages(this._logger).withDirectory(this.directory);
-    if (await pages.isPagesProject()) {
+    if (await this.helixPages.isPagesProject()) {
       this.log.info('    __ __    ___       ___                  ');
       this.log.info('   / // /__ / (_)_ __ / _ \\___ ____ ____ ___');
       this.log.info('  / _  / -_) / /\\ \\ // ___/ _ `/ _ `/ -_|_-<');
@@ -203,30 +199,18 @@ class UpCommand extends BuildCommand {
       this.log.info(`                              /___/ v${pkgJson.version}`);
       this.log.info('');
 
-      if (this._helixPagesRepo) {
-        pages.withRepo(this._helixPagesRepo);
-      }
-
-      await pages.init();
-
       // use bundled helix-pages sources
-      this.withFiles(['src/**/*.htl', 'src/**/*.js']);
-      this.withSourceRoot(pages.checkoutDirectory);
-      this._project.withSourceDir(pages.srcDirectory);
+      this._project.withSourceDir(this.helixPages.srcDirectory);
 
       // use bundled helix-pages htdocs
       if (!await fse.pathExists(path.join(this.directory, 'htdocs'))) {
-        this.config.strains.get('default').static.url = pages.staticURL;
+        this.config.strains.get('default').static.url = this.helixPages.staticURL;
         localRepos.push({
-          repoPath: pages.checkoutDirectory,
-          gitUrl: pages.staticURL,
+          repoPath: this.helixPages.checkoutDirectory,
+          gitUrl: this.helixPages.staticURL,
         });
-        this.config.strains.get('default').static.url = pages.staticURL;
+        this.config.strains.get('default').static.url = this.helixPages.staticURL;
       }
-
-      // append the pages node_modules to the module path
-      const pagesModules = path.resolve(pages.checkoutDirectory, 'node_modules');
-      this._project.withRuntimeModulePaths([pagesModules, ...module.paths]);
 
       // pretend to have config file to suppress message below
       hasConfigFile = true;
@@ -236,6 +220,8 @@ class UpCommand extends BuildCommand {
       this.log.info('  / _  / -_) / /\\ \\ / ');
       this.log.info(` /_//_/\\__/_/_//_\\_\\ v${pkgJson.version}`);
       this.log.info('                         ');
+      this._project.withSourceDir(path.resolve(this._sourceRoot, 'src'));
+      this._project.withSourceDir(path.resolve(this._sourceRoot, 'cgi-bin'));
     }
 
     // start debugger (#178)
@@ -280,8 +266,6 @@ class UpCommand extends BuildCommand {
 
     const onBuildEnd = async () => {
       try {
-        readline.clearLine(process.stdout, 0);
-        readline.moveCursor(process.stdout, 0, -1);
         const buildTime = Date.now() - buildStartTime;
         this.log.info(`${buildMessage}done ${buildTime}ms`);
         if (this._project.started) {
@@ -289,6 +273,9 @@ class UpCommand extends BuildCommand {
           this._project.invalidateCache();
           return;
         }
+
+        // ensure correct module paths
+        this._project.withRuntimeModulePaths([...this.modulePaths, ...module.paths]);
 
         await this._project.start();
 

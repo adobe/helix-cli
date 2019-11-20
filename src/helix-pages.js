@@ -82,7 +82,9 @@ class HelixPages {
     this._checkoutDir = path.resolve(this.homeDirectory, this._ref);
     this._srcDirectory = path.resolve(this.checkoutDirectory, 'src');
     this._staticURL = new GitUrl('https://github.com/adobe/helix-pages.git/htdocs');
+  }
 
+  async prepare() {
     if (!await fse.pathExists(this.checkoutDirectory)) {
       this.log.info(chalk`Checking out sources from {cyan ${this._repo}#${this._ref}}`);
       try {

@@ -170,7 +170,7 @@ class GitUtils {
   static async getRepository(dir) {
     const repo = (await GitUtils.getOrigin(dir))
       .replace(/[\W]/g, '-');
-    return repo !== '' ? repo : `local--${path.basename(process.cwd())}`;
+    return repo !== '' ? repo : `local--${path.basename(dir)}`;
   }
 
   /**

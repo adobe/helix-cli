@@ -16,13 +16,21 @@ const assert = require('assert');
 const fs = require('fs-extra');
 const path = require('path');
 const { Logger } = require('@adobe/helix-shared');
-const { createTestRoot, assertFile, assertZipEntries } = require('./utils.js');
+const {
+  createTestRoot, assertFile, assertZipEntries, getTestModules,
+} = require('./utils.js');
 const PackageCommand = require('../src/package.cmd.js');
 
 describe('hlx package (Integration)', () => {
   let testRoot;
   let hlxDir;
   let buildDir;
+  let testModules;
+
+  before(async function beforeAll() {
+    this.timeout(60000); // ensure enough time for installing modules on slow machines
+    testModules = [await getTestModules(), ...module.paths];
+  });
 
   beforeEach(async () => {
     testRoot = await createTestRoot();
@@ -38,6 +46,7 @@ describe('hlx package (Integration)', () => {
     const created = {};
     const ignored = {};
     await new PackageCommand()
+      .withModulePaths(testModules)
       .withDirectory(testRoot)
       .withTarget(buildDir)
       .withFiles([

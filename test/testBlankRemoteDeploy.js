@@ -16,38 +16,29 @@ const assert = require('assert');
 const path = require('path');
 const fse = require('fs-extra');
 const GitUtils = require('../src/git-utils');
+const { createTestRoot } = require('./utils.js');
 const DemoCommand = require('../src/demo.cmd');
 
-const TEST_DIR = path.resolve(__dirname, 'tmp');
 const PROJECT_NAME = 'pulvillar-pantograph';
-const pwd = process.cwd();
 
 describe('Test Deployment in Empty Project', () => {
-  beforeEach('Initialize test project', function bef(done) {
-    this.timeout(5000);
+  let testRoot;
 
-    new DemoCommand()
-      .withDirectory(TEST_DIR)
+  beforeEach('Initialize test project', async () => {
+    testRoot = await createTestRoot();
+    await new DemoCommand()
+      .withDirectory(testRoot)
       .withName(PROJECT_NAME)
-      .run()
-      .then(() => {
-        process.chdir(path.resolve(TEST_DIR, PROJECT_NAME));
-        done();
-      })
-      .catch((e) => {
-        done(e);
-      });
+      .run();
   });
 
   it('Get function name', async () => {
     // eslint-disable-next-line global-require
-    assert.notEqual('', await GitUtils.getRepository(process.cwd()));
-    assert.equal('local--pulvillar-pantograph', await GitUtils.getRepository(process.cwd()));
+    const project = path.resolve(testRoot, PROJECT_NAME);
+    assert.equal(await GitUtils.getRepository(project), 'local--pulvillar-pantograph');
   });
 
-  afterEach('Reset working directory', function after() {
-    this.timeout(15000);
-    process.chdir(pwd);
-    fse.removeSync(TEST_DIR);
+  afterEach('Reset working directory', async () => {
+    await fse.remove(testRoot);
   });
 });

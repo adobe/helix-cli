@@ -42,6 +42,7 @@ describe('Integration test for build', function suite() {
       .withFiles(['src/**/*.htl', 'src/**/*.js'])
       .withDirectory(path.resolve(__dirname, 'integration'))
       .withTargetDir(buildDir)
+      .withRequiredModules([])
       .run();
 
     assertFile(path.resolve(buildDir, 'src', 'html.js'));

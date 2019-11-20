@@ -9,6 +9,8 @@
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
+/* eslint-env mocha */
+const { Module } = require('module');
 const assert = require('assert');
 const path = require('path');
 const shell = require('shelljs');
@@ -19,6 +21,7 @@ const yauzl = require('yauzl');
 const { JSDOM } = require('jsdom');
 const { dom: { assertEquivalentNode } } = require('@adobe/helix-shared');
 const BuildCommand = require('../src/build.cmd');
+const ModuleHelper = require('../src/builder/ModuleHelper.js');
 
 /**
  * init git in integration so that helix-simulator can run
@@ -177,21 +180,49 @@ async function createFakeTestRoot() {
   return path.resolve(__dirname, 'tmp', crypto.randomBytes(16).toString('hex'));
 }
 
-async function processSource(scriptName, type = 'htl') {
+/**
+ * Global test modules for all tests
+ */
+let testModules;
+async function getTestModules() {
+  if (!testModules) {
+    testModules = await createTestRoot();
+    const moduleHelper = new ModuleHelper()
+      .withBuildDir(testModules)
+      .withModulePaths([]);
+
+    await moduleHelper.init();
+    await moduleHelper.ensureModule('@adobe/helix-pipeline');
+  }
+  return path.resolve(testModules, 'node_modules');
+}
+
+after(async () => {
+  if (!testModules) {
+    return;
+  }
+  await fse.remove(testModules);
+  testModules = null;
+});
+
+async function processSource(scriptName, type = 'htl', modulePaths) {
   const testRoot = await createTestRoot();
   const buildDir = path.resolve(testRoot, '.hlx/build');
-  const distHtmlJS = path.resolve(buildDir, `${scriptName}.js`);
-  const distHtmlHtl = path.resolve(buildDir, `${scriptName}.${type}`);
+  const distHtmlJS = path.resolve(buildDir, 'src', `${scriptName}.js`);
+  const distHtmlHtl = path.resolve(buildDir, 'src', `${scriptName}.${type}`);
+  const sourceRoot = path.resolve(__dirname, 'specs', 'builder');
 
   const files = [
-    path.resolve(__dirname, `specs/builder/${scriptName}.${type}`),
-    path.resolve(__dirname, `specs/builder/${scriptName}.pre.js`),
-    path.resolve(__dirname, 'specs/builder/helpers.js'),
+    `src/${scriptName}.${type}`,
+    `src/${scriptName}.pre.js`,
+    'src/helpers.js',
   ];
 
   await new BuildCommand()
     .withFiles(files)
+    .withModulePaths(modulePaths)
     .withDirectory(path.resolve(__dirname, 'specs/builder'))
+    .withSourceRoot(sourceRoot)
     .withTargetDir(buildDir)
     .run();
 
@@ -200,6 +231,27 @@ async function processSource(scriptName, type = 'htl') {
     distHtmlHtl,
     distHtmlJS,
   };
+}
+
+function requireWithPaths(id, modPaths) {
+  if (!Array.isArray(modPaths)) {
+    // eslint-disable-next-line no-param-reassign
+    modPaths = [modPaths];
+  }
+  /* eslint-disable no-underscore-dangle */
+  const nodeModulePathsFn = Module._nodeModulePaths;
+  try {
+    Module._nodeModulePaths = function nodeModulePaths(from) {
+      let paths = nodeModulePathsFn.call(this, from);
+      paths = modPaths.concat(paths);
+      return paths;
+    };
+
+    // eslint-disable-next-line import/no-dynamic-require,global-require
+    return require(id);
+  } finally {
+    Module._nodeModulePaths = nodeModulePathsFn;
+  }
 }
 
 const perfExample = {
@@ -324,4 +376,6 @@ module.exports = {
   perfExample,
   assertZipEntries,
   clearHelixEnv,
+  getTestModules,
+  requireWithPaths,
 };

@@ -18,7 +18,9 @@ const NodeHttpAdapter = require('@pollyjs/adapter-node-http');
 const FSPersister = require('@pollyjs/persister-fs');
 const { setupMocha: setupPolly } = require('@pollyjs/core');
 const { Logger } = require('@adobe/helix-shared');
-const { processSource } = require('./utils');
+const {
+  processSource, getTestModules, requireWithPaths,
+} = require('./utils');
 
 const params = {
   path: '/hello.md',
@@ -81,13 +83,18 @@ const TEST_SCRIPTS = [
 ];
 
 describe('Generated Action Tests', () => {
+  let testModules;
+
+  before(async function beforeAll() {
+    this.timeout(60000); // ensure enough time for installing modules on slow machines
+    testModules = await getTestModules();
+  });
+
   TEST_SCRIPTS.forEach((testScript) => {
-    describe(`Testing ${testScript.name}`, function testSuite() {
+    describe(`Testing ${testScript.name}`, () => {
       let distJS;
       let distHtl;
       let testRoot;
-
-      this.timeout(10000);
 
       setupPolly({
         recordIfMissing: false,
@@ -105,6 +112,7 @@ describe('Generated Action Tests', () => {
         ({ distHtmlJS: distJS, distHtmlHtl: distHtl, testRoot } = await processSource(
           testScript.name,
           testScript.type,
+          [testModules, ...module.paths],
         ));
       });
 
@@ -120,21 +128,18 @@ describe('Generated Action Tests', () => {
       });
 
       it('script can be required', () => {
-        // eslint-disable-next-line import/no-dynamic-require,global-require
-        const script = require(distJS);
+        const script = requireWithPaths(distJS, testModules);
         assert.ok(script);
       });
 
       it('script has main function', () => {
-        // eslint-disable-next-line import/no-dynamic-require,global-require
-        const script = require(distJS);
+        const script = requireWithPaths(distJS, testModules);
         assert.ok(script.main);
         assert.equal(typeof script.main, 'function');
       });
 
       it('script can be executed', async () => {
-        // eslint-disable-next-line import/no-dynamic-require,global-require
-        const script = require(distJS);
+        const script = requireWithPaths(distJS, testModules);
         const logger = Logger.getTestLogger();
         const spy = sinon.spy(logger, 'debug');
         const testParams = {

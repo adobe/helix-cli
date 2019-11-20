@@ -107,6 +107,9 @@ class ActionBundler {
     }, {
       message: /^Module not found: Error: Can't resolve 'utf-8-validate'/,
       resource: '/ws/lib/validation.js',
+    }, {
+      message: /^Module not found: Error: Can't resolve '\.\/src\/build'/,
+      resource: '/dtrace-provider/dtrace-provider.js',
     }];
 
     const ignoredErrors = [{

@@ -18,6 +18,7 @@ const fse = require('fs-extra');
 const HtlCompiler = require('@adobe/htlengine/src/compiler/Compiler');
 const Babel = require('@babel/core');
 const BableJsxPlugin = require('@babel/plugin-transform-react-jsx');
+const ModuleHelper = require('./ModuleHelper.js');
 
 const SCRIPTS = ['html.js', 'json.js', 'xml.js', 'svg.js', 'css.js', 'txt.js'];
 const SCRIPTS_PAT = SCRIPTS.map((s) => (`_${s}`));
@@ -60,14 +61,22 @@ class Builder {
 
   constructor() {
     this._cwd = process.cwd();
+    this._sourceRoot = process.cwd();
     this._logger = console;
     this._files = ['src/**/*.htl', 'src/**/*.js', 'src/**/*.jsx', 'cgi-bin/**/*.js'];
+    this._required = [];
     this._buildDir = '.hlx/build';
     this._showReport = false;
+    this._modulePaths = [];
   }
 
   withDirectory(d) {
     this._cwd = d;
+    return this;
+  }
+
+  withSourceRoot(value) {
+    this._sourceRoot = value;
     return this;
   }
 
@@ -89,6 +98,20 @@ class Builder {
   withBuildDir(value) {
     this._buildDir = value;
     return this;
+  }
+
+  withModulePaths(paths) {
+    this._modulePaths = paths;
+    return this;
+  }
+
+  withRequiredModules(value) {
+    this._required = value;
+    return this;
+  }
+
+  get modulePaths() {
+    return this._modulePaths;
   }
 
   async init() {
@@ -155,8 +178,12 @@ class Builder {
   }
 
   getFallbackPreprocessor(fallback) {
+    const opts = {};
+    if (this._modulePaths.length > 0) {
+      opts.paths = this._modulePaths;
+    }
     try {
-      if (require.resolve(fallback)) {
+      if (require.resolve(fallback, opts)) {
         return fallback;
       }
     } catch (e) {
@@ -178,13 +205,23 @@ class Builder {
     const { _logger: log } = this;
     await this.init();
 
+    const moduleHelper = new ModuleHelper()
+      .withDirectory(this._cwd)
+      .withBuildDir(this._buildDir)
+      .withModulePaths(this._modulePaths)
+      .withLogger(this._logger);
+
+    await moduleHelper.init();
+    await moduleHelper.ensureModules(this._required);
+    this._modulePaths = moduleHelper.modulePaths;
+
     // prepare script infos
     const myfiles = this._files.reduce((a, f) => [...a, ...glob.sync(f, {
-      cwd: this._cwd,
+      cwd: this._sourceRoot,
     })], []);
     const actionInfos = {};
     myfiles.forEach((f) => {
-      const file = path.resolve(this._cwd, f);
+      const file = path.resolve(this._sourceRoot, f);
       const basename = path.basename(file);
       const idx = basename.lastIndexOf('.');
       if (idx > 0) {
@@ -199,7 +236,7 @@ class Builder {
             const relPath = path.relative(this._cwd, actionInfos[actionName].entryFile);
             throw Error(`Unable to process '${f}': Action with name '${actionName}' already exists for '${relPath}'.`);
           }
-          const relDir = path.relative(this._cwd, path.dirname(file));
+          const relDir = path.relative(this._sourceRoot, path.dirname(file));
           const buildDir = path.resolve(this._buildDir, relDir);
           actionInfos[actionName] = {
             name: actionName,
