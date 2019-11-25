@@ -1,3 +1,10 @@
+# [6.1.0](https://github.com/adobe/helix-cli/compare/v6.0.7...v6.1.0) (2019-11-25)
+
+
+### Features
+
+* **build:** automatically install helix-pipeline during build ([#1222](https://github.com/adobe/helix-cli/issues/1222)) ([85b39d6](https://github.com/adobe/helix-cli/commit/85b39d6d181b50582b6c27de9ab1ccdeda48bd99)), closes [#1200](https://github.com/adobe/helix-cli/issues/1200)
+
 ## [6.0.7](https://github.com/adobe/helix-cli/compare/v6.0.6...v6.0.7) (2019-11-19)
 
 
