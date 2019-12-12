@@ -36,9 +36,10 @@ describe('hlx publish --remote (default)', () => {
   let RemotePublishCommand;
   let writeDictItem;
   let purgeAll;
+  let deleted;
 
   beforeEach('Setting up Fake Server', function bef() {
-    clearHelixEnv();
+    deleted = clearHelixEnv();
     this.timeout(5000);
     writeDictItem = sinon.fake.resolves(true);
     purgeAll = sinon.fake.resolves(true);
@@ -474,6 +475,12 @@ describe('hlx publish --remote (default)', () => {
   });
 
   afterEach(() => {
+    clearHelixEnv();
+    // restore env
+    Object.keys(deleted).forEach((key) => {
+      process.env[key] = deleted[key];
+    });
+
     scope.done();
     nock.restore();
   });

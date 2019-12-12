@@ -25,9 +25,10 @@ const RemotePublishCommand = require('../src/remotepublish.cmd.js');
 describe('hlx publish', () => {
   // mocked command instance
   let mockPublish;
+  let deleted;
 
   beforeEach(() => {
-    clearHelixEnv();
+    deleted = clearHelixEnv();
     mockPublish = sinon.createStubInstance(RemotePublishCommand);
     mockPublish.withWskHost.returnsThis();
     mockPublish.withWskAuth.returnsThis();
@@ -49,6 +50,10 @@ describe('hlx publish', () => {
 
   afterEach(() => {
     clearHelixEnv();
+    // restore env
+    Object.keys(deleted).forEach((key) => {
+      process.env[key] = deleted[key];
+    });
   });
 
   it('hlx publish requires auth', (done) => {

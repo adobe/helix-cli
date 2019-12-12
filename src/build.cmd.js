@@ -17,6 +17,8 @@ const AbstractCommand = require('./abstract.cmd.js');
 const Builder = require('./builder/Builder.js');
 const HelixPages = require('./helix-pages.js');
 
+const HLX_PIPELINE_MOD = '@adobe/helix-pipeline';
+
 class BuildCommand extends AbstractCommand {
   constructor(logger) {
     super(logger);
@@ -26,7 +28,7 @@ class BuildCommand extends AbstractCommand {
     this._helixPagesRepo = '';
     this._helixPages = null;
     this._modulePaths = [];
-    this._requiredModules = [{ name: '@adobe/helix-pipeline', installer: process.env.HLX_CUSTOM_PIPELINE }];
+    this._requiredModules = [{ name: HLX_PIPELINE_MOD, installer: HLX_PIPELINE_MOD }];
   }
 
   // eslint-disable-next-line class-methods-use-this
@@ -65,6 +67,16 @@ class BuildCommand extends AbstractCommand {
   withRequiredModules(mods) {
     if (mods) {
       this._requiredModules = mods;
+    }
+    return this;
+  }
+
+  withCustomPipeline(customPipeline) {
+    const mod = this._requiredModules.find((m) => m.name === HLX_PIPELINE_MOD);
+    if (mod) {
+      mod.installer = customPipeline;
+    } else {
+      this._requiredModules.push({ name: HLX_PIPELINE_MOD, installer: customPipeline });
     }
     return this;
   }

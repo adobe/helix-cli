@@ -28,6 +28,14 @@ module.exports = function build() {
     builder: (yargs) => {
       yargsBuild(yargs);
       yargs.help();
+      yargs
+        .help()
+        .option('custom-pipeline', {
+          alias: 'customPipeline',
+          describe: 'Specify the pipeline to use, string representing a npm install dependency',
+          type: 'string',
+          default: '',
+        });
     },
     handler: async (argv) => {
       if (!executor) {
@@ -39,6 +47,7 @@ module.exports = function build() {
       await executor
         .withTargetDir(argv.target)
         .withFiles(argv.files)
+        .withCustomPipeline(argv.customPipeline)
         .run();
     },
   };

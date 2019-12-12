@@ -24,9 +24,10 @@ const PackageCommand = require('../src/package.cmd');
 describe('hlx package', () => {
   // mocked command instance
   let mockPackage;
+  let deleted;
 
   beforeEach(() => {
-    clearHelixEnv();
+    deleted = clearHelixEnv();
     mockPackage = sinon.createStubInstance(PackageCommand);
     mockPackage.withTarget.returnsThis();
     mockPackage.withFiles.returnsThis();
@@ -37,6 +38,10 @@ describe('hlx package', () => {
 
   afterEach(() => {
     clearHelixEnv();
+    // restore env
+    Object.keys(deleted).forEach((key) => {
+      process.env[key] = deleted[key];
+    });
   });
 
   it('hlx package works with minimal arguments', () => {

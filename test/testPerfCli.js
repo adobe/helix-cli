@@ -24,9 +24,10 @@ const PerfCommand = require('../src/perf.cmd');
 describe('hlx perf (CLI)', () => {
   // mocked command instance
   let mockPerf;
+  let deleted;
 
   beforeEach(() => {
-    clearHelixEnv();
+    deleted = clearHelixEnv();
     mockPerf = sinon.createStubInstance(PerfCommand);
     mockPerf.run.returnsThis();
     mockPerf.withConnection.returnsThis();
@@ -39,6 +40,10 @@ describe('hlx perf (CLI)', () => {
 
   afterEach(() => {
     clearHelixEnv();
+    // restore env
+    Object.keys(deleted).forEach((key) => {
+      process.env[key] = deleted[key];
+    });
   });
 
   it('hlx perf can use env', () => {

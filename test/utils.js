@@ -39,9 +39,12 @@ function initGit(dir, remote) {
 }
 
 function clearHelixEnv() {
+  const deleted = {};
   Object.keys(process.env).filter((key) => key.startsWith('HLX_')).forEach((key) => {
+    deleted[key] = process.env[key];
     delete process.env[key];
   });
+  return deleted;
 }
 
 function assertFile(p, expectMissing) {
