@@ -26,7 +26,7 @@ class BuildCommand extends AbstractCommand {
     this._helixPagesRepo = '';
     this._helixPages = null;
     this._modulePaths = [];
-    this._requiredModules = ['@adobe/helix-pipeline'];
+    this._requiredModules = [{ name: '@adobe/helix-pipeline', installer: process.env.HLX_CUSTOM_PIPELINE }];
   }
 
   // eslint-disable-next-line class-methods-use-this
