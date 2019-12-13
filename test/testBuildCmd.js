@@ -61,4 +61,30 @@ describe('Integration test for build', function suite() {
     const htmlJs = await fs.readFile(path.resolve(buildDir, 'src', 'html.script.js'), 'utf-8');
     assert.ok(htmlJs.indexOf('sourceMappingURL=html.script.js.map') >= 0);
   });
+
+  it('build can use a custom pipeline', async () => {
+    await new BuildCommand()
+      .withFiles(['src/**/*.htl', 'src/**/*.js'])
+      .withDirectory(path.resolve(__dirname, 'integration'))
+      .withTargetDir(buildDir)
+      .withRequiredModules([])
+      .withCustomPipeline('@adobe/helix-pipeline@1.0.0')
+      .run();
+
+    const pkg = await fs.readJson(path.resolve(buildDir, 'node_modules', '@adobe/helix-pipeline', 'package.json'));
+    assert.equal(pkg.version, '1.0.0');
+  });
+
+  it('build can use a custom pipeline from git tag', async () => {
+    await new BuildCommand()
+      .withFiles(['src/**/*.htl', 'src/**/*.js'])
+      .withDirectory(path.resolve(__dirname, 'integration'))
+      .withTargetDir(buildDir)
+      .withRequiredModules([])
+      .withCustomPipeline('https://github.com/adobe/helix-pipeline.git#v1.1.0')
+      .run();
+
+    const pkg = await fs.readJson(path.resolve(buildDir, 'node_modules', '@adobe/helix-pipeline', 'package.json'));
+    assert.equal(pkg.version, '1.1.0');
+  });
 });
