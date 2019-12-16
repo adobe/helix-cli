@@ -128,14 +128,12 @@ describe('hlx package (Integration)', () => {
   }).timeout(60000);
 });
 
-describe('hlx package (custom pipeline)', () => {
+describe('hlx package (custom pipeline)', function suite() {
+  this.timeout(60000);
+
   let testRoot;
   let hlxDir;
   let buildDir;
-
-  before(async function beforeAll() {
-    this.timeout(60000); // ensure enough time for installing modules on slow machines
-  });
 
   beforeEach(async () => {
     testRoot = await createTestRoot();

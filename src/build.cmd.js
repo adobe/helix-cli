@@ -28,7 +28,7 @@ class BuildCommand extends AbstractCommand {
     this._helixPagesRepo = '';
     this._helixPages = null;
     this._modulePaths = [];
-    this._requiredModules = [{ name: HLX_PIPELINE_MOD, descriptor: HLX_PIPELINE_MOD }];
+    this._requiredModules = [{ name: HLX_PIPELINE_MOD, descriptor: `${HLX_PIPELINE_MOD}@latest` }];
   }
 
   // eslint-disable-next-line class-methods-use-this

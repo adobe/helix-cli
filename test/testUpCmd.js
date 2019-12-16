@@ -494,14 +494,12 @@ describe('Integration test for up command', function suite() {
   });
 });
 
-describe('Integration test for up command (custom pipeline', () => {
+describe('Integration test for up command (custom pipeline)', function suite() {
+  this.timeout(60000); // ensure enough time for installing modules on slow machines
+
   let testDir;
   let buildDir;
   let testRoot;
-
-  before(async function beforeAll() {
-    this.timeout(60000); // ensure enough time for installing modules on slow machines
-  });
 
   beforeEach(async () => {
     testRoot = await createTestRoot();

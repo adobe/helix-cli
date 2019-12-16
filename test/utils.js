@@ -195,7 +195,7 @@ async function getTestModules() {
       .withModulePaths([]);
 
     await moduleHelper.init();
-    await moduleHelper.ensureModule('@adobe/helix-pipeline', process.env.HLX_CUSTOM_PIPELINE);
+    await moduleHelper.ensureModule('@adobe/helix-pipeline', process.env.HLX_CUSTOM_PIPELINE || '@adobe/helix-pipeline@latest');
   }
   return path.resolve(testModules, 'node_modules');
 }
