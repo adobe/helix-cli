@@ -130,7 +130,7 @@ class ModuleHelper {
     }
   }
 
-  async installModule(name, installer) {
+  async installModule(name, descriptor) {
     const cwd = process.cwd();
     try {
       shell.cd(this._buildDir);
@@ -146,12 +146,12 @@ class ModuleHelper {
         cmd = 'ci';
       }
 
-      const moduleInstaller = installer || name;
+      const moduleDescriptor = descriptor || name;
 
-      this.log.info(chalk`Running {grey npm ${cmd} ${moduleInstaller}} in {grey ${path.relative(this.directory, this._buildDir)}} ...`);
+      this.log.info(chalk`Running {grey npm ${cmd} ${moduleDescriptor}} in {grey ${path.relative(this.directory, this._buildDir)}} ...`);
       // todo: maye use npm API instead, so that we can show a nice progress bar.
       // todo: since stderr is not a TTY when executed with shelljs, we don't see it.
-      await execAsync(`npm ${cmd} --only=prod --prefer-offline --ignore-scripts --no-bin-links --no-audit --save-exact --loglevel ${loglevel} --no-fund --progress true ${moduleInstaller}`);
+      await execAsync(`npm ${cmd} --only=prod --prefer-offline --ignore-scripts --no-bin-links --no-audit --save-exact --loglevel ${loglevel} --no-fund --progress true ${moduleDescriptor}`);
     } catch (e) {
       throw Error(`Unable to install ${name}: ${e}`);
     } finally {
@@ -159,12 +159,12 @@ class ModuleHelper {
     }
   }
 
-  async ensureModule(name, installer) {
+  async ensureModule(name, descriptor) {
     const { log } = this;
     let info = await this.getModuleInfo(name);
     if (!info) {
       log.info(chalk`Module {yellow ${name}} not found.`);
-      await this.installModule(name, installer);
+      await this.installModule(name, descriptor);
     }
     info = await this.getModuleInfo(name);
     if (!info) {
@@ -175,7 +175,7 @@ class ModuleHelper {
 
   async ensureModules(names) {
     // todo: invoke npm with all required modules at once
-    return Promise.all(names.map((mod) => this.ensureModule(mod.name, mod.installer)));
+    return Promise.all(names.map((mod) => this.ensureModule(mod.name, mod.descriptor)));
   }
 }
 

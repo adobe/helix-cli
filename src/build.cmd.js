@@ -28,7 +28,7 @@ class BuildCommand extends AbstractCommand {
     this._helixPagesRepo = '';
     this._helixPages = null;
     this._modulePaths = [];
-    this._requiredModules = [{ name: HLX_PIPELINE_MOD, installer: HLX_PIPELINE_MOD }];
+    this._requiredModules = [{ name: HLX_PIPELINE_MOD, descriptor: HLX_PIPELINE_MOD }];
   }
 
   // eslint-disable-next-line class-methods-use-this
@@ -74,9 +74,9 @@ class BuildCommand extends AbstractCommand {
   withCustomPipeline(customPipeline) {
     const mod = this._requiredModules.find((m) => m.name === HLX_PIPELINE_MOD);
     if (mod) {
-      mod.installer = customPipeline;
+      mod.descriptor = customPipeline;
     } else {
-      this._requiredModules.push({ name: HLX_PIPELINE_MOD, installer: customPipeline });
+      this._requiredModules.push({ name: HLX_PIPELINE_MOD, descriptor: customPipeline });
     }
     return this;
   }
