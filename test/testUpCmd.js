@@ -498,8 +498,6 @@ describe('Integration test for up command (custom pipeline', () => {
   let testDir;
   let buildDir;
   let testRoot;
-  let testModules;
-
 
   before(async function beforeAll() {
     this.timeout(60000); // ensure enough time for installing modules on slow machines
