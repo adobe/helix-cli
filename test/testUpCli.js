@@ -39,6 +39,7 @@ describe('hlx up', () => {
     mockUp.withLocalRepo.returnsThis();
     mockUp.withDevDefault.returnsThis();
     mockUp.withGithubToken.returnsThis();
+    mockUp.withCustomPipeline.returnsThis();
     mockUp.run.returnsThis();
   });
 
