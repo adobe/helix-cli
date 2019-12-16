@@ -33,6 +33,7 @@ describe('hlx package', () => {
     mockPackage.withFiles.returnsThis();
     mockPackage.withOnlyModified.returnsThis();
     mockPackage.withMinify.returnsThis();
+    mockPackage.withCustomPipeline.returnsThis();
     mockPackage.run.returnsThis();
   });
 
