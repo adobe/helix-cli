@@ -22,7 +22,7 @@ const BuildCommand = require('../src/build.cmd');
 const TEST_DIR = path.resolve('test/integration');
 
 describe('Integration test for build', function suite() {
-  this.timeout(20000);
+  this.timeout(60000);
   let testRoot;
   let buildDir;
 
