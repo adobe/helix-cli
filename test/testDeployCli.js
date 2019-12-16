@@ -50,6 +50,7 @@ describe('hlx deploy', () => {
     mockDeploy.withAddStrain.returnsThis();
     mockDeploy.withMinify.returnsThis();
     mockDeploy.withResolveGitRefService.returnsThis();
+    mockDeploy.withCustomPipeline.returnsThis();
     mockDeploy.run.returnsThis();
 
     // disable static functions as well to avoid shelljs executions.
