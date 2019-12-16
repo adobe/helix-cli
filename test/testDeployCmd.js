@@ -20,7 +20,9 @@ const NodeHttpAdapter = require('@pollyjs/adapter-node-http');
 const FSPersister = require('@pollyjs/persister-fs');
 const { setupMocha: setupPolly } = require('@pollyjs/core');
 const { HelixConfig, Logger } = require('@adobe/helix-shared');
-const { assertFile, initGit, createTestRoot, getTestModules } = require('./utils.js');
+const {
+  assertFile, initGit, createTestRoot, getTestModules,
+} = require('./utils.js');
 const GitUtils = require('../src/git-utils');
 const DeployCommand = require('../src/deploy.cmd.js');
 
