@@ -127,3 +127,42 @@ describe('hlx package (Integration)', () => {
     assert.ok(/Critical dependency: the request of a dependency is an expression/.test(log));
   }).timeout(60000);
 });
+
+describe('hlx package (custom pipeline)', () => {
+  let testRoot;
+  let hlxDir;
+  let buildDir;
+
+  before(async function beforeAll() {
+    this.timeout(60000); // ensure enough time for installing modules on slow machines
+  });
+
+  beforeEach(async () => {
+    testRoot = await createTestRoot();
+    hlxDir = path.resolve(testRoot, '.hlx');
+    buildDir = path.resolve(hlxDir, 'build');
+  });
+
+  afterEach(async () => {
+    await fs.remove(testRoot);
+  });
+
+  it('package creates installs the correct custom pipeline', async () => {
+    await new PackageCommand()
+      .withDirectory(testRoot)
+      .withTarget(buildDir)
+      .withFiles([
+        'test/integration/src/html.htl',
+        'test/integration/src/html.pre.js',
+      ])
+      .withOnlyModified(false)
+      .withMinify(false)
+      .withCustomPipeline('@adobe/helix-pipeline@1.0.0')
+      .run();
+
+    // verify build output
+    assertFile(path.resolve(buildDir, 'test/integration/src/html.js'));
+    const pkg = await fs.readJson(path.resolve(buildDir, 'node_modules', '@adobe/helix-pipeline', 'package.json'));
+    assert.equal(pkg.version, '1.0.0');
+  });
+});

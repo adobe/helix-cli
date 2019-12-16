@@ -493,3 +493,46 @@ describe('Integration test for up command', function suite() {
       .catch(done);
   });
 });
+
+describe('Integration test for up command (custom pipeline', () => {
+  let testDir;
+  let buildDir;
+  let testRoot;
+  let testModules;
+
+
+  before(async function beforeAll() {
+    this.timeout(60000); // ensure enough time for installing modules on slow machines
+  });
+
+  beforeEach(async () => {
+    testRoot = await createTestRoot();
+    testDir = path.resolve(testRoot, 'project');
+    buildDir = path.resolve(testRoot, '.hlx/build');
+    await fse.copy(TEST_DIR, testDir);
+  });
+
+  afterEach(async () => {
+    await fse.remove(testRoot);
+  });
+
+  it('up command installs the correct custom pipeline', (done) => {
+    initGit(testDir);
+    new UpCommand()
+      .withFiles([path.join(testDir, 'src', '*.htl'), path.join(testDir, 'src', '*.js')])
+      .withTargetDir(buildDir)
+      .withDirectory(testDir)
+      .withHttpPort(0)
+      .withCustomPipeline('@adobe/helix-pipeline@1.0.0')
+      .on('started', async (cmd) => {
+        const pkg = await fse.readJson(path.resolve(buildDir, 'node_modules', '@adobe/helix-pipeline', 'package.json'));
+        assert.equal(pkg.version, '1.0.0');
+        cmd.stop();
+      })
+      .on('stopped', () => {
+        done();
+      })
+      .run()
+      .catch(done);
+  });
+});
