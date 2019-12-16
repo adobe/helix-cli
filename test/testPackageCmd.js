@@ -145,7 +145,25 @@ describe('hlx package (custom pipeline)', function suite() {
     await fs.remove(testRoot);
   });
 
-  it('package creates installs the correct custom pipeline', async () => {
+  it('package installs a default pipeline', async () => {
+    await new PackageCommand()
+      .withDirectory(testRoot)
+      .withTarget(buildDir)
+      .withFiles([
+        'test/integration/src/html.htl',
+        'test/integration/src/html.pre.js',
+      ])
+      .withOnlyModified(false)
+      .withMinify(false)
+      .run();
+
+    // verify build output
+    assertFile(path.resolve(buildDir, 'test/integration/src/html.js'));
+    const pipelinePackageJson = path.resolve(buildDir, 'node_modules', '@adobe/helix-pipeline', 'package.json');
+    assertFile(pipelinePackageJson);
+  });
+
+  it('package installs the correct custom pipeline', async () => {
     await new PackageCommand()
       .withDirectory(testRoot)
       .withTarget(buildDir)
@@ -160,7 +178,9 @@ describe('hlx package (custom pipeline)', function suite() {
 
     // verify build output
     assertFile(path.resolve(buildDir, 'test/integration/src/html.js'));
-    const pkg = await fs.readJson(path.resolve(buildDir, 'node_modules', '@adobe/helix-pipeline', 'package.json'));
+    const pipelinePackageJson = path.resolve(buildDir, 'node_modules', '@adobe/helix-pipeline', 'package.json');
+    assertFile(pipelinePackageJson);
+    const pkg = await fs.readJson(pipelinePackageJson);
     assert.equal(pkg.version, '1.0.0');
   });
 });

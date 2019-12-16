@@ -512,6 +512,26 @@ describe('Integration test for up command (custom pipeline)', function suite() {
     await fse.remove(testRoot);
   });
 
+  it('up command installs a default pipeline', (done) => {
+    initGit(testDir);
+    new UpCommand()
+      .withFiles([path.join(testDir, 'src', '*.htl'), path.join(testDir, 'src', '*.js')])
+      .withTargetDir(buildDir)
+      .withDirectory(testDir)
+      .withHttpPort(0)
+      .withCustomPipeline('@adobe/helix-pipeline@1.0.0')
+      .on('started', async (cmd) => {
+        const pipelinePackageJson = path.resolve(buildDir, 'node_modules', '@adobe/helix-pipeline', 'package.json');
+        assertFile(pipelinePackageJson);
+        cmd.stop();
+      })
+      .on('stopped', () => {
+        done();
+      })
+      .run()
+      .catch(done);
+  });
+
   it('up command installs the correct custom pipeline', (done) => {
     initGit(testDir);
     new UpCommand()
@@ -521,7 +541,9 @@ describe('Integration test for up command (custom pipeline)', function suite() {
       .withHttpPort(0)
       .withCustomPipeline('@adobe/helix-pipeline@1.0.0')
       .on('started', async (cmd) => {
-        const pkg = await fse.readJson(path.resolve(buildDir, 'node_modules', '@adobe/helix-pipeline', 'package.json'));
+        const pipelinePackageJson = path.resolve(buildDir, 'node_modules', '@adobe/helix-pipeline', 'package.json');
+        assertFile(pipelinePackageJson);
+        const pkg = await fse.readJson(pipelinePackageJson);
         assert.equal(pkg.version, '1.0.0');
         cmd.stop();
       })
