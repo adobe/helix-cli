@@ -19,7 +19,7 @@ const path = require('path');
 const proxyquire = require('proxyquire');
 const sinon = require('sinon');
 const shell = require('shelljs');
-const { Logger } = require('@adobe/helix-shared');
+const { logging } = require('@adobe/helix-testutils');
 const { createTestRoot } = require('./utils.js');
 const { clearHelixEnv } = require('./utils.js');
 
@@ -125,7 +125,7 @@ describe('hlx publish --custom-vcl (check requests)', () => {
     shell.exec('git commit -m"initial commit."');
 
     // set up command
-    const logger = Logger.getTestLogger();
+    const logger = logging.createTestLogger();
     remote = await new ProxiedRemotePublishCommand(logger)
       .withWskAuth('fakeauth')
       .withWskNamespace('fakename')

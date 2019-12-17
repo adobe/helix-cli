@@ -19,7 +19,8 @@ const $ = require('shelljs');
 const NodeHttpAdapter = require('@pollyjs/adapter-node-http');
 const FSPersister = require('@pollyjs/persister-fs');
 const { setupMocha: setupPolly } = require('@pollyjs/core');
-const { HelixConfig, Logger } = require('@adobe/helix-shared');
+const { HelixConfig } = require('@adobe/helix-shared');
+const { logging } = require('@adobe/helix-testutils');
 const {
   assertFile, initGit, createTestRoot, getTestModules,
 } = require('./utils.js');
@@ -84,7 +85,7 @@ describe('hlx deploy (Integration)', () => {
 
   it('deploy fails if no helix-config is present.', async () => {
     initGit(testRoot);
-    const logger = Logger.getTestLogger();
+    const logger = logging.createTestLogger();
     try {
       await new DeployCommand(logger)
         .withDirectory(testRoot)
@@ -102,7 +103,7 @@ describe('hlx deploy (Integration)', () => {
         .run();
       assert.fail('deploy should fail if no helix-config is present');
     } catch (e) {
-      const log = await logger.getOutput();
+      const log = logger.getOutput();
       assert.ok(log.indexOf('error: No helix-config.yaml. Please add one before deployment.') >= 0);
     }
   });
@@ -162,7 +163,7 @@ describe('hlx deploy (Integration)', () => {
     await fs.copy(TEST_DIR, testRoot);
     await fs.rename(path.resolve(testRoot, 'default-config.yaml'), path.resolve(testRoot, 'helix-config.yaml'));
     initGit(testRoot, 'git@github.com:adobe/project-foo.io.git');
-    const logger = Logger.getTestLogger();
+    const logger = logging.createTestLogger();
     try {
       await new DeployCommand(logger)
         .withDirectory(testRoot)
@@ -180,7 +181,7 @@ describe('hlx deploy (Integration)', () => {
         .run();
       assert.fail('deploy fails if no stain is affected');
     } catch (e) {
-      const log = await logger.getOutput();
+      const log = logger.getOutput();
       assert.ok(log.indexOf('error: Remote repository ssh://git@github.com/adobe/project-foo.io.git#master does not affect any strains.') >= 0);
       assert.ok(log.indexOf('http://localhost') < 0, true);
     }
@@ -191,7 +192,7 @@ describe('hlx deploy (Integration)', () => {
     const cfg = path.resolve(testRoot, 'helix-config.yaml');
     await fs.rename(path.resolve(testRoot, 'default-config.yaml'), cfg);
     initGit(testRoot, 'git@github.com:adobe/project-foo.io.git');
-    const logger = Logger.getTestLogger();
+    const logger = logging.createTestLogger();
     const cmd = await new DeployCommand(logger)
       .withDirectory(testRoot)
       .withWskHost('adobeioruntime.net')
@@ -209,7 +210,7 @@ describe('hlx deploy (Integration)', () => {
       .withCreatePackages('ignore')
       .run();
 
-    const log = await logger.getOutput();
+    const log = logger.getOutput();
     assert.ok(log.indexOf('info: Updated strain foo in helix-config.yaml') >= 0);
     await cmd.config.saveConfig(); // trigger manual save because of dry-run
     const actual = await fs.readFile(cfg, 'utf-8');
@@ -223,7 +224,7 @@ describe('hlx deploy (Integration)', () => {
     const cfg = path.resolve(testRoot, 'helix-config.yaml');
     initGit(testRoot, 'git@github.com:adobe/project-foo.io.git');
     await fs.rename(path.resolve(testRoot, 'default-config.yaml'), cfg);
-    const logger = Logger.getTestLogger();
+    const logger = logging.createTestLogger();
     const cmd = await new DeployCommand(logger)
       .withDirectory(testRoot)
       .withWskHost('adobeioruntime.net')
@@ -241,7 +242,7 @@ describe('hlx deploy (Integration)', () => {
       .withCreatePackages('ignore')
       .run();
 
-    const log = await logger.getOutput();
+    const log = logger.getOutput();
     assert.ok(log.indexOf('info: Updated strain default in helix-config.yaml') >= 0);
     await cmd.config.saveConfig(); // trigger manual save because of dry-run
     const actual = await fs.readFile(cfg, 'utf-8');
@@ -253,7 +254,7 @@ describe('hlx deploy (Integration)', () => {
     await fs.copy(TEST_DIR, testRoot);
     await fs.rename(path.resolve(testRoot, 'default-config.yaml'), path.resolve(testRoot, 'helix-config.yaml'));
     initGit(testRoot, 'git@github.com:adobe/project-helix.io.git');
-    const logger = Logger.getTestLogger();
+    const logger = logging.createTestLogger();
     await new DeployCommand(logger)
       .withDirectory(testRoot)
       .withWskHost('adobeioruntime.net')
@@ -270,7 +271,7 @@ describe('hlx deploy (Integration)', () => {
       .withCreatePackages('ignore')
       .run();
 
-    const log = await logger.getOutput();
+    const log = logger.getOutput();
     assert.ok(log.indexOf('Affected strains of ssh://git@github.com/adobe/project-helix.io.git#master') >= 0);
     assert.ok(log.indexOf('- dev') >= 0);
   });
@@ -279,7 +280,7 @@ describe('hlx deploy (Integration)', () => {
     await fs.copy(TEST_DIR, testRoot);
     await fs.rename(path.resolve(testRoot, 'default-config-no-master.yaml'), path.resolve(testRoot, 'helix-config.yaml'));
     initGit(testRoot, 'git@github.com:adobe/project-helix.io.git');
-    const logger = Logger.getTestLogger();
+    const logger = logging.createTestLogger();
     await new DeployCommand(logger)
       .withDirectory(testRoot)
       .withWskHost('adobeioruntime.net')
@@ -296,7 +297,7 @@ describe('hlx deploy (Integration)', () => {
       .withCreatePackages('ignore')
       .run();
 
-    const log = await logger.getOutput();
+    const log = logger.getOutput();
     assert.ok(log.indexOf('Affected strains of ssh://git@github.com/adobe/project-helix.io.git#master') >= 0);
     assert.ok(log.indexOf('- dev') >= 0);
   });
@@ -306,7 +307,7 @@ describe('hlx deploy (Integration)', () => {
     const cfg = path.resolve(testRoot, 'helix-config.yaml');
     await fs.copy(path.resolve(__dirname, 'fixtures', 'default-proxy.yaml'), cfg);
     initGit(testRoot, 'git@github.com:adobe/dummy.git');
-    const logger = Logger.getTestLogger();
+    const logger = logging.createTestLogger();
     const cmd = await new DeployCommand(logger)
       .withDirectory(testRoot)
       .withWskHost('adobeioruntime.net')
@@ -324,7 +325,7 @@ describe('hlx deploy (Integration)', () => {
       .withAddStrain('new-strain')
       .run();
 
-    const log = await logger.getOutput();
+    const log = logger.getOutput();
     assert.ok(log.indexOf('Affected strains of ssh://git@github.com/adobe/dummy.git#master') >= 0);
     assert.ok(log.indexOf('- new-strain') >= 0);
     await cmd.config.saveConfig(); // trigger manual save because of dry-run
@@ -363,7 +364,7 @@ describe('hlx deploy (Integration)', () => {
     await fs.copy(TEST_DIR, testRoot);
     await fs.rename(path.resolve(testRoot, 'default-config.yaml'), path.resolve(testRoot, 'helix-config.yaml'));
     initGit(testRoot, 'git@github.com:adobe/project-helix.io.git');
-    const logger = Logger.getTestLogger();
+    const logger = logging.createTestLogger();
 
     const cmd = await new DeployCommand(logger)
       .withDirectory(testRoot)
@@ -389,7 +390,7 @@ describe('hlx deploy (Integration)', () => {
     assert.equal(cmd.config.strains.get('default').package, '');
     assert.equal(cmd.config.strains.get('dev').package, `hlx/${ref}`);
 
-    const log = await logger.getOutput();
+    const log = logger.getOutput();
     assert.ok(log.indexOf('deployment of 1 action completed') >= 0);
     assert.ok(log.indexOf(`- hlx/${ref}/html`) >= 0);
   }).timeout(60000);
@@ -398,7 +399,7 @@ describe('hlx deploy (Integration)', () => {
     await fs.copy(CGI_BIN_TEST_DIR, testRoot);
     await fs.rename(path.resolve(testRoot, 'default-config.yaml'), path.resolve(testRoot, 'helix-config.yaml'));
     initGit(testRoot, 'git@github.com:adobe/project-helix.io.git');
-    const logger = Logger.getTestLogger();
+    const logger = logging.createTestLogger();
 
     const cmd = await new DeployCommand(logger)
       .withDirectory(testRoot)
@@ -425,7 +426,7 @@ describe('hlx deploy (Integration)', () => {
     assert.equal(cmd.config.strains.get('default').package, '');
     assert.equal(cmd.config.strains.get('dev').package, `hlx/${ref}`);
 
-    const log = await logger.getOutput();
+    const log = logger.getOutput();
     assert.ok(log.indexOf('deployment of 2 actions completed') >= 0);
     assert.ok(log.indexOf(`- hlx/${ref}/html`) >= 0);
     assert.ok(log.indexOf(`- hlx/${ref}/cgi-bin-hello`) >= 0);
@@ -437,7 +438,7 @@ describe('hlx deploy (Integration)', () => {
     await fs.copy(TEST_DIR, testRoot);
     await fs.rename(path.resolve(testRoot, 'default-config.yaml'), path.resolve(testRoot, 'helix-config.yaml'));
     initGit(testRoot, 'git@github.com:adobe/project-helix.io.git');
-    const logger = Logger.getTestLogger();
+    const logger = logging.createTestLogger();
 
     const ref = await GitUtils.getCurrentRevision(testRoot);
 
@@ -521,7 +522,7 @@ describe('hlx deploy (Integration)', () => {
     assert.equal(cmd.config.strains.get('default').package, '');
     assert.equal(cmd.config.strains.get('dev').package, `hlx/${ref}`);
 
-    const log = await logger.getOutput();
+    const log = logger.getOutput();
     assert.ok(log.indexOf('deployment of 1 action completed') >= 0);
     assert.ok(log.indexOf(`- hlx/${ref}/html`) >= 0);
 
@@ -539,7 +540,7 @@ describe('hlx deploy (Integration)', () => {
     await fs.copy(TEST_DIR, testRoot);
     await fs.rename(path.resolve(testRoot, 'default-config.yaml'), path.resolve(testRoot, 'helix-config.yaml'));
     initGit(testRoot, 'git@github.com:adobe/project-helix.io.git');
-    const logger = Logger.getTestLogger();
+    const logger = logging.createTestLogger();
 
     const ref = await GitUtils.getCurrentRevision(testRoot);
 
@@ -640,7 +641,7 @@ describe('hlx deploy (custom pipeline)', function suite() {
     await fs.copy(TEST_DIR, testRoot);
     await fs.rename(path.resolve(testRoot, 'default-config.yaml'), path.resolve(testRoot, 'helix-config.yaml'));
     initGit(testRoot, 'git@github.com:adobe/project-helix.io.git');
-    const logger = Logger.getTestLogger();
+    const logger = logging.createTestLogger();
 
     await new DeployCommand(logger)
       .withDirectory(testRoot)
@@ -669,7 +670,7 @@ describe('hlx deploy (custom pipeline)', function suite() {
     await fs.copy(TEST_DIR, testRoot);
     await fs.rename(path.resolve(testRoot, 'default-config.yaml'), path.resolve(testRoot, 'helix-config.yaml'));
     initGit(testRoot, 'git@github.com:adobe/project-helix.io.git');
-    const logger = Logger.getTestLogger();
+    const logger = logging.createTestLogger();
 
     await new DeployCommand(logger)
       .withDirectory(testRoot)

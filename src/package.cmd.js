@@ -182,10 +182,10 @@ class PackageCommand extends AbstractCommand {
       .withMinify(this._enableMinify);
     const stats = await bundler.run(scripts);
     if (stats.errors) {
-      stats.errors.forEach(this.log.error);
+      stats.errors.forEach((msg) => this.log.error(msg));
     }
     if (stats.warnings) {
-      stats.warnings.forEach(this.log.warn);
+      stats.warnings.forEach((msg) => this.log.warn(msg));
     }
   }
 

@@ -12,7 +12,7 @@
 
 'use strict';
 
-const { makeLogger } = require('./log-common.js');
+const { getOrCreateLogger } = require('./log-common.js');
 const yargsBuild = require('./yargs-build.js');
 
 module.exports = function pack() {
@@ -49,7 +49,7 @@ module.exports = function pack() {
       if (!executor) {
         // eslint-disable-next-line global-require
         const PackageCommand = require('./package.cmd'); // lazy load the handler to speed up execution time
-        executor = new PackageCommand(makeLogger(argv));
+        executor = new PackageCommand(getOrCreateLogger(argv));
       }
 
       await executor

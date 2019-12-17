@@ -18,7 +18,7 @@ const fse = require('fs-extra');
 const NodeHttpAdapter = require('@pollyjs/adapter-node-http');
 const FSPersister = require('@pollyjs/persister-fs');
 const { setupMocha: setupPolly } = require('@pollyjs/core');
-const { Logger } = require('@adobe/helix-shared');
+const { logging } = require('@adobe/helix-testutils');
 
 const {
   initGit,
@@ -322,7 +322,7 @@ describe('Integration test for up command', function suite() {
     await fse.copy(path.resolve(__dirname, 'fixtures', 'api-repo'), apiDir);
     initGit(apiDir);
     initGit(testDir, 'https://github.com/adobe/dummy-foo.git');
-    const logger = Logger.getTestLogger();
+    const logger = logging.createTestLogger();
     const cmd = new UpCommand(logger)
       .withFiles([
         path.join(testDir, 'src', '*.htl'),
@@ -340,7 +340,7 @@ describe('Integration test for up command', function suite() {
     } finally {
       await cmd.stop();
     }
-    const log = await logger.getOutput();
+    const log = logger.getOutput();
     assert.ok(log.indexOf(`Ignoring --local-repo=${apiDir}. No remote 'origin' defined.`) >= 0);
   });
 

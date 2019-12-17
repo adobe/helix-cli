@@ -12,7 +12,7 @@
 
 'use strict';
 
-const { makeLogger } = require('./log-common.js');
+const { getOrCreateLogger } = require('./log-common.js');
 
 module.exports = function demo() {
   let executor;
@@ -35,7 +35,7 @@ module.exports = function demo() {
       if (!executor) {
         // eslint-disable-next-line global-require
         const CleanCommand = require('./clean.cmd'); // lazy load the handler to speed up execution time
-        executor = new CleanCommand(makeLogger(argv));
+        executor = new CleanCommand(getOrCreateLogger(argv));
       }
 
       await executor

@@ -17,7 +17,7 @@ const path = require('path');
 const yargsBuild = require('./yargs-build.js');
 const yargsParams = require('./yargs-params.js');
 const yargsGithub = require('./yargs-github.js');
-const { makeLogger } = require('./log-common.js');
+const { getOrCreateLogger } = require('./log-common.js');
 
 module.exports = function up() {
   let executor;
@@ -93,7 +93,7 @@ module.exports = function up() {
       if (!executor) {
         // eslint-disable-next-line global-require
         const UpCommand = require('./up.cmd'); // lazy load the handler to speed up execution time
-        executor = new UpCommand(makeLogger(argv));
+        executor = new UpCommand(getOrCreateLogger(argv));
       }
 
       await executor

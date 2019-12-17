@@ -19,7 +19,7 @@ const chalk = require('chalk');
 const shell = require('shelljs');
 const glob = require('glob');
 
-const { makeLogger } = require('./log-common');
+const { getOrCreateLogger } = require('./log-common');
 
 const ANSI_REGEXP = RegExp([
   '[\\u001B\\u009B][[\\]()#;?]*(?:(?:(?:[a-zA-Z\\d]*(?:;[a-zA-Z\\d]*)*)?\\u0007)',
@@ -44,7 +44,7 @@ function execAsync(cmd) {
 }
 
 class DemoCommand {
-  constructor(logger = makeLogger()) {
+  constructor(logger = getOrCreateLogger()) {
     this._logger = logger;
     this._name = '';
     this._dir = process.cwd();

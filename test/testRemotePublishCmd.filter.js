@@ -20,7 +20,7 @@ const shell = require('shelljs');
 const fse = require('fs-extra');
 const assert = require('assert');
 const { createTestRoot } = require('./utils.js');
-const { makeLogger } = require('../src/log-common');
+const { getOrCreateLogger } = require('../src/log-common');
 const { clearHelixEnv } = require('./utils.js');
 
 describe('hlx publish --remote (with filters)', () => {
@@ -91,7 +91,7 @@ describe('hlx publish --remote (with filters)', () => {
     shell.exec('git commit -m"initial commit."');
 
     // set up command
-    remote = await new RemotePublishCommand(makeLogger({ logLevel: 'debug' }))
+    remote = await new RemotePublishCommand(getOrCreateLogger({ logLevel: 'debug' }))
       .withWskAuth('fakeauth')
       .withWskNamespace('fakename')
       .withFastlyAuth('fake_auth')
@@ -223,7 +223,7 @@ describe('hlx publish --remote (with filters, but without config)', () => {
     shell.exec('git commit -m"initial commit."');
 
     // set up command
-    remote = await new RemotePublishCommand(makeLogger({ logLevel: 'debug' }))
+    remote = await new RemotePublishCommand(getOrCreateLogger({ logLevel: 'debug' }))
       .withWskAuth('fakeauth')
       .withWskNamespace('fakename')
       .withFastlyAuth('fake_auth')

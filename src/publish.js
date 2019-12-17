@@ -15,7 +15,7 @@
 const yargsOpenwhisk = require('./yargs-openwhisk.js');
 const yargsFastly = require('./yargs-fastly.js');
 const yargsGithub = require('./yargs-github.js');
-const { makeLogger } = require('./log-common.js');
+const { getOrCreateLogger } = require('./log-common.js');
 
 module.exports = function strain() {
   let executor;
@@ -114,7 +114,7 @@ module.exports = function strain() {
       if (!executor) {
         // eslint-disable-next-line global-require
         const RemotePublish = require('./remotepublish.cmd'); // lazy load the handler to speed up execution time
-        executor = new RemotePublish(makeLogger(argv));
+        executor = new RemotePublish(getOrCreateLogger(argv));
       }
 
       await executor
