@@ -24,17 +24,23 @@ const BuildCommand = require('../src/build.cmd');
 describe('hlx build', () => {
   // mocked command instance
   let mockBuild;
+  let deleted;
 
   beforeEach(() => {
-    clearHelixEnv();
+    deleted = clearHelixEnv();
     mockBuild = sinon.createStubInstance(BuildCommand);
     mockBuild.withTargetDir.returnsThis();
     mockBuild.withFiles.returnsThis();
+    mockBuild.withCustomPipeline.returnsThis();
     mockBuild.run.returnsThis();
   });
 
   afterEach(() => {
     clearHelixEnv();
+    // restore env
+    Object.keys(deleted).forEach((key) => {
+      process.env[key] = deleted[key];
+    });
   });
 
   it('hlx build runs w/o arguments', () => {

@@ -22,7 +22,7 @@ const BuildCommand = require('../src/build.cmd');
 const TEST_DIR = path.resolve('test/integration');
 
 describe('Integration test for build', function suite() {
-  this.timeout(20000);
+  this.timeout(60000);
   let testRoot;
   let buildDir;
 
@@ -60,5 +60,44 @@ describe('Integration test for build', function suite() {
     // test if source map contains correct reference
     const htmlJs = await fs.readFile(path.resolve(buildDir, 'src', 'html.script.js'), 'utf-8');
     assert.ok(htmlJs.indexOf('sourceMappingURL=html.script.js.map') >= 0);
+  });
+
+  it('build provides a default pipeline', async () => {
+    await new BuildCommand()
+      .withFiles(['src/**/*.htl', 'src/**/*.js'])
+      .withDirectory(path.resolve(__dirname, 'integration'))
+      .withTargetDir(buildDir)
+      .run();
+
+    const pipelinePackageJson = path.resolve(buildDir, 'node_modules', '@adobe/helix-pipeline', 'package.json');
+    assertFile(pipelinePackageJson);
+  });
+
+  it('build can use a custom pipeline', async () => {
+    await new BuildCommand()
+      .withFiles(['src/**/*.htl', 'src/**/*.js'])
+      .withDirectory(path.resolve(__dirname, 'integration'))
+      .withTargetDir(buildDir)
+      .withCustomPipeline('@adobe/helix-pipeline@1.0.0')
+      .run();
+
+    const pipelinePackageJson = path.resolve(buildDir, 'node_modules', '@adobe/helix-pipeline', 'package.json');
+    assertFile(pipelinePackageJson);
+    const pkg = await fs.readJson(pipelinePackageJson);
+    assert.equal(pkg.version, '1.0.0');
+  });
+
+  it('build can use a custom pipeline from git tag', async () => {
+    await new BuildCommand()
+      .withFiles(['src/**/*.htl', 'src/**/*.js'])
+      .withDirectory(path.resolve(__dirname, 'integration'))
+      .withTargetDir(buildDir)
+      .withCustomPipeline('https://github.com/adobe/helix-pipeline.git#v1.1.0')
+      .run();
+
+    const pipelinePackageJson = path.resolve(buildDir, 'node_modules', '@adobe/helix-pipeline', 'package.json');
+    assertFile(pipelinePackageJson);
+    const pkg = await fs.readJson(pipelinePackageJson);
+    assert.equal(pkg.version, '1.1.0');
   });
 });

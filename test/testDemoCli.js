@@ -23,9 +23,10 @@ const DemoCommand = require('../src/demo.cmd');
 describe('hlx demo', () => {
   // mocked command instance
   let mockDemo;
+  let deleted;
 
   beforeEach(() => {
-    clearHelixEnv();
+    deleted = clearHelixEnv();
     mockDemo = sinon.createStubInstance(DemoCommand);
     mockDemo.withDirectory.returnsThis();
     mockDemo.withName.returnsThis();
@@ -35,6 +36,10 @@ describe('hlx demo', () => {
 
   afterEach(() => {
     clearHelixEnv();
+    // restore env
+    Object.keys(deleted).forEach((key) => {
+      process.env[key] = deleted[key];
+    });
   });
 
   it('hlx demo accepts name and directory', () => {

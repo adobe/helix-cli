@@ -160,6 +160,7 @@ module.exports = function deploy() {
         .withAddStrain(argv.add)
         .withMinify(argv.minify)
         .withResolveGitRefService(argv.svcResolveGitRef)
+        .withCustomPipeline(argv.customPipeline)
         .run();
     },
 

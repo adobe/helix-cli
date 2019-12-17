@@ -31,6 +31,7 @@ class PackageCommand extends AbstractCommand {
     this._requiredModules = null;
     this._onlyModified = false;
     this._enableMinify = false;
+    this._customPipeline = null;
   }
 
   // eslint-disable-next-line class-methods-use-this
@@ -65,6 +66,11 @@ class PackageCommand extends AbstractCommand {
 
   withRequiredModules(mods) {
     this._requiredModules = mods;
+    return this;
+  }
+
+  withCustomPipeline(customPipeline) {
+    this._customPipeline = customPipeline;
     return this;
   }
 
@@ -194,6 +200,7 @@ class PackageCommand extends AbstractCommand {
       .withFiles(this._files)
       .withModulePaths(this._modulePaths)
       .withRequiredModules(this._requiredModules)
+      .withCustomPipeline(this._customPipeline)
       .withTargetDir(this._target);
     await build.run();
     this._modulePaths = build.modulePaths;

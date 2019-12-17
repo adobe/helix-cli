@@ -57,6 +57,7 @@ module.exports = function pack() {
         .withFiles(argv.files)
         .withOnlyModified(!argv.force)
         .withMinify(argv.minify)
+        .withCustomPipeline(argv.customPipeline)
         .run();
     },
   };

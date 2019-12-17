@@ -58,6 +58,7 @@ class DeployCommand extends AbstractCommand {
     this._addStrain = null;
     this._enableMinify = false;
     this._resolveGitRefSvc = 'helix-services/resolve-git-ref@v1';
+    this._customPipeline = null;
   }
 
   get requireConfigFile() {
@@ -161,6 +162,11 @@ class DeployCommand extends AbstractCommand {
 
   withResolveGitRefService(value) {
     this._resolveGitRefSvc = value;
+    return this;
+  }
+
+  withCustomPipeline(customPipeline) {
+    this._customPipeline = customPipeline;
     return this;
   }
 
@@ -364,6 +370,7 @@ Alternatively you can auto-add one using the {grey --add <name>} option.`);
         .withRequiredModules(this._requiredModules)
         .withDirectory(this.directory)
         .withOnlyModified(this._createPackages === 'auto')
+        .withCustomPipeline(this._customPipeline)
         .withMinify(this._enableMinify);
       await pgkCommand.run();
     }

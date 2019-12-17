@@ -27,9 +27,10 @@ describe('hlx deploy', () => {
   // mocked command instance
   let mockDeploy;
   let stubs;
+  let deleted;
 
   beforeEach(() => {
-    clearHelixEnv();
+    deleted = clearHelixEnv();
     mockDeploy = sinon.createStubInstance(DeployCommand);
     mockDeploy.withEnableAuto.returnsThis();
     mockDeploy.withCircleciAuth.returnsThis();
@@ -49,6 +50,7 @@ describe('hlx deploy', () => {
     mockDeploy.withAddStrain.returnsThis();
     mockDeploy.withMinify.returnsThis();
     mockDeploy.withResolveGitRefService.returnsThis();
+    mockDeploy.withCustomPipeline.returnsThis();
     mockDeploy.run.returnsThis();
 
     // disable static functions as well to avoid shelljs executions.
@@ -61,6 +63,11 @@ describe('hlx deploy', () => {
 
   afterEach(() => {
     clearHelixEnv();
+    // restore env
+    Object.keys(deleted).forEach((key) => {
+      process.env[key] = deleted[key];
+    });
+
     stubs.forEach((s) => {
       s.restore();
     });
