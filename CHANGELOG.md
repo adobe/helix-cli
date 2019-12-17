@@ -1,3 +1,10 @@
+# [6.2.0](https://github.com/adobe/helix-cli/compare/v6.1.1...v6.2.0) (2019-12-17)
+
+
+### Features
+
+* **tests:** Tests should accept a specific pipeline version (git repo) as a parameter ([#1243](https://github.com/adobe/helix-cli/issues/1243)) ([d976aea](https://github.com/adobe/helix-cli/commit/d976aead20f95a5f455c742a86fbe82cdc0c8801))
+
 ## [6.1.1](https://github.com/adobe/helix-cli/compare/v6.1.0...v6.1.1) (2019-12-02)
 
 
