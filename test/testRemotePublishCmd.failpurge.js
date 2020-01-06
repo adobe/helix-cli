@@ -47,7 +47,7 @@ describe('hlx publish --remote (fail purge)', () => {
     nock.activate();
 
     scope = nock('https://adobeioruntime.net')
-      .post('/api/v1/web/helix/helix-services/publish@v2')
+      .post('/api/v1/web/helix/helix-services/publish@v3')
       .reply(200, {})
       .post('/api/v1/web/helix/helix-services/logging@v1')
       .reply(200, {});
