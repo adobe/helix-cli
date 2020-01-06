@@ -1,3 +1,20 @@
+# [7.0.0](https://github.com/adobe/helix-cli/compare/v6.2.0...v7.0.0) (2020-01-06)
+
+
+### Bug Fixes
+
+* **dependencies:** npm audit fix ([9ffcc16](https://github.com/adobe/helix-cli/commit/9ffcc16e10489b57f967bc5306ed14d485ff9959))
+
+
+### Features
+
+* **publish:** use new v3 publish service with dynamic defaults ([7431a24](https://github.com/adobe/helix-cli/commit/7431a24bb450e386e7fc07c57c253b6f1f6c3552)), closes [adobe/helix-publish#264](https://github.com/adobe/helix-publish/issues/264)
+
+
+### BREAKING CHANGES
+
+* **publish:** the new version has support for dynamic defaults
+
 # [6.2.0](https://github.com/adobe/helix-cli/compare/v6.1.1...v6.2.0) (2019-12-17)
 
 
