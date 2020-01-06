@@ -130,7 +130,7 @@ class ModuleHelper {
     }
   }
 
-  async installModule(name) {
+  async installModule(name, descriptor) {
     const cwd = process.cwd();
     try {
       shell.cd(this._buildDir);
@@ -145,10 +145,13 @@ class ModuleHelper {
       if (await fse.pathExists(path.resolve(this._buildDir, 'package-lock.json'))) {
         cmd = 'ci';
       }
-      this.log.info(chalk`Running {grey npm ${cmd} ${name}} in {grey ${path.relative(this.directory, this._buildDir)}} ...`);
+
+      const moduleDescriptor = descriptor || name;
+
+      this.log.info(chalk`Running {grey npm ${cmd} ${moduleDescriptor}} in {grey ${path.relative(this.directory, this._buildDir)}} ...`);
       // todo: maye use npm API instead, so that we can show a nice progress bar.
       // todo: since stderr is not a TTY when executed with shelljs, we don't see it.
-      await execAsync(`npm ${cmd} --only=prod --prefer-offline --ignore-scripts --no-bin-links --no-audit --save-exact --loglevel ${loglevel} --no-fund --progress true ${name}`);
+      await execAsync(`npm ${cmd} --only=prod --prefer-offline --ignore-scripts --no-bin-links --no-audit --save-exact --loglevel ${loglevel} --no-fund --progress true ${moduleDescriptor}`);
     } catch (e) {
       throw Error(`Unable to install ${name}: ${e}`);
     } finally {
@@ -156,12 +159,12 @@ class ModuleHelper {
     }
   }
 
-  async ensureModule(name) {
+  async ensureModule(name, descriptor) {
     const { log } = this;
     let info = await this.getModuleInfo(name);
     if (!info) {
       log.info(chalk`Module {yellow ${name}} not found.`);
-      await this.installModule(name);
+      await this.installModule(name, descriptor);
     }
     info = await this.getModuleInfo(name);
     if (!info) {
@@ -172,7 +175,7 @@ class ModuleHelper {
 
   async ensureModules(names) {
     // todo: invoke npm with all required modules at once
-    return Promise.all(names.map((mod) => this.ensureModule(mod)));
+    return Promise.all(names.map((mod) => this.ensureModule(mod.name, mod.descriptor)));
   }
 }
 

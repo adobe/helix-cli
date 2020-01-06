@@ -19,6 +19,7 @@ const shell = require('shelljs');
 const path = require('path');
 const fse = require('fs-extra');
 const sinon = require('sinon');
+const { clearHelixEnv } = require('./utils.js');
 const pkgJson = require('../package.json');
 const CLI = require('../src/cli.js');
 
@@ -33,7 +34,19 @@ function runCLI(...args) {
 }
 
 describe('hlx command line', () => {
+  let deleted;
+
+  beforeEach(() => {
+    deleted = clearHelixEnv();
+  });
+
   afterEach(() => {
+    clearHelixEnv();
+    // restore env
+    Object.keys(deleted).forEach((key) => {
+      process.env[key] = deleted[key];
+    });
+
     shell.cd(cwd);
   });
 

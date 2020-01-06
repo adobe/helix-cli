@@ -56,6 +56,7 @@ describe('Integration test for up command with helix pages', function suite() {
       .withTargetDir(buildDir)
       .withDirectory(testDir)
       .withHelixPagesRepo(helixPagesRepo)
+      .withCustomPipeline(process.env.HLX_CUSTOM_PIPELINE)
       .withHttpPort(0);
 
     const myDone = (err) => {

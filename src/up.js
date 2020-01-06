@@ -108,6 +108,7 @@ module.exports = function up() {
         // only open browser window when executable is `hlx`
         // this prevents the window to be opened during integration tests
         .withOpen(argv.open && path.basename(argv.$0) === 'hlx')
+        .withCustomPipeline(argv.customPipeline)
         .run();
     },
   };

@@ -39,9 +39,12 @@ function initGit(dir, remote) {
 }
 
 function clearHelixEnv() {
+  const deleted = {};
   Object.keys(process.env).filter((key) => key.startsWith('HLX_')).forEach((key) => {
+    deleted[key] = process.env[key];
     delete process.env[key];
   });
+  return deleted;
 }
 
 function assertFile(p, expectMissing) {
@@ -192,7 +195,7 @@ async function getTestModules() {
       .withModulePaths([]);
 
     await moduleHelper.init();
-    await moduleHelper.ensureModule('@adobe/helix-pipeline');
+    await moduleHelper.ensureModule('@adobe/helix-pipeline', process.env.HLX_CUSTOM_PIPELINE || '@adobe/helix-pipeline@latest');
   }
   return path.resolve(testModules, 'node_modules');
 }

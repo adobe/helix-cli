@@ -25,9 +25,10 @@ const UpCommand = require('../src/up.cmd');
 describe('hlx up', () => {
   // mocked command instance
   let mockUp;
+  let deleted;
 
   beforeEach(() => {
-    clearHelixEnv();
+    deleted = clearHelixEnv();
     mockUp = sinon.createStubInstance(UpCommand);
     mockUp.withTargetDir.returnsThis();
     mockUp.withFiles.returnsThis();
@@ -38,11 +39,16 @@ describe('hlx up', () => {
     mockUp.withLocalRepo.returnsThis();
     mockUp.withDevDefault.returnsThis();
     mockUp.withGithubToken.returnsThis();
+    mockUp.withCustomPipeline.returnsThis();
     mockUp.run.returnsThis();
   });
 
   afterEach(() => {
     clearHelixEnv();
+    // restore env
+    Object.keys(deleted).forEach((key) => {
+      process.env[key] = deleted[key];
+    });
   });
 
   it('hlx up runs w/o arguments', () => {

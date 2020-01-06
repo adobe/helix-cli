@@ -39,6 +39,7 @@ module.exports = function build() {
       await executor
         .withTargetDir(argv.target)
         .withFiles(argv.files)
+        .withCustomPipeline(argv.customPipeline)
         .run();
     },
   };

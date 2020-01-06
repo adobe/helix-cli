@@ -24,9 +24,10 @@ const CleanCommand = require('../src/clean.cmd');
 describe('hlx clean', () => {
   // mocked command instance
   let mockClean;
+  let deleted;
 
   beforeEach(() => {
-    clearHelixEnv();
+    deleted = clearHelixEnv();
     mockClean = sinon.createStubInstance(CleanCommand);
     mockClean.withTargetDir.returnsThis();
     mockClean.run.returnsThis();
@@ -34,6 +35,10 @@ describe('hlx clean', () => {
 
   afterEach(() => {
     clearHelixEnv();
+    // restore env
+    Object.keys(deleted).forEach((key) => {
+      process.env[key] = deleted[key];
+    });
   });
 
   it('hlx clean runs w/o arguments', () => {

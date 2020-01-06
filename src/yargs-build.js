@@ -17,6 +17,12 @@ module.exports = function commonArgs(yargs) {
       default: '.hlx/build',
       describe: 'Target directory for compiled JS',
     })
+    .option('custom-pipeline', {
+      alias: 'customPipeline',
+      describe: 'Specify the pipeline to use, string representing a npm install dependency',
+      type: 'string',
+      default: '',
+    })
     .positional('files', {
       describe: 'The template files to compile',
       default: ['src/**/*.htl', 'src/**/*.js', 'src/**/*.jsx', 'cgi-bin/**/*.js'],

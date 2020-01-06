@@ -20,7 +20,9 @@ const NodeHttpAdapter = require('@pollyjs/adapter-node-http');
 const FSPersister = require('@pollyjs/persister-fs');
 const { setupMocha: setupPolly } = require('@pollyjs/core');
 const { HelixConfig, Logger } = require('@adobe/helix-shared');
-const { initGit, createTestRoot, getTestModules } = require('./utils.js');
+const {
+  assertFile, initGit, createTestRoot, getTestModules,
+} = require('./utils.js');
 const GitUtils = require('../src/git-utils');
 const DeployCommand = require('../src/deploy.cmd.js');
 
@@ -583,6 +585,116 @@ describe('hlx deploy (Integration)', () => {
       // expected
       assert.equal(String(e), 'Error');
     }
+  });
+});
+
+describe('hlx deploy (custom pipeline)', function suite() {
+  this.timeout(60000);
+
+  let testRoot;
+  let hlxDir;
+  let buildDir;
+  let cwd;
+
+  setupPolly({
+    recordFailedRequests: true,
+    recordIfMissing: false,
+    logging: false,
+    adapters: [NodeHttpAdapter],
+    persister: FSPersister,
+    persisterOptions: {
+      fs: {
+        recordingsDir: path.resolve(__dirname, 'fixtures/recordings'),
+      },
+    },
+    matchRequestsBy: {
+      body: false,
+      headers: {
+        exclude: ['content-length', 'user-agent'],
+      },
+    },
+  });
+
+  beforeEach(async function beforeEach() {
+    testRoot = await createTestRoot();
+    hlxDir = path.resolve(testRoot, '.hlx');
+    buildDir = path.resolve(hlxDir, 'build');
+
+    cwd = process.cwd();
+
+    // ignore requests by snyk runtime agent
+    this.polly.server.any('https://homebase.snyk.io/*').passthrough();
+
+    this.polly.server.any().on('beforeResponse', (req) => {
+      // don't record the authorization header
+      req.removeHeaders(['authorization']);
+    });
+  });
+
+  afterEach(async () => {
+    $.cd(cwd);
+    await fs.remove(testRoot);
+  });
+
+  it('Deploy (dry-running) installs a default pipeline', async () => {
+    await fs.copy(TEST_DIR, testRoot);
+    await fs.rename(path.resolve(testRoot, 'default-config.yaml'), path.resolve(testRoot, 'helix-config.yaml'));
+    initGit(testRoot, 'git@github.com:adobe/project-helix.io.git');
+    const logger = Logger.getTestLogger();
+
+    await new DeployCommand(logger)
+      .withDirectory(testRoot)
+      .withWskHost('adobeioruntime.net')
+      .withWskAuth('secret-key')
+      .withWskNamespace('hlx')
+      .withEnableAuto(false)
+      .withEnableDirty(false)
+      .withDryRun(true)
+      .withTarget(buildDir)
+      .withFiles([
+        path.resolve(testRoot, 'src/html.htl'),
+        path.resolve(testRoot, 'src/html.pre.js'),
+        path.resolve(testRoot, 'src/helper.js'),
+        path.resolve(testRoot, 'src/utils/another_helper.js'),
+        path.resolve(testRoot, 'src/third_helper.js'),
+      ])
+      .withMinify(false)
+      .run();
+
+    const pipelinePackageJson = path.resolve(buildDir, 'node_modules', '@adobe/helix-pipeline', 'package.json');
+    assertFile(pipelinePackageJson);
+  });
+
+  it('Deploy (dry-running) installs a the correct custom pipeline', async () => {
+    await fs.copy(TEST_DIR, testRoot);
+    await fs.rename(path.resolve(testRoot, 'default-config.yaml'), path.resolve(testRoot, 'helix-config.yaml'));
+    initGit(testRoot, 'git@github.com:adobe/project-helix.io.git');
+    const logger = Logger.getTestLogger();
+
+    await new DeployCommand(logger)
+      .withDirectory(testRoot)
+      .withWskHost('adobeioruntime.net')
+      .withWskAuth('secret-key')
+      .withWskNamespace('hlx')
+      .withEnableAuto(false)
+      .withEnableDirty(false)
+      .withDryRun(true)
+      .withTarget(buildDir)
+      .withFiles([
+        path.resolve(testRoot, 'src/html.htl'),
+        path.resolve(testRoot, 'src/html.pre.js'),
+        path.resolve(testRoot, 'src/helper.js'),
+        path.resolve(testRoot, 'src/utils/another_helper.js'),
+        path.resolve(testRoot, 'src/third_helper.js'),
+      ])
+      .withMinify(false)
+      .withCustomPipeline('@adobe/helix-pipeline@1.0.0')
+      .run();
+
+    const pipelinePackageJson = path.resolve(buildDir, 'node_modules', '@adobe/helix-pipeline', 'package.json');
+    assertFile(pipelinePackageJson);
+    const pkg = await fs.readJson(pipelinePackageJson);
+    assert.equal(pkg.version, '1.0.0');
   });
 });
 

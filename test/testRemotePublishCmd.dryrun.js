@@ -23,9 +23,10 @@ describe('hlx publish --remote --dry-run (default)', () => {
   let RemotePublishCommand;
   let writeDictItem;
   let purgeAll;
+  let deleted;
 
   before('Setting up Fake Server', function bef() {
-    clearHelixEnv();
+    deleted = clearHelixEnv();
     this.timeout(5000);
     writeDictItem = sinon.fake.resolves(true);
     purgeAll = sinon.fake.resolves(true);
@@ -36,6 +37,14 @@ describe('hlx publish --remote --dry-run (default)', () => {
         writeDictItem,
         purgeAll,
       }),
+    });
+  });
+
+  after('Reset environment', () => {
+    clearHelixEnv();
+    // restore env
+    Object.keys(deleted).forEach((key) => {
+      process.env[key] = deleted[key];
     });
   });
 
