@@ -39,6 +39,7 @@ describe('Integration test for up command', function suite() {
   let buildDir;
   let testRoot;
   let testModules;
+  let pollyError;
 
   setupPolly({
     recordFailedRequests: true,
@@ -62,7 +63,11 @@ describe('Integration test for up command', function suite() {
     this.polly.server.any()
       .filter((req) => req.headers.host.startsWith('localhost') || req.headers.host.startsWith('127.0.0.1'))
       .passthrough();
+    this.polly.server.any().on('error', () => {
+      pollyError = Error('Polly error');
+    });
 
+    pollyError = null;
     testRoot = await createTestRoot();
     testDir = path.resolve(testRoot, 'project');
     buildDir = path.resolve(testRoot, '.hlx/build');
@@ -155,7 +160,7 @@ describe('Integration test for up command', function suite() {
         }
       })
       .on('stopped', () => {
-        done(error);
+        done(error || pollyError);
       })
       .run()
       .catch(done);
