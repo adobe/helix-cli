@@ -1,3 +1,10 @@
+## [7.0.2](https://github.com/adobe/helix-cli/compare/v7.0.1...v7.0.2) (2020-01-10)
+
+
+### Bug Fixes
+
+* **publish:** use correct default version (v3) for publish API ([#1258](https://github.com/adobe/helix-cli/issues/1258)) ([ca49f20](https://github.com/adobe/helix-cli/commit/ca49f208dc78a297d1c7cfe71a99f3f777838d0c)), closes [#1254](https://github.com/adobe/helix-cli/issues/1254) [#1254](https://github.com/adobe/helix-cli/issues/1254)
+
 ## [7.0.1](https://github.com/adobe/helix-cli/compare/v7.0.0...v7.0.1) (2020-01-07)
 
 
