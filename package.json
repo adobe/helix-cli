@@ -32,8 +32,8 @@
   "dependencies": {
     "@adobe/fastly-native-promises": "^1.12.0",
     "@adobe/helix-shared": "3.3.0",
-    "@adobe/helix-simulator": "2.17.9",
-    "@adobe/htlengine": "3.2.8",
+    "@adobe/helix-simulator": "2.17.10",
+    "@adobe/htlengine": "3.3.0",
     "@babel/core": "^7.7.0",
     "@babel/plugin-transform-react-jsx": "^7.7.0",
     "archiver": "^3.1.1",
@@ -64,7 +64,7 @@
   },
   "devDependencies": {
     "@adobe/eslint-config-helix": "1.1.0",
-    "@adobe/helix-testutils": "0.2.0",
+    "@adobe/helix-testutils": "0.3.0",
     "@pollyjs/adapter-fetch": "3.0.1",
     "@pollyjs/adapter-node-http": "3.0.2",
     "@pollyjs/core": "3.0.0",
