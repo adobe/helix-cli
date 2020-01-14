@@ -12,7 +12,7 @@ The Helix Command Line Interface allows web developers to create, develop, and d
 
 ## Installation
 
-Install `hlx` as a global command. You need Node 8.9 or newer.
+Install `hlx` as a global command. You need Node 10.13 or newer.
 
 ```bash
 $ npm install -g @adobe/helix-cli
@@ -173,10 +173,10 @@ strains:
     static: https://github.com/adobe/project-helix.io.git/htdocs#master
 ```
 
-The same core configuration options (`repo`, `ref`, `root`, and `owner`) are supported for `static` as for `content`. 
+The same core configuration options (`repo`, `ref`, `root`, and `owner`) are supported for `static` as for `content`.
 
-After your next deployment with `hlx publish`, all static content will be served out of the 
-directory `htdocs`. None of this will be visible in the URL, so that no visitor will ever see 
+After your next deployment with `hlx publish`, all static content will be served out of the
+directory `htdocs`. None of this will be visible in the URL, so that no visitor will ever see
 _htdocs_ in the URL. `https://example.com/favico.ico` would be served from `$REPO/htdocs/favico.ico`.
 
 ## Matching Strains to URLs
@@ -204,11 +204,11 @@ strains:
 
 ## Mixing old and new Content
 
-Helix can run old and new versions of the same site side by side, and even intermixed. This allows you to gradually upgrade to using Helix. 
+Helix can run old and new versions of the same site side by side, and even intermixed. This allows you to gradually upgrade to using Helix.
 
 If you want to serve content from another origin server, just add the property `origin` to any strain. `code`, `content`, `directoryIndex`, and most other properties will then be ignored, as all content for that strain will be retrieved from the URL specified in `origin`.
 
-You are still able to set strain `conditions` or assign traffic to a strain based on the `url` property. 
+You are still able to set strain `conditions` or assign traffic to a strain based on the `url` property.
 
 ```yaml
 strains:
@@ -317,10 +317,10 @@ strains:
 
 Usually, when invoking `hlx up` without any arguments, the Helix Development Server will serve the
 content directly from GitHub. This is not suitable for local development. Also, the `api` strain
-will never be selected, because the `localhost:3000` host header will not match the specified `url` 
+will never be selected, because the `localhost:3000` host header will not match the specified `url`
 condition.
 
-Starting the server with:  
+Starting the server with:
 
 ```
 $ hlx up --host=www.project-helix.io
@@ -340,7 +340,7 @@ projects/
     └── index.md
 ```
 
-We can now launch the server with the respective `--local-repo` arguments: 
+We can now launch the server with the respective `--local-repo` arguments:
 
 ```
 $ hlx up --host=www.project-helix.io --local-repo=. --local-repo=../welcome-api
@@ -348,7 +348,7 @@ $ hlx up --host=www.project-helix.io --local-repo=. --local-repo=../welcome-api
 
 Now the server will transiently reconfigure the strains, so that the emulated repositories are used.
 
-> **Note**: If you turn on `--log-level=debug` you should see log entries for the emulated repositories:   
+> **Note**: If you turn on `--log-level=debug` you should see log entries for the emulated repositories:
 ```
 [hlx] debug: git emulating https://github.com/helix/welcome.git via http://127.0.0.1:52270/helix/github.com--helix--welcome.git#master from './'
 [hlx] debug: git emulating https://github.com/helix/welcome-api.git via http://127.0.0.1:52270/helix/github.com--helix-welcome-api.git#master from '../welcome-api'
@@ -408,7 +408,7 @@ If the site does not meet all performance criteria you have defined, `hlx perf` 
   * `GalaxyS5`
   * `iPad`
   * `iPadPro`
-* Possible `connection` values are: 
+* Possible `connection` values are:
   * `regular2G`
   * `good2G`
   * `slow3G`
@@ -468,7 +468,7 @@ You can set performance budgets against following scores (more is better) and me
 
 #### Structured (JUnit) Performance Reporting
 
-By calling `hlx perf` with the option `--junit <file>`, the performance test 
+By calling `hlx perf` with the option `--junit <file>`, the performance test
 results will be reported in JUnit-format, which makes it possible to integrate
 performance result reporting with the CI system performing an automated deployment.
 
@@ -509,7 +509,7 @@ JavaScript is the universal language that powers Helix and you can use it in a w
 
 A JavaScript template functions is a step in the Helix rendering Pipeline that takes the current [`context`](https://github.com/adobe/helix-pipeline/blob/master/docs/context.schema.md) and sets the `context`'s [`response.body`](https://github.com/adobe/helix-pipeline/blob/master/docs/response.schema.md#body). It is a full-powered (serverless) JavaScript function, so you can do whatever you want, include any NPM module that's useful, as long as the function is fast enough to be executed within a couple of seconds.
 
-JavaScript template functions are found in files that are follow the naming pattern `src/${extension}.js` or `src/${selector}_${extension}.js`, for instance `src/html.js` or `src/footer_html.js`. Only a number of `extension`s are allowed, including `html`, `json`, `txt`, `xml`, `svg`, and `css`. 
+JavaScript template functions are found in files that are follow the naming pattern `src/${extension}.js` or `src/${selector}_${extension}.js`, for instance `src/html.js` or `src/footer_html.js`. Only a number of `extension`s are allowed, including `html`, `json`, `txt`, `xml`, `svg`, and `css`.
 
 A minimal functional JavaScript template function must export a `main` function and should set the `context`'s [`response.body`](https://github.com/adobe/helix-pipeline/blob/master/docs/response.schema.md#body) property.
 

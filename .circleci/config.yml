@@ -1,9 +1,9 @@
 version: 2.1
 executors:
-  node8:
+  node10:
     docker:
-    # use latest node 8 on debian 8 (jessie)
-    - image: circleci/node:8-jessie
+    # use latest node 10 on debian (jessie)
+    - image: circleci/node:10-stretch
     environment:
       NPM_CONFIG_PREFIX: ~/.npm-global
 
@@ -15,8 +15,8 @@ commands:
         keys:
         - v4-dependencies-{{ arch }}-{{ checksum "package-lock.json" }}
     - run:
-        name: install npm 6.4.1
-        command: sudo npm -g install npm@6.4.1
+        name: install npm 6.13.4
+        command: sudo npm -g install npm@6.13.4
     - run:
         name: Installing Dependencies
         command: npm ci
@@ -64,7 +64,7 @@ jobs:
 
   build:
     parallelism: 4
-    executor: node8
+    executor: node10
     working_directory: ~/repo
 
     steps:
@@ -93,7 +93,7 @@ jobs:
         path: junit
 
   release:
-    executor: node8
+    executor: node10
     working_directory: ~/repo
 
     steps:
@@ -107,7 +107,7 @@ jobs:
         command: npm run semantic-release
 
   forkwarning:
-    executor: node8
+    executor: node10
     working_directory: ~/repo
 
     steps:
