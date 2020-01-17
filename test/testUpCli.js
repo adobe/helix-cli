@@ -75,6 +75,7 @@ describe('hlx up', () => {
     sinon.assert.calledWith(mockUp.withHttpPort, 1234);
     sinon.assert.calledWith(mockUp.withLocalRepo, ['.', '../foo-content', '../bar-content']);
     sinon.assert.calledOnce(mockUp.run);
+    sinon.assert.calledWith(mockUp.withDevDefault, { SECRET1: 'VALUE1', SECRET2: 5000 });
   });
 
   it('hlx up fails with non env extra argument', () => {

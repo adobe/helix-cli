@@ -29,6 +29,16 @@ module.exports = function commonArgs(yargs, options) {
           }
           return p;
         }, {});
+      } else if (length === 1 && typeof argv[0] === 'string' && argv[0][0] === '{') {
+        // This indicates environment variable has been set
+        try {
+          return JSON.parse(argv);
+        } catch (e) {
+          throw new Error(
+            `HLX_DEV_DEFAULT env variable is not in proper JSON format, i.e:
+             HLX_DEV_DEFAULT='{"KEY1":5000, "KEY2":"VALUE2"}'`,
+          );
+        }
       } else if (length) {
         throw new Error(`${options.name} needs an even number of parameters, think key-value pairs`);
       }

@@ -84,7 +84,7 @@ $ hlx deploy \
   --fastly-namespace <serviceid>
 ```
 
-As always, you can keep all parameters in `HLX_CIRCLECI_AUTH`, `HLX_WSK_AUTH`, and `HLX_FASTLY_AUTH` environment variables if you don't want them in your `.bash_history`.
+As always, you can keep all parameters in `HLX_CIRCLECI_AUTH`, `HLX_WSK_AUTH`, `HLX_DEV_DEFAULT` and `HLX_FASTLY_AUTH` environment variables if you don't want them in your `.bash_history`.
 
 ### One-Shot Deployment
 
@@ -283,6 +283,10 @@ action parameters as needed. For example, to configure request timeouts:
 ```
 $ hlx up --dev-default HTTP_TIMEOUT 2000
 ```
+
+Developers can pass additional action parameters by setting the
+`HLX_DEV_DEFAULT` environment variable. This must fulfill JSON string formatting; 
+i.e `$HLX_DEV_DEFAULT='{"KEY1":5000, "KEY2":"VALUE2"}'`
 
 For a list of known parameters, see [the Helix Pipeline Configuration Parameters documentation](https://github.com/adobe/helix-pipeline/blob/master/docs/secrets.schema.md#secrets-properties)
 
