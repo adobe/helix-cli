@@ -240,4 +240,28 @@ describe('hlx up', () => {
         '--dev-default', 'HTTP_PIMEOUT', 2000, 'HTTP_QIMEOUT']);
     assert.fail('hlx up should fail when called with an uneven number of arguments');
   });
+
+  it('hlx up fails with bad JSON string formatting', () => {
+    let failed = false;
+    new CLI()
+      .withCommandExecutor('up', mockUp)
+      .onFail(() => {
+        failed = true;
+      })
+      .run(['up', '--dev-default', '{NoQuotes:Value, "quotes":5000}']);
+
+    assert.equal(failed, true);
+  });
+
+  it('hlx up passes with good JSON string formatting', () => {
+    let failed = false;
+    new CLI()
+      .withCommandExecutor('up', mockUp)
+      .onFail(() => {
+        failed = true;
+      })
+      .run(['up', '--dev-default', '\'{"KEY1":5000, "KEY2":"VALUE2"}\'']);
+
+    assert.equal(failed, false);
+  });
 });
