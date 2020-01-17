@@ -1,3 +1,10 @@
+# [7.1.0](https://github.com/adobe/helix-cli/compare/v7.0.6...v7.1.0) (2020-01-17)
+
+
+### Features
+
+* **cli:** dev-defaults can be set with env vars ([#1270](https://github.com/adobe/helix-cli/issues/1270)) ([3ae6c9a](https://github.com/adobe/helix-cli/commit/3ae6c9a3b488ac461d278bb217d4034d184b5a5a)), closes [#1266](https://github.com/adobe/helix-cli/issues/1266)
+
 ## [7.0.6](https://github.com/adobe/helix-cli/compare/v7.0.5...v7.0.6) (2020-01-15)
 
 
