@@ -1,3 +1,10 @@
+## [7.1.1](https://github.com/adobe/helix-cli/compare/v7.1.0...v7.1.1) (2020-01-20)
+
+
+### Bug Fixes
+
+* **deps:** update external ([#1271](https://github.com/adobe/helix-cli/issues/1271)) ([46ea3d3](https://github.com/adobe/helix-cli/commit/46ea3d38f3d5e88d7afacb76812fd6633a2f70fb))
+
 # [7.1.0](https://github.com/adobe/helix-cli/compare/v7.0.6...v7.1.0) (2020-01-17)
 
 
