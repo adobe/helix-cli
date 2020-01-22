@@ -42,6 +42,8 @@ class RemotePublishCommand extends AbstractCommand {
     this._vcl = null;
     this._dispatchVersion = null;
     this._purge = 'soft';
+    this._algoliaAppID = null;
+    this._algoliaAPIKey = null;
   }
 
   tick(ticks = 1, message, name) {
@@ -130,6 +132,16 @@ class RemotePublishCommand extends AbstractCommand {
 
   withDebugKey(value) {
     this._debug_key = value;
+    return this;
+  }
+
+  withAlgoliaAppID(value) {
+    this._algoliaAppID = value;
+    return this;
+  }
+
+  withAlgoliaAPIKey(value) {
+    this._algoliaAPIKey = value;
     return this;
   }
 

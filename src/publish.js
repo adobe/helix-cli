@@ -85,6 +85,16 @@ module.exports = function strain() {
           default: '',
           type: 'string',
         })
+        .option('algolia-app-id', {
+          alias: 'algoliaAppID',
+          describe: 'Algolia Application ID for query proxying',
+          type: 'string',
+        })
+        .option('algolia-api-key', {
+          alias: 'algoliaAPIKey',
+          describe: 'Algolia (search-only) API Key for query proxying',
+          type: 'string',
+        })
         .conflicts('only', 'exclude')
         .demandOption(
           'fastly-auth',
@@ -133,6 +143,8 @@ module.exports = function strain() {
         .withCustomVCLs(argv.customVCL)
         .withDispatchVersion(argv.dispatchVersion)
         .withPurge(argv.purge)
+        .withAlgoliaAppID(argv.withAlgoliaAppID)
+        .withAlgoliaAPIKey(argv.withAlgoliaAPIKey)
         .run();
     },
   };
