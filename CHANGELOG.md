@@ -1,3 +1,10 @@
+# [7.2.0](https://github.com/adobe/helix-cli/compare/v7.1.1...v7.2.0) (2020-01-22)
+
+
+### Features
+
+* **logging:** use helix-log ([#1250](https://github.com/adobe/helix-cli/issues/1250)) ([9b74c62](https://github.com/adobe/helix-cli/commit/9b74c62eafdd6148dfe605d44f97bad43e041b1a))
+
 ## [7.1.1](https://github.com/adobe/helix-cli/compare/v7.1.0...v7.1.1) (2020-01-20)
 
 
