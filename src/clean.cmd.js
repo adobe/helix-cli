@@ -13,7 +13,7 @@
 const path = require('path');
 const fse = require('fs-extra');
 const chalk = require('chalk');
-const { makeLogger } = require('./log-common');
+const { getOrCreateLogger } = require('./log-common');
 
 async function clean(dir, logger) {
   if (!await fse.pathExists(dir)) {
@@ -29,7 +29,7 @@ async function clean(dir, logger) {
 
 
 class CleanCommand {
-  constructor(logger = makeLogger()) {
+  constructor(logger = getOrCreateLogger()) {
     this._logger = logger;
     this._cwd = process.cwd();
     this._target = null;

@@ -17,7 +17,7 @@ const path = require('path');
 const proxyquire = require('proxyquire');
 const sinon = require('sinon');
 const assert = require('assert');
-const { Logger } = require('@adobe/helix-shared');
+const { logging } = require('@adobe/helix-testutils');
 const { clearHelixEnv } = require('./utils.js');
 
 const EXPECTED_BODY = {
@@ -120,7 +120,7 @@ describe('hlx publish --remote (default)', () => {
           { 'content-type': 'application/json' },
         ];
       });
-    const logger = Logger.getTestLogger();
+    const logger = logging.createTestLogger();
     const remote = await new RemotePublishCommand(logger)
       .withWskAuth('fakeauth')
       .withWskNamespace('fakename')
@@ -139,7 +139,7 @@ describe('hlx publish --remote (default)', () => {
     sinon.assert.callCount(writeDictItem, 4);
     sinon.assert.calledOnce(purgeAll);
 
-    const log = await logger.getOutput();
+    const log = logger.getOutput();
     const idx0 = log.indexOf('Updated the purge-configuration of the following repositories');
     const idx1 = log.indexOf('The purge-configuration of following repositories were not updated due to errors');
     const idx2 = log.indexOf('The following repositories are referenced by strains but don\'t have the helix-bot setup');
@@ -175,7 +175,7 @@ describe('hlx publish --remote (default)', () => {
           { 'content-type': 'application/json' },
         ];
       });
-    const logger = Logger.getTestLogger();
+    const logger = logging.createTestLogger();
     const remote = await new RemotePublishCommand(logger)
       .withWskAuth('fakeauth')
       .withWskNamespace('fakename')
@@ -193,7 +193,7 @@ describe('hlx publish --remote (default)', () => {
     sinon.assert.callCount(writeDictItem, 4);
     sinon.assert.calledOnce(purgeAll);
 
-    const log = await logger.getOutput();
+    const log = logger.getOutput();
     const idx0 = log.indexOf('Updated the purge-configuration of the following repositories');
     const idx1 = log.indexOf('The purge-configuration of following repositories were not updated due to errors');
     const idx2 = log.indexOf('The following repositories are referenced by strains but don\'t have the helix-bot setup');
@@ -217,7 +217,7 @@ describe('hlx publish --remote (default)', () => {
           { 'content-type': 'application/json' },
         ];
       });
-    const logger = Logger.getTestLogger();
+    const logger = logging.createTestLogger();
     const remote = await new RemotePublishCommand(logger)
       .withWskAuth('fakeauth')
       .withWskNamespace('fakename')
@@ -235,7 +235,7 @@ describe('hlx publish --remote (default)', () => {
     sinon.assert.callCount(writeDictItem, 4);
     sinon.assert.calledOnce(purgeAll);
 
-    const log = await logger.getOutput();
+    const log = logger.getOutput();
     const idx0 = log.indexOf('Updated the purge-configuration of the following repositories');
     const idx1 = log.indexOf('The purge-configuration of following repositories were not updated due to errors');
     const idx2 = log.indexOf('The following repositories are referenced by strains but don\'t have the helix-bot setup');
@@ -278,7 +278,7 @@ describe('hlx publish --remote (default)', () => {
           { 'content-type': 'application/json' },
         ];
       });
-    const logger = Logger.getTestLogger();
+    const logger = logging.createTestLogger();
     const remote = await new RemotePublishCommand(logger)
       .withWskAuth('fakeauth')
       .withWskNamespace('fakename')
@@ -296,7 +296,7 @@ describe('hlx publish --remote (default)', () => {
     sinon.assert.callCount(writeDictItem, 4);
     sinon.assert.calledOnce(purgeAll);
 
-    const log = await logger.getOutput();
+    const log = logger.getOutput();
     const idx0 = log.indexOf('Updated the purge-configuration of the following repositories');
     const idx1 = log.indexOf('The purge-configuration of following repositories were not updated due to errors');
     const idx2 = log.indexOf('The following repositories are referenced by strains but don\'t have the helix-bot setup');
@@ -322,7 +322,7 @@ describe('hlx publish --remote (default)', () => {
           }),
         ];
       });
-    const logger = Logger.getTestLogger();
+    const logger = logging.createTestLogger();
     const remote = await new RemotePublishCommand(logger)
       .withWskAuth('fakeauth')
       .withWskNamespace('fakename')
@@ -366,7 +366,7 @@ describe('hlx publish --remote (default)', () => {
           { 'content-type': 'application/json' },
         ];
       });
-    const logger = Logger.getTestLogger();
+    const logger = logging.createTestLogger();
     const remote = await new RemotePublishCommand(logger)
       .withWskAuth('fakeauth')
       .withWskNamespace('fakename')
@@ -384,7 +384,7 @@ describe('hlx publish --remote (default)', () => {
     sinon.assert.callCount(writeDictItem, 4);
     sinon.assert.calledOnce(purgeAll);
 
-    const log = await logger.getOutput();
+    const log = logger.getOutput();
 
     const idx0 = log.indexOf('Updated the purge-configuration of the following repositories');
     const idx1 = log.indexOf('The purge-configuration of following repositories were not updated due to errors');
@@ -441,7 +441,7 @@ describe('hlx publish --remote (default)', () => {
           { 'content-type': 'application/json' },
         ];
       });
-    const logger = Logger.getTestLogger();
+    const logger = logging.createTestLogger();
     const remote = await new RemotePublishCommand(logger)
       .withWskAuth('fakeauth')
       .withWskNamespace('fakename')
@@ -459,7 +459,7 @@ describe('hlx publish --remote (default)', () => {
     sinon.assert.callCount(writeDictItem, 4);
     sinon.assert.calledOnce(purgeAll);
 
-    const log = await logger.getOutput();
+    const log = logger.getOutput();
 
     const idx0 = log.indexOf('Updated the purge-configuration of the following repositories');
     const idx1 = log.indexOf('The purge-configuration of following repositories were not updated due to errors');

@@ -15,7 +15,7 @@
 const assert = require('assert');
 const fs = require('fs-extra');
 const path = require('path');
-const { Logger } = require('@adobe/helix-shared');
+const { logging } = require('@adobe/helix-testutils');
 const {
   createTestRoot, assertFile, assertZipEntries, getTestModules,
 } = require('./utils.js');
@@ -111,7 +111,7 @@ describe('hlx package (Integration)', () => {
 
   // todo: fix
   it.skip('package reports bundling errors and warnings', async () => {
-    const logger = Logger.getTestLogger();
+    const logger = logging.createTestLogger();
     await new PackageCommand(logger)
       .withDirectory(testRoot)
       .withTarget(buildDir)
@@ -122,7 +122,7 @@ describe('hlx package (Integration)', () => {
       .withMinify(false)
       .run();
 
-    const log = await logger.getOutput();
+    const log = logger.getOutput();
     assert.ok(/Module not found: Error: Can't resolve 'does-not-exist'/.test(log));
     assert.ok(/Critical dependency: the request of a dependency is an expression/.test(log));
   }).timeout(60000);

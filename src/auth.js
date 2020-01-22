@@ -14,7 +14,7 @@
 
 /* eslint global-require: off */
 
-const { makeLogger } = require('./log-common.js');
+const { getOrCreateLogger } = require('./log-common.js');
 
 module.exports = function auth() {
   let executor;
@@ -40,7 +40,7 @@ module.exports = function auth() {
       if (!executor) {
         // eslint-disable-next-line global-require
         const BuildCommand = require('./auth.cmd'); // lazy load the handler to speed up execution time
-        executor = new BuildCommand(makeLogger(argv));
+        executor = new BuildCommand(getOrCreateLogger(argv));
       }
 
       await executor

@@ -12,7 +12,7 @@
 
 'use strict';
 
-const { makeLogger } = require('./log-common.js');
+const { getOrCreateLogger } = require('./log-common.js');
 
 module.exports = function perf() {
   let executor;
@@ -106,7 +106,7 @@ module.exports = function perf() {
       if (!executor) {
         // eslint-disable-next-line global-require
         const PerfCommand = require('./perf.cmd'); // lazy load the handler to speed up execution time
-        executor = new PerfCommand(makeLogger(argv));
+        executor = new PerfCommand(getOrCreateLogger(argv));
       }
 
       await executor

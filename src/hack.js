@@ -12,7 +12,7 @@
 
 /* eslint global-require: off */
 
-const { makeLogger } = require('./log-common.js');
+const { getOrCreateLogger } = require('./log-common.js');
 
 module.exports = function hack() {
   let executor;
@@ -40,7 +40,7 @@ module.exports = function hack() {
       if (!executor) {
         // eslint-disable-next-line global-require
         const HackCommand = require('./hack.cmd'); // lazy load the handler to speed up execution time
-        executor = new HackCommand(makeLogger(argv));
+        executor = new HackCommand(getOrCreateLogger(argv));
         executor.withHackathon(argv.hackathon);
         executor.withOpen(argv.open);
       }

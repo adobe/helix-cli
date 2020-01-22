@@ -16,7 +16,7 @@ const yargsOpenwhisk = require('./yargs-openwhisk.js');
 const yargsFastly = require('./yargs-fastly.js');
 const yargsBuild = require('./yargs-build.js');
 const yargsParams = require('./yargs-params.js');
-const { makeLogger } = require('./log-common.js');
+const { getOrCreateLogger } = require('./log-common.js');
 
 module.exports = function deploy() {
   let executor;
@@ -138,7 +138,7 @@ module.exports = function deploy() {
       if (!executor) {
         // eslint-disable-next-line global-require
         const DeployCommand = require('./deploy.cmd'); // lazy load the handler to speed up execution time
-        executor = new DeployCommand(makeLogger(argv));
+        executor = new DeployCommand(getOrCreateLogger(argv));
       }
 
       await executor

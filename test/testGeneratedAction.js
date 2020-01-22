@@ -17,7 +17,7 @@ const path = require('path');
 const NodeHttpAdapter = require('@pollyjs/adapter-node-http');
 const FSPersister = require('@pollyjs/persister-fs');
 const { setupMocha: setupPolly } = require('@pollyjs/core');
-const { Logger } = require('@adobe/helix-shared');
+const { logging } = require('@adobe/helix-testutils');
 const {
   processSource, getTestModules, requireWithPaths,
 } = require('./utils');
@@ -140,7 +140,7 @@ describe('Generated Action Tests', () => {
 
       it('script can be executed', async () => {
         const script = requireWithPaths(distJS, testModules);
-        const logger = Logger.getTestLogger();
+        const logger = logging.createTestLogger();
         const spy = sinon.spy(logger, 'debug');
         const testParams = {
           ...params,

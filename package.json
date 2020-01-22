@@ -31,8 +31,9 @@
   },
   "dependencies": {
     "@adobe/fastly-native-promises": "^1.12.0",
-    "@adobe/helix-shared": "4.0.1",
-    "@adobe/helix-simulator": "2.17.11",
+    "@adobe/helix-shared": "5.0.0",
+    "@adobe/helix-log": "4.4.2",
+    "@adobe/helix-simulator": "3.0.1",
     "@adobe/htlengine": "3.3.0",
     "@babel/core": "^7.7.0",
     "@babel/plugin-transform-react-jsx": "^7.7.0",

@@ -15,14 +15,14 @@
 const EventEmitter = require('events');
 const chalk = require('chalk');
 const { HelixConfig } = require('@adobe/helix-shared');
-const { makeLogger } = require('./log-common');
+const { getOrCreateLogger } = require('./log-common');
 const ConfigUtils = require('./config/config-utils.js');
 
 class AbstractCommand extends EventEmitter {
   constructor(logger) {
     super();
     this._initialized = false;
-    this._logger = logger || makeLogger();
+    this._logger = logger || getOrCreateLogger();
     this._helixConfig = new HelixConfig().withLogger(this._logger);
   }
 

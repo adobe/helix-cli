@@ -17,7 +17,7 @@ const nock = require('nock');
 const path = require('path');
 const proxyquire = require('proxyquire');
 const sinon = require('sinon');
-const { Logger } = require('@adobe/helix-shared');
+const { logging } = require('@adobe/helix-testutils');
 const { clearHelixEnv } = require('./utils.js');
 
 describe('hlx publish --remote (default)', () => {
@@ -130,7 +130,7 @@ describe('hlx publish --remote (default)', () => {
       .post('/api/v1/web/helix/helix-services/publish@v2')
       .reply(200, {});
 
-    const logger = Logger.getTestLogger();
+    const logger = logging.createTestLogger();
     const remote = await new RemotePublishCommand(logger)
       .withWskAuth('fakeauth')
       .withWskNamespace('fakename')
@@ -146,7 +146,7 @@ describe('hlx publish --remote (default)', () => {
     sinon.assert.callCount(writeDictItem, 4);
     sinon.assert.calledOnce(softPurgeKey);
 
-    const log = await logger.getOutput();
+    const log = logger.getOutput();
     assert.ok(/Remote addlogger service failed/.test(log));
 
     scope.done();

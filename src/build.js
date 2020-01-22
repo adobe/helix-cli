@@ -15,7 +15,7 @@
 /* eslint global-require: off */
 
 const yargsBuild = require('./yargs-build.js');
-const { makeLogger } = require('./log-common.js');
+const { getOrCreateLogger } = require('./log-common.js');
 
 module.exports = function build() {
   let executor;
@@ -33,7 +33,7 @@ module.exports = function build() {
       if (!executor) {
         // eslint-disable-next-line global-require
         const BuildCommand = require('./build.cmd'); // lazy load the handler to speed up execution time
-        executor = new BuildCommand(makeLogger(argv));
+        executor = new BuildCommand(getOrCreateLogger(argv));
       }
 
       await executor
