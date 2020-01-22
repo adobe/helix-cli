@@ -307,6 +307,8 @@ ${e}`);
       }
     }
     const body = {
+      indexconfig: this.indexConfig.toJSON(),
+      algoliaappid: this._algoliaAppID,
       configuration: this.config.toJSON(),
       service: this._fastly_namespace,
       token: this._fastly_auth,
@@ -343,6 +345,14 @@ ${e}`);
     if (this._wsk_namespace) {
       const namespace = this._fastly.writeDictItem(this._version, 'secrets', 'OPENWHISK_NAMESPACE', this._wsk_namespace);
       jobs.push(namespace);
+    }
+    if (this._algoliaAPIKey) {
+      const apikey = this._fastly.writeDictItem(this._version, 'secrets', 'ALGOLIA_API_KEY', this._algoliaAPIKey);
+      jobs.push(apikey);
+    }
+    if (this._algoliaAppID) {
+      const appid = this._fastly.writeDictItem(this._version, 'secrets', 'ALGOLIA_APP_ID', this._algoliaAppID);
+      jobs.push(appid);
     }
     const token = this._fastly.writeDictItem(this._version, 'secrets', 'GITHUB_TOKEN', this._githubToken);
     jobs.push(token);
