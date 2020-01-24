@@ -62,6 +62,8 @@ describe('hlx publish --remote (default)', () => {
       .withFastlyAuth('fake_auth')
       .withFastlyNamespace('fake_name')
       .withWskHost('doesn.t.matter')
+      .withAlgoliaAppID('fake_id')
+      .withAlgoliaAPIKey('fake_key')
       .withPublishAPI('https://adobeioruntime.net/api/v1/web/helix/helix-services/publish@v2')
       .withDebugKey('something')
       .withConfigFile(path.resolve(__dirname, 'fixtures/deployed.yaml'))
@@ -69,13 +71,13 @@ describe('hlx publish --remote (default)', () => {
       .withDryRun(false);
     await remote.run();
 
-    sinon.assert.callCount(writeDictItem, 4);
+    sinon.assert.callCount(writeDictItem, 6);
     sinon.assert.calledOnce(softPurgeKey);
 
     scope.done();
   });
 
-  it.only('publishing sends expected parameters', async () => {
+  it('publishing sends expected parameters', async () => {
     let publishBody;
     const scope = nock('https://adobeioruntime.net')
       .post('/api/v1/web/helix/helix-services/publish@v3', (body) => {
