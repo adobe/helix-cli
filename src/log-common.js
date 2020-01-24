@@ -107,7 +107,7 @@ function getOrCreateLogger(config = 'cli') {
   }
 
   // setup helix logger
-  const level = (config && config.level) || (this && this.level) || 'info';
+  const level = (config && config.logLevel) || 'info';
   const logsDir = path.normalize((config && config.logsDir) || 'logs');
   const logFiles = config && Array.isArray(config.logFile)
     ? config.logFile
