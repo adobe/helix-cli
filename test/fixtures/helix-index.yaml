@@ -1,0 +1,42 @@
+version: 1
+indices:
+  blog-posts:
+    source: html
+    fetch: https://${repo}-${owner}.project-helix.page/${path}
+    properties:
+      author:
+        select: main > div:nth-of-type(3) > p:nth-of-type(1)
+        value: |
+          ${match('by (.*)')}
+        faceted: true
+      title:
+        select: h1:first-of-type
+        value: |
+          ${textContent()}
+      date:
+        select: main > div:nth-of-type(3) > p:nth-of-type(2)
+        value: |
+          ${parseTimestamp('[POSTED ON] MM-DD-YYYY')}
+      topics:
+        select: main > div:last-of-type > p:first-of-type
+        values: |
+          ${match('(Topics: )? ([^,]+)')}
+        faceted: true
+      hero:
+        select: main > div > img:first-of-type
+        value: |
+          ${attribute('src')}
+    queries:
+      fresh:
+        query: "*"
+        hitsPerPage: 25
+      all:
+        query: "*"
+        hitsPerPage: 25
+        cache: 600
+      by-author:
+        parameters: author
+        query: "*"
+        filters: |
+          author:${author}
+        cache: "300"
