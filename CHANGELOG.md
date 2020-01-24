@@ -1,3 +1,10 @@
+## [7.2.4](https://github.com/adobe/helix-cli/compare/v7.2.3...v7.2.4) (2020-01-24)
+
+
+### Bug Fixes
+
+* **cli:** use correct parameter to initialize the log level ([#1278](https://github.com/adobe/helix-cli/issues/1278)) ([1794b93](https://github.com/adobe/helix-cli/commit/1794b9336da519e8e1c8a0eb53bd94c5130e800b)), closes [#1276](https://github.com/adobe/helix-cli/issues/1276)
+
 ## [7.2.3](https://github.com/adobe/helix-cli/compare/v7.2.2...v7.2.3) (2020-01-24)
 
 
