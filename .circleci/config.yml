@@ -2,8 +2,7 @@ version: 2.1
 executors:
   node10:
     docker:
-    # use latest node 10 on debian (jessie)
-    - image: circleci/node:10-stretch
+    - image: circleci/node:10-buster
     environment:
       NPM_CONFIG_PREFIX: ~/.npm-global
 
@@ -15,8 +14,8 @@ commands:
         keys:
         - v4-dependencies-{{ arch }}-{{ checksum "package-lock.json" }}
     - run:
-        name: install npm 6.13.4
-        command: sudo npm -g install npm@6.13.4
+        name: install latest npm
+        command: sudo npm -g install npm
     - run:
         name: Installing Dependencies
         command: npm ci
