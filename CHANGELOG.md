@@ -1,3 +1,10 @@
+## [7.2.5](https://github.com/adobe/helix-cli/compare/v7.2.4...v7.2.5) (2020-01-27)
+
+
+### Bug Fixes
+
+* **log:** ensure progress bar uses log correctly ([#1281](https://github.com/adobe/helix-cli/issues/1281)) ([1890994](https://github.com/adobe/helix-cli/commit/18909942c108da00dbffa81c5487384934abd33e)), closes [#1280](https://github.com/adobe/helix-cli/issues/1280)
+
 ## [7.2.4](https://github.com/adobe/helix-cli/compare/v7.2.3...v7.2.4) (2020-01-24)
 
 
