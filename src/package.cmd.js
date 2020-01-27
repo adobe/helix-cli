@@ -96,10 +96,8 @@ class PackageCommand extends AbstractCommand {
         action: name ? `packaging ${shortname}` : '',
       });
       if (message) {
-        this.log.maybe({
+        this.log.infoFields(message, {
           progress: true,
-          level: 'info',
-          message,
         });
       }
     };

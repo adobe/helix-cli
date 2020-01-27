@@ -401,10 +401,8 @@ Alternatively you can auto-add one using the {grey --add <name>} option.`);
         action: name ? `deploying ${name}` : '',
       });
       if (message) {
-        this.log.log({
+        this.log.infoFields(message, {
           progress: true,
-          level: 'info',
-          message,
         });
       }
     };
