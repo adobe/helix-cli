@@ -3,6 +3,6 @@ coverage
 logs
 test
 docs
-demos
 test-results.xml
-.*
+/*.tgz
+/.*
