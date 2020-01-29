@@ -143,8 +143,8 @@ module.exports = function strain() {
         .withCustomVCLs(argv.customVCL)
         .withDispatchVersion(argv.dispatchVersion)
         .withPurge(argv.purge)
-        .withAlgoliaAppID(argv.withAlgoliaAppID)
-        .withAlgoliaAPIKey(argv.withAlgoliaAPIKey)
+        .withAlgoliaAppID(argv.algoliaAppId)
+        .withAlgoliaAPIKey(argv.algoliaApiKey)
         .run();
     },
   };
