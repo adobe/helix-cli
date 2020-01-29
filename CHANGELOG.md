@@ -1,3 +1,10 @@
+## [7.3.1](https://github.com/adobe/helix-cli/compare/v7.3.0...v7.3.1) (2020-01-29)
+
+
+### Bug Fixes
+
+* **publish:** fix parameter passing for publish ([4e6110d](https://github.com/adobe/helix-cli/commit/4e6110d2d3de7434d3653a676501d17fd8fd06fb))
+
 # [7.3.0](https://github.com/adobe/helix-cli/compare/v7.2.5...v7.3.0) (2020-01-29)
 
 
