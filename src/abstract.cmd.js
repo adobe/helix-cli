@@ -14,7 +14,7 @@
 
 const EventEmitter = require('events');
 const chalk = require('chalk');
-const { HelixConfig } = require('@adobe/helix-shared');
+const { HelixConfig, IndexConfig } = require('@adobe/helix-shared');
 const { getOrCreateLogger } = require('./log-common');
 const ConfigUtils = require('./config/config-utils.js');
 
@@ -24,10 +24,12 @@ class AbstractCommand extends EventEmitter {
     this._initialized = false;
     this._logger = logger || getOrCreateLogger();
     this._helixConfig = new HelixConfig().withLogger(this._logger);
+    this._indexConfig = new IndexConfig().withLogger(this._logger);
   }
 
   withDirectory(dir) {
     this._helixConfig.withDirectory(dir);
+    this._indexConfig.withDirectory(dir);
     return this;
   }
 
@@ -49,11 +51,20 @@ class AbstractCommand extends EventEmitter {
     return this;
   }
 
+  withIndexConfigFile(file) {
+    this._indexConfig.withConfigPath(file);
+    return this;
+  }
+
   get config() {
     if (!this._initialized) {
       throw Error('illegal access to #config before initialized');
     }
     return this._helixConfig;
+  }
+
+  get indexConfig() {
+    return this._indexConfig;
   }
 
   async init() {
@@ -68,6 +79,7 @@ class AbstractCommand extends EventEmitter {
           this._helixConfig.withSource(await ConfigUtils.createDefaultConfig(this.directory));
         }
       }
+      await this._indexConfig.init();
       await this._helixConfig.init();
       this._initialized = true;
     }
@@ -82,6 +94,11 @@ class AbstractCommand extends EventEmitter {
       .withLogger(this._helixConfig.log)
       .withConfigPath(this._helixConfig.configPath)
       .withDirectory(this._helixConfig.directory)
+      .init());
+    this._indexConfig = await (new IndexConfig()
+      .withLogger(this._indexConfig.log)
+      .withConfigPath(this._indexConfig.configPath)
+      .withDirectory(this._indexConfig.directory)
       .init());
     return this;
   }
