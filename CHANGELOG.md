@@ -1,3 +1,15 @@
+# [7.3.0](https://github.com/adobe/helix-cli/compare/v7.2.5...v7.3.0) (2020-01-29)
+
+
+### Features
+
+* **config:** load `helix-query.yaml` on start ([7834b39](https://github.com/adobe/helix-cli/commit/7834b39ab4f91b66d00090d9ef834e5aecd54531))
+* **config:** load `helix-query.yaml` on start ([d07a476](https://github.com/adobe/helix-cli/commit/d07a476763891253d94adb6c19305cd6ed4c8cc4))
+* **publish:** add CLI options for Algolia API Key and Algolia App ID ([b2d2143](https://github.com/adobe/helix-cli/commit/b2d214341fb6af77c7cebda2eefaefa8785cb20e))
+* **publish:** add CLI options for Algolia API Key and Algolia App ID ([ef31edb](https://github.com/adobe/helix-cli/commit/ef31edb23afd72d23a3ffe18ba1dee795968c945))
+* **publish:** send index config to helix-publish service ([f87a400](https://github.com/adobe/helix-cli/commit/f87a400567608b03f6313f6126db3ef48e9050cd))
+* **publish:** send index config to helix-publish service ([ab837cf](https://github.com/adobe/helix-cli/commit/ab837cf858215d13810b013a27301936abf4476a))
+
 ## [7.2.5](https://github.com/adobe/helix-cli/compare/v7.2.4...v7.2.5) (2020-01-27)
 
 
