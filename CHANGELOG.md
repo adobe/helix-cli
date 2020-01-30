@@ -1,3 +1,10 @@
+## [7.3.2](https://github.com/adobe/helix-cli/compare/v7.3.1...v7.3.2) (2020-01-30)
+
+
+### Bug Fixes
+
+* **.npmignore:** revert some changes which broke 'hlx demo' ([#1287](https://github.com/adobe/helix-cli/issues/1287)) ([6bb6d87](https://github.com/adobe/helix-cli/commit/6bb6d87c9e78074caf5aa2f2b34f58703e90d0b4)), closes [#1285](https://github.com/adobe/helix-cli/issues/1285)
+
 ## [7.3.1](https://github.com/adobe/helix-cli/compare/v7.3.0...v7.3.1) (2020-01-29)
 
 
