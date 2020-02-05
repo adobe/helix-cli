@@ -1,3 +1,10 @@
+## [7.3.3](https://github.com/adobe/helix-cli/compare/v7.3.2...v7.3.3) (2020-02-05)
+
+
+### Bug Fixes
+
+* **deps:** update [@adobe](https://github.com/adobe) ([#1289](https://github.com/adobe/helix-cli/issues/1289)) ([5f1b54c](https://github.com/adobe/helix-cli/commit/5f1b54ca0be1d7c4176fb53075d2df4b373be232))
+
 ## [7.3.2](https://github.com/adobe/helix-cli/compare/v7.3.1...v7.3.2) (2020-01-30)
 
 
