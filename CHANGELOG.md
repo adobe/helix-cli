@@ -1,3 +1,10 @@
+## [7.3.7](https://github.com/adobe/helix-cli/compare/v7.3.6...v7.3.7) (2020-02-13)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @adobe/helix-simulator to v3.1.0 ([#1298](https://github.com/adobe/helix-cli/issues/1298)) ([1a15de3](https://github.com/adobe/helix-cli/commit/1a15de32645a0a9e0b55b368d92b1c1b44832e2e))
+
 ## [7.3.6](https://github.com/adobe/helix-cli/compare/v7.3.5...v7.3.6) (2020-02-12)
 
 
