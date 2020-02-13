@@ -1,3 +1,15 @@
+# [7.4.0](https://github.com/adobe/helix-cli/compare/v7.3.7...v7.4.0) (2020-02-13)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @adobe/helix-simulator to v3.1.1 ([#1300](https://github.com/adobe/helix-cli/issues/1300)) ([fd58006](https://github.com/adobe/helix-cli/commit/fd580065725be51b6904b3fa1c0cd87784044f97))
+
+
+### Features
+
+* **up:** hlx up: add optional parameters --algolia-app-id, --algolia-api-key ([#1295](https://github.com/adobe/helix-cli/issues/1295)) ([#1299](https://github.com/adobe/helix-cli/issues/1299)) ([95ccc77](https://github.com/adobe/helix-cli/commit/95ccc77c4340ba8f9d237e809a5f728fe7aa83db))
+
 ## [7.3.7](https://github.com/adobe/helix-cli/compare/v7.3.6...v7.3.7) (2020-02-13)
 
 
