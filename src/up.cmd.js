@@ -32,6 +32,8 @@ class UpCommand extends BuildCommand {
     this._localRepos = [];
     this._devDefault = {};
     this._githubToken = '';
+    this._algoliaAppID = null;
+    this._algoliaAPIKey = null;
   }
 
   withHttpPort(p) {
@@ -75,6 +77,16 @@ class UpCommand extends BuildCommand {
 
   withGithubToken(value) {
     this._githubToken = value;
+    return this;
+  }
+
+  withAlgoliaAppID(value) {
+    this._algoliaAppID = value;
+    return this;
+  }
+
+  withAlgoliaAPIKey(value) {
+    this._algoliaAPIKey = value;
     return this;
   }
 
@@ -183,10 +195,17 @@ class UpCommand extends BuildCommand {
       this._devDefault.GITHUB_TOKEN = this._githubToken;
     }
 
+    // algolia default credentials
+    const ALGOLIA_APP_ID = 'A8PL9E4TZT';
+    const ALGOLIA_API_KEY = '3934d5173a5fedf1cb7c619a6a26f300';
+
     this._project = new HelixProject()
       .withCwd(this.directory)
       .withBuildDir(this._target)
       .withHelixConfig(this.config)
+      .withIndexConfig(this.indexConfig)
+      .withAlgoliaAppID(this._algoliaAppID || ALGOLIA_APP_ID)
+      .withAlgoliaAPIKey(this._algoliaAPIKey || ALGOLIA_API_KEY)
       .withActionParams(this._devDefault)
       .withRuntimeModulePaths(module.paths);
 

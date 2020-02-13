@@ -15,6 +15,7 @@
 const yargsOpenwhisk = require('./yargs-openwhisk.js');
 const yargsFastly = require('./yargs-fastly.js');
 const yargsGithub = require('./yargs-github.js');
+const yargsAlgolia = require('./yargs-algolia.js');
 const { getOrCreateLogger } = require('./log-common.js');
 
 module.exports = function strain() {
@@ -30,6 +31,7 @@ module.exports = function strain() {
       yargsOpenwhisk(yargs);
       yargsFastly(yargs);
       yargsGithub(yargs);
+      yargsAlgolia(yargs);
       yargs
         .option('dry-run', {
           alias: 'dryRun',
@@ -83,16 +85,6 @@ module.exports = function strain() {
           alias: 'debugKey',
           describe: 'The key to enable the X-Debug header (default is the fastly service id)',
           default: '',
-          type: 'string',
-        })
-        .option('algolia-app-id', {
-          alias: 'algoliaAppID',
-          describe: 'Algolia Application ID for query proxying',
-          type: 'string',
-        })
-        .option('algolia-api-key', {
-          alias: 'algoliaAPIKey',
-          describe: 'Algolia (search-only) API Key for query proxying',
           type: 'string',
         })
         .conflicts('only', 'exclude')
