@@ -40,6 +40,8 @@ describe('hlx up', () => {
     mockUp.withDevDefault.returnsThis();
     mockUp.withGithubToken.returnsThis();
     mockUp.withCustomPipeline.returnsThis();
+    mockUp.withAlgoliaAppID.returnsThis();
+    mockUp.withAlgoliaAPIKey.returnsThis();
     mockUp.run.returnsThis();
   });
 
@@ -263,5 +265,14 @@ describe('hlx up', () => {
       .run(['up', '--dev-default', '\'{"KEY1":5000, "KEY2":"VALUE2"}\'']);
 
     assert.equal(failed, false);
+  });
+
+  it('hlx up with --algolia-app-id and --algolia-api-key works', () => {
+    new CLI()
+      .withCommandExecutor('up', mockUp)
+      .run(['up', '--algolia-app-id', 'fake-app-id', '--algolia-api-key', 'fake-api-key']);
+    sinon.assert.calledWith(mockUp.withAlgoliaAppID, 'fake-app-id');
+    sinon.assert.calledWith(mockUp.withAlgoliaAPIKey, 'fake-api-key');
+    sinon.assert.calledOnce(mockUp.run);
   });
 });

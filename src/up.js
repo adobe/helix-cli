@@ -17,6 +17,7 @@ const path = require('path');
 const yargsBuild = require('./yargs-build.js');
 const yargsParams = require('./yargs-params.js');
 const yargsGithub = require('./yargs-github.js');
+const yargsAlgolia = require('./yargs-algolia.js');
 const { getOrCreateLogger } = require('./log-common.js');
 
 module.exports = function up() {
@@ -30,6 +31,7 @@ module.exports = function up() {
     builder: (yargs) => {
       yargsBuild(yargs);
       yargsGithub(yargs);
+      yargsAlgolia(yargs);
       yargsParams(yargs, {
         name: 'dev-default',
         describe: 'Additional action parameters',
@@ -109,6 +111,8 @@ module.exports = function up() {
         // this prevents the window to be opened during integration tests
         .withOpen(argv.open && path.basename(argv.$0) === 'hlx')
         .withCustomPipeline(argv.customPipeline)
+        .withAlgoliaAppID(argv.algoliaAppID)
+        .withAlgoliaAPIKey(argv.algoliaAPIKey)
         .run();
     },
   };
