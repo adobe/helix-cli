@@ -1,3 +1,10 @@
+# [7.5.0](https://github.com/adobe/helix-cli/compare/v7.4.2...v7.5.0) (2020-02-18)
+
+
+### Features
+
+* **up.cmd.js:** watch helix-query.yaml and restart on modification ([#1307](https://github.com/adobe/helix-cli/issues/1307)) ([0e73a63](https://github.com/adobe/helix-cli/commit/0e73a6313ef5ceaa82b258c8d9a529527bc031f4)), closes [#1301](https://github.com/adobe/helix-cli/issues/1301)
+
 ## [7.4.2](https://github.com/adobe/helix-cli/compare/v7.4.1...v7.4.2) (2020-02-18)
 
 
