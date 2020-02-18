@@ -1,3 +1,10 @@
+## [7.4.1](https://github.com/adobe/helix-cli/compare/v7.4.0...v7.4.1) (2020-02-14)
+
+
+### Bug Fixes
+
+* **deps:** update [@adobe](https://github.com/adobe) ([2491bb6](https://github.com/adobe/helix-cli/commit/2491bb6ff585ab337bcc5baaf41824e2f0b0c8d3))
+
 # [7.4.0](https://github.com/adobe/helix-cli/compare/v7.3.7...v7.4.0) (2020-02-13)
 
 
