@@ -21,6 +21,7 @@ const BuildCommand = require('./build.cmd');
 const pkgJson = require('../package.json');
 
 const HELIX_CONFIG = 'helix-config.yaml';
+const HELIX_QUERY = 'helix-query.yaml';
 
 class UpCommand extends BuildCommand {
   constructor(logger) {
@@ -119,7 +120,7 @@ class UpCommand extends BuildCommand {
     let timer = null;
     let modifiedFiles = {};
 
-    this._watcher = chokidar.watch(['src', 'cgi-bin', HELIX_CONFIG], {
+    this._watcher = chokidar.watch(['src', 'cgi-bin', HELIX_CONFIG, HELIX_QUERY], {
       ignored: /(.*\.swx|.*\.swp|.*~)/,
       persistent: true,
       ignoreInitial: true,
@@ -318,8 +319,10 @@ access remote content and to deploy helix. Consider running
     this.on('buildEnd', onBuildEnd);
 
     this._initSourceWatcher(async (files) => {
-      if (HELIX_CONFIG in files) {
-        this.log.info(`${HELIX_CONFIG} modified. Restarting dev server...`);
+      const dirtyConfigFiles = Object.keys(files || {})
+        .filter((f) => f === HELIX_CONFIG || f === HELIX_QUERY);
+      if (dirtyConfigFiles.length) {
+        this.log.info(`${dirtyConfigFiles.join(', ')} modified. Restarting dev server...`);
         await this._project.stop();
         await this.reloadConfig();
         this._project.withHelixConfig(this.config);
