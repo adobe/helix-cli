@@ -33,7 +33,7 @@
     "@adobe/fastly-native-promises": "^1.15.0",
     "@adobe/helix-log": "4.5.0",
     "@adobe/helix-shared": "5.2.1",
-    "@adobe/helix-simulator": "3.1.2",
+    "@adobe/helix-simulator": "3.1.4",
     "@adobe/htlengine": "3.3.1",
     "@babel/core": "^7.8.3",
     "@babel/plugin-transform-react-jsx": "^7.8.3",
