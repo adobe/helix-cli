@@ -138,7 +138,14 @@ describe('Generated Action Tests', () => {
         assert.equal(typeof script.main, 'function');
       });
 
-      it('script can be executed', async () => {
+      it('script can be executed', async function test() {
+        this.polly.configure({
+          matchRequestsBy: {
+            headers: {
+              exclude: ['connection', 'accept', 'accept-encoding', 'user-agent'],
+            },
+          },
+        });
         const script = requireWithPaths(distJS, testModules);
         const logger = logging.createTestLogger();
         const spy = sinon.spy(logger, 'debug');
