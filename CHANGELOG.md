@@ -1,3 +1,10 @@
+## [7.5.2](https://github.com/adobe/helix-cli/compare/v7.5.1...v7.5.2) (2020-02-25)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @adobe/helix-log to v4.5.1 ([a3c80b4](https://github.com/adobe/helix-cli/commit/a3c80b478074a6b25b3d732f488c8237e8cd54cd))
+
 ## [7.5.1](https://github.com/adobe/helix-cli/compare/v7.5.0...v7.5.1) (2020-02-24)
 
 
