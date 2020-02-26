@@ -1,3 +1,10 @@
+## [7.5.12](https://github.com/adobe/helix-cli/compare/v7.5.11...v7.5.12) (2020-02-26)
+
+
+### Bug Fixes
+
+* **deps:** update [@adobe](https://github.com/adobe) ([469c1aa](https://github.com/adobe/helix-cli/commit/469c1aa520952953fd4db88020217973f8c56303))
+
 ## [7.5.11](https://github.com/adobe/helix-cli/compare/v7.5.10...v7.5.11) (2020-02-26)
 
 
