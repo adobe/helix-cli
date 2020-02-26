@@ -1,3 +1,10 @@
+## [7.5.9](https://github.com/adobe/helix-cli/compare/v7.5.8...v7.5.9) (2020-02-26)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @adobe/htlengine to v4.1.1 ([cb027e9](https://github.com/adobe/helix-cli/commit/cb027e954237c7486e01ae833ae7f4945bce50bf))
+
 ## [7.5.8](https://github.com/adobe/helix-cli/compare/v7.5.7...v7.5.8) (2020-02-26)
 
 
