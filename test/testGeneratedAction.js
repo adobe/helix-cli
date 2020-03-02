@@ -97,6 +97,7 @@ describe('Generated Action Tests', () => {
       let testRoot;
 
       setupPolly({
+        recordFailedRequests: true,
         recordIfMissing: false,
         logging: false,
         adapters: [NodeHttpAdapter],
@@ -109,6 +110,7 @@ describe('Generated Action Tests', () => {
       });
 
       before(`Run builder programmatically on ${testScript.name}`, async () => {
+        process.env.HELIX_PIPELINE_FORCE_HTTP1 = true;
         ({ distHtmlJS: distJS, distHtmlHtl: distHtl, testRoot } = await processSource(
           testScript.name,
           testScript.type,
@@ -117,6 +119,7 @@ describe('Generated Action Tests', () => {
       });
 
       after(async () => {
+        delete process.env.HELIX_PIPELINE_FORCE_HTTP1;
         await fs.remove(testRoot);
       });
 
