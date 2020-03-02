@@ -60,6 +60,7 @@ describe('Integration test for up command', function suite() {
   });
 
   beforeEach(async function beforeEach() {
+    process.env.HELIX_PIPELINE_FORCE_HTTP1 = true;
     this.polly.server.any()
       .filter((req) => req.headers.host.startsWith('localhost') || req.headers.host.startsWith('127.0.0.1'))
       .passthrough();
@@ -75,6 +76,7 @@ describe('Integration test for up command', function suite() {
   });
 
   afterEach(async () => {
+    delete process.env.HELIX_PIPELINE_FORCE_HTTP1;
     await fse.remove(testRoot);
   });
 
