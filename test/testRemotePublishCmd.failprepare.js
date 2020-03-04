@@ -47,7 +47,7 @@ describe('hlx publish --remote (fail prepare service config)', () => {
     nock.activate();
 
     scope = nock('https://adobeioruntime.net')
-      .post('/api/v1/web/helix/helix-services/publish@v3')
+      .post('/api/v1/web/helix/helix-services/publish@v4')
       .reply(400, {});
   });
 
