@@ -1,3 +1,15 @@
+# [8.0.0](https://github.com/adobe/helix-cli/compare/v7.5.15...v8.0.0) (2020-03-04)
+
+
+### Features
+
+* **publish:** full condition support with helix-publish@v4 ([63968f9](https://github.com/adobe/helix-cli/commit/63968f90004e8fd2be1a35f97efd94b7ae9b1ffe)), closes [#1328](https://github.com/adobe/helix-cli/issues/1328)
+
+
+### BREAKING CHANGES
+
+* **publish:** This change introduces full support for the new YAML-based conditions language. At the same time, VCL-based conditions (strings) can no longer be used.
+
 ## [7.5.15](https://github.com/adobe/helix-cli/compare/v7.5.14...v7.5.15) (2020-03-03)
 
 
