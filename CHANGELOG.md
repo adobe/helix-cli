@@ -1,3 +1,10 @@
+## [8.0.2](https://github.com/adobe/helix-cli/compare/v8.0.1...v8.0.2) (2020-03-06)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @adobe/helix-simulator to v4.1.1 ([2f259ba](https://github.com/adobe/helix-cli/commit/2f259ba65da6fe91abe62237819414fd973bef62))
+
 ## [8.0.1](https://github.com/adobe/helix-cli/compare/v8.0.0...v8.0.1) (2020-03-06)
 
 
