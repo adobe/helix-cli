@@ -8,12 +8,18 @@
             "type": "node",
             "request": "attach",
             "name": "Attach",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
             "port": 9229
         },
         {
             "type": "node",
             "request": "launch",
             "name": "Mocha All",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
             "program": "${workspaceFolder}/node_modules/mocha/bin/_mocha",
             "args": [
                 "--timeout",
@@ -28,6 +34,9 @@
             "type": "node",
             "request": "launch",
             "name": "Mocha Current File",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
             "program": "${workspaceFolder}/node_modules/mocha/bin/_mocha",
             "args": [
                 "--timeout",
@@ -42,6 +51,9 @@
             "type": "node",
             "request": "launch",
             "name": "Launch 'hlx up'",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
             "program": "${workspaceFolder}/index.js",
             "args":[
                 "up"
