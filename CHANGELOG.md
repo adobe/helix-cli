@@ -1,3 +1,10 @@
+# [8.1.0](https://github.com/adobe/helix-cli/compare/v8.0.2...v8.1.0) (2020-03-07)
+
+
+### Features
+
+* port to isomorphic-git v1 ([#1334](https://github.com/adobe/helix-cli/issues/1334)) ([ea426f2](https://github.com/adobe/helix-cli/commit/ea426f281169be12f00ece672d339d7a61b377b2)), closes [#1331](https://github.com/adobe/helix-cli/issues/1331)
+
 ## [8.0.2](https://github.com/adobe/helix-cli/compare/v8.0.1...v8.0.2) (2020-03-06)
 
 
