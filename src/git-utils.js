@@ -10,15 +10,15 @@
  * governing permissions and limitations under the License.
  */
 
+const fs = require('fs');
 const path = require('path');
 const os = require('os');
+
 const ignore = require('ignore');
 const ini = require('ini');
 const fse = require('fs-extra');
-
 const { GitUrl } = require('@adobe/helix-shared');
 const git = require('isomorphic-git');
-git.plugins.set('fs', require('fs'));
 
 class GitUtils {
   /**
@@ -33,7 +33,7 @@ class GitUtils {
     const HEAD = 1;
     const WORKDIR = 2;
     const STAGE = 3;
-    const matrix = await git.statusMatrix({ dir });
+    const matrix = await git.statusMatrix({ fs, dir });
     let modified = matrix
       .filter((row) => !(row[HEAD] === row[WORKDIR] && row[WORKDIR] === row[STAGE]));
     if (modified.length === 0) {
@@ -56,14 +56,26 @@ class GitUtils {
       }
     }
 
+    // workaround for https://github.com/isomorphic-git/isomorphic-git/issues/1076
+    // TODO: remove once #1076 has been resolved.
+    let ign;
+    const localeIgnore = path.resolve(dir, '.gitignore');
+    if (await fse.pathExists(localeIgnore)) {
+      ign = ignore();
+      ign.add(await fse.readFile(localeIgnore, 'utf-8'));
+    }
+
     // need to re-check the modified against the globally ignored
     // see: https://github.com/isomorphic-git/isomorphic-git/issues/444
     const globalConfig = path.resolve(homedir, '.gitconfig');
     const config = ini.parse(await fse.readFile(globalConfig, 'utf-8'));
     const globalIgnore = path.resolve(homedir, (config.core && config.core.excludesfile) || '.gitignore_global');
     if (await fse.pathExists(globalIgnore)) {
-      const ign = ignore()
-        .add(await fse.readFile(globalIgnore, 'utf-8'));
+      ign = ign || ignore();
+      ign.add(await fse.readFile(globalIgnore, 'utf-8'));
+    }
+
+    if (ign) {
       modified = modified.filter((row) => !ign.ignores(row[0]));
       if (modified.length === 0) {
         return false;
@@ -99,7 +111,7 @@ class GitUtils {
       return true;
     }
 
-    const status = await git.status({ dir, filepath });
+    const status = await git.status({ fs, dir, filepath });
     if (status === 'ignored') {
       return true;
     }
@@ -126,19 +138,19 @@ class GitUtils {
    */
   static async getBranch(dir) {
     // current branch name
-    const currentBranch = await git.currentBranch({ dir, fullname: false });
+    const currentBranch = await git.currentBranch({ fs, dir, fullname: false });
     // current commit sha
-    const rev = await git.resolveRef({ dir, ref: 'HEAD' });
+    const rev = await git.resolveRef({ fs, dir, ref: 'HEAD' });
     // reverse-lookup tag from commit sha
-    const allTags = await git.listTags({ dir });
+    const allTags = await git.listTags({ fs, dir });
 
     const tagCommitShas = await Promise.all(allTags.map(async (tag) => {
-      const oid = await git.resolveRef({ dir, ref: tag });
-      const obj = await git.readObject({ dir, oid });
+      const oid = await git.resolveRef({ fs, dir, ref: tag });
+      const obj = await git.readObject({ fs, dir, oid });
       // annotated or lightweight tag?
       return obj.type === 'tag' ? {
         tag,
-        sha: await git.resolveRef({ dir, ref: obj.object.object }),
+        sha: await git.resolveRef({ fs, dir, ref: obj.object.object }),
       } : { tag, sha: oid };
     }));
     const tag = tagCommitShas.find((entry) => entry.sha === rev);
@@ -181,7 +193,7 @@ class GitUtils {
    */
   static async getOrigin(dir) {
     try {
-      const rmt = (await git.listRemotes({ dir })).find((entry) => entry.remote === 'origin');
+      const rmt = (await git.listRemotes({ fs, dir })).find((entry) => entry.remote === 'origin');
       return typeof rmt === 'object' ? rmt.url : '';
     } catch (e) {
       // don't fail if directory is not a git repository
@@ -207,7 +219,7 @@ class GitUtils {
    * @returns {Promise<string>} sha of the current (i.e. `HEAD`) commit
    */
   static async getCurrentRevision(dir) {
-    return git.resolveRef({ dir, ref: 'HEAD' });
+    return git.resolveRef({ fs, dir, ref: 'HEAD' });
   }
 
   /**
@@ -216,16 +228,16 @@ class GitUtils {
    * @param {string} dir git repo path
    * @param {string} ref reference (branch, tag or commit sha)
    * @returns {Promise<string>} commit oid of the curent commit referenced by `ref`
-   * @throws {GitError} `err.code === 'ResolveRefError'`: invalid reference
+   * @throws {Errors.NotFoundError}: resource not found
    */
   static async resolveCommit(dir, ref) {
-    return git.resolveRef({ dir, ref })
+    return git.resolveRef({ fs, dir, ref })
       .catch(async (err) => {
-        if (err.code === 'ResolveRefError') {
+        if (err instanceof git.Errors.NotFoundError) {
           // fallback: is ref a shortened oid prefix?
-          const oid = await git.expandOid({ dir, oid: ref })
+          const oid = await git.expandOid({ fs, dir, oid: ref })
             .catch(() => { throw err; });
-          return git.resolveRef({ dir, ref: oid });
+          return git.resolveRef({ fs, dir, ref: oid });
         }
         // re-throw
         throw err;
@@ -239,13 +251,12 @@ class GitUtils {
    * @param {string} ref reference (branch, tag or commit sha)
    * @param {string} filePath relative path to file
    * @returns {Promise<Buffer>} content of specified file
-   * @throws {GitError} `err.code === 'TreeOrBlobNotFoundError'`: resource not found
-   *                    `err.code === 'ResolveRefError'`: invalid reference
+   * @throws {Errors.NotFoundError}: resource not found or invalid reference
    */
   static async getRawContent(dir, ref, pathName) {
     return GitUtils.resolveCommit(dir, ref)
       .then((oid) => git.readObject({
-        dir, oid, filepath: pathName, format: 'content',
+        fs, dir, oid, filepath: pathName, format: 'content',
       }))
       .then((obj) => obj.object);
   }

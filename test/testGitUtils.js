@@ -15,14 +15,12 @@
 const assert = require('assert');
 const path = require('path');
 const net = require('net');
+
 const fse = require('fs-extra');
 const shell = require('shelljs');
-const git = require('isomorphic-git');
 const { condit } = require('@adobe/helix-testutils');
+
 const { createTestRoot } = require('./utils.js');
-
-git.plugins.set('fs', require('fs'));
-
 const GitUtils = require('../src/git-utils');
 
 const GIT_USER_HOME = path.resolve(__dirname, 'fixtures', 'gitutils');
@@ -84,7 +82,7 @@ describe('Testing GitUtils', () => {
     assert.equal(await GitUtils.isDirty(testRoot, GIT_USER_HOME), true);
   });
 
-  // windows has somehow problems wit adding file:// submodules. so we skip for now.
+  // windows has somehow problems with adding file:// submodules. so we skip for now.
   condit('isDirty #unit with submodules', isNotWindows, async () => {
     // https://github.com/adobe/helix-cli/issues/614
     const moduleRoot = await createTestRoot();
@@ -200,7 +198,7 @@ describe('Tests against the helix-cli repo', () => {
   });
 
   condit('resolveCommit throws for unknown ref', ishelix, async () => {
-    await assert.rejects(async () => GitUtils.resolveCommit(repoDir, 'v99.unicorn.foobar'), { code: 'ResolveRefError' });
+    await assert.rejects(async () => GitUtils.resolveCommit(repoDir, 'v99.unicorn.foobar'), { code: 'NotFoundError' });
   });
 
   it('resolveCommit throws for invalid argument type', async () => {
