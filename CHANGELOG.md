@@ -1,3 +1,10 @@
+## [8.1.2](https://github.com/adobe/helix-cli/compare/v8.1.1...v8.1.2) (2020-03-09)
+
+
+### Bug Fixes
+
+* **deps:** update external ([#1336](https://github.com/adobe/helix-cli/issues/1336)) ([92f75b5](https://github.com/adobe/helix-cli/commit/92f75b5cfd8fc0025d09b9fb6d8599afa11adb2d))
+
 ## [8.1.1](https://github.com/adobe/helix-cli/compare/v8.1.0...v8.1.1) (2020-03-07)
 
 
