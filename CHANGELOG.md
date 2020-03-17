@@ -1,3 +1,10 @@
+## [8.1.5](https://github.com/adobe/helix-cli/compare/v8.1.4...v8.1.5) (2020-03-17)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @adobe/helix-shared to v6.0.4 ([befe299](https://github.com/adobe/helix-cli/commit/befe299d77225e481990d8e0057c9c4494270522))
+
 ## [8.1.4](https://github.com/adobe/helix-cli/compare/v8.1.3...v8.1.4) (2020-03-17)
 
 
