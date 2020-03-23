@@ -34,7 +34,7 @@
     "@adobe/helix-log": "4.5.1",
     "@adobe/helix-shared": "6.0.4",
     "@adobe/helix-simulator": "4.1.4",
-    "@adobe/htlengine": "4.3.0",
+    "@adobe/htlengine": "4.3.1",
     "@babel/core": "^7.8.3",
     "@babel/plugin-transform-react-jsx": "^7.8.3",
     "archiver": "^3.1.1",
