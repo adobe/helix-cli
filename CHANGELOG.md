@@ -1,3 +1,10 @@
+## [8.1.9](https://github.com/adobe/helix-cli/compare/v8.1.8...v8.1.9) (2020-03-24)
+
+
+### Bug Fixes
+
+* **deps:** update dependency fs-extra to v9 ([#1346](https://github.com/adobe/helix-cli/issues/1346)) ([f789f49](https://github.com/adobe/helix-cli/commit/f789f492f5ea4539a9a6aa9b7efa355d1a234b3b))
+
 ## [8.1.8](https://github.com/adobe/helix-cli/compare/v8.1.7...v8.1.8) (2020-03-24)
 
 
