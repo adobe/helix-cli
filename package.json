@@ -39,7 +39,7 @@
     "@babel/plugin-transform-react-jsx": "^7.8.3",
     "archiver": "^3.1.1",
     "camelcase": "^5.3.1",
-    "chalk": "3.0.0",
+    "chalk": "4.0.0",
     "chokidar": "^3.3.1",
     "dotenv": "^8.0.0",
     "ferrum": "^1.7.0",
