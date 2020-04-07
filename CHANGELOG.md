@@ -1,3 +1,10 @@
+## [8.1.11](https://github.com/adobe/helix-cli/compare/v8.1.10...v8.1.11) (2020-04-07)
+
+
+### Bug Fixes
+
+* **deps:** update dependency chalk to v4 ([#1358](https://github.com/adobe/helix-cli/issues/1358)) ([7ac5270](https://github.com/adobe/helix-cli/commit/7ac527038b658ca3977a7f3b226666b368ef8ce9))
+
 ## [8.1.10](https://github.com/adobe/helix-cli/compare/v8.1.9...v8.1.10) (2020-03-24)
 
 
