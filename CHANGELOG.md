@@ -1,3 +1,10 @@
+## [8.1.12](https://github.com/adobe/helix-cli/compare/v8.1.11...v8.1.12) (2020-04-10)
+
+
+### Bug Fixes
+
+* **embed:** fix embed generated link ([#1359](https://github.com/adobe/helix-cli/issues/1359)) ([a2c39ff](https://github.com/adobe/helix-cli/commit/a2c39ff1359ae4d941799d9487ceb32aa32150b6))
+
 ## [8.1.11](https://github.com/adobe/helix-cli/compare/v8.1.10...v8.1.11) (2020-04-07)
 
 
