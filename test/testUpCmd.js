@@ -15,9 +15,6 @@
 const assert = require('assert');
 const path = require('path');
 const fse = require('fs-extra');
-const NodeHttpAdapter = require('@pollyjs/adapter-node-http');
-const FSPersister = require('@pollyjs/persister-fs');
-const { setupMocha: setupPolly } = require('@pollyjs/core');
 const { logging } = require('@adobe/helix-testutils');
 
 const {
@@ -27,6 +24,7 @@ const {
   assertFile,
   createTestRoot,
   getTestModules,
+  setupPolly,
 } = require('./utils.js');
 
 const UpCommand = require('../src/up.cmd');
@@ -42,16 +40,7 @@ describe('Integration test for up command', function suite() {
   let pollyError;
 
   setupPolly({
-    recordFailedRequests: true,
     recordIfMissing: false,
-    logging: false,
-    adapters: [NodeHttpAdapter],
-    persister: FSPersister,
-    persisterOptions: {
-      fs: {
-        recordingsDir: path.resolve(__dirname, 'fixtures/recordings'),
-      },
-    },
   });
 
   before(async function beforeAll() {

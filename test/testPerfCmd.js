@@ -15,18 +15,13 @@
 const assert = require('assert');
 const { AssertionError } = require('assert');
 const path = require('path');
-const NodeHttpAdapter = require('@pollyjs/adapter-node-http');
-const { setupMocha: setupPolly } = require('@pollyjs/core');
 const fs = require('fs-extra');
 const example = require('./utils').perfExample;
-const { assertFileEqual, createTestRoot } = require('./utils');
+const { assertFileEqual, createTestRoot, setupPolly } = require('./utils');
 const PerfCommand = require('../src/perf.cmd.js');
 
 describe('hlx perf #integrationtest', () => {
-  setupPolly({
-    adapters: [NodeHttpAdapter],
-  });
-
+  setupPolly();
 
   it('hlx perf --junit (partial)', async function test() {
     const { server } = this.polly;

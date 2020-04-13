@@ -13,13 +13,9 @@
 const assert = require('assert');
 const fs = require('fs-extra');
 const sinon = require('sinon');
-const path = require('path');
-const NodeHttpAdapter = require('@pollyjs/adapter-node-http');
-const FSPersister = require('@pollyjs/persister-fs');
-const { setupMocha: setupPolly } = require('@pollyjs/core');
 const { logging } = require('@adobe/helix-testutils');
 const {
-  processSource, getTestModules, requireWithPaths,
+  processSource, getTestModules, requireWithPaths, setupPolly,
 } = require('./utils');
 
 const params = {
@@ -97,16 +93,7 @@ describe('Generated Action Tests', () => {
       let testRoot;
 
       setupPolly({
-        recordFailedRequests: true,
         recordIfMissing: false,
-        logging: false,
-        adapters: [NodeHttpAdapter],
-        persister: FSPersister,
-        persisterOptions: {
-          fs: {
-            recordingsDir: path.resolve(__dirname, 'fixtures/recordings'),
-          },
-        },
       });
 
       before(`Run builder programmatically on ${testScript.name}`, async () => {

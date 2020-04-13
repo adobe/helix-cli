@@ -16,13 +16,10 @@ const fs = require('fs-extra');
 const assert = require('assert');
 const path = require('path');
 const $ = require('shelljs');
-const NodeHttpAdapter = require('@pollyjs/adapter-node-http');
-const FSPersister = require('@pollyjs/persister-fs');
-const { setupMocha: setupPolly } = require('@pollyjs/core');
 const { HelixConfig } = require('@adobe/helix-shared');
 const { logging } = require('@adobe/helix-testutils');
 const {
-  assertFile, initGit, createTestRoot, getTestModules,
+  assertFile, initGit, createTestRoot, getTestModules, setupPolly,
 } = require('./utils.js');
 const GitUtils = require('../src/git-utils');
 const DeployCommand = require('../src/deploy.cmd.js');
@@ -44,22 +41,7 @@ describe('hlx deploy (Integration)', () => {
   });
 
   setupPolly({
-    recordFailedRequests: true,
     recordIfMissing: false,
-    logging: false,
-    adapters: [NodeHttpAdapter],
-    persister: FSPersister,
-    persisterOptions: {
-      fs: {
-        recordingsDir: path.resolve(__dirname, 'fixtures/recordings'),
-      },
-    },
-    matchRequestsBy: {
-      body: false,
-      headers: {
-        exclude: ['content-length', 'user-agent'],
-      },
-    },
   });
 
   beforeEach(async function beforeEach() {
@@ -598,22 +580,7 @@ describe('hlx deploy (custom pipeline)', function suite() {
   let cwd;
 
   setupPolly({
-    recordFailedRequests: true,
     recordIfMissing: false,
-    logging: false,
-    adapters: [NodeHttpAdapter],
-    persister: FSPersister,
-    persisterOptions: {
-      fs: {
-        recordingsDir: path.resolve(__dirname, 'fixtures/recordings'),
-      },
-    },
-    matchRequestsBy: {
-      body: false,
-      headers: {
-        exclude: ['content-length', 'user-agent'],
-      },
-    },
   });
 
   beforeEach(async function beforeEach() {
