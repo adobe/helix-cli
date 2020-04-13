@@ -29,7 +29,7 @@ if (process.env.NODE_OPTIONS) {
 
 function envAwareStrict(args, aliases) {
   const specialKeys = ['$0', '--', '_'];
-  const illegalEnv = ['saveConfig', 'add', 'default'];
+  const illegalEnv = ['saveConfig', 'add'];
 
   const hlxEnv = {};
   Object

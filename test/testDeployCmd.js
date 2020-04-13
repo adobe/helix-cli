@@ -21,6 +21,7 @@ const { logging } = require('@adobe/helix-testutils');
 const {
   assertFile, initGit, createTestRoot, getTestModules, setupPolly,
 } = require('./utils.js');
+const { decodeFileParams } = require('../src/yargs-params');
 const GitUtils = require('../src/git-utils');
 const DeployCommand = require('../src/deploy.cmd.js');
 
@@ -434,22 +435,12 @@ describe('hlx deploy (Integration)', () => {
         assert.deepEqual(body, {
           publish: true,
           parameters: [
-            {
-              key: 'FOO',
-              value: 'bar',
-            },
-            {
-              key: 'LOGGLY_HOST',
-              value: 'loggly-host',
-            },
-            {
-              key: 'LOGGLY_KEY',
-              value: 'loggly-auth',
-            },
-            {
-              key: 'RESOLVE_GITREF_SERVICE',
-              value: 'my-resolver',
-            },
+            { key: 'MY_DEFAULT_2', value: 'default-value-2' },
+            { key: 'MY_DEFAULT_1', value: 'default-value-1' },
+            { key: 'FOO', value: 'bar' },
+            { key: 'LOGGLY_HOST', value: 'loggly-host' },
+            { key: 'LOGGLY_KEY', value: 'loggly-auth' },
+            { key: 'RESOLVE_GITREF_SERVICE', value: 'my-resolver' },
           ],
           annotations: [
             {
@@ -495,9 +486,8 @@ describe('hlx deploy (Integration)', () => {
       .withMinify(false)
       .withLogglyAuth('loggly-auth')
       .withLogglyHost('loggly-host')
-      .withDefault({
-        FOO: 'bar',
-      })
+      .withDefault({ FOO: 'bar' })
+      .withDefaultFile(decodeFileParams.bind(null, ['defaults.json', 'defaults.env']))
       .withResolveGitRefService('my-resolver')
       .run();
 
