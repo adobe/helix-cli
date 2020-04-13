@@ -1,3 +1,10 @@
+## [8.1.13](https://github.com/adobe/helix-cli/compare/v8.1.12...v8.1.13) (2020-04-13)
+
+
+### Bug Fixes
+
+* **tests:** ignore x-request-id in pollyjs ([#1360](https://github.com/adobe/helix-cli/issues/1360)) ([dc94c58](https://github.com/adobe/helix-cli/commit/dc94c586658e78b9f0f89d7e9e80797c9dfca19a))
+
 ## [8.1.12](https://github.com/adobe/helix-cli/compare/v8.1.11...v8.1.12) (2020-04-10)
 
 
