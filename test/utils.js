@@ -19,6 +19,9 @@ const fse = require('fs-extra');
 const http = require('http');
 const yauzl = require('yauzl');
 const { JSDOM } = require('jsdom');
+const NodeHttpAdapter = require('@pollyjs/adapter-node-http');
+const FSPersister = require('@pollyjs/persister-fs');
+const { setupMocha } = require('@pollyjs/core');
 const { dom: { assertEquivalentNode } } = require('@adobe/helix-shared');
 const BuildCommand = require('../src/build.cmd');
 const ModuleHelper = require('../src/builder/ModuleHelper.js');
@@ -94,7 +97,11 @@ async function assertHttp(url, status, spec, replacements = []) {
                 replacements.forEach((r) => {
                   expected = expected.replace(r.pattern, r.with);
                 });
-                assert.equal(data.trim(), expected.trim());
+                if (spec.endsWith('.json')) {
+                  assert.deepEqual(JSON.parse(data), JSON.parse(expected));
+                } else {
+                  assert.equal(data.trim(), expected.trim());
+                }
               }
             }
             resolve();
@@ -257,6 +264,28 @@ function requireWithPaths(id, modPaths) {
   }
 }
 
+function setupPolly(opts = {}) {
+  setupMocha({
+    logging: false,
+    recordFailedRequests: true,
+    recordIfMissing: false,
+    matchRequestsBy: {
+      headers: {
+        exclude: ['authorization', 'accept-encoding', 'user-agent', 'accept', 'connection', 'x-request-id'],
+      },
+      body: false,
+    },
+    adapters: [NodeHttpAdapter],
+    persister: FSPersister,
+    persisterOptions: {
+      fs: {
+        recordingsDir: path.resolve(__dirname, 'fixtures', 'recordings'),
+      },
+    },
+    ...opts,
+  });
+}
+
 const perfExample = {
   uuid: '170b278',
   url: 'https://debug.primordialsoup.life/develop/',
@@ -381,4 +410,5 @@ module.exports = {
   clearHelixEnv,
   getTestModules,
   requireWithPaths,
+  setupPolly,
 };

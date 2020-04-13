@@ -15,9 +15,7 @@
 const path = require('path');
 const proxyquire = require('proxyquire');
 const sinon = require('sinon');
-const NodeHttpAdapter = require('@pollyjs/adapter-node-http');
-const { setupMocha: setupPolly } = require('@pollyjs/core');
-const { clearHelixEnv } = require('./utils.js');
+const { clearHelixEnv, setupPolly } = require('./utils.js');
 
 describe('hlx publish --remote --dry-run (default)', () => {
   let RemotePublishCommand;
@@ -48,9 +46,7 @@ describe('hlx publish --remote --dry-run (default)', () => {
     });
   });
 
-  setupPolly({
-    adapters: [NodeHttpAdapter],
-  });
+  setupPolly();
 
   it('publishing makes HTTP requests', async function test() {
     const { server } = this.polly;
