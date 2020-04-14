@@ -42,6 +42,7 @@ describe('hlx deploy', () => {
     mockDeploy.withTarget.returnsThis();
     mockDeploy.withFiles.returnsThis();
     mockDeploy.withDefault.returnsThis();
+    mockDeploy.withDefaultFile.returnsThis();
     mockDeploy.withEnableDirty.returnsThis();
     mockDeploy.withDryRun.returnsThis();
     mockDeploy.withFastlyAuth.returnsThis();
@@ -134,7 +135,7 @@ OpenWhisk Namespace is required`);
     sinon.assert.calledWith(mockDeploy.withFastlyNamespace, undefined);
     sinon.assert.calledWith(mockDeploy.withTarget, '.hlx/build');
     sinon.assert.calledWith(mockDeploy.withFiles, ['src/**/*.htl', 'src/**/*.js', 'src/**/*.jsx', 'cgi-bin/**/*.js']);
-    sinon.assert.calledWith(mockDeploy.withDefault, undefined);
+    sinon.assert.calledWith(mockDeploy.withDefault, {});
     sinon.assert.calledWith(mockDeploy.withCreatePackages, 'auto');
     sinon.assert.calledWith(mockDeploy.withCircleciAuth, '');
     sinon.assert.calledWith(mockDeploy.withDryRun, false);
@@ -160,27 +161,17 @@ OpenWhisk Namespace is required`);
     sinon.assert.calledWith(mockDeploy.withFastlyNamespace, '1234');
     sinon.assert.calledWith(mockDeploy.withTarget, 'foo');
     sinon.assert.calledWith(mockDeploy.withFiles, ['*.htl', '*.js']);
-    sinon.assert.calledWith(mockDeploy.withDefault, undefined);
     sinon.assert.calledWith(mockDeploy.withCircleciAuth, 'foobar');
     sinon.assert.calledWith(mockDeploy.withDryRun, true);
     sinon.assert.calledWith(mockDeploy.withMinify, true);
     sinon.assert.calledWith(mockDeploy.withResolveGitRefService, 'resolve.api');
+    sinon.assert.calledWith(mockDeploy.withDefault, { SECRET2: 'VALUE2' });
     sinon.assert.calledOnce(mockDeploy.run);
-  });
-
-  it('hlx deploy fails with HLX_DEFAULT env', () => {
-    process.env.HLX_DEFAULT = true;
-    let failed = false;
-    new CLI()
-      .withCommandExecutor('deploy', mockDeploy)
-      .onFail((e) => {
-        failed = e;
-      })
-      .run(['deploy',
-        '--wsk-auth', 'secret-key',
-        '--wsk-namespace', 'hlx',
-      ]);
-    assert.ok(failed);
+    const cb = mockDeploy.withDefaultFile.getCall(0).firstArg;
+    const defaults = cb(path.resolve(__dirname, 'integration'));
+    assert.deepEqual(defaults, {
+      MY_DEFAULT_1: 'default-value-1',
+    });
   });
 
   it('hlx deploy fails with HLX_ADD env', () => {
@@ -418,5 +409,31 @@ OpenWhisk Namespace is required`);
       ]);
     sinon.assert.calledWith(mockDeploy.withFiles, ['lib/*.htl', 'index.htl']);
     sinon.assert.calledOnce(mockDeploy.run);
+  });
+
+  it('hlx deploy with --default-file fails for non-existent file', () => {
+    new CLI()
+      .withCommandExecutor('deploy', mockDeploy)
+      .run(['deploy',
+        '--wsk-auth', 'secret-key',
+        '--wsk-namespace', 'hlx',
+        '--default-file', 'foo']);
+    const cb = mockDeploy.withDefaultFile.getCall(0).firstArg;
+    assert.throws(() => cb('.'), new Error('Specified param file does not exist: foo'));
+  });
+
+  it('hlx deploy with --default-file works', () => {
+    new CLI()
+      .withCommandExecutor('deploy', mockDeploy)
+      .run(['deploy',
+        '--wsk-auth', 'secret-key',
+        '--wsk-namespace', 'hlx',
+        '--default-file', 'defaults.env', 'defaults.json']);
+    const cb = mockDeploy.withDefaultFile.getCall(0).firstArg;
+    const defaults = cb(path.resolve(__dirname, 'integration'));
+    assert.deepEqual(defaults, {
+      MY_DEFAULT_1: 'default-value-1',
+      MY_DEFAULT_2: 'default-value-2',
+    });
   });
 });

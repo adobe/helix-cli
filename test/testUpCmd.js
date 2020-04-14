@@ -16,6 +16,7 @@ const assert = require('assert');
 const path = require('path');
 const fse = require('fs-extra');
 const { logging } = require('@adobe/helix-testutils');
+const { decodeFileParams } = require('../src/yargs-params');
 
 const {
   initGit,
@@ -145,6 +146,47 @@ describe('Integration test for up command', function suite() {
         try {
           await assertHttpDom(`http://localhost:${cmd.project.server.port}/index.html`, 200, 'simple_response.html');
           await assertHttp(`http://localhost:${cmd.project.server.port}/welcome.txt`, 200, 'welcome_response.txt');
+          return myDone();
+        } catch (e) {
+          return myDone(e);
+        }
+      })
+      .on('stopped', () => {
+        done(error || pollyError);
+      })
+      .run()
+      .catch(done);
+  });
+
+  it('up command can provide dev-defaults.', (done) => {
+    initGit(testDir, 'https://github.com/adobe/dummy-foo.git');
+    let error = null;
+    const cmd = new UpCommand()
+      .withFiles([
+        path.join(testDir, 'src', '*.htl'),
+        path.join(testDir, 'src', '*.js'),
+        path.join(testDir, 'src', 'utils', '*.js'),
+      ])
+      .withTargetDir(buildDir)
+      .withModulePaths(testModules)
+      .withDirectory(testDir)
+      .withDevDefault({ MY_DEFAULT_0: 'default-0' })
+      .withDevDefaultFile(decodeFileParams.bind(null, ['defaults.json', 'defaults.env']))
+      .withHttpPort(0);
+
+    const myDone = (err) => {
+      error = err;
+      return cmd.stop();
+    };
+
+    cmd
+      .on('started', async () => {
+        try {
+          assert.deepEqual(cmd.project.actionParams, {
+            MY_DEFAULT_0: 'default-0',
+            MY_DEFAULT_1: 'default-value-1',
+            MY_DEFAULT_2: 'default-value-2',
+          });
           return myDone();
         } catch (e) {
           return myDone(e);

@@ -32,6 +32,7 @@ class UpCommand extends BuildCommand {
     this._overrideHost = null;
     this._localRepos = [];
     this._devDefault = {};
+    this._devDefaultFile = () => ({});
     this._githubToken = '';
     this._algoliaAppID = null;
     this._algoliaAPIKey = null;
@@ -73,6 +74,11 @@ class UpCommand extends BuildCommand {
 
   withDevDefault(value) {
     this._devDefault = value;
+    return this;
+  }
+
+  withDevDefaultFile(value) {
+    this._devDefaultFile = value;
     return this;
   }
 
@@ -152,6 +158,8 @@ class UpCommand extends BuildCommand {
     if (!await fse.pathExists(path.join(this.directory, '.git'))) {
       throw Error('hlx up needs local git repository.');
     }
+    // init dev default file params
+    this._devDefault = Object.assign(this._devDefaultFile(this.directory), this._devDefault);
 
     let hasConfigFile = await this.config.hasFile();
     if (this._saveConfig) {

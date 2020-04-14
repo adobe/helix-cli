@@ -275,10 +275,77 @@ If you want to explicitly always fetch from GitHub, i.e. ignore the local checko
 $ hlx up --no-local-repo
 ```
 
-### Passing action parameters
+## Passing default action parameters during deploy
 
-You can use `hlx up --dev-default param1 value1 param2 value2` to pass additional
-action parameters as needed. For example, to configure request timeouts:
+If the action needs default parameter, they can be specified during `hlx deploy` with the `--default` argument. The argument either takes multiple name/value pairs or json values. They can also be read from environment or json files via the `--default-file` argument.
+
+### use as argument values
+
+```console
+# arguments with name value pairs
+hlx deploy --default SECRET value --default ANOTHER foobar
+
+# multiple name value pairs
+hlx deploy --default SECRET value ANOTHER foobar
+
+# json argument
+hlx deploy --default '{"SECRET": "value", "ANOTHER": "foobar"}'
+```
+
+#### use in environment
+
+All `hlx` command line arguments can also be passed via environment variables, prefixed with `HLX_`. Since the `default` parameters need key and value, this is only possible using the json format:
+
+(note that the `.env` file is automatically loaded by `hlx`)
+
+**.env**
+```env
+HLX_DEFAULT={"SECRET": "value", "ANOTHER": "foobar"}
+```
+
+### use via reference to file
+
+In addition to the above, the parameters can also be specified using a reference to a json or env file:
+
+```console
+# reference to env file
+hlx deploy --default-file secrets.env
+
+# reference to json file
+hlx deploy --default-file ./prod/secrets.json
+```
+
+**secrets.env**
+```env
+SECRET=value
+ANOTHER=foobar
+```
+
+**prod/secrets.json**
+```json
+{
+  "SECRET": "value",
+  "ANOTHER": "foobar"
+}
+```
+
+#### use in environment
+
+similar to the above, the file reference can also be specified in the environment variables:
+
+**.env**
+```
+HLX_DEFAULT_FILE=./prod/secrets.json
+```
+
+### Passing default action parameters to the simulator
+
+When testing helix locally with `hlx up` the `--dev-default` can be used to specify the action
+parameters which the simulator should pass to the action.
+
+the semantics of the arguments and environment variables is the same as for the `--default` and `--default-file` arguments above.
+
+For example, to configure request timeouts:
 
 ```
 $ hlx up --dev-default HTTP_TIMEOUT 2000
@@ -289,6 +356,7 @@ Developers can pass additional action parameters by setting the
 i.e `$HLX_DEV_DEFAULT='{"KEY1":5000, "KEY2":"VALUE2"}'`
 
 For a list of known parameters, see [the Helix Pipeline Configuration Parameters documentation](https://github.com/adobe/helix-pipeline/blob/master/docs/secrets.schema.md#secrets-properties)
+
 
 #### Multi Strain Example
 

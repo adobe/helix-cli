@@ -106,6 +106,7 @@ module.exports = function up() {
         .withHttpPort(argv.port)
         .withLocalRepo(argv.localRepo)
         .withDevDefault(argv.devDefault)
+        .withDevDefaultFile(argv.devDefaultFile)
         .withGithubToken(argv.githubToken)
         // only open browser window when executable is `hlx`
         // this prevents the window to be opened during integration tests

@@ -38,6 +38,7 @@ describe('hlx up', () => {
     mockUp.withOverrideHost.returnsThis();
     mockUp.withLocalRepo.returnsThis();
     mockUp.withDevDefault.returnsThis();
+    mockUp.withDevDefaultFile.returnsThis();
     mockUp.withGithubToken.returnsThis();
     mockUp.withCustomPipeline.returnsThis();
     mockUp.withAlgoliaAppID.returnsThis();
@@ -78,6 +79,11 @@ describe('hlx up', () => {
     sinon.assert.calledWith(mockUp.withLocalRepo, ['.', '../foo-content', '../bar-content']);
     sinon.assert.calledOnce(mockUp.run);
     sinon.assert.calledWith(mockUp.withDevDefault, { SECRET1: 'VALUE1', SECRET2: 5000 });
+    const cb = mockUp.withDevDefaultFile.getCall(0).firstArg;
+    const defaults = cb(path.resolve(__dirname, 'integration'));
+    assert.deepEqual(defaults, {
+      MY_DEFAULT_2: 'default-value-2',
+    });
   });
 
   it('hlx up fails with non env extra argument', () => {
@@ -234,7 +240,7 @@ describe('hlx up', () => {
     new CLI()
       .withCommandExecutor('up', mockUp)
       .onFail((e) => {
-        assert.equal(e, 'dev-default needs an even number of parameters, think key-value pairs');
+        assert.equal(e, 'dev-default needs either a JSON string or key-value pairs');
         done();
       })
       .run(['up',
@@ -262,9 +268,29 @@ describe('hlx up', () => {
       .onFail(() => {
         failed = true;
       })
-      .run(['up', '--dev-default', '\'{"KEY1":5000, "KEY2":"VALUE2"}\'']);
+      .run(['up', '--dev-default', '{"KEY1":5000, "KEY2":"VALUE2"}']);
 
     assert.equal(failed, false);
+  });
+
+  it('hlx up with --dev-default-file fails for non-existent file', () => {
+    new CLI()
+      .withCommandExecutor('up', mockUp)
+      .run(['up', '--dev-default-file', 'foo']);
+    const cb = mockUp.withDevDefaultFile.getCall(0).firstArg;
+    assert.throws(() => cb('.'), new Error('Specified param file does not exist: foo'));
+  });
+
+  it('hlx up with --dev-default-file works', () => {
+    new CLI()
+      .withCommandExecutor('up', mockUp)
+      .run(['up', '--dev-default-file', 'defaults.env', 'defaults.json']);
+    const cb = mockUp.withDevDefaultFile.getCall(0).firstArg;
+    const defaults = cb(path.resolve(__dirname, 'integration'));
+    assert.deepEqual(defaults, {
+      MY_DEFAULT_1: 'default-value-1',
+      MY_DEFAULT_2: 'default-value-2',
+    });
   });
 
   it('hlx up with --algolia-app-id and --algolia-api-key works', () => {

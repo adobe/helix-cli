@@ -35,6 +35,7 @@ module.exports = function deploy() {
         name: 'default',
         describe: 'Adds a default parameter to the function',
         type: 'array',
+        default: [],
       });
       yargs
         .option('auto', {
@@ -99,7 +100,7 @@ module.exports = function deploy() {
           type: 'string',
           default: 'helix-services/resolve-git-ref@v1',
         })
-        .group(['auto', 'wsk-auth', 'wsk-namespace', 'default', 'dirty'], 'Deployment Options')
+        .group(['auto', 'wsk-auth', 'wsk-namespace', 'default', 'default-file', 'dirty'], 'Deployment Options')
         .group(['wsk-host', 'loggly-host', 'loggly-auth', 'target'], 'Advanced Options')
         .group(['package', 'minify', 'target'], 'Package options')
         .check((args) => {
@@ -152,6 +153,7 @@ module.exports = function deploy() {
         .withTarget(argv.target)
         .withFiles(argv.files)
         .withDefault(argv.default)
+        .withDefaultFile(argv.defaultFile)
         .withDryRun(argv.dryRun)
         .withCircleciAuth(argv.circleciAuth)
         .withFastlyAuth(argv.fastlyAuth)

@@ -51,7 +51,8 @@ class DeployCommand extends AbstractCommand {
     this._prefix = null;
     this._modulePaths = [];
     this._requiredModules = null;
-    this._default = null;
+    this._default = { };
+    this._defaultFile = () => ({});
     this._enableDirty = false;
     this._dryRun = false;
     this._createPackages = 'auto';
@@ -135,6 +136,11 @@ class DeployCommand extends AbstractCommand {
     return this;
   }
 
+  withDefaultFile(value) {
+    this._defaultFile = value;
+    return this;
+  }
+
   withEnableDirty(value) {
     this._enableDirty = value;
     return this;
@@ -183,6 +189,8 @@ class DeployCommand extends AbstractCommand {
   async init() {
     await super.init();
     this._target = path.resolve(this.directory, this._target);
+    // init dev default file params
+    this._default = Object.assign(this._defaultFile(this.directory), this._default);
   }
 
   static getBuildVarOptions(name, value, auth, owner, repo) {
