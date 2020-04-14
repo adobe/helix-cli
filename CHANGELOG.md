@@ -1,3 +1,10 @@
+# [8.2.0](https://github.com/adobe/helix-cli/compare/v8.1.13...v8.2.0) (2020-04-14)
+
+
+### Features
+
+* **cli:** better default parameter parsing ([#1362](https://github.com/adobe/helix-cli/issues/1362)) ([b1a1f74](https://github.com/adobe/helix-cli/commit/b1a1f74b4e72c2a65fa16283695fbfddd80023f0)), closes [#1352](https://github.com/adobe/helix-cli/issues/1352)
+
 ## [8.1.13](https://github.com/adobe/helix-cli/compare/v8.1.12...v8.1.13) (2020-04-13)
 
 
