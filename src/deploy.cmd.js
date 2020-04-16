@@ -191,6 +191,12 @@ class DeployCommand extends AbstractCommand {
     this._target = path.resolve(this.directory, this._target);
     // init dev default file params
     this._default = Object.assign(this._defaultFile(this.directory), this._default);
+    // read the package json if present
+    try {
+      this._pkgJson = await fs.readJson(path.resolve(this.directory, 'package.json'));
+    } catch (e) {
+      this._pkgJson = {};
+    }
   }
 
   static getBuildVarOptions(name, value, auth, owner, repo) {
@@ -477,7 +483,13 @@ Alternatively you can auto-add one using the {grey --add <name>} option.`);
         'User-Agent': useragent,
         action,
         kind: 'nodejs:10',
-        annotations: { 'web-export': true },
+        annotations: {
+          'web-export': true,
+          pkgVersion: this._pkgJson.version || 'n/a',
+          pkgName: this._pkgJson.name || 'n/a',
+          dependencies: script.dependencies.map((dep) => dep.id).join(','),
+          git: giturl.toString(),
+        },
       };
 
       const baseName = path.basename(script.main);

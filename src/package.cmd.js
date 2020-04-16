@@ -185,6 +185,9 @@ class PackageCommand extends AbstractCommand {
     if (stats.warnings) {
       stats.warnings.forEach((msg) => this.log.warn(msg));
     }
+    if (stats.errors && stats.errors.length > 0) {
+      throw new Error('Error while bundling packages.');
+    }
   }
 
   /**
