@@ -194,7 +194,11 @@ class ActionBundler {
 
     const matchWarning = (rules) => (w) => {
       const msg = w.message;
-      const res = w.module.resource;
+      let res = w.module.resource;
+      if (res.indexOf('\\') >= 0) {
+        // fake posix path
+        res = res.replace(/\\/g, '/');
+      }
       return !rules.find((r) => {
         if (!res.endsWith(r.resource)) {
           return false;
