@@ -3,19 +3,22 @@ strains:
     content: ssh://git@github.com/adobe/helix-cli.git
     code: ssh://git@github.com/adobe/helix-cli.git
     static: ssh://git@github.com/adobe/helix-cli.git
-    url: https://www.project-helix.io/cli
+    condition:
+      url: https://www.project-helix.io/cli
 
   - name: api
     content: ssh://git@github.com/adobe/helix-content.git
     code: ssh://git@github.com/adobe/helix-cli.git
     static: ssh://git@github.com/adobe/helix-cli.git
-    url: https://www.project-helix.io/api
+    condition:
+      url: https://www.project-helix.io/api
 
   - name: non-deployed
     content: ssh://git@github.com/adobe/helix-cli.git
     code: ssh://git@github.com/adobe/helix-cli.git
     static: ssh://git@github.com/adobe/helix-cli.git
-    url: https://www.project-helix.io/cli
+    condition:
+      url: https://www.project-helix.io/cli
 
   - name: proxy
     origin: https://www.adobe.com

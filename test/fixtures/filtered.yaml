@@ -4,7 +4,8 @@ strains:
     code: ssh://git@github.com/adobe/helix-cli.git
     static: ssh://git@github.com/adobe/helix-cli.git
     package: branch
-    url: https://www.project-helix.io/cli
+    condition:
+      url: https://www.project-helix.io/cli
 
   - name: both-api
     origin: https://www.adobe.io
