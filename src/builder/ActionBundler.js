@@ -84,7 +84,7 @@ class ActionBundler {
         depsByFile[chunkName] = deps;
 
         await Promise.all(chunk.modules.map(async (mod) => {
-          const segs = mod.identifier.split('/');
+          const segs = mod.identifier.split(path.sep);
           let idx = segs.lastIndexOf('node_modules');
           if (idx >= 0) {
             idx += 1;
