@@ -16,7 +16,8 @@ strains:
     static: *localRepo
 
   - name: api
-    url: http://www.project-helix.io/api
+    condition:
+      url: http://www.project-helix.io/api
     code: *localRepo
     content: *apiRepo
     static: *apiRepo

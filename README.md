@@ -193,13 +193,15 @@ strains:
     code: https://github.com/adobe/project-helix.io.git#master
     content: https://github.com/adobe/project-helix.io.git#master
     static: https://github.com/adobe/project-helix.io.git/htdocs#master
-    url: https://www.primordialsoup.life
+    condition:
+      url: https://www.primordialsoup.life
 
   - name: develop
     code: https://github.com/adobe/project-helix.io.git#dev
     content: https://github.com/adobe/project-helix.io.git#master
     static: https://github.com/adobe/project-helix.io.git/htdocs#master
-    url: https://dev.primordialsoup.life/develop/
+    condition:
+      url: https://dev.primordialsoup.life/develop/
 ```
 
 ## Mixing old and new Content
@@ -219,7 +221,8 @@ strains:
 
   - name: oldcontent
     origin: https://www.adobe.io
-    url: https://www.primordialsoup.life/content/
+    condition:
+      url: https://www.primordialsoup.life/content/
 
   - name: proxy
     origin: https://www.adobe.io
@@ -245,7 +248,8 @@ definitions:
 
 strains:
   - name: default
-    url: http://localhost:3000/
+    condition:
+      url: http://localhost:3000/
     code: *localRepo
     content: *localRepo
     static: *localRepo
@@ -375,13 +379,15 @@ definitions:
 
 strains:
   - name: api
-    url: https://www.project-helix.io/api
+    condition:
+      url: https://www.project-helix.io/api
     code: *defaultRepo
     content: *apiRepo
     static: *apiRepo
 
   - name: default
-    url: https://www.project-helix.io/
+    condition:
+      url: https://www.project-helix.io/
     code: *defaultRepo
     content: *defaultRepo
     static: *defaultRepo
@@ -453,7 +459,8 @@ strains:
     code: https://github.com/adobe/project-helix.io.git#master
     content: https://github.com/adobe/project-helix.io.git#master
     static: https://github.com/adobe/project-helix.io.git/htdocs#master
-    url: https://www.primordialsoup.life
+    condition:
+      url: https://www.primordialsoup.life
     urls:
       - https://www.primordialsoup.life/README.html
     perf:
