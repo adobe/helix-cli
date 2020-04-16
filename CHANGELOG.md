@@ -1,3 +1,15 @@
+# [9.0.0](https://github.com/adobe/helix-cli/compare/v8.2.0...v9.0.0) (2020-04-16)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @adobe/helix-simulator to v4.1.9 ([4f8ffa4](https://github.com/adobe/helix-cli/commit/4f8ffa4699413d2accd518358b24dd8315a7ba97))
+
+
+### BREAKING CHANGES
+
+* **deps:** url property removed from strain, use condition instead
+
 # [8.2.0](https://github.com/adobe/helix-cli/compare/v8.1.13...v8.2.0) (2020-04-14)
 
 
