@@ -457,7 +457,20 @@ describe('hlx deploy (Integration)', () => {
       }
     });
     this.polly.server.put(`https://adobeioruntime.net/api/v1/namespaces/hlx/actions/${ref}/html`).intercept((req, res) => {
-      res.sendStatus(201);
+      const body = JSON.parse(req.body);
+      try {
+        const deps = body.annotations.find((a) => a.key === 'dependencies');
+        assert.ok(deps.value.indexOf('@adobe/helix-fetch') >= 0);
+        const name = body.annotations.find((a) => a.key === 'pkgName');
+        assert.equal(name.value, 'n/a');
+        const version = body.annotations.find((a) => a.key === 'pkgVersion');
+        assert.equal(version.value, 'n/a');
+        res.sendStatus(201);
+      } catch (e) {
+        // eslint-disable-next-line no-console
+        console.error(e);
+        res.sendStatus(500);
+      }
     });
     this.polly.server.put('https://adobeioruntime.net/api/v1/namespaces/hlx/packages/helix-services?overwrite=true').intercept((req, res) => {
       res.sendStatus(201);
@@ -591,16 +604,15 @@ describe('hlx deploy (custom pipeline)', function suite() {
 
   afterEach(async () => {
     $.cd(cwd);
-    await fs.remove(testRoot);
+    // await fs.remove(testRoot);
   });
 
   it('Deploy (dry-running) installs a default pipeline', async () => {
     await fs.copy(TEST_DIR, testRoot);
     await fs.rename(path.resolve(testRoot, 'default-config.yaml'), path.resolve(testRoot, 'helix-config.yaml'));
     initGit(testRoot, 'git@github.com:adobe/project-helix.io.git');
-    const logger = logging.createTestLogger();
 
-    await new DeployCommand(logger)
+    await new DeployCommand()
       .withDirectory(testRoot)
       .withWskHost('adobeioruntime.net')
       .withWskAuth('secret-key')
@@ -627,9 +639,8 @@ describe('hlx deploy (custom pipeline)', function suite() {
     await fs.copy(TEST_DIR, testRoot);
     await fs.rename(path.resolve(testRoot, 'default-config.yaml'), path.resolve(testRoot, 'helix-config.yaml'));
     initGit(testRoot, 'git@github.com:adobe/project-helix.io.git');
-    const logger = logging.createTestLogger();
 
-    await new DeployCommand(logger)
+    await new DeployCommand()
       .withDirectory(testRoot)
       .withWskHost('adobeioruntime.net')
       .withWskAuth('secret-key')

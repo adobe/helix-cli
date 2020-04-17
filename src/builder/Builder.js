@@ -48,6 +48,7 @@ const DEFAULT_PIPELINE = '@adobe/helix-pipeline/src/defaults/default.js';
  * @property {string} zipFile - The absolute path to the zipped action.
  * @property {string} archiveName - The filename of the zipped action. eg 'html.zip'.
  * @property {number} archiveSize - The size in bytes of the zipped action.
+ * @property {object[]} dependencies - Array of module dependencies
  */
 
 

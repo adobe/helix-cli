@@ -9,6 +9,7 @@
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
+const fs = require('fs-extra');
 const path = require('path');
 const webpack = require('webpack');
 
@@ -22,6 +23,7 @@ class ActionBundler {
     this._minify = true;
     this._logger = console;
     this._progressHandler = null;
+    this._dependencies = {};
   }
 
   withDirectory(d) {
@@ -47,6 +49,76 @@ class ActionBundler {
   withProgressHandler(value) {
     this._progressHandler = value;
     return this;
+  }
+
+  get dependencies() {
+    return this._dependencies;
+  }
+
+  /**
+   * Resolves the dependencies by chunk. eg:
+   *
+   * {
+   *   'src/idx_json.bundle.js': [{
+   *      id: '@adobe/helix-epsagon:1.2.0',
+   *      name: '@adobe/helix-epsagon',
+   *      version: '1.2.0' },
+   *   ],
+   *   ...
+   * }
+   */
+  async resolveDependencyInfos(stats) {
+    // get list of dependencies
+    const depsByFile = {};
+    const resolved = {};
+
+    const jsonStats = stats.toJson({
+      chunks: true,
+      chunkModules: true,
+    });
+
+    await Promise.all(jsonStats.chunks
+      .map(async (chunk) => {
+        const chunkName = chunk.names[0];
+        const deps = {};
+        depsByFile[chunkName] = deps;
+
+        await Promise.all(chunk.modules.map(async (mod) => {
+          const segs = mod.identifier.split(path.sep);
+          let idx = segs.lastIndexOf('node_modules');
+          if (idx >= 0) {
+            idx += 1;
+            if (segs[idx].charAt(0) === '@') {
+              idx += 1;
+            }
+            segs.splice(idx + 1);
+            const dir = path.resolve('/', ...segs);
+
+            try {
+              if (!resolved[dir]) {
+                const pkgJson = await fs.readJson(path.resolve(dir, 'package.json'));
+                const id = `${pkgJson.name}:${pkgJson.version}`;
+                resolved[dir] = {
+                  id,
+                  name: pkgJson.name,
+                  version: pkgJson.version,
+                };
+              }
+              const dep = resolved[dir];
+              deps[dep.id] = dep;
+            } catch (e) {
+              // ignore
+            }
+          }
+        }));
+      }));
+
+    // sort the deps
+    Object.entries(depsByFile)
+      .forEach(([scriptFile, deps]) => {
+        this._dependencies[scriptFile] = Object.values(deps)
+          .sort((d0, d1) => d0.name.localeCompare(d1.name));
+      });
   }
 
   async run(scripts) {
@@ -99,6 +171,9 @@ class ActionBundler {
       message: /Critical dependency: require function is used in a way in which dependencies cannot be statically extracted/,
       resource: '/@adobe/htlengine/src/compiler/Compiler.js',
     }, {
+      message: /Critical dependency: require function is used in a way in which dependencies cannot be statically extracted/,
+      resource: '/epsagon/dist/bundle.js',
+    }, {
       message: /Critical dependency: the request of a dependency is an expression/,
       resource: '/@adobe/htlengine/src/runtime/Runtime.js',
     }, {
@@ -119,7 +194,11 @@ class ActionBundler {
 
     const matchWarning = (rules) => (w) => {
       const msg = w.message;
-      const res = w.module.resource;
+      let res = w.module.resource;
+      if (res.indexOf('\\') >= 0) {
+        // fake posix path
+        res = res.replace(/\\/g, '/');
+      }
       return !rules.find((r) => {
         if (!res.endsWith(r.resource)) {
           return false;
@@ -128,28 +207,38 @@ class ActionBundler {
       });
     };
 
-    return new Promise((resolve, reject) => {
-      compiler.run((err, stats) => {
+    const stats = await new Promise((resolve, reject) => {
+      compiler.run((err, s) => {
         if (err) {
           reject(err);
-          return;
+        } else {
+          resolve(s);
         }
-
-        // filter out the expected warnings and errors
-        // eslint-disable-next-line no-param-reassign,max-len
-        stats.compilation.warnings = stats.compilation.warnings.filter(matchWarning(ignoredWarnings));
-        // eslint-disable-next-line no-param-reassign
-        stats.compilation.errors = stats.compilation.errors.filter(matchWarning(ignoredErrors));
-
-        if (stats.hasErrors() || stats.hasWarnings()) {
-          resolve(stats.toJson({
-            errorDetails: false,
-          }));
-          return;
-        }
-        resolve({});
       });
     });
+
+    // filter out the expected warnings and errors
+    // eslint-disable-next-line no-param-reassign,max-len
+    stats.compilation.warnings = stats.compilation.warnings.filter(matchWarning(ignoredWarnings));
+    // eslint-disable-next-line no-param-reassign
+    stats.compilation.errors = stats.compilation.errors.filter(matchWarning(ignoredErrors));
+
+    if (!stats.hasErrors()) {
+      await this.resolveDependencyInfos(stats);
+
+      scripts.forEach((s) => {
+        const moduleName = path.relative(this._cwd, s.bundlePath);
+        // eslint-disable-next-line no-param-reassign
+        s.dependencies = this._dependencies[moduleName];
+      });
+    }
+
+    if (stats.hasErrors() || stats.hasWarnings()) {
+      return stats.toJson({
+        errorDetails: false,
+      });
+    }
+    return {};
   }
 }
 
