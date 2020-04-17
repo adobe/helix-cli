@@ -604,7 +604,7 @@ describe('hlx deploy (custom pipeline)', function suite() {
 
   afterEach(async () => {
     $.cd(cwd);
-    // await fs.remove(testRoot);
+    await fs.remove(testRoot);
   });
 
   it('Deploy (dry-running) installs a default pipeline', async () => {
