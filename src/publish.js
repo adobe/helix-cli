@@ -43,7 +43,7 @@ module.exports = function strain() {
           alias: 'apiPublish',
           describe: 'API URL for helix-publish service.',
           type: 'string',
-          default: 'https://adobeioruntime.net/api/v1/web/helix/helix-services/publish@v4',
+          default: 'https://adobeioruntime.net/api/v1/web/helix/helix-services/publish@v5',
         })
         .option('api-config-purge', {
           alias: 'apiConfigPurge',
