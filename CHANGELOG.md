@@ -1,3 +1,10 @@
+# [9.1.0](https://github.com/adobe/helix-cli/compare/v9.0.1...v9.1.0) (2020-04-20)
+
+
+### Features
+
+* **deploy:** add project info and dependencies as action annotations ([#1369](https://github.com/adobe/helix-cli/issues/1369)) ([541ceb2](https://github.com/adobe/helix-cli/commit/541ceb2d6f08a167f6609fec0408b22baf331d8b)), closes [#1365](https://github.com/adobe/helix-cli/issues/1365)
+
 ## [9.0.1](https://github.com/adobe/helix-cli/compare/v9.0.0...v9.0.1) (2020-04-16)
 
 
