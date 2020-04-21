@@ -80,7 +80,7 @@ describe('hlx publish --remote (default)', () => {
   it('publishing sends expected parameters', async () => {
     let publishBody;
     const scope = nock('https://adobeioruntime.net')
-      .post('/api/v1/web/helix/helix-services/publish@v4', (body) => {
+      .post('/api/v1/web/helix/helix-services/publish@v5', (body) => {
         assert.equal(body.algoliaappid, 'fake_id');
         assert.equal(body.indexconfig.indices['blog-posts'].source, 'html');
         publishBody = body;
@@ -98,7 +98,7 @@ describe('hlx publish --remote (default)', () => {
       .withAlgoliaAppID('fake_id')
       .withAlgoliaAPIKey('fake_key')
       .withWskHost('doesn.t.matter')
-      .withPublishAPI('https://adobeioruntime.net/api/v1/web/helix/helix-services/publish@v4')
+      .withPublishAPI('https://adobeioruntime.net/api/v1/web/helix/helix-services/publish@v5')
       .withConfigFile(path.resolve(__dirname, 'fixtures/deployed.yaml'))
       .withIndexConfigFile(path.resolve(__dirname, 'fixtures/helix-index.yaml'))
       .withFilter()
