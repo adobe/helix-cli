@@ -1,3 +1,14 @@
+## [9.1.2](https://github.com/adobe/helix-cli/compare/v9.1.1...v9.1.2) (2020-04-27)
+
+
+### Bug Fixes
+
+* **deps:** npm audit fix ([5c861f7](https://github.com/adobe/helix-cli/commit/5c861f7dc62efea0a8087e2f9b2acaf331b57f24))
+* **deps:** update [@adobe](https://github.com/adobe) ([39d0a94](https://github.com/adobe/helix-cli/commit/39d0a941406f2a81ba1fe53d8ecb7703898f5434))
+* **deps:** update dependency @adobe/helix-shared to v7.2.0 ([bd13a26](https://github.com/adobe/helix-cli/commit/bd13a26e16ce6c181dbe42f10fc4d1e2e19d9e57))
+* **deps:** update dependency @adobe/helix-simulator to v4.1.12 ([2dce23c](https://github.com/adobe/helix-cli/commit/2dce23c5758d4f846879ea1c62f072f9fc961da5))
+* **publish:** use helix-publish@v5 ([bf0f83e](https://github.com/adobe/helix-cli/commit/bf0f83eb66b9dbe4073224ba896a37d5b85999c3)), closes [#1371](https://github.com/adobe/helix-cli/issues/1371)
+
 ## [9.1.1](https://github.com/adobe/helix-cli/compare/v9.1.0...v9.1.1) (2020-04-20)
 
 
