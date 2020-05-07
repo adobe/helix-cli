@@ -1,3 +1,10 @@
+## [9.1.6](https://github.com/adobe/helix-cli/compare/v9.1.5...v9.1.6) (2020-05-07)
+
+
+### Bug Fixes
+
+* **deps:** update [@adobe](https://github.com/adobe) ([#1396](https://github.com/adobe/helix-cli/issues/1396)) ([df3259a](https://github.com/adobe/helix-cli/commit/df3259a9e75bd6b098904134974e66ce1138bce5))
+
 ## [9.1.5](https://github.com/adobe/helix-cli/compare/v9.1.4...v9.1.5) (2020-05-07)
 
 
