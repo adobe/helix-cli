@@ -18,14 +18,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/adobe/helix-cli"
+    "url": "https://github.com/adobe/helix-cli.git"
   },
   "author": "",
   "license": "Apache-2.0",
   "bugs": {
-    "url": "https://github.com/adobe/project-helix/issues"
+    "url": "https://github.com/adobe/helix-cli/issues"
   },
-  "homepage": "https://github.com/adobe/project-helix#readme",
+  "homepage": "https://github.com/adobe/helix-cli#readme",
   "engines": {
     "node": ">=10.0 <11.0 || >=12.11.1 <13.0"
   },
