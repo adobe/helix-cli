@@ -490,6 +490,9 @@ Alternatively you can auto-add one using the {grey --add <name>} option.`);
           dependencies: script.dependencies.map((dep) => dep.id).join(','),
           git: giturl.toString(),
         },
+        limits: {
+          memory: 512,
+        },
       };
 
       const baseName = path.basename(script.main);
