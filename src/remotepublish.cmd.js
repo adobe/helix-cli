@@ -46,6 +46,8 @@ class RemotePublishCommand extends AbstractCommand {
     this._algoliaAPIKey = null;
     this._epsagonAppName = null;
     this._epsagonToken = null;
+    this._coralogixAppName = null;
+    this._coralogixToken = null;
   }
 
   tick(ticks = 1, message, name) {
@@ -157,6 +159,16 @@ class RemotePublishCommand extends AbstractCommand {
     return this;
   }
 
+  withCoralogixAppName(value) {
+    this._coralogixAppName = value;
+    return this;
+  }
+
+  withCoralogixToken(value) {
+    this._coralogixToken = value;
+    return this;
+  }
+
   withFilter(only, exclude) {
     if (!(only || exclude)) {
       return this;
@@ -261,6 +273,8 @@ class RemotePublishCommand extends AbstractCommand {
         service: this._fastly_namespace,
         token: this._fastly_auth,
         version: this._version,
+        coralogixkey: this._coralogixToken,
+        coralogixapp: this._coralogixAppName,
         cliversion,
       },
     }).then(() => {

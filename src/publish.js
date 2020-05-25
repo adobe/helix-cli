@@ -17,6 +17,7 @@ const yargsFastly = require('./yargs-fastly.js');
 const yargsGithub = require('./yargs-github.js');
 const yargsAlgolia = require('./yargs-algolia.js');
 const yargsEpsagon = require('./yargs-epsagon.js');
+const yargsCoralogix = require('./yargs-coralogix.js');
 const { getOrCreateLogger } = require('./log-common.js');
 
 module.exports = function strain() {
@@ -34,6 +35,7 @@ module.exports = function strain() {
       yargsGithub(yargs);
       yargsAlgolia(yargs);
       yargsEpsagon(yargs);
+      yargsCoralogix(yargs);
       yargs
         .option('dry-run', {
           alias: 'dryRun',
@@ -110,7 +112,7 @@ module.exports = function strain() {
           return true;
         })
         .group(['wsk-auth', 'wsk-namespace', 'fastly-auth', 'fastly-serviceid'], 'Deployment Options')
-        .group(['wsk-host', 'dry-run', 'epsagon-app-name', 'epsagon-token'], 'Advanced Options')
+        .group(['wsk-host', 'dry-run', 'epsagon-app-name', 'epsagon-token', 'coralogix-app-name', 'coralogix-token'], 'Advanced Options')
         .group(['github-token', 'update-bot-config'], 'Helix Bot Options')
         .help();
     },
@@ -141,6 +143,8 @@ module.exports = function strain() {
         .withAlgoliaAPIKey(argv.algoliaApiKey)
         .withEpsagonAppName(argv.epsagonAppName)
         .withEpsagonToken(argv.epsagonToken)
+        .withCoralogixAppName(argv.coralogixAppName)
+        .withCoralogixToken(argv.coralogixToken)
         .run();
     },
   };
