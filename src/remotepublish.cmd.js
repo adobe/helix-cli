@@ -44,6 +44,8 @@ class RemotePublishCommand extends AbstractCommand {
     this._purge = 'soft';
     this._algoliaAppID = null;
     this._algoliaAPIKey = null;
+    this._epsagonAppName = null;
+    this._epsagonToken = null;
   }
 
   tick(ticks = 1, message, name) {
@@ -142,6 +144,16 @@ class RemotePublishCommand extends AbstractCommand {
 
   withAlgoliaAPIKey(value) {
     this._algoliaAPIKey = value;
+    return this;
+  }
+
+  withEpsagonAppName(value) {
+    this._epsagonAppName = value;
+    return this;
+  }
+
+  withEpsagonToken(value) {
+    this._epsagonToken = value;
     return this;
   }
 
@@ -309,6 +321,8 @@ ${e}`);
     const body = {
       indexconfig: this.indexConfig.toJSON(),
       algoliaappid: this._algoliaAppID,
+      epsagontoken: this._epsagonToken,
+      epsagonapp: this._epsagonAppName,
       configuration: this.config.toJSON(),
       service: this._fastly_namespace,
       token: this._fastly_auth,
