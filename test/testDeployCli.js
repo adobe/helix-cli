@@ -50,6 +50,10 @@ describe('hlx deploy', () => {
     mockDeploy.withMinify.returnsThis();
     mockDeploy.withResolveGitRefService.returnsThis();
     mockDeploy.withCustomPipeline.returnsThis();
+    mockDeploy.withEpsagonAppName.returnsThis();
+    mockDeploy.withEpsagonToken.returnsThis();
+    mockDeploy.withCoralogixAppName.returnsThis();
+    mockDeploy.withCoralogixToken.returnsThis();
     mockDeploy.run.returnsThis();
 
     // disable static functions as well to avoid shelljs executions.

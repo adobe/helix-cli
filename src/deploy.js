@@ -16,6 +16,8 @@ const yargsOpenwhisk = require('./yargs-openwhisk.js');
 const yargsFastly = require('./yargs-fastly.js');
 const yargsBuild = require('./yargs-build.js');
 const yargsParams = require('./yargs-params.js');
+const yargsCoralogix = require('./yargs-coralogix.js');
+const yargsEpsagon = require('./yargs-epsagon.js');
 const { getOrCreateLogger } = require('./log-common.js');
 
 module.exports = function deploy() {
@@ -31,6 +33,8 @@ module.exports = function deploy() {
       yargsOpenwhisk(yargs);
       yargsFastly(yargs);
       yargsBuild(yargs);
+      yargsEpsagon(yargs);
+      yargsCoralogix(yargs);
       yargsParams(yargs, {
         name: 'default',
         describe: 'Adds a default parameter to the function',
@@ -89,7 +93,7 @@ module.exports = function deploy() {
           default: 'helix-services/resolve-git-ref@v1',
         })
         .group(['auto', 'wsk-auth', 'wsk-namespace', 'default', 'default-file', 'dirty'], 'Deployment Options')
-        .group(['wsk-host', 'target'], 'Advanced Options')
+        .group(['wsk-host', 'target', 'epsagon-app-name', 'epsagon-token', 'coralogix-app-name', 'coralogix-token'], 'Advanced Options')
         .group(['package', 'minify', 'target'], 'Package options')
         .check((args) => {
           if (!args.auto) {
@@ -149,6 +153,10 @@ module.exports = function deploy() {
         .withMinify(argv.minify)
         .withResolveGitRefService(argv.svcResolveGitRef)
         .withCustomPipeline(argv.customPipeline)
+        .withEpsagonAppName(argv.epsagonAppName)
+        .withEpsagonToken(argv.epsagonToken)
+        .withCoralogixAppName(argv.coralogixAppName)
+        .withCoralogixToken(argv.coralogixToken)
         .run();
     },
 

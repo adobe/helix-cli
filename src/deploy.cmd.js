@@ -58,6 +58,10 @@ class DeployCommand extends AbstractCommand {
     this._enableMinify = false;
     this._resolveGitRefSvc = 'helix-services/resolve-git-ref@v1';
     this._customPipeline = null;
+    this._epsagonAppName = null;
+    this._epsagonToken = null;
+    this._coralogixAppName = null;
+    this._coralogixToken = null;
   }
 
   get requireConfigFile() {
@@ -164,6 +168,26 @@ class DeployCommand extends AbstractCommand {
     return this;
   }
 
+  withEpsagonAppName(value) {
+    this._epsagonAppName = value;
+    return this;
+  }
+
+  withEpsagonToken(value) {
+    this._epsagonToken = value;
+    return this;
+  }
+
+  withCoralogixAppName(value) {
+    this._coralogixAppName = value;
+    return this;
+  }
+
+  withCoralogixToken(value) {
+    this._coralogixToken = value;
+    return this;
+  }
+
   actionName(script) {
     if (script.main.indexOf(path.resolve(__dirname, 'openwhisk')) === 0) {
       return `hlx--${script.name}`;
@@ -257,6 +281,19 @@ class DeployCommand extends AbstractCommand {
     }
     if (this._wsk_namespace) {
       envars.push(DeployCommand.setBuildVar('HLX_WSK_NAMESPACE', this._wsk_namespace, owner, repo, auth));
+    }
+
+    if (this._epsagonAppName) {
+      envars.push(DeployCommand.setBuildVar('HLX_EPSAGON_APP_NAME', this._epsagonAppName, owner, repo, auth));
+    }
+    if (this._epsagonToken) {
+      envars.push(DeployCommand.setBuildVar('HLX_EPSAGON_TOKEN', this._epsagonToken, owner, repo, auth));
+    }
+    if (this._coralogixAppName) {
+      envars.push(DeployCommand.setBuildVar('HLX_CORALOGIX_APP_NAME', this._coralogixAppName, owner, repo, auth));
+    }
+    if (this._coralogixToken) {
+      envars.push(DeployCommand.setBuildVar('HLX_CORALOGIX_TOKEN', this._coralogixToken, owner, repo, auth));
     }
 
     await Promise.all(envars);
@@ -405,6 +442,9 @@ Alternatively you can auto-add one using the {grey --add <name>} option.`);
 
     const params = {
       ...this._default,
+      EPSAGON_TOKEN: this._epsagonToken,
+      CORALOGIX_API_KEY: this._coralogixToken,
+      CORALOGIX_APPLICATION_NAME: this._coralogixAppName,
     };
 
     // read files ...
