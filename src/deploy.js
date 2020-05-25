@@ -50,18 +50,6 @@ module.exports = function deploy() {
           type: 'boolean',
           default: false,
         })
-        .option('loggly-host', {
-          alias: 'logglyHost',
-          describe: 'API Host for Log Appender',
-          type: 'string',
-          default: 'trieloff.loggly.com',
-        })
-        .option('loggly-auth', {
-          alias: 'logglyAuth',
-          describe: 'API Key for Log Appender ($HLX_LOGGLY_AUTH)',
-          type: 'string',
-          default: '',
-        })
         .option('circleci-auth', {
           alias: 'circleciAuth',
           describe: 'API Key for CircleCI API ($HLX_CIRCLECI_AUTH)',
@@ -101,7 +89,7 @@ module.exports = function deploy() {
           default: 'helix-services/resolve-git-ref@v1',
         })
         .group(['auto', 'wsk-auth', 'wsk-namespace', 'default', 'default-file', 'dirty'], 'Deployment Options')
-        .group(['wsk-host', 'loggly-host', 'loggly-auth', 'target'], 'Advanced Options')
+        .group(['wsk-host', 'target'], 'Advanced Options')
         .group(['package', 'minify', 'target'], 'Package options')
         .check((args) => {
           if (!args.auto) {
@@ -148,8 +136,6 @@ module.exports = function deploy() {
         .withWskAuth(argv.wskAuth)
         .withWskHost(argv.wskHost)
         .withWskNamespace(argv.wskNamespace)
-        .withLogglyHost(argv.logglyHost)
-        .withLogglyAuth(argv.logglyAuth)
         .withTarget(argv.target)
         .withFiles(argv.files)
         .withDefault(argv.default)

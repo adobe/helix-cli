@@ -42,8 +42,6 @@ class DeployCommand extends AbstractCommand {
     this._wsk_auth = null;
     this._wsk_namespace = null;
     this._wsk_host = null;
-    this._loggly_host = null;
-    this._loggly_auth = null;
     this._fastly_namespace = null;
     this._fastly_auth = null;
     this._target = null;
@@ -98,16 +96,6 @@ class DeployCommand extends AbstractCommand {
 
   withWskNamespace(value) {
     this._wsk_namespace = value;
-    return this;
-  }
-
-  withLogglyHost(value) {
-    this._loggly_host = value;
-    return this;
-  }
-
-  withLogglyAuth(value) {
-    this._loggly_auth = value;
     return this;
   }
 
@@ -270,12 +258,6 @@ class DeployCommand extends AbstractCommand {
     if (this._wsk_namespace) {
       envars.push(DeployCommand.setBuildVar('HLX_WSK_NAMESPACE', this._wsk_namespace, owner, repo, auth));
     }
-    if (this._loggly_auth) {
-      envars.push(DeployCommand.setBuildVar('HLX_LOGGLY_AUTH', this._wsk_auth, owner, repo, auth));
-    }
-    if (this._loggly_host) {
-      envars.push(DeployCommand.setBuildVar('HLX_LOGGLY_HOST', this._loggly_host, owner, repo, auth));
-    }
 
     await Promise.all(envars);
 
@@ -423,8 +405,6 @@ Alternatively you can auto-add one using the {grey --add <name>} option.`);
 
     const params = {
       ...this._default,
-      LOGGLY_HOST: this._loggly_host,
-      LOGGLY_KEY: this._loggly_auth,
     };
 
     // read files ...
