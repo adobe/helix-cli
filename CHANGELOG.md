@@ -1,3 +1,28 @@
+# [10.0.0](https://github.com/adobe/helix-cli/compare/v9.1.9...v10.0.0) (2020-05-26)
+
+
+### Bug Fixes
+
+* **deploy:** add missing epsagon application name ([c98d03a](https://github.com/adobe/helix-cli/commit/c98d03ab744b31014cc2389f542de39492f66504))
+* **deploy:** remove null values when setting deploy-time parameters ([1a155b8](https://github.com/adobe/helix-cli/commit/1a155b862596dc8f795b20e1c55ef38617d37f5e))
+
+
+### Code Refactoring
+
+* **loggly:** remove support for Loggy ([5652cb8](https://github.com/adobe/helix-cli/commit/5652cb86d062ac739a444d2ca3e2faf5c9b11f7e))
+
+
+### Features
+
+* **deploy:** pass epsagon and coralogix credentials to deployed package ([cb0c872](https://github.com/adobe/helix-cli/commit/cb0c872b19017fe6faa2535b8d8bb7d68af41513))
+* **epsagon:** pass Epsagon app name and token to helix-publish for VCL tracing ([b5d7107](https://github.com/adobe/helix-cli/commit/b5d710724f8865b60e2943b9cb58328e61cb6369))
+* **publish:** add support for coralogix logging at CDN level ([1379819](https://github.com/adobe/helix-cli/commit/1379819e2eb7589a8503f14b3301008bee3308b5)), closes [#1372](https://github.com/adobe/helix-cli/issues/1372)
+
+
+### BREAKING CHANGES
+
+* **loggly:** The loggly support wasn't in active use for a while (since we switched from Winston to Helix Log), but remnants remained in the helix-cli code base. This commit removes that support entirely.
+
 ## [9.1.9](https://github.com/adobe/helix-cli/compare/v9.1.8...v9.1.9) (2020-05-19)
 
 
