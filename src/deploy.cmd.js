@@ -445,6 +445,7 @@ Alternatively you can auto-add one using the {grey --add <name>} option.`);
       EPSAGON_TOKEN: this._epsagonToken,
       CORALOGIX_API_KEY: this._coralogixToken,
       CORALOGIX_APPLICATION_NAME: this._coralogixAppName,
+      RESOLVE_GITREF_SERVICE: this._resolveGitRefSvc,
     }).reduce((obj, [key, value]) => {
       // remove all null values
       if (value !== null) {
@@ -459,11 +460,6 @@ Alternatively you can auto-add one using the {grey --add <name>} option.`);
       .filter((script) => script.zipFile) // skip empty zip files
       .map((script) => fs.readFile(script.zipFile)
         .then((action) => ({ script, action })));
-
-    // get API url of resolve action
-    if (this._resolveGitRefSvc) {
-      params.RESOLVE_GITREF_SERVICE = this._resolveGitRefSvc;
-    }
 
     // create openwhisk package
     if (!this._dryRun) {
