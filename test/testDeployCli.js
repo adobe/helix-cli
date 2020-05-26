@@ -37,8 +37,6 @@ describe('hlx deploy', () => {
     mockDeploy.withWskHost.returnsThis();
     mockDeploy.withWskAuth.returnsThis();
     mockDeploy.withWskNamespace.returnsThis();
-    mockDeploy.withLogglyHost.returnsThis();
-    mockDeploy.withLogglyAuth.returnsThis();
     mockDeploy.withTarget.returnsThis();
     mockDeploy.withFiles.returnsThis();
     mockDeploy.withDefault.returnsThis();
@@ -52,6 +50,10 @@ describe('hlx deploy', () => {
     mockDeploy.withMinify.returnsThis();
     mockDeploy.withResolveGitRefService.returnsThis();
     mockDeploy.withCustomPipeline.returnsThis();
+    mockDeploy.withEpsagonAppName.returnsThis();
+    mockDeploy.withEpsagonToken.returnsThis();
+    mockDeploy.withCoralogixAppName.returnsThis();
+    mockDeploy.withCoralogixToken.returnsThis();
     mockDeploy.run.returnsThis();
 
     // disable static functions as well to avoid shelljs executions.
@@ -129,8 +131,6 @@ OpenWhisk Namespace is required`);
     sinon.assert.calledWith(mockDeploy.withWskHost, 'adobeioruntime.net');
     sinon.assert.calledWith(mockDeploy.withWskAuth, 'secret-key');
     sinon.assert.calledWith(mockDeploy.withWskNamespace, 'hlx');
-    sinon.assert.calledWith(mockDeploy.withLogglyHost, 'trieloff.loggly.com'); // TODO !!
-    sinon.assert.calledWith(mockDeploy.withLogglyAuth, '');
     sinon.assert.calledWith(mockDeploy.withFastlyAuth, undefined);
     sinon.assert.calledWith(mockDeploy.withFastlyNamespace, undefined);
     sinon.assert.calledWith(mockDeploy.withTarget, '.hlx/build');
@@ -155,8 +155,6 @@ OpenWhisk Namespace is required`);
     sinon.assert.calledWith(mockDeploy.withWskHost, 'myruntime.net');
     sinon.assert.calledWith(mockDeploy.withWskAuth, 'foobar');
     sinon.assert.calledWith(mockDeploy.withWskNamespace, '1234');
-    sinon.assert.calledWith(mockDeploy.withLogglyHost, 'my.loggly.com');
-    sinon.assert.calledWith(mockDeploy.withLogglyAuth, 'foobar');
     sinon.assert.calledWith(mockDeploy.withFastlyAuth, 'foobar');
     sinon.assert.calledWith(mockDeploy.withFastlyNamespace, '1234');
     sinon.assert.calledWith(mockDeploy.withTarget, 'foo');
@@ -248,12 +246,8 @@ OpenWhisk Namespace is required`);
       .run(['deploy',
         '--wsk-auth', 'secret-key',
         '--wsk-namespace', 'hlx',
-        '--loggly-host', 'example.logly.com',
-        '--loggly-auth', 'some-secret-logger-key',
       ]);
 
-    sinon.assert.calledWith(mockDeploy.withLogglyHost, 'example.logly.com');
-    sinon.assert.calledWith(mockDeploy.withLogglyAuth, 'some-secret-logger-key');
     sinon.assert.calledOnce(mockDeploy.run);
   });
 

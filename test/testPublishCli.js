@@ -47,6 +47,10 @@ describe('hlx publish', () => {
     mockPublish.withDebugKey.returnsThis();
     mockPublish.withAlgoliaAPIKey.returnsThis();
     mockPublish.withAlgoliaAppID.returnsThis();
+    mockPublish.withEpsagonAppName.returnsThis();
+    mockPublish.withEpsagonToken.returnsThis();
+    mockPublish.withCoralogixAppName.returnsThis();
+    mockPublish.withCoralogixToken.returnsThis();
     mockPublish.run.returnsThis();
   });
 

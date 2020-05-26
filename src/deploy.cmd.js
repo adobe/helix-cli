@@ -42,8 +42,6 @@ class DeployCommand extends AbstractCommand {
     this._wsk_auth = null;
     this._wsk_namespace = null;
     this._wsk_host = null;
-    this._loggly_host = null;
-    this._loggly_auth = null;
     this._fastly_namespace = null;
     this._fastly_auth = null;
     this._target = null;
@@ -60,6 +58,10 @@ class DeployCommand extends AbstractCommand {
     this._enableMinify = false;
     this._resolveGitRefSvc = 'helix-services/resolve-git-ref@v1';
     this._customPipeline = null;
+    this._epsagonAppName = null;
+    this._epsagonToken = null;
+    this._coralogixAppName = null;
+    this._coralogixToken = null;
   }
 
   get requireConfigFile() {
@@ -98,16 +100,6 @@ class DeployCommand extends AbstractCommand {
 
   withWskNamespace(value) {
     this._wsk_namespace = value;
-    return this;
-  }
-
-  withLogglyHost(value) {
-    this._loggly_host = value;
-    return this;
-  }
-
-  withLogglyAuth(value) {
-    this._loggly_auth = value;
     return this;
   }
 
@@ -173,6 +165,26 @@ class DeployCommand extends AbstractCommand {
 
   withCustomPipeline(customPipeline) {
     this._customPipeline = customPipeline;
+    return this;
+  }
+
+  withEpsagonAppName(value) {
+    this._epsagonAppName = value;
+    return this;
+  }
+
+  withEpsagonToken(value) {
+    this._epsagonToken = value;
+    return this;
+  }
+
+  withCoralogixAppName(value) {
+    this._coralogixAppName = value;
+    return this;
+  }
+
+  withCoralogixToken(value) {
+    this._coralogixToken = value;
     return this;
   }
 
@@ -270,11 +282,18 @@ class DeployCommand extends AbstractCommand {
     if (this._wsk_namespace) {
       envars.push(DeployCommand.setBuildVar('HLX_WSK_NAMESPACE', this._wsk_namespace, owner, repo, auth));
     }
-    if (this._loggly_auth) {
-      envars.push(DeployCommand.setBuildVar('HLX_LOGGLY_AUTH', this._wsk_auth, owner, repo, auth));
+
+    if (this._epsagonAppName) {
+      envars.push(DeployCommand.setBuildVar('HLX_EPSAGON_APP_NAME', this._epsagonAppName, owner, repo, auth));
     }
-    if (this._loggly_host) {
-      envars.push(DeployCommand.setBuildVar('HLX_LOGGLY_HOST', this._loggly_host, owner, repo, auth));
+    if (this._epsagonToken) {
+      envars.push(DeployCommand.setBuildVar('HLX_EPSAGON_TOKEN', this._epsagonToken, owner, repo, auth));
+    }
+    if (this._coralogixAppName) {
+      envars.push(DeployCommand.setBuildVar('HLX_CORALOGIX_APP_NAME', this._coralogixAppName, owner, repo, auth));
+    }
+    if (this._coralogixToken) {
+      envars.push(DeployCommand.setBuildVar('HLX_CORALOGIX_TOKEN', this._coralogixToken, owner, repo, auth));
     }
 
     await Promise.all(envars);
@@ -421,22 +440,27 @@ Alternatively you can auto-add one using the {grey --add <name>} option.`);
       }
     };
 
-    const params = {
+    const params = Object.entries({
       ...this._default,
-      LOGGLY_HOST: this._loggly_host,
-      LOGGLY_KEY: this._loggly_auth,
-    };
+      EPSAGON_TOKEN: this._epsagonToken,
+      CORALOGIX_API_KEY: this._coralogixToken,
+      CORALOGIX_APPLICATION_NAME: this._coralogixAppName,
+      RESOLVE_GITREF_SERVICE: this._resolveGitRefSvc,
+      EPSAGON_APPLICATION_NAME: this._epsagonAppName,
+    }).reduce((obj, [key, value]) => {
+      // remove all null values
+      if (value !== null) {
+        // eslint-disable-next-line no-param-reassign
+        obj[key] = value;
+      }
+      return obj;
+    }, {});
 
     // read files ...
     const read = scripts
       .filter((script) => script.zipFile) // skip empty zip files
       .map((script) => fs.readFile(script.zipFile)
         .then((action) => ({ script, action })));
-
-    // get API url of resolve action
-    if (this._resolveGitRefSvc) {
-      params.RESOLVE_GITREF_SERVICE = this._resolveGitRefSvc;
-    }
 
     // create openwhisk package
     if (!this._dryRun) {

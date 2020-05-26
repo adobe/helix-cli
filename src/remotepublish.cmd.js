@@ -44,6 +44,10 @@ class RemotePublishCommand extends AbstractCommand {
     this._purge = 'soft';
     this._algoliaAppID = null;
     this._algoliaAPIKey = null;
+    this._epsagonAppName = null;
+    this._epsagonToken = null;
+    this._coralogixAppName = null;
+    this._coralogixToken = null;
   }
 
   tick(ticks = 1, message, name) {
@@ -142,6 +146,26 @@ class RemotePublishCommand extends AbstractCommand {
 
   withAlgoliaAPIKey(value) {
     this._algoliaAPIKey = value;
+    return this;
+  }
+
+  withEpsagonAppName(value) {
+    this._epsagonAppName = value;
+    return this;
+  }
+
+  withEpsagonToken(value) {
+    this._epsagonToken = value;
+    return this;
+  }
+
+  withCoralogixAppName(value) {
+    this._coralogixAppName = value;
+    return this;
+  }
+
+  withCoralogixToken(value) {
+    this._coralogixToken = value;
     return this;
   }
 
@@ -249,6 +273,8 @@ class RemotePublishCommand extends AbstractCommand {
         service: this._fastly_namespace,
         token: this._fastly_auth,
         version: this._version,
+        coralogixkey: this._coralogixToken,
+        coralogixapp: this._coralogixAppName,
         cliversion,
       },
     }).then(() => {
@@ -309,6 +335,8 @@ ${e}`);
     const body = {
       indexconfig: this.indexConfig.toJSON(),
       algoliaappid: this._algoliaAppID,
+      epsagontoken: this._epsagonToken,
+      epsagonapp: this._epsagonAppName,
       configuration: this.config.toJSON(),
       service: this._fastly_namespace,
       token: this._fastly_auth,

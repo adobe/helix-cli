@@ -438,9 +438,11 @@ describe('hlx deploy (Integration)', () => {
             { key: 'MY_DEFAULT_2', value: 'default-value-2' },
             { key: 'MY_DEFAULT_1', value: 'default-value-1' },
             { key: 'FOO', value: 'bar' },
-            { key: 'LOGGLY_HOST', value: 'loggly-host' },
-            { key: 'LOGGLY_KEY', value: 'loggly-auth' },
+            { key: 'EPSAGON_TOKEN', value: 'fake-token' },
+            { key: 'CORALOGIX_API_KEY', value: 'fake-key' },
+            { key: 'CORALOGIX_APPLICATION_NAME', value: 'fake-name' },
             { key: 'RESOLVE_GITREF_SERVICE', value: 'my-resolver' },
+            { key: 'EPSAGON_APPLICATION_NAME', value: 'fake-name' },
           ],
           annotations: [
             {
@@ -489,6 +491,10 @@ describe('hlx deploy (Integration)', () => {
       .withModulePaths(testModules)
       .withDryRun(false)
       .withTarget(buildDir)
+      .withEpsagonToken('fake-token')
+      .withEpsagonAppName('fake-name')
+      .withCoralogixAppName('fake-name')
+      .withCoralogixToken('fake-key')
       .withFiles([
         path.resolve(testRoot, 'src/html.htl'),
         path.resolve(testRoot, 'src/html.pre.js'),
@@ -497,8 +503,6 @@ describe('hlx deploy (Integration)', () => {
         path.resolve(testRoot, 'src/third_helper.js'),
       ])
       .withMinify(false)
-      .withLogglyAuth('loggly-auth')
-      .withLogglyHost('loggly-host')
       .withDefault({ FOO: 'bar' })
       .withDefaultFile(decodeFileParams.bind(null, ['defaults.json', 'defaults.env']))
       .withResolveGitRefService('my-resolver')
