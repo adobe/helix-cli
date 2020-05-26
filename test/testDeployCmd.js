@@ -442,6 +442,7 @@ describe('hlx deploy (Integration)', () => {
             { key: 'CORALOGIX_API_KEY', value: 'fake-key' },
             { key: 'CORALOGIX_APPLICATION_NAME', value: 'fake-name' },
             { key: 'RESOLVE_GITREF_SERVICE', value: 'my-resolver' },
+            { key: 'EPSAGON_APPLICATION_NAME', value: 'fake-name' },
           ],
           annotations: [
             {
