@@ -440,12 +440,19 @@ Alternatively you can auto-add one using the {grey --add <name>} option.`);
       }
     };
 
-    const params = {
+    const params = Object.entries({
       ...this._default,
       EPSAGON_TOKEN: this._epsagonToken,
       CORALOGIX_API_KEY: this._coralogixToken,
       CORALOGIX_APPLICATION_NAME: this._coralogixAppName,
-    };
+    }).reduce((obj, [key, value]) => {
+      // remove all null values
+      if (value !== null) {
+        // eslint-disable-next-line no-param-reassign
+        obj[key] = value;
+      }
+      return obj;
+    }, {});
 
     // read files ...
     const read = scripts
