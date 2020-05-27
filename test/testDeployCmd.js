@@ -42,7 +42,7 @@ describe('hlx deploy (Integration)', () => {
   });
 
   setupPolly({
-    recordIfMissing: true,
+    recordIfMissing: false,
   });
 
   beforeEach(async function beforeEach() {
@@ -540,25 +540,14 @@ describe('hlx deploy (Integration)', () => {
     this.polly.server.put(`https://adobeioruntime.net/api/v1/namespaces/hlx/packages/${ref}`).intercept((req, res) => {
       const body = JSON.parse(req.body);
       try {
-        assert.deepEqual(body, {
-          publish: true,
-          parameters: [
-            { key: 'MY_DEFAULT_2', value: 'default-value-2' },
-            { key: 'MY_DEFAULT_1', value: 'default-value-1' },
-            { key: 'FOO', value: 'bar' },
-            { key: 'EPSAGON_TOKEN', value: 'fake-token' },
-            // { key: 'CORALOGIX_API_KEY', value: 'fake-key' },
-            // { key: 'CORALOGIX_APPLICATION_NAME', value: 'fake-name' },
-            { key: 'RESOLVE_GITREF_SERVICE', value: 'my-resolver' },
-            { key: 'EPSAGON_APPLICATION_NAME', value: 'fake-name' },
-          ],
-          annotations: [
-            {
-              key: 'hlx-code-origin',
-              value: 'ssh://git@github.com/adobe/project-helix.io.git#master',
-            },
-          ],
-        });
+        const empty = body.parameters.filter(({ value }) => value === undefined);
+
+        console.log(empty);
+        if (empty.length !== 0) {
+          res.sendStatus(400);
+          assert.fail('Empty parameters not allowed');
+        }
+
         res.sendStatus(201);
       } catch (e) {
         // eslint-disable-next-line no-console
@@ -599,10 +588,10 @@ describe('hlx deploy (Integration)', () => {
       .withModulePaths(testModules)
       .withDryRun(false)
       .withTarget(buildDir)
-      .withEpsagonToken('fake-token')
-      .withEpsagonAppName('fake-name')
-      // .withCoralogixAppName('fake-name')
-      // .withCoralogixToken('fake-key')
+      .withEpsagonToken('')
+      .withEpsagonAppName(false)
+      .withCoralogixAppName(null)
+      .withCoralogixToken(undefined)
       .withFiles([
         path.resolve(testRoot, 'src/html.htl'),
         path.resolve(testRoot, 'src/html.pre.js'),
