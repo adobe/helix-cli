@@ -1,3 +1,10 @@
+## [10.0.1](https://github.com/adobe/helix-cli/compare/v10.0.0...v10.0.1) (2020-05-27)
+
+
+### Bug Fixes
+
+* **deploy:** filter all falsy values from package parameters ([1b99896](https://github.com/adobe/helix-cli/commit/1b99896d29dbd416120ed855b1d787e426a30546)), closes [#1410](https://github.com/adobe/helix-cli/issues/1410)
+
 # [10.0.0](https://github.com/adobe/helix-cli/compare/v9.1.9...v10.0.0) (2020-05-26)
 
 
