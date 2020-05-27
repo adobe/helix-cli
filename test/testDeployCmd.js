@@ -523,6 +523,103 @@ describe('hlx deploy (Integration)', () => {
     assert.equal(newCfg.strains.get('dev').package, `hlx/${ref}`);
   });
 
+  it('Deploy works with unset parameters', async function test() {
+    this.timeout(60000);
+
+    await fs.copy(TEST_DIR, testRoot);
+    await fs.rename(path.resolve(testRoot, 'default-config.yaml'), path.resolve(testRoot, 'helix-config.yaml'));
+    initGit(testRoot, 'git@github.com:adobe/project-helix.io.git');
+    const logger = logging.createTestLogger();
+
+    const ref = await GitUtils.getCurrentRevision(testRoot);
+
+    this.polly.server.any().on('beforeResponse', (req, res) => {
+      delete req.body;
+      delete res.body;
+    });
+    this.polly.server.put(`https://adobeioruntime.net/api/v1/namespaces/hlx/packages/${ref}`).intercept((req, res) => {
+      const body = JSON.parse(req.body);
+      try {
+        const empty = body.parameters.filter(({ value }) => value === undefined);
+
+        console.log(empty);
+        if (empty.length !== 0) {
+          res.sendStatus(400);
+          assert.fail('Empty parameters not allowed');
+        }
+
+        res.sendStatus(201);
+      } catch (e) {
+        // eslint-disable-next-line no-console
+        console.error(e);
+        res.sendStatus(500);
+      }
+    });
+    this.polly.server.put(`https://adobeioruntime.net/api/v1/namespaces/hlx/actions/${ref}/html`).intercept((req, res) => {
+      const body = JSON.parse(req.body);
+      try {
+        const deps = body.annotations.find((a) => a.key === 'dependencies');
+        assert.ok(deps.value.indexOf('@adobe/helix-fetch') >= 0);
+        const name = body.annotations.find((a) => a.key === 'pkgName');
+        assert.equal(name.value, 'n/a');
+        const version = body.annotations.find((a) => a.key === 'pkgVersion');
+        assert.equal(version.value, 'n/a');
+        res.sendStatus(201);
+      } catch (e) {
+        // eslint-disable-next-line no-console
+        console.error(e);
+        res.sendStatus(500);
+      }
+    });
+    this.polly.server.put('https://adobeioruntime.net/api/v1/namespaces/hlx/packages/helix-services?overwrite=true').intercept((req, res) => {
+      res.sendStatus(201);
+    });
+    this.polly.server.put(`https://adobeioruntime.net/api/v1/namespaces/hlx/actions/${ref}/hlx--static?overwrite=true`).intercept((req, res) => {
+      res.sendStatus(201);
+    });
+
+    const cmd = await new DeployCommand(logger)
+      .withDirectory(testRoot)
+      .withWskHost('adobeioruntime.net')
+      .withWskAuth('dummy')
+      .withWskNamespace('hlx')
+      .withEnableAuto(false)
+      .withEnableDirty(false)
+      .withModulePaths(testModules)
+      .withDryRun(false)
+      .withTarget(buildDir)
+      .withEpsagonToken('')
+      .withEpsagonAppName(false)
+      .withCoralogixAppName(null)
+      .withCoralogixToken(undefined)
+      .withFiles([
+        path.resolve(testRoot, 'src/html.htl'),
+        path.resolve(testRoot, 'src/html.pre.js'),
+        path.resolve(testRoot, 'src/helper.js'),
+        path.resolve(testRoot, 'src/utils/another_helper.js'),
+        path.resolve(testRoot, 'src/third_helper.js'),
+      ])
+      .withMinify(false)
+      .withDefault({ FOO: 'bar' })
+      .withDefaultFile(decodeFileParams.bind(null, ['defaults.json', 'defaults.env']))
+      .withResolveGitRefService('my-resolver')
+      .run();
+
+    assert.equal(cmd.config.strains.get('default').package, '');
+    assert.equal(cmd.config.strains.get('dev').package, `hlx/${ref}`);
+
+    const log = logger.getOutput();
+    assert.ok(log.indexOf('deployment of 1 action completed') >= 0);
+    assert.ok(log.indexOf(`- hlx/${ref}/html`) >= 0);
+
+    // check if written helix config contains package ref
+    const newCfg = new HelixConfig()
+      .withConfigPath(path.resolve(testRoot, 'helix-config.yaml'));
+    await newCfg.init();
+    assert.equal(newCfg.strains.get('default').package, '');
+    assert.equal(newCfg.strains.get('dev').package, `hlx/${ref}`);
+  });
+
   it('Failed action deploy throws', async function test() {
     this.timeout(60000);
 
