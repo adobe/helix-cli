@@ -448,8 +448,8 @@ Alternatively you can auto-add one using the {grey --add <name>} option.`);
       RESOLVE_GITREF_SERVICE: this._resolveGitRefSvc,
       EPSAGON_APPLICATION_NAME: this._epsagonAppName,
     }).reduce((obj, [key, value]) => {
-      // remove all null values
-      if (value !== null) {
+      // remove all falsy values
+      if (value) {
         // eslint-disable-next-line no-param-reassign
         obj[key] = value;
       }
