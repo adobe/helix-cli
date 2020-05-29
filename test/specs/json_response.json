@@ -13,8 +13,8 @@
             "nb-blockquote-1",
             "nb-delete-1",
             "nb-heading-1",
-            "is-text-html-blockquote",
-            "is-text-html",
+            "is-text-blockquote-delete",
+            "is-text-blockquote",
             "is-text"
         ]
     },
