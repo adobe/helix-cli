@@ -54,6 +54,8 @@ describe('hlx deploy', () => {
     mockDeploy.withEpsagonToken.returnsThis();
     mockDeploy.withCoralogixAppName.returnsThis();
     mockDeploy.withCoralogixToken.returnsThis();
+    mockDeploy.withUpdatedAt.returnsThis();
+    mockDeploy.withUpdatedBy.returnsThis();
     mockDeploy.run.returnsThis();
 
     // disable static functions as well to avoid shelljs executions.
@@ -429,5 +431,29 @@ OpenWhisk Namespace is required`);
       MY_DEFAULT_1: 'default-value-1',
       MY_DEFAULT_2: 'default-value-2',
     });
+  });
+
+  it('hlx deploy can set update timestamp', () => {
+    new CLI()
+      .withCommandExecutor('deploy', mockDeploy)
+      .run(['deploy',
+        '--updated-at', '1234',
+        '--wsk-auth', 'secret-key',
+        '--wsk-namespace', 'hlx',
+      ]);
+    sinon.assert.calledWith(mockDeploy.withUpdatedAt, '1234');
+    sinon.assert.calledOnce(mockDeploy.run);
+  });
+
+  it('hlx deploy can set update user', () => {
+    new CLI()
+      .withCommandExecutor('deploy', mockDeploy)
+      .run(['deploy',
+        '--updated-by', 'me',
+        '--wsk-auth', 'secret-key',
+        '--wsk-namespace', 'hlx',
+      ]);
+    sinon.assert.calledWith(mockDeploy.withUpdatedBy, 'me');
+    sinon.assert.calledOnce(mockDeploy.run);
   });
 });

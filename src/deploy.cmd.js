@@ -62,6 +62,8 @@ class DeployCommand extends AbstractCommand {
     this._epsagonToken = null;
     this._coralogixAppName = null;
     this._coralogixToken = null;
+    this._updated = null;
+    this._updatedBy = null;
   }
 
   get requireConfigFile() {
@@ -188,6 +190,16 @@ class DeployCommand extends AbstractCommand {
     return this;
   }
 
+  withUpdatedAt(value) {
+    this._updated = value;
+    return this;
+  }
+
+  withUpdatedBy(value) {
+    this._updatedBy = value;
+    return this;
+  }
+
   actionName(script) {
     if (script.main.indexOf(path.resolve(__dirname, 'openwhisk')) === 0) {
       return `hlx--${script.name}`;
@@ -209,6 +221,7 @@ class DeployCommand extends AbstractCommand {
     } catch (e) {
       this._pkgJson = {};
     }
+    this._updated = this._updated || new Date().getTime();
   }
 
   static getBuildVarOptions(name, value, auth, owner, repo) {
@@ -468,17 +481,33 @@ Alternatively you can auto-add one using the {grey --add <name>} option.`);
         const value = params[key];
         return { key, value };
       });
+      const annotations = [
+        {
+          key: 'hlx-code-origin',
+          value: giturl.toString(),
+        },
+        {
+          key: 'updated',
+          value: this._updated,
+        },
+        {
+          key: 'pkgVersion',
+          value: this._pkgJson.version || 'n/a',
+        },
+        {
+          key: 'pkgName',
+          value: this._pkgJson.name || 'n/a',
+        },
+      ];
+      if (this._updatedBy) {
+        annotations.push({ key: 'updatedBy', value: this._updatedBy });
+      }
       await openwhisk.packages.update({
         name: this._prefix,
         package: {
           publish: true,
           parameters,
-          annotations: [
-            {
-              key: 'hlx-code-origin',
-              value: giturl.toString(),
-            },
-          ],
+          annotations,
         },
       });
       tick(`created package ${this._prefix}`, '');
@@ -513,8 +542,12 @@ Alternatively you can auto-add one using the {grey --add <name>} option.`);
           pkgName: this._pkgJson.name || 'n/a',
           dependencies: script.dependencies.map((dep) => dep.id).join(','),
           git: giturl.toString(),
+          updated: this._updated,
         },
       };
+      if (this._updatedBy) {
+        actionoptions.annotations.updatedBy = this._updatedBy;
+      }
 
       const baseName = path.basename(script.main);
       tick(`deploying ${baseName}`, baseName);

@@ -92,6 +92,17 @@ module.exports = function deploy() {
           type: 'string',
           default: 'helix-services/resolve-git-ref@v1',
         })
+        .option('updated-at', {
+          alias: 'updatedAt',
+          describe: 'Informative Unix timestamp for the deployed actions.',
+          type: 'string',
+          default: new Date().getTime(),
+        })
+        .option('updated-by', {
+          alias: 'updatedBy',
+          describe: 'Informative user name for the deployed actions.',
+          type: 'string',
+        })
         .group(['auto', 'wsk-auth', 'wsk-namespace', 'default', 'default-file', 'dirty'], 'Deployment Options')
         .group(['wsk-host', 'target', 'epsagon-app-name', 'epsagon-token', 'coralogix-app-name', 'coralogix-token'], 'Advanced Options')
         .group(['package', 'minify', 'target'], 'Package options')
@@ -157,6 +168,8 @@ module.exports = function deploy() {
         .withEpsagonToken(argv.epsagonToken)
         .withCoralogixAppName(argv.coralogixAppName)
         .withCoralogixToken(argv.coralogixToken)
+        .withUpdatedAt(argv.updatedAt)
+        .withUpdatedBy(argv.updatedBy)
         .run();
     },
 
