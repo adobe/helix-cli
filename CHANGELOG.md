@@ -1,3 +1,15 @@
+# [10.1.0](https://github.com/adobe/helix-cli/compare/v10.0.1...v10.1.0) (2020-06-03)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @adobe/helix-shared to v7.4.0 ([c54c9b7](https://github.com/adobe/helix-cli/commit/c54c9b74d82d59d58f1818bdc0a93436d11aff26))
+
+
+### Features
+
+* **deploy:** add deploy time and package version ([#1413](https://github.com/adobe/helix-cli/issues/1413)) ([db807f4](https://github.com/adobe/helix-cli/commit/db807f4432d8b8b549ded342352e89672695f62c)), closes [#1409](https://github.com/adobe/helix-cli/issues/1409)
+
 ## [10.0.1](https://github.com/adobe/helix-cli/compare/v10.0.0...v10.0.1) (2020-05-27)
 
 
