@@ -151,7 +151,7 @@ class ModuleHelper {
       this.log.info(chalk`Running {grey npm ${cmd} ${moduleDescriptor}} in {grey ${path.relative(this.directory, this._buildDir)}} ...`);
       // todo: maye use npm API instead, so that we can show a nice progress bar.
       // todo: since stderr is not a TTY when executed with shelljs, we don't see it.
-      await execAsync(`npm ${cmd} --only=prod --prefer-offline --ignore-scripts --no-bin-links --no-audit --save-exact --loglevel ${loglevel} --no-fund --progress true ${moduleDescriptor}`);
+      await execAsync(`npm ${cmd} --only=prod --ignore-scripts --no-bin-links --no-audit --save-exact --loglevel ${loglevel} --no-fund --progress true ${moduleDescriptor}`);
     } catch (e) {
       throw Error(`Unable to install ${name}: ${e}`);
     } finally {

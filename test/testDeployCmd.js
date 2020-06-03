@@ -431,6 +431,7 @@ describe('hlx deploy (Integration)', () => {
     });
     this.polly.server.put(`https://adobeioruntime.net/api/v1/namespaces/hlx/packages/${ref}`).intercept((req, res) => {
       const body = JSON.parse(req.body);
+      console.log(body);
       try {
         assert.deepEqual(body, {
           publish: true,
@@ -449,6 +450,10 @@ describe('hlx deploy (Integration)', () => {
               key: 'hlx-code-origin',
               value: 'ssh://git@github.com/adobe/project-helix.io.git#master',
             },
+            { key: 'updated', value: 1234 },
+            { key: 'pkgVersion', value: 'n/a' },
+            { key: 'pkgName', value: 'n/a' },
+            { key: 'updatedBy', value: 'me' },
           ],
         });
         res.sendStatus(201);
@@ -506,6 +511,8 @@ describe('hlx deploy (Integration)', () => {
       .withDefault({ FOO: 'bar' })
       .withDefaultFile(decodeFileParams.bind(null, ['defaults.json', 'defaults.env']))
       .withResolveGitRefService('my-resolver')
+      .withUpdatedAt(1234)
+      .withUpdatedBy('me')
       .run();
 
     assert.equal(cmd.config.strains.get('default').package, '');
