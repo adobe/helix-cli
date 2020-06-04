@@ -1,3 +1,11 @@
+## [10.1.1](https://github.com/adobe/helix-cli/compare/v10.1.0...v10.1.1) (2020-06-04)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @adobe/helix-simulator to v4.1.16 ([#1417](https://github.com/adobe/helix-cli/issues/1417)) ([79d049a](https://github.com/adobe/helix-cli/commit/79d049a6b5540f19dd3c64262140a68c677b0ffd))
+* **revert:** revert accidental change of pipline installation ([c761c4d](https://github.com/adobe/helix-cli/commit/c761c4d862e1c6486d4cbc4698966207c1c22d5a))
+
 # [10.1.0](https://github.com/adobe/helix-cli/compare/v10.0.1...v10.1.0) (2020-06-03)
 
 
