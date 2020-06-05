@@ -118,7 +118,17 @@ class ModuleHelper {
 
     // the lib path usually points to the index file, so construct the mod path
     const idx = libPath.lastIndexOf(NODE_MODULES_PAT);
-    const modPath = `${libPath.substring(0, idx + NODE_MODULES_PAT.length)}${name}`;
+    let modPath;
+    if (idx < 0) {
+      // look for package.json in parent directory
+      modPath = path.dirname(libPath);
+      if (!await fse.pathExists(path.resolve(modPath, 'package.json'))) {
+        modPath = path.dirname(modPath);
+      }
+    } else {
+      modPath = `${libPath.substring(0, idx + NODE_MODULES_PAT.length)}${name}`;
+    }
+
     try {
       const pkg = await fse.readJson(path.resolve(modPath, 'package.json'));
       return {
@@ -141,12 +151,17 @@ class ModuleHelper {
       if (this.log.level === 'silly') {
         loglevel = 'silly';
       }
+
+      // if path to local directory, use npm link instead
+      let moduleDescriptor = descriptor || name;
       let cmd = 'install';
-      if (await fse.pathExists(path.resolve(this._buildDir, 'package-lock.json'))) {
+      const localPath = path.resolve(this.directory, descriptor);
+      if (await fse.pathExists(localPath)) {
+        cmd = 'link';
+        moduleDescriptor = localPath;
+      } else if (await fse.pathExists(path.resolve(this._buildDir, 'package-lock.json'))) {
         cmd = 'ci';
       }
-
-      const moduleDescriptor = descriptor || name;
 
       this.log.info(chalk`Running {grey npm ${cmd} ${moduleDescriptor}} in {grey ${path.relative(this.directory, this._buildDir)}} ...`);
       // todo: maye use npm API instead, so that we can show a nice progress bar.
