@@ -170,6 +170,7 @@ class ModuleHelper {
         '--no-bin-links', '--no-audit', '--save-exact', '--loglevel', loglevel, '--no-fund',
         '--progress', 'true', moduleDescriptor], {
         cwd: this._buildDir,
+        shell: true,
       });
     } catch (e) {
       throw Error(`Unable to install ${name}: ${e}`);
