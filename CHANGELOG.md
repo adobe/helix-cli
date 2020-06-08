@@ -1,3 +1,10 @@
+# [10.2.0](https://github.com/adobe/helix-cli/compare/v10.1.1...v10.2.0) (2020-06-08)
+
+
+### Features
+
+* **up:** better support for local directories and --custom-pipeline ([f2c023a](https://github.com/adobe/helix-cli/commit/f2c023a294ce6a80d2ee348bdd7e6f9ec9a8dcbd)), closes [#1415](https://github.com/adobe/helix-cli/issues/1415)
+
 ## [10.1.1](https://github.com/adobe/helix-cli/compare/v10.1.0...v10.1.1) (2020-06-04)
 
 
