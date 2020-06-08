@@ -202,6 +202,7 @@ class PackageCommand extends AbstractCommand {
       .withModulePaths(this._modulePaths)
       .withRequiredModules(this._requiredModules)
       .withCustomPipeline(this._customPipeline)
+      .withDirectory(this.directory)
       .withTargetDir(this._target);
     await build.run();
     this._modulePaths = build.modulePaths;

@@ -431,7 +431,6 @@ describe('hlx deploy (Integration)', () => {
     });
     this.polly.server.put(`https://adobeioruntime.net/api/v1/namespaces/hlx/packages/${ref}`).intercept((req, res) => {
       const body = JSON.parse(req.body);
-      console.log(body);
       try {
         assert.deepEqual(body, {
           publish: true,
@@ -548,8 +547,6 @@ describe('hlx deploy (Integration)', () => {
       const body = JSON.parse(req.body);
       try {
         const empty = body.parameters.filter(({ value }) => value === undefined);
-
-        console.log(empty);
         if (empty.length !== 0) {
           res.sendStatus(400);
           assert.fail('Empty parameters not allowed');
@@ -686,7 +683,7 @@ describe('hlx deploy (custom pipeline)', function suite() {
   this.timeout(60000);
 
   let testRoot;
-  let hlxDir;
+  let projectDir;
   let buildDir;
   let cwd;
 
@@ -696,8 +693,8 @@ describe('hlx deploy (custom pipeline)', function suite() {
 
   beforeEach(async function beforeEach() {
     testRoot = await createTestRoot();
-    hlxDir = path.resolve(testRoot, '.hlx');
-    buildDir = path.resolve(hlxDir, 'build');
+    projectDir = path.resolve(testRoot, 'project');
+    buildDir = path.resolve(projectDir, 'build');
 
     cwd = process.cwd();
 
@@ -716,12 +713,12 @@ describe('hlx deploy (custom pipeline)', function suite() {
   });
 
   it('Deploy (dry-running) installs a default pipeline', async () => {
-    await fs.copy(TEST_DIR, testRoot);
-    await fs.rename(path.resolve(testRoot, 'default-config.yaml'), path.resolve(testRoot, 'helix-config.yaml'));
-    initGit(testRoot, 'git@github.com:adobe/project-helix.io.git');
+    await fs.copy(TEST_DIR, projectDir);
+    await fs.rename(path.resolve(projectDir, 'default-config.yaml'), path.resolve(projectDir, 'helix-config.yaml'));
+    initGit(projectDir, 'git@github.com:adobe/project-helix.io.git');
 
     await new DeployCommand()
-      .withDirectory(testRoot)
+      .withDirectory(projectDir)
       .withWskHost('adobeioruntime.net')
       .withWskAuth('secret-key')
       .withWskNamespace('hlx')
@@ -730,11 +727,11 @@ describe('hlx deploy (custom pipeline)', function suite() {
       .withDryRun(true)
       .withTarget(buildDir)
       .withFiles([
-        path.resolve(testRoot, 'src/html.htl'),
-        path.resolve(testRoot, 'src/html.pre.js'),
-        path.resolve(testRoot, 'src/helper.js'),
-        path.resolve(testRoot, 'src/utils/another_helper.js'),
-        path.resolve(testRoot, 'src/third_helper.js'),
+        path.resolve(projectDir, 'src/html.htl'),
+        path.resolve(projectDir, 'src/html.pre.js'),
+        path.resolve(projectDir, 'src/helper.js'),
+        path.resolve(projectDir, 'src/utils/another_helper.js'),
+        path.resolve(projectDir, 'src/third_helper.js'),
       ])
       .withMinify(false)
       .run();
@@ -744,12 +741,12 @@ describe('hlx deploy (custom pipeline)', function suite() {
   });
 
   it('Deploy (dry-running) installs a the correct custom pipeline', async () => {
-    await fs.copy(TEST_DIR, testRoot);
-    await fs.rename(path.resolve(testRoot, 'default-config.yaml'), path.resolve(testRoot, 'helix-config.yaml'));
-    initGit(testRoot, 'git@github.com:adobe/project-helix.io.git');
+    await fs.copy(TEST_DIR, projectDir);
+    await fs.rename(path.resolve(projectDir, 'default-config.yaml'), path.resolve(projectDir, 'helix-config.yaml'));
+    initGit(projectDir, 'git@github.com:adobe/project-helix.io.git');
 
     await new DeployCommand()
-      .withDirectory(testRoot)
+      .withDirectory(projectDir)
       .withWskHost('adobeioruntime.net')
       .withWskAuth('secret-key')
       .withWskNamespace('hlx')
@@ -758,11 +755,11 @@ describe('hlx deploy (custom pipeline)', function suite() {
       .withDryRun(true)
       .withTarget(buildDir)
       .withFiles([
-        path.resolve(testRoot, 'src/html.htl'),
-        path.resolve(testRoot, 'src/html.pre.js'),
-        path.resolve(testRoot, 'src/helper.js'),
-        path.resolve(testRoot, 'src/utils/another_helper.js'),
-        path.resolve(testRoot, 'src/third_helper.js'),
+        path.resolve(projectDir, 'src/html.htl'),
+        path.resolve(projectDir, 'src/html.pre.js'),
+        path.resolve(projectDir, 'src/helper.js'),
+        path.resolve(projectDir, 'src/utils/another_helper.js'),
+        path.resolve(projectDir, 'src/third_helper.js'),
       ])
       .withMinify(false)
       .withCustomPipeline('@adobe/helix-pipeline@1.0.0')
@@ -772,6 +769,54 @@ describe('hlx deploy (custom pipeline)', function suite() {
     assertFile(pipelinePackageJson);
     const pkg = await fs.readJson(pipelinePackageJson);
     assert.equal(pkg.version, '1.0.0');
+  });
+
+  it('Deploy (dry-running) uses the local pipeline reference via directory', async () => {
+    await fs.copy(TEST_DIR, projectDir);
+    await fs.rename(path.resolve(projectDir, 'default-config.yaml'), path.resolve(projectDir, 'helix-config.yaml'));
+    initGit(projectDir, 'git@github.com:adobe/project-helix.io.git');
+
+    // checkout clone of helix-pipeline
+    const pipelineDir = path.resolve(testRoot, 'my-pipeline');
+    $.exec(`git clone --branch master --quiet --depth 1 https://github.com/adobe/helix-pipeline.git ${pipelineDir}`);
+    const pwd = process.cwd();
+    try {
+      $.cd(pipelineDir);
+      $.exec('npm install --only=prod --prefer-offline --no-bin-links --no-audit --no-fund');
+    } finally {
+      $.cd(pwd);
+    }
+
+    // add some marker to the package.json
+    const pkgJson = await fs.readJson(path.resolve(pipelineDir, 'package.json'));
+    const version = `${pkgJson.version}-test`;
+    pkgJson.version = version;
+    await fs.writeJson(path.resolve(pipelineDir, 'package.json'), pkgJson);
+
+    await new DeployCommand()
+      .withDirectory(projectDir)
+      .withWskHost('adobeioruntime.net')
+      .withWskAuth('secret-key')
+      .withWskNamespace('hlx')
+      .withEnableAuto(false)
+      .withEnableDirty(false)
+      .withDryRun(true)
+      .withTarget(buildDir)
+      .withFiles([
+        path.resolve(projectDir, 'src/html.htl'),
+        path.resolve(projectDir, 'src/html.pre.js'),
+        path.resolve(projectDir, 'src/helper.js'),
+        path.resolve(projectDir, 'src/utils/another_helper.js'),
+        path.resolve(projectDir, 'src/third_helper.js'),
+      ])
+      .withMinify(false)
+      .withCustomPipeline('../my-pipeline')
+      .run();
+
+    const pipelinePackageJson = path.resolve(buildDir, 'node_modules', '@adobe/helix-pipeline', 'package.json');
+    assertFile(pipelinePackageJson);
+    const pkg = await fs.readJson(pipelinePackageJson);
+    assert.equal(pkg.version, version);
   });
 });
 

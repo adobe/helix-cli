@@ -21,9 +21,9 @@ function execAsync(cmd, args, opts) {
     const c = execFile(cmd, args, opts, (err, stdout, stderr) => {
       if (err) {
         reject(stderr);
-      } else {
-        resolve(stdout);
+        return;
       }
+      resolve(stdout);
     });
     c.stdout.pipe(process.stdout);
     c.stderr.pipe(process.stderr);
@@ -153,25 +153,27 @@ class ModuleHelper {
       }
 
       // if path to local directory, use npm link instead
-      let moduleDescriptor = descriptor || name;
-      let cmd = 'install';
       const localPath = descriptor ? path.resolve(this.directory, descriptor) : null;
       if (localPath && await fse.pathExists(localPath)) {
-        cmd = 'link';
-        moduleDescriptor = localPath;
-      } else if (await fse.pathExists(path.resolve(this._buildDir, 'package-lock.json'))) {
-        cmd = 'ci';
+        const dstDirectory = path.resolve(this._buildDir, 'node_modules', name);
+        await fse.ensureSymlink(localPath, dstDirectory);
+        this.log.info(chalk`Linked {grey ${path.relative(this.directory, dstDirectory)}} to {grey ${path.relative(this.directory, localPath)}}`);
+      } else {
+        const moduleDescriptor = descriptor || name;
+        let cmd = 'install';
+        if (await fse.pathExists(path.resolve(this._buildDir, 'package-lock.json'))) {
+          cmd = 'ci';
+        }
+        this.log.info(chalk`Running {grey npm ${cmd} ${moduleDescriptor}} in {grey ${path.relative(this.directory, this._buildDir)}} ...`);
+        // todo: maye use npm API instead, so that we can show a nice progress bar.
+        // todo: since stderr is not a TTY when executed with shelljs, we don't see it.
+        await execAsync('npm', [cmd, '--only=prod', '--prefer-offline', '--ignore-scripts',
+          '--no-bin-links', '--no-audit', '--save-exact', '--loglevel', loglevel, '--no-fund',
+          '--progress', 'true', moduleDescriptor], {
+          cwd: this._buildDir,
+          shell: true,
+        });
       }
-
-      this.log.info(chalk`Running {grey npm ${cmd} ${moduleDescriptor}} in {grey ${path.relative(this.directory, this._buildDir)}} ...`);
-      // todo: maye use npm API instead, so that we can show a nice progress bar.
-      // todo: since stderr is not a TTY when executed with shelljs, we don't see it.
-      await execAsync('npm', [cmd, '--only=prod', '--prefer-offline', '--ignore-scripts',
-        '--no-bin-links', '--no-audit', '--save-exact', '--loglevel', loglevel, '--no-fund',
-        '--progress', 'true', moduleDescriptor], {
-        cwd: this._buildDir,
-        shell: true,
-      });
     } catch (e) {
       throw Error(`Unable to install ${name}: ${e}`);
     }

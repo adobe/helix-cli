@@ -14,6 +14,7 @@
 
 const assert = require('assert');
 const fs = require('fs-extra');
+const $ = require('shelljs');
 const path = require('path');
 const { logging } = require('@adobe/helix-testutils');
 const {
@@ -36,6 +37,7 @@ describe('hlx package (Integration)', () => {
     testRoot = await createTestRoot();
     hlxDir = path.resolve(testRoot, '.hlx');
     buildDir = path.resolve(hlxDir, 'build');
+    await fs.copy(path.resolve(__dirname, 'integration'), testRoot);
   });
 
   afterEach(async () => {
@@ -50,11 +52,11 @@ describe('hlx package (Integration)', () => {
       .withDirectory(testRoot)
       .withTarget(buildDir)
       .withFiles([
-        'test/integration/src/html.htl',
-        'test/integration/src/html.pre.js',
-        'test/integration/src/helper.js',
-        'test/integration/src/utils/another_helper.js',
-        'test/integration/src/third_helper.js',
+        'src/html.htl',
+        'src/html.pre.js',
+        'src/helper.js',
+        'src/utils/another_helper.js',
+        'src/third_helper.js',
       ])
       .withOnlyModified(false)
       .withMinify(false)
@@ -67,12 +69,12 @@ describe('hlx package (Integration)', () => {
       .run();
 
     // verify build output
-    assertFile(path.resolve(buildDir, 'test/integration/src/html.js'));
-    assertFile(path.resolve(buildDir, 'test/integration/src/html.script.js'));
-    assertFile(path.resolve(buildDir, 'test/integration/src/html.script.js.map'));
-    assertFile(path.resolve(buildDir, 'test/integration/src/html.info.json'));
-    assertFile(path.resolve(buildDir, 'test/integration/src/html.bundle.js'));
-    assertFile(path.resolve(buildDir, 'test/integration/src/html.zip'));
+    assertFile(path.resolve(buildDir, 'src', 'html.js'));
+    assertFile(path.resolve(buildDir, 'src', 'html.script.js'));
+    assertFile(path.resolve(buildDir, 'src', 'html.script.js.map'));
+    assertFile(path.resolve(buildDir, 'src', 'html.info.json'));
+    assertFile(path.resolve(buildDir, 'src', 'html.bundle.js'));
+    assertFile(path.resolve(buildDir, 'src', 'html.zip'));
 
     assert.deepEqual(created, {
       html: true,
@@ -80,13 +82,13 @@ describe('hlx package (Integration)', () => {
     assert.deepEqual(ignored, {}, 'ignored packages');
 
     await assertZipEntries(
-      path.resolve(buildDir, 'test/integration/src/html.zip'),
+      path.resolve(buildDir, 'src', 'html.zip'),
       ['package.json', 'html.js'],
     );
 
     // execute html script
     {
-      const bundle = path.resolve(buildDir, 'test/integration/src/html.bundle.js');
+      const bundle = path.resolve(buildDir, 'src', 'html.bundle.js');
       // eslint-disable-next-line global-require,import/no-dynamic-require
       const { main } = require(bundle);
       const ret = await main({
@@ -116,7 +118,7 @@ describe('hlx package (Integration)', () => {
       .withDirectory(testRoot)
       .withTarget(buildDir)
       .withFiles([
-        'test/integration/src/broken_html.pre.js',
+        'src/broken_html.pre.js',
       ])
       .withOnlyModified(true)
       .withMinify(false)
@@ -134,11 +136,14 @@ describe('hlx package (custom pipeline)', function suite() {
   let testRoot;
   let hlxDir;
   let buildDir;
+  let projectDir;
 
   beforeEach(async () => {
     testRoot = await createTestRoot();
-    hlxDir = path.resolve(testRoot, '.hlx');
+    projectDir = path.resolve(testRoot, 'project');
+    hlxDir = path.resolve(projectDir, '.hlx');
     buildDir = path.resolve(hlxDir, 'build');
+    await fs.copy(path.resolve(__dirname, 'integration'), projectDir);
   });
 
   afterEach(async () => {
@@ -147,29 +152,29 @@ describe('hlx package (custom pipeline)', function suite() {
 
   it('package installs a default pipeline', async () => {
     await new PackageCommand()
-      .withDirectory(testRoot)
+      .withDirectory(projectDir)
       .withTarget(buildDir)
       .withFiles([
-        'test/integration/src/html.htl',
-        'test/integration/src/html.pre.js',
+        'src/html.htl',
+        'src/html.pre.js',
       ])
       .withOnlyModified(false)
       .withMinify(false)
       .run();
 
     // verify build output
-    assertFile(path.resolve(buildDir, 'test/integration/src/html.js'));
+    assertFile(path.resolve(buildDir, 'src', 'html.js'));
     const pipelinePackageJson = path.resolve(buildDir, 'node_modules', '@adobe/helix-pipeline', 'package.json');
     assertFile(pipelinePackageJson);
   });
 
   it('package installs the correct custom pipeline', async () => {
     await new PackageCommand()
-      .withDirectory(testRoot)
+      .withDirectory(projectDir)
       .withTarget(buildDir)
       .withFiles([
-        'test/integration/src/html.htl',
-        'test/integration/src/html.pre.js',
+        'src/html.htl',
+        'src/html.pre.js',
       ])
       .withOnlyModified(false)
       .withMinify(false)
@@ -177,10 +182,48 @@ describe('hlx package (custom pipeline)', function suite() {
       .run();
 
     // verify build output
-    assertFile(path.resolve(buildDir, 'test/integration/src/html.js'));
+    assertFile(path.resolve(buildDir, 'src', 'html.js'));
     const pipelinePackageJson = path.resolve(buildDir, 'node_modules', '@adobe/helix-pipeline', 'package.json');
     assertFile(pipelinePackageJson);
     const pkg = await fs.readJson(pipelinePackageJson);
     assert.equal(pkg.version, '1.0.0');
+  });
+
+  it('package installs the correct custom pipeline via directory', async () => {
+    // checkout clone of helix-pipeline
+    const pipelineDir = path.resolve(testRoot, 'my-pipeline');
+    $.exec(`git clone --branch master --quiet --depth 1 https://github.com/adobe/helix-pipeline.git ${pipelineDir}`);
+    const pwd = process.cwd();
+    try {
+      $.cd(pipelineDir);
+      $.exec('npm install --only=prod --prefer-offline --no-bin-links --no-audit --no-fund');
+    } finally {
+      $.cd(pwd);
+    }
+
+    // add some marker to the package.json
+    const pkgJson = await fs.readJson(path.resolve(pipelineDir, 'package.json'));
+    const version = `${pkgJson.version}-test`;
+    pkgJson.version = version;
+    await fs.writeJson(path.resolve(pipelineDir, 'package.json'), pkgJson);
+
+    await new PackageCommand()
+      .withDirectory(projectDir)
+      .withTarget(buildDir)
+      .withFiles([
+        'src/html.htl',
+        'src/html.pre.js',
+      ])
+      .withOnlyModified(false)
+      .withMinify(false)
+      .withCustomPipeline('../my-pipeline')
+      .run();
+
+    // verify build output
+    assertFile(path.resolve(buildDir, 'src', 'html.js'));
+    const pipelinePackageJson = path.resolve(buildDir, 'node_modules', '@adobe', 'helix-pipeline', 'package.json');
+    assertFile(pipelinePackageJson);
+    const pkg = await fs.readJson(pipelinePackageJson);
+    assert.equal(pkg.version, version);
   });
 });
