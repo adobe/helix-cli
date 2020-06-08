@@ -148,10 +148,6 @@ class UpCommand extends BuildCommand {
     });
   }
 
-  createBuilder() {
-    return super.createBuilder().withShowReport(false);
-  }
-
   async run() {
     await super.init();
     // check for git repository

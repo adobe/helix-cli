@@ -15,6 +15,7 @@
 const assert = require('assert');
 const path = require('path');
 const fse = require('fs-extra');
+const $ = require('shelljs');
 const { logging } = require('@adobe/helix-testutils');
 const { decodeFileParams } = require('../src/yargs-params');
 
@@ -542,7 +543,7 @@ describe('Integration test for up command (custom pipeline)', function suite() {
   beforeEach(async () => {
     testRoot = await createTestRoot();
     testDir = path.resolve(testRoot, 'project');
-    buildDir = path.resolve(testRoot, '.hlx/build');
+    buildDir = path.resolve(testDir, '.hlx', 'build');
     await fse.copy(TEST_DIR, testDir);
   });
 
@@ -590,5 +591,43 @@ describe('Integration test for up command (custom pipeline)', function suite() {
       })
       .run()
       .catch(done);
+  });
+
+  it('up command uses the correct custom pipeline with directory', async () => {
+    // checkout clone of helix-pipeline
+    const pipelineDir = path.resolve(testRoot, 'my-pipeline');
+    $.exec(`git clone --branch master --quiet --depth 1 https://github.com/adobe/helix-pipeline.git ${pipelineDir}`);
+
+    // add some marker to the package.json
+    const pkgJson = await fse.readJson(path.resolve(pipelineDir, 'package.json'));
+    const version = `${pkgJson.version}-test`;
+    pkgJson.version = version;
+    await fse.writeJson(path.resolve(pipelineDir, 'package.json'), pkgJson);
+
+    initGit(testDir);
+    await new Promise((resolve, reject) => {
+      new UpCommand()
+        .withFiles([path.join(testDir, 'src', '*.htl'), path.join(testDir, 'src', '*.js')])
+        .withTargetDir(buildDir)
+        .withDirectory(testDir)
+        .withHttpPort(0)
+        .withCustomPipeline('../my-pipeline')
+        .on('started', async (cmd) => {
+          try {
+            const pipelinePackageJson = path.resolve(buildDir, 'node_modules', '@adobe', 'helix-pipeline', 'package.json');
+            assertFile(pipelinePackageJson);
+            const pkg = await fse.readJson(pipelinePackageJson);
+            assert.equal(pkg.version, version);
+          } catch (e) {
+            reject(e);
+          }
+          cmd.stop();
+        })
+        .on('stopped', () => {
+          resolve();
+        })
+        .run()
+        .catch(reject);
+    });
   });
 });

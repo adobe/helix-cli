@@ -198,6 +198,7 @@ async function getTestModules() {
   if (!testModules) {
     testModules = await createTestRoot();
     const moduleHelper = new ModuleHelper()
+      .withDirectory(testModules)
       .withBuildDir(testModules)
       .withModulePaths([]);
 

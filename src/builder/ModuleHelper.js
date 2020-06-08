@@ -10,21 +10,23 @@
  * governing permissions and limitations under the License.
  */
 const path = require('path');
+const { execFile } = require('child_process');
 const fse = require('fs-extra');
-const shell = require('shelljs');
 const chalk = require('chalk');
 
 const NODE_MODULES_PAT = `${path.sep}node_modules${path.sep}`;
 
-function execAsync(cmd) {
+function execAsync(cmd, args, opts) {
   return new Promise((resolve, reject) => {
-    shell.exec(cmd, (code, stdout, stderr) => {
-      if (code === 0) {
-        resolve(0);
-      } else {
+    const c = execFile(cmd, args, opts, (err, stdout, stderr) => {
+      if (err) {
         reject(stderr);
+        return;
       }
+      resolve(stdout);
     });
+    c.stdout.pipe(process.stdout);
+    c.stderr.pipe(process.stderr);
   });
 }
 
@@ -118,7 +120,17 @@ class ModuleHelper {
 
     // the lib path usually points to the index file, so construct the mod path
     const idx = libPath.lastIndexOf(NODE_MODULES_PAT);
-    const modPath = `${libPath.substring(0, idx + NODE_MODULES_PAT.length)}${name}`;
+    let modPath;
+    if (idx < 0) {
+      // look for package.json in parent directory
+      modPath = path.dirname(libPath);
+      if (!await fse.pathExists(path.resolve(modPath, 'package.json'))) {
+        modPath = path.dirname(modPath);
+      }
+    } else {
+      modPath = `${libPath.substring(0, idx + NODE_MODULES_PAT.length)}${name}`;
+    }
+
     try {
       const pkg = await fse.readJson(path.resolve(modPath, 'package.json'));
       return {
@@ -131,9 +143,7 @@ class ModuleHelper {
   }
 
   async installModule(name, descriptor) {
-    const cwd = process.cwd();
     try {
-      shell.cd(this._buildDir);
       let loglevel = 'silent';
       if (this.log.level === 'debug') {
         loglevel = 'info';
@@ -141,21 +151,31 @@ class ModuleHelper {
       if (this.log.level === 'silly') {
         loglevel = 'silly';
       }
-      let cmd = 'install';
-      if (await fse.pathExists(path.resolve(this._buildDir, 'package-lock.json'))) {
-        cmd = 'ci';
+
+      // if path to local directory, use npm link instead
+      const localPath = descriptor ? path.resolve(this.directory, descriptor) : null;
+      if (localPath && await fse.pathExists(localPath)) {
+        const dstDirectory = path.resolve(this._buildDir, 'node_modules', name);
+        await fse.ensureSymlink(localPath, dstDirectory);
+        this.log.info(chalk`Linked {grey ${path.relative(this.directory, dstDirectory)}} to {grey ${path.relative(this.directory, localPath)}}`);
+      } else {
+        const moduleDescriptor = descriptor || name;
+        let cmd = 'install';
+        if (await fse.pathExists(path.resolve(this._buildDir, 'package-lock.json'))) {
+          cmd = 'ci';
+        }
+        this.log.info(chalk`Running {grey npm ${cmd} ${moduleDescriptor}} in {grey ${path.relative(this.directory, this._buildDir)}} ...`);
+        // todo: maye use npm API instead, so that we can show a nice progress bar.
+        // todo: since stderr is not a TTY when executed with shelljs, we don't see it.
+        await execAsync('npm', [cmd, '--only=prod', '--prefer-offline', '--ignore-scripts',
+          '--no-bin-links', '--no-audit', '--save-exact', '--loglevel', loglevel, '--no-fund',
+          '--progress', 'true', moduleDescriptor], {
+          cwd: this._buildDir,
+          shell: true,
+        });
       }
-
-      const moduleDescriptor = descriptor || name;
-
-      this.log.info(chalk`Running {grey npm ${cmd} ${moduleDescriptor}} in {grey ${path.relative(this.directory, this._buildDir)}} ...`);
-      // todo: maye use npm API instead, so that we can show a nice progress bar.
-      // todo: since stderr is not a TTY when executed with shelljs, we don't see it.
-      await execAsync(`npm ${cmd} --only=prod --prefer-offline --ignore-scripts --no-bin-links --no-audit --save-exact --loglevel ${loglevel} --no-fund --progress true ${moduleDescriptor}`);
     } catch (e) {
       throw Error(`Unable to install ${name}: ${e}`);
-    } finally {
-      shell.cd(cwd);
     }
   }
 
