@@ -1,3 +1,10 @@
+## [10.2.1](https://github.com/adobe/helix-cli/compare/v10.2.0...v10.2.1) (2020-06-08)
+
+
+### Bug Fixes
+
+* **deps:** update [@adobe](https://github.com/adobe) ([#1420](https://github.com/adobe/helix-cli/issues/1420)) ([fe9eaf2](https://github.com/adobe/helix-cli/commit/fe9eaf2684cfe19a34bc4b6e06c87f78d352bbd0))
+
 # [10.2.0](https://github.com/adobe/helix-cli/compare/v10.1.1...v10.2.0) (2020-06-08)
 
 
