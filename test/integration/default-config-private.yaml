@@ -16,5 +16,5 @@ definitions:
 strains:
   default:
     code: *localRepo
-    content: https://github.com/Adobe-Marketing-Cloud/reactor-user-docs.git
+    content: https://github.com/adobe/project-helix.git
     static: *localRepo

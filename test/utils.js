@@ -272,7 +272,10 @@ function setupPolly(opts = {}) {
     recordIfMissing: false,
     matchRequestsBy: {
       headers: {
-        exclude: ['authorization', 'accept-encoding', 'user-agent', 'accept', 'connection', 'x-request-id'],
+        exclude: [
+          'authorization', 'accept-encoding', 'user-agent', 'accept', 'connection', 'x-request-id',
+          'x-cdn-request-id', 'x-cdn-url',
+        ],
       },
       body: false,
     },
