@@ -1,3 +1,10 @@
+## [10.2.2](https://github.com/adobe/helix-cli/compare/v10.2.1...v10.2.2) (2020-06-12)
+
+
+### Bug Fixes
+
+* **tests:** re-record tests for pipeline that uses content-proxy ([#1424](https://github.com/adobe/helix-cli/issues/1424)) ([4b7ee39](https://github.com/adobe/helix-cli/commit/4b7ee395bb8b73905824ecf279ad46ef93955744))
+
 ## [10.2.1](https://github.com/adobe/helix-cli/compare/v10.2.0...v10.2.1) (2020-06-08)
 
 
