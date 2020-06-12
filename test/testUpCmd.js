@@ -232,16 +232,15 @@ describe('Integration test for up command', function suite() {
     const readmeMd = await fse.readFile(path.resolve(TEST_DIR, 'README.md'), 'utf-8');
     const { server } = this.polly;
     const privateHandler = () => {
-      server.get('/Adobe-Marketing-Cloud/reactor-user-docs/master/README.md').intercept((req, res) => {
-        if (req.headers.authorization === 'Bearer 1234' || req.headers.authorization === 'token 1234') {
+      server.get('/api/v1/web/helix/helix-services/content-proxy@v1?owner=adobe&repo=project-helix&path=%2FREADME.md&ref=master').intercept((req, res) => {
+        if (req.headers['x-github-token'] === '1234') {
           res.sendStatus(200).send(readmeMd);
         } else {
           res.sendStatus(401);
         }
       });
     };
-    server.host('https://raw.githubusercontent.com', privateHandler);
-    server.host('https://raw.github.com', privateHandler);
+    server.host('https://adobeioruntime.net', privateHandler);
 
     initGit(testDir, 'https://github.com/adobe/dummy-foo.git');
     await fse.rename(path.resolve(testDir, 'default-config-private.yaml'), path.resolve(testDir, 'helix-config.yaml'));
