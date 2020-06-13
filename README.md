@@ -125,7 +125,7 @@ Every request parameter is a potential cache-buster and given that modern web ap
 
 This means, the client side of your application will still be able to access request parameters, but your server(less)-side scripts and templates will not see any parameters.
 
-If you need to pass request parameters, you can whitelist the parameters you need using the `strain.params` configuration. The value of `params` is an array of whitelisted parameter names.
+If you need to pass request parameters, you can allow the parameters you need using the `strain.params` configuration. The value of `params` is an array of allowed parameter names.
 
 ```yaml
 strains:
