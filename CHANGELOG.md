@@ -1,3 +1,10 @@
+## [10.2.5](https://github.com/adobe/helix-cli/compare/v10.2.4...v10.2.5) (2020-06-15)
+
+
+### Bug Fixes
+
+* **deps:** update external ([c523f4b](https://github.com/adobe/helix-cli/commit/c523f4b876daa9fd50a24c6a19e06a120967b4d7))
+
 ## [10.2.4](https://github.com/adobe/helix-cli/compare/v10.2.3...v10.2.4) (2020-06-15)
 
 
