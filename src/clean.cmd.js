@@ -27,7 +27,6 @@ async function clean(dir, logger) {
   }
 }
 
-
 class CleanCommand {
   constructor(logger = getOrCreateLogger()) {
     this._logger = logger;

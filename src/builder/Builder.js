@@ -51,7 +51,6 @@ const DEFAULT_PIPELINE = '@adobe/helix-pipeline/src/defaults/default.js';
  * @property {object[]} dependencies - Array of module dependencies
  */
 
-
 class Builder {
   static isScript(name) {
     if (SCRIPTS.indexOf(name) >= 0) {

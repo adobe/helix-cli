@@ -71,7 +71,6 @@ describe('hlx publish --custom-vcl (check requests)', () => {
       }),
     });
 
-
     // ensure to reset nock to avoid conflicts with PollyJS
     nock.restore();
     nock.cleanAll();
