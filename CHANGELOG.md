@@ -1,3 +1,10 @@
+## [10.2.6](https://github.com/adobe/helix-cli/compare/v10.2.5...v10.2.6) (2020-06-16)
+
+
+### Bug Fixes
+
+* tests ([b7be035](https://github.com/adobe/helix-cli/commit/b7be03593237f40d07561e5b368de4c7ee8de8d1))
+
 ## [10.2.5](https://github.com/adobe/helix-cli/compare/v10.2.4...v10.2.5) (2020-06-15)
 
 
