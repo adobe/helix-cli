@@ -654,7 +654,6 @@ describe('hlx perf #integrationtest', () => {
     const root = await createTestRoot();
     const junit = path.resolve(root, 'junit-results.xml');
 
-
     const perf = await new PerfCommand()
       .withFastlyAuth('fake')
       .withFastlyNamespace('fake')
@@ -1459,13 +1458,11 @@ describe('hlx perf #integrationtest', () => {
     const root = await createTestRoot();
     const junit = path.resolve(root, 'junit-results.xml');
 
-
     const perf = await new PerfCommand()
       .withFastlyAuth('fake')
       .withFastlyNamespace('fake')
       .withConfigFile(path.resolve(__dirname, 'fixtures/perf.yaml'))
       .withJunit(junit);
-
 
     await perf.run();
     assertFileEqual(junit, path.resolve(__dirname, 'fixtures', 'junit-succeeded.xml'));
@@ -2257,7 +2254,6 @@ describe('hlx perf #integrationtest', () => {
     const root = await createTestRoot();
     const junit = path.resolve(root, 'junit-results.xml');
 
-
     const perf = await new PerfCommand()
       .withFastlyAuth('fake')
       .withFastlyNamespace('fake')
@@ -2290,7 +2286,6 @@ describe('hlx perf #integrationtest', () => {
     const root = await createTestRoot();
     const junit = path.resolve(root, 'junit-results.xml');
 
-
     const perf = await new PerfCommand()
       .withFastlyAuth('fake')
       .withFastlyNamespace('fake')
@@ -2322,7 +2317,6 @@ describe('hlx perf #integrationtest', () => {
 
     const root = await createTestRoot();
     const junit = path.resolve(root, 'junit-results.xml');
-
 
     const perf = await new PerfCommand()
       .withFastlyAuth('fake')

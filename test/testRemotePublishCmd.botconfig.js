@@ -30,7 +30,6 @@ const EXPECTED_BODY = {
   github_token: 'github-token-foobar',
 };
 
-
 describe('hlx publish --remote (default)', () => {
   let scope;
   let RemotePublishCommand;

@@ -27,7 +27,6 @@ const {
   createTestRoot,
 } = require('./utils.js');
 
-
 class TestStream extends stream.Writable {
   constructor() {
     super();
@@ -40,7 +39,6 @@ class TestStream extends stream.Writable {
     next();
   }
 }
-
 
 describe('Integration test for auth', () => {
   let testRoot;

@@ -333,7 +333,6 @@ class DeployCommand extends AbstractCommand {
 
       const triggered = await request(triggeroptions);
 
-
       this.log.info(`Go to ${chalk.grey(`${triggered.build_url}`)} for build status.`);
     }
   }
@@ -571,7 +570,6 @@ Alternatively you can auto-add one using the {grey --add <name>} option.`);
 
     await Promise.all([...deployed, bindHelixServices]);
 
-
     let numErrors = 0;
     let staticactionname = '/hlx--static';
     if (!this._dryRun) {
@@ -624,7 +622,6 @@ Alternatively you can auto-add one using the {grey --add <name>} option.`);
         numErrors += 1;
       });
     }
-
 
     bar.terminate();
     this.log.info(`✅  deployment of ${scripts.length} action${scripts.length !== 1 ? 's' : ''} completed:`);

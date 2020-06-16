@@ -51,7 +51,6 @@ describe('hlx publish --remote (with filters)', () => {
       }),
     });
 
-
     // ensure to reset nock to avoid conflicts with PollyJS
     nock.restore();
     nock.cleanAll();
@@ -143,7 +142,6 @@ describe('hlx publish --remote (with filters)', () => {
     });
   });
 
-
   afterEach(async () => {
     clearHelixEnv();
     // restore env
@@ -182,7 +180,6 @@ describe('hlx publish --remote (with filters, but without config)', () => {
         softPurgeKey,
       }),
     });
-
 
     // ensure to reset nock to avoid conflicts with PollyJS
     nock.restore();
@@ -271,7 +268,6 @@ describe('hlx publish --remote (with filters, but without config)', () => {
       assert.equal(e.message, 'Error while running the Publish command');
     }
   });
-
 
   afterEach(async () => {
     nock.restore();

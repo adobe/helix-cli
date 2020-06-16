@@ -24,7 +24,6 @@ const AbstractCommand = require('./abstract.cmd.js');
 const GitUtils = require('./git-utils.js');
 const cliversion = require('../package.json').version;
 
-
 class RemotePublishCommand extends AbstractCommand {
   constructor(logger) {
     super(logger);
