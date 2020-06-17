@@ -1,3 +1,11 @@
+## [10.2.7](https://github.com/adobe/helix-cli/compare/v10.2.6...v10.2.7) (2020-06-17)
+
+
+### Bug Fixes
+
+* **up:** reload if sources in helix pages checkout are changes ([1a1652b](https://github.com/adobe/helix-cli/commit/1a1652b34812240f74a641a0be861335bda3387a)), closes [#1394](https://github.com/adobe/helix-cli/issues/1394)
+* **up:** reload project on git branch switch ([dc2a906](https://github.com/adobe/helix-cli/commit/dc2a906968406f5e97328bb7a813772b860aaec3)), closes [#1389](https://github.com/adobe/helix-cli/issues/1389)
+
 ## [10.2.6](https://github.com/adobe/helix-cli/compare/v10.2.5...v10.2.6) (2020-06-16)
 
 
