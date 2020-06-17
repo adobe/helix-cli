@@ -127,7 +127,10 @@ class UpCommand extends BuildCommand {
     let timer = null;
     let modifiedFiles = {};
 
-    this._watcher = chokidar.watch(['src', 'cgi-bin', HELIX_CONFIG, HELIX_QUERY, GIT_HEAD], {
+    this._watcher = chokidar.watch([
+      'src', 'cgi-bin', '.hlx/pages/master/src', '.hlx/pages/master/cgi-bin',
+      HELIX_CONFIG, HELIX_QUERY, GIT_HEAD,
+    ], {
       ignored: /(.*\.swx|.*\.swp|.*~)/,
       persistent: true,
       ignoreInitial: true,
