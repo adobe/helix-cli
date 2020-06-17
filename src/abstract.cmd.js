@@ -90,11 +90,15 @@ class AbstractCommand extends EventEmitter {
     if (!this._initialized) {
       return this.init();
     }
-    this._helixConfig = await (new HelixConfig()
+    this._helixConfig = new HelixConfig()
       .withLogger(this._helixConfig.log)
       .withConfigPath(this._helixConfig.configPath)
-      .withDirectory(this._helixConfig.directory)
-      .init());
+      .withDirectory(this._helixConfig.directory);
+    if (!await this._helixConfig.hasFile()) {
+      // set default config
+      this._helixConfig.withSource(await ConfigUtils.createDefaultConfig(this.directory));
+    }
+    await this._helixConfig.init();
     this._indexConfig = await (new IndexConfig()
       .withLogger(this._indexConfig.log)
       .withConfigPath(this._indexConfig.configPath)

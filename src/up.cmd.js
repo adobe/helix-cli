@@ -22,6 +22,7 @@ const pkgJson = require('../package.json');
 
 const HELIX_CONFIG = 'helix-config.yaml';
 const HELIX_QUERY = 'helix-query.yaml';
+const GIT_HEAD = '.git/HEAD';
 
 class UpCommand extends BuildCommand {
   constructor(logger) {
@@ -126,7 +127,10 @@ class UpCommand extends BuildCommand {
     let timer = null;
     let modifiedFiles = {};
 
-    this._watcher = chokidar.watch(['src', 'cgi-bin', HELIX_CONFIG, HELIX_QUERY], {
+    this._watcher = chokidar.watch([
+      'src', 'cgi-bin', '.hlx/pages/master/src', '.hlx/pages/master/cgi-bin',
+      HELIX_CONFIG, HELIX_QUERY, GIT_HEAD,
+    ], {
       ignored: /(.*\.swx|.*\.swp|.*~)/,
       persistent: true,
       ignoreInitial: true,
@@ -148,7 +152,7 @@ class UpCommand extends BuildCommand {
     });
   }
 
-  async run() {
+  async setup() {
     await super.init();
     // check for git repository
     if (!await fse.pathExists(path.join(this.directory, '.git'))) {
@@ -235,9 +239,6 @@ class UpCommand extends BuildCommand {
         });
         this.config.strains.get('default').static.url = this.helixPages.staticURL;
       }
-
-      // pretend to have config file to suppress message below
-      hasConfigFile = true;
     } else {
       this.log.info('    __ __    ___         ');
       this.log.info('   / // /__ / (_)_ __    ');
@@ -275,7 +276,10 @@ class UpCommand extends BuildCommand {
     localRepos.forEach((repo) => {
       this._project.registerGitRepository(repo.repoPath, repo.gitUrl);
     });
+  }
 
+  async run() {
+    await this.setup();
     let buildStartTime;
     let buildMessage;
     const onBuildStart = async () => {
@@ -307,7 +311,7 @@ class UpCommand extends BuildCommand {
         if (this._open) {
           opn(`http://localhost:${this._project.server.port}/`, { url: true });
         }
-        if (!hasConfigFile) {
+        if (!await this.config.hasFile() && !await this.helixPages.isPagesProject()) {
           this.log.info(chalk`{green Note:} 
 The project does not have a {cyan helix-config.yaml} which is necessary to 
 access remote content and to deploy helix. Consider running 
@@ -324,13 +328,14 @@ access remote content and to deploy helix. Consider running
 
     this._initSourceWatcher(async (files) => {
       const dirtyConfigFiles = Object.keys(files || {})
-        .filter((f) => f === HELIX_CONFIG || f === HELIX_QUERY);
+        .filter((f) => f === HELIX_CONFIG || f === HELIX_QUERY || f === GIT_HEAD);
       if (dirtyConfigFiles.length) {
         this.log.info(`${dirtyConfigFiles.join(', ')} modified. Restarting dev server...`);
         await this._project.stop();
         await this.reloadConfig();
-        this._project.withHelixConfig(this.config);
-        await this._project.init();
+        await this.setup();
+        // ensure correct module paths
+        this._project.withRuntimeModulePaths([...this.modulePaths, ...module.paths]);
         await this._project.start();
         if (Object.keys(files).length === 1) {
           return Promise.resolve();
