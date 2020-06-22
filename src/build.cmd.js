@@ -131,7 +131,11 @@ class BuildCommand extends AbstractCommand {
       this._modulePaths = builder.modulePaths;
     }
 
-    await builder.run();
+    try {
+      await builder.run();
+    } catch (e) {
+      this.log.error(e.message);
+    }
     this.emit('buildEnd');
   }
 

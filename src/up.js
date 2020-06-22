@@ -52,6 +52,18 @@ module.exports = function up() {
           describe: 'Disable automatic opening of browser window',
           type: 'boolean',
         })
+        .option('livereload', {
+          describe: 'Enable automatic reloading of modified sources in browser.',
+          type: 'boolean',
+          default: true,
+        })
+        .option('no-livereload', {
+          // negation of the livereload option (resets open default)
+          // see https://github.com/yargs/yargs/blob/master/docs/tricks.md#negating-boolean-arguments
+          alias: 'noLiveReload',
+          describe: 'Disable live-reload',
+          type: 'boolean',
+        })
         .option('host', {
           describe: 'Override request.host',
           type: 'string',
@@ -108,9 +120,10 @@ module.exports = function up() {
         .withDevDefault(argv.devDefault)
         .withDevDefaultFile(argv.devDefaultFile)
         .withGithubToken(argv.githubToken)
-        // only open browser window when executable is `hlx`
+        // only open  browser window when executable is `hlx`
         // this prevents the window to be opened during integration tests
         .withOpen(argv.open && path.basename(argv.$0) === 'hlx')
+        .withLiveReload(argv.livereload)
         .withCustomPipeline(argv.customPipeline)
         .withAlgoliaAppID(argv.algoliaAppID)
         .withAlgoliaAPIKey(argv.algoliaAPIKey)

@@ -124,7 +124,7 @@ class Builder {
     const scriptFile = path.resolve(info.buildDir, `${info.name}.script.js`);
     const source = await fse.readFile(info.entryFile, 'utf-8');
     const compiler = new HtlCompiler()
-      .withOutputDirectory(info.buildDir)
+      .withDirectory(info.buildDir)
       .includeRuntime(true)
       .withRuntimeVar('content')
       .withRuntimeVar('request')

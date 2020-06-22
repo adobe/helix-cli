@@ -29,6 +29,7 @@ class UpCommand extends BuildCommand {
     super(logger);
     this._httpPort = -1;
     this._open = false;
+    this._liveReload = false;
     this._saveConfig = false;
     this._overrideHost = null;
     this._localRepos = [];
@@ -46,6 +47,11 @@ class UpCommand extends BuildCommand {
 
   withOpen(o) {
     this._open = !!o;
+    return this;
+  }
+
+  withLiveReload(value) {
+    this._liveReload = value;
     return this;
   }
 
@@ -103,6 +109,10 @@ class UpCommand extends BuildCommand {
   }
 
   async stop() {
+    if (this._watcher) {
+      await this._watcher.close();
+      this._watcher = null;
+    }
     if (this._project) {
       try {
         await this._project.stop();
@@ -110,10 +120,6 @@ class UpCommand extends BuildCommand {
         // ignore
       }
       this._project = null;
-    }
-    if (this._watcher) {
-      await this._watcher.close();
-      this._watcher = null;
     }
     this.log.info('Helix project stopped.');
     this.emit('stopped', this);
@@ -216,6 +222,7 @@ class UpCommand extends BuildCommand {
       .withAlgoliaAppID(this._algoliaAppID || ALGOLIA_APP_ID)
       .withAlgoliaAPIKey(this._algoliaAPIKey || ALGOLIA_API_KEY)
       .withActionParams(this._devDefault)
+      .withLiveReload(this._liveReload)
       .withRuntimeModulePaths(module.paths);
 
     // special handling for helix pages project
@@ -307,6 +314,25 @@ class UpCommand extends BuildCommand {
 
         await this._project.start();
 
+        // init source watcher after everything is built
+        this._initSourceWatcher(async (files) => {
+          const dirtyConfigFiles = Object.keys(files || {})
+            .filter((f) => f === HELIX_CONFIG || f === HELIX_QUERY || f === GIT_HEAD);
+          if (dirtyConfigFiles.length) {
+            this.log.info(`${dirtyConfigFiles.join(', ')} modified. Restarting dev server...`);
+            await this._project.stop();
+            await this.reloadConfig();
+            await this.setup();
+            // ensure correct module paths
+            this._project.withRuntimeModulePaths([...this.modulePaths, ...module.paths]);
+            await this._project.start();
+            if (Object.keys(files).length === 1) {
+              return Promise.resolve();
+            }
+          }
+          return this.build();
+        });
+
         this.emit('started', this);
         if (this._open) {
           opn(`http://localhost:${this._project.server.port}/`, { url: true });
@@ -325,24 +351,6 @@ access remote content and to deploy helix. Consider running
 
     this.on('buildStart', onBuildStart);
     this.on('buildEnd', onBuildEnd);
-
-    this._initSourceWatcher(async (files) => {
-      const dirtyConfigFiles = Object.keys(files || {})
-        .filter((f) => f === HELIX_CONFIG || f === HELIX_QUERY || f === GIT_HEAD);
-      if (dirtyConfigFiles.length) {
-        this.log.info(`${dirtyConfigFiles.join(', ')} modified. Restarting dev server...`);
-        await this._project.stop();
-        await this.reloadConfig();
-        await this.setup();
-        // ensure correct module paths
-        this._project.withRuntimeModulePaths([...this.modulePaths, ...module.paths]);
-        await this._project.start();
-        if (Object.keys(files).length === 1) {
-          return Promise.resolve();
-        }
-      }
-      return this.build();
-    });
 
     this.build();
   }
