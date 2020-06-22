@@ -1,3 +1,10 @@
+## [10.2.8](https://github.com/adobe/helix-cli/compare/v10.2.7...v10.2.8) (2020-06-22)
+
+
+### Bug Fixes
+
+* **deps:** remove eslint update ([278aa57](https://github.com/adobe/helix-cli/commit/278aa57801f0e9e82d7f6fbbdc850ad18ac0cf5d))
+
 ## [10.2.7](https://github.com/adobe/helix-cli/compare/v10.2.6...v10.2.7) (2020-06-17)
 
 
