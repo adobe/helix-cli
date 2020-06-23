@@ -34,7 +34,7 @@ const UpCommand = require('../src/up.cmd');
 const TEST_DIR = path.resolve('test/integration');
 
 describe('Integration test for up command', function suite() {
-  this.timeout(20000);
+  this.timeout(60000); // ensure enough time for installing modules on slow machines
   let testDir;
   let buildDir;
   let testRoot;
@@ -45,8 +45,7 @@ describe('Integration test for up command', function suite() {
     recordIfMissing: false,
   });
 
-  before(async function beforeAll() {
-    this.timeout(60000); // ensure enough time for installing modules on slow machines
+  before(async () => {
     testModules = [await getTestModules(), ...module.paths];
   });
 

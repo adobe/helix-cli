@@ -26,7 +26,7 @@ const UpCommand = require('../src/up.cmd');
 const TEST_DIR = path.resolve('test/integration-helix-pages');
 
 describe('Integration test for up command with helix pages', function suite() {
-  this.timeout(20000);
+  this.timeout(60000); // ensure enough time for installing modules on slow machines
   let testDir;
   let buildDir;
   let testRoot;
