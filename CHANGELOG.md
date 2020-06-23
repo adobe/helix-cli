@@ -1,3 +1,10 @@
+# [10.3.0](https://github.com/adobe/helix-cli/compare/v10.2.8...v10.3.0) (2020-06-23)
+
+
+### Features
+
+* **up:** add support for live-reload ([#1437](https://github.com/adobe/helix-cli/issues/1437)) ([28798e9](https://github.com/adobe/helix-cli/commit/28798e9191880b69aa4d4232ac9ce953afc44dfd))
+
 ## [10.2.8](https://github.com/adobe/helix-cli/compare/v10.2.7...v10.2.8) (2020-06-22)
 
 
