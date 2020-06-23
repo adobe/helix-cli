@@ -33,6 +33,7 @@ describe('hlx up', () => {
     mockUp.withTargetDir.returnsThis();
     mockUp.withFiles.returnsThis();
     mockUp.withOpen.returnsThis();
+    mockUp.withLiveReload.returnsThis();
     mockUp.withHttpPort.returnsThis();
     mockUp.withSaveConfig.returnsThis();
     mockUp.withOverrideHost.returnsThis();
@@ -75,6 +76,7 @@ describe('hlx up', () => {
     sinon.assert.calledWith(mockUp.withFiles, ['*.htl', '*.js']);
     sinon.assert.calledWith(mockUp.withOverrideHost, 'www.project-helix.io');
     sinon.assert.calledWith(mockUp.withOpen, false);
+    sinon.assert.calledWith(mockUp.withLiveReload, false);
     sinon.assert.calledWith(mockUp.withHttpPort, 1234);
     sinon.assert.calledWith(mockUp.withLocalRepo, ['.', '../foo-content', '../bar-content']);
     sinon.assert.calledOnce(mockUp.run);
@@ -127,11 +129,19 @@ describe('hlx up', () => {
     sinon.assert.calledOnce(mockUp.run);
   });
 
-  it('hlx up can open browser with --open option', () => {
+  it('hlx up can disable open browser with --no-open option', () => {
     new CLI()
       .withCommandExecutor('up', mockUp)
       .run(['up', '--no-open', 'tmp/build']);
     sinon.assert.calledWith(mockUp.withOpen, false);
+    sinon.assert.calledOnce(mockUp.run);
+  });
+
+  it('hlx up can disable live-reload browser with --no-livereload option', () => {
+    new CLI()
+      .withCommandExecutor('up', mockUp)
+      .run(['up', '--no-livereload', 'tmp/build']);
+    sinon.assert.calledWith(mockUp.withLiveReload, false);
     sinon.assert.calledOnce(mockUp.run);
   });
 

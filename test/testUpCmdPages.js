@@ -53,6 +53,7 @@ describe('Integration test for up command with helix pages', function suite() {
     initGit(testDir, 'https://github.com/adobe/dummy-foo.git');
     let error = null;
     const cmd = new UpCommand()
+      .withLiveReload(false)
       .withTargetDir(buildDir)
       .withDirectory(testDir)
       .withHelixPagesRepo(helixPagesRepo)

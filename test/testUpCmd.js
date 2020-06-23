@@ -127,6 +127,7 @@ describe('Integration test for up command', function suite() {
     initGit(testDir, 'https://github.com/adobe/dummy-foo.git');
     let error = null;
     const cmd = new UpCommand()
+      .withLiveReload(false)
       .withFiles([
         path.join(testDir, 'src', '*.htl'),
         path.join(testDir, 'src', '*.js'),
@@ -147,6 +148,42 @@ describe('Integration test for up command', function suite() {
         try {
           await assertHttpDom(`http://localhost:${cmd.project.server.port}/index.html`, 200, 'simple_response.html');
           await assertHttp(`http://localhost:${cmd.project.server.port}/welcome.txt`, 200, 'welcome_response.txt');
+          return myDone();
+        } catch (e) {
+          return myDone(e);
+        }
+      })
+      .on('stopped', () => {
+        done(error || pollyError);
+      })
+      .run()
+      .catch(done);
+  });
+
+  it('up command delivers correct response with live-reload.', (done) => {
+    initGit(testDir, 'https://github.com/adobe/dummy-foo.git');
+    let error = null;
+    const cmd = new UpCommand()
+      .withLiveReload(true)
+      .withFiles([
+        path.join(testDir, 'src', '*.htl'),
+        path.join(testDir, 'src', '*.js'),
+        path.join(testDir, 'src', 'utils', '*.js'),
+      ])
+      .withTargetDir(buildDir)
+      .withModulePaths(testModules)
+      .withDirectory(testDir)
+      .withHttpPort(0);
+
+    const myDone = (err) => {
+      error = err;
+      return cmd.stop();
+    };
+
+    cmd
+      .on('started', async () => {
+        try {
+          await assertHttpDom(`http://localhost:${cmd.project.server.port}/index.html`, 200, 'simple_response_with_livereload.html');
           return myDone();
         } catch (e) {
           return myDone(e);
@@ -442,6 +479,7 @@ describe('Integration test for up command', function suite() {
     initGit(testDir, 'https://github.com/adobe/dummy-foo.git');
     let error = null;
     const cmd = new UpCommand()
+      .withLiveReload(false)
       .withFiles([
         path.join(testDir, 'src', '*.htl'),
         path.join(testDir, 'src', '*.js'),
