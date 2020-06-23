@@ -1,3 +1,10 @@
+## [10.3.1](https://github.com/adobe/helix-cli/compare/v10.3.0...v10.3.1) (2020-06-23)
+
+
+### Bug Fixes
+
+* **up:** prefer online when installing pipeline ([#1440](https://github.com/adobe/helix-cli/issues/1440)) ([0724bdd](https://github.com/adobe/helix-cli/commit/0724bdd103538bec283644e0bcedadee1efe42c3)), closes [#1435](https://github.com/adobe/helix-cli/issues/1435)
+
 # [10.3.0](https://github.com/adobe/helix-cli/compare/v10.2.8...v10.3.0) (2020-06-23)
 
 
