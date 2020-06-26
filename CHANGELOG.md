@@ -1,3 +1,10 @@
+## [10.3.8](https://github.com/adobe/helix-cli/compare/v10.3.7...v10.3.8) (2020-06-26)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @adobe/helix-simulator to v4.3.4 ([3ca65d1](https://github.com/adobe/helix-cli/commit/3ca65d13bc353ec8d0eb2f62ef1c60b563726947))
+
 ## [10.3.7](https://github.com/adobe/helix-cli/compare/v10.3.6...v10.3.7) (2020-06-26)
 
 
