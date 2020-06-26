@@ -1,3 +1,10 @@
+## [10.3.7](https://github.com/adobe/helix-cli/compare/v10.3.6...v10.3.7) (2020-06-26)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @adobe/helix-shared to v7.8.1 ([8351964](https://github.com/adobe/helix-cli/commit/83519648cef93bcca61413f8af6659206b40dd28))
+
 ## [10.3.6](https://github.com/adobe/helix-cli/compare/v10.3.5...v10.3.6) (2020-06-26)
 
 

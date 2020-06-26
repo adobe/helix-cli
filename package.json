@@ -1,6 +1,6 @@
 {
   "name": "@adobe/helix-cli",
-  "version": "10.3.6",
+  "version": "10.3.7",
   "description": "Project Helix CLI",
   "main": "index.js",
   "bin": {
