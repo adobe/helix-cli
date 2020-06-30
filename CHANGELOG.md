@@ -1,3 +1,10 @@
+## [10.3.12](https://github.com/adobe/helix-cli/compare/v10.3.11...v10.3.12) (2020-06-30)
+
+
+### Bug Fixes
+
+* **deps:** update dependency isomorphic-git to v1.6.0 ([#1453](https://github.com/adobe/helix-cli/issues/1453)) ([8e6fa46](https://github.com/adobe/helix-cli/commit/8e6fa46126d9e85ececae24226361f0f3668fc31))
+
 ## [10.3.11](https://github.com/adobe/helix-cli/compare/v10.3.10...v10.3.11) (2020-06-30)
 
 
