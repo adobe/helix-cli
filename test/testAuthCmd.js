@@ -19,7 +19,7 @@ const path = require('path');
 const stream = require('stream');
 const fs = require('fs-extra');
 const nock = require('nock');
-const { fetch } = require('@adobe/helix-fetch');
+const fetchAPI = require('@adobe/helix-fetch');
 const AuthCommand = require('../src/auth.cmd');
 
 const {
@@ -84,7 +84,7 @@ describe('Integration test for auth', () => {
       .withDirectory(testRoot)
       .withOpenBrowser(false)
       .on('server-start', async (port) => {
-        const res = await fetch(`http://127.0.0.1:${port}/`, {
+        const res = await fetchAPI.fetch(`http://127.0.0.1:${port}/`, {
           method: 'POST',
           json: {
             token,
@@ -94,6 +94,8 @@ describe('Integration test for auth', () => {
           throw new Error(`Cannot request the server: ${await res.text()}`);
         }
         await res.buffer();
+        // required so that the server can stop properly
+        fetchAPI.disconnectAll();
       });
 
     cmd._stdin = new stream.PassThrough();
@@ -128,7 +130,7 @@ describe('Integration test for auth', () => {
       .withDirectory(testRoot)
       .withOpenBrowser(false)
       .on('server-start', async (port) => {
-        const res = await fetch(`http://127.0.0.1:${port}/`, {
+        const res = await fetchAPI.fetch(`http://127.0.0.1:${port}/`, {
           method: 'POST',
           json: {
             token,
@@ -138,6 +140,8 @@ describe('Integration test for auth', () => {
           throw new Error(`Cannot request the server: ${await res.text()}`);
         }
         await res.buffer();
+        // required so that the server can stop properly
+        fetchAPI.disconnectAll();
       });
 
     cmd._stdin = new stream.PassThrough();
