@@ -12,7 +12,7 @@
 
 /* eslint no-unused-vars: ["error", { "argsIgnorePattern": "^_" }] */
 
-const { fetch } = require('@adobe/helix-fetch');
+const fetchAPI = require('@adobe/helix-fetch');
 const fs = require('fs-extra');
 const path = require('path');
 const fastly = require('@adobe/fastly-native-promises');
@@ -23,6 +23,10 @@ const { HelixConfig } = require('@adobe/helix-shared');
 const AbstractCommand = require('./abstract.cmd.js');
 const GitUtils = require('./git-utils.js');
 const cliversion = require('../package.json').version;
+
+const { fetch } = process.env.HELIX_FETCH_FORCE_HTTP1
+  ? fetchAPI.context({ httpsProtocols: ['http1'] })
+  : fetchAPI;
 
 class RemotePublishCommand extends AbstractCommand {
   constructor(logger) {
