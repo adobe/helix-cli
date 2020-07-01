@@ -11,7 +11,7 @@
  */
 /* eslint-disable max-classes-per-file */
 const chalk = require('chalk');
-const request = require('request-promise-native');
+const { fetch } = require('@adobe/helix-fetch');
 const path = require('path');
 const _ = require('lodash/fp');
 const JunitPerformanceReport = require('./junit-utils');
@@ -161,14 +161,18 @@ class PerfCommand extends AbstractCommand {
     const uri = 'https://adobeioruntime.net/api/v1/web/helix/helix-services/perf@v1';
 
     try {
-      const schedule = await request.post(uri, {
-        json: true,
-        body: {
+      let result = await fetch(uri, {
+        method: 'POST',
+        json: {
           service: this._fastly_namespace,
           token: this._fastly_auth,
           tests: flatttests,
         },
       });
+      if (!result.ok) {
+        throw new Error(`${result.status} - "${await result.text()}"`);
+      }
+      const schedule = await result.json();
 
       let retries = 0;
       let results = [];
@@ -177,14 +181,20 @@ class PerfCommand extends AbstractCommand {
         const completed = results.filter((res) => typeof res === 'object').length;
         console.log(chalk.yellow(`Waiting for test results (${completed}/${flatttests.length})`));
         // eslint-disable-next-line no-await-in-loop
-        results = await request.post(uri, {
-          json: true,
-          body: {
+        result = await fetch(uri, {
+          method: 'POST',
+          json: {
             service: this._fastly_namespace,
             token: this._fastly_auth,
             tests: schedule,
           },
         });
+        if (!result.ok) {
+          // eslint-disable-next-line no-await-in-loop
+          throw new Error(`${result.status} - "${await result.text()}"`);
+        }
+        // eslint-disable-next-line no-await-in-loop
+        results = await result.json();
 
         if (results.reduce((p, uuid) => p && typeof uuid === 'object', true)) {
           break;
@@ -192,14 +202,14 @@ class PerfCommand extends AbstractCommand {
       }
 
       let skipped = 0;
-      const formatted = _.zip(results, flatttests).map(([result, test]) => {
-        if (this._junit && typeof result === 'object') {
+      const formatted = _.zip(results, flatttests).map(([res, test]) => {
+        if (this._junit && typeof res === 'object') {
           // eslint-disable-next-line no-underscore-dangle
-          this._junit.appendResults(result, test._thresholds, test.strain);
+          this._junit.appendResults(res, test._thresholds, test.strain);
         }
-        if (typeof result === 'object') {
+        if (typeof res === 'object') {
           // eslint-disable-next-line no-underscore-dangle
-          return this.formatResponse(result, test._thresholds, test.strain);
+          return this.formatResponse(res, test._thresholds, test.strain);
         }
         skipped += 1;
         console.log(chalk.yellow(`\nSkipped test for ${test.url} on ${test.strain}`));
@@ -210,8 +220,8 @@ class PerfCommand extends AbstractCommand {
         this._junit.writeResults();
       }
 
-      const fail = formatted.filter((result) => result === false).length;
-      const succeed = formatted.filter((result) => result === true).length;
+      const fail = formatted.filter((res) => res === false).length;
+      const succeed = formatted.filter((res) => res === true).length;
       if (skipped) {
         console.log(chalk.yellow(`${skipped} tests skipped due to 10 minute timeout`));
       }

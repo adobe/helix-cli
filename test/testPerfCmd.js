@@ -2331,7 +2331,7 @@ describe('hlx perf #integrationtest', () => {
       if (e instanceof AssertionError) {
         throw e;
       }
-      assert.equal(e.message, 'Unable to run performance test StatusCodeError: 500 - "Internal Server Error"');
+      assert.equal(e.message, 'Unable to run performance test Error: 500 - "Internal Server Error"');
     } finally {
       await fs.remove(root);
     }
