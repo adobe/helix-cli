@@ -12,7 +12,7 @@
 
 /* eslint no-unused-vars: ["error", { "argsIgnorePattern": "^_" }] */
 
-const request = require('request-promise-native');
+const { fetch } = require('@adobe/helix-fetch');
 const fs = require('fs-extra');
 const path = require('path');
 const fastly = require('@adobe/fastly-native-promises');
@@ -266,9 +266,9 @@ class RemotePublishCommand extends AbstractCommand {
   }
 
   serviceAddLogger() {
-    return request.post('https://adobeioruntime.net/api/v1/web/helix/helix-services/logging@v1', {
-      json: true,
-      body: {
+    return fetch('https://adobeioruntime.net/api/v1/web/helix/helix-services/logging@v1', {
+      method: 'POST',
+      json: {
         service: this._fastly_namespace,
         token: this._fastly_auth,
         version: this._version,
@@ -276,7 +276,13 @@ class RemotePublishCommand extends AbstractCommand {
         coralogixapp: this._coralogixAppName,
         cliversion,
       },
-    }).then(() => {
+    }).then(async (res) => {
+      if (!res.ok) {
+        const e = new Error(`${res.status} - "${await res.text()}"`);
+        e.statusCode = e.status;
+        throw e;
+      }
+      await res.buffer();
       this.tick(10, 'set up logging', true);
     }).catch((e) => {
       this.tick(10, 'failed to set up logging', true);
@@ -350,10 +356,16 @@ ${e}`);
       body.dispatchVersion = this._dispatchVersion;
     }
 
-    return request.post(this._publishAPI, {
-      json: true,
-      body,
-    }).then(() => {
+    return fetch(this._publishAPI, {
+      method: 'POST',
+      json: body,
+    }).then(async (res) => {
+      if (!res.ok) {
+        const e = new Error(`${res.status} - "${await res.text()}"`);
+        e.statusCode = res.status;
+        throw e;
+      }
+      await res.buffer();
       this.tick(9, 'set service config up for Helix', true);
       return true;
     }).catch((e) => {
@@ -411,9 +423,9 @@ ${e}`);
       repos[urlString].strains.push(strain.name);
     });
 
-    const response = await request.post(this._configPurgeAPI, {
-      json: true,
-      body: {
+    const response = await fetch(this._configPurgeAPI, {
+      method: 'POST',
+      json: {
         github_token: this._githubToken,
         content_repositories: Object.keys(repos),
         fastly_service_id: this._fastly_namespace,
@@ -421,9 +433,15 @@ ${e}`);
       },
     });
 
+    if (!response.ok) {
+      const e = new Error(`${response.status} - "${await response.text()}"`);
+      e.statusCode = response.status;
+      throw e;
+    }
+
     this._botStatus = {
       repos,
-      response,
+      response: await response.json(),
     };
     this.tick(1, 'updated helix-bot purge config', true);
   }

@@ -19,7 +19,7 @@ const path = require('path');
 const stream = require('stream');
 const fs = require('fs-extra');
 const nock = require('nock');
-const rp = require('request-promise-native');
+const { fetch } = require('@adobe/helix-fetch');
 const AuthCommand = require('../src/auth.cmd');
 
 const {
@@ -84,14 +84,16 @@ describe('Integration test for auth', () => {
       .withDirectory(testRoot)
       .withOpenBrowser(false)
       .on('server-start', async (port) => {
-        await rp({
+        const res = await fetch(`http://127.0.0.1:${port}/`, {
           method: 'POST',
-          uri: `http://127.0.0.1:${port}/`,
-          body: {
+          json: {
             token,
           },
-          json: true,
         });
+        if (!res.ok) {
+          throw new Error(`Cannot request the server: ${await res.text()}`);
+        }
+        await res.buffer();
       });
 
     cmd._stdin = new stream.PassThrough();
@@ -126,14 +128,16 @@ describe('Integration test for auth', () => {
       .withDirectory(testRoot)
       .withOpenBrowser(false)
       .on('server-start', async (port) => {
-        await rp({
+        const res = await fetch(`http://127.0.0.1:${port}/`, {
           method: 'POST',
-          uri: `http://127.0.0.1:${port}/`,
-          body: {
+          json: {
             token,
           },
-          json: true,
         });
+        if (!res.ok) {
+          throw new Error(`Cannot request the server: ${await res.text()}`);
+        }
+        await res.buffer();
       });
 
     cmd._stdin = new stream.PassThrough();

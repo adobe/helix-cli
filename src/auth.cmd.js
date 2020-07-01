@@ -103,6 +103,12 @@ I received an access token that I can use to access the Helix Bot on your behalf
       json: true,
     });
 
+    if (!result.ok) {
+      const e = new Error(`${result.status} - "${await result.text()}"`);
+      e.statusCode = result.status;
+      throw e;
+    }
+
     const userInfo = await result.json();
 
     this._stdout.write(`\n${chalk.gray('   Name: ')}${userInfo.name}\n`);

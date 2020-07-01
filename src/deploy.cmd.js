@@ -576,7 +576,13 @@ Alternatively you can auto-add one using the {grey --add <name>} option.`);
     let staticactionname = '/hlx--static';
     if (!this._dryRun) {
       // probe Helix Static action for version number
-      await fetch('https://adobeioruntime.net/api/v1/web/helix/helix-services/static@latest').then((res) => {
+      await fetch('https://adobeioruntime.net/api/v1/web/helix/helix-services/static@latest').then(async (res) => {
+        if (!res.ok) {
+          const e = new Error(`${res.status} - "${await res.text()}"`);
+          e.statusCode = res.status;
+          throw e;
+        }
+        await res.buffer();
         let version = 'latest';
         try {
           version = `v${semver.major(res.headers['x-version'])}`;
