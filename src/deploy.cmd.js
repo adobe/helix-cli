@@ -12,7 +12,7 @@
 
 'use strict';
 
-const request = require('request-promise-native');
+const { fetch } = require('@adobe/helix-fetch');
 const chalk = require('chalk');
 const ow = require('openwhisk');
 const glob = require('glob');
@@ -245,7 +245,7 @@ class DeployCommand extends AbstractCommand {
 
   static setBuildVar(name, value, owner, repo, auth) {
     const options = DeployCommand.getBuildVarOptions(name, value, auth, owner, repo);
-    return request(options);
+    return fetch(options.uri, options);
   }
 
   async autoDeploy() {
@@ -274,7 +274,8 @@ class DeployCommand extends AbstractCommand {
 
     this.log.info(`Automating deployment with ${followoptions.uri}`);
 
-    const follow = await request(followoptions);
+    const followResult = await fetch(followoptions.uri, followoptions);
+    const follow = await followResult.json();
 
     const envars = [];
 
@@ -331,7 +332,8 @@ class DeployCommand extends AbstractCommand {
         uri: `https://circleci.com/api/v1.1/project/github/${owner}/${repo}/tree/${ref}`,
       };
 
-      const triggered = await request(triggeroptions);
+      const triggeredResult = await fetch(triggeroptions.uri, triggeroptions);
+      const triggered = await triggeredResult.json();
 
       this.log.info(`Go to ${chalk.grey(`${triggered.build_url}`)} for build status.`);
     }
@@ -574,9 +576,7 @@ Alternatively you can auto-add one using the {grey --add <name>} option.`);
     let staticactionname = '/hlx--static';
     if (!this._dryRun) {
       // probe Helix Static action for version number
-      await request.get('https://adobeioruntime.net/api/v1/web/helix/helix-services/static@latest', {
-        resolveWithFullResponse: true,
-      }).then((res) => {
+      await fetch('https://adobeioruntime.net/api/v1/web/helix/helix-services/static@latest').then((res) => {
         let version = 'latest';
         try {
           version = `v${semver.major(res.headers['x-version'])}`;
