@@ -56,8 +56,6 @@
     "open": "^7.0.0",
     "openwhisk": "^3.19.0",
     "progress": "^2.0.3",
-    "request": "^2.88.0",
-    "request-promise-native": "1.0.8",
     "semver": "^7.0.0",
     "shelljs": "^0.8.3",
     "uuid": "^8.0.0",
