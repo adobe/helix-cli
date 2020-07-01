@@ -31,6 +31,7 @@
   },
   "dependencies": {
     "@adobe/fastly-native-promises": "^1.15.0",
+    "@adobe/helix-fetch": "^1.7.0",
     "@adobe/helix-log": "4.5.1",
     "@adobe/helix-shared": "7.9.0",
     "@adobe/helix-simulator": "4.3.5",

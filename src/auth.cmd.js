@@ -12,7 +12,7 @@
 
 const readline = require('readline');
 const path = require('path');
-const rp = require('request-promise-native');
+const { fetch } = require('@adobe/helix-fetch');
 const fse = require('fs-extra');
 const chalk = require('chalk');
 const opn = require('open');
@@ -95,14 +95,15 @@ I received an access token that I can use to access the Helix Bot on your behalf
 
   async showUserInfo() {
     // fetch some user info
-    const userInfo = await rp({
-      uri: 'https://api.github.com/user',
+    const result = await fetch('https://api.github.com/user', {
       headers: {
         'User-Agent': 'HelixBot',
         Authorization: `token ${this._token}`,
       },
       json: true,
     });
+
+    const userInfo = await result.json();
 
     this._stdout.write(`\n${chalk.gray('   Name: ')}${userInfo.name}\n`);
     this._stdout.write(`${chalk.gray('  Login: ')}${userInfo.login}\n\n`);

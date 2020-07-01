@@ -637,13 +637,7 @@ This is the ["Hello World" example from Apache OpenWhisk](https://github.com/apa
 
 #### JavaScript Modules
 
-In all the JavaScript examples above, you have full access to all NPM modules, all you have to do is to add a statement like:
-
-```javascript
-const request = require('request');
-```
-
-to your script. If there are additional helper functions you need in multiple parts of your project, you can simply put them into a JavaScript module below `src`. Make sure to `export` the functions and objects you want to consume in your `cgi-bin`, `pre.js`, or template functions.
+If there are additional helper functions you need in multiple parts of your project, you can simply put them into a JavaScript module below `src`. Make sure to `export` the functions and objects you want to consume in your `cgi-bin`, `pre.js`, or template functions.
 
 ### Creating Things in Helix with JSX
 
