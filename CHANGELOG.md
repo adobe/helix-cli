@@ -1,3 +1,10 @@
+# [10.4.0](https://github.com/adobe/helix-cli/compare/v10.3.12...v10.4.0) (2020-07-02)
+
+
+### Features
+
+* **request:** request is deprecated; replace with helix-fetch ([b375183](https://github.com/adobe/helix-cli/commit/b375183982c7e50b2f84a2d521e0c6be3a4053eb))
+
 ## [10.3.12](https://github.com/adobe/helix-cli/compare/v10.3.11...v10.3.12) (2020-06-30)
 
 
