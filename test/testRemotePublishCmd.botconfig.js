@@ -19,7 +19,7 @@ const assert = require('assert');
 const { logging } = require('@adobe/helix-testutils');
 const { clearHelixEnv } = require('./utils.js');
 
-process.env.HELIX_FETCH_FORCE_HTTP1 = true;
+process.env.HELIX_FETCH_FORCE_HTTP1 = 'true';
 
 const EXPECTED_BODY = {
   content_repositories: [

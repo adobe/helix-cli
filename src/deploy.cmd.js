@@ -274,8 +274,8 @@ class DeployCommand extends AbstractCommand {
 
     this.log.info(`Automating deployment with ${followoptions.uri}`);
 
-    const followResult = await fetch(followoptions.uri, followoptions);
-    const follow = await followResult.json();
+    let response = await fetch(followoptions.uri, followoptions);
+    const follow = await response.json();
 
     const envars = [];
 
@@ -332,8 +332,8 @@ class DeployCommand extends AbstractCommand {
         uri: `https://circleci.com/api/v1.1/project/github/${owner}/${repo}/tree/${ref}`,
       };
 
-      const triggeredResult = await fetch(triggeroptions.uri, triggeroptions);
-      const triggered = await triggeredResult.json();
+      response = await fetch(triggeroptions.uri, triggeroptions);
+      const triggered = await response.json();
 
       this.log.info(`Go to ${chalk.grey(`${triggered.build_url}`)} for build status.`);
     }

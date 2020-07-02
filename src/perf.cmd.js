@@ -161,7 +161,7 @@ class PerfCommand extends AbstractCommand {
     const uri = 'https://adobeioruntime.net/api/v1/web/helix/helix-services/perf@v1';
 
     try {
-      let result = await fetch(uri, {
+      let response = await fetch(uri, {
         method: 'POST',
         json: {
           service: this._fastly_namespace,
@@ -169,10 +169,10 @@ class PerfCommand extends AbstractCommand {
           tests: flatttests,
         },
       });
-      if (!result.ok) {
-        throw new Error(`${result.status} - "${await result.text()}"`);
+      if (!response.ok) {
+        throw new Error(`${response.status} - "${await response.text()}"`);
       }
-      const schedule = await result.json();
+      const schedule = await response.json();
 
       let retries = 0;
       let results = [];
@@ -181,7 +181,7 @@ class PerfCommand extends AbstractCommand {
         const completed = results.filter((res) => typeof res === 'object').length;
         console.log(chalk.yellow(`Waiting for test results (${completed}/${flatttests.length})`));
         // eslint-disable-next-line no-await-in-loop
-        result = await fetch(uri, {
+        response = await fetch(uri, {
           method: 'POST',
           json: {
             service: this._fastly_namespace,
@@ -189,12 +189,12 @@ class PerfCommand extends AbstractCommand {
             tests: schedule,
           },
         });
-        if (!result.ok) {
+        if (!response.ok) {
           // eslint-disable-next-line no-await-in-loop
-          throw new Error(`${result.status} - "${await result.text()}"`);
+          throw new Error(`${response.status} - "${await response.text()}"`);
         }
         // eslint-disable-next-line no-await-in-loop
-        results = await result.json();
+        results = await response.json();
 
         if (results.reduce((p, uuid) => p && typeof uuid === 'object', true)) {
           break;

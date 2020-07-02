@@ -29,13 +29,13 @@ function collectMetadata(req, logger) {
   logger.debug(`Fetching Git Metadata from ${options.uri}`);
 
   return fetch(options.uri, options)
-    .then(async (result) => {
-      if (!result.ok) {
-        const e = new Error(`${result.status} - "${await result.text()}"`);
-        e.statusCode = result.status;
+    .then(async (response) => {
+      if (!response.ok) {
+        const e = new Error(`${response.status} - "${await response.text()}"`);
+        e.statusCode = response.status;
         throw e;
       }
-      const metadata = await result.json();
+      const metadata = await response.json();
       logger.debug('Got git metadata');
       return metadata;
     })
