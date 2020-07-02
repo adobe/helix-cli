@@ -13,7 +13,7 @@
 /* eslint-disable no-param-reassign */
 
 const _ = require('lodash/fp');
-const request = require('request-promise-native');
+const { fetch } = require('@adobe/helix-fetch');
 
 /**
  * Fetches the git metadata
@@ -31,7 +31,13 @@ async function collectMetadata(req, logger) {
 
   logger.debug(`Fetching Git Metadata from ${options.uri}`);
   try {
-    const metadata = await request(options);
+    const response = await fetch(options.uri, options);
+    if (!response.ok) {
+      const e = new Error(`${response.status} - "${await response.text()}"`);
+      e.statusCode = response.status;
+      throw e;
+    }
+    const metadata = await response.json();
     logger.debug('Got git metadata');
     return metadata;
   } catch (error) {
