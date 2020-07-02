@@ -1,3 +1,10 @@
+## [10.4.1](https://github.com/adobe/helix-cli/compare/v10.4.0...v10.4.1) (2020-07-02)
+
+
+### Bug Fixes
+
+* **deps:** update dependency yargs to v15.4.0 ([95c212f](https://github.com/adobe/helix-cli/commit/95c212f8a34b4de29aed6adf6797b749d5464c98))
+
 # [10.4.0](https://github.com/adobe/helix-cli/compare/v10.3.12...v10.4.0) (2020-07-02)
 
 
