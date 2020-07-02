@@ -95,7 +95,7 @@ I received an access token that I can use to access the Helix Bot on your behalf
 
   async showUserInfo() {
     // fetch some user info
-    const result = await fetch('https://api.github.com/user', {
+    const response = await fetch('https://api.github.com/user', {
       headers: {
         'User-Agent': 'HelixBot',
         Authorization: `token ${this._token}`,
@@ -103,13 +103,13 @@ I received an access token that I can use to access the Helix Bot on your behalf
       json: true,
     });
 
-    if (!result.ok) {
-      const e = new Error(`${result.status} - "${await result.text()}"`);
-      e.statusCode = result.status;
+    if (!response.ok) {
+      const e = new Error(`${response.status} - "${await response.text()}"`);
+      e.statusCode = response.status;
       throw e;
     }
 
-    const userInfo = await result.json();
+    const userInfo = await response.json();
 
     this._stdout.write(`\n${chalk.gray('   Name: ')}${userInfo.name}\n`);
     this._stdout.write(`${chalk.gray('  Login: ')}${userInfo.login}\n\n`);
