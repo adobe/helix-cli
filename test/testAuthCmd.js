@@ -186,6 +186,8 @@ describe('Integration test for auth', () => {
         fetchAPI.disconnectAll();
       });
 
+    cmd._stdout = out;
+
     try {
       await cmd.run();
       assert.fail('auth should fail');
