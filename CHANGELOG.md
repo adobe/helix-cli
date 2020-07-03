@@ -1,3 +1,15 @@
+# [11.0.0](https://github.com/adobe/helix-cli/compare/v10.4.2...v11.0.0) (2020-07-03)
+
+
+### Features
+
+* **publish:** use helix-publish@v6 ([0107ffb](https://github.com/adobe/helix-cli/commit/0107ffb15d4e41852077cce6dee1811723da0d52))
+
+
+### BREAKING CHANGES
+
+* **publish:** helix-publish@v6 and helix-dispatch@v4 change the default directory index. Details here: https://github.com/adobe/helix-dispatch/releases/tag/v4.0.0
+
 ## [10.4.2](https://github.com/adobe/helix-cli/compare/v10.4.1...v10.4.2) (2020-07-03)
 
 
