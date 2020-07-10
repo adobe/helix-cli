@@ -503,7 +503,6 @@ describe('Integration test for up command', function suite() {
           // ignore for now, as we don't know how to exactly setup the 404 handler.
           // await assertHttpDom(`http://localhost:${cmd.project.server.port}/404.html`, 404, '404_response.html');
           await assertHttp(`http://localhost:${cmd.project.server.port}/welcome.txt`, 200, 'welcome_response.txt');
-          await assertHttp(`http://localhost:${cmd.project.server.port}/index.json`, 200, 'json_response.json');
           await fse.copy(srcFile, dstFile);
         } catch (e) {
           await myDone(e);
