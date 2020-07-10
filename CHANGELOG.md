@@ -1,3 +1,15 @@
+# [12.0.0](https://github.com/adobe/helix-cli/compare/v11.0.3...v12.0.0) (2020-07-10)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @adobe/helix-simulator to v5 ([#1469](https://github.com/adobe/helix-cli/issues/1469)) ([70c816c](https://github.com/adobe/helix-cli/commit/70c816c74d4753ec8297db45ec01c70bd40e7abf))
+
+
+### BREAKING CHANGES
+
+* **deps:** local dev of json and md scripts are not supported as they are routed directly to the content-proxy.
+
 ## [11.0.3](https://github.com/adobe/helix-cli/compare/v11.0.2...v11.0.3) (2020-07-10)
 
 
