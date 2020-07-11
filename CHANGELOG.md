@@ -1,3 +1,10 @@
+## [12.0.1](https://github.com/adobe/helix-cli/compare/v12.0.0...v12.0.1) (2020-07-11)
+
+
+### Bug Fixes
+
+* **deps:** update dependency isomorphic-git to v1.7.1 ([b3cdcd2](https://github.com/adobe/helix-cli/commit/b3cdcd23f869ad0c56e22fa93908deab662178b0))
+
 # [12.0.0](https://github.com/adobe/helix-cli/compare/v11.0.3...v12.0.0) (2020-07-10)
 
 
