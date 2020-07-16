@@ -1,3 +1,10 @@
+## [12.0.4](https://github.com/adobe/helix-cli/compare/v12.0.3...v12.0.4) (2020-07-16)
+
+
+### Bug Fixes
+
+* **deps:** update dependency lodash to v4.17.19 [security] ([6ed7b2d](https://github.com/adobe/helix-cli/commit/6ed7b2de2f5a12846b40700027ccf358dc67fe7d))
+
 ## [12.0.3](https://github.com/adobe/helix-cli/compare/v12.0.2...v12.0.3) (2020-07-13)
 
 
