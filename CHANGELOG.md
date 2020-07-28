@@ -1,3 +1,10 @@
+## [12.0.16](https://github.com/adobe/helix-cli/compare/v12.0.15...v12.0.16) (2020-07-28)
+
+
+### Bug Fixes
+
+* **deps:** update dependency archiver to v5 ([#1489](https://github.com/adobe/helix-cli/issues/1489)) ([e4d7190](https://github.com/adobe/helix-cli/commit/e4d71906dcea3288dbe59a88d0732910046aa5d3))
+
 ## [12.0.15](https://github.com/adobe/helix-cli/compare/v12.0.14...v12.0.15) (2020-07-27)
 
 
