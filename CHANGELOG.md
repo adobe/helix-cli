@@ -1,3 +1,10 @@
+## [12.0.18](https://github.com/adobe/helix-cli/compare/v12.0.17...v12.0.18) (2020-08-02)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @adobe/htlengine to v5.1.0 ([658c3f8](https://github.com/adobe/helix-cli/commit/658c3f86957d253abfea9295e2c59fd8f38bcdaf))
+
 ## [12.0.17](https://github.com/adobe/helix-cli/compare/v12.0.16...v12.0.17) (2020-07-29)
 
 
