@@ -529,6 +529,77 @@ describe('hlx deploy (Integration)', () => {
     assert.equal(newCfg.strains.get('dev').package, `hlx/${ref}`);
   });
 
+  it.only('Deploy sets action limits', async function test() {
+    this.timeout(60000);
+
+    await fs.copy(TEST_DIR, testRoot);
+    await fs.rename(path.resolve(testRoot, 'default-config.yaml'), path.resolve(testRoot, 'helix-config.yaml'));
+    initGit(testRoot, 'git@github.com:adobe/project-helix.io.git');
+    const logger = logging.createTestLogger();
+
+    const ref = await GitUtils.getCurrentRevision(testRoot);
+
+    this.polly.server.any().on('beforeResponse', (req, res) => {
+      delete req.body;
+      delete res.body;
+    });
+    this.polly.server.put(`https://adobeioruntime.net/api/v1/namespaces/hlx/packages/${ref}`).intercept((req, res) => {
+      res.sendStatus(201);
+    });
+    this.polly.server.put('https://adobeioruntime.net/api/v1/namespaces/hlx/packages/helix-services?overwrite=true').intercept((req, res) => {
+      res.sendStatus(201);
+    });
+    this.polly.server.put(`https://adobeioruntime.net/api/v1/namespaces/hlx/actions/${ref}/html`).intercept((req, res) => {
+      const body = JSON.parse(req.body);
+      try {
+        assert.deepEqual(body.limits, { memory: 384, concurrency: 50 });
+        res.sendStatus(201);
+      } catch (e) {
+        // eslint-disable-next-line no-console
+        console.error(e);
+        res.sendStatus(500);
+      }
+    });
+    this.polly.server.put(`https://adobeioruntime.net/api/v1/namespaces/hlx/actions/${ref}/hlx--static?overwrite=true`).intercept((req, res) => {
+      res.sendStatus(201);
+    });
+
+    await new DeployCommand(logger)
+      .withDirectory(testRoot)
+      .withWskHost('adobeioruntime.net')
+      .withWskAuth('dummy')
+      .withWskActionMemory(384)
+      .withWskActionConcurrency(50)
+      .withWskNamespace('hlx')
+      .withEnableAuto(false)
+      .withEnableDirty(false)
+      .withModulePaths(testModules)
+      .withDryRun(false)
+      .withTarget(buildDir)
+      .withEpsagonToken('fake-token')
+      .withEpsagonAppName('fake-name')
+      .withCoralogixAppName('fake-name')
+      .withCoralogixToken('fake-key')
+      .withFiles([
+        path.resolve(testRoot, 'src/html.htl'),
+        path.resolve(testRoot, 'src/html.pre.js'),
+        path.resolve(testRoot, 'src/helper.js'),
+        path.resolve(testRoot, 'src/utils/another_helper.js'),
+        path.resolve(testRoot, 'src/third_helper.js'),
+      ])
+      .withMinify(false)
+      .withDefault({ FOO: 'bar' })
+      .withDefaultFile(decodeFileParams.bind(null, ['defaults.json', 'defaults.env']))
+      .withResolveGitRefService('my-resolver')
+      .withUpdatedAt(1234)
+      .withUpdatedBy('me')
+      .run();
+
+    const log = logger.getOutput();
+    assert.ok(log.indexOf('deployment of 1 action completed') >= 0);
+    assert.ok(log.indexOf(`- hlx/${ref}/html`) >= 0);
+  });
+
   it('Deploy works with unset parameters', async function test() {
     this.timeout(60000);
 

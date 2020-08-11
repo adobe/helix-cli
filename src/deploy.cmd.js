@@ -105,6 +105,16 @@ class DeployCommand extends AbstractCommand {
     return this;
   }
 
+  withWskActionMemory(value) {
+    this._wsk_action_memory = value;
+    return this;
+  }
+
+  withWskActionConcurrency(value) {
+    this._wsk_action_concurrency = value;
+    return this;
+  }
+
   withTarget(value) {
     this._target = value;
     return this;
@@ -548,6 +558,16 @@ Alternatively you can auto-add one using the {grey --add <name>} option.`);
       };
       if (this._updatedBy) {
         actionoptions.annotations.updatedBy = this._updatedBy;
+      }
+      if (this._wsk_action_memory || this._wsk_action_concurrency) {
+        const limits = actionoptions.limits || {};
+        if (this._wsk_action_memory) {
+          limits.memory = this._wsk_action_memory;
+        }
+        if (this._wsk_action_concurrency) {
+          limits.concurrency = this._wsk_action_concurrency;
+        }
+        actionoptions.limits = limits;
       }
 
       const baseName = path.basename(script.main);

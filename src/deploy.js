@@ -151,6 +151,8 @@ module.exports = function deploy() {
         .withWskAuth(argv.wskAuth)
         .withWskHost(argv.wskHost)
         .withWskNamespace(argv.wskNamespace)
+        .withWskActionMemory(argv.wskActionMemory)
+        .withWskActionConcurrency(argv.wskActionConcurrency)
         .withTarget(argv.target)
         .withFiles(argv.files)
         .withDefault(argv.default)
