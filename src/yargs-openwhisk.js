@@ -32,6 +32,16 @@ module.exports = function commonArgs(yargs) {
       type: 'string',
       default: 'adobeioruntime.net',
     })
+    .option('wsk-action-memory', {
+      alias: 'wskActionMemory',
+      describe: 'the maximum memory LIMIT in MB for the action',
+      type: 'number',
+    })
+    .option('wsk-action-concurrency', {
+      alias: 'wskActionConcurrency',
+      describe: 'the maximum number of cuncurrent activations of the action',
+      type: 'number',
+    })
     .demandOption(
       'wsk-auth',
       'Authentication is required. You can pass the key via the HLX_WSK_AUTH environment variable, too',

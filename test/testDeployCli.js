@@ -37,6 +37,8 @@ describe('hlx deploy', () => {
     mockDeploy.withWskHost.returnsThis();
     mockDeploy.withWskAuth.returnsThis();
     mockDeploy.withWskNamespace.returnsThis();
+    mockDeploy.withWskActionMemory.returnsThis();
+    mockDeploy.withWskActionConcurrency.returnsThis();
     mockDeploy.withTarget.returnsThis();
     mockDeploy.withFiles.returnsThis();
     mockDeploy.withDefault.returnsThis();
@@ -239,6 +241,21 @@ OpenWhisk Namespace is required`);
       ]);
 
     sinon.assert.calledWith(mockDeploy.withWskHost, 'stage.adobeioruntime.net');
+    sinon.assert.calledOnce(mockDeploy.run);
+  });
+
+  it('hlx deploy can set action limits', () => {
+    new CLI()
+      .withCommandExecutor('deploy', mockDeploy)
+      .run(['deploy',
+        '--wsk-auth', 'secret-key',
+        '--wsk-namespace', 'hlx',
+        '--wsk-action-memory', '384',
+        '--wsk-action-concurrency', '50',
+      ]);
+
+    sinon.assert.calledWith(mockDeploy.withWskActionMemory, 384);
+    sinon.assert.calledWith(mockDeploy.withWskActionConcurrency, 50);
     sinon.assert.calledOnce(mockDeploy.run);
   });
 
