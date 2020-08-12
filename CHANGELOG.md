@@ -1,3 +1,15 @@
+# [12.1.0](https://github.com/adobe/helix-cli/compare/v12.0.20...v12.1.0) (2020-08-12)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @adobe/helix-simulator to v5.0.15 ([02f3024](https://github.com/adobe/helix-cli/commit/02f3024f50ab6a7f7ff9e8c6e354a39e641203c4))
+
+
+### Features
+
+* support setting action limits during deploy ([#1503](https://github.com/adobe/helix-cli/issues/1503)) ([540a1e6](https://github.com/adobe/helix-cli/commit/540a1e68f505a8f444b3767f63331de133f1608a)), closes [#1502](https://github.com/adobe/helix-cli/issues/1502)
+
 ## [12.0.20](https://github.com/adobe/helix-cli/compare/v12.0.19...v12.0.20) (2020-08-09)
 
 
