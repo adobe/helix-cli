@@ -13,23 +13,10 @@
 /* eslint-disable */
 const { Runtime } = require('MOD_HTLENGINE');
 
-function run(runtime) {
-  const $ = {
-    col: runtime.col,
-    exec: runtime.exec.bind(runtime),
-    xss: runtime.xss.bind(runtime),
-    listInfo: runtime.listInfo.bind(runtime),
-    use: runtime.use.bind(runtime),
-    slyResource: runtime.resource.bind(runtime),
-    call: runtime.call.bind(runtime),
-    template: runtime.template.bind(runtime),
-    dom: runtime.dom,
-  };
-
+function run($) {
   // TEMPLATES
 
-  return runtime.run(function* () {
-
+  return $.run(function* () {
     // RUNTIME_GLOBALS
 
     // CODE
