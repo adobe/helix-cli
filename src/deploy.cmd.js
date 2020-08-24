@@ -18,7 +18,6 @@ const ow = require('openwhisk');
 const glob = require('glob');
 const path = require('path');
 const fs = require('fs-extra');
-const semver = require('semver');
 const { v4: uuidv4 } = require('uuid');
 const ProgressBar = require('progress');
 const { HelixConfig, GitUrl } = require('@adobe/helix-shared');
@@ -593,62 +592,6 @@ Alternatively you can auto-add one using the {grey --add <name>} option.`);
     await Promise.all([...deployed, bindHelixServices]);
 
     let numErrors = 0;
-    let staticactionname = '/hlx--static';
-    if (!this._dryRun) {
-      // probe Helix Static action for version number
-      await fetch('https://adobeioruntime.net/api/v1/web/helix/helix-services/static@latest').then(async (res) => {
-        if (!res.ok) {
-          const e = new Error(`${res.status} - "${await res.text()}"`);
-          e.statusCode = res.status;
-          throw e;
-        }
-        await res.buffer();
-        let version = 'latest';
-        try {
-          version = `v${semver.major(res.headers['x-version'])}`;
-        } catch (e) {
-          // ignore
-        }
-        tick(` verified static action version: ${version}`);
-        staticactionname = `/helix-services/static@${version}`;
-      }).catch((e) => {
-        this.log.error(`❌  Unable to verify the static action: ${e.message}`);
-        numErrors += 1;
-      });
-    }
-
-    if (!numErrors && !this._dryRun) {
-      await openwhisk.actions.update({
-        name: `${this._prefix}/hlx--static`,
-        action: {
-          namespace: this._wsk_namespace,
-          name: 'hlx--static',
-          exec: {
-            kind: 'sequence',
-            components: [this._wsk_namespace + staticactionname],
-          },
-          annotations: [{
-            key: 'exec',
-            value: 'sequence',
-          }, {
-            key: 'web-export',
-            value: true,
-          }, {
-            key: 'raw-http',
-            value: false,
-          }, {
-            key: 'final',
-            value: true,
-          }],
-        },
-      }).then(() => {
-        tick(` linked static action as sequence ${this._prefix}/hlx--static`);
-      }).catch((e) => {
-        this.log.error(`❌  Unable to link the static action as a sequence: ${e.message}`);
-        numErrors += 1;
-      });
-    }
-
     bar.terminate();
     this.log.info(`✅  deployment of ${scripts.length} action${scripts.length !== 1 ? 's' : ''} completed:`);
     scripts.forEach((script) => {

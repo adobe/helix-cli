@@ -233,7 +233,7 @@ class PackageCommand extends AbstractCommand {
         script.name = path.basename(script.main, '.js');
         script.bundleName = `${script.name}.bundle.js`;
         script.bundlePath = path.resolve(script.buildDir, script.bundleName);
-        script.dirname = script.isStatic ? '' : path.dirname(script.main);
+        script.dirname = path.dirname(script.main);
         script.archiveName = `${script.name}.zip`;
         script.zipFile = path.resolve(script.buildDir, script.archiveName);
         /* eslint-enable no-param-reassign */

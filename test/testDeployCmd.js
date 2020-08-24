@@ -481,9 +481,6 @@ describe('hlx deploy (Integration)', () => {
     this.polly.server.put('https://adobeioruntime.net/api/v1/namespaces/hlx/packages/helix-services?overwrite=true').intercept((req, res) => {
       res.sendStatus(201);
     });
-    this.polly.server.put(`https://adobeioruntime.net/api/v1/namespaces/hlx/actions/${ref}/hlx--static?overwrite=true`).intercept((req, res) => {
-      res.sendStatus(201);
-    });
 
     const cmd = await new DeployCommand(logger)
       .withDirectory(testRoot)
@@ -529,7 +526,7 @@ describe('hlx deploy (Integration)', () => {
     assert.equal(newCfg.strains.get('dev').package, `hlx/${ref}`);
   });
 
-  it.only('Deploy sets action limits', async function test() {
+  it('Deploy sets action limits', async function test() {
     this.timeout(60000);
 
     await fs.copy(TEST_DIR, testRoot);
@@ -559,9 +556,6 @@ describe('hlx deploy (Integration)', () => {
         console.error(e);
         res.sendStatus(500);
       }
-    });
-    this.polly.server.put(`https://adobeioruntime.net/api/v1/namespaces/hlx/actions/${ref}/hlx--static?overwrite=true`).intercept((req, res) => {
-      res.sendStatus(201);
     });
 
     await new DeployCommand(logger)
@@ -649,9 +643,6 @@ describe('hlx deploy (Integration)', () => {
     this.polly.server.put('https://adobeioruntime.net/api/v1/namespaces/hlx/packages/helix-services?overwrite=true').intercept((req, res) => {
       res.sendStatus(201);
     });
-    this.polly.server.put(`https://adobeioruntime.net/api/v1/namespaces/hlx/actions/${ref}/hlx--static?overwrite=true`).intercept((req, res) => {
-      res.sendStatus(201);
-    });
 
     const cmd = await new DeployCommand(logger)
       .withDirectory(testRoot)
@@ -713,13 +704,10 @@ describe('hlx deploy (Integration)', () => {
       res.sendStatus(201);
     });
     this.polly.server.put(`https://adobeioruntime.net/api/v1/namespaces/hlx/actions/${ref}/html?overwrite=true`).intercept((req, res) => {
-      res.sendStatus(201);
+      res.sendStatus(500);
     });
     this.polly.server.put('https://adobeioruntime.net/api/v1/namespaces/hlx/packages/helix-services?overwrite=true').intercept((req, res) => {
       res.sendStatus(201);
-    });
-    this.polly.server.get('https://adobeioruntime.net/api/v1/web/helix/helix-services/static@latest').intercept((req, res) => {
-      res.sendStatus(500);
     });
 
     try {
