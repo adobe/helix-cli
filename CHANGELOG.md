@@ -1,3 +1,10 @@
+## [12.1.4](https://github.com/adobe/helix-cli/compare/v12.1.3...v12.1.4) (2020-08-25)
+
+
+### Bug Fixes
+
+* **deploy:** remove unused hlx--static ([#1508](https://github.com/adobe/helix-cli/issues/1508)) ([7d78a71](https://github.com/adobe/helix-cli/commit/7d78a714415619c99354fa50c6cd3e86ad7d125f))
+
 ## [12.1.3](https://github.com/adobe/helix-cli/compare/v12.1.2...v12.1.3) (2020-08-20)
 
 
