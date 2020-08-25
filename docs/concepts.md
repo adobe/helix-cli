@@ -23,7 +23,7 @@ For dynamic requests, it invokes the adobeioruntime action, passing along conten
 and resource information. Once it retrieves the response it will cache and deliver it back to the
 client.
 
-Requests to static resources are proxied through a single global `hlx--static`
+Requests to static resources are proxied through a single global `helix-services/static@v1`
 action that handles requests to all static resources.
 
 
