@@ -1,3 +1,10 @@
+## [12.1.5](https://github.com/adobe/helix-cli/compare/v12.1.4...v12.1.5) (2020-08-26)
+
+
+### Bug Fixes
+
+* **deploy:** ensure default params win over cli arguments ([#1511](https://github.com/adobe/helix-cli/issues/1511)) ([070689e](https://github.com/adobe/helix-cli/commit/070689e8244a5316c4b0c25248e980c6a1a5d427)), closes [#1510](https://github.com/adobe/helix-cli/issues/1510)
+
 ## [12.1.4](https://github.com/adobe/helix-cli/compare/v12.1.3...v12.1.4) (2020-08-25)
 
 
