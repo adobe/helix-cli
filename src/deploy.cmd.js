@@ -464,12 +464,12 @@ Alternatively you can auto-add one using the {grey --add <name>} option.`);
     };
 
     const params = Object.entries({
-      ...this._default,
       EPSAGON_TOKEN: this._epsagonToken,
       CORALOGIX_API_KEY: this._coralogixToken,
       CORALOGIX_APPLICATION_NAME: this._coralogixAppName,
       RESOLVE_GITREF_SERVICE: this._resolveGitRefSvc,
       EPSAGON_APPLICATION_NAME: this._epsagonAppName,
+      ...this._default,
     }).reduce((obj, [key, value]) => {
       // remove all falsy values
       if (value) {

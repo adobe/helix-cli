@@ -435,14 +435,14 @@ describe('hlx deploy (Integration)', () => {
         assert.deepEqual(body, {
           publish: true,
           parameters: [
-            { key: 'MY_DEFAULT_2', value: 'default-value-2' },
-            { key: 'MY_DEFAULT_1', value: 'default-value-1' },
-            { key: 'FOO', value: 'bar' },
             { key: 'EPSAGON_TOKEN', value: 'fake-token' },
             { key: 'CORALOGIX_API_KEY', value: 'fake-key' },
             { key: 'CORALOGIX_APPLICATION_NAME', value: 'fake-name' },
             { key: 'RESOLVE_GITREF_SERVICE', value: 'my-resolver' },
             { key: 'EPSAGON_APPLICATION_NAME', value: 'fake-name' },
+            { key: 'MY_DEFAULT_2', value: 'default-value-2' },
+            { key: 'MY_DEFAULT_1', value: 'default-value-1' },
+            { key: 'FOO', value: 'bar' },
           ],
           annotations: [
             {
@@ -506,6 +506,117 @@ describe('hlx deploy (Integration)', () => {
       .withMinify(false)
       .withDefault({ FOO: 'bar' })
       .withDefaultFile(decodeFileParams.bind(null, ['defaults.json', 'defaults.env']))
+      .withResolveGitRefService('my-resolver')
+      .withUpdatedAt(1234)
+      .withUpdatedBy('me')
+      .run();
+
+    assert.equal(cmd.config.strains.get('default').package, '');
+    assert.equal(cmd.config.strains.get('dev').package, `hlx/${ref}`);
+
+    const log = logger.getOutput();
+    assert.ok(log.indexOf('deployment of 1 action completed') >= 0);
+    assert.ok(log.indexOf(`- hlx/${ref}/html`) >= 0);
+
+    // check if written helix config contains package ref
+    const newCfg = new HelixConfig()
+      .withConfigPath(path.resolve(testRoot, 'helix-config.yaml'));
+    await newCfg.init();
+    assert.equal(newCfg.strains.get('default').package, '');
+    assert.equal(newCfg.strains.get('dev').package, `hlx/${ref}`);
+  });
+
+  it('Deploy works with colliding default params', async function test() {
+    this.timeout(60000);
+
+    await fs.copy(TEST_DIR, testRoot);
+    await fs.rename(path.resolve(testRoot, 'default-config.yaml'), path.resolve(testRoot, 'helix-config.yaml'));
+    initGit(testRoot, 'git@github.com:adobe/project-helix.io.git');
+    const logger = logging.createTestLogger();
+
+    const ref = await GitUtils.getCurrentRevision(testRoot);
+
+    this.polly.server.any().on('beforeResponse', (req, res) => {
+      delete req.body;
+      delete res.body;
+    });
+    this.polly.server.put(`https://adobeioruntime.net/api/v1/namespaces/hlx/packages/${ref}`).intercept((req, res) => {
+      const body = JSON.parse(req.body);
+      try {
+        assert.deepEqual(body, {
+          publish: true,
+          parameters: [
+            { key: 'EPSAGON_TOKEN', value: 'default-token' },
+            { key: 'CORALOGIX_API_KEY', value: 'coralogix-key' },
+            { key: 'CORALOGIX_APPLICATION_NAME', value: 'coralogix-name' },
+            { key: 'RESOLVE_GITREF_SERVICE', value: 'my-resolver' },
+            { key: 'EPSAGON_APPLICATION_NAME', value: 'fake-name' },
+            { key: 'FOO', value: 'bar' },
+          ],
+          annotations: [
+            {
+              key: 'hlx-code-origin',
+              value: 'ssh://git@github.com/adobe/project-helix.io.git#master',
+            },
+            { key: 'updated', value: 1234 },
+            { key: 'pkgVersion', value: 'n/a' },
+            { key: 'pkgName', value: 'n/a' },
+            { key: 'updatedBy', value: 'me' },
+          ],
+        });
+        res.sendStatus(201);
+      } catch (e) {
+        // eslint-disable-next-line no-console
+        console.error(e);
+        res.sendStatus(500);
+      }
+    });
+    this.polly.server.put(`https://adobeioruntime.net/api/v1/namespaces/hlx/actions/${ref}/html`).intercept((req, res) => {
+      const body = JSON.parse(req.body);
+      try {
+        const deps = body.annotations.find((a) => a.key === 'dependencies');
+        assert.ok(deps.value.indexOf('@adobe/helix-fetch') >= 0);
+        const name = body.annotations.find((a) => a.key === 'pkgName');
+        assert.equal(name.value, 'n/a');
+        const version = body.annotations.find((a) => a.key === 'pkgVersion');
+        assert.equal(version.value, 'n/a');
+        res.sendStatus(201);
+      } catch (e) {
+        // eslint-disable-next-line no-console
+        console.error(e);
+        res.sendStatus(500);
+      }
+    });
+    this.polly.server.put('https://adobeioruntime.net/api/v1/namespaces/hlx/packages/helix-services?overwrite=true').intercept((req, res) => {
+      res.sendStatus(201);
+    });
+
+    const cmd = await new DeployCommand(logger)
+      .withDirectory(testRoot)
+      .withWskHost('adobeioruntime.net')
+      .withWskAuth('dummy')
+      .withWskNamespace('hlx')
+      .withEnableAuto(false)
+      .withEnableDirty(false)
+      .withModulePaths(testModules)
+      .withDryRun(false)
+      .withTarget(buildDir)
+      .withEpsagonToken('cli-token')
+      .withEpsagonAppName('fake-name')
+      .withFiles([
+        path.resolve(testRoot, 'src/html.htl'),
+        path.resolve(testRoot, 'src/html.pre.js'),
+        path.resolve(testRoot, 'src/helper.js'),
+        path.resolve(testRoot, 'src/utils/another_helper.js'),
+        path.resolve(testRoot, 'src/third_helper.js'),
+      ])
+      .withMinify(false)
+      .withDefault({
+        FOO: 'bar',
+        EPSAGON_TOKEN: 'default-token',
+        CORALOGIX_API_KEY: 'coralogix-key',
+        CORALOGIX_APPLICATION_NAME: 'coralogix-name',
+      })
       .withResolveGitRefService('my-resolver')
       .withUpdatedAt(1234)
       .withUpdatedBy('me')
