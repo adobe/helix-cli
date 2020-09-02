@@ -29,7 +29,7 @@ const ModuleHelper = require('../src/builder/ModuleHelper.js');
 /**
  * init git in integration so that helix-simulator can run
  */
-function initGit(dir, remote) {
+function initGit(dir, remote, branch) {
   const pwd = shell.pwd();
   shell.cd(dir);
   shell.exec('git init');
@@ -37,6 +37,9 @@ function initGit(dir, remote) {
   shell.exec('git commit -m"initial commit."');
   if (remote) {
     shell.exec(`git remote add origin ${remote}`);
+  }
+  if (branch) {
+    shell.exec(`git checkout -b ${branch}`);
   }
   shell.cd(pwd);
 }
