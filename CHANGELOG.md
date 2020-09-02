@@ -1,3 +1,10 @@
+## [12.1.8](https://github.com/adobe/helix-cli/compare/v12.1.7...v12.1.8) (2020-09-02)
+
+
+### Bug Fixes
+
+* **pages:** use correct branch for pages project ([#1517](https://github.com/adobe/helix-cli/issues/1517)) ([4d179e2](https://github.com/adobe/helix-cli/commit/4d179e282d35441e29811ef655dc173203029d08)), closes [#1516](https://github.com/adobe/helix-cli/issues/1516)
+
 ## [12.1.7](https://github.com/adobe/helix-cli/compare/v12.1.6...v12.1.7) (2020-08-26)
 
 
