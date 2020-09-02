@@ -16,6 +16,7 @@ const opn = require('open');
 const chokidar = require('chokidar');
 const chalk = require('chalk');
 const { HelixProject } = require('@adobe/helix-simulator');
+const { GitUrl } = require('@adobe/helix-shared');
 const GitUtils = require('./git-utils.js');
 const BuildCommand = require('./build.cmd');
 const pkgJson = require('../package.json');
@@ -237,14 +238,21 @@ class UpCommand extends BuildCommand {
       // use bundled helix-pages sources
       this._project.withSourceDir(this.helixPages.srcDirectory);
 
+      // local branch should be considered as default for pages project
+      const ref = await GitUtils.getBranch(this.directory);
+      const defaultStrain = this.config.strains.get('default');
+      defaultStrain.content = new GitUrl({
+        ...defaultStrain.content.toJSON(),
+        ref,
+      });
+
       // use bundled helix-pages htdocs
       if (!await fse.pathExists(path.join(this.directory, 'htdocs'))) {
-        this.config.strains.get('default').static.url = this.helixPages.staticURL;
+        defaultStrain.static.url = this.helixPages.staticURL;
         localRepos.push({
           repoPath: this.helixPages.checkoutDirectory,
           gitUrl: this.helixPages.staticURL,
         });
-        this.config.strains.get('default').static.url = this.helixPages.staticURL;
       }
     } else {
       this.log.info('    __ __    ___         ');

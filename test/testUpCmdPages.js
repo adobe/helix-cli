@@ -13,6 +13,7 @@
 /* eslint-env mocha */
 const path = require('path');
 const fse = require('fs-extra');
+const nock = require('nock');
 
 const {
   initGit,
@@ -43,6 +44,10 @@ describe('Integration test for up command with helix pages', function suite() {
     // the helix-cli repository, and we want to keep the tests offline
     await fse.copy(path.resolve(__dirname, 'fixtures', 'helix-pages', 'master'), helixPagesRepo);
     initGit(helixPagesRepo, 'https://github.com/adobe/helix-pages.git');
+
+    nock.restore();
+    nock.cleanAll();
+    nock.activate();
   });
 
   afterEach(async () => {
@@ -70,6 +75,44 @@ describe('Integration test for up command with helix pages', function suite() {
         try {
           await assertHttpDom(`http://localhost:${cmd.project.server.port}/index.html`, 200, 'pages_response.html');
           await assertHttp(`http://localhost:${cmd.project.server.port}/style.css`, 200, path.resolve(helixPagesRepo, 'htdocs', 'style.css'));
+          myDone();
+        } catch (e) {
+          myDone(e);
+        }
+      })
+      .on('stopped', () => {
+        done(error);
+      })
+      .run()
+      .catch(done);
+  });
+
+  it('up command delivers correct response from different branch.', (done) => {
+    initGit(testDir, 'https://github.com/adobe/dummy-foo.git', 'test-branch');
+
+    const scope = nock('https://adobeioruntime.net')
+      .get('/api/v1/web/helix/helix-services/content-proxy@v1?owner=adobe&repo=dummy-foo&path=%2Fdocument.md&ref=test-branch&ignore=github')
+      .reply(200, '## Welcome');
+
+    let error = null;
+    const cmd = new UpCommand()
+      .withLiveReload(false)
+      .withTargetDir(buildDir)
+      .withDirectory(testDir)
+      .withHelixPagesRepo(helixPagesRepo)
+      .withCustomPipeline(process.env.HLX_CUSTOM_PIPELINE)
+      .withHttpPort(0);
+
+    const myDone = (err) => {
+      error = err;
+      return cmd.stop();
+    };
+
+    cmd
+      .on('started', async () => {
+        try {
+          await assertHttpDom(`http://localhost:${cmd.project.server.port}/document.html`, 200, 'pages_response_fstab.html');
+          await scope.done();
           myDone();
         } catch (e) {
           myDone(e);
