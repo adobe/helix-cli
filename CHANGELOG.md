@@ -1,3 +1,10 @@
+## [12.1.12](https://github.com/adobe/helix-cli/compare/v12.1.11...v12.1.12) (2020-09-15)
+
+
+### Bug Fixes
+
+* **deps:** update dependency yargs to v16 ([#1527](https://github.com/adobe/helix-cli/issues/1527)) ([aa2c433](https://github.com/adobe/helix-cli/commit/aa2c433271b775f9cfb85456552edb3a77f13d2c))
+
 ## [12.1.11](https://github.com/adobe/helix-cli/compare/v12.1.10...v12.1.11) (2020-09-11)
 
 
