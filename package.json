@@ -32,9 +32,9 @@
   "dependencies": {
     "@adobe/fastly-native-promises": "^1.15.0",
     "@adobe/helix-fetch": "^1.7.0",
-    "@adobe/helix-log": "4.5.1",
+    "@adobe/helix-log": "4.5.2",
     "@adobe/helix-shared": "7.13.0",
-    "@adobe/helix-simulator": "5.0.20",
+    "@adobe/helix-simulator": "5.0.21",
     "@adobe/htlengine": "6.2.0",
     "@babel/core": "^7.8.3",
     "@babel/plugin-transform-react-jsx": "^7.8.3",
