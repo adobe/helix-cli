@@ -1,3 +1,10 @@
+## [12.1.15](https://github.com/adobe/helix-cli/compare/v12.1.14...v12.1.15) (2020-09-29)
+
+
+### Bug Fixes
+
+* **deps:** update [@adobe](https://github.com/adobe) fixes ([71ec625](https://github.com/adobe/helix-cli/commit/71ec6251e21a4e5e664315dcdedee4721a01ad12))
+
 ## [12.1.14](https://github.com/adobe/helix-cli/compare/v12.1.13...v12.1.14) (2020-09-26)
 
 
