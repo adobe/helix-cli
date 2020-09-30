@@ -38,7 +38,7 @@ class RemotePublishCommand extends AbstractCommand {
     this._debug_key = null;
     this._fastly_auth = null;
     this._dryRun = false;
-    this._publishAPI = 'https://adobeioruntime.net/api/v1/web/helix/helix-services/publish@v6';
+    this._publishAPI = 'https://adobeioruntime.net/api/v1/web/helix/helix-services/publish@v7';
     this._githubToken = '';
     this._updateBotConfig = false;
     this._configPurgeAPI = 'https://app.project-helix.io/config/purge';
