@@ -1,3 +1,24 @@
+# [13.0.0](https://github.com/adobe/helix-cli/compare/v12.1.16...v13.0.0) (2020-09-30)
+
+
+### Features
+
+* **test:** update tests to use content-proxy v2 ([#1534](https://github.com/adobe/helix-cli/issues/1534)) ([4197cb6](https://github.com/adobe/helix-cli/commit/4197cb63a5b3b083bd35e6dcdca9b5ab7ec62ca0))
+
+
+### BREAKING CHANGES
+
+* **test:** helix publish v7 uses content-proxy v2 which comes
+  with some breaking changes:
+
+- requests to json now returns an object instead of and array [0]
+- gdocs2md now has a different table handling [1]
+- gdocs2md supports author friendly names [2]
+
+[0] adobe/helix-data-embed@9d1e924
+[1] adobe/helix-gdocs2md@e4befdb
+[2] adobe/helix-gdocs2md@3aca7b3
+
 ## [12.1.16](https://github.com/adobe/helix-cli/compare/v12.1.15...v12.1.16) (2020-09-29)
 
 
