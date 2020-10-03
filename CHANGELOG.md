@@ -1,3 +1,11 @@
+## [13.0.1](https://github.com/adobe/helix-cli/compare/v13.0.0...v13.0.1) (2020-10-03)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @adobe/helix-shared to v7.15.0 ([914f23d](https://github.com/adobe/helix-cli/commit/914f23d12f6647a68589b6082739e67e7edd3f35))
+* **deps:** update dependency @adobe/helix-simulator to v5.0.23 ([df57156](https://github.com/adobe/helix-cli/commit/df571564dc1919fd990f65844e71c1184f4e13f4))
+
 # [13.0.0](https://github.com/adobe/helix-cli/compare/v12.1.16...v13.0.0) (2020-09-30)
 
 
