@@ -144,17 +144,20 @@ class GitUtils {
     // reverse-lookup tag from commit sha
     const allTags = await git.listTags({ fs, dir });
 
-    const tagCommitShas = await Promise.all(allTags.map(async (tag) => {
+    // iterate sequentially over tags to avoid OOME
+    for (const tag of allTags) {
+      /* eslint-disable no-await-in-loop */
       const oid = await git.resolveRef({ fs, dir, ref: tag });
       const obj = await git.readObject({ fs, dir, oid });
-      // annotated or lightweight tag?
-      return obj.type === 'tag' ? {
-        tag,
-        sha: await git.resolveRef({ fs, dir, ref: obj.object.object }),
-      } : { tag, sha: oid };
-    }));
-    const tag = tagCommitShas.find((entry) => entry.sha === rev);
-    return typeof tag === 'object' ? tag.tag : currentBranch;
+      const commitSha = obj.type === 'tag'
+        ? await git.resolveRef({ fs, dir, ref: obj.object.object }) // annotated tag
+        : oid; // lightweight tag
+      if (commitSha === rev) {
+        return tag;
+      }
+    }
+    // HEAD is not at a tag, return current branch
+    return currentBranch;
   }
 
   /**
