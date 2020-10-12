@@ -1,3 +1,10 @@
+## [13.0.3](https://github.com/adobe/helix-cli/compare/v13.0.2...v13.0.3) (2020-10-12)
+
+
+### Bug Fixes
+
+* **git-utils:** avoid potential OOME by iterating sequentially over tags ([#1543](https://github.com/adobe/helix-cli/issues/1543)) ([e5abdba](https://github.com/adobe/helix-cli/commit/e5abdbaa91b24cf7b3549365cc8c9eb5586cb882)), closes [#1542](https://github.com/adobe/helix-cli/issues/1542)
+
 ## [13.0.2](https://github.com/adobe/helix-cli/compare/v13.0.1...v13.0.2) (2020-10-05)
 
 
