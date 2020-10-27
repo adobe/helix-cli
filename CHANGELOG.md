@@ -1,3 +1,10 @@
+## [13.0.5](https://github.com/adobe/helix-cli/compare/v13.0.4...v13.0.5) (2020-10-27)
+
+
+### Bug Fixes
+
+* **sim:** fix performance issue on certain large repositories ([#1551](https://github.com/adobe/helix-cli/issues/1551)) ([baa3995](https://github.com/adobe/helix-cli/commit/baa39957cdf19c67affc57ddc11a5da192cf5a61))
+
 ## [13.0.4](https://github.com/adobe/helix-cli/compare/v13.0.3...v13.0.4) (2020-10-17)
 
 
