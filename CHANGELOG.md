@@ -1,3 +1,10 @@
+## [13.0.6](https://github.com/adobe/helix-cli/compare/v13.0.5...v13.0.6) (2020-10-31)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @adobe/helix-simulator to v5.1.1 ([10db134](https://github.com/adobe/helix-cli/commit/10db1344d219b79d6067ae7597bae32e15e6bdb0))
+
 ## [13.0.5](https://github.com/adobe/helix-cli/compare/v13.0.4...v13.0.5) (2020-10-27)
 
 
