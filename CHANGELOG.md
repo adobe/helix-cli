@@ -1,3 +1,10 @@
+## [13.0.10](https://github.com/adobe/helix-cli/compare/v13.0.9...v13.0.10) (2020-11-09)
+
+
+### Performance Improvements
+
+* bump isomorphic-git to 1.8.0, use cache param ([#1557](https://github.com/adobe/helix-cli/issues/1557)) ([496e87f](https://github.com/adobe/helix-cli/commit/496e87fb3fa1e4d9b41646ea4c8ee6b5ffb917cf))
+
 ## [13.0.9](https://github.com/adobe/helix-cli/compare/v13.0.8...v13.0.9) (2020-11-09)
 
 
