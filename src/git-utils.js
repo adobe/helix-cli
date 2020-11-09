@@ -20,6 +20,10 @@ const fse = require('fs-extra');
 const { GitUrl } = require('@adobe/helix-shared');
 const git = require('isomorphic-git');
 
+// cache for isomorphic-git API
+// see https://isomorphic-git.org/docs/en/cache
+const cache = {};
+
 class GitUtils {
   /**
    * Determines whether the working tree directory contains uncommitted or unstaged changes.
@@ -33,7 +37,7 @@ class GitUtils {
     const HEAD = 1;
     const WORKDIR = 2;
     const STAGE = 3;
-    const matrix = await git.statusMatrix({ fs, dir });
+    const matrix = await git.statusMatrix({ fs, dir, cache });
     let modified = matrix
       .filter((row) => !(row[HEAD] === row[WORKDIR] && row[WORKDIR] === row[STAGE]));
     if (modified.length === 0) {
@@ -111,7 +115,9 @@ class GitUtils {
       return true;
     }
 
-    const status = await git.status({ fs, dir, filepath });
+    const status = await git.status({
+      fs, dir, filepath, cache,
+    });
     if (status === 'ignored') {
       return true;
     }
@@ -148,7 +154,9 @@ class GitUtils {
     for (const tag of allTags) {
       /* eslint-disable no-await-in-loop */
       const oid = await git.resolveRef({ fs, dir, ref: tag });
-      const obj = await git.readObject({ fs, dir, oid });
+      const obj = await git.readObject({
+        fs, dir, oid, cache,
+      });
       const commitSha = obj.type === 'tag'
         ? await git.resolveRef({ fs, dir, ref: obj.object.object }) // annotated tag
         : oid; // lightweight tag
@@ -238,7 +246,9 @@ class GitUtils {
       .catch(async (err) => {
         if (err instanceof git.Errors.NotFoundError) {
           // fallback: is ref a shortened oid prefix?
-          const oid = await git.expandOid({ fs, dir, oid: ref })
+          const oid = await git.expandOid({
+            fs, dir, oid: ref, cache,
+          })
             .catch(() => { throw err; });
           return git.resolveRef({ fs, dir, ref: oid });
         }
@@ -259,7 +269,7 @@ class GitUtils {
   static async getRawContent(dir, ref, pathName) {
     return GitUtils.resolveCommit(dir, ref)
       .then((oid) => git.readObject({
-        fs, dir, oid, filepath: pathName, format: 'content',
+        fs, dir, oid, filepath: pathName, format: 'content', cache,
       }))
       .then((obj) => obj.object);
   }
