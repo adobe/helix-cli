@@ -92,6 +92,10 @@ describe('Integration test for up command with helix pages', function suite() {
 
     const scope = nock('https://adobeioruntime.net')
       .get('/api/v1/web/helix/helix-services/content-proxy@v1?owner=adobe&repo=dummy-foo&path=%2Fdocument.md&ref=test-branch&ignore=github')
+      .optionally()
+      .reply(200, '## Welcome')
+      .get('/api/v1/web/helix/helix-services/content-proxy@v2?owner=adobe&repo=dummy-foo&path=%2Fdocument.md&ref=test-branch&ignore=github')
+      .optionally()
       .reply(200, '## Welcome');
 
     let error = null;
