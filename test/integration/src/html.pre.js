@@ -76,6 +76,48 @@ function findnotes(node) {
     
     return node;
   }
+  // remark v9+
+  if (node && 
+    node.type === 'blockquote' && 
+    node.children && 
+    node.children[0] && 
+    node.children[0].children && 
+    node.children[0].children[0] && 
+    node.children[0].children[0].type === 'text' &&
+    node.children[0].children[0].value && 
+    node.children[0].children[0].value.match(/^\[![A-Z]+\]/)) {
+
+    console.log("ADDDDDDDD", node.children[0].children[0]);
+    // get the class name
+    const [title, ...text] = node.children[0].children[0].value.replace(/^\[!([A-Z]+)+\]/, '$1\n').split('\n');
+    const classname = "admonition-" + title.toLowerCase();
+
+    console.log(classname, title, text);
+    
+
+
+    // overwrite the linkReference node
+    node.children[0].children = [{
+      type: "strong",
+      children: [ { type:"text", value: title.toLowerCase()}]
+    }, {
+      type: "text",
+      value: text.join('\n')
+    }];
+
+    
+
+    // make sure the correct HTML gets generated
+    node.data = {
+      hName: 'div',
+      hProperties: {
+        'class': classname
+      }
+    };
+    
+    return node;
+  }
+
   return node;
 }
 
