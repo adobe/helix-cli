@@ -45,14 +45,14 @@ module.exports.before = {
  * @param {object} node an MDAST node
  */
 function findnotes(node) {
-  if (node && 
-    node.type === 'blockquote' && 
-    node.children && 
-    node.children[0] && 
-    node.children[0].children && 
-    node.children[0].children[0] && 
+  if (node &&
+    node.type === 'blockquote' &&
+    node.children &&
+    node.children[0] &&
+    node.children[0].children &&
+    node.children[0].children[0] &&
     node.children[0].children[0].type === 'linkReference' &&
-    node.children[0].children[0].identifier && 
+    node.children[0].children[0].identifier &&
     node.children[0].children[0].identifier.match(/![a-z]+/)) {
     // get the class name
     const classname = node.children[0].children[0].identifier.replace(/!/, 'admonition-');
@@ -64,7 +64,41 @@ function findnotes(node) {
       children: [ { type:"text", value: title}]
     };
 
-    
+    // make sure the correct HTML gets generated
+    node.data = {
+      hName: 'div',
+      hProperties: {
+        'class': classname
+      }
+    };
+
+    return node;
+  }
+  // remark v9+
+  if (node &&
+    node.type === 'blockquote' &&
+    node.children &&
+    node.children[0] &&
+    node.children[0].children &&
+    node.children[0].children[0] &&
+    node.children[0].children[0].type === 'text' &&
+    node.children[0].children[0].value &&
+    node.children[0].children[0].value.match(/^\[![A-Z]+\]/)) {
+
+    // get the class name
+    const [title, ...text] = node.children[0].children[0].value.replace(/^\[!([A-Z]+)+\]/, '$1\n').split('\n');
+    const classname = "admonition-" + title.toLowerCase();
+
+    console.log(classname, title, text);
+
+    // overwrite the linkReference node
+    node.children[0].children = [{
+      type: "strong",
+      children: [ { type:"text", value: title.toLowerCase()}]
+    }, {
+      type: "text",
+      value: text.join('\n')
+    }];
 
     // make sure the correct HTML gets generated
     node.data = {
@@ -73,16 +107,17 @@ function findnotes(node) {
         'class': classname
       }
     };
-    
+
     return node;
   }
+
   return node;
 }
 
 /**
  * Finds "Liquid Tags" as defined by Jekyll and turns them into embeds using a (ficticious)
  * embeds.project-helix.io service that could interpret them.
- * @param {*} node 
+ * @param {*} node
  */
 function findliquid(node) {
   const re = /\{% (\w+) (.*) %\}/;
