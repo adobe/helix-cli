@@ -18,7 +18,7 @@ jobs:
       - run: git config --global user.email "test@project-helix.io" && git config --global user.name "Test Build"
       - run: npm test
         env:
-          CIRCLE_REPOSITORY_URL: helix-cli
+          CIRCLE_REPOSITORY_URL: dummy-url
 
   build_win:
     runs-on: windows-latest
@@ -34,7 +34,7 @@ jobs:
       - run: git config --global user.email "test@project-helix.io" && git config --global user.name "Test Build"
       - run: npm test
         env:
-          CIRCLE_REPOSITORY_URL: helix-cli
+          CIRCLE_REPOSITORY_URL: dummy-url
 
   release:
     runs-on: ubuntu-latest
