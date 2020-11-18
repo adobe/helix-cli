@@ -15,6 +15,7 @@ jobs:
         with:
           node-version: '10.x'
       - run: npm install
+      - run: git config --global user.email "test@project-helix.io" && git config --global user.name "Test Build"
       - run: npm test
 
   build_win:
@@ -28,6 +29,7 @@ jobs:
         with:
           node-version: '10.x'
       - run: npm install
+      - run: git config --global user.email "test@project-helix.io" && git config --global user.name "Test Build"
       - run: npm test
 
   release:
