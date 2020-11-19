@@ -1,3 +1,11 @@
+## [13.0.15](https://github.com/adobe/helix-cli/compare/v13.0.14...v13.0.15) (2020-11-19)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @adobe/helix-log to v4.5.3 ([9a161ab](https://github.com/adobe/helix-cli/commit/9a161ab477916666a0d9e4590e6a935c1d716dc6))
+* **deps:** update dependency @adobe/helix-simulator to v5.1.6 ([771f15a](https://github.com/adobe/helix-cli/commit/771f15a1f8470e1c2c01b894236ce6a7784681da))
+
 ## [13.0.14](https://github.com/adobe/helix-cli/compare/v13.0.13...v13.0.14) (2020-11-17)
 
 
