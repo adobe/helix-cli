@@ -987,7 +987,7 @@ describe('hlx deploy (custom pipeline)', function suite() {
     assertFile(pipelinePackageJson);
     const pkg = await fs.readJson(pipelinePackageJson);
     assert.equal(pkg.version, version);
-  });
+  }).timeout(120000);
 });
 
 describe('DeployCommand #unittest', () => {
