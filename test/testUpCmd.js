@@ -633,7 +633,7 @@ describe('Integration test for up command (custom pipeline)', function suite() {
   it('up command uses the correct custom pipeline with directory', async () => {
     // checkout clone of helix-pipeline
     const pipelineDir = path.resolve(testRoot, 'my-pipeline');
-    $.exec(`git clone --branch master --quiet --depth 1 https://github.com/adobe/helix-pipeline.git ${pipelineDir}`);
+    $.exec(`git clone --branch main --quiet --depth 1 https://github.com/adobe/helix-pipeline.git ${pipelineDir}`);
 
     // add some marker to the package.json
     const pkgJson = await fse.readJson(path.resolve(pipelineDir, 'package.json'));

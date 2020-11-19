@@ -192,7 +192,7 @@ describe('hlx package (custom pipeline)', function suite() {
   it('package installs the correct custom pipeline via directory', async () => {
     // checkout clone of helix-pipeline
     const pipelineDir = path.resolve(testRoot, 'my-pipeline');
-    $.exec(`git clone --branch master --quiet --depth 1 https://github.com/adobe/helix-pipeline.git ${pipelineDir}`);
+    $.exec(`git clone --branch main --quiet --depth 1 https://github.com/adobe/helix-pipeline.git ${pipelineDir}`);
     const pwd = process.cwd();
     try {
       $.cd(pipelineDir);
