@@ -1,3 +1,10 @@
+## [13.0.17](https://github.com/adobe/helix-cli/compare/v13.0.16...v13.0.17) (2020-11-26)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @adobe/helix-shared to v7.16.2 ([3030b65](https://github.com/adobe/helix-cli/commit/3030b653b76355a6ec2da4d0cfc53bc7a44b4485))
+
 ## [13.0.16](https://github.com/adobe/helix-cli/compare/v13.0.15...v13.0.16) (2020-11-26)
 
 
