@@ -1,3 +1,10 @@
+## [13.0.19](https://github.com/adobe/helix-cli/compare/v13.0.18...v13.0.19) (2020-12-01)
+
+
+### Bug Fixes
+
+* **deps:** update adobe fixes ([beb4400](https://github.com/adobe/helix-cli/commit/beb4400e2668a93b79eef844f84363ded8b3116b))
+
 ## [13.0.18](https://github.com/adobe/helix-cli/compare/v13.0.17...v13.0.18) (2020-11-30)
 
 
