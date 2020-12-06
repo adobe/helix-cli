@@ -24,6 +24,10 @@ const AbstractCommand = require('./abstract.cmd.js');
 const GitUtils = require('./git-utils.js');
 const cliversion = require('../package.json').version;
 
+// force HTTP/1 in order to avoid issues with long-lived HTTP/2 sessions
+// on azure/kubernetes based I/O Runtime
+process.env.HELIX_PIPELINE_FORCE_HTTP1 = true;
+
 const { fetch } = process.env.HELIX_FETCH_FORCE_HTTP1
   ? fetchAPI.context({ httpsProtocols: ['http1'] })
   : fetchAPI;
