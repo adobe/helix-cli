@@ -1,3 +1,10 @@
+## [13.0.31](https://github.com/adobe/helix-cli/compare/v13.0.30...v13.0.31) (2021-01-05)
+
+
+### Bug Fixes
+
+* **desp:** add AJV 7.x to avoid errors when running pipeline ([#1603](https://github.com/adobe/helix-cli/issues/1603)) ([d512fcb](https://github.com/adobe/helix-cli/commit/d512fcbf5f1ed8e88ba416b5a5b80089ee389f92))
+
 ## [13.0.30](https://github.com/adobe/helix-cli/compare/v13.0.29...v13.0.30) (2021-01-05)
 
 
