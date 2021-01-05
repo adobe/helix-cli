@@ -1,3 +1,10 @@
+## [13.0.32](https://github.com/adobe/helix-cli/compare/v13.0.31...v13.0.32) (2021-01-05)
+
+
+### Bug Fixes
+
+* **build:** add option to generate universal action ([#1602](https://github.com/adobe/helix-cli/issues/1602)) ([ee8e589](https://github.com/adobe/helix-cli/commit/ee8e589d1e45d6cf52d4f6a389f089df4609e8dd)), closes [#1595](https://github.com/adobe/helix-cli/issues/1595)
+
 ## [13.0.31](https://github.com/adobe/helix-cli/compare/v13.0.30...v13.0.31) (2021-01-05)
 
 
