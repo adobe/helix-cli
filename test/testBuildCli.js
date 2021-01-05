@@ -32,6 +32,7 @@ describe('hlx build', () => {
     mockBuild.withTargetDir.returnsThis();
     mockBuild.withFiles.returnsThis();
     mockBuild.withCustomPipeline.returnsThis();
+    mockBuild.withUniversal.returnsThis();
     mockBuild.run.returnsThis();
   });
 
@@ -49,6 +50,7 @@ describe('hlx build', () => {
       .run(['build']);
     sinon.assert.calledWith(mockBuild.withTargetDir, '.hlx/build');
     sinon.assert.calledWith(mockBuild.withFiles, ['src/**/*.htl', 'src/**/*.js', 'src/**/*.jsx', 'cgi-bin/**/*.js']);
+    sinon.assert.calledWith(mockBuild.withUniversal, false);
     sinon.assert.calledOnce(mockBuild.run);
   });
 
@@ -67,6 +69,14 @@ describe('hlx build', () => {
       .withCommandExecutor('build', mockBuild)
       .run(['build', '--target', 'tmp/build']);
     sinon.assert.calledWith(mockBuild.withTargetDir, 'tmp/build');
+    sinon.assert.calledOnce(mockBuild.run);
+  });
+
+  it('hlx build can set universal', () => {
+    new CLI()
+      .withCommandExecutor('build', mockBuild)
+      .run(['build', '--universal']);
+    sinon.assert.calledWith(mockBuild.withUniversal, true);
     sinon.assert.calledOnce(mockBuild.run);
   });
 

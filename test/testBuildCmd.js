@@ -62,6 +62,19 @@ describe('Integration test for build', function suite() {
     assert.ok(htmlJs.indexOf('sourceMappingURL=html.script.js.map') >= 0);
   });
 
+  it('build command can use universal template', async () => {
+    await new BuildCommand()
+      .withFiles(['src/**/*.htl', 'src/**/*.js'])
+      .withUniversal(true)
+      .withDirectory(path.resolve(__dirname, 'integration'))
+      .withTargetDir(buildDir)
+      .withRequiredModules([])
+      .run();
+
+    const html = await fs.readFile(path.resolve(buildDir, 'src', 'html.js'), 'utf-8');
+    assert.ok(html.indexOf('UniversalAction') >= 0);
+  });
+
   it('build provides a default pipeline', async () => {
     await new BuildCommand()
       .withFiles(['src/**/*.htl', 'src/**/*.js'])

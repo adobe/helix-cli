@@ -26,6 +26,7 @@ const CGI_PAT = `${path.sep}cgi-bin${path.sep}`;
 
 const RUNTIME_TEMPLATE = path.resolve(__dirname, 'RuntimeTemplate.js');
 const ACTION_TEMPLATE = path.resolve(__dirname, 'ActionTemplate.js');
+const UNIVERSAL_TEMPLATE = path.resolve(__dirname, 'UniversalTemplate.js');
 const DEFAULT_PIPELINE = '@adobe/helix-pipeline/src/defaults/default.js';
 
 /**
@@ -68,6 +69,7 @@ class Builder {
     this._buildDir = '.hlx/build';
     this._showReport = false;
     this._modulePaths = [];
+    this._universsal = false;
   }
 
   withDirectory(d) {
@@ -107,6 +109,11 @@ class Builder {
 
   withRequiredModules(value) {
     this._required = value;
+    return this;
+  }
+
+  withUniversal(value) {
+    this._universal = value;
     return this;
   }
 
@@ -194,7 +201,9 @@ class Builder {
 
   // eslint-disable-next-line class-methods-use-this
   async generateScript(info) {
-    let body = await fse.readFile(ACTION_TEMPLATE, 'utf-8');
+    let body = this._universal
+      ? await fse.readFile(UNIVERSAL_TEMPLATE, 'utf-8')
+      : await fse.readFile(ACTION_TEMPLATE, 'utf-8');
     body = body.replace(/'MOD_PIPE'/, JSON.stringify(info.pipe));
     body = body.replace(/'MOD_PRE'/, JSON.stringify(info.pre));
     body = body.replace(/'MOD_SCRIPT'/, JSON.stringify(`./${path.relative(info.buildDir, info.scriptFile)}`));
