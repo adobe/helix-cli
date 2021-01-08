@@ -62,7 +62,7 @@ jobs:
           path: junit
 
   build:
-    parallelism: 4
+    parallelism: 1
     executor: node10
     working_directory: ~/repo
 
