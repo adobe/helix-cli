@@ -33,7 +33,7 @@ orbs:
 
 jobs:
   build_win:
-    parallelism: 4
+    parallelism: 1
     executor: win/default
     steps:
       - run: git config --global core.autocrlf false
@@ -62,7 +62,7 @@ jobs:
           path: junit
 
   build:
-    parallelism: 1
+    parallelism: 4
     executor: node10
     working_directory: ~/repo
 
