@@ -38,12 +38,11 @@ class RemotePublishCommand extends AbstractCommand {
     this._debug_key = null;
     this._fastly_auth = null;
     this._dryRun = false;
-    this._publishAPI = 'https://adobeioruntime.net/api/v1/web/helix/helix-services/publish@v7';
+    this._publishAPI = 'https://adobeioruntime.net/api/v1/web/helix/helix-services/publish@v8';
     this._githubToken = '';
     this._updateBotConfig = false;
     this._configPurgeAPI = 'https://app.project-helix.io/config/purge';
     this._vcl = null;
-    this._dispatchVersion = null;
     this._purge = 'soft';
     this._algoliaAppID = null;
     this._algoliaAPIKey = null;
@@ -236,15 +235,6 @@ class RemotePublishCommand extends AbstractCommand {
     return this;
   }
 
-  /**
-   * Sets custom dispatch version.
-   * @param {string} version The custom version
-   */
-  withDispatchVersion(version) {
-    this._dispatchVersion = version;
-    return this;
-  }
-
   showNextStep(dryrun) {
     this.progressBar().terminate();
     if (dryrun) {
@@ -354,10 +344,6 @@ ${e}`);
 
     if (this._vcl) {
       body.vcl = this._vcl;
-    }
-
-    if (this._dispatchVersion) {
-      body.dispatchVersion = this._dispatchVersion;
     }
 
     return fetch(this._publishAPI, {

@@ -47,7 +47,7 @@ module.exports = function strain() {
           alias: 'apiPublish',
           describe: 'API URL for helix-publish service.',
           type: 'string',
-          default: 'https://adobeioruntime.net/api/v1/web/helix/helix-services/publish@v7',
+          default: 'https://adobeioruntime.net/api/v1/web/helix/helix-services/publish@v8',
         })
         .option('api-config-purge', {
           alias: 'apiConfigPurge',
@@ -74,11 +74,6 @@ module.exports = function strain() {
           type: 'string',
           array: true,
           default: [],
-        })
-        .option('dispatch-version', {
-          alias: 'dispatchVersion',
-          describe: 'Version of the dispatch action to use.',
-          type: 'string',
         })
         .option('purge', {
           describe: 'How to purge the cache after deployment',
@@ -137,7 +132,6 @@ module.exports = function strain() {
         .withConfigPurgeAPI(argv.apiConfigPurge)
         .withFilter(argv.only, argv.exclude)
         .withCustomVCLs(argv.customVCL)
-        .withDispatchVersion(argv.dispatchVersion)
         .withPurge(argv.purge)
         .withAlgoliaAppID(argv.algoliaAppId)
         .withAlgoliaAPIKey(argv.algoliaApiKey)

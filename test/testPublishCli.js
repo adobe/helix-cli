@@ -42,7 +42,6 @@ describe('hlx publish', () => {
     mockPublish.withGithubToken.returnsThis();
     mockPublish.withFilter.returnsThis();
     mockPublish.withCustomVCLs.returnsThis();
-    mockPublish.withDispatchVersion.returnsThis();
     mockPublish.withPurge.returnsThis();
     mockPublish.withDebugKey.returnsThis();
     mockPublish.withAlgoliaAPIKey.returnsThis();
@@ -87,7 +86,6 @@ describe('hlx publish', () => {
     sinon.assert.calledWith(mockPublish.withPublishAPI, 'foobar.api');
     sinon.assert.calledWith(mockPublish.withDryRun, true);
     sinon.assert.calledWith(mockPublish.withCustomVCLs, []);
-    sinon.assert.calledWith(mockPublish.withDispatchVersion, undefined);
   });
 
   it('hlx publish works with minimal arguments', () => {
@@ -107,7 +105,6 @@ describe('hlx publish', () => {
     sinon.assert.calledWith(mockPublish.withFastlyNamespace, 'hlx'); // TODO !!
     sinon.assert.calledWith(mockPublish.withFastlyAuth, 'secret-key');
     sinon.assert.calledWith(mockPublish.withCustomVCLs, []);
-    sinon.assert.calledWith(mockPublish.withDispatchVersion, undefined);
     sinon.assert.calledWith(mockPublish.withPurge, 'hard');
     sinon.assert.calledOnce(mockPublish.run);
   });
@@ -209,20 +206,6 @@ describe('hlx publish', () => {
     assert.fail('publish w/o github token should fail.');
   });
 
-  it('hlx publish handles dispatch-version', () => {
-    new CLI()
-      .withCommandExecutor('publish', mockPublish)
-      .run(['publish',
-        '--wsk-auth', 'secret-key',
-        '--wsk-namespace', 'hlx',
-        '--fastly-auth', 'secret-key',
-        '--fastly-namespace', 'hlx',
-        '--dispatch-version', 'ci1',
-      ]);
-
-    sinon.assert.calledWith(mockPublish.withDispatchVersion, 'ci1');
-  });
-
   it('hlx publish handles fastly-serviceid', () => {
     new CLI()
       .withCommandExecutor('publish', mockPublish)
@@ -312,7 +295,6 @@ describe('hlx publish', () => {
         '--wsk-namespace', 'hlx',
         '--fastly-auth', 'secret-key',
         '--fastly-namespace', 'hlx',
-        '--dispatch-version', 'ci1',
         '--debug-key', 'something',
       ]);
 
