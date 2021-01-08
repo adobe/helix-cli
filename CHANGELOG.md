@@ -1,3 +1,10 @@
+## [13.0.35](https://github.com/adobe/helix-cli/compare/v13.0.34...v13.0.35) (2021-01-08)
+
+
+### Bug Fixes
+
+* use helix-publish@v8 ([#1605](https://github.com/adobe/helix-cli/issues/1605)) ([8664ea9](https://github.com/adobe/helix-cli/commit/8664ea90433a3661463c2dbb54ee7eb76ceb3245)), closes [#1578](https://github.com/adobe/helix-cli/issues/1578)
+
 ## [13.0.34](https://github.com/adobe/helix-cli/compare/v13.0.33...v13.0.34) (2021-01-08)
 
 
