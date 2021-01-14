@@ -1,3 +1,10 @@
+## [13.0.41](https://github.com/adobe/helix-cli/compare/v13.0.40...v13.0.41) (2021-01-14)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @adobe/helix-shared to v7.19.0 ([d4db587](https://github.com/adobe/helix-cli/commit/d4db58724b7395dcfd442dc8dd2130a73a16c8af))
+
 ## [13.0.40](https://github.com/adobe/helix-cli/compare/v13.0.39...v13.0.40) (2021-01-14)
 
 
