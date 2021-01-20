@@ -20,7 +20,7 @@ const example = require('./utils').perfExample;
 const { assertFileEqual, createTestRoot, setupPolly } = require('./utils');
 const PerfCommand = require('../src/perf.cmd.js');
 
-describe('hlx perf #integrationtest', () => {
+describe.skip('hlx perf #integrationtest', () => {
   setupPolly();
 
   it('hlx perf --junit (partial)', async function test() {
