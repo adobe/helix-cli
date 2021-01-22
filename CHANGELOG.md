@@ -1,3 +1,10 @@
+## [13.0.44](https://github.com/adobe/helix-cli/compare/v13.0.43...v13.0.44) (2021-01-22)
+
+
+### Bug Fixes
+
+* **test:** fix http/2 related failures in tests ([#1618](https://github.com/adobe/helix-cli/issues/1618)) ([3eba81f](https://github.com/adobe/helix-cli/commit/3eba81f268c5c92165dd34975a7a0c8ce8d3f567))
+
 ## [13.0.43](https://github.com/adobe/helix-cli/compare/v13.0.42...v13.0.43) (2021-01-20)
 
 
