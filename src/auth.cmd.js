@@ -21,7 +21,10 @@ const LoginServer = require('./auth-login-server.js');
 const cliutils = require('./cli-util');
 
 const { fetch } = process.env.HELIX_FETCH_FORCE_HTTP1
-  ? fetchAPI.context({ httpsProtocols: ['http1'] })
+  /* istanbul ignore next */
+  ? fetchAPI.context({
+    alpnProtocols: [fetchAPI.ALPN_HTTP1_1],
+  })
   : fetchAPI;
 
 const HELIX_APP_HOST = 'https://app.project-helix.io';
@@ -104,7 +107,6 @@ I received an access token that I can use to access the Helix Bot on your behalf
         'User-Agent': 'HelixBot',
         Authorization: `token ${this._token}`,
       },
-      json: true,
     });
 
     if (!response.ok) {

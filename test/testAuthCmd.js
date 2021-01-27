@@ -88,7 +88,7 @@ describe('Integration test for auth', () => {
       .on('server-start', async (port) => {
         const res = await fetchAPI.fetch(`http://127.0.0.1:${port}/`, {
           method: 'POST',
-          json: {
+          body: {
             token,
           },
         });
@@ -134,7 +134,7 @@ describe('Integration test for auth', () => {
       .on('server-start', async (port) => {
         const res = await fetchAPI.fetch(`http://127.0.0.1:${port}/`, {
           method: 'POST',
-          json: {
+          body: {
             token,
           },
         });
@@ -176,7 +176,7 @@ describe('Integration test for auth', () => {
       .on('server-start', async (port) => {
         const res = await fetchAPI.fetch(`http://127.0.0.1:${port}/`, {
           method: 'POST',
-          json: {
+          body: {
             token,
           },
         });

@@ -139,7 +139,9 @@ describe('hlx publish --remote (default)', () => {
   it('publishing warns if remote logging fails', async () => {
     const scope = nock('https://adobeioruntime.net')
       .post('/api/v1/web/helix/helix-services/publish@v2')
-      .reply(200, {});
+      .reply(200, {})
+      .post('/api/v1/web/helix/helix-services/logging@v1')
+      .reply(404);
 
     const logger = logging.createTestLogger();
     const remote = await new RemotePublishCommand(logger)

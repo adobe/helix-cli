@@ -25,7 +25,10 @@ const GitUtils = require('./git-utils.js');
 const cliversion = require('../package.json').version;
 
 const { fetch } = process.env.HELIX_FETCH_FORCE_HTTP1
-  ? fetchAPI.context({ httpsProtocols: ['http1'] })
+  /* istanbul ignore next */
+  ? fetchAPI.context({
+    alpnProtocols: [fetchAPI.ALPN_HTTP1_1],
+  })
   : fetchAPI;
 
 class RemotePublishCommand extends AbstractCommand {
@@ -262,7 +265,7 @@ class RemotePublishCommand extends AbstractCommand {
   serviceAddLogger() {
     return fetch('https://adobeioruntime.net/api/v1/web/helix/helix-services/logging@v1', {
       method: 'POST',
-      json: {
+      body: {
         service: this._fastly_namespace,
         token: this._fastly_auth,
         version: this._version,
@@ -348,7 +351,7 @@ ${e}`);
 
     return fetch(this._publishAPI, {
       method: 'POST',
-      json: body,
+      body,
     }).then(async (res) => {
       if (!res.ok) {
         const e = new Error(`${res.status} - "${await res.text()}"`);
@@ -415,7 +418,7 @@ ${e}`);
 
     const response = await fetch(this._configPurgeAPI, {
       method: 'POST',
-      json: {
+      body: {
         github_token: this._githubToken,
         content_repositories: Object.keys(repos),
         fastly_service_id: this._fastly_namespace,

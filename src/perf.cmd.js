@@ -11,11 +11,18 @@
  */
 /* eslint-disable max-classes-per-file */
 const chalk = require('chalk');
-const { fetch } = require('@adobe/helix-fetch');
+const fetchAPI = require('@adobe/helix-fetch');
 const path = require('path');
 const _ = require('lodash/fp');
 const JunitPerformanceReport = require('./junit-utils');
 const AbstractCommand = require('./abstract.cmd.js');
+
+const { fetch } = process.env.HELIX_FETCH_FORCE_HTTP1
+  /* istanbul ignore next */
+  ? fetchAPI.context({
+    alpnProtocols: [fetchAPI.ALPN_HTTP1_1],
+  })
+  : fetchAPI;
 
 class PerformanceError extends Error {
 
@@ -163,7 +170,7 @@ class PerfCommand extends AbstractCommand {
     try {
       let response = await fetch(uri, {
         method: 'POST',
-        json: {
+        body: {
           service: this._fastly_namespace,
           token: this._fastly_auth,
           tests: flatttests,
@@ -183,7 +190,7 @@ class PerfCommand extends AbstractCommand {
         // eslint-disable-next-line no-await-in-loop
         response = await fetch(uri, {
           method: 'POST',
-          json: {
+          body: {
             service: this._fastly_namespace,
             token: this._fastly_auth,
             tests: schedule,
