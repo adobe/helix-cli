@@ -1,8 +1,8 @@
 version: 2.1
 executors:
-  node10:
+  node12:
     docker:
-    - image: circleci/node:10-buster
+    - image: circleci/node:12
     environment:
       NPM_CONFIG_PREFIX: ~/.npm-global
 
@@ -63,7 +63,7 @@ jobs:
 
   build:
     parallelism: 1
-    executor: node10
+    executor: node12
     working_directory: ~/repo
 
     steps:
@@ -92,7 +92,7 @@ jobs:
         path: junit
 
   forkwarning:
-    executor: node10
+    executor: node12
     working_directory: ~/repo
 
     steps:
