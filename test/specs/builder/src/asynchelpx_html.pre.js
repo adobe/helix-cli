@@ -26,7 +26,6 @@ async function collectMetadata(req, logger) {
     headers: {
       'User-Agent': 'Request-Promise',
     },
-    json: true,
   };
 
   logger.debug(`Fetching Git Metadata from ${options.uri}`);
