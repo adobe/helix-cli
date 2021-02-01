@@ -33,7 +33,7 @@
     "@adobe/fastly-native-promises": "^1.19.2",
     "@adobe/helix-fetch": "2.0.1",
     "@adobe/helix-log": "4.5.3",
-    "@adobe/helix-shared": "7.19.4",
+    "@adobe/helix-shared": "7.19.5",
     "@adobe/helix-simulator": "5.1.21",
     "@adobe/htlengine": "6.3.2",
     "@babel/core": "^7.12.10",
