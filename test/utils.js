@@ -107,7 +107,7 @@ async function assertHttp(url, status, spec, replacements = []) {
                 }
               }
             }
-            resolve();
+            resolve(data);
           } catch (e) {
             reject(e);
           }

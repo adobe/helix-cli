@@ -27,14 +27,14 @@
   },
   "homepage": "https://github.com/adobe/helix-cli#readme",
   "engines": {
-    "node": ">=10.0 <11.0 || >=12.11.1 <13.0"
+    "node": ">=10.0 <11.0 || >=12.11.1 <15.0"
   },
   "dependencies": {
     "@adobe/fastly-native-promises": "^1.19.2",
     "@adobe/helix-fetch": "2.0.1",
     "@adobe/helix-log": "4.5.3",
     "@adobe/helix-shared": "7.19.5",
-    "@adobe/helix-simulator": "5.1.22",
+    "@adobe/helix-simulator": "5.2.0",
     "@adobe/htlengine": "6.3.5",
     "@babel/core": "^7.12.10",
     "@babel/plugin-transform-react-jsx": "^7.12.12",

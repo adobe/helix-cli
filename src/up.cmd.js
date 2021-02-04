@@ -39,6 +39,9 @@ class UpCommand extends BuildCommand {
     this._githubToken = '';
     this._algoliaAppID = null;
     this._algoliaAPIKey = null;
+    this._pagesProxy = true;
+    this._pagesUrl = null;
+    this._pagesCache = true;
   }
 
   withHttpPort(p) {
@@ -102,6 +105,21 @@ class UpCommand extends BuildCommand {
 
   withAlgoliaAPIKey(value) {
     this._algoliaAPIKey = value;
+    return this;
+  }
+
+  withPagesProxy(value) {
+    this._pagesProxy = value;
+    return this;
+  }
+
+  withPagesUrl(value) {
+    this._pagesUrl = value;
+    return this;
+  }
+
+  withPagesCache(value) {
+    this._pagesCache = value;
     return this;
   }
 
@@ -238,21 +256,33 @@ class UpCommand extends BuildCommand {
       // use bundled helix-pages sources
       this._project.withSourceDir(this.helixPages.srcDirectory);
 
-      // local branch should be considered as default for pages project
-      const ref = await GitUtils.getBranch(this.directory);
-      const defaultStrain = this.config.strains.get('default');
-      defaultStrain.content = new GitUrl({
-        ...defaultStrain.content.toJSON(),
-        ref,
-      });
-
-      // use bundled helix-pages htdocs
-      if (!await fse.pathExists(path.join(this.directory, 'htdocs'))) {
-        defaultStrain.static.url = this.helixPages.staticURL;
-        localRepos.push({
-          repoPath: this.helixPages.checkoutDirectory,
-          gitUrl: this.helixPages.staticURL,
+      if (!this._pagesProxy) {
+        // local branch should be considered as default for pages project
+        const ref = await GitUtils.getBranch(this.directory);
+        const defaultStrain = this.config.strains.get('default');
+        defaultStrain.content = new GitUrl({
+          ...defaultStrain.content.toJSON(),
+          ref,
         });
+
+        // use bundled helix-pages htdocs
+        if (!await fse.pathExists(path.join(this.directory, 'htdocs'))) {
+          defaultStrain.static.url = this.helixPages.staticURL;
+          localRepos.push({
+            repoPath: this.helixPages.checkoutDirectory,
+            gitUrl: this.helixPages.staticURL,
+          });
+        }
+      } else {
+        if (!this._pagesUrl) {
+          // get proxy url
+          const gitUrl = await GitUtils.getOriginURL(this.directory);
+          const ref = await GitUtils.getBranch(this.directory);
+          this._pagesUrl = `https://${ref}--${gitUrl.repo}--${gitUrl.owner}.hlx.page`;
+        }
+        this._project
+          .withProxyUrl(this._pagesUrl)
+          .withProxyCache(this._pagesCache);
       }
     } else {
       this.log.info('    __ __    ___         ');
@@ -357,10 +387,19 @@ access remote content and to deploy helix. Consider running
       }
     };
 
-    this.on('buildStart', onBuildStart);
-    this.on('buildEnd', onBuildEnd);
-
-    this.build();
+    if (await this.helixPages.isPagesProject() && this._pagesProxy) {
+      // use proxy
+      await this._project.start();
+      this.emit('started', this);
+      if (this._open) {
+        opn(`http://localhost:${this._project.server.port}/`, { url: true });
+      }
+    } else {
+      this.on('buildStart', onBuildStart);
+      this.on('buildEnd', onBuildEnd);
+      // start build
+      this.build();
+    }
   }
 }
 

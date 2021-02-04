@@ -101,6 +101,25 @@ module.exports = function up() {
           default: 3000,
         })
         .group(['port', 'open', 'no-open', 'host', 'local-repo', 'no-local-repo'], 'Server options')
+        .option('pages-proxy', {
+          alias: 'pagesProxy',
+          describe: 'Use the pages proxy',
+          type: 'boolean',
+          default: true,
+        })
+        .option('pages-url', {
+          alias: 'pagesUrl',
+          describe: 'The origin url to fetch pages content from.',
+          type: 'string',
+        })
+        .option('pages-cache', {
+          alias: 'pagesCache',
+          describe: 'Enable memory cache for pages content.',
+          type: 'boolean',
+          default: true,
+        })
+        .group(['pages-proxy', 'pages-url', 'pages-cache'], 'Helix Pages Options')
+
         .help();
     },
     handler: async (argv) => {
@@ -127,6 +146,9 @@ module.exports = function up() {
         .withCustomPipeline(argv.customPipeline)
         .withAlgoliaAppID(argv.algoliaAppID)
         .withAlgoliaAPIKey(argv.algoliaAPIKey)
+        .withPagesProxy(argv.pagesProxy)
+        .withPagesUrl(argv.pagesUrl)
+        .withPagesCache(argv.pagesCache)
         .run();
     },
   };

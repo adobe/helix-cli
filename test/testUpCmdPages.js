@@ -11,6 +11,7 @@
  */
 
 /* eslint-env mocha */
+const assert = require('assert');
 const path = require('path');
 const fse = require('fs-extra');
 const nock = require('nock');
@@ -61,6 +62,7 @@ describe('Integration test for up command with helix pages', function suite() {
       .withLiveReload(false)
       .withTargetDir(buildDir)
       .withDirectory(testDir)
+      .withPagesProxy(false)
       .withHelixPagesRepo(helixPagesRepo)
       .withCustomPipeline(process.env.HLX_CUSTOM_PIPELINE)
       .withHttpPort(0);
@@ -103,6 +105,7 @@ describe('Integration test for up command with helix pages', function suite() {
       .withLiveReload(false)
       .withTargetDir(buildDir)
       .withDirectory(testDir)
+      .withPagesProxy(false)
       .withHelixPagesRepo(helixPagesRepo)
       .withCustomPipeline(process.env.HLX_CUSTOM_PIPELINE)
       .withHttpPort(0);
@@ -116,6 +119,47 @@ describe('Integration test for up command with helix pages', function suite() {
       .on('started', async () => {
         try {
           await assertHttpDom(`http://localhost:${cmd.project.server.port}/document.html`, 200, 'pages_response_fstab.html');
+          await scope.done();
+          myDone();
+        } catch (e) {
+          myDone(e);
+        }
+      })
+      .on('stopped', () => {
+        done(error);
+      })
+      .run()
+      .catch(done);
+  });
+
+  it('up command delivers correct response with pages proxy mode.', (done) => {
+    initGit(testDir, 'https://github.com/adobe/dummy-foo.git');
+    let error = null;
+    const cmd = new UpCommand()
+      .withLiveReload(false)
+      .withTargetDir(buildDir)
+      .withDirectory(testDir)
+      .withHttpPort(0);
+
+    const myDone = (err) => {
+      error = err;
+      return cmd.stop();
+    };
+
+    const scope = nock('https://master--dummy-foo--adobe.hlx.page')
+      .get('/index.html')
+      .reply(200, '## Welcome')
+      .get('/not-found.txt')
+      .reply(404);
+
+    cmd
+      .on('started', async () => {
+        try {
+          let ret = await assertHttp(`http://localhost:${cmd.project.server.port}/index.html`, 200);
+          assert.strictEqual(ret.trim(), '## Welcome');
+          ret = await assertHttp(`http://localhost:${cmd.project.server.port}/local.txt`, 200);
+          assert.strictEqual(ret.trim(), 'Hello, world.');
+          await assertHttp(`http://localhost:${cmd.project.server.port}/not-found.txt`, 404);
           await scope.done();
           myDone();
         } catch (e) {
