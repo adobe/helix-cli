@@ -1,3 +1,10 @@
+# [13.2.0](https://github.com/adobe/helix-cli/compare/v13.1.7...v13.2.0) (2021-02-05)
+
+
+### Features
+
+* **cli:** add pages proxy mode ([#1634](https://github.com/adobe/helix-cli/issues/1634)) ([c6b9d81](https://github.com/adobe/helix-cli/commit/c6b9d8168ca0360e91e1bb61141d6c0a36bfb75b)), closes [#1633](https://github.com/adobe/helix-cli/issues/1633)
+
 ## [13.1.7](https://github.com/adobe/helix-cli/compare/v13.1.6...v13.1.7) (2021-02-05)
 
 
