@@ -34,7 +34,7 @@
     "@adobe/helix-fetch": "2.0.1",
     "@adobe/helix-log": "4.5.3",
     "@adobe/helix-shared": "7.19.5",
-    "@adobe/helix-simulator": "5.1.22",
+    "@adobe/helix-simulator": "5.2.0",
     "@adobe/htlengine": "6.3.5",
     "@babel/core": "^7.12.10",
     "@babel/plugin-transform-react-jsx": "^7.12.12",
