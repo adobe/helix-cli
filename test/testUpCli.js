@@ -44,6 +44,9 @@ describe('hlx up', () => {
     mockUp.withCustomPipeline.returnsThis();
     mockUp.withAlgoliaAppID.returnsThis();
     mockUp.withAlgoliaAPIKey.returnsThis();
+    mockUp.withPagesCache.returnsThis();
+    mockUp.withPagesProxy.returnsThis();
+    mockUp.withPagesUrl.returnsThis();
     mockUp.run.returnsThis();
   });
 
@@ -64,6 +67,8 @@ describe('hlx up', () => {
     sinon.assert.calledWith(mockUp.withFiles, ['src/**/*.htl', 'src/**/*.js', 'src/**/*.jsx', 'cgi-bin/**/*.js']);
     sinon.assert.calledWith(mockUp.withOverrideHost, undefined);
     sinon.assert.calledWith(mockUp.withLocalRepo, ['.']);
+    sinon.assert.calledWith(mockUp.withPagesProxy, true);
+    sinon.assert.calledWith(mockUp.withPagesCache, true);
     sinon.assert.calledOnce(mockUp.run);
   });
 
@@ -309,6 +314,30 @@ describe('hlx up', () => {
       .run(['up', '--algolia-app-id', 'fake-app-id', '--algolia-api-key', 'fake-api-key']);
     sinon.assert.calledWith(mockUp.withAlgoliaAppID, 'fake-app-id');
     sinon.assert.calledWith(mockUp.withAlgoliaAPIKey, 'fake-api-key');
+    sinon.assert.calledOnce(mockUp.run);
+  });
+
+  it('hlx up can disable pages proxy', () => {
+    new CLI()
+      .withCommandExecutor('up', mockUp)
+      .run(['up', '--no-pages-proxy']);
+    sinon.assert.calledWith(mockUp.withPagesProxy, false);
+    sinon.assert.calledOnce(mockUp.run);
+  });
+
+  it('hlx up can disable pages cache', () => {
+    new CLI()
+      .withCommandExecutor('up', mockUp)
+      .run(['up', '--no-pages-cache']);
+    sinon.assert.calledWith(mockUp.withPagesCache, false);
+    sinon.assert.calledOnce(mockUp.run);
+  });
+
+  it('hlx up can set pages url', () => {
+    new CLI()
+      .withCommandExecutor('up', mockUp)
+      .run(['up', '--pages-url', 'https://foo--bar.hlx.page']);
+    sinon.assert.calledWith(mockUp.withPagesUrl, 'https://foo--bar.hlx.page');
     sinon.assert.calledOnce(mockUp.run);
   });
 });

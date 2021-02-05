@@ -97,7 +97,7 @@ describe('Integration test for auth', () => {
         }
         await res.buffer();
         // required so that the server can stop properly
-        fetchAPI.disconnectAll();
+        fetchAPI.reset();
       });
 
     cmd._stdin = new stream.PassThrough();
@@ -143,7 +143,7 @@ describe('Integration test for auth', () => {
         }
         await res.buffer();
         // required so that the server can stop properly
-        fetchAPI.disconnectAll();
+        fetchAPI.reset();
       });
 
     cmd._stdin = new stream.PassThrough();
@@ -185,7 +185,7 @@ describe('Integration test for auth', () => {
         }
         await res.buffer();
         // required so that the server can stop properly
-        fetchAPI.disconnectAll();
+        fetchAPI.reset();
       });
 
     cmd._stdout = out;
