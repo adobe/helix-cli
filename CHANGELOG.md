@@ -1,3 +1,10 @@
+## [13.1.7](https://github.com/adobe/helix-cli/compare/v13.1.6...v13.1.7) (2021-02-05)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @adobe/htlengine to v6.3.5 ([1cd2b88](https://github.com/adobe/helix-cli/commit/1cd2b8894e504e0f8177ed876248e9a2a590fee7))
+
 ## [13.1.6](https://github.com/adobe/helix-cli/compare/v13.1.5...v13.1.6) (2021-02-03)
 
 
