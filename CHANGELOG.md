@@ -1,3 +1,10 @@
+## [13.2.1](https://github.com/adobe/helix-cli/compare/v13.2.0...v13.2.1) (2021-02-08)
+
+
+### Bug Fixes
+
+* **publish:** ensure that preflight config is properly merged ([#1639](https://github.com/adobe/helix-cli/issues/1639)) ([15827ec](https://github.com/adobe/helix-cli/commit/15827ec4d85e0c6909ae92042a0d70b2ba969b51)), closes [#1638](https://github.com/adobe/helix-cli/issues/1638)
+
 # [13.2.0](https://github.com/adobe/helix-cli/compare/v13.1.7...v13.2.0) (2021-02-05)
 
 
