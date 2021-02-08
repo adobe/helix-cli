@@ -1,3 +1,5 @@
+preflight: https://adobeioruntime.net/
+
 strains:
   - name: default
     content: ssh://git@github.com/adobe/helix-cli.git
