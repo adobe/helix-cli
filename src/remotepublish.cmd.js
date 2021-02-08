@@ -327,6 +327,12 @@ class RemotePublishCommand extends AbstractCommand {
         const merged = other.merge(this.config, this._filter);
         this.log.debug(Array.from(merged.strains.keys()).join(', '));
 
+        // ensure preflight is copied... this.config is preferred it would probably be better
+        // to turn the merge around, but then the filter-logic needs to be changed...
+        if (this.config.preflight) {
+          // eslint-disable-next-line no-underscore-dangle
+          merged._cfg.preflight = this.config.preflight;
+        }
         this._helixConfig = merged;
       } catch (e) {
         this.log.error(`Cannot merge configuration from master. Do you have a helix-config.yaml commited in the master branch?

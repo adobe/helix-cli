@@ -34,6 +34,7 @@ describe('hlx publish --remote (with filters)', () => {
   let remote;
   let softPurgeKey;
   let deleted;
+  let preflight;
 
   beforeEach('Setting up Fake Server', async function bef() {
     deleted = clearHelixEnv();
@@ -41,6 +42,7 @@ describe('hlx publish --remote (with filters)', () => {
     writeDictItem = sinon.fake.resolves(true);
     purgeAll = sinon.fake.resolves(true);
     softPurgeKey = sinon.fake.resolves(true);
+    preflight = null;
 
     RemotePublishCommand = proxyquire('../src/remotepublish.cmd', {
       '@adobe/fastly-native-promises': () => ({
@@ -58,6 +60,7 @@ describe('hlx publish --remote (with filters)', () => {
 
     scope = nock('https://adobeioruntime.net')
       .post('/api/v1/web/helix/helix-services/publish@v2', (body) => {
+        preflight = body.configuration.preflight;
         publishedstrains = body.configuration.strains.reduce((o, strain) => {
           if (strain.origin) {
             // eslint-disable-next-line no-param-reassign
@@ -111,6 +114,7 @@ describe('hlx publish --remote (with filters)', () => {
       'branch-bar': 'branch',
       'only-branch': 'branch',
     });
+    assert.strictEqual(preflight, 'https://adobeioruntime.net/');
   });
 
   it('publishing with only selects from branch', async () => {
@@ -126,6 +130,7 @@ describe('hlx publish --remote (with filters)', () => {
       'master-bar': 'master',
       'only-master': 'master',
     });
+    assert.strictEqual(preflight, 'https://adobeioruntime.net/');
   });
 
   it('publishing with exclude selects from master', async () => {
@@ -140,6 +145,7 @@ describe('hlx publish --remote (with filters)', () => {
       'only-master': 'master',
       'only-branch': 'branch',
     });
+    assert.strictEqual(preflight, 'https://adobeioruntime.net/');
   });
 
   afterEach(async () => {
