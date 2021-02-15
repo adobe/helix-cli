@@ -51,7 +51,7 @@
     "ignore": "^5.1.8",
     "ini": "^2.0.0",
     "isomorphic-git": "1.8.1",
-    "junit-report-builder": "2.1.0",
+    "junit-report-builder": "3.0.0",
     "lodash": "^4.17.20",
     "open": "^7.3.0",
     "openwhisk": "^3.21.3",
