@@ -5,9 +5,7 @@
       <skipped/>
     </testcase>
     <testcase classname="https://debug.primordialsoup.life/develop/" name="Visually Complete" time="1.233">
-      <system-out>
-        <![CDATA[Metric visually_complete of 1233 below limit of 1500]]>
-      </system-out>
+      <system-out><![CDATA[Metric visually_complete of 1233 below limit of 1500]]></system-out>
     </testcase>
     <testcase classname="https://debug.primordialsoup.life/develop/" name="85% Visually Complete" time="1.233">
       <failure message="Metric visually_complete_85 of 1233 exceeds limit of 1000"/>
