@@ -28,16 +28,18 @@ describe('Test Junit Report Builder', () => {
     await fs.remove(root);
   });
 
-  it('Responses can be appended', () => {
+  it('Responses can be appended', async () => {
     const outfile = path.resolve(root, 'simple.xml');
     const report = new JunitPerformanceReport().withOutfile(outfile);
     report.appendResults(perfExample);
     report.writeResults();
 
-    assert.equal(fs.readFileSync(outfile).toString(), fs.readFileSync(path.resolve(__dirname, 'fixtures', 'simple.xml')).toString());
+    const actual = (await fs.readFile(outfile, 'utf-8')).trim();
+    const expected = (await fs.readFile(path.resolve(__dirname, 'fixtures', 'simple.xml'), 'utf-8')).trim();
+    assert.equal(actual, expected);
   });
 
-  it('Custom performance budgets are respected', () => {
+  it('Custom performance budgets are respected', async () => {
     const outfile = path.resolve(root, 'custom.xml');
     const report = new JunitPerformanceReport().withOutfile(outfile);
     report.appendResults(perfExample, {
@@ -46,16 +48,20 @@ describe('Test Junit Report Builder', () => {
     });
     report.writeResults();
 
-    assert.equal(fs.readFileSync(outfile).toString(), fs.readFileSync(path.resolve(__dirname, 'fixtures', 'custom.xml')).toString());
+    const actual = (await fs.readFile(outfile, 'utf-8')).trim();
+    const expected = (await fs.readFile(path.resolve(__dirname, 'fixtures', 'custom.xml'), 'utf-8')).trim();
+    assert.equal(actual, expected);
   });
 
-  it('Multiple Test Suites are possible', () => {
+  it('Multiple Test Suites are possible', async () => {
     const outfile = path.resolve(root, 'double.xml');
     const report = new JunitPerformanceReport().withOutfile(outfile);
     report.appendResults(perfExample);
     report.appendResults(perfExample);
     report.writeResults();
 
-    assert.equal(fs.readFileSync(outfile).toString(), fs.readFileSync(path.resolve(__dirname, 'fixtures', 'double.xml')).toString());
+    const actual = (await fs.readFile(outfile, 'utf-8')).trim();
+    const expected = (await fs.readFile(path.resolve(__dirname, 'fixtures', 'double.xml'), 'utf-8')).trim();
+    assert.equal(actual, expected);
   });
 });

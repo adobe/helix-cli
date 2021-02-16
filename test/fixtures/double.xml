@@ -20,9 +20,7 @@
       <failure message="Score lighthouse-accessibility-score of 50 below lower bound of 80"/>
     </testcase>
     <testcase classname="https://debug.primordialsoup.life/develop/" name="Lighthouse Performance Score">
-      <system-out>
-        <![CDATA[Score lighthouse-performance-score of 99 meets lower bound of 80]]>
-      </system-out>
+      <system-out><![CDATA[Score lighthouse-performance-score of 99 meets lower bound of 80]]></system-out>
     </testcase>
     <testcase classname="https://debug.primordialsoup.life/develop/" name="Lighthouse Progressive Web App Score">
       <skipped/>
@@ -99,9 +97,7 @@
       <failure message="Score lighthouse-accessibility-score of 50 below lower bound of 80"/>
     </testcase>
     <testcase classname="https://debug.primordialsoup.life/develop/" name="Lighthouse Performance Score">
-      <system-out>
-        <![CDATA[Score lighthouse-performance-score of 99 meets lower bound of 80]]>
-      </system-out>
+      <system-out><![CDATA[Score lighthouse-performance-score of 99 meets lower bound of 80]]></system-out>
     </testcase>
     <testcase classname="https://debug.primordialsoup.life/develop/" name="Lighthouse Progressive Web App Score">
       <skipped/>
