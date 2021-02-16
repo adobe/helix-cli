@@ -1,3 +1,10 @@
+## [13.2.8](https://github.com/adobe/helix-cli/compare/v13.2.7...v13.2.8) (2021-02-16)
+
+
+### Bug Fixes
+
+* **deps:** update dependency junit-report-builder to v3 ([#1646](https://github.com/adobe/helix-cli/issues/1646)) ([53f5f60](https://github.com/adobe/helix-cli/commit/53f5f60599eee974244cf347d37612fc07c893f6))
+
 ## [13.2.7](https://github.com/adobe/helix-cli/compare/v13.2.6...v13.2.7) (2021-02-16)
 
 
