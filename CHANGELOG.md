@@ -1,3 +1,10 @@
+## [13.2.13](https://github.com/adobe/helix-cli/compare/v13.2.12...v13.2.13) (2021-02-18)
+
+
+### Bug Fixes
+
+* trigger release ([4b36049](https://github.com/adobe/helix-cli/commit/4b3604917d85302735cb10fabce6190249e81bea))
+
 ## [13.2.12](https://github.com/adobe/helix-cli/compare/v13.2.11...v13.2.12) (2021-02-18)
 
 
