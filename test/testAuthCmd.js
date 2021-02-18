@@ -13,6 +13,8 @@
 /* eslint-disable no-console, no-underscore-dangle */
 /* eslint-env mocha */
 
+process.env.HELIX_FETCH_FORCE_HTTP1 = 'true';
+
 const assert = require('assert');
 const crypto = require('crypto');
 const path = require('path');
@@ -26,8 +28,6 @@ const {
   assertFile,
   createTestRoot,
 } = require('./utils.js');
-
-process.env.HELIX_FETCH_FORCE_HTTP1 = 'true';
 
 class TestStream extends stream.Writable {
   constructor() {
