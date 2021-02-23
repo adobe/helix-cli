@@ -34,7 +34,7 @@
     "@adobe/helix-fetch": "2.1.5",
     "@adobe/helix-log": "4.5.3",
     "@adobe/helix-shared": "7.19.10",
-    "@adobe/helix-simulator": "5.2.10",
+    "@adobe/helix-simulator": "5.2.11",
     "@adobe/htlengine": "6.3.7",
     "@babel/core": "^7.12.10",
     "@babel/plugin-transform-react-jsx": "^7.12.12",
@@ -64,7 +64,7 @@
     "yargs": "16.2.0"
   },
   "devDependencies": {
-    "@adobe/eslint-config-helix": "1.1.3",
+    "@adobe/eslint-config-helix": "1.1.4",
     "@adobe/helix-testutils": "0.4.2",
     "@pollyjs/adapter-fetch": "5.1.0",
     "@pollyjs/adapter-node-http": "5.1.0",
