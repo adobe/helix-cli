@@ -1,3 +1,10 @@
+## [13.2.23](https://github.com/adobe/helix-cli/compare/v13.2.22...v13.2.23) (2021-02-25)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @adobe/helix-fetch to v2.1.6 ([#1665](https://github.com/adobe/helix-cli/issues/1665)) ([ebd3a5e](https://github.com/adobe/helix-cli/commit/ebd3a5e4702a10241a86eb0896e049d9cf2e9ad1))
+
 ## [13.2.22](https://github.com/adobe/helix-cli/compare/v13.2.21...v13.2.22) (2021-02-25)
 
 
