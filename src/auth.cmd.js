@@ -12,20 +12,13 @@
 
 const readline = require('readline');
 const path = require('path');
-const fetchAPI = require('@adobe/helix-fetch');
 const fse = require('fs-extra');
 const chalk = require('chalk');
 const opn = require('open');
+const { fetch } = require('./fetch-utils.js');
 const AbstractCommand = require('./abstract.cmd.js');
 const LoginServer = require('./auth-login-server.js');
 const cliutils = require('./cli-util');
-
-const { fetch } = process.env.HELIX_FETCH_FORCE_HTTP1
-  /* istanbul ignore next */
-  ? fetchAPI.context({
-    alpnProtocols: [fetchAPI.ALPN_HTTP1_1],
-  })
-  : fetchAPI;
 
 const HELIX_APP_HOST = 'https://app.project-helix.io';
 

@@ -16,6 +16,7 @@
 
 const yargs = require('yargs');
 const camelcase = require('camelcase');
+const fetchContext = require('./fetch-utils.js');
 
 const MIN_MSG = 'You need at least one command.';
 
@@ -143,6 +144,8 @@ class CLI {
       argv.showHelp();
       process.exit(1);
     }
+    // reset fetch connections so that process can terminate
+    fetchContext.reset();
   }
 }
 

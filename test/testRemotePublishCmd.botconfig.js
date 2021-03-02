@@ -11,6 +11,8 @@
  */
 
 /* eslint-env mocha */
+process.env.HELIX_FETCH_FORCE_HTTP1 = 'true';
+
 const nock = require('nock');
 const path = require('path');
 const proxyquire = require('proxyquire');
@@ -18,8 +20,6 @@ const sinon = require('sinon');
 const assert = require('assert');
 const { logging } = require('@adobe/helix-testutils');
 const { clearHelixEnv } = require('./utils.js');
-
-process.env.HELIX_FETCH_FORCE_HTTP1 = 'true';
 
 const EXPECTED_BODY = {
   content_repositories: [

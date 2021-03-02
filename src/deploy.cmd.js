@@ -12,7 +12,6 @@
 
 'use strict';
 
-const fetchAPI = require('@adobe/helix-fetch');
 const chalk = require('chalk');
 const ow = require('openwhisk');
 const glob = require('glob');
@@ -21,18 +20,12 @@ const fs = require('fs-extra');
 const { v4: uuidv4 } = require('uuid');
 const ProgressBar = require('progress');
 const { HelixConfig, GitUrl } = require('@adobe/helix-shared');
+const { fetch } = require('./fetch-utils.js');
 const GitUtils = require('./git-utils');
 const useragent = require('./user-agent-util');
 const AbstractCommand = require('./abstract.cmd.js');
 const PackageCommand = require('./package.cmd.js');
 const ConfigUtils = require('./config/config-utils.js');
-
-const { fetch } = process.env.HELIX_FETCH_FORCE_HTTP1
-  /* istanbul ignore next */
-  ? fetchAPI.context({
-    alpnProtocols: [fetchAPI.ALPN_HTTP1_1],
-  })
-  : fetchAPI;
 
 function humanFileSize(size) {
   const i = size === 0 ? 0 : Math.floor(Math.log(size) / Math.log(1024));

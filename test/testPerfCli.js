@@ -11,8 +11,7 @@
  */
 
 /* eslint-env mocha */
-
-'use strict';
+process.env.HELIX_FETCH_FORCE_HTTP1 = 'true';
 
 const sinon = require('sinon');
 const dotenv = require('dotenv');

@@ -11,9 +11,6 @@
  */
 
 /* global describe, it, beforeEach */
-
-'use strict';
-
 process.env.HELIX_FETCH_FORCE_HTTP1 = 'true';
 
 const sinon = require('sinon');
