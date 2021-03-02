@@ -11,6 +11,8 @@
  */
 
 /* eslint-env mocha */
+process.env.HELIX_FETCH_FORCE_HTTP1 = 'true';
+
 const nock = require('nock');
 const path = require('path');
 const proxyquire = require('proxyquire');
@@ -18,8 +20,6 @@ const sinon = require('sinon');
 const assert = require('assert');
 const { logging } = require('@adobe/helix-testutils');
 const { clearHelixEnv } = require('./utils.js');
-
-process.env.HELIX_FETCH_FORCE_HTTP1 = 'true';
 
 const EXPECTED_BODY = {
   content_repositories: [
@@ -36,6 +36,7 @@ describe('hlx publish --remote (default)', () => {
   let RemotePublishCommand;
   let writeDictItem;
   let purgeAll;
+  let discard;
   let deleted;
 
   beforeEach('Setting up Fake Server', function bef() {
@@ -43,12 +44,14 @@ describe('hlx publish --remote (default)', () => {
     this.timeout(5000);
     writeDictItem = sinon.fake.resolves(true);
     purgeAll = sinon.fake.resolves(true);
+    discard = sinon.fake.resolves(true);
 
     RemotePublishCommand = proxyquire('../src/remotepublish.cmd', {
       '@adobe/fastly-native-promises': () => ({
         transact: (fn) => fn(3),
         writeDictItem,
         purgeAll,
+        discard,
       }),
     });
 
@@ -138,6 +141,7 @@ describe('hlx publish --remote (default)', () => {
 
     sinon.assert.callCount(writeDictItem, 4);
     sinon.assert.calledOnce(purgeAll);
+    sinon.assert.calledOnce(discard);
 
     const log = logger.getOutput();
     const idx0 = log.indexOf('Updated the purge-configuration of the following repositories');
@@ -192,6 +196,7 @@ describe('hlx publish --remote (default)', () => {
 
     sinon.assert.callCount(writeDictItem, 4);
     sinon.assert.calledOnce(purgeAll);
+    sinon.assert.calledOnce(discard);
 
     const log = logger.getOutput();
     const idx0 = log.indexOf('Updated the purge-configuration of the following repositories');
@@ -234,6 +239,7 @@ describe('hlx publish --remote (default)', () => {
 
     sinon.assert.callCount(writeDictItem, 4);
     sinon.assert.calledOnce(purgeAll);
+    sinon.assert.calledOnce(discard);
 
     const log = logger.getOutput();
     const idx0 = log.indexOf('Updated the purge-configuration of the following repositories');
@@ -295,6 +301,7 @@ describe('hlx publish --remote (default)', () => {
 
     sinon.assert.callCount(writeDictItem, 4);
     sinon.assert.calledOnce(purgeAll);
+    sinon.assert.calledOnce(discard);
 
     const log = logger.getOutput();
     const idx0 = log.indexOf('Updated the purge-configuration of the following repositories');
@@ -383,6 +390,7 @@ describe('hlx publish --remote (default)', () => {
 
     sinon.assert.callCount(writeDictItem, 4);
     sinon.assert.calledOnce(purgeAll);
+    sinon.assert.calledOnce(discard);
 
     const log = logger.getOutput();
 
@@ -458,6 +466,7 @@ describe('hlx publish --remote (default)', () => {
 
     sinon.assert.callCount(writeDictItem, 4);
     sinon.assert.calledOnce(purgeAll);
+    sinon.assert.calledOnce(discard);
 
     const log = logger.getOutput();
 

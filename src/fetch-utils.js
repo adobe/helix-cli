@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Adobe. All rights reserved.
+ * Copyright 2021 Adobe. All rights reserved.
  * This file is licensed to you under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License. You may obtain a copy
  * of the License at http://www.apache.org/licenses/LICENSE-2.0
@@ -10,14 +10,14 @@
  * governing permissions and limitations under the License.
  */
 
-/* eslint-env mocha */
-process.env.HELIX_FETCH_FORCE_HTTP1 = 'true';
+const fetchAPI = require('@adobe/helix-fetch');
 
-const assert = require('assert');
-const useragent = require('../src/user-agent-util');
+// create global context that is used by all commands and can be reset for CLI to terminate
+const context = process.env.HELIX_FETCH_FORCE_HTTP1
+  /* istanbul ignore next */
+  ? fetchAPI.context({
+    alpnProtocols: [fetchAPI.ALPN_HTTP1_1],
+  })
+  : fetchAPI.context();
 
-describe('Validate user agent string', () => {
-  it('User Agent String mentions Project Helix', () => {
-    assert.ok(/Project Helix/.test(useragent));
-  });
-});
+module.exports = context;

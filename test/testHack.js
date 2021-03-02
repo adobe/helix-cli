@@ -10,6 +10,8 @@
  * governing permissions and limitations under the License.
  */
 /* eslint-env mocha */
+process.env.HELIX_FETCH_FORCE_HTTP1 = 'true';
+
 const assert = require('assert');
 const { logging } = require('@adobe/helix-testutils');
 const hack = require('../src/hack');

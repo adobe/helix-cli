@@ -12,7 +12,6 @@
 
 /* eslint no-unused-vars: ["error", { "argsIgnorePattern": "^_" }] */
 
-const fetchAPI = require('@adobe/helix-fetch');
 const fs = require('fs-extra');
 const path = require('path');
 const fastly = require('@adobe/fastly-native-promises');
@@ -20,16 +19,10 @@ const chalk = require('chalk');
 const ProgressBar = require('progress');
 const glob = require('glob-to-regexp');
 const { HelixConfig } = require('@adobe/helix-shared');
+const { fetch } = require('./fetch-utils.js');
 const AbstractCommand = require('./abstract.cmd.js');
 const GitUtils = require('./git-utils.js');
 const cliversion = require('../package.json').version;
-
-const { fetch } = process.env.HELIX_FETCH_FORCE_HTTP1
-  /* istanbul ignore next */
-  ? fetchAPI.context({
-    alpnProtocols: [fetchAPI.ALPN_HTTP1_1],
-  })
-  : fetchAPI;
 
 class RemotePublishCommand extends AbstractCommand {
   constructor(logger) {
@@ -568,6 +561,8 @@ You can generate a new token by running 'hlx auth'`);
         this.log.error(`${message}: ${e.stack}`, e);
         throw new Error(message, e);
       }
+    } finally {
+      this._fastly.discard();
     }
   }
 }

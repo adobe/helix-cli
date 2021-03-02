@@ -11,6 +11,7 @@
  */
 
 /* eslint-env mocha */
+process.env.HELIX_FETCH_FORCE_HTTP1 = 'true';
 
 const assert = require('assert');
 const nock = require('nock');
@@ -24,12 +25,14 @@ describe('hlx publish --remote (fail purge)', () => {
   let scope;
   let RemotePublishCommand;
   let writeDictItem;
+  let discard;
   let deleted;
 
   before('Setting up Fake Server', function bef() {
     deleted = clearHelixEnv();
     this.timeout(5000);
     writeDictItem = sinon.fake.resolves(true);
+    discard = sinon.fake.resolves(true);
 
     RemotePublishCommand = proxyquire('../src/remotepublish.cmd', {
       '@adobe/fastly-native-promises': () => ({
@@ -38,6 +41,7 @@ describe('hlx publish --remote (fail purge)', () => {
         purgeAll: async () => {
           throw new Error('Cannot purge.');
         },
+        discard,
       }),
     });
 
@@ -72,6 +76,7 @@ describe('hlx publish --remote (fail purge)', () => {
         assert.fail(e);
       }
       sinon.assert.callCount(writeDictItem, 4);
+      sinon.assert.calledOnce(discard);
     }
   });
 

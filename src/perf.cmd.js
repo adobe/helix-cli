@@ -11,18 +11,11 @@
  */
 /* eslint-disable max-classes-per-file */
 const chalk = require('chalk');
-const fetchAPI = require('@adobe/helix-fetch');
 const path = require('path');
 const _ = require('lodash/fp');
+const { fetch } = require('./fetch-utils.js');
 const JunitPerformanceReport = require('./junit-utils');
 const AbstractCommand = require('./abstract.cmd.js');
-
-const { fetch } = process.env.HELIX_FETCH_FORCE_HTTP1
-  /* istanbul ignore next */
-  ? fetchAPI.context({
-    alpnProtocols: [fetchAPI.ALPN_HTTP1_1],
-  })
-  : fetchAPI;
 
 class PerformanceError extends Error {
 
