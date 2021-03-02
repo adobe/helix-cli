@@ -1,3 +1,15 @@
+# [13.3.0](https://github.com/adobe/helix-cli/compare/v13.2.27...v13.3.0) (2021-03-02)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @adobe/helix-simulator to v5.2.17 ([#1672](https://github.com/adobe/helix-cli/issues/1672)) ([dcca9b5](https://github.com/adobe/helix-cli/commit/dcca9b584ce275f8446f552bd23a2bf69df76a88))
+
+
+### Features
+
+* **cli:** reset fetch context to terminate process ([#1670](https://github.com/adobe/helix-cli/issues/1670)) ([ce7b2fc](https://github.com/adobe/helix-cli/commit/ce7b2fce5790c14afb58f9f20c28800c100ad49f))
+
 ## [13.2.27](https://github.com/adobe/helix-cli/compare/v13.2.26...v13.2.27) (2021-03-02)
 
 
