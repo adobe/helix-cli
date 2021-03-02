@@ -25,12 +25,14 @@ describe('hlx publish --remote (fail secrets)', () => {
   let scope;
   let RemotePublishCommand;
   let purgeAll;
+  let discard;
   let deleted;
 
   before('Setting up Fake Server', function bef() {
     deleted = clearHelixEnv();
     this.timeout(15000);
     purgeAll = sinon.fake.resolves(true);
+    discard = sinon.fake.resolves(true);
 
     RemotePublishCommand = proxyquire('../src/remotepublish.cmd', {
       '@adobe/fastly-native-promises': () => ({
@@ -39,6 +41,7 @@ describe('hlx publish --remote (fail secrets)', () => {
           throw new Error('Cannot write secrets.');
         },
         purgeAll,
+        discard,
       }),
     });
 
@@ -72,6 +75,7 @@ describe('hlx publish --remote (fail secrets)', () => {
         assert.fail(e);
       }
       sinon.assert.notCalled(purgeAll);
+      sinon.assert.calledOnce(discard);
     }
   });
 

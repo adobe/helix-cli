@@ -78,6 +78,7 @@ describe('hlx publish --custom-vcl (check requests)', () => {
   let scope;
   let remote;
   let softPurgeKey;
+  let discard;
   let deleted;
 
   beforeEach('Setting up Fake Server', async function bef() {
@@ -86,6 +87,7 @@ describe('hlx publish --custom-vcl (check requests)', () => {
     writeDictItem = sinon.fake.resolves(true);
     purgeAll = sinon.fake.resolves(true);
     softPurgeKey = sinon.fake.resolves(true);
+    discard = sinon.fake.resolves(true);
 
     ProxiedRemotePublishCommand = proxyquire('../src/remotepublish.cmd', {
       '@adobe/fastly-native-promises': () => ({
@@ -93,6 +95,7 @@ describe('hlx publish --custom-vcl (check requests)', () => {
         writeDictItem,
         purgeAll,
         softPurgeKey,
+        discard,
       }),
     });
 

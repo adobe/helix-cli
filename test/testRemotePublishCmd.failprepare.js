@@ -26,6 +26,7 @@ describe('hlx publish --remote (fail prepare service config)', () => {
   let RemotePublishCommand;
   let writeDictItem;
   let purgeAll;
+  let discard;
   let deleted;
 
   before('Setting up Fake Server', function bef() {
@@ -33,12 +34,14 @@ describe('hlx publish --remote (fail prepare service config)', () => {
     this.timeout(5000);
     writeDictItem = sinon.fake.resolves(true);
     purgeAll = sinon.fake.resolves(true);
+    discard = sinon.fake.resolves(true);
 
     RemotePublishCommand = proxyquire('../src/remotepublish.cmd', {
       '@adobe/fastly-native-promises': () => ({
         transact: (fn) => fn(3),
         writeDictItem,
         purgeAll,
+        discard,
       }),
     });
 

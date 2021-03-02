@@ -561,6 +561,8 @@ You can generate a new token by running 'hlx auth'`);
         this.log.error(`${message}: ${e.stack}`, e);
         throw new Error(message, e);
       }
+    } finally {
+      this._fastly.discard();
     }
   }
 }

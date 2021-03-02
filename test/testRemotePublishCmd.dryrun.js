@@ -22,6 +22,7 @@ describe('hlx publish --remote --dry-run (default)', () => {
   let RemotePublishCommand;
   let writeDictItem;
   let purgeAll;
+  let discard;
   let deleted;
 
   before('Setting up Fake Server', function bef() {
@@ -29,12 +30,14 @@ describe('hlx publish --remote --dry-run (default)', () => {
     this.timeout(5000);
     writeDictItem = sinon.fake.resolves(true);
     purgeAll = sinon.fake.resolves(true);
+    discard = sinon.fake.resolves(true);
 
     RemotePublishCommand = proxyquire('../src/remotepublish.cmd', {
       '@adobe/fastly-native-promises': () => ({
         transact: (fn) => fn(3),
         writeDictItem,
         purgeAll,
+        discard,
       }),
     });
   });
@@ -66,5 +69,6 @@ describe('hlx publish --remote --dry-run (default)', () => {
 
     sinon.assert.callCount(writeDictItem, 4);
     sinon.assert.notCalled(purgeAll);
+    sinon.assert.calledOnce(discard);
   });
 });
