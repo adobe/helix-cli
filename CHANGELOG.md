@@ -1,3 +1,10 @@
+## [13.3.7](https://github.com/adobe/helix-cli/compare/v13.3.6...v13.3.7) (2021-03-08)
+
+
+### Bug Fixes
+
+* **deps:** update dependency open to v8 ([1d2bd72](https://github.com/adobe/helix-cli/commit/1d2bd7228df1735f31dd256942809421842610c2))
+
 ## [13.3.6](https://github.com/adobe/helix-cli/compare/v13.3.5...v13.3.6) (2021-03-05)
 
 
