@@ -53,7 +53,7 @@
     "isomorphic-git": "1.8.1",
     "junit-report-builder": "3.0.0",
     "lodash": "^4.17.20",
-    "open": "^7.3.0",
+    "open": "^8.0.0",
     "openwhisk": "^3.21.3",
     "progress": "^2.0.3",
     "request": "^2.88.2",
