@@ -1,3 +1,10 @@
+## [13.3.9](https://github.com/adobe/helix-cli/compare/v13.3.8...v13.3.9) (2021-03-09)
+
+
+### Bug Fixes
+
+* add data to universal template as well ([#1683](https://github.com/adobe/helix-cli/issues/1683)) ([ac6291b](https://github.com/adobe/helix-cli/commit/ac6291b8e611bdcb85ef3ddff328fd0b0257e9f7))
+
 ## [13.3.8](https://github.com/adobe/helix-cli/compare/v13.3.7...v13.3.8) (2021-03-09)
 
 
