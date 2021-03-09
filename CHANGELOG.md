@@ -1,3 +1,10 @@
+## [13.3.8](https://github.com/adobe/helix-cli/compare/v13.3.7...v13.3.8) (2021-03-09)
+
+
+### Bug Fixes
+
+* keep data property in content ([#1682](https://github.com/adobe/helix-cli/issues/1682)) ([6b65fca](https://github.com/adobe/helix-cli/commit/6b65fca2ed3cc6eee5c572e1d84e6ba8bdd8b835))
+
 ## [13.3.7](https://github.com/adobe/helix-cli/compare/v13.3.6...v13.3.7) (2021-03-08)
 
 
