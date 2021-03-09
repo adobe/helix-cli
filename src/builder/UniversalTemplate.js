@@ -18,7 +18,7 @@ const script = require('MOD_SCRIPT');
 
 // todo: move to helix-pipeline
 const CONTEXT_PROPS = ['error', 'request', 'content', 'response'];
-const CONTENT_PROPS = ['sources', 'body', 'mdast', 'sections', 'document', 'htast', 'json', 'xml', 'meta', 'title', 'intro', 'image'];
+const CONTENT_PROPS = ['sources', 'body', 'mdast', 'sections', 'document', 'htast', 'json', 'xml', 'meta', 'title', 'intro', 'image', 'data'];
 const REQUEST_PROPS = ['url', 'path', 'pathInfo', 'rootPath', 'selector', 'extension', 'method', 'headers', 'params'];
 const RESPONSE_PROPS = ['status', 'body', 'hast', 'headers', 'document'];
 
