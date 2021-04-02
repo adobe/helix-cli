@@ -1,3 +1,10 @@
+## [13.3.25](https://github.com/adobe/helix-cli/compare/v13.3.24...v13.3.25) (2021-04-02)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @adobe/helix-log to v5.0.1 ([abbe4ab](https://github.com/adobe/helix-cli/commit/abbe4ab751f4518f69ad7dfd79931a89c5738c38))
+
 ## [13.3.24](https://github.com/adobe/helix-cli/compare/v13.3.23...v13.3.24) (2021-03-30)
 
 
