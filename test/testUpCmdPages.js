@@ -94,12 +94,8 @@ describe('Integration test for up command with helix pages', function suite() {
   it('up command delivers correct response from different branch.', (done) => {
     initGit(testDir, 'https://github.com/adobe/dummy-foo.git', 'test-branch');
 
-    const scope = nock('https://adobeioruntime.net')
-      .get('/api/v1/web/helix/helix-services/content-proxy@v1?owner=adobe&repo=dummy-foo&path=%2Fdocument.md&ref=test-branch&ignore=github')
-      .optionally()
-      .reply(200, '## Welcome')
-      .get('/api/v1/web/helix/helix-services/content-proxy@v2?owner=adobe&repo=dummy-foo&path=%2Fdocument.md&ref=test-branch&ignore=github')
-      .optionally()
+    const scope = nock('https://test-branch--dummy-foo--adobe.hlx.page')
+      .get('/document.md')
       .reply(200, '## Welcome');
 
     let error = null;
