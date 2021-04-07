@@ -86,12 +86,6 @@ module.exports = function deploy() {
           type: 'boolean',
           default: false,
         })
-        .option('svc-resolve-git-ref', {
-          alias: 'svcResolveGitRef',
-          describe: 'Service name for git-resolve-ref service',
-          type: 'string',
-          default: 'helix-services/resolve-git-ref@v1',
-        })
         .option('updated-at', {
           alias: 'updatedAt',
           describe: 'Informative Unix timestamp for the deployed actions.',

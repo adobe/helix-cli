@@ -55,7 +55,6 @@ class DeployCommand extends AbstractCommand {
     this._createPackages = 'auto';
     this._addStrain = null;
     this._enableMinify = false;
-    this._resolveGitRefSvc = 'helix-services/resolve-git-ref@v1';
     this._customPipeline = null;
     this._epsagonAppName = null;
     this._epsagonToken = null;
