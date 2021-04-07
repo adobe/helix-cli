@@ -32,7 +32,8 @@ const ModuleHelper = require('../src/builder/ModuleHelper.js');
 function initGit(dir, remote, branch) {
   const pwd = shell.pwd();
   shell.cd(dir);
-  shell.exec('git init -b master');
+  shell.exec('git init');
+  shell.exec('git checkout -b master');
   shell.exec('git add -A');
   shell.exec('git commit -m"initial commit."');
   if (remote) {
