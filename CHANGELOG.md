@@ -1,3 +1,10 @@
+# [13.4.0](https://github.com/adobe/helix-cli/compare/v13.3.32...v13.4.0) (2021-04-07)
+
+
+### Features
+
+* **cli:** remove unused resolve git ref ([#1720](https://github.com/adobe/helix-cli/issues/1720)) ([a565a0c](https://github.com/adobe/helix-cli/commit/a565a0cd835b2a52c794729334ecf59c70e050e8)), closes [#1719](https://github.com/adobe/helix-cli/issues/1719)
+
 ## [13.3.32](https://github.com/adobe/helix-cli/compare/v13.3.31...v13.3.32) (2021-04-07)
 
 
