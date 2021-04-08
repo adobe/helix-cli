@@ -62,8 +62,8 @@ describe('hlx publish --remote (with filters)', () => {
     nock.cleanAll();
     nock.activate();
 
-    scope = nock('https://adobeioruntime.net')
-      .post('/api/v1/web/helix/helix-services/publish@v2', (body) => {
+    scope = nock('https://helix-pages.anywhere.run')
+      .post('/helix-services/publish@v8', (body) => {
         preflight = body.configuration.preflight;
         publishedstrains = body.configuration.strains.reduce((o, strain) => {
           if (strain.origin) {
@@ -79,7 +79,7 @@ describe('hlx publish --remote (with filters)', () => {
         return true;
       })
       .reply(200, {})
-      .post('/api/v1/web/helix/helix-services/logging@v1')
+      .post('/helix-services/logging@v1')
       .reply(200, {});
 
     // set up a fake git repo.
@@ -93,6 +93,7 @@ describe('hlx publish --remote (with filters)', () => {
     pwd = shell.pwd();
     shell.cd(testRoot);
     shell.exec('git init');
+    shell.exec('git checkout -b master');
     shell.exec('git add -A');
     shell.exec('git commit -m"initial commit."');
 
@@ -103,7 +104,6 @@ describe('hlx publish --remote (with filters)', () => {
       .withFastlyAuth('fake_auth')
       .withFastlyNamespace('fake_name')
       .withWskHost('doesn.t.matter')
-      .withPublishAPI('https://adobeioruntime.net/api/v1/web/helix/helix-services/publish@v2')
       .withConfigFile(path.resolve(__dirname, 'fixtures/filtered.yaml'))
       .withDryRun(false);
   });
@@ -229,6 +229,7 @@ describe('hlx publish --remote (with filters, but without config)', () => {
     pwd = shell.pwd();
     shell.cd(testRoot);
     shell.exec('git init');
+    shell.exec('git checkout -b master');
     shell.exec('git add -A');
     shell.exec('git commit -m"initial commit."');
 

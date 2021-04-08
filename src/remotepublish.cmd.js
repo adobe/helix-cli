@@ -34,7 +34,7 @@ class RemotePublishCommand extends AbstractCommand {
     this._debug_key = null;
     this._fastly_auth = null;
     this._dryRun = false;
-    this._publishAPI = 'https://helix-pages.anywhere.run/helix-services/publish@v';
+    this._publishAPI = 'https://helix-pages.anywhere.run/helix-services/publish@v8';
     this._githubToken = '';
     this._updateBotConfig = false;
     this._configPurgeAPI = 'https://app.project-helix.io/config/purge';
@@ -256,7 +256,7 @@ class RemotePublishCommand extends AbstractCommand {
   }
 
   serviceAddLogger() {
-    return fetch('https://adobeioruntime.net/api/v1/web/helix/helix-services/logging@v1', {
+    return fetch('https://helix-pages.anywhere.run/helix-services/logging@v1', {
       method: 'POST',
       body: {
         service: this._fastly_namespace,

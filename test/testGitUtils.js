@@ -48,6 +48,7 @@ describe('Testing GitUtils', () => {
     pwd = shell.pwd();
     shell.cd(testRoot);
     shell.exec('git init');
+    shell.exec('git checkout -b master');
     shell.exec('git add -A');
     shell.exec('git commit -m"initial commit."');
   });
@@ -91,6 +92,7 @@ describe('Testing GitUtils', () => {
     const currentPwd = shell.pwd();
     shell.cd(moduleRoot);
     shell.exec('git init');
+    shell.exec('git checkout -b master');
     shell.exec('git add -A');
     shell.exec('git commit -m"initial commit."');
     shell.cd(currentPwd);

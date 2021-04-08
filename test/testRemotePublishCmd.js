@@ -54,10 +54,10 @@ describe('hlx publish --remote (default)', () => {
   });
 
   it('publishing makes HTTP requests', async () => {
-    const scope = nock('https://adobeioruntime.net')
-      .post('/api/v1/web/helix/helix-services/publish@v2')
+    const scope = nock('https://helix-pages.anywhere.run')
+      .post('/helix-services/publish@v8')
       .reply(200, {})
-      .post('/api/v1/web/helix/helix-services/logging@v1')
+      .post('/helix-services/logging@v1')
       .reply(200, {});
 
     const remote = await new RemotePublishCommand()
@@ -72,7 +72,6 @@ describe('hlx publish --remote (default)', () => {
       .withEpsagonToken('fake_key')
       .withCoralogixAppName('fake_id')
       .withCoralogixToken('fake_key')
-      .withPublishAPI('https://adobeioruntime.net/api/v1/web/helix/helix-services/publish@v2')
       .withDebugKey('something')
       .withConfigFile(path.resolve(__dirname, 'fixtures/deployed.yaml'))
       .withFilter()

@@ -78,6 +78,7 @@ describe('hlx command line', () => {
     shell.cd(testRoot);
     await fse.writeFile(path.resolve(testRoot, '.env'), '# Helix Env\n', 'utf-8');
     shell.exec('git init');
+    shell.exec('git checkout -b master');
     shell.exec('git add -A');
     shell.exec('git commit -m"initial"');
     const cmd = runCLI('--version');

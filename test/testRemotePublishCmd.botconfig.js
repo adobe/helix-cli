@@ -60,10 +60,10 @@ describe('hlx publish --remote (default)', () => {
     nock.cleanAll();
     nock.activate();
 
-    scope = nock('https://adobeioruntime.net')
-      .post('/api/v1/web/helix/helix-services/publish@v2')
+    scope = nock('https://helix-pages.anywhere.run')
+      .post('/helix-services/publish@v8')
       .reply(200, {})
-      .post('/api/v1/web/helix/helix-services/logging@v1')
+      .post('/helix-services/logging@v1')
       .reply(200, {});
   });
 
@@ -130,7 +130,6 @@ describe('hlx publish --remote (default)', () => {
       .withFastlyAuth('fake_auth')
       .withFastlyNamespace('fake_name')
       .withWskHost('doesn.t.matter')
-      .withPublishAPI('https://adobeioruntime.net/api/v1/web/helix/helix-services/publish@v2')
       .withConfigFile(path.resolve(__dirname, 'fixtures/deployed.yaml'))
       .withUpdateBotConfig(true)
       .withGithubToken('github-token-foobar')
@@ -186,7 +185,6 @@ describe('hlx publish --remote (default)', () => {
       .withFastlyAuth('fake_auth')
       .withFastlyNamespace('fake_name')
       .withWskHost('doesn.t.matter')
-      .withPublishAPI('https://adobeioruntime.net/api/v1/web/helix/helix-services/publish@v2')
       .withConfigFile(path.resolve(__dirname, 'fixtures/deployed.yaml'))
       .withUpdateBotConfig(true)
       .withGithubToken('github-token-foobar')
@@ -229,7 +227,6 @@ describe('hlx publish --remote (default)', () => {
       .withFastlyAuth('fake_auth')
       .withFastlyNamespace('fake_name')
       .withWskHost('doesn.t.matter')
-      .withPublishAPI('https://adobeioruntime.net/api/v1/web/helix/helix-services/publish@v2')
       .withConfigFile(path.resolve(__dirname, 'fixtures/deployed.yaml'))
       .withUpdateBotConfig(true)
       .withGithubToken('github-token-foobar')
@@ -291,7 +288,6 @@ describe('hlx publish --remote (default)', () => {
       .withFastlyAuth('fake_auth')
       .withFastlyNamespace('fake_name')
       .withWskHost('doesn.t.matter')
-      .withPublishAPI('https://adobeioruntime.net/api/v1/web/helix/helix-services/publish@v2')
       .withConfigFile(path.resolve(__dirname, 'fixtures/deployed.yaml'))
       .withUpdateBotConfig(true)
       .withGithubToken('github-token-foobar')
@@ -336,7 +332,6 @@ describe('hlx publish --remote (default)', () => {
       .withFastlyAuth('fake_auth')
       .withFastlyNamespace('fake_name')
       .withWskHost('doesn.t.matter')
-      .withPublishAPI('https://adobeioruntime.net/api/v1/web/helix/helix-services/publish@v2')
       .withConfigFile(path.resolve(__dirname, 'fixtures/deployed.yaml'))
       .withUpdateBotConfig(true)
       .withGithubToken('github-token-foobar')
@@ -380,7 +375,6 @@ describe('hlx publish --remote (default)', () => {
       .withFastlyAuth('fake_auth')
       .withFastlyNamespace('fake_name')
       .withWskHost('doesn.t.matter')
-      .withPublishAPI('https://adobeioruntime.net/api/v1/web/helix/helix-services/publish@v2')
       .withConfigFile(path.resolve(__dirname, 'fixtures/deployed.yaml'))
       .withUpdateBotConfig(true)
       .withGithubToken('github-token-foobar')
@@ -456,7 +450,6 @@ describe('hlx publish --remote (default)', () => {
       .withFastlyAuth('fake_auth')
       .withFastlyNamespace('fake_name')
       .withWskHost('doesn.t.matter')
-      .withPublishAPI('https://adobeioruntime.net/api/v1/web/helix/helix-services/publish@v2')
       .withConfigFile(path.resolve(__dirname, 'fixtures/deployed.yaml'))
       .withUpdateBotConfig(true)
       .withGithubToken('github-token-foobar')
