@@ -87,15 +87,15 @@ describe('hlx publish --remote (default)', () => {
 
   it('publishing sends expected parameters', async () => {
     let publishBody;
-    const scope = nock('https://adobeioruntime.net')
-      .post('/api/v1/web/helix/helix-services/publish@v8', (body) => {
+    const scope = nock('https://helix-pages.anywhere.run')
+      .post('/helix-services/publish@v8', (body) => {
         assert.equal(body.algoliaappid, 'fake_id');
         assert.equal(body.indexconfig.indices['blog-posts'].source, 'html');
         publishBody = body;
         return true;
       })
       .reply(200, {})
-      .post('/api/v1/web/helix/helix-services/logging@v1')
+      .post('/helix-services/logging@v1')
       .reply(200, {});
 
     const remote = await new RemotePublishCommand()
@@ -106,7 +106,6 @@ describe('hlx publish --remote (default)', () => {
       .withAlgoliaAppID('fake_id')
       .withAlgoliaAPIKey('fake_key')
       .withWskHost('doesn.t.matter')
-      .withPublishAPI('https://adobeioruntime.net/api/v1/web/helix/helix-services/publish@v8')
       .withConfigFile(path.resolve(__dirname, 'fixtures/deployed.yaml'))
       .withIndexConfigFile(path.resolve(__dirname, 'fixtures/helix-index.yaml'))
       .withFilter()
@@ -131,7 +130,6 @@ describe('hlx publish --remote (default)', () => {
       .withFastlyAuth('fake_auth')
       .withFastlyNamespace('fake_name')
       .withWskHost('doesn.t.matter')
-      .withPublishAPI('https://adobeioruntime.net/api/v1/web/helix/helix-services/publish@v2')
       .withConfigFile(path.resolve(__dirname, 'fixtures/non-deployed.yaml'))
       .withDryRun(false);
     await remote.run();
@@ -141,11 +139,11 @@ describe('hlx publish --remote (default)', () => {
   });
 
   it('publishing warns if remote logging fails', async () => {
-    const scope = nock('https://adobeioruntime.net')
-      .post('/api/v1/web/helix/helix-services/publish@v2')
+    const scope = nock('https://helix-pages.anywhere.run')
+      .post('/helix-services/publish@v8')
       .reply(200, {})
-      .post('/api/v1/web/helix/helix-services/logging@v1')
-      .reply(404);
+      .post('/helix-services/logging@v1')
+      .reply(404, {});
 
     const logger = logging.createTestLogger();
     const remote = await new RemotePublishCommand(logger)
@@ -154,7 +152,6 @@ describe('hlx publish --remote (default)', () => {
       .withFastlyAuth('fake_auth')
       .withFastlyNamespace('fake_name')
       .withWskHost('doesn.t.matter')
-      .withPublishAPI('https://adobeioruntime.net/api/v1/web/helix/helix-services/publish@v2')
       .withConfigFile(path.resolve(__dirname, 'fixtures/deployed.yaml'))
       .withFilter()
       .withDryRun(false);
