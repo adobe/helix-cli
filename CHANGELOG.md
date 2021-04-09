@@ -1,3 +1,10 @@
+## [13.4.2](https://github.com/adobe/helix-cli/compare/v13.4.1...v13.4.2) (2021-04-09)
+
+
+### Bug Fixes
+
+* **publish:** use universal publish and logging by default ([aceebd0](https://github.com/adobe/helix-cli/commit/aceebd0192a3d4c3859d9282bbac26701faad3a2))
+
 ## [13.4.1](https://github.com/adobe/helix-cli/compare/v13.4.0...v13.4.1) (2021-04-07)
 
 
