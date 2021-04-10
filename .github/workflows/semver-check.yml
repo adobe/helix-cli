@@ -1,8 +1,4 @@
-on:
-  push:
-    branches-ignore:
-      - 'main'
-
+on: [pull_request]
 jobs:
   ci_trigger:
     runs-on: ubuntu-latest
