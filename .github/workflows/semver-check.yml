@@ -6,4 +6,6 @@ jobs:
     steps:
       - name: Comment
         id: comment
-        run: echo '${{secrets.ADOBE_BOT_NPM_TOKEN}}'
+        run: echo '$NPM_TOKEN'
+        env:
+          NPM_TOKEN: ${{ secrets.ADOBE_BOT_NPM_TOKEN }}
