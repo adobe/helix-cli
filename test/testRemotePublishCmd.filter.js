@@ -255,7 +255,7 @@ describe('hlx publish --remote (with filters, but without config)', () => {
       'branch-bar': 'branch',
       'only-branch': 'branch',
     });
-  });
+  }).timeout(30000);
 
   it('publishing with only fails', async () => {
     remote = remote.withFilter('branch-*', undefined);
