@@ -19,6 +19,8 @@ const HelixPages = require('./helix-pages.js');
 
 const HLX_PIPELINE_MOD = '@adobe/helix-pipeline';
 
+const HLX_UNIVERSAL_MOD = '@adobe/helix-universal';
+
 class BuildCommand extends AbstractCommand {
   constructor(logger) {
     super(logger);
@@ -28,8 +30,10 @@ class BuildCommand extends AbstractCommand {
     this._helixPagesRepo = '';
     this._helixPages = null;
     this._modulePaths = [];
-    this._requiredModules = [{ name: HLX_PIPELINE_MOD, descriptor: `${HLX_PIPELINE_MOD}@latest` }];
-    this._universal = false;
+    this._requiredModules = [
+      { name: HLX_PIPELINE_MOD, descriptor: `${HLX_PIPELINE_MOD}@latest` },
+      { name: HLX_UNIVERSAL_MOD, descriptor: `${HLX_UNIVERSAL_MOD}@latest` },
+    ];
   }
 
   // eslint-disable-next-line class-methods-use-this
@@ -82,11 +86,6 @@ class BuildCommand extends AbstractCommand {
     return this;
   }
 
-  withUniversal(value) {
-    this._universal = value;
-    return this;
-  }
-
   /**
    * @override
    */
@@ -115,7 +114,6 @@ class BuildCommand extends AbstractCommand {
       .withLogger(this.log)
       .withFiles(this._files)
       .withRequiredModules(this._requiredModules)
-      .withUniversal(this._universal)
       .withShowReport(true);
 
     if (await this.helixPages.isPagesProject()) {
