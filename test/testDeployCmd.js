@@ -17,7 +17,7 @@ const fs = require('fs-extra');
 const assert = require('assert');
 const path = require('path');
 const $ = require('shelljs');
-const { HelixConfig } = require('@adobe/helix-shared');
+const { HelixConfig } = require('@adobe/helix-shared-config');
 const { logging } = require('@adobe/helix-testutils');
 const {
   assertFile, initGit, createTestRoot, getTestModules, setupPolly,
