@@ -13,7 +13,7 @@ const path = require('path');
 const fse = require('fs-extra');
 const shell = require('shelljs');
 const chalk = require('chalk');
-const { GitUrl } = require('@adobe/helix-shared');
+const { GitUrl } = require('@adobe/helix-shared-git');
 
 function execAsync(cmd) {
   return new Promise((resolve, reject) => {
