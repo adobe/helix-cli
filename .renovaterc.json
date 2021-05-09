@@ -4,6 +4,14 @@
     {
       "packageNames": ["webpack"],
       "allowedVersions": "<5.0.0"
+    },
+    {
+      "packageNames": ["yargs"],
+      "allowedVersions": "<17.0.0"
+    },
+    {
+      "packageNames": ["circleci/node"],
+      "allowedVersions": "12"
     }
   ]
 }
