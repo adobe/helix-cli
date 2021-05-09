@@ -3,7 +3,7 @@ jobs:
   build:
     docker:
       # specify the version you desire here
-      - image: circleci/node:8-stretch
+      - image: circleci/node:15-stretch
     steps:
         - checkout
 
