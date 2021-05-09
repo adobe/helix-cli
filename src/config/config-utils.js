@@ -12,7 +12,7 @@
 const fs = require('fs-extra');
 const path = require('path');
 const chalk = require('chalk');
-const { GitUrl } = require('@adobe/helix-shared');
+const { GitUrl } = require('@adobe/helix-shared-git');
 const semver = require('semver');
 const GitUtils = require('../git-utils');
 const pkgJson = require('../../package.json');

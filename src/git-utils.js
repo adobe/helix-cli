@@ -17,7 +17,7 @@ const os = require('os');
 const ignore = require('ignore');
 const ini = require('ini');
 const fse = require('fs-extra');
-const { GitUrl } = require('@adobe/helix-shared');
+const { GitUrl } = require('@adobe/helix-shared-git');
 const git = require('isomorphic-git');
 
 // cache for isomorphic-git API

@@ -14,7 +14,7 @@
 
 const EventEmitter = require('events');
 const chalk = require('chalk');
-const { HelixConfig, IndexConfig } = require('@adobe/helix-shared');
+const { HelixConfig, IndexConfig } = require('@adobe/helix-shared-config');
 const { getOrCreateLogger } = require('./log-common');
 const ConfigUtils = require('./config/config-utils.js');
 
