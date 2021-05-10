@@ -1,3 +1,10 @@
+## [13.4.30](https://github.com/adobe/helix-cli/compare/v13.4.29...v13.4.30) (2021-05-10)
+
+
+### Bug Fixes
+
+* **cli:** remove unused commands ([2bcb3ad](https://github.com/adobe/helix-cli/commit/2bcb3ade3e5fe51a6fbcb815da7fbab448a6567f)), closes [#1759](https://github.com/adobe/helix-cli/issues/1759)
+
 ## [13.4.29](https://github.com/adobe/helix-cli/compare/v13.4.28...v13.4.29) (2021-05-09)
 
 
