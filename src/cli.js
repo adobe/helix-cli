@@ -85,15 +85,12 @@ function logArgs(argv) {
 class CLI {
   constructor() {
     this._commands = {
-      demo: require('./demo.js')(),
       up: require('./up.js')(),
       build: require('./build.js')(),
       package: require('./package.js')(),
       deploy: require('./deploy.js')(),
-      perf: require('./perf.js')(),
       publish: require('./publish.js')(),
       clean: require('./clean.js')(),
-      auth: require('./auth.js')(),
       hack: require('./hack.js')(),
     };
     this._failFn = (message, err, argv) => {

@@ -42,23 +42,11 @@ module.exports = function deploy() {
         default: [],
       });
       yargs
-        .option('auto', {
-          describe: 'Enable auto-deployment',
-          type: 'boolean',
-          default: false,
-          demandOption: true,
-        })
         .option('dry-run', {
           alias: 'dryRun',
           describe: 'List the actions that would be created, but do not actually deploy',
           type: 'boolean',
           default: false,
-        })
-        .option('circleci-auth', {
-          alias: 'circleciAuth',
-          describe: 'API Key for CircleCI API ($HLX_CIRCLECI_AUTH)',
-          type: 'string',
-          default: '',
         })
         .option('target', {
           alias: 'o',
@@ -97,39 +85,9 @@ module.exports = function deploy() {
           describe: 'Informative user name for the deployed actions.',
           type: 'string',
         })
-        .group(['auto', 'wsk-auth', 'wsk-namespace', 'default', 'default-file', 'dirty'], 'Deployment Options')
+        .group(['wsk-auth', 'wsk-namespace', 'default', 'default-file', 'dirty'], 'Deployment Options')
         .group(['wsk-host', 'target', 'epsagon-app-name', 'epsagon-token', 'coralogix-app-name', 'coralogix-token'], 'Advanced Options')
         .group(['package', 'minify', 'target'], 'Package options')
-        .check((args) => {
-          if (!args.auto) {
-            // single-shot deployment is easy
-            return true;
-          }
-          const message = 'Auto-deployment requires: ';
-          const missing = [];
-          if (!args.circleciAuth) {
-            missing.push('--circleci-auth');
-          }
-          if (!args.fastlyAuth) {
-            missing.push('--fastly-auth');
-          }
-          if (!args.fastlyNamespace) {
-            missing.push('--fastly-namespace');
-          }
-          if (!args.wskAuth) {
-            missing.push('--wsk-auth');
-          }
-          if (!args.wskNamespace) {
-            missing.push('--wsk-namespace');
-          }
-          if (!args.wskHost) {
-            missing.push('--wsk-host');
-          }
-          if (missing.length === 0) {
-            return true;
-          }
-          return new Error(message + missing.join(', '));
-        })
         .help();
     },
     handler: async (argv) => {
@@ -140,7 +98,6 @@ module.exports = function deploy() {
       }
 
       await executor
-        .withEnableAuto(argv.auto)
         .withEnableDirty(argv.dirty)
         .withWskAuth(argv.wskAuth)
         .withWskHost(argv.wskHost)
@@ -152,9 +109,6 @@ module.exports = function deploy() {
         .withDefault(argv.default)
         .withDefaultFile(argv.defaultFile)
         .withDryRun(argv.dryRun)
-        .withCircleciAuth(argv.circleciAuth)
-        .withFastlyAuth(argv.fastlyAuth)
-        .withFastlyNamespace(argv.fastlyNamespace)
         .withCreatePackages(argv.package)
         .withAddStrain(argv.add)
         .withMinify(argv.minify)

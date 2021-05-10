@@ -26,7 +26,6 @@ const { decodeFileParams } = require('../src/yargs-params');
 const GitUtils = require('../src/git-utils');
 const DeployCommand = require('../src/deploy.cmd.js');
 
-const CI_TOKEN = 'nope';
 const TEST_DIR = path.resolve('test/integration');
 const CGI_BIN_TEST_DIR = path.resolve('test/integration-with-cgi-bin');
 
@@ -76,14 +75,10 @@ describe('hlx deploy (Integration)', () => {
         .withWskHost('adobeioruntime.net')
         .withWskAuth('secret-key')
         .withWskNamespace('hlx')
-        .withEnableAuto(false)
         .withEnableDirty(true)
         .withModulePaths(testModules)
         .withDryRun(true)
         .withTarget(buildDir)
-        .withFastlyAuth('nope')
-        .withFastlyNamespace('justtesting')
-        .withCircleciAuth(CI_TOKEN)
         .run();
       assert.fail('deploy should fail if no helix-config is present');
     } catch (e) {
@@ -102,14 +97,10 @@ describe('hlx deploy (Integration)', () => {
         .withWskHost('adobeioruntime.net')
         .withWskAuth('secret-key')
         .withWskNamespace('hlx')
-        .withEnableAuto(false)
         .withEnableDirty(true)
         .withModulePaths(testModules)
         .withDryRun(true)
         .withTarget(buildDir)
-        .withFastlyAuth('nope')
-        .withFastlyNamespace('justtesting')
-        .withCircleciAuth(CI_TOKEN)
         .run();
       assert.fail('deploy fails if no git remote');
     } catch (e) {
@@ -128,14 +119,10 @@ describe('hlx deploy (Integration)', () => {
         .withWskHost('adobeioruntime.net')
         .withWskAuth('secret-key')
         .withWskNamespace('hlx')
-        .withEnableAuto(false)
         .withEnableDirty(false)
         .withModulePaths(testModules)
         .withDryRun(true)
         .withTarget(buildDir)
-        .withFastlyAuth('nope')
-        .withFastlyNamespace('justtesting')
-        .withCircleciAuth(CI_TOKEN)
         .run();
       assert.fail('deploy fails if dirty');
     } catch (e) {
@@ -154,14 +141,10 @@ describe('hlx deploy (Integration)', () => {
         .withWskHost('adobeioruntime.net')
         .withWskAuth('secret-key')
         .withWskNamespace('hlx')
-        .withEnableAuto(false)
         .withEnableDirty(false)
         .withModulePaths(testModules)
         .withDryRun(true)
         .withTarget(buildDir)
-        .withFastlyAuth('nope')
-        .withFastlyNamespace('justtesting')
-        .withCircleciAuth(CI_TOKEN)
         .run();
       assert.fail('deploy fails if no stain is affected');
     } catch (e) {
@@ -182,14 +165,10 @@ describe('hlx deploy (Integration)', () => {
       .withWskHost('adobeioruntime.net')
       .withWskAuth('secret-key')
       .withWskNamespace('hlx')
-      .withEnableAuto(false)
       .withEnableDirty(false)
       .withModulePaths(testModules)
       .withDryRun(true)
       .withTarget(buildDir)
-      .withFastlyAuth('nope')
-      .withFastlyNamespace('justtesting')
-      .withCircleciAuth(CI_TOKEN)
       .withAddStrain('foo')
       .withCreatePackages('ignore')
       .run();
@@ -214,14 +193,10 @@ describe('hlx deploy (Integration)', () => {
       .withWskHost('adobeioruntime.net')
       .withWskAuth('secret-key')
       .withWskNamespace('hlx')
-      .withEnableAuto(false)
       .withEnableDirty(true)
       .withModulePaths(testModules)
       .withDryRun(true)
       .withTarget(buildDir)
-      .withFastlyAuth('nope')
-      .withFastlyNamespace('justtesting')
-      .withCircleciAuth(CI_TOKEN)
       .withAddStrain('default')
       .withCreatePackages('ignore')
       .run();
@@ -244,14 +219,10 @@ describe('hlx deploy (Integration)', () => {
       .withWskHost('adobeioruntime.net')
       .withWskAuth('secret-key')
       .withWskNamespace('hlx')
-      .withEnableAuto(false)
       .withEnableDirty(false)
       .withModulePaths(testModules)
       .withDryRun(true)
       .withTarget(buildDir)
-      .withFastlyAuth('nope')
-      .withFastlyNamespace('justtesting')
-      .withCircleciAuth(CI_TOKEN)
       .withCreatePackages('ignore')
       .run();
 
@@ -270,14 +241,10 @@ describe('hlx deploy (Integration)', () => {
       .withWskHost('adobeioruntime.net')
       .withWskAuth('secret-key')
       .withWskNamespace('hlx')
-      .withEnableAuto(false)
       .withEnableDirty(false)
       .withModulePaths(testModules)
       .withDryRun(true)
       .withTarget(buildDir)
-      .withFastlyAuth('nope')
-      .withFastlyNamespace('justtesting')
-      .withCircleciAuth(CI_TOKEN)
       .withCreatePackages('ignore')
       .run();
 
@@ -297,14 +264,10 @@ describe('hlx deploy (Integration)', () => {
       .withWskHost('adobeioruntime.net')
       .withWskAuth('secret-key')
       .withWskNamespace('hlx')
-      .withEnableAuto(false)
       .withEnableDirty(false)
       .withModulePaths(testModules)
       .withDryRun(true)
       .withTarget(buildDir)
-      .withFastlyAuth('nope')
-      .withFastlyNamespace('justtesting')
-      .withCircleciAuth(CI_TOKEN)
       .withCreatePackages('ignore')
       .withAddStrain('new-strain')
       .run();
@@ -319,31 +282,6 @@ describe('hlx deploy (Integration)', () => {
     assert.equal(actual, expected.replace('$REF', cmd._prefix));
   });
 
-  it.skip('Auto-Deploy works', (done) => {
-    try {
-      $.cd(testRoot);
-      $.exec('git clone https://github.com/trieloff/helix-helpx.git');
-      $.cd(path.resolve(testRoot, 'helix-helpx'));
-
-      new DeployCommand()
-        .withWskHost('adobeioruntime.net')
-        .withWskAuth('secret-key')
-        .withWskNamespace('hlx')
-        .withEnableAuto(true)
-        .withEnableDirty(true)
-        .withModulePaths(testModules)
-        .withDryRun(true)
-        .withTarget(buildDir)
-        .withFastlyAuth('nope')
-        .withFastlyNamespace('justtesting')
-        .withCircleciAuth(CI_TOKEN)
-        .run()
-        .then(() => { done(); });
-    } catch (e) {
-      done(e);
-    }
-  }).timeout(15000);
-
   it('Dry-Running works', async () => {
     await fs.copy(TEST_DIR, testRoot);
     await fs.rename(path.resolve(testRoot, 'default-config.yaml'), path.resolve(testRoot, 'helix-config.yaml'));
@@ -355,7 +293,6 @@ describe('hlx deploy (Integration)', () => {
       .withWskHost('adobeioruntime.net')
       .withWskAuth('secret-key')
       .withWskNamespace('hlx')
-      .withEnableAuto(false)
       .withEnableDirty(false)
       .withModulePaths(testModules)
       .withDryRun(true)
@@ -390,7 +327,6 @@ describe('hlx deploy (Integration)', () => {
       .withWskHost('adobeioruntime.net')
       .withWskAuth('secret-key')
       .withWskNamespace('hlx')
-      .withEnableAuto(false)
       .withEnableDirty(false)
       .withModulePaths(testModules)
       .withDryRun(true)
@@ -488,7 +424,6 @@ describe('hlx deploy (Integration)', () => {
       .withWskHost('adobeioruntime.net')
       .withWskAuth('dummy')
       .withWskNamespace('hlx')
-      .withEnableAuto(false)
       .withEnableDirty(false)
       .withModulePaths(testModules)
       .withDryRun(false)
@@ -597,7 +532,6 @@ describe('hlx deploy (Integration)', () => {
       .withWskHost('adobeioruntime.net')
       .withWskAuth('dummy')
       .withWskNamespace('hlx')
-      .withEnableAuto(false)
       .withEnableDirty(false)
       .withModulePaths(testModules)
       .withDryRun(false)
@@ -677,7 +611,6 @@ describe('hlx deploy (Integration)', () => {
       .withWskActionMemory(384)
       .withWskActionConcurrency(50)
       .withWskNamespace('hlx')
-      .withEnableAuto(false)
       .withEnableDirty(false)
       .withModulePaths(testModules)
       .withDryRun(false)
@@ -761,7 +694,6 @@ describe('hlx deploy (Integration)', () => {
       .withWskHost('adobeioruntime.net')
       .withWskAuth('dummy')
       .withWskNamespace('hlx')
-      .withEnableAuto(false)
       .withEnableDirty(false)
       .withModulePaths(testModules)
       .withDryRun(false)
@@ -828,7 +760,6 @@ describe('hlx deploy (Integration)', () => {
         .withWskHost('adobeioruntime.net')
         .withWskAuth('dummy')
         .withWskNamespace('hlx')
-        .withEnableAuto(false)
         .withEnableDirty(false)
         .withModulePaths(testModules)
         .withDryRun(false)
@@ -893,7 +824,6 @@ describe('hlx deploy (custom pipeline)', function suite() {
       .withWskHost('adobeioruntime.net')
       .withWskAuth('secret-key')
       .withWskNamespace('hlx')
-      .withEnableAuto(false)
       .withEnableDirty(false)
       .withDryRun(true)
       .withTarget(buildDir)
@@ -921,7 +851,6 @@ describe('hlx deploy (custom pipeline)', function suite() {
       .withWskHost('adobeioruntime.net')
       .withWskAuth('secret-key')
       .withWskNamespace('hlx')
-      .withEnableAuto(false)
       .withEnableDirty(false)
       .withDryRun(true)
       .withTarget(buildDir)
@@ -969,7 +898,6 @@ describe('hlx deploy (custom pipeline)', function suite() {
       .withWskHost('adobeioruntime.net')
       .withWskAuth('secret-key')
       .withWskNamespace('hlx')
-      .withEnableAuto(false)
       .withEnableDirty(false)
       .withDryRun(true)
       .withTarget(buildDir)
@@ -989,13 +917,4 @@ describe('hlx deploy (custom pipeline)', function suite() {
     const pkg = await fs.readJson(pipelinePackageJson);
     assert.equal(pkg.version, version);
   }).timeout(120000);
-});
-
-describe('DeployCommand #unittest', () => {
-  it('setDeployOptions() #unittest', () => {
-    const options = DeployCommand.getBuildVarOptions('FOO', 'BAR', 'adobe', 'helix-cli', {});
-    assert.equal(options.method, 'POST');
-    assert.equal(JSON.parse(options.body).name, 'FOO');
-    assert.equal(JSON.parse(options.body).value, 'BAR');
-  });
 });
