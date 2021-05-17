@@ -31,8 +31,6 @@ describe('hlx deploy', () => {
   beforeEach(() => {
     deleted = clearHelixEnv();
     mockDeploy = sinon.createStubInstance(DeployCommand);
-    mockDeploy.withEnableAuto.returnsThis();
-    mockDeploy.withCircleciAuth.returnsThis();
     mockDeploy.withWskHost.returnsThis();
     mockDeploy.withWskAuth.returnsThis();
     mockDeploy.withWskNamespace.returnsThis();
@@ -44,8 +42,6 @@ describe('hlx deploy', () => {
     mockDeploy.withDefaultFile.returnsThis();
     mockDeploy.withEnableDirty.returnsThis();
     mockDeploy.withDryRun.returnsThis();
-    mockDeploy.withFastlyAuth.returnsThis();
-    mockDeploy.withFastlyNamespace.returnsThis();
     mockDeploy.withCreatePackages.returnsThis();
     mockDeploy.withAddStrain.returnsThis();
     mockDeploy.withMinify.returnsThis();
@@ -107,20 +103,6 @@ OpenWhisk Namespace is required`);
     assert.fail('deploy w/o arguments should fail.');
   });
 
-  it('hlx deploy requires circleci auth', (done) => {
-    new CLI()
-      .withCommandExecutor('deploy', mockDeploy)
-      .onFail((err) => {
-        assert.equal(err, 'Error: Auto-deployment requires: --circleci-auth, --fastly-auth, --fastly-namespace');
-        done();
-      })
-      .run(['deploy', '--auto', 'true',
-        '--wsk-auth', 'secret-key',
-        '--wsk-namespace', 'hlx']);
-
-    assert.fail('deploy w/o arguments should fail.');
-  });
-
   it('hlx deploy works with minimal arguments', () => {
     new CLI()
       .withCommandExecutor('deploy', mockDeploy)
@@ -129,18 +111,14 @@ OpenWhisk Namespace is required`);
         '--wsk-namespace', 'hlx',
       ]);
 
-    sinon.assert.calledWith(mockDeploy.withEnableAuto, false);
     sinon.assert.calledWith(mockDeploy.withEnableDirty, false);
     sinon.assert.calledWith(mockDeploy.withWskHost, 'adobeioruntime.net');
     sinon.assert.calledWith(mockDeploy.withWskAuth, 'secret-key');
     sinon.assert.calledWith(mockDeploy.withWskNamespace, 'hlx');
-    sinon.assert.calledWith(mockDeploy.withFastlyAuth, undefined);
-    sinon.assert.calledWith(mockDeploy.withFastlyNamespace, undefined);
     sinon.assert.calledWith(mockDeploy.withTarget, '.hlx/build');
     sinon.assert.calledWith(mockDeploy.withFiles, ['src/**/*.htl', 'src/**/*.js', 'src/**/*.jsx', 'cgi-bin/**/*.js']);
     sinon.assert.calledWith(mockDeploy.withDefault, {});
     sinon.assert.calledWith(mockDeploy.withCreatePackages, 'auto');
-    sinon.assert.calledWith(mockDeploy.withCircleciAuth, '');
     sinon.assert.calledWith(mockDeploy.withDryRun, false);
     sinon.assert.calledWith(mockDeploy.withMinify, false);
     sinon.assert.calledOnce(mockDeploy.run);
@@ -152,16 +130,12 @@ OpenWhisk Namespace is required`);
       .withCommandExecutor('deploy', mockDeploy)
       .run(['deploy']);
 
-    sinon.assert.calledWith(mockDeploy.withEnableAuto, true);
     sinon.assert.calledWith(mockDeploy.withEnableDirty, true);
     sinon.assert.calledWith(mockDeploy.withWskHost, 'myruntime.net');
     sinon.assert.calledWith(mockDeploy.withWskAuth, 'foobar');
     sinon.assert.calledWith(mockDeploy.withWskNamespace, '1234');
-    sinon.assert.calledWith(mockDeploy.withFastlyAuth, 'foobar');
-    sinon.assert.calledWith(mockDeploy.withFastlyNamespace, '1234');
     sinon.assert.calledWith(mockDeploy.withTarget, 'foo');
     sinon.assert.calledWith(mockDeploy.withFiles, ['*.htl', '*.js']);
-    sinon.assert.calledWith(mockDeploy.withCircleciAuth, 'foobar');
     sinon.assert.calledWith(mockDeploy.withDryRun, true);
     sinon.assert.calledWith(mockDeploy.withMinify, true);
     sinon.assert.calledWith(mockDeploy.withResolveGitRefService, 'resolve.api');
@@ -198,22 +172,6 @@ OpenWhisk Namespace is required`);
         '--wsk-auth', 'secret-key',
         '--wsk-namespace', 'hlx',
       ]);
-  });
-
-  it('hlx deploy can enable auto', (done) => {
-    new CLI()
-      .withCommandExecutor('deploy', mockDeploy)
-      .onFail((err) => {
-        assert.equal(err, 'Error: Auto-deployment requires: --circleci-auth, --fastly-auth, --fastly-namespace');
-        done();
-      })
-      .run(['deploy', '--auto', 'true',
-        '--wsk-auth', 'secret-key',
-        '--wsk-namespace', 'hlx',
-      ]);
-
-    sinon.assert.calledWith(mockDeploy.withEnableAuto, true);
-    sinon.assert.calledOnce(mockDeploy.run);
   });
 
   it('hlx deploy works can enable dirty', () => {

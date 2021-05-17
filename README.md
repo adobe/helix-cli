@@ -3,7 +3,7 @@
 ## Status
 
 [![codecov](https://img.shields.io/codecov/c/github/adobe/helix-cli.svg)](https://codecov.io/gh/adobe/helix-cli)
-[![CircleCI](https://img.shields.io/circleci/project/github/adobe/helix-cli/master.svg)](https://circleci.com/gh/adobe/helix-cli/tree/master)
+[![CircleCI](https://img.shields.io/circleci/project/github/adobe/helix-cli/main.svg)](https://circleci.com/gh/adobe/helix-cli/tree/main)
 [![GitHub license](https://img.shields.io/github/license/adobe/helix-cli.svg)](https://github.com/adobe/helix-cli/blob/master/LICENSE.txt)
 [![GitHub issues](https://img.shields.io/github/issues/adobe/helix-cli.svg)](https://github.com/adobe/helix-cli/issues)
 [![LGTM Code Quality Grade: JavaScript](https://img.shields.io/lgtm/grade/javascript/g/adobe/helix-cli.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/adobe/helix-cli)
@@ -22,26 +22,25 @@ $ npm install -g @adobe/helix-cli
 
 ```
 $ hlx --help
-hlx <command>
+Usage: hlx <command> [options]
 
 Commands:
-  hlx demo <name> [dir]  Create example helix project.
   hlx up [files...]      Run a Helix development server
   hlx build [files..]    Compile the template functions and build package
-  hlx package            Create Adobe I/O runtime packages
-  hlx deploy             Deploy packaged functions to Adobe I/O runtime
-  hlx perf               Test performance
-  hlx publish            Activate strains in the Fastly CDN and publish the site
+  hlx package [files..]  Create Adobe I/O runtime packages
+  hlx deploy [files..]   Deploy packaged functions to Adobe I/O runtime
+  hlx publish            Activate strains in the Fastly CDN and publish the
+                         site.
   hlx clean              Remove generated files and caches.
-  hlx completion         generate bash completion script
+  hlx completion         generate completion script
 
 Options:
-  --version    Show version number                                     [boolean]
-  --log-file   Log file (use "-" for stdout)              [array] [default: "-"]
-  --log-level  Log level
+  --version                Show version number                         [boolean]
+  --log-file, --logFile    Log file (use "-" for stdout)  [array] [default: "-"]
+  --log-level, --logLevel  Log level
         [string] [choices: "silly", "debug", "verbose", "info", "warn", "error"]
                                                                [default: "info"]
-  --help       Show help                                               [boolean]
+  --help                   Show help                                   [boolean]
 
 for more information, find our manual at https://github.com/adobe/helix-cli
 ```
@@ -70,23 +69,7 @@ $ hlx build
 
 ## (Optional) Deploy to Adobe I/O Runtime
 
-### Automatic Deployment
-
-By default, Helix will set up automated deployment that deploys whenever a new commit has been pushed to your GitHub code repository. In order to do so, you need a [CircleCI](https://circleci.com) account and generate a [personal API Token](https://circleci.com/account/api).
-
-```
-# In <my-cool-project>
-$ hlx deploy \
-  --circleci-auth <personal-api-token> \
-  --wsk-namespace <your-namespace> \
-  --wsk-auth <your-key> \
-  --fastly-auth <key> \
-  --fastly-namespace <serviceid>
-```
-
-As always, you can keep all parameters in `HLX_CIRCLECI_AUTH`, `HLX_WSK_AUTH`, `HLX_DEV_DEFAULT` and `HLX_FASTLY_AUTH` environment variables if you don't want them in your `.bash_history`.
-
-### One-Shot Deployment
+### Deployment
 
 Alternatively, you can also perform a one-shot deployment like this:
 
@@ -439,121 +422,6 @@ HLX_HOST=www.project-helix.io
 HLX_LOCAL_REPO=., ../welcome-api
 HLX_LOG_LEVEL=debug
 ```
-
-
-## (Recommended) Performance Testing
-
-You can (and should) test the performance of your deployed site by running `hlx perf`.
-
-The default test will test the entry page of every strain (using the `url`) property, if defined. Additional known URLs can be configured for each strain using the key `urls` (expects an array of URLs).
-
-The default test will run from a mid-range mobile phone (Motorola Moto G4), using a regular 3G connection from London, UK. It makes sure that the Lighthouse Accessibility Score and the Lighthouse Performance Score of your site is at least 80.
-
-You can set custom performance budgets and change the performance condition for each strain using the `perf` property. If a strain has no `perf` measurement configured, the `perf` configuration of the default strain will be used.
-
-An example performance configuration might look like this:
-
-```yaml
-strains:
-  - name: default
-    code: https://github.com/adobe/project-helix.io.git#master
-    content: https://github.com/adobe/project-helix.io.git#master
-    static: https://github.com/adobe/project-helix.io.git/htdocs#master
-    condition:
-      url: https://www.primordialsoup.life
-    urls:
-      - https://www.primordialsoup.life/README.html
-    perf:
-      device: iPhone8
-      connection: good3G
-      location: Sydney
-      visually_complete_85: 1500
-      lighthouse-best-practices-score: 80
-```
-
-If the site does not meet all performance criteria you have defined, `hlx perf` will exit with a non-null exit code (the exit code equals the number of failed tests). This allows you to use `hlx perf` as a gating condition in a CI/CD workflow.
-
-### Testing Environment
-
-* Possible `device` values are:
-  * `MotorolaMotoG4`
-  * `iPhone5`
-  * `iPhone6`
-  * `iPhone6Plus`
-  * `iPhone7`
-  * `iPhone8`
-  * `Nexus5X`
-  * `Nexus6P`
-  * `GalaxyS5`
-  * `iPad`
-  * `iPadPro`
-* Possible `connection` values are:
-  * `regular2G`
-  * `good2G`
-  * `slow3G`
-  * `regular3G`
-  * `good3G`
-  * `emergingMarkets`
-  * `regular4G`
-  * `LTE`
-  * `dsl`
-  * `wifi`
-  * `cable`
-* Possible `location` values are:
-  * `NorthVirginia`
-  * `Frankfurt`
-  * `Sydney`
-  * `Ohio`
-  * `California`
-  * `Oregon`
-  * `Canada`
-  * `Ireland`
-  * `Tokyo`
-  * `Seoul`
-  * `Singapore`
-  * `Mumbai`
-  * `SaoPaulo`
-  * `London`
-
-### Performance Metrics
-
-You can set performance budgets against following scores (more is better) and metrics (less is better):
-
-* `speed_index`: Speed Index
-* `visually_complete`: Visually Complete
-* `visually_complete_85`: 85% Visually Complete
-* `lighthouse-seo-score`: Lighthouse SEO Score
-* `lighthouse-best-practices-score`: Lighthouse Best Practices Score
-* `lighthouse-accessibility-score`: Lighthouse Accessibility Score
-* `lighthouse-performance-score`: Lighthouse Performance Score
-* `lighthouse-pwa-score`: Lighthouse Progressive Web App Score
-* `js-parse-compile`: JS Parse & Compile
-* `time-to-first-byte`: Time to First Byte
-* `first-contentful-paint`: First Contentful Paint
-* `first-meaningful-paint`: First Meaningful Paint
-* `firstRender`: First Paint
-* `dom-size`: DOM Element Count
-* `estimated-input-latency`: Estimated input latency
-* `consistently-interactive`: Time to Interactive
-* `first-interactive`: First CPU Idle
-* `html_body_size_in_bytes`: Total HTML size in bytes
-* `html_size_in_bytes`: Total HTML transferred
-* `page_wait_timing`: Response time
-* `page_size_in_bytes`: Total Page transferred
-* `page_body_size_in_bytes`: Total Page size in bytes
-* `asset_count`: Number of requests
-* `onload`: onLoad
-* `oncontentload`: onContentLoad
-
-#### Structured (JUnit) Performance Reporting
-
-By calling `hlx perf` with the option `--junit <file>`, the performance test
-results will be reported in JUnit-format, which makes it possible to integrate
-performance result reporting with the CI system performing an automated deployment.
-
-For `hlx demo full`, a full CI configuration is created that will run a performance
-test after a completed deployment, report the per-metric results and mark the build
-as failed in case metrics are not met.
 
 ## Supported Programming Languages
 

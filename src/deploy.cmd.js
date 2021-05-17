@@ -19,8 +19,8 @@ const path = require('path');
 const fs = require('fs-extra');
 const { v4: uuidv4 } = require('uuid');
 const ProgressBar = require('progress');
-const { HelixConfig, GitUrl } = require('@adobe/helix-shared');
-const { fetch } = require('./fetch-utils.js');
+const { HelixConfig } = require('@adobe/helix-shared-config');
+const { GitUrl } = require('@adobe/helix-shared-git');
 const GitUtils = require('./git-utils');
 const useragent = require('./user-agent-util');
 const AbstractCommand = require('./abstract.cmd.js');
@@ -36,13 +36,9 @@ function humanFileSize(size) {
 class DeployCommand extends AbstractCommand {
   constructor(logger) {
     super(logger);
-    this._enableAuto = true;
-    this._circleciAuth = null;
     this._wsk_auth = null;
     this._wsk_namespace = null;
     this._wsk_host = null;
-    this._fastly_namespace = null;
-    this._fastly_auth = null;
     this._target = null;
     this._files = null;
     this._prefix = null;
@@ -66,26 +62,6 @@ class DeployCommand extends AbstractCommand {
 
   get requireConfigFile() {
     return this._addStrain === null;
-  }
-
-  withEnableAuto(value) {
-    this._enableAuto = value;
-    return this;
-  }
-
-  withCircleciAuth(value) {
-    this._circleciAuth = value;
-    return this;
-  }
-
-  withFastlyAuth(value) {
-    this._fastly_auth = value;
-    return this;
-  }
-
-  withFastlyNamespace(value) {
-    this._fastly_namespace = value;
-    return this;
   }
 
   withWskHost(value) {
@@ -232,119 +208,6 @@ class DeployCommand extends AbstractCommand {
     this._updated = this._updated || new Date().getTime();
   }
 
-  static getBuildVarOptions(name, value, auth, owner, repo) {
-    const body = JSON.stringify({
-      name,
-      value,
-    });
-    const options = {
-      method: 'POST',
-      auth,
-      uri: `https://circleci.com/api/v1.1/project/github/${owner}/${repo}/envvar`,
-      headers: {
-        'Content-Type': 'application/json',
-        Accept: 'application/json',
-        'User-Agent': useragent,
-      },
-      body,
-    };
-    return options;
-  }
-
-  static setBuildVar(name, value, owner, repo, auth) {
-    const options = DeployCommand.getBuildVarOptions(name, value, auth, owner, repo);
-    return fetch(options.uri, options);
-  }
-
-  async autoDeploy() {
-    if (!(fs.existsSync(path.resolve(process.cwd(), '.circleci', 'config.yaml')) || fs.existsSync(path.resolve(process.cwd(), '.circleci', 'config.yml')))) {
-      throw new Error(`Cannot automate deployment without ${path.resolve(process.cwd(), '.circleci', 'config.yaml')}`);
-    }
-
-    const { owner, repo, ref } = await GitUtils.getOriginURL(this.directory);
-
-    const auth = {
-      username: this._circleciAuth,
-      password: '',
-    };
-
-    const followoptions = {
-      method: 'POST',
-      auth,
-      headers: {
-        'Content-Type': 'application/json',
-        Accept: 'application/json',
-        'User-Agent': useragent,
-      },
-      uri: `https://circleci.com/api/v1.1/project/github/${owner}/${repo}/follow`,
-    };
-
-    this.log.info(`Automating deployment with ${followoptions.uri}`);
-
-    let response = await fetch(followoptions.uri, followoptions);
-    const follow = await response.json();
-
-    const envars = [];
-
-    if (this._fastly_namespace) {
-      envars.push(DeployCommand.setBuildVar('HLX_FASTLY_NAMESPACE', this._fastly_namespace, owner, repo, auth));
-    }
-    if (this._fastly_auth) {
-      envars.push(DeployCommand.setBuildVar('HLX_FASTLY_AUTH', this._fastly_auth, owner, repo, auth));
-    }
-
-    if (this._wsk_auth) {
-      envars.push(DeployCommand.setBuildVar('HLX_WSK_AUTH', this._wsk_auth, owner, repo, auth));
-    }
-
-    if (this._wsk_host) {
-      envars.push(DeployCommand.setBuildVar('HLX_WSK_HOST', this._wsk_host, owner, repo, auth));
-    }
-    if (this._wsk_namespace) {
-      envars.push(DeployCommand.setBuildVar('HLX_WSK_NAMESPACE', this._wsk_namespace, owner, repo, auth));
-    }
-
-    if (this._epsagonAppName) {
-      envars.push(DeployCommand.setBuildVar('HLX_EPSAGON_APP_NAME', this._epsagonAppName, owner, repo, auth));
-    }
-    if (this._epsagonToken) {
-      envars.push(DeployCommand.setBuildVar('HLX_EPSAGON_TOKEN', this._epsagonToken, owner, repo, auth));
-    }
-    if (this._coralogixAppName) {
-      envars.push(DeployCommand.setBuildVar('HLX_CORALOGIX_APP_NAME', this._coralogixAppName, owner, repo, auth));
-    }
-    if (this._coralogixToken) {
-      envars.push(DeployCommand.setBuildVar('HLX_CORALOGIX_TOKEN', this._coralogixToken, owner, repo, auth));
-    }
-
-    await Promise.all(envars);
-
-    if (follow.first_build) {
-      this.log.info('\nAuto-deployment started.');
-      this.log.info('Configuration finished. Go to');
-      this.log.info(`${chalk.grey(`https://circleci.com/gh/${owner}/${repo}/edit`)} for build settings or`);
-      this.log.info(`${chalk.grey(`https://circleci.com/gh/${owner}/${repo}`)} for build status.`);
-    } else {
-      this.log.warn('\nAuto-deployment already set up. Triggering a new build.');
-
-      const triggeroptions = {
-        method: 'POST',
-        auth,
-        headers: {
-          'Content-Type': 'application/json',
-          Accept: 'application/json',
-          'User-Agent': useragent,
-        },
-        uri: `https://circleci.com/api/v1.1/project/github/${owner}/${repo}/tree/${ref}`,
-      };
-
-      response = await fetch(triggeroptions.uri, triggeroptions);
-      const triggered = await response.json();
-
-      this.log.info(`Go to ${chalk.grey(`${triggered.build_url}`)} for build status.`);
-    }
-  }
-
   async run() {
     await this.init();
     const origin = await GitUtils.getOrigin(this.directory);
@@ -354,9 +217,6 @@ class DeployCommand extends AbstractCommand {
     const dirty = await GitUtils.isDirty(this.directory);
     if (dirty && !this._enableDirty) {
       throw Error('hlx will not deploy a working copy that has uncommitted changes. Re-run with flag --dirty to force.');
-    }
-    if (this._enableAuto) {
-      return this.autoDeploy();
     }
 
     // get git coordinates and list affected strains

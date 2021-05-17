@@ -22,7 +22,7 @@ const { JSDOM } = require('jsdom');
 const NodeHttpAdapter = require('@pollyjs/adapter-node-http');
 const FSPersister = require('@pollyjs/persister-fs');
 const { setupMocha } = require('@pollyjs/core');
-const { dom: { assertEquivalentNode } } = require('@adobe/helix-shared');
+const { assertEquivalentNode } = require('@adobe/helix-shared-dom');
 const BuildCommand = require('../src/build.cmd');
 const ModuleHelper = require('../src/builder/ModuleHelper.js');
 

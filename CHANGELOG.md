@@ -1,3 +1,80 @@
+## [13.4.33](https://github.com/adobe/helix-cli/compare/v13.4.32...v13.4.33) (2021-05-15)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @adobe/helix-simulator to v5.3.47 ([7260494](https://github.com/adobe/helix-cli/commit/726049470c20c805fda1eadc503eb4a77f58b5a4))
+
+## [13.4.32](https://github.com/adobe/helix-cli/compare/v13.4.31...v13.4.32) (2021-05-11)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @adobe/helix-simulator to v5.3.46 ([#1766](https://github.com/adobe/helix-cli/issues/1766)) ([4ed3bbc](https://github.com/adobe/helix-cli/commit/4ed3bbcc6ab0752f5f0e83405387d1e732eb0cd8))
+
+## [13.4.31](https://github.com/adobe/helix-cli/compare/v13.4.30...v13.4.31) (2021-05-11)
+
+
+### Bug Fixes
+
+* **deps:** update adobe fixes ([#1765](https://github.com/adobe/helix-cli/issues/1765)) ([d89a09f](https://github.com/adobe/helix-cli/commit/d89a09f4825b0d34fa935f9962816c2fdc251620))
+
+## [13.4.30](https://github.com/adobe/helix-cli/compare/v13.4.29...v13.4.30) (2021-05-10)
+
+
+### Bug Fixes
+
+* **cli:** remove unused commands ([2bcb3ad](https://github.com/adobe/helix-cli/commit/2bcb3ade3e5fe51a6fbcb815da7fbab448a6567f)), closes [#1759](https://github.com/adobe/helix-cli/issues/1759)
+
+## [13.4.29](https://github.com/adobe/helix-cli/compare/v13.4.28...v13.4.29) (2021-05-09)
+
+
+### Bug Fixes
+
+* **deps:** update adobe fixes ([331b4e1](https://github.com/adobe/helix-cli/commit/331b4e1776010d9a72bc2fb01527f3d37fa84f97))
+
+## [13.4.28](https://github.com/adobe/helix-cli/compare/v13.4.27...v13.4.28) (2021-05-09)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @adobe/helix-shared to v8.0.3 ([#1758](https://github.com/adobe/helix-cli/issues/1758)) ([6e73542](https://github.com/adobe/helix-cli/commit/6e73542adebb0ca984e064b3d762d8a39f6205b3))
+
+## [13.4.27](https://github.com/adobe/helix-cli/compare/v13.4.26...v13.4.27) (2021-04-30)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @adobe/helix-shared to v8 ([aa85591](https://github.com/adobe/helix-cli/commit/aa8559138ae0faf273a3fbfca0559e2d79872594))
+
+## [13.4.26](https://github.com/adobe/helix-cli/compare/v13.4.25...v13.4.26) (2021-04-28)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @adobe/helix-simulator to v5.3.39 ([91b34ec](https://github.com/adobe/helix-cli/commit/91b34ecf9640d0531ee30c04c3ddfd24313a1e35))
+
+## [13.4.25](https://github.com/adobe/helix-cli/compare/v13.4.24...v13.4.25) (2021-04-27)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @adobe/helix-shared to v7.29.1 ([1720562](https://github.com/adobe/helix-cli/commit/1720562fd29fca480d3766e0e717e08afa75e250))
+
+## [13.4.24](https://github.com/adobe/helix-cli/compare/v13.4.23...v13.4.24) (2021-04-27)
+
+
+### Bug Fixes
+
+* **deps:** update adobe fixes ([51b8aac](https://github.com/adobe/helix-cli/commit/51b8aac299c34655150c652b08707c41d12ea4ab))
+
+## [13.4.23](https://github.com/adobe/helix-cli/compare/v13.4.22...v13.4.23) (2021-04-26)
+
+
+### Bug Fixes
+
+* **deps:** update adobe fixes ([5caa46f](https://github.com/adobe/helix-cli/commit/5caa46fa896cb5cfdfdecf30de32aacd3588e2de))
+
 ## [13.4.22](https://github.com/adobe/helix-cli/compare/v13.4.21...v13.4.22) (2021-04-24)
 
 

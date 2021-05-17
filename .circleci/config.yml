@@ -33,7 +33,6 @@ orbs:
 
 jobs:
   build_win:
-    parallelism: 1
     executor: win/default
     steps:
       - run: git config --global core.autocrlf false
@@ -62,23 +61,18 @@ jobs:
           path: junit
 
   build:
-    parallelism: 1
     executor: node12
     working_directory: ~/repo
 
     steps:
     - setup
-
-    # run tests!
     - run: mkdir junit
     - run:
         name: prepare test git user
         command: git config --global user.email "you@example.com" && git config --global user.name "Your Name"
     - run:
         name: Lint
-        command: npm run lint-ci
-
-    # test & get code coverage
+        command: npm run lint
     - run:
         name: Test and Code Coverage
         command: npm run test-ci
