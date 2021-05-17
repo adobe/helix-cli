@@ -164,7 +164,10 @@ class ModuleHelper {
         if (await fse.pathExists(path.resolve(this._buildDir, 'package-lock.json'))) {
           cmd = 'ci';
         }
-        this.log.info(chalk`Running {grey npm ${cmd} ${moduleDescriptor}} in {grey ${path.relative(this.directory, this._buildDir)}} ...`);
+        const dirInfo = this.directory === this._buildDir
+          ? path.relative(process.cwd(), this._buildDir)
+          : path.relative(this.directory, this._buildDir);
+        this.log.info(chalk`Running {grey npm ${cmd} ${moduleDescriptor}} in {grey ${dirInfo}} ...`);
         // todo: maye use npm API instead, so that we can show a nice progress bar.
         // todo: since stderr is not a TTY when executed with shelljs, we don't see it.
         await execAsync('npm', [cmd, '--only=prod', '--ignore-scripts',
@@ -173,6 +176,9 @@ class ModuleHelper {
           cwd: this._buildDir,
           shell: true,
         });
+        if (cmd === 'install') {
+          await fse.remove(path.resolve(this._buildDir, 'package-lock.json'));
+        }
       }
     } catch (e) {
       throw Error(`Unable to install ${name}: ${e}`);

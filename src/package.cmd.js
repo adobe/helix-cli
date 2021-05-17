@@ -9,15 +9,13 @@
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-const chalk = require('chalk');
 const glob = require('glob');
 const path = require('path');
 const fs = require('fs-extra');
 const ProgressBar = require('progress');
-const archiver = require('archiver');
+const { Bundler, BaseConfig } = require('@adobe/helix-deploy');
 const AbstractCommand = require('./abstract.cmd.js');
 const BuildCommand = require('./build.cmd.js');
-const ActionBundler = require('./builder/ActionBundler.js');
 
 /**
  * Uses webpack to bundle each template script and creates an OpenWhisk action for each.
@@ -77,88 +75,45 @@ class PackageCommand extends AbstractCommand {
   async init() {
     await super.init();
     this._target = path.resolve(this.directory, this._target);
+    // read the package json if present
+    try {
+      this._pkgJson = await fs.readJson(path.resolve(this.directory, 'package.json'));
+    } catch (e) {
+      this._pkgJson = {};
+    }
   }
 
   /**
-   * Creates a .zip package that contains the contents to be deployed to openwhisk.
-   * As a side effect, this method updates the {@code info.archiveSize} after completion.
+   * Creates a .zip package that contains the contents to be deployed.
    *
    * @param {ActionInfo} info - The action info object.
-   * @param {ProgressBar} bar - The progress bar.
-   * @returns {Promise<any>} Promise that resolves to the package file {@code path}.
    */
-  async createPackage(info, bar) {
-    const { log } = this;
-
-    const tick = (message, name) => {
-      const shortname = name.replace(/\/package.json.*/, '').replace(/node_modules\//, '');
-      bar.tick({
-        action: name ? `packaging ${shortname}` : '',
-      });
-      if (message) {
-        this.log.infoFields(message, {
-          progress: true,
-        });
-      }
-    };
-
-    return new Promise((resolve, reject) => {
-      const archiveName = path.basename(info.zipFile);
-      let hadErrors = false;
-
-      // create zip file for package
-      const output = fs.createWriteStream(info.zipFile);
-      const archive = archiver('zip');
-
-      log.debug(`preparing package ${archiveName}`);
-      output.on('close', () => {
-        if (!hadErrors) {
-          log.debug(`${archiveName}: Created package. ${archive.pointer()} total bytes`);
-          // eslint-disable-next-line no-param-reassign
-          info.archiveSize = archive.pointer();
-          this.emit('create-package', info);
-          resolve(info);
-        }
-      });
-      archive.on('entry', (data) => {
-        log.debug(`${archiveName}: A ${data.name}`);
-        tick('', data.name);
-      });
-      archive.on('warning', (err) => {
-        log.error(`${chalk.redBright('[error] ')}Unable to create archive: ${err.message}`);
-        hadErrors = true;
-        reject(err);
-      });
-      archive.on('error', (err) => {
-        log.error(`${chalk.redBright('[error] ')}Unable to create archive: ${err.message}`);
-        hadErrors = true;
-        reject(err);
-      });
-      archive.pipe(output);
-
-      const packageJson = {
-        name: info.name,
-        version: '1.0',
-        description: `Lambda function of ${info.name}`,
-        main: path.basename(info.main),
-        license: 'Apache-2.0',
-      };
-
-      archive.append(JSON.stringify(packageJson, null, '  '), { name: 'package.json' });
-      archive.file(info.bundlePath, { name: path.basename(info.main) });
-      archive.finalize();
-    });
+  async createPackage(info) {
+    const buildConfig = new BaseConfig()
+      .withName(info.name)
+      .withVersion(this._pkgJson.version || '1.0.0')
+      .withBundlePath(info.bundlePath)
+      .withZipPath(info.zipFile)
+      .withLogger(this.log);
+    buildConfig.baseName = info.name;
+    const bundler = new Bundler()
+      .withConfig(buildConfig);
+    const data = await bundler.createArchive();
+    // eslint-disable-next-line no-param-reassign
+    info.archiveSize = data.size;
+    this.emit('create-package', info);
   }
 
   /**
-   * Creates the action bundles from the given scripts. It uses the {@code ActionBundler} which
-   * in turn uses webpack to create individual bundles of each {@code script}. The final bundles
-   * are wirtten to the {@code this._target} directory.
+   * Creates the action bundles from the given scripts. It uses helix-deploy which
+   * in turn uses webpack to create individual bundles of the {@code script}. The final bundles
+   * are written to the {@code this._target} directory.
    *
-   * @param {ActionInfo[]} scripts - the scripts information.
+   * @param {ActionInfo[]} actionInfos - the script information.
    * @param {ProgressBar} bar - The progress bar.
    */
-  async createBundles(scripts, bar) {
+  async createBundles(actionInfos, bar) {
+    let total = 0;
     const progressHandler = (percent, msg, ...args) => {
       /* eslint-disable no-param-reassign */
       const action = args.length > 0 ? `${msg} ${args[0]}` : msg;
@@ -167,26 +122,45 @@ class PackageCommand extends AbstractCommand {
         // this is kind of a hack to force redraw for non-bundling steps.
         bar.renderThrottle = 0;
       }
-      bar.update(percent * 0.8, { action });
+      bar.update((total + percent) / actionInfos.length, { action });
       bar.renderThrottle = rt;
       /* eslint-enable no-param-reassign */
     };
-    // create the bundles
-    const bundler = new ActionBundler()
-      .withDirectory(this._target)
-      .withModulePaths(['node_modules', ...this._modulePaths, path.resolve(__dirname, '..', 'node_modules')])
-      .withLogger(this.log)
-      .withProgressHandler(progressHandler)
-      .withMinify(this._enableMinify);
-    const stats = await bundler.run(scripts);
-    if (stats.errors) {
-      stats.errors.forEach((msg) => this.log.error(msg));
+    const bundlers = [];
+    for (const actionInfo of actionInfos) {
+      const buildConfig = new BaseConfig()
+        .withEntryFile(actionInfo.main)
+        .withBundlePath(actionInfo.bundlePath)
+        .withZipPath(actionInfo.zipFile)
+        .withDepInfoPath(actionInfo.depFile)
+        .withMinify(this._enableMinify)
+        .withModulePaths(this._modulePaths)
+        .withLogger(this.log);
+
+      buildConfig.progressHandler = progressHandler;
+      const bundler = new Bundler()
+        .withConfig(buildConfig);
+      // eslint-disable-next-line no-await-in-loop
+      await bundler.init();
+      // eslint-disable-next-line no-await-in-loop
+      const stats = await bundler.createBundle();
+      if (stats.errors) {
+        stats.errors.forEach((msg) => this.log.error(msg));
+      }
+      if (stats.warnings) {
+        stats.warnings.forEach((msg) => this.log.warn(msg));
+      }
+      if (stats.errors && stats.errors.length > 0) {
+        throw new Error('Error while bundling packages.');
+      }
+      total += 1;
+      bundlers.push(bundler);
     }
-    if (stats.warnings) {
-      stats.warnings.forEach((msg) => this.log.warn(msg));
-    }
-    if (stats.errors && stats.errors.length > 0) {
-      throw new Error('Error while bundling packages.');
+
+    // validate bundles
+    for (const bundler of bundlers) {
+      // eslint-disable-next-line no-await-in-loop
+      await bundler.validateBundle();
     }
   }
 
@@ -231,17 +205,18 @@ class PackageCommand extends AbstractCommand {
       scripts.forEach((script) => {
         /* eslint-disable no-param-reassign */
         script.name = path.basename(script.main, '.js');
-        script.bundleName = `${script.name}.bundle.js`;
+        script.bundleName = `${script.name}.bundle.cjs`;
         script.bundlePath = path.resolve(script.buildDir, script.bundleName);
         script.dirname = path.dirname(script.main);
         script.archiveName = `${script.name}.zip`;
         script.zipFile = path.resolve(script.buildDir, script.archiveName);
+        script.depFile = path.resolve(script.buildDir, `${script.name}.dependencies.json`);
         /* eslint-enable no-param-reassign */
       });
 
       // we reserve 80% for bundling the scripts and 20% for creating the zip files.
       const bar = new ProgressBar('[:bar] :action :elapseds', {
-        total: scripts.length * 2 * 5,
+        total: 100,
         width: 50,
         renderThrottle: 50,
         stream: process.stdout,

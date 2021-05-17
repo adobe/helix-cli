@@ -200,6 +200,7 @@ async function createFakeTestRoot() {
 let testModules;
 async function getTestModules() {
   if (!testModules) {
+    // testModules = path.resolve(__dirname, 'tmp', 'test-modules');
     testModules = await createTestRoot();
     const moduleHelper = new ModuleHelper()
       .withDirectory(testModules)
@@ -207,6 +208,7 @@ async function getTestModules() {
       .withModulePaths([]);
 
     await moduleHelper.init();
+    await moduleHelper.ensureModule('@adobe/helix-universal', process.env.HLX_CUSTOM_UNIVERSAL || '@adobe/helix-universal@latest');
     await moduleHelper.ensureModule('@adobe/helix-pipeline', process.env.HLX_CUSTOM_PIPELINE || '@adobe/helix-pipeline@latest');
   }
   return path.resolve(testModules, 'node_modules');

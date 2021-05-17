@@ -23,11 +23,6 @@ module.exports = function commonArgs(yargs) {
       type: 'string',
       default: '',
     })
-    .option('universal', {
-      describe: 'Generate an universal bundle instead of an on openwhisk action.',
-      type: 'boolean',
-      default: false,
-    })
     .positional('files', {
       describe: 'The template files to compile',
       default: ['src/**/*.htl', 'src/**/*.js', 'src/**/*.jsx', 'cgi-bin/**/*.js'],

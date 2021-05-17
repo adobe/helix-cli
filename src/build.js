@@ -40,7 +40,6 @@ module.exports = function build() {
         .withTargetDir(argv.target)
         .withFiles(argv.files)
         .withCustomPipeline(argv.customPipeline)
-        .withUniversal(argv.universal)
         .run();
     },
   };
