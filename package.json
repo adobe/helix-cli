@@ -30,7 +30,7 @@
   },
   "dependencies": {
     "@adobe/fastly-native-promises": "1.23.0",
-    "@adobe/helix-fetch": "2.2.0",
+    "@adobe/helix-fetch": "2.2.1",
     "@adobe/helix-log": "5.0.3",
     "@adobe/helix-shared-config": "1.1.1",
     "@adobe/helix-shared-git": "1.0.3",
