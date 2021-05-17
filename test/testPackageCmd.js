@@ -47,7 +47,7 @@ describe('hlx package (Integration)', () => {
     nock.cleanAll();
   });
 
-  it.only('package creates correct package', async () => {
+  it('package creates correct package', async () => {
     const created = {};
     const ignored = {};
     await new PackageCommand()
@@ -118,7 +118,9 @@ describe('hlx package (Integration)', () => {
       assert.deepEqual(ret, {
         body: "<!DOCTYPE html><html>\n\t<head>\n\t\t<title>Example</title>\n\t\t<link rel=\"related\" href=\"/welcome.txt\">\n\t</head>\n\t<body>\n\t\tNothing happens here, yet.\n\n\t\t<h1>Here are a few things I know:</h1>\n\t\t<dl>\n\t\t\t<dt>Requested Content</dt>\n\t\t\t<dd><code>/README.md</code></dd>\n\n\t\t\t<dt>Title</dt>\n\t\t\t<dd><code>foo</code></dd>\n\t\t</dl>\n\t\t<!-- anyway, here's the full content-->\n\t\t<main>\n\t\t<h1 id=\"foo\">foo</h1>\n\t\t</main>\n\t</body>\n</html>",
         headers: {
-          'Content-Type': 'text/html',
+          'content-type': 'text/html;charset=UTF-8',
+          'surrogate-key': 'o8y/soib3WfdwqXW',
+          'x-invocation-id': '1234',
         },
         statusCode: 200,
       });
