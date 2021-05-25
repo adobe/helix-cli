@@ -32,7 +32,7 @@
     "@adobe/fastly-native-promises": "1.23.1",
     "@adobe/helix-fetch": "2.2.1",
     "@adobe/helix-log": "5.0.3",
-    "@adobe/helix-shared-config": "1.1.1",
+    "@adobe/helix-shared-config": "1.1.2",
     "@adobe/helix-shared-git": "1.0.3",
     "@adobe/helix-simulator": "5.3.49",
     "@adobe/htlengine": "6.3.7",
@@ -65,7 +65,7 @@
   },
   "devDependencies": {
     "@adobe/eslint-config-helix": "1.1.5",
-    "@adobe/helix-shared-dom": "1.0.3",
+    "@adobe/helix-shared-dom": "1.0.4",
     "@adobe/helix-testutils": "0.4.5",
     "@pollyjs/adapter-fetch": "5.1.0",
     "@pollyjs/adapter-node-http": "5.1.0",
