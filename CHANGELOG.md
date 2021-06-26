@@ -1,3 +1,10 @@
+## [13.4.47](https://github.com/adobe/helix-cli/compare/v13.4.46...v13.4.47) (2021-06-26)
+
+
+### Bug Fixes
+
+* **deps:** update dependency isomorphic-git to v1.8.3 ([e7e9782](https://github.com/adobe/helix-cli/commit/e7e9782f2a30eb269900a8a4f887671ffaa9dc3b))
+
 ## [13.4.46](https://github.com/adobe/helix-cli/compare/v13.4.45...v13.4.46) (2021-06-19)
 
 
