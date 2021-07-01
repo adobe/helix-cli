@@ -181,7 +181,7 @@ class UpCommand extends BuildCommand {
     await super.init();
     // check for git repository
     try {
-      const stat = await fse.lstat(path.join(this.directory, '.git'));
+      const stat = await fse.lstat(path.resolve(this.directory, '.git'));
       if (stat.isFile()) {
         throw Error('git submodules are not supported.');
       }
