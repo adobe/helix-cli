@@ -180,9 +180,18 @@ class UpCommand extends BuildCommand {
   async setup() {
     await super.init();
     // check for git repository
-    if (!await fse.pathExists(path.join(this.directory, '.git'))) {
-      throw Error('hlx up needs local git repository.');
+    try {
+      const stat = await fse.lstat(path.join(this.directory, '.git'));
+      if (stat.isFile()) {
+        throw Error('git submodules are not supported.');
+      }
+    } catch (e) {
+      if (e.code === 'ENOENT') {
+        throw Error('hlx up needs local git repository.');
+      }
+      throw e;
     }
+
     // init dev default file params
     this._devDefault = Object.assign(this._devDefaultFile(this.directory), this._devDefault);
 
