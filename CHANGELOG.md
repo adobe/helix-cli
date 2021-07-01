@@ -1,3 +1,10 @@
+## [13.4.50](https://github.com/adobe/helix-cli/compare/v13.4.49...v13.4.50) (2021-07-01)
+
+
+### Bug Fixes
+
+* **cli:** add error message for hlx up command in submodule repo ([#1796](https://github.com/adobe/helix-cli/issues/1796)) ([835f80a](https://github.com/adobe/helix-cli/commit/835f80af4357fd52444c9b1f56a8f6ec7021a4b2)), closes [#1794](https://github.com/adobe/helix-cli/issues/1794)
+
 ## [13.4.49](https://github.com/adobe/helix-cli/compare/v13.4.48...v13.4.49) (2021-06-26)
 
 
