@@ -86,6 +86,21 @@ describe('Integration test for up command', function suite() {
     }
   });
 
+  it('up command fails inside submodule repository', async () => {
+    await fse.createFile(path.resolve(testDir, '.git'));
+    try {
+      await new UpCommand()
+        .withFiles([path.join(testDir, 'src', '*.htl'), path.join(testDir, 'src', '*.js')])
+        .withTargetDir(buildDir)
+        .withModulePaths(testModules)
+        .withDirectory(testDir)
+        .run();
+      assert.fail('hlx up with .git file should fail.');
+    } catch (e) {
+      assert.equal(e.message, 'git submodules are not supported.');
+    }
+  });
+
   it('up command with local repo without configured origin succeeds and can be stopped', (done) => {
     initGit(testDir);
     new UpCommand()
