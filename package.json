@@ -29,12 +29,12 @@
     "node": ">=12.11.1 <15.0"
   },
   "dependencies": {
-    "@adobe/fastly-native-promises": "1.23.2",
+    "@adobe/fastly-native-promises": "1.23.3",
     "@adobe/helix-fetch": "2.3.0",
     "@adobe/helix-log": "5.0.3",
     "@adobe/helix-shared-config": "1.1.11",
     "@adobe/helix-shared-git": "1.0.3",
-    "@adobe/helix-simulator": "5.3.67",
+    "@adobe/helix-simulator": "5.3.68",
     "@adobe/htlengine": "6.3.8",
     "@babel/core": "^7.12.10",
     "@babel/plugin-transform-react-jsx": "^7.12.12",
