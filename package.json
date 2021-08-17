@@ -65,7 +65,7 @@
   },
   "devDependencies": {
     "@adobe/eslint-config-helix": "1.1.5",
-    "@adobe/helix-shared-dom": "1.0.5",
+    "@adobe/helix-shared-dom": "1.0.6",
     "@adobe/helix-testutils": "0.4.5",
     "@pollyjs/adapter-fetch": "5.1.1",
     "@pollyjs/adapter-node-http": "5.1.1",
