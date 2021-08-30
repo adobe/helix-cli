@@ -1,3 +1,10 @@
+## [13.4.79](https://github.com/adobe/helix-cli/compare/v13.4.78...v13.4.79) (2021-08-30)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @adobe/fastly-native-promises to v1.23.5 ([#1844](https://github.com/adobe/helix-cli/issues/1844)) ([e59a733](https://github.com/adobe/helix-cli/commit/e59a7331bcaf67011230cb1995cea1bfdf1a45d9))
+
 ## [13.4.78](https://github.com/adobe/helix-cli/compare/v13.4.77...v13.4.78) (2021-08-28)
 
 
