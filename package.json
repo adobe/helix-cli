@@ -29,7 +29,7 @@
     "node": ">=12.11.1 <15.0"
   },
   "dependencies": {
-    "@adobe/fastly-native-promises": "1.23.4",
+    "@adobe/fastly-native-promises": "1.23.5",
     "@adobe/helix-fetch": "2.4.2",
     "@adobe/helix-log": "5.0.3",
     "@adobe/helix-shared-config": "1.2.2",
