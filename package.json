@@ -31,8 +31,8 @@
   "dependencies": {
     "@adobe/fastly-native-promises": "1.23.5",
     "@adobe/helix-fetch": "2.4.2",
-    "@adobe/helix-log": "5.0.3",
-    "@adobe/helix-shared-config": "1.2.2",
+    "@adobe/helix-log": "5.0.4",
+    "@adobe/helix-shared-config": "1.2.3",
     "@adobe/helix-shared-git": "1.0.3",
     "@adobe/helix-simulator": "5.3.78",
     "@adobe/htlengine": "6.3.8",
