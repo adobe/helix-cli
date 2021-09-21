@@ -1,8 +1,0 @@
-<html>
-	<head>
-		<title>Example</title>
-	</head>
-	<body>
-		${context.stamp}
-	</body>
-</html>

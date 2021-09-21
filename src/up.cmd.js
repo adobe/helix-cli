@@ -14,32 +14,23 @@ const path = require('path');
 const fse = require('fs-extra');
 const opn = require('open');
 const chokidar = require('chokidar');
-const chalk = require('chalk');
-const { HelixProject } = require('@adobe/helix-simulator');
-const { GitUrl } = require('@adobe/helix-shared-git');
+const HelixProject = require('./server/HelixProject.js');
 const GitUtils = require('./git-utils.js');
-const BuildCommand = require('./build.cmd');
+const AbstractCommand = require('./abstract.cmd');
 const pkgJson = require('../package.json');
 
-const HELIX_CONFIG = 'helix-config.yaml';
-const HELIX_QUERY = 'helix-query.yaml';
+const INDEX_CONFIG = 'helix-query.yaml';
+const MOUNT_CONFIG = 'fstab.yaml';
 const GIT_HEAD = '.git/HEAD';
 
-class UpCommand extends BuildCommand {
+class UpCommand extends AbstractCommand {
   constructor(logger) {
     super(logger);
     this._httpPort = -1;
     this._open = false;
     this._liveReload = false;
-    this._saveConfig = false;
-    this._overrideHost = null;
-    this._localRepos = [];
     this._devDefault = {};
     this._devDefaultFile = () => ({});
-    this._githubToken = '';
-    this._algoliaAppID = null;
-    this._algoliaAPIKey = null;
-    this._pagesProxy = true;
     this._pagesUrl = null;
     this._pagesCache = true;
   }
@@ -59,30 +50,6 @@ class UpCommand extends BuildCommand {
     return this;
   }
 
-  withSaveConfig(value) {
-    this._saveConfig = value;
-    return this;
-  }
-
-  withOverrideHost(value) {
-    this._overrideHost = value;
-    return this;
-  }
-
-  withLocalRepo(value = []) {
-    if (Array.isArray(value)) {
-      this._localRepos.push(...value.filter((r) => !!r));
-    } else if (value) {
-      this._localRepos.push(value);
-    }
-    return this;
-  }
-
-  withHelixPagesRepo(url) {
-    this._helixPagesRepo = url;
-    return this;
-  }
-
   withDevDefault(value) {
     this._devDefault = value;
     return this;
@@ -90,26 +57,6 @@ class UpCommand extends BuildCommand {
 
   withDevDefaultFile(value) {
     this._devDefaultFile = value;
-    return this;
-  }
-
-  withGithubToken(value) {
-    this._githubToken = value;
-    return this;
-  }
-
-  withAlgoliaAppID(value) {
-    this._algoliaAppID = value;
-    return this;
-  }
-
-  withAlgoliaAPIKey(value) {
-    this._algoliaAPIKey = value;
-    return this;
-  }
-
-  withPagesProxy(value) {
-    this._pagesProxy = value;
     return this;
   }
 
@@ -153,8 +100,7 @@ class UpCommand extends BuildCommand {
     let modifiedFiles = {};
 
     this._watcher = chokidar.watch([
-      'src', 'cgi-bin', '.hlx/pages/master/src', '.hlx/pages/master/cgi-bin',
-      HELIX_CONFIG, HELIX_QUERY, GIT_HEAD,
+      MOUNT_CONFIG, INDEX_CONFIG, GIT_HEAD,
     ], {
       ignored: /(.*\.swx|.*\.swp|.*~)/,
       persistent: true,
@@ -194,130 +140,27 @@ class UpCommand extends BuildCommand {
 
     // init dev default file params
     this._devDefault = Object.assign(this._devDefaultFile(this.directory), this._devDefault);
-
-    let hasConfigFile = await this.config.hasFile();
-    if (this._saveConfig) {
-      if (hasConfigFile) {
-        this.log.warn(chalk`Cowardly refusing to overwrite existing {cyan helix-config.yaml}.`);
-      } else {
-        await this.config.saveConfig();
-        this.log.info(chalk`Wrote new default config to {cyan ${path.relative(process.cwd(), this.config.configPath)}}.`);
-        hasConfigFile = true;
-      }
-    }
-
-    // check for git repository
-    if (!hasConfigFile && this._localRepos.length === 0) {
-      if (!this.config.strains.get('default').content.isLocal) {
-        // ensure local repository will be mounted for default config with origin
-        this._localRepos.push('.');
-      }
-    }
-
-    // check all local repos
-    const localRepos = (await Promise.all(this._localRepos.map(async (repo) => {
-      const repoPath = path.resolve(this.directory, repo);
-      if (!await fse.pathExists(path.join(repoPath, '.git'))) {
-        throw Error(`Specified --local-repo=${repo} is not a git repository.`);
-      }
-      const gitUrl = await GitUtils.getOriginURL(repoPath);
-      if (!gitUrl) {
-        if (repoPath !== this.directory) {
-          this.log.warn(`Ignoring --local-repo=${repo}. No remote 'origin' defined.`);
-        }
-        return null;
-      }
-      return {
-        gitUrl,
-        repoPath,
-      };
-    }))).filter((e) => !!e);
-
-    // add github token to action params
-    if (this._githubToken && !this._devDefault.GITHUB_TOKEN) {
-      this._devDefault.GITHUB_TOKEN = this._githubToken;
-    }
-
-    // algolia default credentials
-    const ALGOLIA_APP_ID = 'A8PL9E4TZT';
-    const ALGOLIA_API_KEY = '3934d5173a5fedf1cb7c619a6a26f300';
-
     this._project = new HelixProject()
       .withCwd(this.directory)
-      .withBuildDir(this._target)
-      .withHelixConfig(this.config)
-      .withIndexConfig(this.indexConfig)
-      .withAlgoliaAppID(this._algoliaAppID || ALGOLIA_APP_ID)
-      .withAlgoliaAPIKey(this._algoliaAPIKey || ALGOLIA_API_KEY)
-      .withActionParams(this._devDefault)
-      .withLiveReload(this._liveReload)
-      .withRuntimeModulePaths(module.paths);
+      .withLiveReload(this._liveReload);
 
-    // special handling for helix pages project
-    if (await this.helixPages.isPagesProject()) {
-      this.log.info('    __ __    ___       ___                  ');
-      this.log.info('   / // /__ / (_)_ __ / _ \\___ ____ ____ ___');
-      this.log.info('  / _  / -_) / /\\ \\ // ___/ _ `/ _ `/ -_|_-<');
-      this.log.info(' /_//_/\\__/_/_//_\\_\\/_/   \\_,_/\\_, /\\__/___/');
-      this.log.info(`                              /___/ v${pkgJson.version}`);
-      this.log.info('');
+    this.log.info('    __ __    ___       ___                  ');
+    this.log.info('   / // /__ / (_)_ __ / _ \\___ ____ ____ ___');
+    this.log.info('  / _  / -_) / /\\ \\ // ___/ _ `/ _ `/ -_|_-<');
+    this.log.info(' /_//_/\\__/_/_//_\\_\\/_/   \\_,_/\\_, /\\__/___/');
+    this.log.info(`                              /___/ v${pkgJson.version}`);
+    this.log.info('');
 
-      // use bundled helix-pages sources
-      this._project.withSourceDir(this.helixPages.srcDirectory);
+    const gitUrl = await GitUtils.getOriginURL(this.directory);
+    const ref = await GitUtils.getBranch(this.directory);
+    this._pagesUrl = `https://${ref}--${gitUrl.repo}--${gitUrl.owner}.hlx3.page`;
 
-      if (!this._pagesProxy) {
-        // local branch should be considered as default for pages project
-        const ref = await GitUtils.getBranch(this.directory);
-        const defaultStrain = this.config.strains.get('default');
-        defaultStrain.content = new GitUrl({
-          ...defaultStrain.content.toJSON(),
-          ref,
-        });
-
-        // use bundled helix-pages htdocs
-        if (!await fse.pathExists(path.join(this.directory, 'htdocs'))) {
-          defaultStrain.static.url = this.helixPages.staticURL;
-          localRepos.push({
-            repoPath: this.helixPages.checkoutDirectory,
-            gitUrl: this.helixPages.staticURL,
-          });
-        }
-      } else {
-        if (!this._pagesUrl) {
-          // get proxy url
-          const gitUrl = await GitUtils.getOriginURL(this.directory);
-          const ref = await GitUtils.getBranch(this.directory);
-          this._pagesUrl = `https://${ref}--${gitUrl.repo}--${gitUrl.owner}.hlx.page`;
-        }
-        this._project
-          .withProxyUrl(this._pagesUrl)
-          .withProxyCache(this._pagesCache);
-      }
-    } else {
-      this.log.info('    __ __    ___         ');
-      this.log.info('   / // /__ / (_)_ __    ');
-      this.log.info('  / _  / -_) / /\\ \\ / ');
-      this.log.info(` /_//_/\\__/_/_//_\\_\\ v${pkgJson.version}`);
-      this.log.info('                         ');
-      this._project.withSourceDir(path.resolve(this._sourceRoot, 'src'));
-      this._project.withSourceDir(path.resolve(this._sourceRoot, 'cgi-bin'));
-    }
-
-    // start debugger (#178)
-    // https://nodejs.org/en/docs/guides/debugging-getting-started/#enable-inspector
-    if (process.platform !== 'win32') {
-      process.kill(process.pid, 'SIGUSR1');
-    }
+    this._project
+      .withProxyUrl(this._pagesUrl)
+      .withProxyCache(this._pagesCache);
 
     if (this._httpPort >= 0) {
       this._project.withHttpPort(this._httpPort);
-    }
-    if (this._overrideHost) {
-      this._project.withRequestOverride({
-        headers: {
-          host: this._overrideHost,
-        },
-      });
     }
 
     try {
@@ -327,87 +170,15 @@ class UpCommand extends BuildCommand {
     }
 
     // register the local repositories
-    localRepos.forEach((repo) => {
-      this._project.registerGitRepository(repo.repoPath, repo.gitUrl);
-    });
+    this._project.registerGitRepository(this.directory, gitUrl);
   }
 
   async run() {
     await this.setup();
-    let buildStartTime;
-    let buildMessage;
-    const onBuildStart = async () => {
-      if (this._project.started) {
-        buildMessage = 'Rebuilding project files...';
-      } else {
-        buildMessage = 'Building project files...';
-      }
-      this.log.info(buildMessage);
-      buildStartTime = Date.now();
-    };
-
-    const onBuildEnd = async () => {
-      try {
-        const buildTime = Date.now() - buildStartTime;
-        this.log.info(`${buildMessage}done ${buildTime}ms`);
-        if (this._project.started) {
-          this.emit('build', this);
-          this._project.invalidateCache();
-          return;
-        }
-
-        // ensure correct module paths
-        this._project.withRuntimeModulePaths([...this.modulePaths, ...module.paths]);
-
-        await this._project.start();
-
-        // init source watcher after everything is built
-        this._initSourceWatcher(async (files) => {
-          const dirtyConfigFiles = Object.keys(files || {})
-            .filter((f) => f === HELIX_CONFIG || f === HELIX_QUERY || f === GIT_HEAD);
-          if (dirtyConfigFiles.length) {
-            this.log.info(`${dirtyConfigFiles.join(', ')} modified. Restarting dev server...`);
-            await this._project.stop();
-            await this.reloadConfig();
-            await this.setup();
-            // ensure correct module paths
-            this._project.withRuntimeModulePaths([...this.modulePaths, ...module.paths]);
-            await this._project.start();
-            if (Object.keys(files).length === 1) {
-              return Promise.resolve();
-            }
-          }
-          return this.build();
-        });
-
-        this.emit('started', this);
-        if (this._open) {
-          opn(`http://localhost:${this._project.server.port}/`, { url: true });
-        }
-        if (!await this.config.hasFile() && !await this.helixPages.isPagesProject()) {
-          this.log.info(chalk`{green Note:} 
-The project does not have a {cyan helix-config.yaml} which is necessary to 
-access remote content and to deploy helix. Consider running 
-{gray hlx up --save-config} to generate a default config.`);
-        }
-      } catch (e) {
-        this.log.error(`Error: ${e.message}`);
-        await this.stop();
-      }
-    };
-
-    if (await this.helixPages.isPagesProject() && this._pagesProxy) {
-      // use proxy
-      await this._project.start();
-      this.emit('started', this);
-      if (this._open) {
-        opn(`http://localhost:${this._project.server.port}/`, { url: true });
-      }
-    } else {
-      this.on('buildStart', onBuildStart);
-      this.on('buildEnd', onBuildEnd);
-      // start build
-      this.build();
+    await this._project.start();
+    this.emit('started', this);
+    if (this._open) {
+      opn(`http://localhost:${this._project.server.port}/`, { url: true });
     }
   }
 }

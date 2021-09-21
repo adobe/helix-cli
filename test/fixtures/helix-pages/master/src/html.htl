@@ -1,9 +1,0 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>${content.title}</title>
-  </head>
-<body>
-  ${content.document.body.innerHTML}
-</body>
-</html>

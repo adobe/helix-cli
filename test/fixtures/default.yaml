@@ -1,5 +1,0 @@
-strains:
-  default:
-    content: ssh://git@github.com/adobe/helix-cli.git
-    code: ssh://git@github.com/adobe/helix-cli.git
-    static: ssh://git@github.com/adobe/helix-cli.git

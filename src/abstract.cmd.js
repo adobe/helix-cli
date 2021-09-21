@@ -13,23 +13,21 @@
 'use strict';
 
 const EventEmitter = require('events');
-const chalk = require('chalk');
-const { HelixConfig, IndexConfig } = require('@adobe/helix-shared-config');
+const { MountConfig, IndexConfig } = require('@adobe/helix-shared-config');
 const { getOrCreateLogger } = require('./log-common');
-const ConfigUtils = require('./config/config-utils.js');
 
 class AbstractCommand extends EventEmitter {
   constructor(logger) {
     super();
     this._initialized = false;
     this._logger = logger || getOrCreateLogger();
-    this._helixConfig = new HelixConfig().withLogger(this._logger);
+    this._directory = process.cwd();
     this._indexConfig = new IndexConfig().withLogger(this._logger);
+    this._mountConfig = new MountConfig().withLogger(this._logger);
   }
 
   withDirectory(dir) {
-    this._helixConfig.withDirectory(dir);
-    this._indexConfig.withDirectory(dir);
+    this._directory = dir;
     return this;
   }
 
@@ -38,7 +36,7 @@ class AbstractCommand extends EventEmitter {
   }
 
   get directory() {
-    return this._helixConfig.directory;
+    return this._directory;
   }
 
   // eslint-disable-next-line class-methods-use-this
@@ -46,41 +44,18 @@ class AbstractCommand extends EventEmitter {
     return true;
   }
 
-  withConfigFile(file) {
-    this._helixConfig.withConfigPath(file);
-    return this;
-  }
-
-  withIndexConfigFile(file) {
-    this._indexConfig.withConfigPath(file);
-    return this;
-  }
-
-  get config() {
-    if (!this._initialized) {
-      throw Error('illegal access to #config before initialized');
-    }
-    return this._helixConfig;
-  }
-
   get indexConfig() {
     return this._indexConfig;
   }
 
+  get mountConfig() {
+    return this._mountConfig;
+  }
+
   async init() {
     if (!this._initialized) {
-      if (!await this._helixConfig.hasFile()) {
-        if (this.requireConfigFile) {
-          this.log.error(chalk`No {cyan helix-config.yaml}. Please add one before deployment.`);
-          this.log.info(chalk`You can auto generate a default config with\n{grey $ hlx deploy --add=default}\n`);
-          throw Error();
-        } else {
-          // set default config
-          this._helixConfig.withSource(await ConfigUtils.createDefaultConfig(this.directory));
-        }
-      }
       await this._indexConfig.init();
-      await this._helixConfig.init();
+      await this._mountConfig.init();
       this._initialized = true;
     }
     return this;
@@ -90,19 +65,13 @@ class AbstractCommand extends EventEmitter {
     if (!this._initialized) {
       return this.init();
     }
-    this._helixConfig = new HelixConfig()
+    this._helixConfig = await (new MountConfig()
       .withLogger(this._helixConfig.log)
-      .withConfigPath(this._helixConfig.configPath)
-      .withDirectory(this._helixConfig.directory);
-    if (!await this._helixConfig.hasFile()) {
-      // set default config
-      this._helixConfig.withSource(await ConfigUtils.createDefaultConfig(this.directory));
-    }
-    await this._helixConfig.init();
+      .withDirectory(this._directory)
+      .init());
     this._indexConfig = await (new IndexConfig()
       .withLogger(this._indexConfig.log)
-      .withConfigPath(this._indexConfig.configPath)
-      .withDirectory(this._indexConfig.directory)
+      .withDirectory(this._directory)
       .init());
     return this;
   }
