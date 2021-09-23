@@ -86,7 +86,7 @@ describe('hlx command line', () => {
     assert.ok(cmd.stdout.trim().indexOf('This is typically not good because it might contain secrets') >= 0);
     shell.cd(cwd);
     await fse.remove(testRoot);
-  });
+  }).timeout(4000);
 
   it('un-supported node version should give warning', async () => {
     const testVersions = [

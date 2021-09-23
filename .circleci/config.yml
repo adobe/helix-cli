@@ -28,7 +28,7 @@ commands:
         command: git config --global user.email "circleci@project-helix.io" && git config --global user.name "CircleCi Build"
 
 orbs:
-  win: circleci/windows-tools@0.1.0
+  win: circleci/windows@2.2.0
 
 jobs:
   build_win:
@@ -42,8 +42,7 @@ jobs:
           name: prepare test git user
           command: git config --global user.name "CircleCi Build"
       - checkout
-      - run: choco install nodejs-lts --version=10.16.3
-      - run: npm install
+      - run: choco install nodejs-lts --version=14.17.6
       - run: mkdir junit
 
       # test & get code coverage
@@ -89,4 +88,4 @@ workflows:
   build:
     jobs:
     - build
-    #- build_win
+    # - build_win
