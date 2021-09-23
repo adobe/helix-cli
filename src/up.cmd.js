@@ -25,8 +25,6 @@ class UpCommand extends AbstractCommand {
     this._httpPort = -1;
     this._open = '/';
     this._liveReload = false;
-    this._devDefault = {};
-    this._devDefaultFile = () => ({});
     this._pagesUrl = null;
   }
 
@@ -42,16 +40,6 @@ class UpCommand extends AbstractCommand {
 
   withLiveReload(value) {
     this._liveReload = value;
-    return this;
-  }
-
-  withDevDefault(value) {
-    this._devDefault = value;
-    return this;
-  }
-
-  withDevDefaultFile(value) {
-    this._devDefaultFile = value;
     return this;
   }
 
@@ -97,7 +85,6 @@ class UpCommand extends AbstractCommand {
     }
 
     // init dev default file params
-    this._devDefault = Object.assign(this._devDefaultFile(this.directory), this._devDefault);
     this._project = new HelixProject()
       .withCwd(this.directory)
       .withLiveReload(this._liveReload);

@@ -42,8 +42,7 @@ jobs:
           name: prepare test git user
           command: git config --global user.name "CircleCi Build"
       - checkout
-      - run: choco install nodejs-lts --version=10.16.3
-      - run: npm install
+      - run: choco install nodejs-lts --version=14.17.6
       - run: mkdir junit
 
       # test & get code coverage
@@ -89,4 +88,4 @@ workflows:
   build:
     jobs:
     - build
-    #- build_win
+    - build_win

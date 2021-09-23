@@ -14,7 +14,6 @@
 /* eslint global-require: off */
 
 const path = require('path');
-const yargsParams = require('./yargs-params.js');
 const { getOrCreateLogger } = require('./log-common.js');
 
 module.exports = function up() {
@@ -26,13 +25,6 @@ module.exports = function up() {
     command: 'up',
     description: 'Run a Helix development server',
     builder: (yargs) => {
-      yargsParams(yargs, {
-        name: 'dev-default',
-        describe: 'Additional action parameters',
-        alias: ['devDefault'],
-        type: 'array',
-        default: [],
-      });
       yargs
         .option('open', {
           describe: 'Open a browser window at specified path',
@@ -81,8 +73,6 @@ module.exports = function up() {
       }
       await executor
         .withHttpPort(argv.port)
-        .withDevDefault(argv.devDefault)
-        .withDevDefaultFile(argv.devDefaultFile)
         // only open  browser window when executable is `hlx`
         // this prevents the window to be opened during integration tests
         .withOpen(path.basename(argv.$0) === 'hlx' ? argv.open : false)

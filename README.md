@@ -66,6 +66,23 @@ HLX_PORT=8080
 HLX_PAGES_URL=https://stage.myproject.com
 ```
 
+#### Global
+
+| option | variable | default | description |
+|--------|----------|---------|-------------|
+| `--log-file` | `HLX_LOG_FILE` | `-` | Log file. use `-` to log to stdout |
+| `--log-level` | `HLX_LOG_LEVEL` | `info` | Log level |
+
+#### Up command
+
+| option | variable | default | description |
+|--------|----------|---------|-------------|
+| `--port` | `HLX_PORT` | `3000` | Development server port |
+| `--livereload` | `HLX_LIVERELOAD` | `true` | Enable automatic reloading of modified sources in browser. |
+| `--no-livereload` | `HLX_NO_LIVERELOAD` | `false` | Disable live-reload. |
+| `--open` | `HLX_OPEN` | `/` | Open a browser window at specified path after server start. |
+| `--no-open` | `HLX_NO_OPEN` | `false` | Disable automatic opening of browser window. |
+
 # Developing Helix CLI
 
 ## Testing
