@@ -1,3 +1,16 @@
+# [14.0.0](https://github.com/adobe/helix-cli/compare/v13.4.86...v14.0.0) (2021-09-23)
+
+
+### Bug Fixes
+
+* cleanup ([3153c5d](https://github.com/adobe/helix-cli/commit/3153c5d3eb8f215149647534712497e7cee7049c))
+* helix 3 support only ([6271477](https://github.com/adobe/helix-cli/commit/62714770706123c20258d006306bc709b2898e48)), closes [#1848](https://github.com/adobe/helix-cli/issues/1848)
+
+
+### BREAKING CHANGES
+
+* only supports helix-3 projects (proxy mode)
+
 ## [13.4.86](https://github.com/adobe/helix-cli/compare/v13.4.85...v13.4.86) (2021-09-20)
 
 
