@@ -1,3 +1,10 @@
+## [14.0.1](https://github.com/adobe/helix-cli/compare/v14.0.0...v14.0.1) (2021-09-23)
+
+
+### Bug Fixes
+
+* upgrade open ([#1860](https://github.com/adobe/helix-cli/issues/1860)) ([6ee5050](https://github.com/adobe/helix-cli/commit/6ee5050b482f43baf3880f963a06265f8f590d3c)), closes [#1859](https://github.com/adobe/helix-cli/issues/1859)
+
 # [14.0.0](https://github.com/adobe/helix-cli/compare/v13.4.86...v14.0.0) (2021-09-23)
 
 
