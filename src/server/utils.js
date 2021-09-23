@@ -201,15 +201,6 @@ const utils = {
   },
 
   /**
-   * Generates a completely random uuid of the format:
-   * `00000000-0000-0000-0000-000000000000`
-   * @returns {string} A random uuid.
-   */
-  uuid() {
-    return `${utils.randomChars(8, true)}-${utils.randomChars(4, true)}-${utils.randomChars(4, true)}-${utils.randomChars(4, true)}-${utils.randomChars(12, true)}`;
-  },
-
-  /**
    * Checks if the given port is already in use on any addr. This is used to prevent starting a
    * server on the same port with an existing socket bound to 0.0.0.0 and SO_REUSEADDR.
    * @param port

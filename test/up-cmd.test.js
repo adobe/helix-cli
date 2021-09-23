@@ -47,6 +47,7 @@ describe('Integration test for up command with helix pages', function suite() {
     const cmd = new UpCommand()
       .withLiveReload(false)
       .withDirectory(testDir)
+      .withOpen(false)
       .withHttpPort(0);
 
     const myDone = (err) => {

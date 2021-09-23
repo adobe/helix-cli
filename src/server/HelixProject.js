@@ -9,29 +9,18 @@
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-
-const fs = require('fs-extra');
-const path = require('path');
 const { SimpleInterface, deriveLogger } = require('@adobe/helix-log');
 const HelixServer = require('./HelixServer.js');
 const LiveReload = require('./LiveReload.js');
-
-const GIT_DIR = '.git';
-
-async function isDirectory(dirPath) {
-  return fs.stat(dirPath).then((stats) => stats.isDirectory()).catch(() => false);
-}
 
 class HelixProject {
   constructor() {
     this._cwd = process.cwd();
     this._server = new HelixServer(this);
     this._logger = null;
-    this._gitMgr = null;
     this._liveReload = null;
     this._enableLiveReload = false;
     this._proxyUrl = null;
-    this._proxyCache = true;
   }
 
   withCwd(cwd) {
@@ -49,11 +38,6 @@ class HelixProject {
     return this;
   }
 
-  withLogsDir(dir) {
-    this._logsDir = dir;
-    return this;
-  }
-
   withLiveReload(value) {
     this._enableLiveReload = value;
     return this;
@@ -61,18 +45,6 @@ class HelixProject {
 
   withProxyUrl(value) {
     this._proxyUrl = value;
-    return this;
-  }
-
-  withProxyCache(value) {
-    this._proxyCache = value;
-    return this;
-  }
-
-  registerGitRepository(repoPath, gitUrl) {
-    if (this._gitMgr) {
-      this._gitMgr.registerServer(repoPath, gitUrl);
-    }
     return this;
   }
 
@@ -84,20 +56,12 @@ class HelixProject {
     return this._server.isStarted();
   }
 
-  get gitState() {
-    return this._gitMgr ? this._gitMgr.state : null;
-  }
-
   get liveReload() {
     return this._liveReload;
   }
 
   get proxyUrl() {
     return this._proxyUrl;
-  }
-
-  get proxyCache() {
-    return this._proxyCache;
   }
 
   get directory() {
@@ -110,22 +74,6 @@ class HelixProject {
    */
   get server() {
     return this._server;
-  }
-
-  async checkPaths() {
-    const dotGitPath = path.join(this._cwd, GIT_DIR);
-    if (await isDirectory(dotGitPath)) {
-      this._repoPath = path.resolve(dotGitPath, '../');
-    }
-  }
-
-  /**
-   * Invalidates the node module cache of the file in the build directory.
-   */
-  async invalidateCache() {
-    if (this.liveReload) {
-      this.liveReload.changed(['/']);
-    }
   }
 
   async init() {
@@ -170,9 +118,6 @@ class HelixProject {
   async stop() {
     this.log.debug('Stopping helix simulation server..');
     await this._server.stop();
-    if (this._gitMgr) {
-      await this._gitMgr.stop();
-    }
     if (this.liveReload) {
       this.liveReload.stop();
     }

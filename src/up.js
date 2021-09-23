@@ -23,7 +23,7 @@ module.exports = function up() {
     set executor(value) {
       executor = value;
     },
-    command: 'up [files...]',
+    command: 'up',
     description: 'Run a Helix development server',
     builder: (yargs) => {
       yargsParams(yargs, {
@@ -35,9 +35,9 @@ module.exports = function up() {
       });
       yargs
         .option('open', {
-          describe: 'Open a browser window',
-          type: 'boolean',
-          default: true,
+          describe: 'Open a browser window at specified path',
+          type: 'string',
+          default: '/',
         })
         .option('no-open', {
           // negation of the open option (resets open default)
@@ -63,19 +63,13 @@ module.exports = function up() {
           type: 'int',
           default: 3000,
         })
-        .group(['port', 'open', 'no-open'], 'Server options')
+        .group(['port'], 'Server options')
         .option('pages-url', {
           alias: 'pagesUrl',
           describe: 'The origin url to fetch pages content from.',
           type: 'string',
         })
-        .option('pages-cache', {
-          alias: 'pagesCache',
-          describe: 'Enable memory cache for pages content.',
-          type: 'boolean',
-          default: true,
-        })
-        .group(['pages-url', 'pages-cache'], 'Helix Pages Options')
+        .group(['pages-url', 'livereload', 'no-livereload', 'open', 'no-open'], 'Helix Pages Options')
 
         .help();
     },
@@ -85,17 +79,15 @@ module.exports = function up() {
         const UpCommand = require('./up.cmd'); // lazy load the handler to speed up execution time
         executor = new UpCommand(getOrCreateLogger(argv));
       }
-
       await executor
         .withHttpPort(argv.port)
         .withDevDefault(argv.devDefault)
         .withDevDefaultFile(argv.devDefaultFile)
         // only open  browser window when executable is `hlx`
         // this prevents the window to be opened during integration tests
-        .withOpen(argv.open && path.basename(argv.$0) === 'hlx')
+        .withOpen(path.basename(argv.$0) === 'hlx' ? argv.open : false)
         .withLiveReload(argv.livereload)
         .withPagesUrl(argv.pagesUrl)
-        .withPagesCache(argv.pagesCache)
         .run();
     },
   };

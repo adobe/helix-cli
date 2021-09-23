@@ -32,7 +32,6 @@ describe('hlx up', () => {
     mockUp.withHttpPort.returnsThis();
     mockUp.withDevDefault.returnsThis();
     mockUp.withDevDefaultFile.returnsThis();
-    mockUp.withPagesCache.returnsThis();
     mockUp.withPagesUrl.returnsThis();
     mockUp.run.returnsThis();
   });
@@ -49,7 +48,7 @@ describe('hlx up', () => {
     new CLI()
       .withCommandExecutor('up', mockUp)
       .run(['up']);
-    sinon.assert.calledWith(mockUp.withPagesCache, true);
+    sinon.assert.calledWith(mockUp.withOpen, '/');
     sinon.assert.calledOnce(mockUp.run);
   });
 
@@ -58,7 +57,7 @@ describe('hlx up', () => {
     new CLI()
       .withCommandExecutor('up', mockUp)
       .run(['up']);
-    sinon.assert.calledWith(mockUp.withOpen, false);
+    sinon.assert.calledWith(mockUp.withOpen, 'false');
     sinon.assert.calledWith(mockUp.withLiveReload, false);
     sinon.assert.calledWith(mockUp.withHttpPort, 1234);
     sinon.assert.calledOnce(mockUp.run);
@@ -173,14 +172,6 @@ describe('hlx up', () => {
       MY_DEFAULT_1: 'default-value-1',
       MY_DEFAULT_2: 'default-value-2',
     });
-  });
-
-  it('hlx up can disable pages cache', () => {
-    new CLI()
-      .withCommandExecutor('up', mockUp)
-      .run(['up', '--no-pages-cache']);
-    sinon.assert.calledWith(mockUp.withPagesCache, false);
-    sinon.assert.calledOnce(mockUp.run);
   });
 
   it('hlx up can set pages url', () => {

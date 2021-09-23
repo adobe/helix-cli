@@ -109,9 +109,8 @@ class CLI {
       .fail(this._failFn)
       .exitProcess(args.indexOf('--get-yargs-completions') > -1)
       .demandCommand(1, MIN_MSG)
-      .epilogue('for more information, find our manual at https://github.com/adobe/helix-cli')
+      .epilogue('use <command> --help to get command specific details.\n\nfor more information, find our manual at https://github.com/adobe/helix-cli')
       .help()
-      .completion()
       .parse(args);
 
     // hack to check if command is valid in non-strict mode

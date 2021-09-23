@@ -43,8 +43,8 @@ describe('Helix Server', () => {
     const cwd = await setupProject(path.join(__dirname, 'fixtures', 'project'), testRoot);
     const project = new HelixProject()
       .withCwd(cwd)
-      .withHttpPort(0)
-      .withLogsDir(path.resolve(cwd, 'logs'));
+      .withLogger(console)
+      .withHttpPort(0);
     await project.init();
     try {
       await project.start();
@@ -68,8 +68,7 @@ describe('Helix Server', () => {
     const cwd = await setupProject(path.join(__dirname, 'fixtures', 'project'), testRoot);
     const project = new HelixProject()
       .withCwd(cwd)
-      .withHttpPort(0)
-      .withLogsDir(path.resolve(cwd, 'logs'));
+      .withHttpPort(0);
     await project.init();
     try {
       await project.start();
@@ -84,7 +83,6 @@ describe('Helix Server', () => {
     const project = new HelixProject()
       .withCwd(cwd)
       .withHttpPort(0)
-      .withLogsDir(path.resolve(cwd, 'logs'))
       .withProxyUrl('http://main--foo--bar.hlx3.page');
 
     await project.init();
@@ -107,7 +105,6 @@ describe('Helix Server', () => {
     const project = new HelixProject()
       .withCwd(cwd)
       .withHttpPort(0)
-      .withLogsDir(path.resolve(cwd, 'logs'))
       .withProxyUrl('http://main--foo--bar.hlx3.page');
 
     await project.init();
@@ -132,7 +129,6 @@ describe('Helix Server', () => {
     const project = new HelixProject()
       .withCwd(cwd)
       .withHttpPort(0)
-      .withLogsDir(path.resolve(cwd, 'logs'))
       .withProxyUrl('http://main--foo--bar.hlx.page');
 
     await project.init();

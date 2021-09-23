@@ -47,8 +47,7 @@ describe('Helix Server with Livereload', () => {
     const project = new HelixProject()
       .withCwd(cwd)
       .withHttpPort(0)
-      .withLiveReload(true)
-      .withLogsDir(path.resolve(cwd, 'logs'));
+      .withLiveReload(true);
     await project.init();
     try {
       await project.start();
@@ -64,7 +63,6 @@ describe('Helix Server with Livereload', () => {
       .withCwd(cwd)
       .withHttpPort(0)
       .withLiveReload(true)
-      .withLogsDir(path.resolve(cwd, 'logs'))
       .withProxyUrl('http://main--foo--bar.hlx3.page');
     await project.init();
 
@@ -90,7 +88,6 @@ describe('Helix Server with Livereload', () => {
       .withCwd(cwd)
       .withHttpPort(0)
       .withLiveReload(true)
-      .withLogsDir(path.resolve(cwd, 'logs'))
       .withProxyUrl('http://main--foo--bar.hlx3.page');
     await project.init();
 
@@ -116,7 +113,6 @@ describe('Helix Server with Livereload', () => {
       .withCwd(cwd)
       .withHttpPort(0)
       .withLiveReload(true)
-      .withLogsDir(path.resolve(cwd, 'logs'))
       .withProxyUrl('http://main--foo--bar.hlx3.page');
     await project.init();
 
@@ -142,7 +138,6 @@ describe('Helix Server with Livereload', () => {
       .withCwd(cwd)
       .withHttpPort(0)
       .withLiveReload(true)
-      .withLogsDir(path.resolve(cwd, 'logs'))
       .withProxyUrl('http://main--foo--bar.hlx3.page');
 
     const scope = nock('http://main--foo--bar.hlx3.page')
@@ -168,7 +163,6 @@ describe('Helix Server with Livereload', () => {
       .withCwd(cwd)
       .withHttpPort(0)
       .withLiveReload(true)
-      .withLogsDir(path.resolve(cwd, 'logs'))
       .withProxyUrl('http://main--foo--bar.hlx3.page');
     await project.init();
 
@@ -251,7 +245,6 @@ describe('Helix Server with Livereload', () => {
       .withCwd(cwd)
       .withHttpPort(0)
       .withLiveReload(true)
-      .withLogsDir(path.resolve(cwd, 'logs'))
       .withProxyUrl('http://main--foo--bar.hlx3.page');
 
     await project.init();

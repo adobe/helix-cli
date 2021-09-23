@@ -13,7 +13,6 @@
 'use strict';
 
 const EventEmitter = require('events');
-const { MountConfig, IndexConfig } = require('@adobe/helix-shared-config');
 const { getOrCreateLogger } = require('./log-common');
 
 class AbstractCommand extends EventEmitter {
@@ -22,8 +21,6 @@ class AbstractCommand extends EventEmitter {
     this._initialized = false;
     this._logger = logger || getOrCreateLogger();
     this._directory = process.cwd();
-    this._indexConfig = new IndexConfig().withLogger(this._logger);
-    this._mountConfig = new MountConfig().withLogger(this._logger);
   }
 
   withDirectory(dir) {
@@ -39,40 +36,10 @@ class AbstractCommand extends EventEmitter {
     return this._directory;
   }
 
-  // eslint-disable-next-line class-methods-use-this
-  get requireConfigFile() {
-    return true;
-  }
-
-  get indexConfig() {
-    return this._indexConfig;
-  }
-
-  get mountConfig() {
-    return this._mountConfig;
-  }
-
   async init() {
     if (!this._initialized) {
-      await this._indexConfig.init();
-      await this._mountConfig.init();
       this._initialized = true;
     }
-    return this;
-  }
-
-  async reloadConfig() {
-    if (!this._initialized) {
-      return this.init();
-    }
-    this._helixConfig = await (new MountConfig()
-      .withLogger(this._helixConfig.log)
-      .withDirectory(this._directory)
-      .init());
-    this._indexConfig = await (new IndexConfig()
-      .withLogger(this._indexConfig.log)
-      .withDirectory(this._directory)
-      .init());
     return this;
   }
 }
