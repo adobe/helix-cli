@@ -2,8 +2,6 @@ coverage
 .nyc_output/
 node_modules/
 pipeline.log
-test/integration/.hlx/build
-test/integration/.hlx/cache
 junit
 tmp
 logs

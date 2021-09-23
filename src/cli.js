@@ -20,17 +20,8 @@ const fetchContext = require('./fetch-utils.js');
 
 const MIN_MSG = 'You need at least one command.';
 
-// fix for #189: strip debug options from NODE_OPTIONS env variable
-if (process.env.NODE_OPTIONS) {
-  process.env.NODE_OPTIONS = process.env.NODE_OPTIONS
-    .split(' ')
-    .filter((opt) => opt.indexOf('--inspect') === -1)
-    .join(' ');
-}
-
 function envAwareStrict(args, aliases) {
   const specialKeys = ['$0', '--', '_'];
-  const illegalEnv = ['saveConfig', 'add'];
 
   const hlxEnv = {};
   Object
@@ -39,12 +30,6 @@ function envAwareStrict(args, aliases) {
     .forEach((key) => {
       hlxEnv[camelcase(key.substring(4))] = key;
     });
-
-  illegalEnv.forEach((key) => {
-    if (key in hlxEnv) {
-      throw new Error(`${hlxEnv[key]} is not allowed in environment.`);
-    }
-  });
 
   const unknown = [];
   Object.keys(args).forEach((key) => {
@@ -86,11 +71,6 @@ class CLI {
   constructor() {
     this._commands = {
       up: require('./up.js')(),
-      build: require('./build.js')(),
-      package: require('./package.js')(),
-      deploy: require('./deploy.js')(),
-      publish: require('./publish.js')(),
-      clean: require('./clean.js')(),
       hack: require('./hack.js')(),
     };
     this._failFn = (message, err, argv) => {
@@ -129,9 +109,8 @@ class CLI {
       .fail(this._failFn)
       .exitProcess(args.indexOf('--get-yargs-completions') > -1)
       .demandCommand(1, MIN_MSG)
-      .epilogue('for more information, find our manual at https://github.com/adobe/helix-cli')
+      .epilogue('use <command> --help to get command specific details.\n\nfor more information, find our manual at https://github.com/adobe/helix-cli')
       .help()
-      .completion()
       .parse(args);
 
     // hack to check if command is valid in non-strict mode

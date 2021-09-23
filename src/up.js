@@ -14,10 +14,7 @@
 /* eslint global-require: off */
 
 const path = require('path');
-const yargsBuild = require('./yargs-build.js');
 const yargsParams = require('./yargs-params.js');
-const yargsGithub = require('./yargs-github.js');
-const yargsAlgolia = require('./yargs-algolia.js');
 const { getOrCreateLogger } = require('./log-common.js');
 
 module.exports = function up() {
@@ -26,12 +23,9 @@ module.exports = function up() {
     set executor(value) {
       executor = value;
     },
-    command: 'up [files...]',
+    command: 'up',
     description: 'Run a Helix development server',
     builder: (yargs) => {
-      yargsBuild(yargs);
-      yargsGithub(yargs);
-      yargsAlgolia(yargs);
       yargsParams(yargs, {
         name: 'dev-default',
         describe: 'Additional action parameters',
@@ -41,9 +35,9 @@ module.exports = function up() {
       });
       yargs
         .option('open', {
-          describe: 'Open a browser window',
-          type: 'boolean',
-          default: true,
+          describe: 'Open a browser window at specified path',
+          type: 'string',
+          default: '/',
         })
         .option('no-open', {
           // negation of the open option (resets open default)
@@ -64,61 +58,18 @@ module.exports = function up() {
           describe: 'Disable live-reload',
           type: 'boolean',
         })
-        .option('host', {
-          describe: 'Override request.host',
-          type: 'string',
-        })
-        .option('local-repo', {
-          alias: 'localRepo',
-          describe: 'Emulates a GitHub repository for the specified local git repository.',
-          type: 'string',
-          array: true,
-          default: '.',
-        })
-        // allow for comma separated values
-        .coerce('localRepo', (value) => value.reduce((acc, curr) => {
-          if (curr) {
-            acc.push(...curr.split(/\s*,\s*/));
-          }
-          return acc;
-        }, []))
-        .option('no-local-repo', {
-          // negation of the local-repo option (resets local-repo default)
-          // see https://github.com/yargs/yargs/blob/master/docs/tricks.md#negating-boolean-arguments
-          alias: 'noLocalRepo',
-          describe: 'Ignore local checkout, always fetch from GitHub',
-          type: 'boolean',
-        })
-        .option('save-config', {
-          alias: 'saveConfig',
-          describe: 'Saves the default config.',
-          type: 'boolean',
-          default: false,
-        })
         .option('port', {
           describe: 'Start development server on port',
           type: 'int',
           default: 3000,
         })
-        .group(['port', 'open', 'no-open', 'host', 'local-repo', 'no-local-repo'], 'Server options')
-        .option('pages-proxy', {
-          alias: 'pagesProxy',
-          describe: 'Use the pages proxy',
-          type: 'boolean',
-          default: true,
-        })
+        .group(['port'], 'Server options')
         .option('pages-url', {
           alias: 'pagesUrl',
           describe: 'The origin url to fetch pages content from.',
           type: 'string',
         })
-        .option('pages-cache', {
-          alias: 'pagesCache',
-          describe: 'Enable memory cache for pages content.',
-          type: 'boolean',
-          default: true,
-        })
-        .group(['pages-proxy', 'pages-url', 'pages-cache'], 'Helix Pages Options')
+        .group(['pages-url', 'livereload', 'no-livereload', 'open', 'no-open'], 'Helix Pages Options')
 
         .help();
     },
@@ -128,27 +79,15 @@ module.exports = function up() {
         const UpCommand = require('./up.cmd'); // lazy load the handler to speed up execution time
         executor = new UpCommand(getOrCreateLogger(argv));
       }
-
       await executor
-        .withTargetDir(argv.target)
-        .withFiles(argv.files)
-        .withOverrideHost(argv.host)
-        .withSaveConfig(argv.saveConfig)
         .withHttpPort(argv.port)
-        .withLocalRepo(argv.localRepo)
         .withDevDefault(argv.devDefault)
         .withDevDefaultFile(argv.devDefaultFile)
-        .withGithubToken(argv.githubToken)
         // only open  browser window when executable is `hlx`
         // this prevents the window to be opened during integration tests
-        .withOpen(argv.open && path.basename(argv.$0) === 'hlx')
+        .withOpen(path.basename(argv.$0) === 'hlx' ? argv.open : false)
         .withLiveReload(argv.livereload)
-        .withCustomPipeline(argv.customPipeline)
-        .withAlgoliaAppID(argv.algoliaAppID)
-        .withAlgoliaAPIKey(argv.algoliaAPIKey)
-        .withPagesProxy(argv.pagesProxy)
         .withPagesUrl(argv.pagesUrl)
-        .withPagesCache(argv.pagesCache)
         .run();
     },
   };

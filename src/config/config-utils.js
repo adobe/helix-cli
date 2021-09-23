@@ -9,27 +9,12 @@
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-const fs = require('fs-extra');
-const path = require('path');
 const chalk = require('chalk');
-const { GitUrl } = require('@adobe/helix-shared-git');
 const semver = require('semver');
 const GitUtils = require('../git-utils');
 const pkgJson = require('../../package.json');
 
-const DEFAULT_CONFIG = path.resolve(__dirname, 'default-config.yaml');
-
 class ConfigUtils {
-  /**
-   * Returns a new default config
-   * @param {String} dir The working directory to use (optional)
-   */
-  static async createDefaultConfig(dir) {
-    const source = await fs.readFile(DEFAULT_CONFIG, 'utf8');
-    const origin = new GitUrl(await GitUtils.getOrigin(dir || process.cwd()) || 'http://localhost/local/default.git');
-    return source.replace(/"\$CURRENT_ORIGIN"/g, `"${origin.toString()}"`);
-  }
-
   /**
    * Checks if the .env file is ignored by git.
    * @param dir the current directory
