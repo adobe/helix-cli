@@ -51,7 +51,7 @@
     "ini": "2.0.0",
     "isomorphic-git": "1.10.0",
     "livereload-js": "3.3.2",
-    "open": "8.0.0",
+    "open": "8.2.1",
     "progress": "2.0.3",
     "semver": "7.3.4",
     "shelljs": "0.8.4",
