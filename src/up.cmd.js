@@ -119,7 +119,10 @@ class UpCommand extends AbstractCommand {
     await this._project.start();
     this.emit('started', this);
     if (this._open) {
-      opn(`http://localhost:${this._project.server.port}${this._open}`, { url: true });
+      const url = this._open.startsWith('/')
+        ? `http://localhost:${this._project.server.port}${this._open}`
+        : this._open;
+      opn(url, { url: true });
     }
   }
 }
