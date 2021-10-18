@@ -1,6 +1,6 @@
 {
   "name": "@adobe/helix-cli",
-  "version": "14.0.2",
+  "version": "14.0.3",
   "description": "Project Helix CLI",
   "main": "index.js",
   "bin": {
@@ -35,7 +35,7 @@
     "node": ">=12.11.1 <15.0"
   },
   "dependencies": {
-    "@adobe/helix-fetch": "2.4.2",
+    "@adobe/helix-fetch": "3.0.0",
     "@adobe/helix-log": "5.0.5",
     "@adobe/helix-shared-git": "1.0.3",
     "camelcase": "6.2.0",
