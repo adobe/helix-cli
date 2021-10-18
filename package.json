@@ -59,7 +59,7 @@
     "yargs": "16.2.0"
   },
   "devDependencies": {
-    "@adobe/eslint-config-helix": "1.2.0",
+    "@adobe/eslint-config-helix": "1.3.0",
     "@adobe/helix-shared-dom": "1.1.0",
     "@adobe/helix-testutils": "0.4.5",
     "@semantic-release/changelog": "6.0.0",
