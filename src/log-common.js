@@ -14,7 +14,6 @@ const fs = require('fs-extra');
 const chalk = require('chalk');
 const {
   SimpleInterface,
-  rootLogger,
   serializeMessage,
   messageFormatJsonString,
   messageFormatTechnical,
@@ -77,9 +76,6 @@ const categoryAwareMessageFormatConsole = (fields) => {
     return chalk`{grey [${category}]} ${lvl}: ${ser}`;
   }
 };
-
-// set the default logger, in case code uses root logger directly.
-rootLogger.loggers.get('default').formatter = categoryAwareMessageFormatConsole;
 
 // module global loggers by category
 const loggersByCategory = new Map();
