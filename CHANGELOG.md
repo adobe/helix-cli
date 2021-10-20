@@ -1,3 +1,10 @@
+## [14.0.4](https://github.com/adobe/helix-cli/compare/v14.0.3...v14.0.4) (2021-10-20)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @adobe/helix-log to v6 ([#1874](https://github.com/adobe/helix-cli/issues/1874)) ([69ac798](https://github.com/adobe/helix-cli/commit/69ac79850336ec289361e1c8e2ba291e8282968c))
+
 ## [14.0.3](https://github.com/adobe/helix-cli/compare/v14.0.2...v14.0.3) (2021-10-18)
 
 
