@@ -87,7 +87,8 @@ class UpCommand extends AbstractCommand {
     // init dev default file params
     this._project = new HelixProject()
       .withCwd(this.directory)
-      .withLiveReload(this._liveReload);
+      .withLiveReload(this._liveReload)
+      .withLogger(this._logger);
 
     this.log.info(chalk.yellow('    __ __    ___       ___                  '));
     this.log.info(chalk.yellow('   / // /__ / (_)_ __ / _ \\___ ____ ____ ___'));

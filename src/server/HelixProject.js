@@ -110,7 +110,6 @@ class HelixProject {
 
   async start() {
     this.log.debug('Launching helix simulation server for development...');
-    await this._server.init();
     await this._server.start(this);
     return this;
   }

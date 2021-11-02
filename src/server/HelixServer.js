@@ -14,7 +14,6 @@ const { promisify } = require('util');
 const EventEmitter = require('events');
 const path = require('path');
 const express = require('express');
-const { SimpleInterface } = require('@adobe/helix-log');
 const utils = require('./utils.js');
 const packageJson = require('../../package.json');
 
@@ -44,18 +43,6 @@ class HelixServer extends EventEmitter {
     this._app = express();
     this._port = DEFAULT_PORT;
     this._server = null;
-    this._logger = new SimpleInterface({
-      defaultFields: {
-        category: 'hlx',
-      },
-    });
-  }
-
-  /**
-   * Initializes the server
-   */
-  async init() {
-    this._logger = this._project.log || this.log;
   }
 
   /**
@@ -63,7 +50,7 @@ class HelixServer extends EventEmitter {
    * @returns {Logger} the logger.
    */
   get log() {
-    return this._logger;
+    return this._project.log;
   }
 
   /**
