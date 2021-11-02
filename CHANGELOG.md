@@ -1,3 +1,10 @@
+## [14.0.5](https://github.com/adobe/helix-cli/compare/v14.0.4...v14.0.5) (2021-11-02)
+
+
+### Bug Fixes
+
+* exception while logging ([#1882](https://github.com/adobe/helix-cli/issues/1882)) ([e6d4001](https://github.com/adobe/helix-cli/commit/e6d400127d6aeed6ad49ec10af85b8517d4918e0)), closes [#1879](https://github.com/adobe/helix-cli/issues/1879)
+
 ## [14.0.4](https://github.com/adobe/helix-cli/compare/v14.0.3...v14.0.4) (2021-10-20)
 
 
