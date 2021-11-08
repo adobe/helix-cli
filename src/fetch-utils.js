@@ -14,10 +14,7 @@ const fetchAPI = require('@adobe/helix-fetch');
 
 // create global context that is used by all commands and can be reset for CLI to terminate
 const context = process.env.HELIX_FETCH_FORCE_HTTP1
-  /* istanbul ignore next */
-  ? fetchAPI.context({
-    alpnProtocols: [fetchAPI.ALPN_HTTP1_1],
-  })
-  : fetchAPI.context();
+  ? /* istanbul ignore next */ fetchAPI.h1()
+  : /* istanbul ignore next */ fetchAPI.context();
 
 module.exports = context;

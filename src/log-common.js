@@ -66,15 +66,10 @@ const categoryAwareMessageFormatConsole = (fields) => {
   if (colors[level]) {
     lvl = chalk[colors[level]](lvl);
   }
-  if (category === 'cli') {
-    if (level === 'info') {
-      return `${ser}`;
-    } else {
-      return `${lvl}: ${ser}`;
-    }
-  } else {
-    return chalk`{grey [${category}]} ${lvl}: ${ser}`;
+  if (category === 'cli' && level === 'info') {
+    return `${ser}`;
   }
+  return `${lvl}: ${ser}`;
 };
 
 // module global loggers by category

@@ -18,6 +18,7 @@ const HelixProject = require('./server/HelixProject.js');
 const GitUtils = require('./git-utils.js');
 const AbstractCommand = require('./abstract.cmd');
 const pkgJson = require('../package.json');
+const { fetch } = require('./fetch-utils.js');
 
 class UpCommand extends AbstractCommand {
   constructor(logger) {
@@ -97,9 +98,21 @@ class UpCommand extends AbstractCommand {
     this.log.info(chalk.yellow(`                              /___/ v${pkgJson.version}`));
     this.log.info('');
 
-    const gitUrl = await GitUtils.getOriginURL(this.directory);
-    const ref = await GitUtils.getBranch(this.directory);
+    let ref = await GitUtils.getBranch(this.directory);
+    const gitUrl = await GitUtils.getOriginURL(this.directory, { ref });
     if (!this._pagesUrl) {
+      // check if remote already has the `ref`
+      const resp = await fetch(`${gitUrl.raw}/fstab.yaml`);
+      await resp.buffer();
+      if (!resp.ok) {
+        const friendlyUrl = `https://github.com/${gitUrl.owner}/${gitUrl.repo}/tree/${ref}`;
+        if (ref === 'main') {
+          this.log.warn(chalk`Error (${resp.status}) while loading fstab.yaml from {blue ${friendlyUrl}}. Maybe not pushed yet?`);
+        } else {
+          this.log.warn(chalk`Error (${resp.status}) while loading fstab.yaml from {blue ${friendlyUrl}}. Fallback to {yellow main} branch.`);
+          ref = 'main';
+        }
+      }
       this._pagesUrl = `https://${ref}--${gitUrl.repo}--${gitUrl.owner}.hlx3.page`;
     }
 
