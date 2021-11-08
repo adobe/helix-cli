@@ -12,8 +12,6 @@
 
 /* eslint-env mocha */
 /* eslint-disable no-underscore-dangle */
-process.env.HELIX_FETCH_FORCE_HTTP1 = 'true';
-
 const os = require('os');
 const assert = require('assert');
 const fse = require('fs-extra');

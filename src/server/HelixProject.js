@@ -12,6 +12,7 @@
 const { SimpleInterface, deriveLogger } = require('@adobe/helix-log');
 const HelixServer = require('./HelixServer.js');
 const LiveReload = require('./LiveReload.js');
+const HeadHtmlSupport = require('./HeadHtmlSupport');
 
 class HelixProject {
   constructor() {
@@ -21,6 +22,7 @@ class HelixProject {
     this._liveReload = null;
     this._enableLiveReload = false;
     this._proxyUrl = null;
+    this._headHtml = null;
   }
 
   withCwd(cwd) {
@@ -106,6 +108,15 @@ class HelixProject {
     if (this.liveReload) {
       this.liveReload.init(app, server);
     }
+  }
+
+  async initHeadHtml() {
+    this.headHtml = new HeadHtmlSupport({
+      directory: this.directory,
+      log: this.log,
+      proxyUrl: this.proxyUrl,
+    });
+    await this.headHtml.init();
   }
 
   async start() {

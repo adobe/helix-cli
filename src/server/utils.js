@@ -16,8 +16,8 @@ const { PassThrough } = require('stream');
 const fetchAPI = require('@adobe/helix-fetch');
 
 const { fetch } = process.env.HELIX_FETCH_FORCE_HTTP1
-  ? fetchAPI.context({ alpnProtocols: [fetchAPI.ALPN_HTTP1_1] })
-  : fetchAPI.context({});
+  ? /* istanbul ignore next */ fetchAPI.h1()
+  : /* istanbul ignore next */ fetchAPI.context();
 
 const utils = {
   status2level(status, debug3xx) {
@@ -131,14 +131,17 @@ const utils = {
     const contentType = ret.headers.get('content-type') || 'text/plain';
     const level = utils.status2level(ret.status, true);
     ctx.log[level](`Proxy ${req.method} request to ${url}: ${ret.status} (${contentType})`);
-    const injectLR = opts.injectLiveReload && ret.status === 200 && contentType.indexOf('text/html') === 0;
+
+    const isHTML = ret.status === 200 && contentType.indexOf('text/html') === 0;
+    const injectLR = isHTML && opts.injectLiveReload;
+    const replaceHead = isHTML && opts.headHtml && opts.headHtml.isModified;
 
     // because fetch decodes the response, we need to reset content encoding and length
     const respHeaders = ret.headers.plain();
     delete respHeaders['content-encoding'];
     delete respHeaders['content-length'];
 
-    if (ctx.log.level === 'silly' || injectLR) {
+    if (ctx.log.level === 'silly' || injectLR || replaceHead) {
       let respBody;
       let textBody;
       if (contentType.startsWith('text/')) {
@@ -166,6 +169,9 @@ const utils = {
           lines.push(textBody);
         }
         ctx.log.trace(lines.join('\n'));
+      }
+      if (replaceHead) {
+        textBody = opts.headHtml.replace(textBody);
       }
       if (injectLR) {
         textBody = utils.injectLiveReloadScript(textBody);

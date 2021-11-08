@@ -93,6 +93,7 @@ class HelixServer extends EventEmitter {
       const url = utils.makeProxyURL(ctx.url, proxyUrl);
       await utils.proxyRequest(ctx, url, req, res, {
         injectLiveReload: this._project.liveReload,
+        headHtml: this._project.headHtml,
       });
     } catch (err) {
       log.error(`Failed to proxy helix request ${ctx.path}: ${err.message}`);
@@ -142,8 +143,9 @@ class HelixServer extends EventEmitter {
         }
         resolve();
       });
-      this._project.initLiveReload(this._app, this._server);
     });
+    await this._project.initLiveReload(this._app, this._server);
+    await this._project.initHeadHtml();
     await this.setupApp();
   }
 
