@@ -126,6 +126,7 @@ const utils = {
       headers,
       cache: 'no-store',
       body,
+      redirect: 'manual',
     });
     const contentType = ret.headers.get('content-type') || 'text/plain';
     const level = utils.status2level(ret.status, true);

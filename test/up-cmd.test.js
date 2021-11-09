@@ -61,6 +61,10 @@ describe('Integration test for up command with helix pages', function suite() {
       .get('/not-found.txt')
       .reply(404);
 
+    const scope1 = nock('https://raw.githubusercontent.com')
+      .get('/adobe/dummy-foo/master/fstab.yaml')
+      .reply(200, 'dummy');
+
     cmd
       .on('started', async () => {
         try {
@@ -70,6 +74,53 @@ describe('Integration test for up command with helix pages', function suite() {
           assert.strictEqual(ret.trim(), 'Hello, world.');
           await assertHttp(`http://localhost:${cmd.project.server.port}/not-found.txt`, 404);
           await scope.done();
+          await scope1.done();
+          myDone();
+        } catch (e) {
+          myDone(e);
+        }
+      })
+      .on('stopped', () => {
+        done(error);
+      })
+      .run()
+      .catch(done);
+  });
+
+  it('up command switches to main branch if needed.', (done) => {
+    initGit(testDir, 'https://github.com/adobe/dummy-foo.git');
+    let error = null;
+    const cmd = new UpCommand()
+      .withLiveReload(false)
+      .withDirectory(testDir)
+      .withOpen(false)
+      .withHttpPort(0);
+
+    const myDone = (err) => {
+      error = err;
+      return cmd.stop();
+    };
+
+    const scope = nock('https://main--dummy-foo--adobe.hlx3.page')
+      .get('/index.html')
+      .reply(200, '## Welcome')
+      .get('/not-found.txt')
+      .reply(404);
+
+    const scope1 = nock('https://raw.githubusercontent.com')
+      .get('/adobe/dummy-foo/master/fstab.yaml')
+      .reply(404, 'dummy');
+
+    cmd
+      .on('started', async () => {
+        try {
+          let ret = await assertHttp(`http://localhost:${cmd.project.server.port}/index.html`, 200);
+          assert.strictEqual(ret.trim(), '## Welcome');
+          ret = await assertHttp(`http://localhost:${cmd.project.server.port}/local.txt`, 200);
+          assert.strictEqual(ret.trim(), 'Hello, world.');
+          await assertHttp(`http://localhost:${cmd.project.server.port}/not-found.txt`, 404);
+          await scope.done();
+          await scope1.done();
           myDone();
         } catch (e) {
           myDone(e);

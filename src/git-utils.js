@@ -217,10 +217,11 @@ class GitUtils {
    *
    * @param {string} dir working tree directory path of the git repo
    * @returns {Promise<GitUrl>} `origin` remote url ot {@code null} if not available
+   * @param {GitUrl~JSON} defaults Defaults for creating the git url.
    */
-  static async getOriginURL(dir) {
+  static async getOriginURL(dir, defaults) {
     const origin = await GitUtils.getOrigin(dir);
-    return origin ? new GitUrl(origin) : null;
+    return origin ? new GitUrl(origin, defaults) : null;
   }
 
   /**
