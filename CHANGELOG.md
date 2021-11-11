@@ -1,3 +1,11 @@
+## [14.0.6](https://github.com/adobe/helix-cli/compare/v14.0.5...v14.0.6) (2021-11-09)
+
+
+### Bug Fixes
+
+* don't follow redirects ([d5e32c0](https://github.com/adobe/helix-cli/commit/d5e32c0cc77ee6df531c6634f69ca80de33ca6bf)), closes [#1863](https://github.com/adobe/helix-cli/issues/1863)
+* fallback to main if current branch is not available yet ([5c0daee](https://github.com/adobe/helix-cli/commit/5c0daee59ce6b676160e01335662212a7a994ce5)), closes [#1884](https://github.com/adobe/helix-cli/issues/1884)
+
 ## [14.0.5](https://github.com/adobe/helix-cli/compare/v14.0.4...v14.0.5) (2021-11-02)
 
 
