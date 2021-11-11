@@ -103,7 +103,7 @@ describe('Head.html loading tests', () => {
     const directory = await setupProject(path.join(__dirname, 'fixtures', 'project'), testRoot);
     const hhs = new HeadHtmlSupport({ log: console, directory });
     await hhs.loadLocal();
-    assert.strictEqual(hhs.localHtml, '<!-- local head html -->\n');
+    assert.strictEqual(hhs.localHtml, '<!-- local head html -->\n<link rel="stylesheet" href="/styles.css">');
     assert.strictEqual(hhs.localStatus, 200);
   });
 
@@ -166,7 +166,7 @@ describe('Head.html loading tests', () => {
     await hhs.init();
     assert.strictEqual(hhs.remoteHtml, '<!-- remote head html -->');
     assert.strictEqual(hhs.remoteStatus, 200);
-    assert.strictEqual(hhs.localHtml, '<!-- local head html -->\n');
+    assert.strictEqual(hhs.localHtml, '<!-- local head html -->\n<link rel="stylesheet" href="/styles.css">');
     assert.strictEqual(hhs.localStatus, 200);
     assert.strictEqual(hhs.isModified, true);
 
@@ -179,7 +179,7 @@ describe('Head.html loading tests', () => {
 
     const scope = nock('https://main--blog--adobe.hlx3.page')
       .get('/head.html')
-      .reply(200, '<!-- local head html -->\n');
+      .reply(200, '<!-- local head html -->\n<link rel="stylesheet" href="/styles.css"/>');
 
     const hhs = new HeadHtmlSupport({
       log: console,
@@ -187,9 +187,9 @@ describe('Head.html loading tests', () => {
       directory,
     });
     await hhs.init();
-    assert.strictEqual(hhs.remoteHtml, '<!-- local head html -->\n');
+    assert.strictEqual(hhs.remoteHtml, '<!-- local head html -->\n<link rel="stylesheet" href="/styles.css">');
     assert.strictEqual(hhs.remoteStatus, 200);
-    assert.strictEqual(hhs.localHtml, '<!-- local head html -->\n');
+    assert.strictEqual(hhs.localHtml, '<!-- local head html -->\n<link rel="stylesheet" href="/styles.css">');
     assert.strictEqual(hhs.localStatus, 200);
     assert.strictEqual(hhs.isModified, false);
 

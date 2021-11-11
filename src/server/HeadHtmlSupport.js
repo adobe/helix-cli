@@ -12,6 +12,7 @@
 const fetchAPI = require('@adobe/helix-fetch');
 const fs = require('fs/promises');
 const { resolve } = require('path');
+const { JSDOM } = require('jsdom');
 
 const { fetch } = process.env.HELIX_FETCH_FORCE_HTTP1
   ? /* istanbul ignore next */ fetchAPI.h1()
@@ -33,7 +34,7 @@ module.exports = class HeadHtmlSupport {
     const resp = await fetch(this.url, {
       cache: 'no-store',
     });
-    this.remoteHtml = (await resp.text()).trim();
+    this.remoteHtml = this.sanitize(await resp.text());
     this.remoteStatus = resp.status;
     if (resp.ok) {
       this.log.debug('loaded remote head.html from from', this.url);
@@ -44,13 +45,24 @@ module.exports = class HeadHtmlSupport {
 
   async loadLocal() {
     try {
-      this.localHtml = (await fs.readFile(this.filePath, 'utf-8')).trim();
+      this.localHtml = this.sanitize(await fs.readFile(this.filePath, 'utf-8'));
       this.localStatus = 200;
       this.log.debug('loaded local head.html from from', this.filePath);
     } catch (e) {
       this.log.error(`error while loading local head.html from ${this.filePath}: ${e.code}`);
       this.localStatus = 404;
     }
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  sanitize(html) {
+    // do the same as the pipeline-service does when injecting the head.html
+    const dom = new JSDOM('<html><head></head></html>');
+    const doc = dom.window.document;
+    const $headHtml = doc.createElement('template');
+    $headHtml.innerHTML = html;
+    doc.head.appendChild($headHtml.content);
+    return doc.head.innerHTML.trim();
   }
 
   async init() {

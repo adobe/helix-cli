@@ -111,12 +111,24 @@ class HelixProject {
   }
 
   async initHeadHtml() {
-    this.headHtml = new HeadHtmlSupport({
-      directory: this.directory,
-      log: this.log,
-      proxyUrl: this.proxyUrl,
-    });
-    await this.headHtml.init();
+    if (this.proxyUrl) {
+      this.headHtml = new HeadHtmlSupport({
+        directory: this.directory,
+        log: this.log,
+        proxyUrl: this.proxyUrl,
+      });
+      await this.headHtml.init();
+
+      // register local head in live-reload
+      if (this.liveReload) {
+        this.liveReload.registerFiles([this.headHtml.filePath], '/');
+        this.liveReload.on('modified', async (modified) => {
+          if (modified.indexOf('/') >= 0) {
+            await this.headHtml.loadLocal();
+          }
+        });
+      }
+    }
   }
 
   async start() {
