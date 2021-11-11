@@ -125,6 +125,7 @@ class HelixProject {
         this.liveReload.on('modified', async (modified) => {
           if (modified.indexOf('/') >= 0) {
             await this.headHtml.loadLocal();
+            await this.headHtml.init();
           }
         });
       }
