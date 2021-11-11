@@ -104,8 +104,9 @@ class ClientConnection extends EventEmitter {
 /**
  * Live reload file watcher and server.
  */
-class LiveReload {
+class LiveReload extends EventEmitter {
   constructor(logger) {
+    super();
     // file to request mapping
     this._fileMapping = new Map();
     // pending requests by request id
@@ -135,9 +136,13 @@ class LiveReload {
       return;
     }
     this._pending.delete(requestId);
-    this._watcher.add(info.files);
-    info.files.forEach((file) => {
-      this._fileMapping.set(file, info.pathname);
+    this.registerFiles(info.files, info.pathname);
+  }
+
+  registerFiles(files, pathName) {
+    this._watcher.add(files);
+    files.forEach((file) => {
+      this._fileMapping.set(file, pathName);
     });
   }
 
@@ -181,7 +186,7 @@ class LiveReload {
         modifiedFiles = {};
 
         // inform clients
-        this.changed(files);
+        await this.changed(files);
       }, 100);
     });
   }
@@ -226,7 +231,7 @@ class LiveReload {
     fs.createReadStream(this._liveReloadJSPath).pipe(res);
   }
 
-  changed(files) {
+  async changed(files) {
     this.log.debug(`changed files: ${files}`);
 
     // map each file to the registered source
@@ -238,6 +243,7 @@ class LiveReload {
       }
     });
     const modified = Array.from(sources);
+    await this.emit('modified', modified);
 
     Object.values(this._connections).forEach((cx) => {
       this.log.debug(`reloading client ${cx.id} (url: ${cx.url})`);

@@ -59,7 +59,9 @@ describe('Integration test for up command with helix pages', function suite() {
       .get('/index.html')
       .reply(200, '## Welcome')
       .get('/not-found.txt')
-      .reply(404);
+      .reply(404)
+      .get('/head.html')
+      .reply(200, '<link rel="stylesheet" href="/styles.css"/>');
 
     const scope1 = nock('https://raw.githubusercontent.com')
       .get('/adobe/dummy-foo/master/fstab.yaml')
@@ -105,7 +107,9 @@ describe('Integration test for up command with helix pages', function suite() {
       .get('/index.html')
       .reply(200, '## Welcome')
       .get('/not-found.txt')
-      .reply(404);
+      .reply(404)
+      .get('/head.html')
+      .reply(200, '<link rel="stylesheet" href="/styles.css"/>');
 
     const scope1 = nock('https://raw.githubusercontent.com')
       .get('/adobe/dummy-foo/master/fstab.yaml')

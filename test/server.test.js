@@ -89,7 +89,9 @@ describe('Helix Server', () => {
 
     const scope = nock('http://main--foo--bar.hlx3.page')
       .get('/notfound.css')
-      .reply(404);
+      .reply(404)
+      .get('/head.html')
+      .reply(200, '<link rel="stylesheet" href="/styles.css"/>');
 
     try {
       await project.start();
@@ -112,7 +114,9 @@ describe('Helix Server', () => {
     const scope = nock('http://main--foo--bar.hlx3.page')
       .get('/local.html')
       .optionally(true)
-      .reply(200, 'foo');
+      .reply(200, 'foo')
+      .get('/head.html')
+      .reply(200, '<link rel="stylesheet" href="/styles.css"/>');
 
     try {
       await project.start();
@@ -136,7 +140,10 @@ describe('Helix Server', () => {
 
     const scope = nock('http://main--foo--bar.hlx.page')
       .get('/readme.html')
-      .reply(200, 'hello readme');
+      .reply(200, 'hello readme')
+      .get('/head.html')
+      .reply(200, '<link rel="stylesheet" href="/styles.css"/>');
+
     try {
       await project.start();
       const ret = await assertHttp(`http://localhost:${project.server.port}/readme.html`, 200);

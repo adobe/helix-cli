@@ -96,7 +96,7 @@ describe('hlx command line', () => {
       '9.0.0', 0,
       '10.0.0', 0,
       '11.1.0', 0,
-      '12.20.1', 1,
+      '12.20.1', 0,
       '14.15.4', 1,
     ];
     for (let i = 0; i < testVersions.length; i += 2) {

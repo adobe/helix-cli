@@ -12,8 +12,6 @@
 
 /* eslint-env mocha */
 /* eslint-disable no-underscore-dangle */
-process.env.HELIX_FETCH_FORCE_HTTP1 = 'true';
-
 const os = require('os');
 const assert = require('assert');
 const fse = require('fs-extra');
@@ -71,7 +69,9 @@ describe('Helix Server with Livereload', () => {
       .optionally(true)
       .reply(200, '<html><head>Test</head><body>Hello, world. path=/index.md, strain=default</body></html>', {
         'content-type': 'text/html',
-      });
+      })
+      .get('/head.html')
+      .reply(200, '<link rel="stylesheet" href="/styles.css"/>');
 
     try {
       await project.start();
@@ -96,7 +96,9 @@ describe('Helix Server with Livereload', () => {
       .optionally(true)
       .reply(200, '<html><body>Hello, world. path=/index.md, strain=default</body></html>', {
         'content-type': 'text/html',
-      });
+      })
+      .get('/head.html')
+      .reply(200, '<link rel="stylesheet" href="/styles.css"/>');
 
     try {
       await project.start();
@@ -121,7 +123,9 @@ describe('Helix Server with Livereload', () => {
       .optionally(true)
       .reply(200, '<html>Hello, world. path=/index.md, strain=default</html>', {
         'content-type': 'text/html',
-      });
+      })
+      .get('/head.html')
+      .reply(200, '<link rel="stylesheet" href="/styles.css"/>');
 
     try {
       await project.start();
@@ -145,7 +149,9 @@ describe('Helix Server with Livereload', () => {
       .optionally(true)
       .reply(200, 'Hello, world. path=/index.md, strain=default', {
         'content-type': 'text/html',
-      });
+      })
+      .get('/head.html')
+      .reply(200, '<link rel="stylesheet" href="/styles.css"/>');
 
     await project.init();
     try {
@@ -170,7 +176,9 @@ describe('Helix Server with Livereload', () => {
       .get('/live/index.html')
       .reply(200, '<html><head>Test</head><body>Hello, world. path=/index.md, strain=default</body></html>', {
         'content-type': 'text/html',
-      });
+      })
+      .get('/head.html')
+      .reply(200, '<link rel="stylesheet" href="/styles.css"/>');
     try {
       await project.start();
 
@@ -252,7 +260,9 @@ describe('Helix Server with Livereload', () => {
       .get('/live/index.html')
       .reply(200, '<html><head>Test</head><body>Hello, world. path=/index.md, strain=default</body></html>', {
         'content-type': 'text/html',
-      });
+      })
+      .get('/head.html')
+      .reply(200, '<link rel="stylesheet" href="/styles.css"/>');
 
     try {
       await project.start();
