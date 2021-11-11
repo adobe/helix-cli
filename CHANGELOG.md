@@ -1,3 +1,10 @@
+## [14.1.1](https://github.com/adobe/helix-cli/compare/v14.1.0...v14.1.1) (2021-11-11)
+
+
+### Bug Fixes
+
+* update head.html when it is modified ([#1891](https://github.com/adobe/helix-cli/issues/1891)) ([b4c8f0c](https://github.com/adobe/helix-cli/commit/b4c8f0cb8aaeb54d63fe02a2296f6b35374c6563))
+
 # [14.1.0](https://github.com/adobe/helix-cli/compare/v14.0.6...v14.1.0) (2021-11-11)
 
 
