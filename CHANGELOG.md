@@ -1,3 +1,10 @@
+# [14.1.0](https://github.com/adobe/helix-cli/compare/v14.0.6...v14.1.0) (2021-11-11)
+
+
+### Features
+
+* Local head html support ([dd369a9](https://github.com/adobe/helix-cli/commit/dd369a9723687c986b38f693b395d29678e66bbb)), closes [#1867](https://github.com/adobe/helix-cli/issues/1867)
+
 ## [14.0.6](https://github.com/adobe/helix-cli/compare/v14.0.5...v14.0.6) (2021-11-09)
 
 
