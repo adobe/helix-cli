@@ -105,7 +105,7 @@ describe('Testing GitUtils', () => {
     assert.equal(await GitUtils.isDirty(testRoot, GIT_USER_HOME), false);
 
     await fse.remove(moduleRoot);
-  });
+  }).timeout(5000);
 
   it('isDirty #unit with new file', async () => {
     assert.equal(await GitUtils.isDirty(testRoot, GIT_USER_HOME), false);

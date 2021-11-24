@@ -15,9 +15,7 @@ const path = require('path');
 const shell = require('shelljs');
 const crypto = require('crypto');
 const fse = require('fs-extra');
-const http = require('http');
-const { JSDOM } = require('jsdom');
-const { assertEquivalentNode } = require('@adobe/helix-shared-dom');
+const { fetch } = require('../src/fetch-utils.js');
 
 /**
  * init git in integration so that helix-simulator can run
@@ -47,118 +45,40 @@ function clearHelixEnv() {
   return deleted;
 }
 
-function assertFile(p, expectMissing) {
-  const exists = fse.pathExistsSync(p);
-  if (!exists && !expectMissing) {
-    assert.fail(`Expected file at ${p} exists`);
-  }
-  if (exists && expectMissing) {
-    assert.fail(`Unexpected file at ${p} exists`);
-  }
-}
-
-async function assertFileEqual(actualFile, expectedFile) {
-  const actual = await fse.readFile(actualFile, 'utf-8');
-  const expected = await fse.readFile(expectedFile, 'utf-8');
-  assert.equal(actual.trim(), expected.trim());
-}
-
 async function assertHttp(url, status, spec, replacements = []) {
-  return new Promise((resolve, reject) => {
-    let data = '';
-    http.get(url, (res) => {
-      try {
-        assert.equal(res.statusCode, status);
-      } catch (e) {
-        res.resume();
-        reject(e);
-      }
-
-      res
-        .on('data', (chunk) => {
-          data += chunk;
-        })
-        .on('end', () => {
-          try {
-            if (spec) {
-              if (Array.isArray(spec)) {
-                spec.forEach((str) => {
-                  try {
-                    assert.equal(data.indexOf(str) >= 0, true);
-                  } catch (e) {
-                    assert.fail(`response does not contain string "${str}"`);
-                  }
-                });
-              } else {
-                let expected = fse.readFileSync(path.resolve(__dirname, 'specs', spec)).toString();
-                replacements.forEach((r) => {
-                  expected = expected.replace(r.pattern, r.with);
-                });
-                if (spec.endsWith('.json')) {
-                  assert.deepEqual(JSON.parse(data), JSON.parse(expected));
-                } else {
-                  assert.equal(data.trim(), expected.trim());
-                }
-              }
-            }
-            resolve(data);
-          } catch (e) {
-            reject(e);
-          }
-        });
-    }).on('error', (e) => {
-      reject(e);
-    });
+  const resp = await fetch(url, {
+    cache: 'no-store',
   });
-}
-
-async function assertHttpDom(url, status, spec) {
-  return new Promise((resolve, reject) => {
-    let data = '';
-    http.get(url, (res) => {
-      try {
-        assert.equal(res.statusCode, status);
-      } catch (e) {
-        res.resume();
-        reject(e);
+  assert.strictEqual(resp.status, status);
+  const data = await resp.text();
+  if (spec) {
+    if (Array.isArray(spec)) {
+      spec.forEach((str) => {
+        try {
+          assert.equal(data.indexOf(str) >= 0, true);
+        } catch (e) {
+          assert.fail(`response does not contain string "${str}"`);
+        }
+      });
+    } else {
+      let expected = await fse.readFile(path.resolve(__dirname, 'specs', spec), 'utf-8');
+      replacements.forEach((r) => {
+        expected = expected.replace(r.pattern, r.with);
+      });
+      if (spec.endsWith('.json')) {
+        assert.deepStrictEqual(JSON.parse(data), JSON.parse(expected));
+      } else {
+        assert.strictEqual(data.trim(), expected.trim());
       }
-
-      res
-        .on('data', (chunk) => {
-          data += chunk;
-        })
-        .on('end', () => {
-          try {
-            if (spec) {
-              const datadom = new JSDOM(data);
-              const specdom = new JSDOM(fse.readFileSync(path.resolve(__dirname, 'specs', spec)).toString());
-              try {
-                assertEquivalentNode(datadom.window.document, specdom.window.document);
-              } catch (e) {
-                e.actual = datadom.serialize();
-                e.expected = specdom.serialize();
-                throw e;
-              }
-            }
-            resolve();
-          } catch (e) {
-            reject(e);
-          }
-        });
-    }).on('error', (e) => {
-      reject(e);
-    });
-  });
+    }
+  }
+  return data;
 }
 
 async function createTestRoot() {
   const dir = path.resolve(__dirname, 'tmp', crypto.randomBytes(16).toString('hex'));
   await fse.ensureDir(dir);
   return dir;
-}
-
-async function createFakeTestRoot() {
-  return path.resolve(__dirname, 'tmp', crypto.randomBytes(16).toString('hex'));
 }
 
 async function setupProject(srcDir, root) {
@@ -174,14 +94,10 @@ async function wait(time) {
 }
 
 module.exports = {
-  assertFile,
-  assertFileEqual,
   assertHttp,
-  assertHttpDom,
   initGit,
   createTestRoot,
   clearHelixEnv,
-  createFakeTestRoot,
   setupProject,
   wait,
 };
