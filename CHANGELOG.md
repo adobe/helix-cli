@@ -1,3 +1,10 @@
+# [14.2.0](https://github.com/adobe/helix-cli/compare/v14.1.2...v14.2.0) (2021-11-25)
+
+
+### Features
+
+* add CORS and Via headers ([9e80e20](https://github.com/adobe/helix-cli/commit/9e80e2016c6fa55d7f95ca5abd254c25a9e0d491)), closes [#1896](https://github.com/adobe/helix-cli/issues/1896)
+
 ## [14.1.2](https://github.com/adobe/helix-cli/compare/v14.1.1...v14.1.2) (2021-11-20)
 
 
