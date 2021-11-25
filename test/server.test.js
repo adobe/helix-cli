@@ -151,8 +151,7 @@ describe('Helix Server', () => {
       const ret = await resp.text();
       assert.strictEqual(resp.status, 200);
       assert.strictEqual(ret.trim(), 'hello readme');
-      assert.strictEqual(resp.headers.get('access-control-allowed-origin'), '*');
-      assert.strictEqual(resp.headers.get('access-control-allow-methods'), 'GET, POST, OPTIONS');
+      assert.strictEqual(resp.headers.get('access-control-allow-origin'), '*');
       assert.strictEqual(resp.headers.get('via'), '1.0 main--foo--bar.hlx.page');
     } finally {
       await project.stop();
