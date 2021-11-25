@@ -141,7 +141,6 @@ const utils = {
     delete respHeaders['content-encoding'];
     delete respHeaders['content-length'];
     respHeaders['access-control-allowed-origin'] = '*';
-    respHeaders['access-control-allow-methods'] = 'GET, POST, OPTIONS';
     respHeaders.via = `${ret.httpVersion ?? '1.0'} ${new URL(url).hostname}`;
 
     if (ctx.log.level === 'silly' || injectLR || replaceHead) {
