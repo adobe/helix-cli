@@ -140,6 +140,8 @@ const utils = {
     const respHeaders = ret.headers.plain();
     delete respHeaders['content-encoding'];
     delete respHeaders['content-length'];
+    respHeaders['access-control-allow-origin'] = '*';
+    respHeaders.via = `${ret.httpVersion ?? '1.0'} ${new URL(url).hostname}`;
 
     if (ctx.log.level === 'silly' || injectLR || replaceHead) {
       let respBody;

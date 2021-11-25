@@ -12,8 +12,6 @@
 
 /* eslint-env mocha */
 /* eslint-disable no-underscore-dangle */
-process.env.HELIX_FETCH_FORCE_HTTP1 = 'true';
-
 const os = require('os');
 const assert = require('assert');
 const fse = require('fs-extra');
@@ -21,6 +19,7 @@ const path = require('path');
 const nock = require('nock');
 const HelixProject = require('../src/server/HelixProject.js');
 const { createTestRoot, setupProject, assertHttp } = require('./utils.js');
+const { fetch } = require('../src/fetch-utils.js');
 
 describe('Helix Server', () => {
   let testRoot;
@@ -146,8 +145,14 @@ describe('Helix Server', () => {
 
     try {
       await project.start();
-      const ret = await assertHttp(`http://localhost:${project.server.port}/readme.html`, 200);
+      const resp = await fetch(`http://localhost:${project.server.port}/readme.html`, {
+        cache: 'no-store',
+      });
+      const ret = await resp.text();
+      assert.strictEqual(resp.status, 200);
       assert.strictEqual(ret.trim(), 'hello readme');
+      assert.strictEqual(resp.headers.get('access-control-allow-origin'), '*');
+      assert.strictEqual(resp.headers.get('via'), '1.0 main--foo--bar.hlx.page');
     } finally {
       await project.stop();
       scope.done();
