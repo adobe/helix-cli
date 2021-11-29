@@ -9,6 +9,12 @@
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
+import { resolve } from 'path';
+import { fileURLToPath } from 'url';
+
 // eslint-disable-next-line no-console
 console.log('Forcing HTTP/1.1 for Helix-Fetch');
 process.env.HELIX_FETCH_FORCE_HTTP1 = 'true';
+
+// eslint-disable-next-line no-underscore-dangle
+global.__rootdir = resolve(fileURLToPath(import.meta.url), '..', '..');

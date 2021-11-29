@@ -11,19 +11,20 @@
  */
 
 /* eslint-env mocha */
-const sinon = require('sinon');
-const dotenv = require('dotenv');
-const path = require('path');
-const { clearHelixEnv } = require('./utils.js');
-const CLI = require('../src/cli.js');
-const UpCommand = require('../src/up.cmd');
+import sinon from 'sinon';
+import dotenv from 'dotenv';
+import path from 'path';
+import { clearHelixEnv } from './utils.js';
+import CLI from '../src/cli.js';
+import UpCommand from '../src/up.cmd.js';
 
 describe('hlx up', () => {
   // mocked command instance
   let mockUp;
   let deleted;
+  let cli;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     deleted = clearHelixEnv();
     mockUp = sinon.createStubInstance(UpCommand);
     mockUp.withOpen.returnsThis();
@@ -31,6 +32,7 @@ describe('hlx up', () => {
     mockUp.withHttpPort.returnsThis();
     mockUp.withPagesUrl.returnsThis();
     mockUp.run.returnsThis();
+    cli = (await new CLI().initCommands()).withCommandExecutor('up', mockUp);
   });
 
   afterEach(() => {
@@ -41,29 +43,24 @@ describe('hlx up', () => {
     });
   });
 
-  it('hlx up runs w/o arguments', () => {
-    new CLI()
-      .withCommandExecutor('up', mockUp)
-      .run(['up']);
+  it('hlx up runs w/o arguments', async () => {
+    await cli.run(['up']);
     sinon.assert.calledWith(mockUp.withOpen, '/');
     sinon.assert.calledOnce(mockUp.run);
   });
 
-  it('hlx up can use env', () => {
-    dotenv.config({ path: path.resolve(__dirname, 'fixtures', 'all.env') });
-    new CLI()
-      .withCommandExecutor('up', mockUp)
-      .run(['up']);
+  it('hlx up can use env', async () => {
+    dotenv.config({ path: path.resolve(__rootdir, 'test', 'fixtures', 'all.env') });
+    await cli.run(['up']);
     sinon.assert.calledWith(mockUp.withOpen, 'false');
     sinon.assert.calledWith(mockUp.withLiveReload, false);
     sinon.assert.calledWith(mockUp.withHttpPort, 1234);
     sinon.assert.calledOnce(mockUp.run);
   });
 
-  it('hlx up fails with non env extra argument', () => {
+  it('hlx up fails with non env extra argument', async () => {
     let failed = false;
-    new CLI()
-      .withCommandExecutor('up', mockUp)
+    await cli
       .onFail(() => {
         failed = true;
       })
@@ -72,34 +69,26 @@ describe('hlx up', () => {
     sinon.assert.match(true, failed);
   });
 
-  it('hlx up can disable open browser with --no-open option', () => {
-    new CLI()
-      .withCommandExecutor('up', mockUp)
-      .run(['up', '--no-open']);
+  it('hlx up can disable open browser with --no-open option', async () => {
+    await cli.run(['up', '--no-open']);
     sinon.assert.calledWith(mockUp.withOpen, false);
     sinon.assert.calledOnce(mockUp.run);
   });
 
-  it('hlx up can disable live-reload browser with --no-livereload option', () => {
-    new CLI()
-      .withCommandExecutor('up', mockUp)
-      .run(['up', '--no-livereload']);
+  it('hlx up can disable live-reload browser with --no-livereload option', async () => {
+    await cli.run(['up', '--no-livereload']);
     sinon.assert.calledWith(mockUp.withLiveReload, false);
     sinon.assert.calledOnce(mockUp.run);
   });
 
-  it('hlx up can specify port number to run development server on', () => {
-    new CLI()
-      .withCommandExecutor('up', mockUp)
-      .run(['up', '--port', '3210']);
+  it('hlx up can specify port number to run development server on', async () => {
+    await cli.run(['up', '--port', '3210']);
     sinon.assert.calledWith(mockUp.withHttpPort, 3210);
     sinon.assert.calledOnce(mockUp.run);
   });
 
-  it('hlx up can set pages url', () => {
-    new CLI()
-      .withCommandExecutor('up', mockUp)
-      .run(['up', '--pages-url', 'https://foo--bar.hlx.page']);
+  it('hlx up can set pages url', async () => {
+    await cli.run(['up', '--pages-url', 'https://foo--bar.hlx.page']);
     sinon.assert.calledWith(mockUp.withPagesUrl, 'https://foo--bar.hlx.page');
     sinon.assert.calledOnce(mockUp.run);
   });

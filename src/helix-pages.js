@@ -9,11 +9,11 @@
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-const path = require('path');
-const fse = require('fs-extra');
-const shell = require('shelljs');
-const chalk = require('chalk');
-const { GitUrl } = require('@adobe/helix-shared-git');
+import path from 'path';
+import fse from 'fs-extra';
+import shell from 'shelljs';
+import chalk from 'chalk';
+import { GitUrl } from '@adobe/helix-shared-git';
 
 function execAsync(cmd) {
   return new Promise((resolve, reject) => {
@@ -30,7 +30,7 @@ function execAsync(cmd) {
 /**
  * Utilities for helix pages
  */
-class HelixPages {
+export default class HelixPages {
   constructor(logger) {
     this._logger = logger;
     this._cwd = process.cwd();
@@ -110,5 +110,3 @@ class HelixPages {
     }
   }
 }
-
-module.exports = HelixPages;

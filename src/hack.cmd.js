@@ -9,12 +9,11 @@
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
+import chalk from 'chalk';
+import opn from 'open';
+import AbstractCommand from './abstract.cmd.js';
 
-const chalk = require('chalk');
-const opn = require('open');
-const AbstractCommand = require('./abstract.cmd.js');
-
-class HackCommand extends AbstractCommand {
+export default class HackCommand extends AbstractCommand {
   constructor(logger) {
     super(logger);
     this._open = false;
@@ -38,7 +37,7 @@ class HackCommand extends AbstractCommand {
 
   async run() {
     await this.init();
-    const url = `https://helix-home-adobe.project-helix.page/hackathons/${this._hackathon}.html`;
+    const url = `https://github.com/adobe/helix-home/tree/main/hackathons/${this._hackathon}.html`;
     if (this._open) {
       opn(url, { url: true });
     } else {
@@ -47,5 +46,3 @@ class HackCommand extends AbstractCommand {
     }
   }
 }
-
-module.exports = HackCommand;

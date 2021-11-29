@@ -10,11 +10,11 @@
  * governing permissions and limitations under the License.
  */
 /* eslint-env mocha */
-const assert = require('assert');
-const { logging } = require('@adobe/helix-testutils');
-const hack = require('../src/hack');
-const HackCommand = require('../src/hack.cmd');
-const CLI = require('../src/cli');
+import assert from 'assert';
+import { logging } from '@adobe/helix-testutils';
+import hack from '../src/hack.js';
+import CLI from '../src/cli.js';
+import HackCommand from '../src/hack.cmd.js';
 
 describe('Test hlx hack', () => {
   it('hlx hack works', async () => {

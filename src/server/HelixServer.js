@@ -9,15 +9,13 @@
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-
-const { promisify } = require('util');
-const EventEmitter = require('events');
-const path = require('path');
-const express = require('express');
-const utils = require('./utils.js');
-const packageJson = require('../../package.json');
-
-const RequestContext = require('./RequestContext.js');
+import { promisify } from 'util';
+import EventEmitter from 'events';
+import path from 'path';
+import express from 'express';
+import utils from './utils.js';
+import packageJson from '../package.cjs';
+import RequestContext from './RequestContext.js';
 
 const DEFAULT_PORT = 3000;
 
@@ -32,7 +30,7 @@ function asyncHandler(fn) {
   return (req, res, next) => (Promise.resolve(fn(req, res, next)).catch(next));
 }
 
-class HelixServer extends EventEmitter {
+export default class HelixServer extends EventEmitter {
   /**
    * Creates a new HelixServer for the given project.
    * @param {HelixProject} project
@@ -167,5 +165,3 @@ class HelixServer extends EventEmitter {
     });
   }
 }
-
-module.exports = HelixServer;

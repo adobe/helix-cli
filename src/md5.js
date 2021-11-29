@@ -9,10 +9,10 @@
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-const crypto = require('crypto');
-const fs = require('fs');
+import crypto from 'crypto';
+import fs from 'fs';
 
-function md5(string, encoding = 'hex') {
+export default function md5(string, encoding = 'hex') {
   return crypto
     .createHash('md5')
     .update(string)
@@ -32,5 +32,3 @@ md5.file = async function md5File(filename) {
       .on('error', reject);
   });
 };
-
-module.exports = md5;

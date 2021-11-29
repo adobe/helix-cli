@@ -11,11 +11,11 @@
  */
 
 /* eslint-env mocha */
-const assert = require('assert');
-const path = require('path');
-const HelixProject = require('../src/server/HelixProject.js');
+import assert from 'assert';
+import path from 'path';
+import HelixProject from '../src/server/HelixProject.js';
 
-const SPEC_ROOT = path.resolve(__dirname, 'specs');
+const SPEC_ROOT = path.resolve(__rootdir, 'test', 'specs');
 
 describe('Helix Project', () => {
   it('can set port', async () => {

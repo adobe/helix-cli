@@ -9,15 +9,11 @@
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-const fs = require('fs-extra');
-const crypto = require('crypto');
-const { Socket } = require('net');
-const { PassThrough } = require('stream');
-const fetchAPI = require('@adobe/helix-fetch');
-
-const { fetch } = process.env.HELIX_FETCH_FORCE_HTTP1
-  ? /* istanbul ignore next */ fetchAPI.h1()
-  : /* istanbul ignore next */ fetchAPI.context();
+import fs from 'fs-extra';
+import crypto from 'crypto';
+import { Socket } from 'net';
+import { PassThrough } from 'stream';
+import { fetch } from '../fetch-utils.js';
 
 const utils = {
   status2level(status, debug3xx) {
@@ -269,4 +265,4 @@ const utils = {
   },
 };
 
-module.exports = Object.freeze(utils);
+export default Object.freeze(utils);

@@ -9,14 +9,10 @@
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
+import path from 'path';
+import { getOrCreateLogger } from './log-common.js';
 
-/* eslint no-console: off */
-/* eslint global-require: off */
-
-const path = require('path');
-const { getOrCreateLogger } = require('./log-common.js');
-
-module.exports = function up() {
+export default function up() {
   let executor;
   return {
     set executor(value) {
@@ -68,7 +64,7 @@ module.exports = function up() {
     handler: async (argv) => {
       if (!executor) {
         // eslint-disable-next-line global-require
-        const UpCommand = require('./up.cmd'); // lazy load the handler to speed up execution time
+        const UpCommand = (await import('./up.cmd.js')).default; // lazy load the handler to speed up execution time
         executor = new UpCommand(getOrCreateLogger(argv));
       }
       await executor
@@ -81,4 +77,4 @@ module.exports = function up() {
         .run();
     },
   };
-};
+}

@@ -9,13 +9,10 @@
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
+import EventEmitter from 'events';
+import { getOrCreateLogger } from './log-common.js';
 
-'use strict';
-
-const EventEmitter = require('events');
-const { getOrCreateLogger } = require('./log-common');
-
-class AbstractCommand extends EventEmitter {
+export default class AbstractCommand extends EventEmitter {
   constructor(logger) {
     super();
     this._initialized = false;
@@ -43,5 +40,3 @@ class AbstractCommand extends EventEmitter {
     return this;
   }
 }
-
-module.exports = AbstractCommand;

@@ -9,22 +9,20 @@
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
+import fs from 'fs';
+import path from 'path';
+import os from 'os';
+import ignore from 'ignore';
+import ini from 'ini';
+import fse from 'fs-extra';
+import { GitUrl } from '@adobe/helix-shared-git';
 
-const fs = require('fs');
-const path = require('path');
-const os = require('os');
-
-const ignore = require('ignore');
-const ini = require('ini');
-const fse = require('fs-extra');
-const { GitUrl } = require('@adobe/helix-shared-git');
-const git = require('isomorphic-git');
-
+import git from 'isomorphic-git';
 // cache for isomorphic-git API
 // see https://isomorphic-git.org/docs/en/cache
 const cache = {};
 
-class GitUtils {
+export default class GitUtils {
   /**
    * Determines whether the working tree directory contains uncommitted or unstaged changes.
    *
@@ -275,5 +273,3 @@ class GitUtils {
       .then((obj) => obj.object);
   }
 }
-
-module.exports = GitUtils;

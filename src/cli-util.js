@@ -9,14 +9,13 @@
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-
-const chalk = require('chalk');
+import chalk from 'chalk';
 
 const spinnerFrames = process.platform === 'win32'
   ? ['-', '\\', '|', '/']
   : ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'];
 
-const createSpinner = (msg) => {
+export const createSpinner = (msg) => {
   const hideCursor = () => {
     this.running = false;
     // ensure we quit after ctrl+c and show cursor again
@@ -68,13 +67,8 @@ const createSpinner = (msg) => {
   };
 };
 
-async function prompt(rl, question) {
+export async function prompt(rl, question) {
   return new Promise((resolve) => {
     rl.question(question, resolve);
   });
 }
-
-module.exports = {
-  createSpinner,
-  prompt,
-};

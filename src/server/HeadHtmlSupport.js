@@ -9,16 +9,12 @@
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-const fetchAPI = require('@adobe/helix-fetch');
-const fs = require('fs/promises');
-const { resolve } = require('path');
-const { JSDOM } = require('jsdom');
+import fs from 'fs/promises';
+import { resolve } from 'path';
+import { JSDOM } from 'jsdom';
+import { fetch } from '../fetch-utils.js';
 
-const { fetch } = process.env.HELIX_FETCH_FORCE_HTTP1
-  ? /* istanbul ignore next */ fetchAPI.h1()
-  : /* istanbul ignore next */ fetchAPI.context();
-
-module.exports = class HeadHtmlSupport {
+export default class HeadHtmlSupport {
   constructor({ proxyUrl, directory, log }) {
     this.remoteHtml = '';
     this.remoteStatus = 0;
@@ -104,4 +100,4 @@ module.exports = class HeadHtmlSupport {
 
     return `${source.substring(0, idx)}${this.localHtml}${source.substring(idx + this.remoteHtml.length)}`;
   }
-};
+}

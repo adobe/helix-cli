@@ -9,16 +9,15 @@
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-
-const { parse } = require('url');
-const utils = require('./utils.js');
+import { parse } from 'url';
+import utils from './utils.js';
 
 /**
  * Context that is used during request handling.
  *
  * @type {module.RequestContext}
  */
-module.exports = class RequestContext {
+export default class RequestContext {
   constructor(request, cfg) {
     // see https://github.com/nodejs/node/issues/36550
     const req = {
@@ -203,4 +202,4 @@ module.exports = class RequestContext {
     }
     return o;
   }
-};
+}

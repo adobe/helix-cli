@@ -12,14 +12,14 @@
 
 /* eslint-env mocha */
 /* eslint-disable no-underscore-dangle */
-const os = require('os');
-const assert = require('assert');
-const fse = require('fs-extra');
-const path = require('path');
-const nock = require('nock');
-const HelixProject = require('../src/server/HelixProject.js');
-const { createTestRoot, setupProject, assertHttp } = require('./utils.js');
-const { fetch } = require('../src/fetch-utils.js');
+import os from 'os';
+import assert from 'assert';
+import fse from 'fs-extra';
+import path from 'path';
+import nock from 'nock';
+import HelixProject from '../src/server/HelixProject.js';
+import { assertHttp, createTestRoot, setupProject } from './utils.js';
+import { fetch } from '../src/fetch-utils.js';
 
 describe('Helix Server', () => {
   let testRoot;
@@ -39,7 +39,7 @@ describe('Helix Server', () => {
   });
 
   it('does not start on occupied port', async () => {
-    const cwd = await setupProject(path.join(__dirname, 'fixtures', 'project'), testRoot);
+    const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
     const project = new HelixProject()
       .withCwd(cwd)
       .withLogger(console)
@@ -64,7 +64,7 @@ describe('Helix Server', () => {
   });
 
   it('deliver static content resource', async () => {
-    const cwd = await setupProject(path.join(__dirname, 'fixtures', 'project'), testRoot);
+    const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
     const project = new HelixProject()
       .withCwd(cwd)
       .withHttpPort(0);
@@ -78,7 +78,7 @@ describe('Helix Server', () => {
   });
 
   it('deliver 404 for static content non existing', async () => {
-    const cwd = await setupProject(path.join(__dirname, 'fixtures', 'project'), testRoot);
+    const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
     const project = new HelixProject()
       .withCwd(cwd)
       .withHttpPort(0)
@@ -102,7 +102,7 @@ describe('Helix Server', () => {
   });
 
   it('delivers local file system first.', async () => {
-    const cwd = await setupProject(path.join(__dirname, 'fixtures', 'project'), testRoot);
+    const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
     const project = new HelixProject()
       .withCwd(cwd)
       .withHttpPort(0)
@@ -128,7 +128,7 @@ describe('Helix Server', () => {
   });
 
   it('delivers from proxy.', async () => {
-    const cwd = await setupProject(path.join(__dirname, 'fixtures', 'project'), testRoot);
+    const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
     const project = new HelixProject()
       .withCwd(cwd)
       .withHttpPort(0)

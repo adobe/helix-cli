@@ -9,12 +9,9 @@
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
+import { getOrCreateLogger } from './log-common.js';
 
-/* eslint global-require: off */
-
-const { getOrCreateLogger } = require('./log-common.js');
-
-module.exports = function hack() {
+export default function hack() {
   let executor;
   return {
     set executor(value) {
@@ -39,7 +36,7 @@ module.exports = function hack() {
     handler: async (argv) => {
       if (!executor) {
         // eslint-disable-next-line global-require
-        const HackCommand = require('./hack.cmd'); // lazy load the handler to speed up execution time
+        const HackCommand = (await import('./hack.cmd.js')).default; // lazy load the handler to speed up execution time
         executor = new HackCommand(getOrCreateLogger(argv));
         executor.withHackathon(argv.hackathon);
         executor.withOpen(argv.open);
@@ -49,4 +46,4 @@ module.exports = function hack() {
         .run();
     },
   };
-};
+}
