@@ -12,7 +12,7 @@
 import path from 'path';
 import fse from 'fs-extra';
 import shell from 'shelljs';
-import chalk from 'chalk';
+import chalk from 'chalk-template';
 import { GitUrl } from '@adobe/helix-shared-git';
 
 function execAsync(cmd) {

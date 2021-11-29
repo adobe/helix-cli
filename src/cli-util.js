@@ -9,7 +9,7 @@
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-import chalk from 'chalk';
+import chalk from 'chalk-template';
 
 const spinnerFrames = process.platform === 'win32'
   ? ['-', '\\', '|', '/']
@@ -33,10 +33,10 @@ export const createSpinner = (msg) => {
     run() {
       if (this.running) {
         if (msg) {
-          this.s.write(`${chalk.cyan(spinnerFrames[this.i])} ${msg}`);
+          this.s.write(chalk`{cyan ${spinnerFrames[this.i]}} ${msg}`);
           this.s.cursorTo(0);
         } else {
-          this.s.write(chalk.cyan(spinnerFrames[this.i]));
+          this.s.write(chalk`{cyan ${spinnerFrames[this.i]}}`);
           this.s.moveCursor(-1);
         }
         this.written = true;

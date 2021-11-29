@@ -11,7 +11,7 @@
  */
 import path from 'path';
 import fs from 'fs-extra';
-import chalk from 'chalk';
+import chalk from 'chalk-template';
 import {
   ConsoleLogger,
   FileLogger,
@@ -21,10 +21,10 @@ import {
   SimpleInterface,
 } from '@adobe/helix-log';
 
-const colors = {
-  info: 'green',
-  warn: 'yellow',
-  error: 'red',
+const LEVEL_NAMES = {
+  info: chalk`{green info}`,
+  warn: chalk`{yellow warn}`,
+  error: chalk`{red error}`,
 };
 
 /**
@@ -61,10 +61,7 @@ const categoryAwareMessageFormatConsole = (fields) => {
   const fullMsg = Object.keys(rest).length === 0 ? message : [...message, ' ', rest];
   const ser = serializeMessage(fullMsg, { colors: false });
 
-  let lvl = level.toLowerCase();
-  if (colors[level]) {
-    lvl = chalk[colors[level]](lvl);
-  }
+  const lvl = LEVEL_NAMES[level] ?? level.toLowerCase();
   if (category === 'cli' && level === 'info') {
     return `${ser}`;
   }
