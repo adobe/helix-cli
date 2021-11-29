@@ -75,6 +75,9 @@ class HelixServer extends EventEmitter {
       log.debug('trying to serve local file', filePath);
       await sendFile(filePath, {
         dotfiles: 'allow',
+        headers: {
+          'access-control-allow-origin': '*',
+        },
       });
       if (liveReload) {
         liveReload.registerFile(ctx.requestId, filePath);
