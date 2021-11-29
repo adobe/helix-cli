@@ -1,3 +1,10 @@
+## [14.3.1](https://github.com/adobe/helix-cli/compare/v14.3.0...v14.3.1) (2021-11-29)
+
+
+### Bug Fixes
+
+* **deps:** update dependency chalk to v5 ([#1902](https://github.com/adobe/helix-cli/issues/1902)) ([5491d0e](https://github.com/adobe/helix-cli/commit/5491d0e05b14e968ac45ac00ae2abb4a24536cf6)), closes [#1901](https://github.com/adobe/helix-cli/issues/1901)
+
 # [14.3.0](https://github.com/adobe/helix-cli/compare/v14.2.1...v14.3.0) (2021-11-29)
 
 
