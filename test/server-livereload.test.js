@@ -12,16 +12,19 @@
 
 /* eslint-env mocha */
 /* eslint-disable no-underscore-dangle */
-const os = require('os');
-const assert = require('assert');
-const fse = require('fs-extra');
-const path = require('path');
-const nock = require('nock');
-const WebSocket = require('faye-websocket');
-const HelixProject = require('../src/server/HelixProject.js');
-const {
-  createTestRoot, setupProject, wait, assertHttp,
-} = require('./utils.js');
+import { createRequire } from 'module';
+import os from 'os';
+import assert from 'assert';
+import fse from 'fs-extra';
+import path from 'path';
+import nock from 'nock';
+import WebSocket from 'faye-websocket';
+import HelixProject from '../src/server/HelixProject.js';
+import {
+  assertHttp, createTestRoot, setupProject, wait,
+} from './utils.js';
+
+const require = createRequire(import.meta.url);
 
 describe('Helix Server with Livereload', () => {
   let testRoot;
@@ -41,7 +44,7 @@ describe('Helix Server with Livereload', () => {
   });
 
   it('deliver livereload script', async () => {
-    const cwd = await setupProject(path.join(__dirname, 'fixtures', 'project'), testRoot);
+    const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
     const project = new HelixProject()
       .withCwd(cwd)
       .withHttpPort(0)
@@ -56,7 +59,7 @@ describe('Helix Server with Livereload', () => {
   });
 
   it('deliver rendered resource with live reload injected in head', async () => {
-    const cwd = await setupProject(path.join(__dirname, 'fixtures', 'project'), testRoot);
+    const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
     const project = new HelixProject()
       .withCwd(cwd)
       .withHttpPort(0)
@@ -83,7 +86,7 @@ describe('Helix Server with Livereload', () => {
   });
 
   it('deliver rendered resource with live reload injected in body', async () => {
-    const cwd = await setupProject(path.join(__dirname, 'fixtures', 'project'), testRoot);
+    const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
     const project = new HelixProject()
       .withCwd(cwd)
       .withHttpPort(0)
@@ -110,7 +113,7 @@ describe('Helix Server with Livereload', () => {
   });
 
   it('deliver rendered resource with live reload injected in html', async () => {
-    const cwd = await setupProject(path.join(__dirname, 'fixtures', 'project'), testRoot);
+    const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
     const project = new HelixProject()
       .withCwd(cwd)
       .withHttpPort(0)
@@ -137,7 +140,7 @@ describe('Helix Server with Livereload', () => {
   });
 
   it('deliver rendered resource with live reload no injected with no html', async () => {
-    const cwd = await setupProject(path.join(__dirname, 'fixtures', 'project'), testRoot);
+    const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
     const project = new HelixProject()
       .withCwd(cwd)
       .withHttpPort(0)
@@ -164,7 +167,7 @@ describe('Helix Server with Livereload', () => {
   });
 
   it('livereload informs clients when file is modified', async () => {
-    const cwd = await setupProject(path.join(__dirname, 'fixtures', 'project'), testRoot);
+    const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
     const project = new HelixProject()
       .withCwd(cwd)
       .withHttpPort(0)
@@ -248,7 +251,7 @@ describe('Helix Server with Livereload', () => {
   });
 
   it('livereload informs clients via alert', async () => {
-    const cwd = await setupProject(path.join(__dirname, 'fixtures', 'project'), testRoot);
+    const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
     const project = new HelixProject()
       .withCwd(cwd)
       .withHttpPort(0)

@@ -9,18 +9,17 @@
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-const path = require('path');
-const fs = require('fs-extra');
-const chalk = require('chalk');
-const {
-  SimpleInterface,
-  serializeMessage,
-  messageFormatJsonString,
-  messageFormatTechnical,
-  MultiLogger,
-  FileLogger,
+import path from 'path';
+import fs from 'fs-extra';
+import chalk from 'chalk';
+import {
   ConsoleLogger,
-} = require('@adobe/helix-log');
+  FileLogger,
+  messageFormatJsonString,
+  messageFormatTechnical, MultiLogger,
+  serializeMessage,
+  SimpleInterface,
+} from '@adobe/helix-log';
 
 const colors = {
   info: 'green',
@@ -85,7 +84,7 @@ const loggersByCategory = new Map();
  *
  * @returns {SimpleInterface} a helix-log simple interface.
  */
-function getOrCreateLogger(config = 'cli') {
+export function getOrCreateLogger(config = 'cli') {
   let categ;
   if (typeof config === 'string') {
     categ = config;
@@ -134,7 +133,3 @@ function getOrCreateLogger(config = 'cli') {
   loggersByCategory.set(categ, log);
   return log;
 }
-
-module.exports = {
-  getOrCreateLogger,
-};

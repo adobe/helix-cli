@@ -11,20 +11,14 @@
  */
 
 /* eslint-env mocha */
-const assert = require('assert');
-const path = require('path');
-const fse = require('fs-extra');
-const nock = require('nock');
+import assert from 'assert';
+import path from 'path';
+import fse from 'fs-extra';
+import nock from 'nock';
+import { assertHttp, createTestRoot, initGit } from './utils.js';
+import UpCommand from '../src/up.cmd.js';
 
-const {
-  initGit,
-  assertHttp,
-  createTestRoot,
-} = require('./utils.js');
-
-const UpCommand = require('../src/up.cmd');
-
-const TEST_DIR = path.resolve(__dirname, 'fixtures', 'project');
+const TEST_DIR = path.resolve(__rootdir, 'test', 'fixtures', 'project');
 
 describe('Integration test for up command with helix pages', function suite() {
   this.timeout(60000); // ensure enough time for installing modules on slow machines

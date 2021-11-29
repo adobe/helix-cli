@@ -11,22 +11,19 @@
  */
 
 /* eslint-env mocha */
-process.env.HELIX_FETCH_FORCE_HTTP1 = 'true';
+import assert from 'assert';
+import shell from 'shelljs';
+import path from 'path';
+import fse from 'fs-extra';
+import sinon from 'sinon';
+import { clearHelixEnv, createTestRoot } from './utils.js';
+import pkgJson from '../src/package.cjs';
+import CLI from '../src/cli.js';
 
-const assert = require('assert');
-const shell = require('shelljs');
-const path = require('path');
-const fse = require('fs-extra');
-const sinon = require('sinon');
-const { clearHelixEnv } = require('./utils.js');
-const pkgJson = require('../package.json');
-const CLI = require('../src/cli.js');
-
-const { createTestRoot } = require('./utils.js');
-const { checkNodeVersion } = require('../src/config/config-utils.js');
+import { checkNodeVersion } from '../src/config/config-utils.js';
 
 function runCLI(...args) {
-  const cmd = ['node', path.resolve(__dirname, '../index.js'), ...args].join(' ');
+  const cmd = ['node', path.resolve(__rootdir, 'index.js'), ...args].join(' ');
   return shell.exec(cmd);
 }
 
@@ -67,8 +64,8 @@ describe('hlx command line', () => {
     assert.ok(/.*Unknown command: foo*/.test(cmd.stderr.toString()));
   });
 
-  it('hlx build with unknown argument shows help and exists with != 0', () => {
-    const cmd = runCLI('build', '--foo=bar');
+  it('hlx up with unknown argument shows help and exists with != 0', () => {
+    const cmd = runCLI('up', '--foo=bar');
     assert.notEqual(cmd.code, 0);
     assert.ok(/.*Unknown argument: foo*/.test(cmd.stderr.toString()));
   });
@@ -117,20 +114,20 @@ describe('hlx command line', () => {
   });
 
   it('can set log-level and log-file', async () => {
-    const testCmd = {
-      command: 'test',
+    const upCmd = {
+      command: 'up',
       desc: 'Test Command.',
       handler: sinon.spy(),
     };
     const cli = new CLI();
     // eslint-disable-next-line no-underscore-dangle
     cli._commands = {
-      test: testCmd,
+      up: upCmd,
     };
-    await cli.run(['test', '--log-level', 'silly', '--log-file', 'foo.log']);
-    sinon.assert.calledWith(testCmd.handler, {
+    await cli.run(['up', '--log-level', 'silly', '--log-file', 'foo.log']);
+    sinon.assert.calledWith(upCmd.handler, {
       $0: 'hlx',
-      _: ['test'],
+      _: ['up'],
       'log-file': ['foo.log'],
       'log-level': 'silly',
       logFile: ['foo.log'],

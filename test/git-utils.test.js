@@ -9,21 +9,17 @@
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-
 /* eslint-env mocha */
+import assert from 'assert';
+import path from 'path';
+import net from 'net';
+import fse from 'fs-extra';
+import shell from 'shelljs';
+import { condit } from '@adobe/helix-testutils';
+import { createTestRoot } from './utils.js';
+import GitUtils from '../src/git-utils.js';
 
-const assert = require('assert');
-const path = require('path');
-const net = require('net');
-
-const fse = require('fs-extra');
-const shell = require('shelljs');
-const { condit } = require('@adobe/helix-testutils');
-
-const { createTestRoot } = require('./utils.js');
-const GitUtils = require('../src/git-utils');
-
-const GIT_USER_HOME = path.resolve(__dirname, 'fixtures', 'gitutils');
+const GIT_USER_HOME = path.resolve(__rootdir, 'test', 'fixtures', 'gitutils');
 
 const isNotWindows = () => (process.platform !== 'win32');
 
@@ -180,7 +176,7 @@ describe('Testing GitUtils', () => {
 });
 
 describe('Tests against the helix-cli repo', () => {
-  const repoDir = path.resolve(__dirname, '..');
+  const repoDir = __rootdir;
 
   function ishelix() {
     if (process.env.CIRCLE_REPOSITORY_URL) {

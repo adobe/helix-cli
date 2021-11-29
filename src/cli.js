@@ -9,14 +9,9 @@
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-
-/* eslint-disable global-require, no-console */
-
-'use strict';
-
-const yargs = require('yargs');
-const camelcase = require('camelcase');
-const fetchContext = require('./fetch-utils.js');
+import yargs from 'yargs';
+import camelcase from 'camelcase';
+import { context as fetchContext } from './fetch-utils.js';
 
 const MIN_MSG = 'You need at least one command.';
 
@@ -67,12 +62,8 @@ function logArgs(argv) {
     });
 }
 
-class CLI {
+export default class CLI {
   constructor() {
-    this._commands = {
-      up: require('./up.js')(),
-      hack: require('./hack.js')(),
-    };
     this._failFn = (message, err, argv) => {
       const msg = err && err.message ? err.message : message;
       if (msg) {
@@ -95,16 +86,32 @@ class CLI {
     return this;
   }
 
-  run(args) {
-    const argv = yargs();
-    Object.values(this._commands).forEach((cmd) => argv.command(cmd));
+  async initCommands() {
+    if (!this._commands) {
+      this._commands = {};
+      for (const cmd of ['up', 'hack']) {
+        if (!this._commands[cmd]) {
+          // eslint-disable-next-line no-await-in-loop
+          this._commands[cmd] = (await import(`./${cmd}.js`)).default();
+        }
+      }
+    }
+    return this;
+  }
 
-    const ret = logArgs(argv)
+  async run(args) {
+    await this.initCommands();
+    const argv = yargs();
+    Object.values(this._commands)
+      .forEach((cmd) => argv.command(cmd));
+
+    logArgs(argv)
+      .strictCommands(true)
       .scriptName('hlx')
       .usage('Usage: $0 <command> [options]')
       .parserConfiguration({ 'camel-case-expansion': false })
       .env('HLX')
-      .check(envAwareStrict)
+      .check((a) => envAwareStrict(a, argv.parsed.aliases))
       .showHelpOnFail(true)
       .fail(this._failFn)
       .exitProcess(args.indexOf('--get-yargs-completions') > -1)
@@ -113,16 +120,7 @@ class CLI {
       .help()
       .parse(args);
 
-    // hack to check if command is valid in non-strict mode
-    const cmd = ret._[0];
-    if (cmd && !(cmd in this._commands)) {
-      console.error('Unknown command: %s\n', cmd);
-      argv.showHelp();
-      process.exit(1);
-    }
     // reset fetch connections so that process can terminate
     fetchContext.reset();
   }
 }
-
-module.exports = CLI;

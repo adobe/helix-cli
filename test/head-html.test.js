@@ -11,14 +11,13 @@
  */
 
 /* eslint-env mocha */
-const assert = require('assert');
-const nock = require('nock');
-const os = require('os');
-const fse = require('fs-extra');
-const path = require('path');
-
-const HeadHtmlSupport = require('../src/server/HeadHtmlSupport.js');
-const { createTestRoot, setupProject } = require('./utils.js');
+import assert from 'assert';
+import nock from 'nock';
+import os from 'os';
+import fse from 'fs-extra';
+import path from 'path';
+import HeadHtmlSupport from '../src/server/HeadHtmlSupport.js';
+import { createTestRoot, setupProject } from './utils.js';
 
 describe('Head.html replacement tests', () => {
   it('replaces the head html within <head> tags', () => {
@@ -100,7 +99,7 @@ describe('Head.html loading tests', () => {
   });
 
   it('loads local head.html', async () => {
-    const directory = await setupProject(path.join(__dirname, 'fixtures', 'project'), testRoot);
+    const directory = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
     const hhs = new HeadHtmlSupport({ log: console, directory });
     await hhs.loadLocal();
     assert.strictEqual(hhs.localHtml, '<!-- local head html -->\n<link rel="stylesheet" href="/styles.css">');
@@ -108,7 +107,7 @@ describe('Head.html loading tests', () => {
   });
 
   it('loads missing head.html', async () => {
-    const directory = await setupProject(path.join(__dirname, 'fixtures', 'project'), testRoot);
+    const directory = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
     const hhs = new HeadHtmlSupport({ log: console, directory: `${directory}-not-exist` });
     await hhs.loadLocal();
     assert.strictEqual(hhs.localHtml, '');
@@ -116,7 +115,7 @@ describe('Head.html loading tests', () => {
   });
 
   it('loads remote head.html', async () => {
-    const directory = await setupProject(path.join(__dirname, 'fixtures', 'project'), testRoot);
+    const directory = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
 
     const scope = nock('https://main--blog--adobe.hlx3.page')
       .get('/head.html')
@@ -134,7 +133,7 @@ describe('Head.html loading tests', () => {
   });
 
   it('loads missing remote head.html', async () => {
-    const directory = await setupProject(path.join(__dirname, 'fixtures', 'project'), testRoot);
+    const directory = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
 
     const scope = nock('https://main--blog--adobe.hlx3.page')
       .get('/head.html')
@@ -152,7 +151,7 @@ describe('Head.html loading tests', () => {
   });
 
   it('init loads local and remote head.html', async () => {
-    const directory = await setupProject(path.join(__dirname, 'fixtures', 'project'), testRoot);
+    const directory = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
 
     const scope = nock('https://main--blog--adobe.hlx3.page')
       .get('/head.html')
@@ -175,7 +174,7 @@ describe('Head.html loading tests', () => {
   });
 
   it('init loads local and remote head.html (not modified)', async () => {
-    const directory = await setupProject(path.join(__dirname, 'fixtures', 'project'), testRoot);
+    const directory = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
 
     const scope = nock('https://main--blog--adobe.hlx3.page')
       .get('/head.html')

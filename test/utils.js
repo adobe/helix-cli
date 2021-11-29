@@ -10,17 +10,17 @@
  * governing permissions and limitations under the License.
  */
 /* eslint-env mocha */
-const assert = require('assert');
-const path = require('path');
-const shell = require('shelljs');
-const crypto = require('crypto');
-const fse = require('fs-extra');
-const { fetch } = require('../src/fetch-utils.js');
+import assert from 'assert';
+import path from 'path';
+import shell from 'shelljs';
+import crypto from 'crypto';
+import fse from 'fs-extra';
+import { fetch } from '../src/fetch-utils.js';
 
 /**
  * init git in integration so that helix-simulator can run
  */
-function initGit(dir, remote, branch) {
+export function initGit(dir, remote, branch) {
   const pwd = shell.pwd();
   shell.cd(dir);
   shell.exec('git init');
@@ -36,7 +36,7 @@ function initGit(dir, remote, branch) {
   shell.cd(pwd);
 }
 
-function clearHelixEnv() {
+export function clearHelixEnv() {
   const deleted = {};
   Object.keys(process.env).filter((key) => key.startsWith('HLX_')).forEach((key) => {
     deleted[key] = process.env[key];
@@ -45,7 +45,7 @@ function clearHelixEnv() {
   return deleted;
 }
 
-async function assertHttp(url, status, spec, replacements = []) {
+export async function assertHttp(url, status, spec, replacements = []) {
   const resp = await fetch(url, {
     cache: 'no-store',
   });
@@ -61,7 +61,7 @@ async function assertHttp(url, status, spec, replacements = []) {
         }
       });
     } else {
-      let expected = await fse.readFile(path.resolve(__dirname, 'specs', spec), 'utf-8');
+      let expected = await fse.readFile(path.resolve(__rootdir, 'test', 'specs', spec), 'utf-8');
       replacements.forEach((r) => {
         expected = expected.replace(r.pattern, r.with);
       });
@@ -75,29 +75,20 @@ async function assertHttp(url, status, spec, replacements = []) {
   return data;
 }
 
-async function createTestRoot() {
-  const dir = path.resolve(__dirname, 'tmp', crypto.randomBytes(16).toString('hex'));
+export async function createTestRoot() {
+  const dir = path.resolve(__rootdir, 'test', 'tmp', crypto.randomBytes(16).toString('hex'));
   await fse.ensureDir(dir);
   return dir;
 }
 
-async function setupProject(srcDir, root) {
+export async function setupProject(srcDir, root) {
   const dir = path.resolve(root, path.basename(srcDir));
   await fse.copy(srcDir, dir);
   return dir;
 }
 
-async function wait(time) {
+export async function wait(time) {
   return new Promise((resolve) => {
     setTimeout(resolve, time);
   });
 }
-
-module.exports = {
-  assertHttp,
-  initGit,
-  createTestRoot,
-  clearHelixEnv,
-  setupProject,
-  wait,
-};

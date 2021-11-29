@@ -10,10 +10,13 @@
  * governing permissions and limitations under the License.
  */
 // eslint-disable-next-line max-classes-per-file
-const fs = require('fs');
-const { EventEmitter } = require('events');
-const WebSocket = require('faye-websocket');
-const chokidar = require('chokidar');
+import fs from 'fs';
+import chokidar from 'chokidar';
+import WebSocket from 'faye-websocket';
+import { EventEmitter } from 'events';
+import { createRequire } from 'module';
+
+const require = createRequire(import.meta.url);
 
 /**
  * Client connection for the live reload server.
@@ -104,7 +107,7 @@ class ClientConnection extends EventEmitter {
 /**
  * Live reload file watcher and server.
  */
-class LiveReload extends EventEmitter {
+export default class LiveReload extends EventEmitter {
   constructor(logger) {
     super();
     // file to request mapping
@@ -259,5 +262,3 @@ class LiveReload extends EventEmitter {
     });
   }
 }
-
-module.exports = LiveReload;

@@ -9,13 +9,11 @@
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-
 /* eslint-env mocha */
-
-const assert = require('assert');
-const net = require('net');
-const RequestContext = require('../src/server/RequestContext.js');
-const utils = require('../src/server/utils.js');
+import assert from 'assert';
+import net from 'net';
+import RequestContext from '../src/server/RequestContext.js';
+import utils from '../src/server/utils.js';
 
 describe('Utils Test', () => {
   describe('Request context', () => {

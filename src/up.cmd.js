@@ -9,18 +9,17 @@
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
+import path from 'path';
+import fse from 'fs-extra';
+import opn from 'open';
+import chalk from 'chalk';
+import HelixProject from './server/HelixProject.js';
+import GitUtils from './git-utils.js';
+import pkgJson from './package.cjs';
+import { fetch } from './fetch-utils.js';
+import AbstractCommand from './abstract.cmd.js';
 
-const path = require('path');
-const fse = require('fs-extra');
-const opn = require('open');
-const chalk = require('chalk');
-const HelixProject = require('./server/HelixProject.js');
-const GitUtils = require('./git-utils.js');
-const AbstractCommand = require('./abstract.cmd');
-const pkgJson = require('../package.json');
-const { fetch } = require('./fetch-utils.js');
-
-class UpCommand extends AbstractCommand {
+export default class UpCommand extends AbstractCommand {
   constructor(logger) {
     super(logger);
     this._httpPort = -1;
@@ -140,5 +139,3 @@ class UpCommand extends AbstractCommand {
     }
   }
 }
-
-module.exports = UpCommand;

@@ -9,12 +9,12 @@
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-const { SimpleInterface, deriveLogger } = require('@adobe/helix-log');
-const HelixServer = require('./HelixServer.js');
-const LiveReload = require('./LiveReload.js');
-const HeadHtmlSupport = require('./HeadHtmlSupport');
+import { deriveLogger, SimpleInterface } from '@adobe/helix-log';
+import HelixServer from './HelixServer.js';
+import LiveReload from './LiveReload.js';
+import HeadHtmlSupport from './HeadHtmlSupport.js';
 
-class HelixProject {
+export default class HelixProject {
   constructor() {
     this._cwd = process.cwd();
     this._server = new HelixServer(this);
@@ -147,5 +147,3 @@ class HelixProject {
     return this;
   }
 }
-
-module.exports = HelixProject;
