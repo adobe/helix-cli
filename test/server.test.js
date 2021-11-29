@@ -119,8 +119,13 @@ describe('Helix Server', () => {
 
     try {
       await project.start();
-      const ret = await assertHttp(`http://localhost:${project.server.port}/local.html`, 200);
+      const resp = await fetch(`http://localhost:${project.server.port}/local.html`, {
+        cache: 'no-store',
+      });
+      const ret = await resp.text();
+      assert.strictEqual(resp.status, 200);
       assert.strictEqual(ret.trim(), 'hello index');
+      assert.strictEqual(resp.headers.get('access-control-allow-origin'), '*');
     } finally {
       await project.stop();
       scope.done();
