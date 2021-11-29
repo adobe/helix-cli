@@ -12,7 +12,7 @@
 import path from 'path';
 import fse from 'fs-extra';
 import opn from 'open';
-import chalk from 'chalk';
+import chalk from 'chalk-template';
 import HelixProject from './server/HelixProject.js';
 import GitUtils from './git-utils.js';
 import pkgJson from './package.cjs';
@@ -90,11 +90,11 @@ export default class UpCommand extends AbstractCommand {
       .withLiveReload(this._liveReload)
       .withLogger(this._logger);
 
-    this.log.info(chalk.yellow('    __ __    ___       ___                  '));
-    this.log.info(chalk.yellow('   / // /__ / (_)_ __ / _ \\___ ____ ____ ___'));
-    this.log.info(chalk.yellow('  / _  / -_) / /\\ \\ // ___/ _ `/ _ `/ -_|_-<'));
-    this.log.info(chalk.yellow(' /_//_/\\__/_/_//_\\_\\/_/   \\_,_/\\_, /\\__/___/'));
-    this.log.info(chalk.yellow(`                              /___/ v${pkgJson.version}`));
+    this.log.info(chalk`{yellow     __ __    ___       ___                  }`);
+    this.log.info(chalk`{yellow    / // /__ / (_)_ __ / _ \\___ ____ ____ ___}`);
+    this.log.info(chalk`{yellow   / _  / -_) / /\\ \\ // ___/ _ \`/ _ \`/ -_|_-<}`);
+    this.log.info(chalk`{yellow  /_//_/\\__/_/_//_\\_\\/_/   \\_,_/\\_, /\\__/___/}`);
+    this.log.info(chalk`{yellow                               /___/ v${pkgJson.version}}`);
     this.log.info('');
 
     let ref = await GitUtils.getBranch(this.directory);

@@ -9,7 +9,7 @@
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-import chalk from 'chalk';
+import chalk from 'chalk-template';
 import opn from 'open';
 import AbstractCommand from './abstract.cmd.js';
 

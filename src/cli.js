@@ -67,9 +67,11 @@ export default class CLI {
     this._failFn = (message, err, argv) => {
       const msg = err && err.message ? err.message : message;
       if (msg) {
+        // eslint-disable-next-line no-console
         console.error(msg);
       }
       if (msg === MIN_MSG || /.*Unknown argument.*/.test(msg) || /.*Not enough non-option arguments:.*/.test(msg)) {
+        // eslint-disable-next-line no-console
         console.error('\n%s', argv.help());
       }
       process.exit(1);
