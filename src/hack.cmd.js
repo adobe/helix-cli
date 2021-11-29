@@ -37,7 +37,7 @@ export default class HackCommand extends AbstractCommand {
 
   async run() {
     await this.init();
-    const url = `https://github.com/adobe/helix-home/tree/main/hackathons/${this._hackathon}.html`;
+    const url = `https://github.com/adobe/helix-home/tree/main/hackathons/${this._hackathon}.md`;
     if (this._open) {
       opn(url, { url: true });
     } else {

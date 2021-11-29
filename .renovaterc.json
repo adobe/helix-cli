@@ -2,10 +2,6 @@
   "extends": ["github>adobe/helix-shared"],
   "packageRules": [
     {
-      "packageNames": ["yargs"],
-      "allowedVersions": "<17.0.0"
-    },
-    {
       "packageNames": ["circleci/node"],
       "allowedVersions": "14"
     }

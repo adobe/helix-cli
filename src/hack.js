@@ -18,18 +18,19 @@ export default function hack() {
       executor = value;
     },
     command: 'hack [hackathon]',
+    aliases: [],
     builder: (yargs) => {
       yargs
+        .option('open', {
+          describe: 'Open a browser window',
+          type: 'boolean',
+          default: true,
+        })
         .positional('hackathon', {
           describe: 'The hackathon to attend',
           default: '',
           array: false,
           type: 'string',
-        })
-        .option('open', {
-          describe: 'Open a browser window',
-          type: 'boolean',
-          default: true,
         })
         .help();
     },

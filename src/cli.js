@@ -105,12 +105,13 @@ export default class CLI {
     Object.values(this._commands)
       .forEach((cmd) => argv.command(cmd));
 
-    const ret = logArgs(argv)
+    logArgs(argv)
+      .strictCommands(true)
       .scriptName('hlx')
       .usage('Usage: $0 <command> [options]')
       .parserConfiguration({ 'camel-case-expansion': false })
       .env('HLX')
-      .check(envAwareStrict)
+      .check((a) => envAwareStrict(a, argv.parsed.aliases))
       .showHelpOnFail(true)
       .fail(this._failFn)
       .exitProcess(args.indexOf('--get-yargs-completions') > -1)
@@ -119,13 +120,6 @@ export default class CLI {
       .help()
       .parse(args);
 
-    // hack to check if command is valid in non-strict mode
-    const cmd = ret._[0];
-    if (cmd && !(cmd in this._commands)) {
-      console.error('Unknown command: %s\n', cmd);
-      argv.showHelp();
-      process.exit(1);
-    }
     // reset fetch connections so that process can terminate
     fetchContext.reset();
   }

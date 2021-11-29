@@ -31,6 +31,6 @@ describe('Test hlx hack', () => {
       .withOpen(false)
       .run();
     const log = logger.getOutput();
-    assert.ok(log.indexOf(`/hackathons/${hackathon}.html`) > 0);
+    assert.ok(log.indexOf(`/hackathons/${hackathon}.md`) > 0);
   });
 });
