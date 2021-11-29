@@ -1,3 +1,10 @@
+## [14.2.1](https://github.com/adobe/helix-cli/compare/v14.2.0...v14.2.1) (2021-11-29)
+
+
+### Bug Fixes
+
+* also add CORS headers for local files ([#1900](https://github.com/adobe/helix-cli/issues/1900)) ([8374533](https://github.com/adobe/helix-cli/commit/8374533599940e84707c54acd0401a90714663b1)), closes [#1896](https://github.com/adobe/helix-cli/issues/1896)
+
 # [14.2.0](https://github.com/adobe/helix-cli/compare/v14.1.2...v14.2.0) (2021-11-25)
 
 
