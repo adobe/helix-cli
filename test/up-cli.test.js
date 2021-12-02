@@ -31,6 +31,7 @@ describe('hlx up', () => {
     mockUp.withLiveReload.returnsThis();
     mockUp.withHttpPort.returnsThis();
     mockUp.withPagesUrl.returnsThis();
+    mockUp.withPrintIndex.returnsThis();
     mockUp.run.returnsThis();
     cli = (await new CLI().initCommands()).withCommandExecutor('up', mockUp);
   });
@@ -90,6 +91,12 @@ describe('hlx up', () => {
   it('hlx up can set pages url', async () => {
     await cli.run(['up', '--pages-url', 'https://foo--bar.hlx.page']);
     sinon.assert.calledWith(mockUp.withPagesUrl, 'https://foo--bar.hlx.page');
+    sinon.assert.calledOnce(mockUp.run);
+  });
+
+  it('hlx up can enable print index', async () => {
+    await cli.run(['up', '--print-index']);
+    sinon.assert.calledWith(mockUp.withPrintIndex, true);
     sinon.assert.calledOnce(mockUp.run);
   });
 });

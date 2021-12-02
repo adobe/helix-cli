@@ -26,6 +26,7 @@ export default class UpCommand extends AbstractCommand {
     this._open = '/';
     this._liveReload = false;
     this._pagesUrl = null;
+    this._printIndex = false;
   }
 
   withHttpPort(p) {
@@ -48,15 +49,16 @@ export default class UpCommand extends AbstractCommand {
     return this;
   }
 
+  withPrintIndex(value) {
+    this._printIndex = value;
+    return this;
+  }
+
   get project() {
     return this._project;
   }
 
   async stop() {
-    if (this._watcher) {
-      await this._watcher.close();
-      this._watcher = null;
-    }
     if (this._project) {
       try {
         await this._project.stop();
@@ -88,7 +90,8 @@ export default class UpCommand extends AbstractCommand {
     this._project = new HelixProject()
       .withCwd(this.directory)
       .withLiveReload(this._liveReload)
-      .withLogger(this._logger);
+      .withLogger(this._logger)
+      .withPrintIndex(this._printIndex);
 
     this.log.info(chalk`{yellow     __ __    ___       ___                  }`);
     this.log.info(chalk`{yellow    / // /__ / (_)_ __ / _ \\___ ____ ____ ___}`);

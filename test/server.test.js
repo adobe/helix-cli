@@ -137,6 +137,7 @@ describe('Helix Server', () => {
     const project = new HelixProject()
       .withCwd(cwd)
       .withHttpPort(0)
+      .withPrintIndex(true)
       .withProxyUrl('http://main--foo--bar.hlx.page');
 
     await project.init();
@@ -144,9 +145,13 @@ describe('Helix Server', () => {
 
     const scope = nock('http://main--foo--bar.hlx.page')
       .get('/readme.html')
-      .reply(200, 'hello readme')
+      .reply(200, 'hello readme', {
+        'content-type': 'text/html',
+      })
       .get('/head.html')
-      .reply(200, '<link rel="stylesheet" href="/styles.css"/>');
+      .reply(200, '<link rel="stylesheet" href="/styles.css"/>', {
+        'content-type': 'text/html',
+      });
 
     try {
       await project.start();
