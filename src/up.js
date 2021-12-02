@@ -51,13 +51,19 @@ export default function up() {
           type: 'int',
           default: 3000,
         })
+        .option('print-index', {
+          alias: 'printIndex',
+          describe: 'Prints the indexed records for the current page.',
+          type: 'boolean',
+          default: false,
+        })
         .group(['port'], 'Server options')
         .option('pages-url', {
           alias: 'pagesUrl',
           describe: 'The origin url to fetch pages content from.',
           type: 'string',
         })
-        .group(['pages-url', 'livereload', 'no-livereload', 'open', 'no-open'], 'Helix Pages Options')
+        .group(['pages-url', 'livereload', 'no-livereload', 'open', 'no-open', 'print-index'], 'Helix Pages Options')
 
         .help();
     },
@@ -74,6 +80,7 @@ export default function up() {
         .withOpen(path.basename(argv.$0) === 'hlx' ? argv.open : false)
         .withLiveReload(argv.livereload)
         .withPagesUrl(argv.pagesUrl)
+        .withPrintIndex(argv.printIndex)
         .run();
     },
   };

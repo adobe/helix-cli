@@ -131,6 +131,7 @@ const utils = {
     const isHTML = ret.status === 200 && contentType.indexOf('text/html') === 0;
     const injectLR = isHTML && opts.injectLiveReload;
     const replaceHead = isHTML && opts.headHtml && opts.headHtml.isModified;
+    const doIndex = isHTML && opts.indexer && url.indexOf('.plain.html') < 0;
 
     // because fetch decodes the response, we need to reset content encoding and length
     const respHeaders = ret.headers.plain();
@@ -139,7 +140,7 @@ const utils = {
     respHeaders['access-control-allow-origin'] = '*';
     respHeaders.via = `${ret.httpVersion ?? '1.0'} ${new URL(url).hostname}`;
 
-    if (ctx.log.level === 'silly' || injectLR || replaceHead) {
+    if (ctx.log.level === 'silly' || injectLR || replaceHead || doIndex) {
       let respBody;
       let textBody;
       if (contentType.startsWith('text/')) {
@@ -173,6 +174,12 @@ const utils = {
       }
       if (injectLR) {
         textBody = utils.injectLiveReloadScript(textBody);
+      }
+      if (doIndex) {
+        opts.indexer.onData(url, {
+          body: textBody,
+          headers: respHeaders,
+        });
       }
       res
         .status(ret.status)

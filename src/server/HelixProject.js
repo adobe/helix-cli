@@ -9,10 +9,11 @@
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-import { deriveLogger, SimpleInterface } from '@adobe/helix-log';
+import { ConsoleLogger, deriveLogger, SimpleInterface } from '@adobe/helix-log';
 import HelixServer from './HelixServer.js';
 import LiveReload from './LiveReload.js';
 import HeadHtmlSupport from './HeadHtmlSupport.js';
+import Indexer from './Indexer.js';
 
 export default class HelixProject {
   constructor() {
@@ -23,6 +24,8 @@ export default class HelixProject {
     this._enableLiveReload = false;
     this._proxyUrl = null;
     this._headHtml = null;
+    this._indexer = null;
+    this._printIndex = false;
   }
 
   withCwd(cwd) {
@@ -50,6 +53,11 @@ export default class HelixProject {
     return this;
   }
 
+  withPrintIndex(value) {
+    this._printIndex = value;
+    return this;
+  }
+
   get log() {
     return this._logger;
   }
@@ -70,6 +78,10 @@ export default class HelixProject {
     return this._cwd;
   }
 
+  get indexer() {
+    return this._indexer;
+  }
+
   /**
    * Returns the helix server
    * @returns {HelixServer}
@@ -81,6 +93,7 @@ export default class HelixProject {
   async init() {
     if (!this._logger) {
       this._logger = new SimpleInterface({
+        logger: new ConsoleLogger(),
         level: 'debug',
         defaultFields: {
           category: 'hlx',
@@ -101,6 +114,10 @@ export default class HelixProject {
       });
     }
     this._liveReload = this._enableLiveReload ? new LiveReload(this._logger) : null;
+    this._indexer = new Indexer()
+      .withLogger(this._logger)
+      .withCwd(this._cwd)
+      .withPrintIndex(this._printIndex);
     return this;
   }
 
@@ -135,6 +152,9 @@ export default class HelixProject {
   async start() {
     this.log.debug('Launching helix simulation server for development...');
     await this._server.start(this);
+    if (this._indexer) {
+      await this._indexer.init();
+    }
     return this;
   }
 
@@ -143,6 +163,9 @@ export default class HelixProject {
     await this._server.stop();
     if (this.liveReload) {
       this.liveReload.stop();
+    }
+    if (this._indexer) {
+      await this._indexer.close();
     }
     return this;
   }
