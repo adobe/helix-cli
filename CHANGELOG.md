@@ -1,3 +1,10 @@
+## [14.4.1](https://github.com/adobe/helix-cli/compare/v14.4.0...v14.4.1) (2021-12-02)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @adobe/helix-shared-config to v1.6.0 ([3b47817](https://github.com/adobe/helix-cli/commit/3b4781752d21ed313336461b17f6c678d5448fdb))
+
 # [14.4.0](https://github.com/adobe/helix-cli/compare/v14.3.1...v14.4.0) (2021-12-02)
 
 
