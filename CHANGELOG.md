@@ -1,3 +1,10 @@
+# [14.4.0](https://github.com/adobe/helix-cli/compare/v14.3.1...v14.4.0) (2021-12-02)
+
+
+### Features
+
+* add --print-index to help debug query.yaml ([#1904](https://github.com/adobe/helix-cli/issues/1904)) ([0918aa0](https://github.com/adobe/helix-cli/commit/0918aa0226124ae3d358570f93e769023067f34a)), closes [#1903](https://github.com/adobe/helix-cli/issues/1903)
+
 ## [14.3.1](https://github.com/adobe/helix-cli/compare/v14.3.0...v14.3.1) (2021-11-29)
 
 
