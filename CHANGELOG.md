@@ -1,3 +1,10 @@
+## [14.4.3](https://github.com/adobe/helix-cli/compare/v14.4.2...v14.4.3) (2021-12-06)
+
+
+### Bug Fixes
+
+* **deps:** update dependency jsdom to v19 ([#1908](https://github.com/adobe/helix-cli/issues/1908)) ([e3b1629](https://github.com/adobe/helix-cli/commit/e3b1629276eab1c6b18f141959b3e1320a23e77f))
+
 ## [14.4.2](https://github.com/adobe/helix-cli/compare/v14.4.1...v14.4.2) (2021-12-04)
 
 
