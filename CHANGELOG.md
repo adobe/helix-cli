@@ -1,3 +1,10 @@
+## [14.4.5](https://github.com/adobe/helix-cli/compare/v14.4.4...v14.4.5) (2021-12-11)
+
+
+### Bug Fixes
+
+* **deps:** update adobe fixes ([2d5c336](https://github.com/adobe/helix-cli/commit/2d5c336331e1456c0069d4a578bef9a79dbe7e7c))
+
 ## [14.4.4](https://github.com/adobe/helix-cli/compare/v14.4.3...v14.4.4) (2021-12-07)
 
 
