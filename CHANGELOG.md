@@ -1,3 +1,10 @@
+## [14.4.7](https://github.com/adobe/helix-cli/compare/v14.4.6...v14.4.7) (2022-01-01)
+
+
+### Bug Fixes
+
+* **deps:** update dependency camelcase to v6.3.0 ([16c4630](https://github.com/adobe/helix-cli/commit/16c46303c7ee4f057c3d2ee2e9adff6e4d0022cf))
+
 ## [14.4.6](https://github.com/adobe/helix-cli/compare/v14.4.5...v14.4.6) (2021-12-25)
 
 
