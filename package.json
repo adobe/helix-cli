@@ -52,7 +52,7 @@
     "glob-to-regexp": "0.4.1",
     "ignore": "5.2.0",
     "ini": "2.0.0",
-    "isomorphic-git": "1.10.5",
+    "isomorphic-git": "1.11.1",
     "jsdom": "19.0.0",
     "livereload-js": "3.3.2",
     "open": "8.4.0",
