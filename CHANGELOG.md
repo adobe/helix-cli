@@ -1,3 +1,10 @@
+## [14.4.25](https://github.com/adobe/helix-cli/compare/v14.4.24...v14.4.25) (2022-02-15)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @adobe/helix-shared-indexer to v0.2.17 ([575df0c](https://github.com/adobe/helix-cli/commit/575df0c47367db8992c02da9e2f9ea0364e93fb2))
+
 ## [14.4.24](https://github.com/adobe/helix-cli/compare/v14.4.23...v14.4.24) (2022-02-14)
 
 
