@@ -191,7 +191,7 @@ describe('Utils Test', () => {
       }
     });
 
-    it.only('gives an error for port not available', async () => {
+    it('gives an error for port not available', async () => {
       try {
         await utils.checkPortInUse(0);
       } catch (e) {

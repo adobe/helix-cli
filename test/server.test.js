@@ -88,6 +88,7 @@ describe('Helix Server', () => {
       await project.start();
       await assertHttp(`http://localhost:${project.server.port}/.kill`, 200, 'expected_goodbye.txt');
     } finally {
+      assert.ok(!project.server.isStarted());
       await project.stop();
     }
   });
