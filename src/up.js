@@ -51,6 +51,11 @@ export default function up() {
           type: 'int',
           default: 3000,
         })
+        .option('kill', {
+          describe: 'Kill existing Helix CLI running on the above port',
+          type: 'boolean',
+          default: true,
+        })
         .option('print-index', {
           alias: 'printIndex',
           describe: 'Prints the indexed records for the current page.',
@@ -81,6 +86,7 @@ export default function up() {
         .withLiveReload(argv.livereload)
         .withPagesUrl(argv.pagesUrl)
         .withPrintIndex(argv.printIndex)
+        .withKill(argv.kill)
         .run();
     },
   };
