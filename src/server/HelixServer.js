@@ -133,7 +133,7 @@ export default class HelixServer extends EventEmitter {
   async start() {
     const { log } = this;
     if (this._port !== 0) {
-      if (this._kill) {
+      if (this._kill && await utils.checkPortInUse(this._port)) {
         await fetch(`http://localhost:${this._port}/.kill`);
       }
       const inUse = await utils.checkPortInUse(this._port);
