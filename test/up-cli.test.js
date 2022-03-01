@@ -32,6 +32,7 @@ describe('hlx up', () => {
     mockUp.withHttpPort.returnsThis();
     mockUp.withPagesUrl.returnsThis();
     mockUp.withPrintIndex.returnsThis();
+    mockUp.withKill.returnsThis();
     mockUp.run.returnsThis();
     cli = (await new CLI().initCommands()).withCommandExecutor('up', mockUp);
   });
