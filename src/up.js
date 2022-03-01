@@ -51,8 +51,8 @@ export default function up() {
           type: 'int',
           default: 3000,
         })
-        .option('kill', {
-          describe: 'Kill existing Helix CLI running on the above port',
+        .option('--stop-other', {
+          describe: 'Stop other Helix CLI running on the above port',
           type: 'boolean',
           default: true,
         })
@@ -86,7 +86,7 @@ export default function up() {
         .withLiveReload(argv.livereload)
         .withPagesUrl(argv.pagesUrl)
         .withPrintIndex(argv.printIndex)
-        .withKill(argv.kill)
+        .withKill(argv.stopOther)
         .run();
     },
   };
