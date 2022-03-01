@@ -77,6 +77,27 @@ describe('Helix Server', () => {
     }
   });
 
+  it('stops server on /.kill', async () => {
+    const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
+    const project = new HelixProject()
+      .withCwd(cwd)
+      .withHttpPort(0);
+    await project.init();
+    const { exit } = process;
+    try {
+      let stopped = false;
+      process.exit = function fakeexit() {
+        stopped = true;
+      };
+      await project.start();
+      await assertHttp(`http://localhost:${project.server.port}/.kill`, 200, 'expected_goodbye.txt');
+      assert.ok(stopped);
+    } finally {
+      await project.stop();
+      process.exit = exit;
+    }
+  });
+
   it('deliver 404 for static content non existing', async () => {
     const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
     const project = new HelixProject()

@@ -107,6 +107,10 @@ export default class HelixServer extends EventEmitter {
 
   async setupApp() {
     const handler = asyncHandler(this.handleProxyModeRequest.bind(this));
+    this._app.get('/.kill', (req, res) => {
+      res.send('Goodbye!');
+      process.exit();
+    });
     this._app.get('*', handler);
     this._app.post('*', handler);
   }
