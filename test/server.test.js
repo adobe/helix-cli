@@ -50,10 +50,11 @@ describe('Helix Server', () => {
 
       const project2 = new HelixProject()
         .withCwd(cwd)
+        .withKill(false)
         .withHttpPort(project.server.port);
       await project2.init();
       try {
-        await project.start();
+        await project2.start();
         assert.fail('server should detect port in use.');
       } catch (e) {
         assert.equal(e.message, `Port ${project.server.port} already in use by another process.`);
@@ -73,6 +74,21 @@ describe('Helix Server', () => {
       await project.start();
       await assertHttp(`http://localhost:${project.server.port}/welcome.txt`, 200, 'expected_welcome.txt');
     } finally {
+      await project.stop();
+    }
+  });
+
+  it('stops server on /.kill', async () => {
+    const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
+    const project = new HelixProject()
+      .withCwd(cwd)
+      .withHttpPort(0);
+    await project.init();
+    try {
+      await project.start();
+      await assertHttp(`http://localhost:${project.server.port}/.kill`, 200, 'expected_goodbye.txt');
+    } finally {
+      assert.ok(!project.server.isStarted());
       await project.stop();
     }
   });

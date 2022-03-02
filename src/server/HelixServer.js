@@ -13,6 +13,7 @@ import { promisify } from 'util';
 import EventEmitter from 'events';
 import path from 'path';
 import express from 'express';
+import { fetch } from '../fetch-utils.js';
 import utils from './utils.js';
 import packageJson from '../package.cjs';
 import RequestContext from './RequestContext.js';
@@ -41,6 +42,7 @@ export default class HelixServer extends EventEmitter {
     this._app = express();
     this._port = DEFAULT_PORT;
     this._server = null;
+    this._kill = project.kill;
   }
 
   /**
@@ -107,6 +109,10 @@ export default class HelixServer extends EventEmitter {
 
   async setupApp() {
     const handler = asyncHandler(this.handleProxyModeRequest.bind(this));
+    this._app.get('/.kill', (req, res) => {
+      res.send('Goodbye!');
+      this.stop();
+    });
     this._app.get('*', handler);
     this._app.post('*', handler);
   }
@@ -127,6 +133,9 @@ export default class HelixServer extends EventEmitter {
   async start() {
     const { log } = this;
     if (this._port !== 0) {
+      if (this._kill && await utils.checkPortInUse(this._port)) {
+        await fetch(`http://localhost:${this._port}/.kill`);
+      }
       const inUse = await utils.checkPortInUse(this._port);
       if (inUse) {
         throw new Error(`Port ${this._port} already in use by another process.`);

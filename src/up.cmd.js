@@ -54,6 +54,11 @@ export default class UpCommand extends AbstractCommand {
     return this;
   }
 
+  withKill(value) {
+    this._kill = value;
+    return this;
+  }
+
   get project() {
     return this._project;
   }
@@ -91,6 +96,7 @@ export default class UpCommand extends AbstractCommand {
       .withCwd(this.directory)
       .withLiveReload(this._liveReload)
       .withLogger(this._logger)
+      .withKill(this._kill)
       .withPrintIndex(this._printIndex);
 
     this.log.info(chalk`{yellow     __ __    ___       ___                  }`);

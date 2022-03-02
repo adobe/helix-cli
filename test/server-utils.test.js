@@ -195,7 +195,7 @@ describe('Utils Test', () => {
       try {
         await utils.checkPortInUse(0);
       } catch (e) {
-        assert.ok(e.toString().startsWith('Error: connect EADDRNOTAVAIL 127.0.0.1 - Local (0.0.0.0:'));
+        assert.ok(e.toString().startsWith('Error: connect EADDRNOTAVAIL'));
       }
     });
   });

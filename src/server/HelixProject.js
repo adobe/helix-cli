@@ -26,10 +26,16 @@ export default class HelixProject {
     this._headHtml = null;
     this._indexer = null;
     this._printIndex = false;
+    this._kill = false;
   }
 
   withCwd(cwd) {
     this._cwd = cwd;
+    return this;
+  }
+
+  withKill(kill) {
+    this._kill = !!kill;
     return this;
   }
 
@@ -80,6 +86,10 @@ export default class HelixProject {
 
   get indexer() {
     return this._indexer;
+  }
+
+  get kill() {
+    return this._kill;
   }
 
   /**
