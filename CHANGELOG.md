@@ -1,3 +1,11 @@
+# [14.5.0](https://github.com/adobe/helix-cli/compare/v14.4.28...v14.5.0) (2022-03-02)
+
+
+### Features
+
+* **cli:** add `--kill` option (default: on) to kill other Helix CLI server instances on the same port ([13275e4](https://github.com/adobe/helix-cli/commit/13275e426e463a10c72be7f8dd31963e4eb9a175)), closes [#1939](https://github.com/adobe/helix-cli/issues/1939)
+* **server:** add `/.kill` switch to quickly turn the server off ([af2d458](https://github.com/adobe/helix-cli/commit/af2d4581e4e471ff48bf485118703ddc3686a287)), closes [#1939](https://github.com/adobe/helix-cli/issues/1939)
+
 ## [14.4.28](https://github.com/adobe/helix-cli/compare/v14.4.27...v14.4.28) (2022-02-28)
 
 
