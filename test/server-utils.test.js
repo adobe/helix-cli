@@ -243,4 +243,13 @@ describe('Utils Test', () => {
       );
     });
   });
+
+  describe('Cache', () => {
+    it('compute path for cache', () => {
+      assert.equal(utils.computePathForCache('/index.html', '', '/target/'), '/target/index.html');
+      assert.equal(utils.computePathForCache('/folder/index.html', '', '/target/'), '/target/folder/index.html');
+      assert.equal(utils.computePathForCache('/script.js', '', '/target/'), '/target/script.js');
+      assert.equal(utils.computePathForCache('/page.html', '?foo=bar&baz=qux', '/target/'), '/target/page.?foo=bar&baz=qux.html');
+    });
+  });
 });
