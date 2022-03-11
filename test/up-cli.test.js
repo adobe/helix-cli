@@ -36,6 +36,8 @@ describe('hlx up', () => {
     mockUp.withCache.returnsThis();
     mockUp.run.returnsThis();
     cli = (await new CLI().initCommands()).withCommandExecutor('up', mockUp);
+
+    sinon.stub(process, 'exit');
   });
 
   afterEach(() => {
@@ -103,7 +105,8 @@ describe('hlx up', () => {
   });
 
   it('hlx up can enable cache', async () => {
-    await cli.run(['up', '--cache', '.cache/']);
+    await cli.run(['up', '--alpha-cache', '.cache/']);
+    sinon.assert.notCalled(process.exit);
     sinon.assert.calledWith(mockUp.withCache, '.cache/');
     sinon.assert.calledOnce(mockUp.run);
   });
