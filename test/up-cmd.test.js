@@ -166,6 +166,7 @@ describe('Integration test for up command with cache', function suite() {
       index: '## Welcome',
       page1: '## Some page with qs',
       page2: '## Some different content for different qs',
+      plain: 'Some plain content',
     };
     const scope = nock('https://master--dummy-foo--adobe.hlx3.page')
       .get('/index.html')
@@ -176,6 +177,8 @@ describe('Integration test for up command with cache', function suite() {
       .reply(200, content.page2)
       .get('/not-found.txt')
       .reply(404)
+      .get('/page.plain.html')
+      .reply(200, content.plain, { 'Content-Type': 'text/html' })
       .get('/head.html')
       .reply(200, '<link rel="stylesheet" href="/styles.css"/>');
 
@@ -196,6 +199,8 @@ describe('Integration test for up command with cache', function suite() {
             ret = await assertHttp(`http://localhost:${cmd.project.server.port}/folder/page.html?foo=bar&baz=othervalue`, 200);
             assert.strictEqual(ret.trim(), content.page2);
             await assertHttp(`http://localhost:${cmd.project.server.port}/not-found.txt`, 404);
+            ret = await assertHttp(`http://localhost:${cmd.project.server.port}/page.plain.html`, 200);
+            assert.strictEqual(ret.trim(), content.plain);
 
             ret = await assertHttp(`http://localhost:${cmd.project.server.port}/local.txt`, 200);
             assert.strictEqual(ret.trim(), 'Hello, world.');
