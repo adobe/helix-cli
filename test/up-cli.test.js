@@ -24,6 +24,8 @@ describe('hlx up', () => {
   let deleted;
   let cli;
 
+  sinon.stub(process, 'exit');
+
   beforeEach(async () => {
     deleted = clearHelixEnv();
     mockUp = sinon.createStubInstance(UpCommand);
@@ -36,11 +38,10 @@ describe('hlx up', () => {
     mockUp.withCache.returnsThis();
     mockUp.run.returnsThis();
     cli = (await new CLI().initCommands()).withCommandExecutor('up', mockUp);
-
-    sinon.stub(process, 'exit');
   });
 
   afterEach(() => {
+    sinon.assert.notCalled(process.exit);
     clearHelixEnv();
     // restore env
     Object.keys(deleted).forEach((key) => {
@@ -106,7 +107,6 @@ describe('hlx up', () => {
 
   it('hlx up can enable cache', async () => {
     await cli.run(['up', '--alpha-cache', '.cache/']);
-    sinon.assert.notCalled(process.exit);
     sinon.assert.calledWith(mockUp.withCache, '.cache/');
     sinon.assert.calledOnce(mockUp.run);
   });
