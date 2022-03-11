@@ -268,7 +268,7 @@ describe('Utils Test', () => {
     };
 
     it('write and read cache', async () => {
-      test('/index.html', '', {
+      await test('/index.html', '', {
         body: '<html><body>Hello World</body></html>',
         headers: {
           'Content-Type': 'text/html',
@@ -276,7 +276,7 @@ describe('Utils Test', () => {
         status: 200,
       });
 
-      test('/folder/page', '?foo=bar&baz=qux', {
+      await test('/folder/page', '?foo=bar&baz=qux', {
         body: '{ "p": "Hello World" }',
         headers: {
           'Content-Type': 'application/json',
@@ -284,7 +284,7 @@ describe('Utils Test', () => {
         status: 200,
       });
 
-      test('/not-found', '', {
+      await test('/not-found', '', {
         body: '',
         headers: {
           'Content-Type': 'application/json',
