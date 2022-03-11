@@ -26,6 +26,7 @@ export default class UpCommand extends AbstractCommand {
     this._open = '/';
     this._liveReload = false;
     this._pagesUrl = null;
+    this._cache = null;
     this._printIndex = false;
   }
 
@@ -46,6 +47,11 @@ export default class UpCommand extends AbstractCommand {
 
   withPagesUrl(value) {
     this._pagesUrl = value;
+    return this;
+  }
+
+  withCache(value) {
+    this._cache = value;
     return this;
   }
 
@@ -122,6 +128,11 @@ export default class UpCommand extends AbstractCommand {
         }
       }
       this._pagesUrl = `https://${ref}--${gitUrl.repo}--${gitUrl.owner}.hlx3.page`;
+    }
+
+    if (this._cache) {
+      await fse.ensureDir(this._cache);
+      this._project.withCacheDirectory(this._cache);
     }
 
     this._project.withProxyUrl(this._pagesUrl);

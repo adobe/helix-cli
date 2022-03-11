@@ -11,6 +11,7 @@
  */
 import fs from 'fs-extra';
 import crypto from 'crypto';
+import path from 'path';
 import { Socket } from 'net';
 import { PassThrough } from 'stream';
 import { fetch } from '../fetch-utils.js';
@@ -91,6 +92,50 @@ const utils = {
     return body;
   },
 
+  computePathForCache(pathname, qs, directory) {
+    let fileName = pathname;
+    if (qs) {
+      const index = fileName.lastIndexOf('.');
+      if (index > -1) {
+        // inject qs as b64 in filename before extension
+        fileName = `${fileName.substring(0, index)}.${qs}${fileName.substring(index)}`;
+      } else {
+        fileName = `${fileName}.${qs}`;
+      }
+    }
+    const filePath = path.join(directory, fileName);
+    return filePath;
+  },
+
+  async writeToCache(pathname, qs, directory, { body, headers, status }, logger) {
+    try {
+      const filePath = utils.computePathForCache(pathname, qs, directory);
+      const parent = path.dirname(filePath);
+      logger.debug(`Not in cache, saving: ${filePath}`);
+      await fs.ensureDir(parent);
+      await fs.writeFile(filePath, body);
+      await fs.writeJSON(`${filePath}.json`, { headers, status });
+    } catch (error) {
+      logger.error(error);
+    }
+  },
+
+  async getFromCache(pathname, qs, directory, logger) {
+    try {
+      const filePath = utils.computePathForCache(pathname, qs, directory);
+      logger.debug(`Trying from cache first: ${filePath}`);
+
+      if (await fs.pathExists(filePath)) {
+        const body = await fs.readFile(filePath);
+        const { headers, status } = await fs.readJSON(`${filePath}.json`);
+        return { body, headers, status };
+      }
+    } catch (error) {
+      logger.error(error);
+    }
+    return null;
+  },
+
   /**
    * Fetches the content from the url  and streams it back to the response.
    * @param {RequestContext} ctx Context
@@ -102,6 +147,23 @@ const utils = {
    */
   async proxyRequest(ctx, url, req, res, opts = {}) {
     ctx.log.debug(`Proxy ${req.method} request to ${url}`);
+
+    if (opts.cacheDirectory) {
+      const cached = await utils.getFromCache(
+        ctx.path,
+        ctx.queryString,
+        opts.cacheDirectory,
+        ctx.log,
+      );
+      if (cached) {
+        res
+          .status(cached.status)
+          .set(cached.headers)
+          .send(cached.body);
+        return;
+      }
+    }
+
     let body;
     // GET and HEAD requests can't have a body
     if (!['GET', 'HEAD'].includes(req.method)) {
@@ -117,7 +179,11 @@ const utils = {
     delete headers.cookie;
     delete headers.connection;
     delete headers.host;
-    const ret = await fetch(url, {
+    let proxyUrl = url;
+    if (ctx.queryString) {
+      proxyUrl = `${url}${ctx.queryString}`;
+    }
+    const ret = await fetch(proxyUrl, {
       method: req.method,
       headers,
       cache: 'no-store',
@@ -181,10 +247,45 @@ const utils = {
           headers: respHeaders,
         });
       }
+
+      if (opts.cacheDirectory) {
+        await utils.writeToCache(
+          ctx.path,
+          ctx.queryString,
+          opts.cacheDirectory,
+          {
+            body: respBody || textBody,
+            headers: respHeaders,
+            status: ret.status,
+          },
+          ctx.log,
+        );
+      }
+
       res
         .status(ret.status)
         .set(respHeaders)
         .send(respBody || textBody);
+      return;
+    }
+
+    if (opts.cacheDirectory) {
+      const buffer = await ret.buffer();
+      await utils.writeToCache(
+        ctx.path,
+        ctx.queryString,
+        opts.cacheDirectory,
+        {
+          body: buffer,
+          headers: respHeaders,
+          status: ret.status,
+        },
+        ctx.log,
+      );
+      res
+        .status(ret.status)
+        .set(respHeaders)
+        .send(buffer);
       return;
     }
 
