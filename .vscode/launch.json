@@ -57,11 +57,7 @@
             "program": "${workspaceFolder}/index.js",
             "args":[
                 "up",
-                "--pagesUrl", "https://venia.magento.com",
-                "--alpha-cache", ".cache/",
-                "--no-livereload"
             ],
-            "cwd": "/Users/acapt/work/dev/helix/projects/venia-jam"
         }
     ]
 }
