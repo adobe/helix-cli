@@ -56,8 +56,8 @@
             ],
             "program": "${workspaceFolder}/index.js",
             "args":[
-                "up",
-            ],
+                "up"
+            ]
         }
     ]
 }
