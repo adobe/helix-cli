@@ -110,7 +110,7 @@ const utils = {
         fileName = `${fileName}.${qs}`;
       }
     }
-    const filePath = path.join(directory, fileName);
+    const filePath = path.resolve(directory, fileName);
     return filePath;
   },
 
