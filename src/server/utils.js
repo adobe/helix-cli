@@ -92,6 +92,13 @@ const utils = {
     return body;
   },
 
+  /**
+   * Computes a path to store a cache objet
+   * @param {string} pathname the url pathname
+   * @param {string} qs the url query string
+   * @param {string} directory a local directory path
+   * @returns {string} the computed path
+   */
   computePathForCache(pathname, qs, directory) {
     let fileName = pathname;
     if (qs) {
@@ -107,6 +114,14 @@ const utils = {
     return filePath;
   },
 
+  /**
+   * Writes a partial request object to a local file
+   * @param {string} pathname the url pathname
+   * @param {string} qs the url query string
+   * @param {string} directory a local directory path
+   * @param {Object} ret the partial request object ({ body, headers, status })
+   * @param {Logger} logger a logger
+   */
   async writeToCache(pathname, qs, directory, { body, headers, status }, logger) {
     try {
       const filePath = utils.computePathForCache(pathname, qs, directory);
@@ -120,6 +135,14 @@ const utils = {
     }
   },
 
+  /**
+   * Returns a partial request object ({ body, headers, status }) from a local file
+   * @param {string} pathname the url pathname
+   * @param {string} qs the url query string
+   * @param {string} directory a local directory path
+   * @param {Logger} logger a logger
+   * @returns {Object} the partial request object ({ body, headers, status }). Null if not found.
+   */
   async getFromCache(pathname, qs, directory, logger) {
     try {
       const filePath = utils.computePathForCache(pathname, qs, directory);
