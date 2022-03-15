@@ -105,9 +105,9 @@ const utils = {
       const index = fileName.lastIndexOf('.');
       if (index > -1) {
         // inject qs as b64 in filename before extension
-        fileName = `${fileName.substring(0, index)}.${qs}${fileName.substring(index)}`;
+        fileName = `${fileName.substring(0, index)}.${qs.substring(1)}${fileName.substring(index)}`;
       } else {
-        fileName = `${fileName}.${qs}`;
+        fileName = `${fileName}.${qs.substring(1)}`;
       }
     }
     const filePath = path.resolve(directory, fileName.substring(1));
