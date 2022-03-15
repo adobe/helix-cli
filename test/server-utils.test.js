@@ -13,6 +13,7 @@
 import assert from 'assert';
 import fse from 'fs-extra';
 import net from 'net';
+import path from 'path';
 import RequestContext from '../src/server/RequestContext.js';
 import utils from '../src/server/utils.js';
 import { createTestRoot } from './utils.js';
@@ -248,10 +249,10 @@ describe('Utils Test', () => {
 
   describe('Cache', () => {
     it('compute path for cache', () => {
-      assert.equal(utils.computePathForCache('/index.html', '', '/target/'), '/target/index.html');
-      assert.equal(utils.computePathForCache('/folder/index.html', '', '/target/'), '/target/folder/index.html');
-      assert.equal(utils.computePathForCache('/script.js', '', '/target/'), '/target/script.js');
-      assert.equal(utils.computePathForCache('/page.html', '?foo=bar&baz=qux', '/target/'), '/target/page.foo=bar&baz=qux.html');
+      assert.equal(utils.computePathForCache('/index.html', '', '/target/'), path.resolve('/target', 'index.html'));
+      assert.equal(utils.computePathForCache('/folder/index.html', '', '/target/'), path.resolve('/target', 'folder/index.html'));
+      assert.equal(utils.computePathForCache('/script.js', '', '/target/'), path.resolve('/target', 'script.js'));
+      assert.equal(utils.computePathForCache('/page.html', '?foo=bar&baz=qux', '/target/'), path.resolve('/target', 'page.foo=bar&baz=qux.html'));
     });
 
     const test = async (pathname, qs, req) => {
