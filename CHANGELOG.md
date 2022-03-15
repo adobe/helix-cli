@@ -1,3 +1,10 @@
+# [14.6.0](https://github.com/adobe/helix-cli/compare/v14.5.3...v14.6.0) (2022-03-15)
+
+
+### Features
+
+* filesystem cache for hlx up ([dd81338](https://github.com/adobe/helix-cli/commit/dd813389767d5674a5e79aa100732f8a85cd3c6d))
+
 ## [14.5.3](https://github.com/adobe/helix-cli/compare/v14.5.2...v14.5.3) (2022-03-12)
 
 
