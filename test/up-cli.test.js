@@ -24,6 +24,8 @@ describe('hlx up', () => {
   let deleted;
   let cli;
 
+  sinon.stub(process, 'exit');
+
   beforeEach(async () => {
     deleted = clearHelixEnv();
     mockUp = sinon.createStubInstance(UpCommand);
@@ -33,11 +35,13 @@ describe('hlx up', () => {
     mockUp.withPagesUrl.returnsThis();
     mockUp.withPrintIndex.returnsThis();
     mockUp.withKill.returnsThis();
+    mockUp.withCache.returnsThis();
     mockUp.run.returnsThis();
     cli = (await new CLI().initCommands()).withCommandExecutor('up', mockUp);
   });
 
   afterEach(() => {
+    sinon.assert.notCalled(process.exit);
     clearHelixEnv();
     // restore env
     Object.keys(deleted).forEach((key) => {
@@ -98,6 +102,12 @@ describe('hlx up', () => {
   it('hlx up can enable print index', async () => {
     await cli.run(['up', '--print-index']);
     sinon.assert.calledWith(mockUp.withPrintIndex, true);
+    sinon.assert.calledOnce(mockUp.run);
+  });
+
+  it('hlx up can enable cache', async () => {
+    await cli.run(['up', '--alpha-cache', '.cache/']);
+    sinon.assert.calledWith(mockUp.withCache, '.cache/');
     sinon.assert.calledOnce(mockUp.run);
   });
 });

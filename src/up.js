@@ -68,7 +68,12 @@ export default function up() {
           describe: 'The origin url to fetch pages content from.',
           type: 'string',
         })
-        .group(['pages-url', 'livereload', 'no-livereload', 'open', 'no-open', 'print-index'], 'Helix Pages Options')
+        .option('alpha-cache', {
+          alias: 'alphaCache',
+          describe: 'Path to local folder to cache the responses (note: this is an alpha feature, it may be removed without notice)',
+          type: 'string',
+        })
+        .group(['pages-url', 'livereload', 'no-livereload', 'open', 'no-open', 'print-index', 'cache'], 'Helix Pages Options')
 
         .help();
     },
@@ -87,6 +92,7 @@ export default function up() {
         .withPagesUrl(argv.pagesUrl)
         .withPrintIndex(argv.printIndex)
         .withKill(argv.stopOther)
+        .withCache(argv.alphaCache)
         .run();
     },
   };

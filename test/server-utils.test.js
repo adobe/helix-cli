@@ -11,9 +11,11 @@
  */
 /* eslint-env mocha */
 import assert from 'assert';
+import fse from 'fs-extra';
 import net from 'net';
 import RequestContext from '../src/server/RequestContext.js';
 import utils from '../src/server/utils.js';
+import { createTestRoot } from './utils.js';
 
 describe('Utils Test', () => {
   describe('Request context', () => {
@@ -241,6 +243,54 @@ describe('Utils Test', () => {
         utils.makeProxyURL('/foo.html?code=123', 'https://helix-pages--adobe.hlx.page'),
         'https://helix-pages--adobe.hlx.page/foo.html',
       );
+    });
+  });
+
+  describe('Cache', () => {
+    it('compute path for cache', () => {
+      assert.equal(utils.computePathForCache('/index.html', '', '/target/'), '/target/index.html');
+      assert.equal(utils.computePathForCache('/folder/index.html', '', '/target/'), '/target/folder/index.html');
+      assert.equal(utils.computePathForCache('/script.js', '', '/target/'), '/target/script.js');
+      assert.equal(utils.computePathForCache('/page.html', '?foo=bar&baz=qux', '/target/'), '/target/page.?foo=bar&baz=qux.html');
+    });
+
+    const test = async (pathname, qs, req) => {
+      const testRoot = await createTestRoot();
+
+      await utils.writeToCache(pathname, qs, testRoot, req, console);
+      const read = await utils.getFromCache(pathname, qs, testRoot, console);
+
+      assert.equal(read.status, req.status);
+      assert.equal(read.body, req.body.toString());
+      assert.deepStrictEqual(read.headers, req.headers);
+
+      await fse.remove(testRoot);
+    };
+
+    it('write and read cache', async () => {
+      await test('/index.html', '', {
+        body: '<html><body>Hello World</body></html>',
+        headers: {
+          'Content-Type': 'text/html',
+        },
+        status: 200,
+      });
+
+      await test('/folder/page', '?foo=bar&baz=qux', {
+        body: '{ "p": "Hello World" }',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        status: 200,
+      });
+
+      await test('/not-found', '', {
+        body: '',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        status: 404,
+      });
     });
   });
 });

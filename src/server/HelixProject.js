@@ -23,6 +23,7 @@ export default class HelixProject {
     this._liveReload = null;
     this._enableLiveReload = false;
     this._proxyUrl = null;
+    this._cacheDirectory = null;
     this._headHtml = null;
     this._indexer = null;
     this._printIndex = false;
@@ -59,6 +60,11 @@ export default class HelixProject {
     return this;
   }
 
+  withCacheDirectory(value) {
+    this._cacheDirectory = value;
+    return this;
+  }
+
   withPrintIndex(value) {
     this._printIndex = value;
     return this;
@@ -78,6 +84,10 @@ export default class HelixProject {
 
   get proxyUrl() {
     return this._proxyUrl;
+  }
+
+  get cacheDirectory() {
+    return this._cacheDirectory;
   }
 
   get directory() {
