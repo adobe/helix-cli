@@ -44,6 +44,9 @@ jobs:
       - checkout
       - run: choco install nodejs-lts --version=14.17.6
       - run: mkdir junit
+      - run:
+        name: Installing Dependencies
+        command: npm ci
 
       # test & get code coverage
       - run:
