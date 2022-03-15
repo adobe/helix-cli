@@ -145,7 +145,6 @@ const utils = {
    */
   async getFromCache(pathname, qs, directory, logger) {
     try {
-      console.log('WINDOWS DEBUGGING', pathname, qs, directory);
       const filePath = utils.computePathForCache(pathname, qs, directory);
       logger.debug(`Trying from cache first: ${filePath}`);
 
