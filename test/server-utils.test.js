@@ -253,6 +253,7 @@ describe('Utils Test', () => {
       assert.equal(utils.computePathForCache('/folder/index.html', '', '/target/'), path.resolve('/target', 'folder/index.html'));
       assert.equal(utils.computePathForCache('/script.js', '', '/target/'), path.resolve('/target', 'script.js'));
       assert.equal(utils.computePathForCache('/page.html', '?foo=bar&baz=qux', '/target/'), path.resolve('/target', 'page.foo=bar&baz=qux.html'));
+      assert.equal(utils.computePathForCache('/noext', '?foo=bar&baz=qux', '/target/'), path.resolve('/target', 'noext.foo=bar&baz=qux'));
     });
 
     const test = async (pathname, qs, req) => {
