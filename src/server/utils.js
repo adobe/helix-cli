@@ -107,7 +107,7 @@ const utils = {
         // inject qs as b64 in filename before extension
         fileName = `${fileName.substring(0, index)}.${qs.substring(1)}${fileName.substring(index)}`;
       } else {
-        fileName = `${fileName}.${qs}`;
+        fileName = `${fileName}.${qs.substring(1)}`;
       }
     }
     const filePath = path.resolve(directory, fileName.substring(1));
@@ -145,6 +145,7 @@ const utils = {
    */
   async getFromCache(pathname, qs, directory, logger) {
     try {
+      console.log('WINDOWS DEBUGGING', pathname, qs, directory);
       const filePath = utils.computePathForCache(pathname, qs, directory);
       logger.debug(`Trying from cache first: ${filePath}`);
 
