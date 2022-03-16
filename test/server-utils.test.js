@@ -256,7 +256,7 @@ describe('Utils Test', () => {
       assert.equal(utils.computePathForCache('/noext', '?foo=bar&baz=qux', '/target/'), path.resolve('/target', 'noext!foo=bar&baz=qux'));
     });
 
-    it('compute different path for cache if long names', () => {
+    it('compute different path for cache if query string', () => {
       const l1 = utils.computePathForCache('/page.html', '?query=query+getMegaMenu{categoryList{uid+name+children{uid+include_in_menu+name+position+url_path+children{uid+include_in_menu+name+position+url_path+children{uid+include_in_menu+name+position+url_path+__typename}__typename}__typename}__typename}}&operationName=getMegaMenu&variables={}', '/target/with/several/folders');
       const l2 = utils.computePathForCache('/page.html', '?query=query+getMegaMenu{categoryList{uid+name+children{uid+include_in_menu+name+position+url_path+children{uid+include_in_menu+name+position+url_path+children{uid+include_in_menu+name+position+url_path+__typename}__typename}__typename}__typename}}&operationName=getMegaMenu&variable={}', '/target/with/several/folders');
       const l3 = utils.computePathForCache('/page.html', '?query=query+getMegaMenu{}', '/target/with/several/folders');
@@ -267,6 +267,13 @@ describe('Utils Test', () => {
       assert.notEqual(l2, l3);
       assert.notEqual(l2, l4);
       assert.notEqual(l3, l4);
+    });
+
+    it('compute a path for cache if long name', () => {
+      // should never happen, but who knows...
+      const l1 = utils.computePathForCache('/page_with_a_really_really_long_name_page_with_a_really_really_long_name_page_with_a_really_really_long_name_page_with_a_really_really_long_name_page_with_a_really_really_long_name_page_with_a_really_really_long_name_page_with_a_really_really_long_name_page_with_a_really_really_long_name_page_with_a_really_really_long_name.html', '?query=query+getMegaMenu{categoryList{uid+name+children{uid+include_in_menu+name+position+url_path+children{uid+include_in_menu+name+position+url_path+children{uid+include_in_menu+name+position+url_path+__typename}__typename}__typename}__typename}}&operationName=getMegaMenu&variables={}', '/target/with/several/folders');
+      assert.ok(l1);
+      assert.ok(l1.substring(l1.lastIndexOf('/')).length < 255);
     });
 
     const test = async (pathname, qs, req) => {
