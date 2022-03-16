@@ -252,8 +252,21 @@ describe('Utils Test', () => {
       assert.equal(utils.computePathForCache('/index.html', '', '/target/'), path.resolve('/target', 'index.html'));
       assert.equal(utils.computePathForCache('/folder/index.html', '', '/target/'), path.resolve('/target', 'folder/index.html'));
       assert.equal(utils.computePathForCache('/script.js', '', '/target/'), path.resolve('/target', 'script.js'));
-      assert.equal(utils.computePathForCache('/page.html', '?foo=bar&baz=qux', '/target/'), path.resolve('/target', 'page.foo=bar&baz=qux.html'));
-      assert.equal(utils.computePathForCache('/noext', '?foo=bar&baz=qux', '/target/'), path.resolve('/target', 'noext.foo=bar&baz=qux'));
+      assert.equal(utils.computePathForCache('/page.html', '?foo=bar&baz=qux', '/target/'), path.resolve('/target', 'page!foo=bar&baz=qux.html'));
+      assert.equal(utils.computePathForCache('/noext', '?foo=bar&baz=qux', '/target/'), path.resolve('/target', 'noext!foo=bar&baz=qux'));
+    });
+
+    it('compute different path for cache if long names', () => {
+      const l1 = utils.computePathForCache('/page.html', '?query=query+getMegaMenu{categoryList{uid+name+children{uid+include_in_menu+name+position+url_path+children{uid+include_in_menu+name+position+url_path+children{uid+include_in_menu+name+position+url_path+__typename}__typename}__typename}__typename}}&operationName=getMegaMenu&variables={}', '/target/with/several/folders');
+      const l2 = utils.computePathForCache('/page.html', '?query=query+getMegaMenu{categoryList{uid+name+children{uid+include_in_menu+name+position+url_path+children{uid+include_in_menu+name+position+url_path+children{uid+include_in_menu+name+position+url_path+__typename}__typename}__typename}__typename}}&operationName=getMegaMenu&variable={}', '/target/with/several/folders');
+      const l3 = utils.computePathForCache('/page.html', '?query=query+getMegaMenu{}', '/target/with/several/folders');
+      const l4 = utils.computePathForCache('/page.html', '', '/target/with/several/folders');
+      assert.notEqual(l1, l2);
+      assert.notEqual(l1, l3);
+      assert.notEqual(l1, l4);
+      assert.notEqual(l2, l3);
+      assert.notEqual(l2, l4);
+      assert.notEqual(l3, l4);
     });
 
     const test = async (pathname, qs, req) => {
@@ -262,6 +275,7 @@ describe('Utils Test', () => {
       await utils.writeToCache(pathname, qs, testRoot, req, console);
       const read = await utils.getFromCache(pathname, qs, testRoot, console);
 
+      assert.ok(!!read, 'Could read from cache');
       assert.equal(read.status, req.status);
       assert.equal(read.body, req.body.toString());
       assert.deepStrictEqual(read.headers, req.headers);
@@ -280,6 +294,14 @@ describe('Utils Test', () => {
 
       await test('/folder/page', '?foo=bar&baz=qux', {
         body: '{ "p": "Hello World" }',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        status: 200,
+      });
+
+      await test('/target/with/several/folders/page', '?query=query+getMegaMenu{categoryList{uid+name+children{uid+include_in_menu+name+position+url_path+children{uid+include_in_menu+name+position+url_path+children{uid+include_in_menu+name+position+url_path+__typename}__typename}__typename}__typename}}&operationName=getMegaMenu&variables={}', {
+        body: '{ "p": "Long query string" }',
         headers: {
           'Content-Type': 'application/json',
         },
