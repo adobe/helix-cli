@@ -95,22 +95,32 @@ const utils = {
   /**
    * Computes a path to store a cache objet
    * @param {string} pathname the url pathname
-   * @param {string} qs the url query string
+   * @param {string} queryString the url query string
    * @param {string} directory a local directory path
    * @returns {string} the computed path
    */
-  computePathForCache(pathname, qs, directory) {
-    let fileName = pathname;
-    if (qs) {
-      const index = fileName.lastIndexOf('.');
-      if (index > -1) {
-        // inject qs as b64 in filename before extension
-        fileName = `${fileName.substring(0, index)}.${qs.substring(1)}${fileName.substring(index)}`;
+  computePathForCache(pathname, queryString, directory) {
+    let fileName = pathname.substring(1);
+    if (queryString) {
+      let qs = queryString.substring(1); // remove leading '?'
+      if (fileName.length + qs.length > 255) {
+        // try with query string as md5
+        qs = crypto.createHash('md5').update(qs).digest('hex');
+      }
+      if (fileName.length + qs.length <= 255) {
+        const index = fileName.lastIndexOf('.');
+        if (index > -1) {
+          // inject qs before extension
+          fileName = `${fileName.substring(0, index)}!${qs}${fileName.substring(index)}`;
+        } else {
+          fileName = `${fileName}!${qs}`;
+        }
       } else {
-        fileName = `${fileName}.${qs.substring(1)}`;
+        // still too long, use md5 as filename
+        fileName = crypto.createHash('md5').update(`${fileName}${queryString.substring(1)}`).digest('hex');
       }
     }
-    const filePath = path.resolve(directory, fileName.substring(1));
+    const filePath = path.resolve(directory, fileName);
     return filePath;
   },
 
