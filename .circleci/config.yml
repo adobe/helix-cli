@@ -28,7 +28,7 @@ commands:
         command: git config --global user.email "circleci@project-helix.io" && git config --global user.name "CircleCi Build"
 
 orbs:
-  win: circleci/windows@4.0.0
+  win: circleci/windows@4.1.1
 
 jobs:
   build_win:
