@@ -38,9 +38,9 @@
   "dependencies": {
     "@adobe/helix-fetch": "3.0.8",
     "@adobe/helix-log": "6.0.0",
-    "@adobe/helix-shared-config": "1.7.20",
+    "@adobe/helix-shared-config": "1.7.21",
     "@adobe/helix-shared-git": "1.1.4",
-    "@adobe/helix-shared-indexer": "0.2.25",
+    "@adobe/helix-shared-indexer": "0.2.27",
     "camelcase": "6.3.0",
     "chalk-template": "0.4.0",
     "chokidar": "3.5.3",
