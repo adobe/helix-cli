@@ -1,3 +1,10 @@
+## [14.6.12](https://github.com/adobe/helix-cli/compare/v14.6.11...v14.6.12) (2022-04-11)
+
+
+### Bug Fixes
+
+* **deps:** update dependency ini to v3 ([#1979](https://github.com/adobe/helix-cli/issues/1979)) ([7b719d1](https://github.com/adobe/helix-cli/commit/7b719d1b0eeb16cfd94e45d8fa09ebcf51854c1a))
+
 ## [14.6.11](https://github.com/adobe/helix-cli/compare/v14.6.10...v14.6.11) (2022-04-10)
 
 
