@@ -1,3 +1,10 @@
+## [14.6.14](https://github.com/adobe/helix-cli/compare/v14.6.13...v14.6.14) (2022-04-11)
+
+
+### Bug Fixes
+
+* **deps:** update dependency glob to v8 ([#1982](https://github.com/adobe/helix-cli/issues/1982)) ([ecd782d](https://github.com/adobe/helix-cli/commit/ecd782db7ca03d15f0ea43c8bc5f2817d9b7171a))
+
 ## [14.6.13](https://github.com/adobe/helix-cli/compare/v14.6.12...v14.6.13) (2022-04-11)
 
 
