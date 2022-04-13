@@ -50,14 +50,16 @@
         {
             "type": "node",
             "request": "launch",
-            "name": "Launch 'hlx up'",
+            "name": "Launch 'hlx import'",
             "skipFiles": [
                 "<node_internals>/**"
             ],
             "program": "${workspaceFolder}/index.js",
             "args":[
-                "up"
-            ]
+                "import",
+                // "--alpha-cache", ".cache/",
+            ],
+            "cwd": "/Users/acapt/work/dev/helix/projects/bamboohr-website/",
         }
     ]
 }
