@@ -116,4 +116,10 @@ describe('hlx up', () => {
     sinon.assert.calledWith(mockUp.withCache, '.cache/');
     sinon.assert.calledOnce(mockUp.run);
   });
+
+  it('hlx up can disable kill', async () => {
+    await cli.run(['up', '--stop-other', 'false']);
+    sinon.assert.calledWith(mockUp.withKill, false);
+    sinon.assert.calledOnce(mockUp.run);
+  });
 });

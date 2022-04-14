@@ -51,7 +51,8 @@ export default function up() {
           type: 'int',
           default: 3000,
         })
-        .option('--stop-other', {
+        .option('stop-other', {
+          alias: 'stopOther',
           describe: 'Stop other Helix CLI running on the above port',
           type: 'boolean',
           default: true,

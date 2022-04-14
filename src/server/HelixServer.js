@@ -42,7 +42,6 @@ export default class HelixServer extends EventEmitter {
     this._app = express();
     this._port = DEFAULT_PORT;
     this._server = null;
-    this._kill = project.kill;
   }
 
   /**
@@ -134,7 +133,7 @@ export default class HelixServer extends EventEmitter {
   async start() {
     const { log } = this;
     if (this._port !== 0) {
-      if (this._kill && await utils.checkPortInUse(this._port)) {
+      if (this._project.kill && await utils.checkPortInUse(this._port)) {
         await fetch(`http://localhost:${this._port}/.kill`);
       }
       const inUse = await utils.checkPortInUse(this._port);
