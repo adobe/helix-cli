@@ -1,3 +1,10 @@
+## [14.6.16](https://github.com/adobe/helix-cli/compare/v14.6.15...v14.6.16) (2022-04-14)
+
+
+### Bug Fixes
+
+* fix kill implementation ([827f803](https://github.com/adobe/helix-cli/commit/827f803cb00990fb4c0a204b3f41ddf24671a473))
+
 ## [14.6.15](https://github.com/adobe/helix-cli/compare/v14.6.14...v14.6.15) (2022-04-11)
 
 
