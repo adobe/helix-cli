@@ -1,3 +1,31 @@
+## [14.6.15](https://github.com/adobe/helix-cli/compare/v14.6.14...v14.6.15) (2022-04-11)
+
+
+### Bug Fixes
+
+* **deps:** update adobe major to v2 ([#1981](https://github.com/adobe/helix-cli/issues/1981)) ([11279d5](https://github.com/adobe/helix-cli/commit/11279d50a2324011f5a980a4765dfa5756625fa4))
+
+## [14.6.14](https://github.com/adobe/helix-cli/compare/v14.6.13...v14.6.14) (2022-04-11)
+
+
+### Bug Fixes
+
+* **deps:** update dependency glob to v8 ([#1982](https://github.com/adobe/helix-cli/issues/1982)) ([ecd782d](https://github.com/adobe/helix-cli/commit/ecd782db7ca03d15f0ea43c8bc5f2817d9b7171a))
+
+## [14.6.13](https://github.com/adobe/helix-cli/compare/v14.6.12...v14.6.13) (2022-04-11)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @adobe/helix-shared-indexer to v0.3.0 ([bf4b33f](https://github.com/adobe/helix-cli/commit/bf4b33fd8d15c657902545d479e0c0e7719e33f7))
+
+## [14.6.12](https://github.com/adobe/helix-cli/compare/v14.6.11...v14.6.12) (2022-04-11)
+
+
+### Bug Fixes
+
+* **deps:** update dependency ini to v3 ([#1979](https://github.com/adobe/helix-cli/issues/1979)) ([7b719d1](https://github.com/adobe/helix-cli/commit/7b719d1b0eeb16cfd94e45d8fa09ebcf51854c1a))
+
 ## [14.6.11](https://github.com/adobe/helix-cli/compare/v14.6.10...v14.6.11) (2022-04-10)
 
 
