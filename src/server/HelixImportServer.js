@@ -162,7 +162,10 @@ export default class HelixServer extends EventEmitter {
       } else {
         text = await ret.text();
       }
-      text = text.replace(host, '/');
+      let replacer = new RegExp(`${host}/`, 'gm');
+      text = text.replace(replacer, '/');
+      replacer = new RegExp(host, 'gm');
+      text = text.replace(replacer, '/');
       res
         .status(ret.status)
         .set(respHeaders)
@@ -204,6 +207,7 @@ export default class HelixServer extends EventEmitter {
       res.status(403).send('Missing host parameter');
     } else {
       try {
+        host = new URL(host).origin;
         res.cookie('hlx-proxyhost', host);
         const url = this._makeProxyURL(ctx.url, host);
         await this._doProxyRequest(ctx, url, host, req, res);

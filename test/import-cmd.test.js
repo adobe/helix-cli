@@ -110,6 +110,78 @@ describe('Integration test for import command', function suite() {
       .run()
       .catch(done);
   });
+
+  it('import command delivers correct response with update host ', (done) => {
+    let error = null;
+    const cmd = new ImportCommand()
+      .withDirectory(TEST_DIR)
+      .withOpen(false)
+      .withHttpPort(0);
+
+    const myDone = (err) => {
+      error = err;
+      return cmd.stop();
+    };
+
+    const content = {
+      index: `<html><head>
+        <script src="${SAMPLE_HOST}/a.js"></script>
+        <script src="/b.js"></script>
+        <script src="./c.js"></script>
+      </head>
+      <body>
+        <a href="${SAMPLE_HOST}">link</a>
+        <a href="${SAMPLE_HOST}/">link</a>
+        <a href="${SAMPLE_HOST}/absolutelink.html">link</a>
+        <a href="/relativelink.html">link</a>
+        <a href="./relativelink.html">link</a>
+        <img src="${SAMPLE_HOST}/img/a.png">link</a>
+        <img src="/img/b.png">link</a>
+        <img src="./img/c.png">link</a>
+      </body>`,
+    };
+
+    const expected = {
+      index: `<html><head>
+        <script src="/a.js"></script>
+        <script src="/b.js"></script>
+        <script src="./c.js"></script>
+      </head>
+      <body>
+        <a href="/">link</a>
+        <a href="/">link</a>
+        <a href="/absolutelink.html">link</a>
+        <a href="/relativelink.html">link</a>
+        <a href="./relativelink.html">link</a>
+        <img src="/img/a.png">link</a>
+        <img src="/img/b.png">link</a>
+        <img src="./img/c.png">link</a>
+      </body>`,
+    };
+
+    const scope = nock(SAMPLE_HOST)
+      .get('/index.html')
+      .reply(200, content.index);
+
+    cmd
+      .on('started', async () => {
+        try {
+          const ret = await assertHttp(`http://localhost:${cmd.project.server.port}/index.html?host=${SAMPLE_HOST}`, 200);
+          assert.strictEqual(ret.trim(), expected.index.trim());
+
+          await scope.done();
+
+          myDone();
+        } catch (e) {
+          myDone(e);
+        }
+      })
+      .on('stopped', () => {
+        done(error);
+      })
+      .run()
+      .catch(done);
+  });
 });
 
 describe('Integration test for import command with cache', function suite() {
