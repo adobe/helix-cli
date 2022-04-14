@@ -93,16 +93,17 @@ const utils = {
   },
 
   /**
-   * Computes a path to store a cache objet
-   * @param {string} pathname the url pathname
-   * @param {string} queryString the url query string
+   * Computes a path to store a cache objet from a url
+   * @param {string} url the url
    * @param {string} directory a local directory path
    * @returns {string} the computed path
    */
-  computePathForCache(pathname, queryString, directory) {
-    let fileName = pathname.substring(1);
-    if (queryString) {
-      let qs = queryString.substring(1); // remove leading '?'
+  computePathForCache(url, directory) {
+    const u = new URL(url);
+    const { pathname, search } = u;
+    let fileName = pathname.substring(1) || 'index.html';
+    if (search) {
+      let qs = search.substring(1); // remove leading '?'
       if (fileName.length + qs.length > 255) {
         // try with query string as md5
         qs = crypto.createHash('md5').update(qs).digest('hex');
@@ -117,7 +118,7 @@ const utils = {
         }
       } else {
         // still too long, use md5 as filename
-        fileName = crypto.createHash('md5').update(`${fileName}${queryString.substring(1)}`).digest('hex');
+        fileName = crypto.createHash('md5').update(`${fileName}${search.substring(1)}`).digest('hex');
       }
     }
     const filePath = path.resolve(directory, fileName);
@@ -126,15 +127,14 @@ const utils = {
 
   /**
    * Writes a partial request object to a local file
-   * @param {string} pathname the url pathname
-   * @param {string} qs the url query string
+   * @param {string} url the request url
    * @param {string} directory a local directory path
    * @param {Object} ret the partial request object ({ body, headers, status })
    * @param {Logger} logger a logger
    */
-  async writeToCache(pathname, qs, directory, { body, headers, status }, logger) {
+  async writeToCache(url, directory, { body, headers, status }, logger) {
     try {
-      const filePath = utils.computePathForCache(pathname, qs, directory);
+      const filePath = utils.computePathForCache(url, directory);
       const parent = path.dirname(filePath);
       logger.debug(`Not in cache, saving: ${filePath}`);
       await fs.ensureDir(parent);
@@ -147,15 +147,14 @@ const utils = {
 
   /**
    * Returns a partial request object ({ body, headers, status }) from a local file
-   * @param {string} pathname the url pathname
-   * @param {string} qs the url query string
+   * @param {string} url the request url
    * @param {string} directory a local directory path
    * @param {Logger} logger a logger
    * @returns {Object} the partial request object ({ body, headers, status }). Null if not found.
    */
-  async getFromCache(pathname, qs, directory, logger) {
+  async getFromCache(url, directory, logger) {
     try {
-      const filePath = utils.computePathForCache(pathname, qs, directory);
+      const filePath = utils.computePathForCache(url, directory);
       logger.debug(`Trying from cache first: ${filePath}`);
 
       if (await fs.pathExists(filePath)) {
@@ -183,8 +182,7 @@ const utils = {
 
     if (opts.cacheDirectory) {
       const cached = await utils.getFromCache(
-        ctx.path,
-        ctx.queryString,
+        `${url}${ctx.queryString}`,
         opts.cacheDirectory,
         ctx.log,
       );
@@ -283,8 +281,7 @@ const utils = {
 
       if (opts.cacheDirectory) {
         await utils.writeToCache(
-          ctx.path,
-          ctx.queryString,
+          `${url}${ctx.queryString}`,
           opts.cacheDirectory,
           {
             body: respBody || textBody,
@@ -305,8 +302,7 @@ const utils = {
     if (opts.cacheDirectory) {
       const buffer = await ret.buffer();
       await utils.writeToCache(
-        ctx.path,
-        ctx.queryString,
+        `${url}${ctx.queryString}`,
         opts.cacheDirectory,
         {
           body: buffer,

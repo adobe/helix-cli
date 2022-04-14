@@ -99,8 +99,7 @@ export default class HelixServer extends EventEmitter {
 
     if (this._project.cacheDirectory) {
       const cached = await utils.getFromCache(
-        ctx.path,
-        ctx.queryString,
+        url,
         this._project.cacheDirectory,
         ctx.log,
       );
@@ -144,8 +143,7 @@ export default class HelixServer extends EventEmitter {
     if (this._project.cacheDirectory) {
       buffer = await ret.buffer();
       await utils.writeToCache(
-        ctx.path,
-        ctx.queryString,
+        url,
         this._project.cacheDirectory,
         {
           body: buffer,
