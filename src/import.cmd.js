@@ -44,6 +44,10 @@ export default class ImportCommand extends AbstractCommand {
     return this;
   }
 
+  get project() {
+    return this._project;
+  }
+
   async stop() {
     if (this._project) {
       try {

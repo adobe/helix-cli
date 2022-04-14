@@ -49,7 +49,7 @@ export default function up() {
           describe: 'Path to local folder to cache the responses',
           type: 'string',
         })
-        .group(['pages-url', 'livereload', 'no-livereload', 'open', 'no-open', 'print-index', 'cache'], 'Helix Import Options')
+        .group(['open', 'no-open', 'cache'], 'Helix Import Options')
 
         .help();
     },

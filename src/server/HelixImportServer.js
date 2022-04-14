@@ -44,7 +44,6 @@ export default class HelixServer extends EventEmitter {
     this._app = express();
     this._port = DEFAULT_PORT;
     this._server = null;
-    this._kill = project.kill;
   }
 
   /**
@@ -120,15 +119,11 @@ export default class HelixServer extends EventEmitter {
     const headers = {
       ...req.headers,
     };
-    // delete headers.cookie;
+    delete headers.cookie;
     delete headers.connection;
     delete headers.host;
 
-    let proxyUrl = url;
-    if (ctx.queryString) {
-      proxyUrl = `${url}${ctx.queryString}`;
-    }
-    const ret = await fetch(proxyUrl, {
+    const ret = await fetch(url, {
       method: req.method,
       headers,
       cache: 'no-store',
@@ -207,10 +202,14 @@ export default class HelixServer extends EventEmitter {
         res.cookie('hlx-proxyhost', host);
         const url = this._makeProxyURL(ctx.url, host);
         await this._doProxyRequest(ctx, url, host, req, res);
+      // codecov:ignore:start
+      /* c8 ignore start */
       } catch (err) {
         log.error(`Failed to proxy helix request ${ctx.path}: ${err.message}`);
         res.status(502).send(`Failed to proxy helix request: ${err.message}`);
       }
+      // codecov:ignore:end
+      /* c8 ignore end */
     }
 
     this.emit('request', req, res, ctx);
@@ -242,7 +241,7 @@ export default class HelixServer extends EventEmitter {
   async start() {
     const { log } = this;
     if (this._port !== 0) {
-      if (this._kill && await utils.checkPortInUse(this._port)) {
+      if (this._project.kill && await utils.checkPortInUse(this._port)) {
         await fetch(`http://localhost:${this._port}/.kill`);
       }
       const inUse = await utils.checkPortInUse(this._port);
@@ -250,18 +249,19 @@ export default class HelixServer extends EventEmitter {
         throw new Error(`Port ${this._port} already in use by another process.`);
       }
     }
-    log.info(`Starting helix-simulator v${packageJson.version}`);
+    log.info(`Starting helix import server v${packageJson.version}`);
     await new Promise((resolve, reject) => {
       this._app.use(cookieParser());
       this._server = this._app.listen(this._port, (err) => {
+        /* c8 ignore start */
+        // codecov:ignore:start
         if (err) {
           reject(new Error(`Error while starting http server: ${err}`));
         }
+        // codecov:ignore:end
+        /* c8 ignore end */
         this._port = this._server.address().port;
         log.info(`Local Helix Dev server up and running: http://localhost:${this._port}/`);
-        if (this._project.proxyUrl) {
-          log.info(`Enabled reverse proxy to ${this._project.proxyUrl}`);
-        }
         resolve();
       });
     });
@@ -277,9 +277,13 @@ export default class HelixServer extends EventEmitter {
     }
     return new Promise((resolve, reject) => {
       this._server.close((err) => {
+        /* c8 ignore start */
+        // codecov:ignore:start
         if (err) {
           reject(new Error(`Error while stopping http server: ${err}`));
         }
+        // codecov:ignore:end
+        /* c8 ignore end */
         log.info('Local Helix Dev server stopped.');
         this._server = null;
         resolve();
