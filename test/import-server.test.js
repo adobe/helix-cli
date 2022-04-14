@@ -59,20 +59,33 @@ describe('Helix Server', () => {
       } catch (e) {
         assert.equal(e.message, `Port ${project.server.port} already in use by another process.`);
       }
+    } finally {
+      await project.stop();
+    }
+  });
 
-      const project3 = new HelixImportProject()
+  it('kills other server', async () => {
+    const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
+    const project = new HelixImportProject()
+      .withCwd(cwd)
+      .withLogger(console)
+      .withHttpPort(0);
+    await project.init();
+    try {
+      await project.start();
+
+      const project2 = new HelixImportProject()
         .withCwd(cwd)
         .withKill(true)
         .withHttpPort(project.server.port);
-      await project3.init();
+      await project2.init();
       try {
-        await project3.start();
-        assert.ok('server should detect port in use.');
+        await project2.start();
+        assert.ok(project2.started, 'server has killed other server.');
       } catch (e) {
-        assert.fail(`server should detect and kill port in use. ${e.message}`);
+        assert.fail(`server should have killed the other server. ${e.message}`);
       } finally {
         await project2.stop();
-        await project3.stop();
       }
     } finally {
       await project.stop();
