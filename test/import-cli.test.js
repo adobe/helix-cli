@@ -94,4 +94,10 @@ describe('hlx import', () => {
     sinon.assert.calledWith(mockImport.withCache, '.cache/');
     sinon.assert.calledOnce(mockImport.run);
   });
+
+  it('hlx import can disable kill', async () => {
+    await cli.run(['import', '--stop-other', 'false']);
+    sinon.assert.calledWith(mockImport.withKill, false);
+    sinon.assert.calledOnce(mockImport.run);
+  });
 });

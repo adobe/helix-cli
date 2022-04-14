@@ -39,12 +39,13 @@ export default function up() {
           type: 'int',
           default: 3001,
         })
-        .option('--stop-other', {
+        .option('stop-other', {
+          alias: 'stopOther',
           describe: 'Stop other Helix CLI running on the above port',
           type: 'boolean',
           default: true,
         })
-        .group(['port'], 'Server options')
+        .group(['port', 'stop-other'], 'Server options')
         .option('cache', {
           describe: 'Path to local folder to cache the responses',
           type: 'string',
