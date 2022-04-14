@@ -64,6 +64,34 @@ describe('Helix Server', () => {
     }
   });
 
+  it('kills other server', async () => {
+    const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
+    const project = new HelixProject()
+      .withCwd(cwd)
+      .withLogger(console)
+      .withHttpPort(0);
+    await project.init();
+    try {
+      await project.start();
+
+      const project2 = new HelixProject()
+        .withCwd(cwd)
+        .withKill(true)
+        .withHttpPort(project.server.port);
+      await project2.init();
+      try {
+        await project2.start();
+        assert.ok(project2.started, 'server has killed other server.');
+      } catch (e) {
+        assert.fail(`server should have killed the other server. ${e.message}`);
+      } finally {
+        await project2.stop();
+      }
+    } finally {
+      await project.stop();
+    }
+  });
+
   it('deliver static content resource', async () => {
     const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
     const project = new HelixProject()
