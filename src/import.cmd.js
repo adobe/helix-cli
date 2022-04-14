@@ -52,9 +52,13 @@ export default class ImportCommand extends AbstractCommand {
     if (this._project) {
       try {
         await this._project.stop();
+      // codecov:ignore:start
+      /* c8 ignore start */
       } catch (e) {
         // ignore
       }
+      // codecov:ignore:end
+      /* c8 ignore end */
       this._project = null;
     }
     this.log.info('Helix project stopped.');

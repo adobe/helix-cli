@@ -83,6 +83,18 @@ describe('hlx import', () => {
     sinon.assert.calledOnce(mockImport.run);
   });
 
+  it('hlx import can disable open browser with --open option', async () => {
+    await cli.run(['import', '--open', 'false']);
+    sinon.assert.calledWith(mockImport.withOpen, 'false');
+    sinon.assert.calledOnce(mockImport.run);
+  });
+
+  it('hlx import can open browser with custom url', async () => {
+    await cli.run(['import', '--open', 'http://localhost:1234']);
+    sinon.assert.calledWith(mockImport.withOpen, 'http://localhost:1234');
+    sinon.assert.calledOnce(mockImport.run);
+  });
+
   it('hlx import can specify port number to run proxy server on', async () => {
     await cli.run(['import', '--port', '3210']);
     sinon.assert.calledWith(mockImport.withHttpPort, 3210);

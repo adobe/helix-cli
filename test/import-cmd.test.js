@@ -25,11 +25,12 @@ const SAMPLE_HOST = 'https://www.sample.com';
 describe('Integration test for import command', function suite() {
   this.timeout(60000);
 
-  it('import command delivers correct response.', (done) => {
+  it('import command delivers correct response without cache', (done) => {
     let error = null;
     const cmd = new ImportCommand()
       .withDirectory(TEST_DIR)
-      .withOpen(false)
+      .withOpen('false')
+      .withKill(false)
       .withHttpPort(0);
 
     const myDone = (err) => {
@@ -37,11 +38,18 @@ describe('Integration test for import command', function suite() {
       return cmd.stop();
     };
 
+    const content = {
+      index: 'Hello world',
+      img: '<svg/>',
+    };
+
     const scope = nock(SAMPLE_HOST)
       .get('/index.html')
-      .reply(200, 'Hello world')
+      .reply(200, content.index)
       .get('/index.html')
-      .reply(200, 'Hello world')
+      .reply(200, content.index)
+      .get('/logo.svg')
+      .reply(200, content.img, { 'Content-Type': 'image/svg+xml' })
       .get('/not-found.txt')
       .reply(404);
 
@@ -53,7 +61,7 @@ describe('Integration test for import command', function suite() {
           let resp = await fetch(`http://localhost:${cmd.project.server.port}/index.html?host=${SAMPLE_HOST}`);
           assert.strictEqual(resp.status, 200);
           let text = await resp.text();
-          assert.strictEqual(text.trim(), 'Hello world');
+          assert.strictEqual(text.trim(), content.index);
           const cookies = resp.headers.get('set-cookie');
           assert.ok(cookies);
 
@@ -65,7 +73,16 @@ describe('Integration test for import command', function suite() {
           });
           assert.strictEqual(resp.status, 200);
           text = await resp.text();
-          assert.strictEqual(text.trim(), 'Hello world');
+          assert.strictEqual(text.trim(), content.index);
+
+          resp = await fetch(`http://localhost:${cmd.project.server.port}/logo.svg`, {
+            headers: {
+              cookie: cookies,
+            },
+          });
+          assert.strictEqual(resp.status, 200);
+          text = await resp.text();
+          assert.strictEqual(text.trim(), content.img);
 
           resp = await fetch(`http://localhost:${cmd.project.server.port}/not-found.txt`, {
             headers: {
@@ -79,6 +96,9 @@ describe('Integration test for import command', function suite() {
           // /tools is delivered for local project folder
           const js = await assertHttp(`http://localhost:${cmd.project.server.port}/tools/importer/import.js`, 200);
           assert.strictEqual(js.trim(), '// import.js code');
+
+          await assertHttp(`http://localhost:${cmd.project.server.port}/tools/not-found.txt`, 404);
+
           myDone();
         } catch (e) {
           myDone(e);
@@ -112,6 +132,7 @@ describe('Integration test for import command with cache', function suite() {
     const cmd = new ImportCommand()
       .withDirectory(testDir)
       .withOpen(false)
+      .withKill(false)
       .withHttpPort(0)
       .withCache(path.resolve(testRoot, '.cache'));
 
@@ -125,6 +146,7 @@ describe('Integration test for import command with cache', function suite() {
       page1: '## Some page with qs',
       page2: '## Some different content for different qs',
       plain: 'Some plain content',
+      img: '<svg/>',
     };
 
     const scope = nock(SAMPLE_HOST)
@@ -137,7 +159,9 @@ describe('Integration test for import command with cache', function suite() {
       .get('/not-found.txt')
       .reply(404)
       .get('/page.plain.html')
-      .reply(200, content.plain, { 'Content-Type': 'text/html' });
+      .reply(200, content.plain, { 'Content-Type': 'text/html' })
+      .get('/logo.svg')
+      .reply(200, content.img, { 'Content-Type': 'image/svg+xml' });
 
     cmd
       .on('started', async () => {
@@ -154,9 +178,13 @@ describe('Integration test for import command with cache', function suite() {
             await assertHttp(`http://localhost:${cmd.project.server.port}/not-found.txt?host=${SAMPLE_HOST}`, 404);
             ret = await assertHttp(`http://localhost:${cmd.project.server.port}/page.plain.html?host=${SAMPLE_HOST}`, 200);
             assert.strictEqual(ret.trim(), content.plain);
+            ret = await assertHttp(`http://localhost:${cmd.project.server.port}/logo.svg?host=${SAMPLE_HOST}`, 200);
+            assert.strictEqual(ret.trim(), content.img);
 
             const js = await assertHttp(`http://localhost:${cmd.project.server.port}/tools/importer/import.js`, 200);
             assert.strictEqual(js.trim(), '// import.js code');
+
+            await assertHttp(`http://localhost:${cmd.project.server.port}/tools/not-found.txt`, 404);
           };
 
           await assertRequests();

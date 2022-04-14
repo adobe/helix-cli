@@ -55,11 +55,15 @@ export default function up() {
         .help();
     },
     handler: async (argv) => {
+      // codecov:ignore:start
+      /* c8 ignore start */
       if (!executor) {
         // eslint-disable-next-line global-require
         const ImportCommand = (await import('./import.cmd.js')).default; // lazy load the handler to speed up execution time
         executor = new ImportCommand(getOrCreateLogger(argv));
       }
+      // codecov:ignore:end
+      /* c8 ignore end */
       await executor
         .withHttpPort(argv.port)
         // only open  browser window when executable is `hlx`

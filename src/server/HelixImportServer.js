@@ -76,7 +76,12 @@ export default class HelixServer extends EventEmitter {
       });
       return;
     } catch (e) {
+      // not sure what to do yet here
+      // codecov:ignore:start
+      /* c8 ignore start */
       log.debug(`Error while delivering resource ${ctx.path} - ${e.stack || e}`);
+      // codecov:ignore:end
+      /* c8 ignore end */
     }
 
     res.status(404).send(`Unknwon path: ${ctx.path}`);
@@ -108,12 +113,6 @@ export default class HelixServer extends EventEmitter {
       }
     }
 
-    let body;
-    // GET and HEAD requests can't have a body
-    if (!['GET', 'HEAD'].includes(req.method)) {
-      body = new PassThrough();
-      req.pipe(body);
-    }
     const stream = new PassThrough();
     req.pipe(stream);
     const headers = {
@@ -127,7 +126,6 @@ export default class HelixServer extends EventEmitter {
       method: req.method,
       headers,
       cache: 'no-store',
-      body,
       redirect: 'manual',
     });
 
@@ -142,8 +140,9 @@ export default class HelixServer extends EventEmitter {
     delete respHeaders.location;
     respHeaders['access-control-allow-origin'] = '*';
 
+    let buffer;
     if (this._project.cacheDirectory) {
-      const buffer = await ret.buffer();
+      buffer = await ret.buffer();
       await utils.writeToCache(
         ctx.path,
         ctx.queryString,
@@ -155,16 +154,16 @@ export default class HelixServer extends EventEmitter {
         },
         ctx.log,
       );
-      res
-        .status(ret.status)
-        .set(respHeaders)
-        .send(buffer);
-      return;
     }
 
     if (contentType.includes('html') || contentType.includes('text')) {
       // make urls relative
-      let text = await ret.text();
+      let text;
+      if (buffer) {
+        text = buffer.toString();
+      } else {
+        text = await ret.text();
+      }
       text = text.replace(host, '/');
       res
         .status(ret.status)
@@ -174,10 +173,18 @@ export default class HelixServer extends EventEmitter {
       return;
     }
 
-    res
-      .status(ret.status)
-      .set(respHeaders);
-    ret.body.pipe(res);
+    if (buffer) {
+      res
+        .status(ret.status)
+        .set(respHeaders)
+        .send(buffer);
+      ret.body.pipe(res);
+    } else {
+      res
+        .status(ret.status)
+        .set(respHeaders);
+      ret.body.pipe(res);
+    }
   }
 
   /**
