@@ -1,3 +1,10 @@
+## [14.6.19](https://github.com/adobe/helix-cli/compare/v14.6.18...v14.6.19) (2022-04-16)
+
+
+### Bug Fixes
+
+* **deps:** update dependency fs-extra to v10.1.0 ([#1988](https://github.com/adobe/helix-cli/issues/1988)) ([833f827](https://github.com/adobe/helix-cli/commit/833f827f753e07191c29139bc86771f0f2084e44))
+
 ## [14.6.18](https://github.com/adobe/helix-cli/compare/v14.6.17...v14.6.18) (2022-04-16)
 
 
