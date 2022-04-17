@@ -1,3 +1,10 @@
+## [14.6.20](https://github.com/adobe/helix-cli/compare/v14.6.19...v14.6.20) (2022-04-17)
+
+
+### Bug Fixes
+
+* **deps:** update adobe fixes ([378d88d](https://github.com/adobe/helix-cli/commit/378d88dc967501f66bfb66f2faf987a4bb56910f))
+
 ## [14.6.19](https://github.com/adobe/helix-cli/compare/v14.6.18...v14.6.19) (2022-04-16)
 
 
