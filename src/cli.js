@@ -91,7 +91,7 @@ export default class CLI {
   async initCommands() {
     if (!this._commands) {
       this._commands = {};
-      for (const cmd of ['up', 'hack']) {
+      for (const cmd of ['up', 'hack', 'import']) {
         if (!this._commands[cmd]) {
           // eslint-disable-next-line no-await-in-loop
           this._commands[cmd] = (await import(`./${cmd}.js`)).default();

@@ -249,18 +249,18 @@ describe('Utils Test', () => {
 
   describe('Cache', () => {
     it('compute path for cache', () => {
-      assert.equal(utils.computePathForCache('/index.html', '', '/target/'), path.resolve('/target', 'index.html'));
-      assert.equal(utils.computePathForCache('/folder/index.html', '', '/target/'), path.resolve('/target', 'folder/index.html'));
-      assert.equal(utils.computePathForCache('/script.js', '', '/target/'), path.resolve('/target', 'script.js'));
-      assert.equal(utils.computePathForCache('/page.html', '?foo=bar&baz=qux', '/target/'), path.resolve('/target', 'page!foo=bar&baz=qux.html'));
-      assert.equal(utils.computePathForCache('/noext', '?foo=bar&baz=qux', '/target/'), path.resolve('/target', 'noext!foo=bar&baz=qux'));
+      assert.equal(utils.computePathForCache('https://www.sample.com/index.html', '/target/'), path.resolve('/target', 'index.html'));
+      assert.equal(utils.computePathForCache('https://www.sample.com/folder/index.html', '/target/'), path.resolve('/target', 'folder/index.html'));
+      assert.equal(utils.computePathForCache('https://www.sample.com/script.js', '/target/'), path.resolve('/target', 'script.js'));
+      assert.equal(utils.computePathForCache('https://www.sample.com/page.html?foo=bar&baz=qux', '/target/'), path.resolve('/target', 'page!foo=bar&baz=qux.html'));
+      assert.equal(utils.computePathForCache('https://www.sample.com/noext?foo=bar&baz=qux', '/target/'), path.resolve('/target', 'noext!foo=bar&baz=qux'));
     });
 
     it('compute different path for cache if query string', () => {
-      const l1 = utils.computePathForCache('/page.html', '?query=query+getMegaMenu{categoryList{uid+name+children{uid+include_in_menu+name+position+url_path+children{uid+include_in_menu+name+position+url_path+children{uid+include_in_menu+name+position+url_path+__typename}__typename}__typename}__typename}}&operationName=getMegaMenu&variables={}', '/target/with/several/folders');
-      const l2 = utils.computePathForCache('/page.html', '?query=query+getMegaMenu{categoryList{uid+name+children{uid+include_in_menu+name+position+url_path+children{uid+include_in_menu+name+position+url_path+children{uid+include_in_menu+name+position+url_path+__typename}__typename}__typename}__typename}}&operationName=getMegaMenu&variable={}', '/target/with/several/folders');
-      const l3 = utils.computePathForCache('/page.html', '?query=query+getMegaMenu{}', '/target/with/several/folders');
-      const l4 = utils.computePathForCache('/page.html', '', '/target/with/several/folders');
+      const l1 = utils.computePathForCache('https://www.sample.com/page.html?query=query+getMegaMenu{categoryList{uid+name+children{uid+include_in_menu+name+position+url_path+children{uid+include_in_menu+name+position+url_path+children{uid+include_in_menu+name+position+url_path+__typename}__typename}__typename}__typename}}&operationName=getMegaMenu&variables={}', '/target/with/several/folders');
+      const l2 = utils.computePathForCache('https://www.sample.com/page.html?query=query+getMegaMenu{categoryList{uid+name+children{uid+include_in_menu+name+position+url_path+children{uid+include_in_menu+name+position+url_path+children{uid+include_in_menu+name+position+url_path+__typename}__typename}__typename}__typename}}&operationName=getMegaMenu&variable={}', '/target/with/several/folders');
+      const l3 = utils.computePathForCache('https://www.sample.com/page.html?query=query+getMegaMenu{}', '/target/with/several/folders');
+      const l4 = utils.computePathForCache('https://www.sample.com/page.html', '/target/with/several/folders');
       assert.notEqual(l1, l2);
       assert.notEqual(l1, l3);
       assert.notEqual(l1, l4);
@@ -271,16 +271,16 @@ describe('Utils Test', () => {
 
     it('compute a path for cache if long name', () => {
       // should never happen, but who knows...
-      const l1 = utils.computePathForCache('/page_with_a_really_really_long_name_page_with_a_really_really_long_name_page_with_a_really_really_long_name_page_with_a_really_really_long_name_page_with_a_really_really_long_name_page_with_a_really_really_long_name_page_with_a_really_really_long_name_page_with_a_really_really_long_name_page_with_a_really_really_long_name.html', '?query=query+getMegaMenu{categoryList{uid+name+children{uid+include_in_menu+name+position+url_path+children{uid+include_in_menu+name+position+url_path+children{uid+include_in_menu+name+position+url_path+__typename}__typename}__typename}__typename}}&operationName=getMegaMenu&variables={}', '/target/with/several/folders');
+      const l1 = utils.computePathForCache('https://www.sample.com/page_with_a_really_really_long_name_page_with_a_really_really_long_name_page_with_a_really_really_long_name_page_with_a_really_really_long_name_page_with_a_really_really_long_name_page_with_a_really_really_long_name_page_with_a_really_really_long_name_page_with_a_really_really_long_name_page_with_a_really_really_long_name.html?query=query+getMegaMenu{categoryList{uid+name+children{uid+include_in_menu+name+position+url_path+children{uid+include_in_menu+name+position+url_path+children{uid+include_in_menu+name+position+url_path+__typename}__typename}__typename}__typename}}&operationName=getMegaMenu&variables={}', '/target/with/several/folders');
       assert.ok(l1);
       assert.ok(l1.substring(l1.lastIndexOf('/')).length < 255);
     });
 
-    const test = async (pathname, qs, req) => {
+    const test = async (url, req) => {
       const testRoot = await createTestRoot();
 
-      await utils.writeToCache(pathname, qs, testRoot, req, console);
-      const read = await utils.getFromCache(pathname, qs, testRoot, console);
+      await utils.writeToCache(url, testRoot, req, console);
+      const read = await utils.getFromCache(url, testRoot, console);
 
       assert.ok(!!read, 'Could read from cache');
       assert.equal(read.status, req.status);
@@ -291,7 +291,7 @@ describe('Utils Test', () => {
     };
 
     it('write and read cache', async () => {
-      await test('/index.html', '', {
+      await test('https://www.sample.com/index.html', {
         body: '<html><body>Hello World</body></html>',
         headers: {
           'Content-Type': 'text/html',
@@ -299,7 +299,7 @@ describe('Utils Test', () => {
         status: 200,
       });
 
-      await test('/folder/page', '?foo=bar&baz=qux', {
+      await test('https://www.sample.com/folder/page?foo=bar&baz=qux', {
         body: '{ "p": "Hello World" }',
         headers: {
           'Content-Type': 'application/json',
@@ -307,7 +307,7 @@ describe('Utils Test', () => {
         status: 200,
       });
 
-      await test('/target/with/several/folders/page', '?query=query+getMegaMenu{categoryList{uid+name+children{uid+include_in_menu+name+position+url_path+children{uid+include_in_menu+name+position+url_path+children{uid+include_in_menu+name+position+url_path+__typename}__typename}__typename}__typename}}&operationName=getMegaMenu&variables={}', {
+      await test('https://www.sample.com/target/with/several/folders/page?query=query+getMegaMenu{categoryList{uid+name+children{uid+include_in_menu+name+position+url_path+children{uid+include_in_menu+name+position+url_path+children{uid+include_in_menu+name+position+url_path+__typename}__typename}__typename}__typename}}&operationName=getMegaMenu&variables={}', {
         body: '{ "p": "Long query string" }',
         headers: {
           'Content-Type': 'application/json',
@@ -315,7 +315,7 @@ describe('Utils Test', () => {
         status: 200,
       });
 
-      await test('/not-found', '', {
+      await test('https://www.sample.com/not-found', {
         body: '',
         headers: {
           'Content-Type': 'application/json',

@@ -24,7 +24,13 @@ describe('hlx up', () => {
   let deleted;
   let cli;
 
-  sinon.stub(process, 'exit');
+  before(() => {
+    sinon.stub(process, 'exit');
+  });
+
+  after(() => {
+    process.exit.restore();
+  });
 
   beforeEach(async () => {
     deleted = clearHelixEnv();
