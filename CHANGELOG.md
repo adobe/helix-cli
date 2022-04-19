@@ -1,3 +1,10 @@
+# [14.7.0](https://github.com/adobe/helix-cli/compare/v14.6.20...v14.7.0) (2022-04-19)
+
+
+### Features
+
+* hlx import - proxy server ([1920145](https://github.com/adobe/helix-cli/commit/1920145f45487c89b749a57ec16781bd3aebc33c))
+
 ## [14.6.20](https://github.com/adobe/helix-cli/compare/v14.6.19...v14.6.20) (2022-04-17)
 
 
