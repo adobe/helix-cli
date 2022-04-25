@@ -1,3 +1,15 @@
+# [14.8.0](https://github.com/adobe/helix-cli/compare/v14.7.0...v14.8.0) (2022-04-25)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @adobe/helix-shared-indexer to v0.3.3 ([4b0080a](https://github.com/adobe/helix-cli/commit/4b0080a70dc77deffbea5aca8d4caecbafa703d7))
+
+
+### Features
+
+* import - support 301 ([7bc30df](https://github.com/adobe/helix-cli/commit/7bc30df754439425e2cd7898d4db077251dea78a))
+
 # [14.7.0](https://github.com/adobe/helix-cli/compare/v14.6.20...v14.7.0) (2022-04-19)
 
 
