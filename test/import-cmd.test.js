@@ -51,7 +51,13 @@ describe('Integration test for import command', function suite() {
       .get('/logo.svg')
       .reply(200, content.img, { 'Content-Type': 'image/svg+xml' })
       .get('/not-found.txt')
-      .reply(404);
+      .reply(404)
+      .get('/redirect.html')
+      .reply(301, '', { Location: '/index.html' })
+      .get('/redirect-with-host.html')
+      .reply(301, '', { Location: `${SAMPLE_HOST}/index.html` })
+      .get('/redirect-with-external-host.html')
+      .reply(301, '', { Location: 'https://www.somewhereelse.com' });
 
     cmd
       .on('started', async () => {
@@ -90,6 +96,33 @@ describe('Integration test for import command', function suite() {
             },
           });
           assert.strictEqual(resp.status, 404);
+
+          resp = await fetch(`http://localhost:${cmd.project.server.port}/redirect.html`, {
+            redirect: 'manual',
+            headers: {
+              cookie: cookies,
+            },
+          });
+          assert.strictEqual(resp.status, 301);
+          assert.strictEqual(resp.headers.get('Location'), '/index.html');
+
+          resp = await fetch(`http://localhost:${cmd.project.server.port}/redirect-with-host.html`, {
+            redirect: 'manual',
+            headers: {
+              cookie: cookies,
+            },
+          });
+          assert.strictEqual(resp.status, 301);
+          assert.strictEqual(resp.headers.get('Location'), '/index.html');
+
+          resp = await fetch(`http://localhost:${cmd.project.server.port}/redirect-with-external-host.html?host=${SAMPLE_HOST}`, {
+            redirect: 'manual',
+            headers: {
+              cookie: cookies,
+            },
+          });
+          assert.strictEqual(resp.status, 301);
+          assert.strictEqual(resp.headers.get('Location'), 'https://www.somewhereelse.com');
 
           await scope.done();
 
@@ -233,7 +266,13 @@ describe('Integration test for import command with cache', function suite() {
       .get('/page.plain.html')
       .reply(200, content.plain, { 'Content-Type': 'text/html' })
       .get('/logo.svg')
-      .reply(200, content.img, { 'Content-Type': 'image/svg+xml' });
+      .reply(200, content.img, { 'Content-Type': 'image/svg+xml' })
+      .get('/redirect.html')
+      .reply(301, '', { Location: '/index.html' })
+      .get('/redirect-with-host.html')
+      .reply(301, '', { Location: `${SAMPLE_HOST}/index.html` })
+      .get('/redirect-with-external-host.html')
+      .reply(301, '', { Location: 'https://www.somewhereelse.com' });
 
     cmd
       .on('started', async () => {
@@ -252,6 +291,24 @@ describe('Integration test for import command with cache', function suite() {
             assert.strictEqual(ret.trim(), content.plain);
             ret = await assertHttp(`http://localhost:${cmd.project.server.port}/logo.svg?host=${SAMPLE_HOST}`, 200);
             assert.strictEqual(ret.trim(), content.img);
+
+            let resp = await fetch(`http://localhost:${cmd.project.server.port}/redirect.html?host=${SAMPLE_HOST}`, {
+              redirect: 'manual',
+            });
+            assert.strictEqual(resp.status, 301);
+            assert.strictEqual(resp.headers.get('Location'), '/index.html');
+
+            resp = await fetch(`http://localhost:${cmd.project.server.port}/redirect-with-host.html?host=${SAMPLE_HOST}`, {
+              redirect: 'manual',
+            });
+            assert.strictEqual(resp.status, 301);
+            assert.strictEqual(resp.headers.get('Location'), '/index.html');
+
+            resp = await fetch(`http://localhost:${cmd.project.server.port}/redirect-with-external-host.html?host=${SAMPLE_HOST}`, {
+              redirect: 'manual',
+            });
+            assert.strictEqual(resp.status, 301);
+            assert.strictEqual(resp.headers.get('Location'), 'https://www.somewhereelse.com');
 
             const js = await assertHttp(`http://localhost:${cmd.project.server.port}/tools/importer/import.js`, 200);
             assert.strictEqual(js.trim(), '// import.js code');

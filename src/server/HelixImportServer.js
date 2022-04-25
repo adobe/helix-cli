@@ -136,8 +136,14 @@ export default class HelixServer extends EventEmitter {
     const respHeaders = ret.headers.plain();
     delete respHeaders['content-encoding'];
     delete respHeaders['content-length'];
-    delete respHeaders.location;
     respHeaders['access-control-allow-origin'] = '*';
+
+    if (respHeaders.location && !respHeaders.location.startsWith('/')) {
+      const u = new URL(respHeaders.location);
+      if (u.origin === host) {
+        respHeaders.location = u.pathname;
+      }
+    }
 
     let buffer;
     if (this._project.cacheDirectory) {
