@@ -115,7 +115,7 @@ describe('Integration test for import command', function suite() {
           assert.strictEqual(resp.status, 301);
           assert.strictEqual(resp.headers.get('Location'), '/index.html');
 
-          resp = await fetch(`http://localhost:${cmd.project.server.port}/redirect-with-external-host.html?host=${SAMPLE_HOST}`, {
+          resp = await fetch(`http://localhost:${cmd.project.server.port}/redirect-with-external-host.html`, {
             redirect: 'manual',
             headers: {
               cookie: cookies,
