@@ -1,3 +1,10 @@
+## [14.8.1](https://github.com/adobe/helix-cli/compare/v14.8.0...v14.8.1) (2022-04-25)
+
+
+### Bug Fixes
+
+* hlx-proxyhost cookie gets lost if remote server has a cookie ([3f8866a](https://github.com/adobe/helix-cli/commit/3f8866a51abbfa83e5eb45a201a6cfa719ee7864))
+
 # [14.8.0](https://github.com/adobe/helix-cli/compare/v14.7.0...v14.8.0) (2022-04-25)
 
 
