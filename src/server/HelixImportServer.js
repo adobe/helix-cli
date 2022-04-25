@@ -107,6 +107,7 @@ export default class HelixServer extends EventEmitter {
         res
           .status(cached.status)
           .set(cached.headers)
+          .cookie('hlx-proxyhost', host)
           .send(cached.body);
         return;
       }
@@ -137,6 +138,7 @@ export default class HelixServer extends EventEmitter {
     delete respHeaders['content-encoding'];
     delete respHeaders['content-length'];
     respHeaders['access-control-allow-origin'] = '*';
+    delete respHeaders['set-cookie'];
 
     if (respHeaders.location && !respHeaders.location.startsWith('/')) {
       const u = new URL(respHeaders.location);
@@ -175,6 +177,7 @@ export default class HelixServer extends EventEmitter {
       res
         .status(ret.status)
         .set(respHeaders)
+        .cookie('hlx-proxyhost', host)
         .send(text);
       ret.body.pipe(res);
       return;
@@ -184,6 +187,7 @@ export default class HelixServer extends EventEmitter {
       res
         .status(ret.status)
         .set(respHeaders)
+        .cookie('hlx-proxyhost', host)
         .send(buffer);
       ret.body.pipe(res);
     } else {
@@ -214,7 +218,6 @@ export default class HelixServer extends EventEmitter {
     } else {
       try {
         host = new URL(host).origin;
-        res.cookie('hlx-proxyhost', host);
         const url = this._makeProxyURL(ctx.url, host);
         await this._doProxyRequest(ctx, url, host, req, res);
       // codecov:ignore:start

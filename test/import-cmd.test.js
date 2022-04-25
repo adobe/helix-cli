@@ -57,19 +57,22 @@ describe('Integration test for import command', function suite() {
       .get('/redirect-with-host.html')
       .reply(301, '', { Location: `${SAMPLE_HOST}/index.html` })
       .get('/redirect-with-external-host.html')
-      .reply(301, '', { Location: 'https://www.somewhereelse.com' });
+      .reply(301, '', { Location: 'https://www.somewhereelse.com' })
+      .get('/index-with-cookie.html')
+      .reply(200, content.index, { 'set-cookie': 'JSESSIONID=07A8BAAC4D936AEA864387BE61A4C457; Path=/; Secure; HttpOnly' });
 
     cmd
       .on('started', async () => {
         try {
           // test proxy
           await assertHttp(`http://localhost:${cmd.project.server.port}/index.html`, 403);
+
           let resp = await fetch(`http://localhost:${cmd.project.server.port}/index.html?host=${SAMPLE_HOST}`);
           assert.strictEqual(resp.status, 200);
           let text = await resp.text();
           assert.strictEqual(text.trim(), content.index);
-          const cookies = resp.headers.get('set-cookie');
-          assert.ok(cookies);
+          let cookies = resp.headers.get('set-cookie');
+          assert.equal(cookies, `hlx-proxyhost=${encodeURIComponent(SAMPLE_HOST)}; Path=/`);
 
           // "host" cookie has been set and host query param is not required anymore
           resp = await fetch(`http://localhost:${cmd.project.server.port}/index.html`, {
@@ -123,6 +126,17 @@ describe('Integration test for import command', function suite() {
           });
           assert.strictEqual(resp.status, 301);
           assert.strictEqual(resp.headers.get('Location'), 'https://www.somewhereelse.com');
+
+          resp = await fetch(`http://localhost:${cmd.project.server.port}/index-with-cookie.html`, {
+            headers: {
+              cookie: cookies,
+            },
+          });
+          assert.strictEqual(resp.status, 200);
+          text = await resp.text();
+          assert.strictEqual(text.trim(), content.index);
+          cookies = resp.headers.get('set-cookie');
+          assert.equal(cookies, `hlx-proxyhost=${encodeURIComponent(SAMPLE_HOST)}; Path=/`);
 
           await scope.done();
 
@@ -229,7 +243,7 @@ describe('Integration test for import command with cache', function suite() {
   });
 
   afterEach(async () => {
-    await fse.remove(testRoot);
+    // await fse.remove(testRoot);
   });
 
   it('up command delivers correct cached response.', (done) => {
@@ -272,14 +286,21 @@ describe('Integration test for import command with cache', function suite() {
       .get('/redirect-with-host.html')
       .reply(301, '', { Location: `${SAMPLE_HOST}/index.html` })
       .get('/redirect-with-external-host.html')
-      .reply(301, '', { Location: 'https://www.somewhereelse.com' });
+      .reply(301, '', { Location: 'https://www.somewhereelse.com' })
+      .get('/index-with-cookie.html')
+      .reply(200, content.index, { 'set-cookie': 'hlx-proxyhost=https://www.previousimport.com; Path=/; Secure; HttpOnly' });
 
     cmd
       .on('started', async () => {
         try {
           const assertRequests = async () => {
-            let ret = await assertHttp(`http://localhost:${cmd.project.server.port}/index.html?host=${SAMPLE_HOST}`, 200);
+            let resp = await fetch(`http://localhost:${cmd.project.server.port}/index.html?host=${SAMPLE_HOST}`);
+            assert.strictEqual(resp.status, 200);
+            let ret = await resp.text();
             assert.strictEqual(ret.trim(), content.index);
+            let cookies = resp.headers.get('set-cookie');
+            assert.equal(cookies, `hlx-proxyhost=${encodeURIComponent(SAMPLE_HOST)}; Path=/`);
+
             ret = await assertHttp(`http://localhost:${cmd.project.server.port}/?host=${SAMPLE_HOST}`, 200);
             assert.strictEqual(ret.trim(), content.index);
             ret = await assertHttp(`http://localhost:${cmd.project.server.port}/folder/page.html?foo=bar&baz=qux&host=${SAMPLE_HOST}`, 200);
@@ -292,7 +313,7 @@ describe('Integration test for import command with cache', function suite() {
             ret = await assertHttp(`http://localhost:${cmd.project.server.port}/logo.svg?host=${SAMPLE_HOST}`, 200);
             assert.strictEqual(ret.trim(), content.img);
 
-            let resp = await fetch(`http://localhost:${cmd.project.server.port}/redirect.html?host=${SAMPLE_HOST}`, {
+            resp = await fetch(`http://localhost:${cmd.project.server.port}/redirect.html?host=${SAMPLE_HOST}`, {
               redirect: 'manual',
             });
             assert.strictEqual(resp.status, 301);
@@ -309,6 +330,13 @@ describe('Integration test for import command with cache', function suite() {
             });
             assert.strictEqual(resp.status, 301);
             assert.strictEqual(resp.headers.get('Location'), 'https://www.somewhereelse.com');
+
+            resp = await fetch(`http://localhost:${cmd.project.server.port}/index-with-cookie.html?host=${SAMPLE_HOST}`);
+            assert.strictEqual(resp.status, 200);
+            ret = await resp.text();
+            assert.strictEqual(ret.trim(), content.index);
+            cookies = resp.headers.get('set-cookie');
+            assert.equal(cookies, `hlx-proxyhost=${encodeURIComponent(SAMPLE_HOST)}; Path=/`);
 
             const js = await assertHttp(`http://localhost:${cmd.project.server.port}/tools/importer/import.js`, 200);
             assert.strictEqual(js.trim(), '// import.js code');
