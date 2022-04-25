@@ -138,6 +138,7 @@ export default class HelixServer extends EventEmitter {
     delete respHeaders['content-encoding'];
     delete respHeaders['content-length'];
     respHeaders['access-control-allow-origin'] = '*';
+    delete respHeaders['set-cookie'];
 
     if (respHeaders.location && !respHeaders.location.startsWith('/')) {
       const u = new URL(respHeaders.location);
