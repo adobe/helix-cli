@@ -126,11 +126,11 @@ describe('Helix Server', () => {
     const project = new HelixProject()
       .withCwd(cwd)
       .withHttpPort(0)
-      .withProxyUrl('http://main--foo--bar.hlx3.page');
+      .withProxyUrl('http://main--foo--bar.hlx.page');
 
     await project.init();
 
-    const scope = nock('http://main--foo--bar.hlx3.page')
+    const scope = nock('http://main--foo--bar.hlx.page')
       .get('/notfound.css')
       .reply(404)
       .get('/head.html')
@@ -150,11 +150,11 @@ describe('Helix Server', () => {
     const project = new HelixProject()
       .withCwd(cwd)
       .withHttpPort(0)
-      .withProxyUrl('http://main--foo--bar.hlx3.page');
+      .withProxyUrl('http://main--foo--bar.hlx.page');
 
     await project.init();
 
-    const scope = nock('http://main--foo--bar.hlx3.page')
+    const scope = nock('http://main--foo--bar.hlx.page')
       .get('/local.html')
       .optionally(true)
       .reply(200, 'foo')

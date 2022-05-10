@@ -127,7 +127,7 @@ export default class UpCommand extends AbstractCommand {
           ref = 'main';
         }
       }
-      this._pagesUrl = `https://${ref}--${gitUrl.repo}--${gitUrl.owner}.hlx3.page`;
+      this._pagesUrl = `https://${ref}--${gitUrl.repo}--${gitUrl.owner}.hlx.page`;
     }
 
     if (this._cache) {
