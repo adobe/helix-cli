@@ -49,7 +49,7 @@ describe('Integration test for up command with helix pages', function suite() {
       return cmd.stop();
     };
 
-    const scope = nock('https://master--dummy-foo--adobe.hlx3.page')
+    const scope = nock('https://master--dummy-foo--adobe.hlx.page')
       .get('/index.html')
       .reply(200, '## Welcome')
       .get('/not-found.txt')
@@ -97,7 +97,7 @@ describe('Integration test for up command with helix pages', function suite() {
       return cmd.stop();
     };
 
-    const scope = nock('https://main--dummy-foo--adobe.hlx3.page')
+    const scope = nock('https://main--dummy-foo--adobe.hlx.page')
       .get('/index.html')
       .reply(200, '## Welcome')
       .get('/not-found.txt')
@@ -168,7 +168,7 @@ describe('Integration test for up command with cache', function suite() {
       page2: '## Some different content for different qs',
       plain: 'Some plain content',
     };
-    const scope = nock('https://master--dummy-foo--adobe.hlx3.page')
+    const scope = nock('https://master--dummy-foo--adobe.hlx.page')
       .get('/index.html')
       .reply(200, content.index)
       .get('/folder/page.html?foo=bar&baz=qux')
