@@ -36,11 +36,11 @@
     "node": ">=14"
   },
   "dependencies": {
-    "@adobe/helix-fetch": "3.0.9",
+    "@adobe/helix-fetch": "3.0.10",
     "@adobe/helix-log": "6.0.0",
-    "@adobe/helix-shared-config": "2.0.6",
-    "@adobe/helix-shared-git": "2.0.2",
-    "@adobe/helix-shared-indexer": "0.3.7",
+    "@adobe/helix-shared-config": "2.0.7",
+    "@adobe/helix-shared-git": "2.0.3",
+    "@adobe/helix-shared-indexer": "0.3.9",
     "camelcase": "6.3.0",
     "chalk-template": "0.4.0",
     "chokidar": "3.5.3",
