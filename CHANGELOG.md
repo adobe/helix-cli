@@ -1,3 +1,10 @@
+## [14.9.2](https://github.com/adobe/helix-cli/compare/v14.9.1...v14.9.2) (2022-05-23)
+
+
+### Bug Fixes
+
+* branch with slash causes problems ([394d276](https://github.com/adobe/helix-cli/commit/394d276a404906f8284958bace4eb23f99016249)), closes [#2006](https://github.com/adobe/helix-cli/issues/2006)
+
 ## [14.9.1](https://github.com/adobe/helix-cli/compare/v14.9.0...v14.9.1) (2022-05-23)
 
 
