@@ -243,7 +243,7 @@ describe('Integration test for import command with cache', function suite() {
   });
 
   afterEach(async () => {
-    // await fse.remove(testRoot);
+    await fse.remove(testRoot);
   });
 
   it('up command delivers correct cached response.', (done) => {
@@ -351,6 +351,53 @@ describe('Integration test for import command with cache', function suite() {
           // re-running the same requests with nock scopes "done" should still work
           // because content will be served from the cache or from local file
           await assertRequests();
+
+          myDone();
+        } catch (e) {
+          myDone(e);
+        }
+      })
+      .on('stopped', () => {
+        done(error);
+      })
+      .run()
+      .catch(done);
+  });
+
+  it('up command delivers POST requests.', (done) => {
+    let error = null;
+    const cmd = new ImportCommand()
+      .withDirectory(testDir)
+      .withOpen(false)
+      .withKill(false)
+      .withHttpPort(0)
+      .withCache(path.resolve(testRoot, '.cache'));
+
+    const myDone = (err) => {
+      error = err;
+      return cmd.stop();
+    };
+
+    const scope = nock(SAMPLE_HOST)
+      .post('/some-post-url', { iteration: 1 })
+      .reply(200, { postIteration: 'num-1' })
+      .post('/some-post-url', { iteration: 2 })
+      .reply(200, { postIteration: 'num-2' });
+
+    cmd
+      .on('started', async () => {
+        try {
+          let resp = await fetch(`http://localhost:${cmd.project.server.port}/some-post-url?host=${SAMPLE_HOST}`, { method: 'POST', body: '{"iteration": 1}' });
+          assert.strictEqual(resp.status, 200);
+          let json = await resp.json();
+          assert.strictEqual(json.postIteration, 'num-1');
+
+          resp = await fetch(`http://localhost:${cmd.project.server.port}/some-post-url?host=${SAMPLE_HOST}`, { method: 'POST', body: '{"iteration": 2}' });
+          assert.strictEqual(resp.status, 200);
+          json = await resp.json();
+          assert.strictEqual(json.postIteration, 'num-2');
+
+          await scope.done();
 
           myDone();
         } catch (e) {

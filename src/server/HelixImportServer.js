@@ -97,7 +97,11 @@ export default class HelixServer extends EventEmitter {
   async _doProxyRequest(ctx, url, host, req, res) {
     ctx.log.debug(`Proxy ${req.method} request to ${url}`);
 
-    if (this._project.cacheDirectory) {
+    // POST requests have a body
+    const isBodyReq = !['GET', 'HEAD'].includes(req.method);
+
+    //  do not cache  POST requests
+    if (!isBodyReq && this._project.cacheDirectory) {
       const cached = await utils.getFromCache(
         url,
         this._project.cacheDirectory,
@@ -113,8 +117,13 @@ export default class HelixServer extends EventEmitter {
       }
     }
 
-    const stream = new PassThrough();
-    req.pipe(stream);
+    let body;
+    // pipe body if any
+    if (isBodyReq) {
+      body = new PassThrough();
+      req.pipe(body);
+    }
+
     const headers = {
       ...req.headers,
     };
@@ -127,6 +136,7 @@ export default class HelixServer extends EventEmitter {
       headers,
       cache: 'no-store',
       redirect: 'manual',
+      body,
     });
 
     const contentType = ret.headers.get('content-type') || 'text/plain';
@@ -148,7 +158,7 @@ export default class HelixServer extends EventEmitter {
     }
 
     let buffer;
-    if (this._project.cacheDirectory) {
+    if (!isBodyReq && this._project.cacheDirectory) {
       buffer = await ret.buffer();
       await utils.writeToCache(
         url,
@@ -241,6 +251,7 @@ export default class HelixServer extends EventEmitter {
 
     this._app.get('/tools/*', asyncHandler(this.handleToolsRequest.bind(this)));
     this._app.get('*', asyncHandler(this.handleProxyModeRequest.bind(this)));
+    this._app.post('*', asyncHandler(this.handleProxyModeRequest.bind(this)));
   }
 
   withPort(port) {
