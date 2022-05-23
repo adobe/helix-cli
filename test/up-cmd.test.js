@@ -14,8 +14,9 @@
 import assert from 'assert';
 import path from 'path';
 import fse from 'fs-extra';
-import nock from 'nock';
-import { assertHttp, createTestRoot, initGit } from './utils.js';
+import {
+  Nock, assertHttp, createTestRoot, initGit,
+} from './utils.js';
 import UpCommand from '../src/up.cmd.js';
 
 const TEST_DIR = path.resolve(__rootdir, 'test', 'fixtures', 'project');
@@ -24,15 +25,19 @@ describe('Integration test for up command with helix pages', function suite() {
   this.timeout(60000); // ensure enough time for installing modules on slow machines
   let testDir;
   let testRoot;
+  let nock;
 
   beforeEach(async () => {
     testRoot = await createTestRoot();
     testDir = path.resolve(testRoot, 'project');
+    nock = new Nock();
+    nock.enableNetConnect(/localhost/);
     await fse.copy(TEST_DIR, testDir);
   });
 
   afterEach(async () => {
     await fse.remove(testRoot);
+    nock.done();
   });
 
   it('up command delivers correct response.', (done) => {
@@ -49,7 +54,7 @@ describe('Integration test for up command with helix pages', function suite() {
       return cmd.stop();
     };
 
-    const scope = nock('https://master--dummy-foo--adobe.hlx.page')
+    nock('https://master--dummy-foo--adobe.hlx.page')
       .get('/index.html')
       .reply(200, '## Welcome')
       .get('/not-found.txt')
@@ -57,7 +62,7 @@ describe('Integration test for up command with helix pages', function suite() {
       .get('/head.html')
       .reply(200, '<link rel="stylesheet" href="/styles.css"/>');
 
-    const scope1 = nock('https://raw.githubusercontent.com')
+    nock('https://raw.githubusercontent.com')
       .get('/adobe/dummy-foo/master/fstab.yaml')
       .reply(200, 'dummy');
 
@@ -69,11 +74,54 @@ describe('Integration test for up command with helix pages', function suite() {
           ret = await assertHttp(`http://localhost:${cmd.project.server.port}/local.txt`, 200);
           assert.strictEqual(ret.trim(), 'Hello, world.');
           await assertHttp(`http://localhost:${cmd.project.server.port}/not-found.txt`, 404);
-          await scope.done();
-          await scope1.done();
-          myDone();
+          await myDone();
         } catch (e) {
-          myDone(e);
+          await myDone(e);
+        }
+      })
+      .on('stopped', () => {
+        done(error);
+      })
+      .run()
+      .catch(done);
+  });
+
+  it('up command delivers correct response (branch with slash).', (done) => {
+    initGit(testDir, 'https://github.com/adobe/dummy-foo.git', 'tripod/test');
+    let error = null;
+    const cmd = new UpCommand()
+      .withLiveReload(false)
+      .withDirectory(testDir)
+      .withOpen(false)
+      .withHttpPort(0);
+
+    const myDone = (err) => {
+      error = err;
+      return cmd.stop();
+    };
+
+    nock('https://tripod-test--dummy-foo--adobe.hlx.page')
+      .get('/index.html')
+      .reply(200, '## Welcome')
+      .get('/not-found.txt')
+      .reply(404)
+      .get('/head.html')
+      .reply(200, '<link rel="stylesheet" href="/styles.css"/>');
+    nock('https://raw.githubusercontent.com')
+      .get('/adobe/dummy-foo/tripod/test/fstab.yaml')
+      .reply(200, 'dummy');
+
+    cmd
+      .on('started', async () => {
+        try {
+          let ret = await assertHttp(`http://localhost:${cmd.project.server.port}/index.html`, 200);
+          assert.strictEqual(ret.trim(), '## Welcome');
+          ret = await assertHttp(`http://localhost:${cmd.project.server.port}/local.txt`, 200);
+          assert.strictEqual(ret.trim(), 'Hello, world.');
+          await assertHttp(`http://localhost:${cmd.project.server.port}/not-found.txt`, 404);
+          await myDone();
+        } catch (e) {
+          await myDone(e);
         }
       })
       .on('stopped', () => {
@@ -97,7 +145,7 @@ describe('Integration test for up command with helix pages', function suite() {
       return cmd.stop();
     };
 
-    const scope = nock('https://main--dummy-foo--adobe.hlx.page')
+    nock('https://main--dummy-foo--adobe.hlx.page')
       .get('/index.html')
       .reply(200, '## Welcome')
       .get('/not-found.txt')
@@ -105,7 +153,7 @@ describe('Integration test for up command with helix pages', function suite() {
       .get('/head.html')
       .reply(200, '<link rel="stylesheet" href="/styles.css"/>');
 
-    const scope1 = nock('https://raw.githubusercontent.com')
+    nock('https://raw.githubusercontent.com')
       .get('/adobe/dummy-foo/master/fstab.yaml')
       .reply(404, 'dummy');
 
@@ -117,11 +165,9 @@ describe('Integration test for up command with helix pages', function suite() {
           ret = await assertHttp(`http://localhost:${cmd.project.server.port}/local.txt`, 200);
           assert.strictEqual(ret.trim(), 'Hello, world.');
           await assertHttp(`http://localhost:${cmd.project.server.port}/not-found.txt`, 404);
-          await scope.done();
-          await scope1.done();
-          myDone();
+          await myDone();
         } catch (e) {
-          myDone(e);
+          await myDone(e);
         }
       })
       .on('stopped', () => {
@@ -136,14 +182,17 @@ describe('Integration test for up command with cache', function suite() {
   this.timeout(60000); // ensure enough time for installing modules on slow machines
   let testDir;
   let testRoot;
+  let nock;
 
   beforeEach(async () => {
     testRoot = await createTestRoot();
     testDir = path.resolve(testRoot, 'project');
     await fse.copy(TEST_DIR, testDir);
+    nock = new Nock();
   });
 
   afterEach(async () => {
+    nock.done();
     await fse.remove(testRoot);
   });
 
@@ -168,7 +217,7 @@ describe('Integration test for up command with cache', function suite() {
       page2: '## Some different content for different qs',
       plain: 'Some plain content',
     };
-    const scope = nock('https://master--dummy-foo--adobe.hlx.page')
+    nock('https://master--dummy-foo--adobe.hlx.page')
       .get('/index.html')
       .reply(200, content.index)
       .get('/folder/page.html?foo=bar&baz=qux')
@@ -182,9 +231,11 @@ describe('Integration test for up command with cache', function suite() {
       .get('/head.html')
       .reply(200, '<link rel="stylesheet" href="/styles.css"/>');
 
-    const scope1 = nock('https://raw.githubusercontent.com')
+    nock('https://raw.githubusercontent.com')
       .get('/adobe/dummy-foo/master/fstab.yaml')
       .reply(200, 'dummy');
+
+    nock.enableNetConnect(/localhost/);
 
     cmd
       .on('started', async () => {
@@ -208,16 +259,13 @@ describe('Integration test for up command with cache', function suite() {
 
           await assertRequests();
 
-          await scope.done();
-          await scope1.done();
-
           // re-running the same requests with nock scopes "done" should still work
           // because content will be served from the cache or from local file
           await assertRequests();
 
-          myDone();
+          await myDone();
         } catch (e) {
-          myDone(e);
+          await myDone(e);
         }
       })
       .on('stopped', () => {

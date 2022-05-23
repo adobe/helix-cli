@@ -127,6 +127,8 @@ export default class UpCommand extends AbstractCommand {
           ref = 'main';
         }
       }
+      // replace `/` by `-` in ref.
+      ref = ref.replace(/\//g, '-');
       this._pagesUrl = `https://${ref}--${gitUrl.repo}--${gitUrl.owner}.hlx.page`;
     }
 

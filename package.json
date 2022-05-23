@@ -10,7 +10,6 @@
   "scripts": {
     "check": "npm run lint && npm run test",
     "test": "c8 mocha",
-    "test-ci": "c8 mocha && codecov",
     "test-ci-win": "npx mocha --reporter xunit test --reporter-options output=junit/test.xml -t 5000",
     "lint": "eslint .",
     "semantic-release": "semantic-release",
@@ -70,7 +69,6 @@
     "@semantic-release/changelog": "6.0.1",
     "@semantic-release/git": "10.0.1",
     "c8": "7.11.3",
-    "codecov": "3.8.3",
     "eslint": "8.16.0",
     "eslint-plugin-header": "3.1.1",
     "eslint-plugin-import": "2.26.0",

@@ -12,12 +12,11 @@
 
 /* eslint-env mocha */
 import assert from 'assert';
-import nock from 'nock';
 import os from 'os';
 import fse from 'fs-extra';
 import path from 'path';
 import HeadHtmlSupport from '../src/server/HeadHtmlSupport.js';
-import { createTestRoot, setupProject } from './utils.js';
+import { Nock, createTestRoot, setupProject } from './utils.js';
 
 describe('Head.html replacement tests', () => {
   it('replaces the head html within <head> tags', () => {
@@ -83,9 +82,12 @@ describe('Head.html replacement tests', () => {
 
 describe('Head.html loading tests', () => {
   let testRoot;
+  let nock;
 
   beforeEach(async () => {
     testRoot = await createTestRoot();
+    nock = new Nock();
+    nock.enableNetConnect(/localhost/);
   });
 
   afterEach(async () => {
@@ -96,6 +98,7 @@ describe('Head.html loading tests', () => {
     } else {
       await fse.remove(testRoot);
     }
+    nock.done();
   });
 
   it('loads local head.html', async () => {
@@ -153,7 +156,7 @@ describe('Head.html loading tests', () => {
   it('init loads local and remote head.html', async () => {
     const directory = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
 
-    const scope = nock('https://main--blog--adobe.hlx.page')
+    nock('https://main--blog--adobe.hlx.page')
       .get('/head.html')
       .reply(200, '<!-- remote head html -->');
 
@@ -170,7 +173,6 @@ describe('Head.html loading tests', () => {
     assert.strictEqual(hhs.isModified, true);
 
     await hhs.init(); // only once
-    scope.done();
   });
 
   it('init loads local and remote head.html (not modified)', async () => {
