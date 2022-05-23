@@ -14,8 +14,7 @@
 import assert from 'assert';
 import path from 'path';
 import fse from 'fs-extra';
-import nock from 'nock';
-import { assertHttp, createTestRoot } from './utils.js';
+import { Nock, assertHttp, createTestRoot } from './utils.js';
 import { fetch } from '../src/fetch-utils.js';
 import ImportCommand from '../src/import.cmd.js';
 
@@ -23,6 +22,17 @@ const TEST_DIR = path.resolve(__rootdir, 'test', 'fixtures', 'import');
 const SAMPLE_HOST = 'https://www.sample.com';
 
 describe('Integration test for import command', function suite() {
+  let nock;
+
+  beforeEach(async () => {
+    nock = new Nock();
+    nock.enableNetConnect(/localhost/);
+  });
+
+  afterEach(() => {
+    nock.done();
+  });
+
   this.timeout(60000);
 
   it('import command delivers correct response without cache', (done) => {
@@ -43,7 +53,7 @@ describe('Integration test for import command', function suite() {
       img: '<svg/>',
     };
 
-    const scope = nock(SAMPLE_HOST)
+    nock(SAMPLE_HOST)
       .get('/index.html')
       .reply(200, content.index)
       .get('/index.html')
@@ -138,17 +148,15 @@ describe('Integration test for import command', function suite() {
           cookies = resp.headers.get('set-cookie');
           assert.equal(cookies, `hlx-proxyhost=${encodeURIComponent(SAMPLE_HOST)}; Path=/`);
 
-          await scope.done();
-
           // /tools is delivered for local project folder
           const js = await assertHttp(`http://localhost:${cmd.project.server.port}/tools/importer/import.js`, 200);
           assert.strictEqual(js.trim(), '// import.js code');
 
           await assertHttp(`http://localhost:${cmd.project.server.port}/tools/not-found.txt`, 404);
 
-          myDone();
+          await myDone();
         } catch (e) {
-          myDone(e);
+          await myDone(e);
         }
       })
       .on('stopped', () => {
@@ -206,7 +214,7 @@ describe('Integration test for import command', function suite() {
       </body>`,
     };
 
-    const scope = nock(SAMPLE_HOST)
+    nock(SAMPLE_HOST)
       .get('/index.html')
       .reply(200, content.index);
 
@@ -216,11 +224,9 @@ describe('Integration test for import command', function suite() {
           const ret = await assertHttp(`http://localhost:${cmd.project.server.port}/index.html?host=${SAMPLE_HOST}`, 200);
           assert.strictEqual(ret.trim(), expected.index.trim());
 
-          await scope.done();
-
-          myDone();
+          await myDone();
         } catch (e) {
-          myDone(e);
+          await myDone(e);
         }
       })
       .on('stopped', () => {
@@ -235,15 +241,19 @@ describe('Integration test for import command with cache', function suite() {
   this.timeout(60000); // ensure enough time for installing modules on slow machines
   let testDir;
   let testRoot;
+  let nock;
 
   beforeEach(async () => {
     testRoot = await createTestRoot();
     testDir = path.resolve(testRoot, 'import');
     await fse.copy(TEST_DIR, testDir);
+    nock = new Nock();
+    nock.enableNetConnect(/localhost/);
   });
 
   afterEach(async () => {
     await fse.remove(testRoot);
+    nock.done();
   });
 
   it('up command delivers correct cached response.', (done) => {
@@ -268,7 +278,7 @@ describe('Integration test for import command with cache', function suite() {
       img: '<svg/>',
     };
 
-    const scope = nock(SAMPLE_HOST)
+    nock(SAMPLE_HOST)
       .get('/index.html')
       .reply(200, content.index)
       .get('/folder/page.html?foo=bar&baz=qux')
@@ -346,15 +356,13 @@ describe('Integration test for import command with cache', function suite() {
 
           await assertRequests();
 
-          await scope.done();
-
           // re-running the same requests with nock scopes "done" should still work
           // because content will be served from the cache or from local file
           await assertRequests();
 
-          myDone();
+          await myDone();
         } catch (e) {
-          myDone(e);
+          await myDone(e);
         }
       })
       .on('stopped', () => {
@@ -378,7 +386,7 @@ describe('Integration test for import command with cache', function suite() {
       return cmd.stop();
     };
 
-    const scope = nock(SAMPLE_HOST)
+    nock(SAMPLE_HOST)
       .post('/some-post-url', { iteration: 1 })
       .reply(200, { postIteration: 'num-1' })
       .post('/some-post-url', { iteration: 2 })
@@ -397,11 +405,9 @@ describe('Integration test for import command with cache', function suite() {
           json = await resp.json();
           assert.strictEqual(json.postIteration, 'num-2');
 
-          await scope.done();
-
-          myDone();
+          await myDone();
         } catch (e) {
-          myDone(e);
+          await myDone(e);
         }
       })
       .on('stopped', () => {

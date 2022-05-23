@@ -15,6 +15,7 @@ import path from 'path';
 import shell from 'shelljs';
 import crypto from 'crypto';
 import fse from 'fs-extra';
+import nock from 'nock';
 import { fetch } from '../src/fetch-utils.js';
 
 /**
@@ -91,4 +92,60 @@ export async function wait(time) {
   return new Promise((resolve) => {
     setTimeout(resolve, time);
   });
+}
+
+const FSTAB = `
+mountpoints:
+  /: https://drive.google.com/drive/u/2/folders/1vjng4ahZWph-9oeaMae16P9Kbb3xg4Cg
+`;
+
+export function Nock() {
+  const scopes = {};
+
+  /** @type RegExp */
+  let exclude;
+  let unmatched;
+
+  function noMatchHandler(req) {
+    if (exclude && exclude.test(req.hostname)) {
+      return;
+    }
+    unmatched.push(req);
+  }
+
+  function nocker(url) {
+    let scope = scopes[url];
+    if (!scope) {
+      scope = nock(url);
+      scopes[url] = scope;
+    }
+    if (!unmatched) {
+      unmatched = [];
+      nock.emitter.on('no match', noMatchHandler);
+    }
+    return scope;
+  }
+
+  nocker.done = () => {
+    try {
+      Object.values(scopes).forEach((s) => s.done());
+    } finally {
+      nock.cleanAll();
+    }
+    if (unmatched) {
+      assert.deepStrictEqual(unmatched.map((req) => req.href || req), []);
+      nock.emitter.off('no match', noMatchHandler);
+    }
+  };
+
+  nocker.fstab = (fstab = FSTAB, owner = 'owner', repo = 'repo') => nocker('https://helix-code-bus.s3.us-east-1.amazonaws.com')
+    .get(`/${owner}/${repo}/main/fstab.yaml?x-id=GetObject`)
+    .reply(200, fstab);
+
+  nocker.enableNetConnect = (pat) => {
+    nock.enableNetConnect(pat);
+    exclude = pat;
+  };
+
+  return nocker;
 }

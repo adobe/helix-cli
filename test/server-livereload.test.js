@@ -17,19 +17,21 @@ import os from 'os';
 import assert from 'assert';
 import fse from 'fs-extra';
 import path from 'path';
-import nock from 'nock';
 import WebSocket from 'faye-websocket';
 import HelixProject from '../src/server/HelixProject.js';
 import {
-  assertHttp, createTestRoot, setupProject, wait,
+  assertHttp, createTestRoot, Nock, setupProject, wait,
 } from './utils.js';
 
 const require = createRequire(import.meta.url);
 
 describe('Helix Server with Livereload', () => {
   let testRoot;
+  let nock;
 
   beforeEach(async () => {
+    nock = new Nock();
+    nock.enableNetConnect(/localhost/);
     testRoot = await createTestRoot();
   });
 
@@ -41,6 +43,7 @@ describe('Helix Server with Livereload', () => {
     } else {
       await fse.remove(testRoot);
     }
+    nock.done();
   });
 
   it('deliver livereload script', async () => {
@@ -67,7 +70,7 @@ describe('Helix Server with Livereload', () => {
       .withProxyUrl('http://main--foo--bar.hlx.page');
     await project.init();
 
-    const scope = nock('http://main--foo--bar.hlx.page')
+    nock('http://main--foo--bar.hlx.page')
       .get('/live/index.html')
       .optionally(true)
       .reply(200, '<html><head>Test</head><body>Hello, world. path=/index.md, strain=default</body></html>', {
@@ -81,7 +84,6 @@ describe('Helix Server with Livereload', () => {
       await assertHttp(`http://localhost:${project.server.port}/live/index.html`, 200, 'expected_index_w_lr.html');
     } finally {
       await project.stop();
-      scope.done();
     }
   });
 
@@ -94,7 +96,7 @@ describe('Helix Server with Livereload', () => {
       .withProxyUrl('http://main--foo--bar.hlx.page');
     await project.init();
 
-    const scope = nock('http://main--foo--bar.hlx.page')
+    nock('http://main--foo--bar.hlx.page')
       .get('/live/index.html')
       .optionally(true)
       .reply(200, '<html><body>Hello, world. path=/index.md, strain=default</body></html>', {
@@ -108,7 +110,6 @@ describe('Helix Server with Livereload', () => {
       await assertHttp(`http://localhost:${project.server.port}/live/index.html`, 200, 'expected_index_w_lr_nohead.html');
     } finally {
       await project.stop();
-      scope.done();
     }
   });
 
@@ -121,7 +122,7 @@ describe('Helix Server with Livereload', () => {
       .withProxyUrl('http://main--foo--bar.hlx.page');
     await project.init();
 
-    const scope = nock('http://main--foo--bar.hlx.page')
+    nock('http://main--foo--bar.hlx.page')
       .get('/live/index.html')
       .optionally(true)
       .reply(200, '<html>Hello, world. path=/index.md, strain=default</html>', {
@@ -135,7 +136,6 @@ describe('Helix Server with Livereload', () => {
       await assertHttp(`http://localhost:${project.server.port}/live/index.html`, 200, 'expected_index_w_lr_nobody.html');
     } finally {
       await project.stop();
-      scope.done();
     }
   });
 
@@ -147,7 +147,7 @@ describe('Helix Server with Livereload', () => {
       .withLiveReload(true)
       .withProxyUrl('http://main--foo--bar.hlx.page');
 
-    const scope = nock('http://main--foo--bar.hlx.page')
+    nock('http://main--foo--bar.hlx.page')
       .get('/live/index.html')
       .optionally(true)
       .reply(200, 'Hello, world. path=/index.md, strain=default', {
@@ -162,7 +162,6 @@ describe('Helix Server with Livereload', () => {
       await assertHttp(`http://localhost:${project.server.port}/live/index.html`, 200, 'expected_index_w_lr_nohtml.html');
     } finally {
       await project.stop();
-      scope.done();
     }
   });
 
@@ -175,7 +174,7 @@ describe('Helix Server with Livereload', () => {
       .withProxyUrl('http://main--foo--bar.hlx.page');
     await project.init();
 
-    const scope = nock('http://main--foo--bar.hlx.page')
+    nock('http://main--foo--bar.hlx.page')
       .get('/live/index.html')
       .reply(200, '<html><head>Test</head><body>Hello, world. path=/index.md, strain=default</body></html>', {
         'content-type': 'text/html',
@@ -246,7 +245,6 @@ describe('Helix Server with Livereload', () => {
       });
     } finally {
       await project.stop();
-      scope.done();
     }
   });
 
@@ -259,7 +257,7 @@ describe('Helix Server with Livereload', () => {
       .withProxyUrl('http://main--foo--bar.hlx.page');
 
     await project.init();
-    const scope = nock('http://main--foo--bar.hlx.page')
+    nock('http://main--foo--bar.hlx.page')
       .get('/live/index.html')
       .reply(200, '<html><head>Test</head><body>Hello, world. path=/index.md, strain=default</body></html>', {
         'content-type': 'text/html',
@@ -326,7 +324,6 @@ describe('Helix Server with Livereload', () => {
       });
     } finally {
       await project.stop();
-      scope.done();
     }
   });
 });

@@ -16,15 +16,19 @@ import os from 'os';
 import assert from 'assert';
 import fse from 'fs-extra';
 import path from 'path';
-import nock from 'nock';
 import HelixProject from '../src/server/HelixProject.js';
-import { assertHttp, createTestRoot, setupProject } from './utils.js';
+import {
+  Nock, assertHttp, createTestRoot, setupProject,
+} from './utils.js';
 import { fetch } from '../src/fetch-utils.js';
 
 describe('Helix Server', () => {
+  let nock;
   let testRoot;
 
   beforeEach(async () => {
+    nock = new Nock();
+    nock.enableNetConnect(/localhost/);
     testRoot = await createTestRoot();
   });
 
@@ -36,6 +40,7 @@ describe('Helix Server', () => {
     } else {
       await fse.remove(testRoot);
     }
+    nock.done();
   });
 
   it('does not start on occupied port', async () => {
@@ -130,7 +135,7 @@ describe('Helix Server', () => {
 
     await project.init();
 
-    const scope = nock('http://main--foo--bar.hlx.page')
+    nock('http://main--foo--bar.hlx.page')
       .get('/notfound.css')
       .reply(404)
       .get('/head.html')
@@ -141,7 +146,6 @@ describe('Helix Server', () => {
       await assertHttp(`http://localhost:${project.server.port}/notfound.css`, 404);
     } finally {
       await project.stop();
-      scope.done();
     }
   });
 
@@ -154,7 +158,7 @@ describe('Helix Server', () => {
 
     await project.init();
 
-    const scope = nock('http://main--foo--bar.hlx.page')
+    nock('http://main--foo--bar.hlx.page')
       .get('/local.html')
       .optionally(true)
       .reply(200, 'foo')
@@ -172,7 +176,6 @@ describe('Helix Server', () => {
       assert.strictEqual(resp.headers.get('access-control-allow-origin'), '*');
     } finally {
       await project.stop();
-      scope.done();
     }
   });
 
@@ -187,7 +190,7 @@ describe('Helix Server', () => {
     await project.init();
     project.log.level = 'silly';
 
-    const scope = nock('http://main--foo--bar.hlx.page')
+    nock('http://main--foo--bar.hlx.page')
       .get('/readme.html')
       .reply(200, 'hello readme', {
         'content-type': 'text/html',
@@ -209,7 +212,6 @@ describe('Helix Server', () => {
       assert.strictEqual(resp.headers.get('via'), '1.0 main--foo--bar.hlx.page');
     } finally {
       await project.stop();
-      scope.done();
     }
   });
 });

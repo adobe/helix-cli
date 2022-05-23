@@ -2,33 +2,32 @@ version: 2.1
 executors:
   node14:
     docker:
-    - image: circleci/node:14
-    environment:
-      NPM_CONFIG_PREFIX: ~/.npm-global
+      - image: cimg/node:14.19
+
+orbs:
+  win: circleci/windows@4.1.1
+  codecov: codecov/codecov@3.2.2
 
 commands:
   setup:
     steps:
-    - checkout
-    - restore_cache:
-        keys:
-        - v4-dependencies-{{ arch }}-{{ checksum "package-lock.json" }}
-    - run:
-        name: install latest npm
-        command: sudo npm -g install npm
-    - run:
-        name: Installing Dependencies
-        command: npm ci
-    - save_cache:
-        paths:
-        - node_modules
-        key: v4-dependencies-{{ arch }}-{{ checksum "package-lock.json" }}
-    - run:
-        name: prepare test git user
-        command: git config --global user.email "circleci@project-helix.io" && git config --global user.name "CircleCi Build"
-
-orbs:
-  win: circleci/windows@4.1.1
+      - checkout
+      - restore_cache:
+          keys:
+            - v4-dependencies-{{ arch }}-{{ checksum "package-lock.json" }}
+      - run:
+          name: install latest npm
+          command: npm -g install npm
+      - run:
+          name: Installing Dependencies
+          command: npm ci
+      - save_cache:
+          paths:
+            - node_modules
+          key: v4-dependencies-{{ arch }}-{{ checksum "package-lock.json" }}
+      - run:
+          name: prepare test git user
+          command: git config --global user.email "circleci@project-helix.io" && git config --global user.name "CircleCi Build"
 
 jobs:
   build_win:
@@ -47,48 +46,42 @@ jobs:
       - run:
           name: Installing Dependencies
           command: npm ci
-
-      # test & get code coverage
       - run:
           name: Test and Code Coverage
           command: npm run test-ci-win
           environment:
             MOCHA_FILE: junit/test-results.xml
-
       - store_test_results:
           path: junit
-
       - store_artifacts:
           path: junit
 
   build:
     executor: node14
     working_directory: ~/repo
-
     steps:
-    - setup
-    - run: mkdir junit
-    - run:
-        name: prepare test git user
-        command: git config --global user.email "you@example.com" && git config --global user.name "Your Name"
-    - run:
-        name: Lint
-        command: npm run lint
-    - run:
-        name: Test and Code Coverage
-        command: npm run test-ci
-        environment:
-          MOCHA_FILE: junit/test-results.xml
-
-    - store_test_results:
-        path: junit
-
-    - store_artifacts:
-        path: junit
+      - setup
+      - run: mkdir junit
+      - run:
+          name: prepare test git user
+          command: git config --global user.email "you@example.com" && git config --global user.name "Your Name"
+      - run:
+          name: Lint
+          command: npm run lint
+      - run:
+          name: Test and Code Coverage
+          command: npm run test
+          environment:
+            MOCHA_FILE: junit/test-results.xml
+      - codecov/upload
+      - store_test_results:
+          path: junit
+      - store_artifacts:
+          path: junit
 
 workflows:
   version: 2
   build:
     jobs:
-    - build
-    - build_win
+      - build
+      - build_win
