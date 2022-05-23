@@ -2,7 +2,7 @@ version: 2.1
 executors:
   node14:
     docker:
-      - image: circleci/node:14.19
+      - image: cimg/node:14.19
 
 orbs:
   win: circleci/windows@4.1.1
