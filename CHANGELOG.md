@@ -1,3 +1,10 @@
+# [14.9.0](https://github.com/adobe/helix-cli/compare/v14.8.7...v14.9.0) (2022-05-23)
+
+
+### Features
+
+* importer - proxy POST requests ([5dd9e19](https://github.com/adobe/helix-cli/commit/5dd9e19267e1950c077e9b92d15740b1a6785463))
+
 ## [14.8.7](https://github.com/adobe/helix-cli/compare/v14.8.6...v14.8.7) (2022-05-21)
 
 
