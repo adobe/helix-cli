@@ -84,7 +84,7 @@ export default class HelixServer extends EventEmitter {
       /* c8 ignore end */
     }
 
-    res.status(404).send(`Unknwon path: ${ctx.path}`);
+    res.status(404).send(`Unknown path: ${ctx.path}`);
   }
 
   // eslint-disable-next-line class-methods-use-this
