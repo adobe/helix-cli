@@ -1,3 +1,10 @@
+## [14.9.3](https://github.com/adobe/helix-cli/compare/v14.9.2...v14.9.3) (2022-05-25)
+
+
+### Bug Fixes
+
+* typo in proxy mode route handler ([6511d48](https://github.com/adobe/helix-cli/commit/6511d48a77ae9251f4dd75d81db30c24be2cbb59))
+
 ## [14.9.2](https://github.com/adobe/helix-cli/compare/v14.9.1...v14.9.2) (2022-05-23)
 
 
