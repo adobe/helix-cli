@@ -1,3 +1,10 @@
+## [14.9.7](https://github.com/adobe/helix-cli/compare/v14.9.6...v14.9.7) (2022-06-05)
+
+
+### Bug Fixes
+
+* **deps:** update adobe major ([#2019](https://github.com/adobe/helix-cli/issues/2019)) ([82003a9](https://github.com/adobe/helix-cli/commit/82003a97012c366914359d1dc00a09d874047cf0))
+
 ## [14.9.6](https://github.com/adobe/helix-cli/compare/v14.9.5...v14.9.6) (2022-06-05)
 
 
