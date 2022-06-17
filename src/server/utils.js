@@ -93,6 +93,28 @@ const utils = {
   },
 
   /**
+   * Injects meta tags
+   * @param {string} body the html body
+   * @param {object} props meta properties
+   * @returns {string} the modified body
+   */
+  injectMeta(body, props) {
+    const match = body.match(/<\/head>/i);
+    if (!match) {
+      return body;
+    }
+    const text = Object.entries(props).map(([property, content]) => {
+      const c = content
+        .replace(/&/g, '&amp;')
+        .replace(/"/g, '&quot;');
+      return `<meta property="${property}" content="${c}">`;
+    }).join('\n');
+
+    const { index } = match;
+    return `${body.substring(0, index)}${text}${body.substring(index)}`;
+  },
+
+  /**
    * Computes a path to store a cache objet from a url
    * @param {string} url the url
    * @param {string} directory a local directory path
@@ -237,7 +259,7 @@ const utils = {
     respHeaders['access-control-allow-origin'] = '*';
     respHeaders.via = `${ret.httpVersion ?? '1.0'} ${new URL(url).hostname}`;
 
-    if (ctx.log.level === 'silly' || injectLR || replaceHead || doIndex) {
+    if (isHTML) {
       let respBody;
       let textBody;
       if (contentType.startsWith('text/')) {
@@ -272,6 +294,10 @@ const utils = {
       if (injectLR) {
         textBody = utils.injectLiveReloadScript(textBody);
       }
+      textBody = utils.injectMeta(textBody, {
+        'hlx:proxyUrl': url,
+      });
+
       if (doIndex) {
         opts.indexer.onData(url, {
           body: textBody,
