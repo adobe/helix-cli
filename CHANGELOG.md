@@ -1,3 +1,10 @@
+# [14.10.0](https://github.com/adobe/helix-cli/compare/v14.9.10...v14.10.0) (2022-06-17)
+
+
+### Features
+
+* inject proxy url as <meta> tag ([#2026](https://github.com/adobe/helix-cli/issues/2026)) ([ae7f926](https://github.com/adobe/helix-cli/commit/ae7f926f8c6525bd0ba66b66702c002899dbb1e8)), closes [#2025](https://github.com/adobe/helix-cli/issues/2025)
+
 ## [14.9.10](https://github.com/adobe/helix-cli/compare/v14.9.9...v14.9.10) (2022-06-16)
 
 
