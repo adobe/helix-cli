@@ -53,7 +53,7 @@
     "ignore": "5.2.0",
     "ini": "3.0.0",
     "isomorphic-git": "1.18.3",
-    "jsdom": "19.0.0",
+    "jsdom": "20.0.0",
     "livereload-js": "3.4.0",
     "open": "8.4.0",
     "progress": "2.0.3",
