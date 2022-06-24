@@ -441,7 +441,7 @@ describe('Import command - importer ui', function suite() {
     await fse.remove(testRoot);
   });
 
-  this.timeout(180000);
+  this.timeout(240000);
 
   it('import command installs the importer ui', (done) => {
     let error = null;
