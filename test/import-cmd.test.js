@@ -423,6 +423,7 @@ describe('Integration test for import command with cache', function suite() {
 });
 
 describe('Import command - importer ui', function suite() {
+  let nock;
   let testDir;
   let testRoot;
 
@@ -430,9 +431,14 @@ describe('Import command - importer ui', function suite() {
     testRoot = await createTestRoot();
     testDir = path.resolve(testRoot, 'import');
     await fse.copy(TEST_DIR, testDir);
+
+    nock = new Nock();
+    nock.enableNetConnect(/localhost/);
+    nock.enableNetConnect(/github.com/);
   });
 
   afterEach(async () => {
+    nock.done();
     await fse.remove(testRoot);
   });
 
