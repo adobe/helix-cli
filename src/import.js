@@ -25,7 +25,19 @@ export default function up() {
         .option('open', {
           describe: 'Open a browser window at specified path',
           type: 'string',
-          default: '/tools/importer/helix-webui-importer/index.html',
+          default: '/tools/importer/helix-importer-ui/index.html',
+        })
+        .option('ui-repo', {
+          alias: 'uiRepo',
+          describe: 'Git repository for the Helix Importer UI',
+          type: 'string',
+          default: 'https://github.com/adobe/helix-importer-ui',
+        })
+        .option('skip-ui', {
+          alias: 'skipUI',
+          describe: 'Do not install the Helix Importer UI',
+          type: 'boolean',
+          default: false,
         })
         .option('no-open', {
           // negation of the open option (resets open default)
@@ -71,6 +83,8 @@ export default function up() {
         .withOpen(path.basename(argv.$0) === 'hlx' ? argv.open : false)
         .withKill(argv.stopOther)
         .withCache(argv.cache)
+        .withSkipUI(argv.skipUI)
+        .withUIRepo(argv.uiRepo)
         .run();
     },
   };

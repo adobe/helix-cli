@@ -10,17 +10,22 @@
  * governing permissions and limitations under the License.
  */
 import fse from 'fs-extra';
+import path from 'path';
 import opn from 'open';
 import chalk from 'chalk-template';
+import git from 'isomorphic-git';
+import http from 'isomorphic-git/http/node/index.js';
+import shell from 'shelljs';
 import HelixImportProject from './server/HelixImportProject.js';
 import pkgJson from './package.cjs';
 import AbstractCommand from './abstract.cmd.js';
 
+const IMPORTER_UI_REPO = 'https://github.com/adobe/helix-importer-ui';
 export default class ImportCommand extends AbstractCommand {
   constructor(logger) {
     super(logger);
     this._httpPort = -1;
-    this._open = '/tools/importer/helix-webui-importer/index.html';
+    this._importerSubPath = 'tools/importer';
     this._cache = null;
   }
 
@@ -44,6 +49,16 @@ export default class ImportCommand extends AbstractCommand {
     return this;
   }
 
+  withSkipUI(value) {
+    this._skipUI = value;
+    return this;
+  }
+
+  withUIRepo(value) {
+    this._uiRepo = value;
+    return this;
+  }
+
   get project() {
     return this._project;
   }
@@ -63,6 +78,35 @@ export default class ImportCommand extends AbstractCommand {
     }
     this.log.info('Helix project stopped.');
     this.emit('stopped', this);
+  }
+
+  async setupImporterUI() {
+    const importerFolder = path.join(this.directory, this._importerSubPath);
+    await fse.ensureDir(importerFolder);
+    const uiProjectName = path.basename(this._uiRepo, '.git');
+    const uiFolder = path.join(importerFolder, uiProjectName);
+    const exists = await fse.pathExists(uiFolder);
+    if (!exists) {
+      this.log.info('Helix Importer UI needs to be installed.');
+      this.log.info(`Cloning ${IMPORTER_UI_REPO} in ${importerFolder}.`);
+      // clone the ui project
+      await git.clone({
+        fs: fse,
+        http,
+        dir: uiFolder,
+        url: IMPORTER_UI_REPO,
+        ref: 'main',
+        depth: 1,
+        singleBranch: true,
+      });
+      this.log.info('Installing Helix Importer UI project (might take a minute or more)...');
+      const cwd = process.cwd();
+      shell.cd(uiFolder);
+      // using dev mode because it is faster (still at least one minute...)
+      shell.exec('npm run build:dev');
+      shell.cd(cwd);
+      this.log.info('Helix Importer UI is ready.');
+    }
   }
 
   async setup() {
@@ -88,6 +132,10 @@ export default class ImportCommand extends AbstractCommand {
 
     if (this._httpPort >= 0) {
       this._project.withHttpPort(this._httpPort);
+    }
+
+    if (!this._skipUI) {
+      await this.setupImporterUI();
     }
 
     try {

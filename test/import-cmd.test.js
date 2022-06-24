@@ -41,6 +41,7 @@ describe('Integration test for import command', function suite() {
       .withDirectory(TEST_DIR)
       .withOpen('false')
       .withKill(false)
+      .withSkipUI(true)
       .withHttpPort(0);
 
     const myDone = (err) => {
@@ -171,6 +172,7 @@ describe('Integration test for import command', function suite() {
     const cmd = new ImportCommand()
       .withDirectory(TEST_DIR)
       .withOpen(false)
+      .withSkipUI(true)
       .withHttpPort(0);
 
     const myDone = (err) => {
@@ -261,6 +263,7 @@ describe('Integration test for import command with cache', function suite() {
     const cmd = new ImportCommand()
       .withDirectory(testDir)
       .withOpen(false)
+      .withSkipUI(true)
       .withKill(false)
       .withHttpPort(0)
       .withCache(path.resolve(testRoot, '.cache'));
@@ -377,6 +380,7 @@ describe('Integration test for import command with cache', function suite() {
     const cmd = new ImportCommand()
       .withDirectory(testDir)
       .withOpen(false)
+      .withSkipUI(true)
       .withKill(false)
       .withHttpPort(0)
       .withCache(path.resolve(testRoot, '.cache'));
@@ -404,6 +408,55 @@ describe('Integration test for import command with cache', function suite() {
           assert.strictEqual(resp.status, 200);
           json = await resp.json();
           assert.strictEqual(json.postIteration, 'num-2');
+
+          await myDone();
+        } catch (e) {
+          await myDone(e);
+        }
+      })
+      .on('stopped', () => {
+        done(error);
+      })
+      .run()
+      .catch(done);
+  });
+});
+
+describe('Import command - importer ui', function suite() {
+  let testDir;
+  let testRoot;
+
+  beforeEach(async () => {
+    testRoot = await createTestRoot();
+    testDir = path.resolve(testRoot, 'import');
+    await fse.copy(TEST_DIR, testDir);
+  });
+
+  afterEach(async () => {
+    await fse.remove(testRoot);
+  });
+
+  this.timeout(180000);
+
+  it('import command installs the importer ui', (done) => {
+    let error = null;
+    const cmd = new ImportCommand()
+      .withDirectory(testDir)
+      .withOpen(false)
+      .withUIRepo('https://github.com/adobe/helix-importer-ui')
+      .withHttpPort(0);
+
+    const myDone = (err) => {
+      error = err;
+      return cmd.stop();
+    };
+
+    cmd
+      .on('started', async () => {
+        try {
+          assert.ok(await fse.pathExists(`${testDir}/tools/importer/helix-importer-ui/index.html`), 'helix-importer-ui project has been cloned');
+          assert.ok(await fse.pathExists(`${testDir}/tools/importer/helix-importer-ui/js/libs/hlx`), 'folder is created by build process');
+          await assertHttp(`http://localhost:${cmd.project.server.port}/tools/importer/helix-importer-ui/index.html`, 200);
 
           await myDone();
         } catch (e) {

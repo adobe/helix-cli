@@ -39,6 +39,8 @@ describe('hlx import', () => {
     mockImport.withHttpPort.returnsThis();
     mockImport.withKill.returnsThis();
     mockImport.withCache.returnsThis();
+    mockImport.withSkipUI.returnsThis();
+    mockImport.withUIRepo.returnsThis();
     mockImport.run.returnsThis();
     cli = (await new CLI().initCommands()).withCommandExecutor('import', mockImport);
   });
@@ -54,7 +56,9 @@ describe('hlx import', () => {
 
   it('hlx import runs w/o arguments', async () => {
     await cli.run(['import']);
-    sinon.assert.calledWith(mockImport.withOpen, '/tools/importer/helix-webui-importer/index.html');
+    sinon.assert.calledWith(mockImport.withOpen, '/tools/importer/helix-importer-ui/index.html');
+    sinon.assert.calledWith(mockImport.withSkipUI, false);
+    sinon.assert.calledWith(mockImport.withUIRepo, 'https://github.com/adobe/helix-importer-ui');
     sinon.assert.calledOnce(mockImport.run);
   });
 
@@ -110,6 +114,18 @@ describe('hlx import', () => {
   it('hlx import can disable kill', async () => {
     await cli.run(['import', '--stop-other', 'false']);
     sinon.assert.calledWith(mockImport.withKill, false);
+    sinon.assert.calledOnce(mockImport.run);
+  });
+
+  it('hlx import can skip ui install', async () => {
+    await cli.run(['import', '--skip-ui']);
+    sinon.assert.calledWith(mockImport.withSkipUI, true);
+    sinon.assert.calledOnce(mockImport.run);
+  });
+
+  it('hlx import can change ui repo', async () => {
+    await cli.run(['import', '--ui-repo', 'https://github.com/adobe/helix-importer-ui#somebranch']);
+    sinon.assert.calledWith(mockImport.withUIRepo, 'https://github.com/adobe/helix-importer-ui#somebranch');
     sinon.assert.calledOnce(mockImport.run);
   });
 });
