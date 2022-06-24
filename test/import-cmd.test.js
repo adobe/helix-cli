@@ -433,8 +433,7 @@ describe('Import command - importer ui', function suite() {
     await fse.copy(TEST_DIR, testDir);
 
     nock = new Nock();
-    nock.enableNetConnect(/localhost/);
-    nock.enableNetConnect(/github.com/);
+    nock.enableNetConnect(/localhost|github\.com/);
   });
 
   afterEach(async () => {
