@@ -460,7 +460,6 @@ describe('Import command - importer ui', function suite() {
       .on('started', async () => {
         try {
           assert.ok(await fse.pathExists(`${testDir}/tools/importer/helix-importer-ui/index.html`), 'helix-importer-ui project has been cloned');
-          assert.ok(await fse.pathExists(`${testDir}/tools/importer/helix-importer-ui/js/libs/hlx`), 'folder is created by build process');
           await assertHttp(`http://localhost:${cmd.project.server.port}/tools/importer/helix-importer-ui/index.html`, 200);
 
           await myDone();

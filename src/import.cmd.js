@@ -15,12 +15,10 @@ import opn from 'open';
 import chalk from 'chalk-template';
 import git from 'isomorphic-git';
 import http from 'isomorphic-git/http/node/index.js';
-import shell from 'shelljs';
 import HelixImportProject from './server/HelixImportProject.js';
 import pkgJson from './package.cjs';
 import AbstractCommand from './abstract.cmd.js';
 
-const IMPORTER_UI_REPO = 'https://github.com/adobe/helix-importer-ui';
 export default class ImportCommand extends AbstractCommand {
   constructor(logger) {
     super(logger);
@@ -88,24 +86,31 @@ export default class ImportCommand extends AbstractCommand {
     const exists = await fse.pathExists(uiFolder);
     if (!exists) {
       this.log.info('Helix Importer UI needs to be installed.');
-      this.log.info(`Cloning ${IMPORTER_UI_REPO} in ${importerFolder}.`);
+      this.log.info(`Cloning ${this._uiRepo} in ${importerFolder}.`);
       // clone the ui project
       await git.clone({
         fs: fse,
         http,
         dir: uiFolder,
-        url: IMPORTER_UI_REPO,
+        url: this._uiRepo,
         ref: 'main',
         depth: 1,
         singleBranch: true,
       });
-      this.log.info('Installing Helix Importer UI project (might take a minute or more)...');
-      const cwd = process.cwd();
-      shell.cd(uiFolder);
-      // using dev mode because it is faster (still at least one minute...)
-      shell.exec('npm run build:dev');
-      shell.cd(cwd);
       this.log.info('Helix Importer UI is ready.');
+    } else {
+      this.log.info('Fetching latest version of the Helix Import UI.');
+      // clone the ui project
+      await git.fetch({
+        fs: fse,
+        http,
+        dir: uiFolder,
+        url: this._uiRepo,
+        ref: 'main',
+        depth: 1,
+        singleBranch: true,
+      });
+      this.log.info('Helix Importer UI is now up-to-date.');
     }
   }
 
