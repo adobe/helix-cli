@@ -93,7 +93,6 @@ export default class ImportCommand extends AbstractCommand {
         http,
         dir: uiFolder,
         url: this._uiRepo,
-        ref: 'main',
         depth: 1,
         singleBranch: true,
       });
@@ -101,14 +100,16 @@ export default class ImportCommand extends AbstractCommand {
     } else {
       this.log.info('Fetching latest version of the Helix Import UI.');
       // clone the ui project
-      await git.fetch({
+      await git.pull({
         fs: fse,
         http,
         dir: uiFolder,
         url: this._uiRepo,
-        ref: 'main',
         depth: 1,
         singleBranch: true,
+        author: {
+          name: 'hlx import',
+        },
       });
       this.log.info('Helix Importer UI is now up-to-date.');
     }
