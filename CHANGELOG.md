@@ -1,3 +1,15 @@
+# [14.12.0](https://github.com/adobe/helix-cli/compare/v14.11.0...v14.12.0) (2022-06-30)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @adobe/helix-fetch to v3.1.1 ([f9c2abd](https://github.com/adobe/helix-cli/commit/f9c2abd436bc9701df4c92909db9bba0a376f908))
+
+
+### Features
+
+* use pull instead of fetch ([72de093](https://github.com/adobe/helix-cli/commit/72de09336d5a832612039891cd4367e53df67fde))
+
 # [14.11.0](https://github.com/adobe/helix-cli/compare/v14.10.3...v14.11.0) (2022-06-29)
 
 
