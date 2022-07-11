@@ -15,10 +15,12 @@ import path from 'path';
 import express from 'express';
 import cookieParser from 'cookie-parser';
 import { PassThrough } from 'stream';
-import { fetch } from '../fetch-utils.js';
+import { context as fetchContext } from '@adobe/helix-fetch';
 import utils from './utils.js';
 import packageJson from '../package.cjs';
 import RequestContext from './RequestContext.js';
+
+const { fetch } = fetchContext({ rejectUnauthorized: false });
 
 const DEFAULT_PORT = 3001;
 
