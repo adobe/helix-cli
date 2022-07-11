@@ -1,3 +1,10 @@
+# [14.13.0](https://github.com/adobe/helix-cli/compare/v14.12.1...v14.13.0) (2022-07-11)
+
+
+### Features
+
+* **import:** disable certificate check ([870e147](https://github.com/adobe/helix-cli/commit/870e147d19475ca948e5e9f1b6aaa1c3b8e7accc))
+
 ## [14.12.1](https://github.com/adobe/helix-cli/compare/v14.12.0...v14.12.1) (2022-07-09)
 
 
