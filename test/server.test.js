@@ -250,4 +250,42 @@ describe('Helix Server', () => {
       await project.stop();
     }
   });
+
+  it('delivers filtered json from proxy.', async () => {
+    const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
+    const project = new HelixProject()
+      .withCwd(cwd)
+      .withHttpPort(0)
+      .withPrintIndex(true)
+      .withProxyUrl('http://main--foo--bar.hlx.page');
+
+    await project.init();
+    project.log.level = 'silly';
+
+    nock('http://main--foo--bar.hlx.page')
+      .get('/subfolder/query-index.json?sheet=foo&limit=20')
+      .reply((uri) => {
+        // note: nock has problems with malformed query strings. in fact, it should not match
+        // a request like: /subfolder/query-index.json?sheet=foo&limit=20?sheet=foo&limit=20
+        assert.strictEqual(uri, '/subfolder/query-index.json?sheet=foo&limit=20');
+        return [200, '{ "data": [] }', { 'content-type': 'application/json' }];
+      })
+      .get('/head.html')
+      .reply(200, '<link rel="stylesheet" href="/styles.css"/>', {
+        'content-type': 'text/html',
+      });
+
+    try {
+      await project.start();
+      const resp = await fetch(`http://localhost:${project.server.port}/subfolder/query-index.json?sheet=foo&limit=20`, {
+        cache: 'no-store',
+      });
+      assert.strictEqual(resp.status, 200);
+      assert.deepStrictEqual(await resp.json(), { data: [] });
+      assert.strictEqual(resp.headers.get('access-control-allow-origin'), '*');
+      assert.strictEqual(resp.headers.get('via'), '1.0 main--foo--bar.hlx.page');
+    } finally {
+      await project.stop();
+    }
+  });
 });

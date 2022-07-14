@@ -203,50 +203,6 @@ describe('Utils Test', () => {
     });
   });
 
-  describe('Proxy URL test', () => {
-    it('Creates proxy url', () => {
-      assert.equal(
-        utils.makeProxyURL('/foo.html', 'https://helix-pages--adobe.hlx.page'),
-        'https://helix-pages--adobe.hlx.page/foo.html',
-      );
-    });
-
-    it('Creates proxy url with search params for json', () => {
-      assert.equal(
-        utils.makeProxyURL('/index.json?limit=256', 'https://helix-pages--adobe.hlx.page'),
-        'https://helix-pages--adobe.hlx.page/index.json?limit=256',
-      );
-    });
-
-    it('Creates proxy url with search params for cgi-bin', () => {
-      assert.equal(
-        utils.makeProxyURL('/cgi-bin/sitemap?limit=256', 'https://helix-pages--adobe.hlx.page'),
-        'https://helix-pages--adobe.hlx.page/cgi-bin/sitemap?limit=256',
-      );
-    });
-
-    it('Creates proxy url with search params for hlx_ paths', () => {
-      assert.equal(
-        utils.makeProxyURL('/hlx_superstatic?x=1234', 'https://helix-pages--adobe.hlx.page'),
-        'https://helix-pages--adobe.hlx.page/hlx_superstatic?x=1234',
-      );
-    });
-
-    it('Creates proxy url with search params for media_ paths', () => {
-      assert.equal(
-        utils.makeProxyURL('/foo/media_1234?format=webp', 'https://helix-pages--adobe.hlx.page'),
-        'https://helix-pages--adobe.hlx.page/foo/media_1234?format=webp',
-      );
-    });
-
-    it('Strips search params from proxy url', () => {
-      assert.equal(
-        utils.makeProxyURL('/foo.html?code=123', 'https://helix-pages--adobe.hlx.page'),
-        'https://helix-pages--adobe.hlx.page/foo.html',
-      );
-    });
-  });
-
   describe('Cache', () => {
     it('compute path for cache', () => {
       assert.equal(utils.computePathForCache('https://www.sample.com/index.html', '/target/'), path.resolve('/target', 'index.html'));

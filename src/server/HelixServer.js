@@ -92,8 +92,7 @@ export default class HelixServer extends EventEmitter {
 
     // use proxy
     try {
-      const url = utils.makeProxyURL(ctx.url, proxyUrl);
-      await utils.proxyRequest(ctx, url, req, res, {
+      await utils.proxyRequest(ctx, new URL(ctx.url, proxyUrl).href, req, res, {
         injectLiveReload: this._project.liveReload,
         headHtml: this._project.headHtml,
         indexer: this._project.indexer,
