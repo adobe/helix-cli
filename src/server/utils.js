@@ -143,8 +143,7 @@ const utils = {
         fileName = crypto.createHash('md5').update(`${fileName}${search.substring(1)}`).digest('hex');
       }
     }
-    const filePath = path.resolve(directory, fileName);
-    return filePath;
+    return path.resolve(directory, fileName);
   },
 
   /**
@@ -203,11 +202,7 @@ const utils = {
     ctx.log.debug(`Proxy ${req.method} request to ${url}`);
 
     if (opts.cacheDirectory) {
-      const cached = await utils.getFromCache(
-        `${url}${ctx.queryString}`,
-        opts.cacheDirectory,
-        ctx.log,
-      );
+      const cached = await utils.getFromCache(url, opts.cacheDirectory, ctx.log);
       if (cached) {
         res
           .status(cached.status)
@@ -303,7 +298,7 @@ const utils = {
 
       if (opts.cacheDirectory) {
         await utils.writeToCache(
-          `${url}${ctx.queryString}`,
+          url,
           opts.cacheDirectory,
           {
             body: respBody || textBody,
@@ -324,7 +319,7 @@ const utils = {
     if (opts.cacheDirectory) {
       const buffer = await ret.buffer();
       await utils.writeToCache(
-        `${url}${ctx.queryString}`,
+        url,
         opts.cacheDirectory,
         {
           body: buffer,
