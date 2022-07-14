@@ -1,3 +1,10 @@
+## [14.13.1](https://github.com/adobe/helix-cli/compare/v14.13.0...v14.13.1) (2022-07-14)
+
+
+### Bug Fixes
+
+* propagate query properly ([#2042](https://github.com/adobe/helix-cli/issues/2042)) ([6fc792b](https://github.com/adobe/helix-cli/commit/6fc792b1bbf46c5b1922d98a82a9c0a22e6db55d))
+
 # [14.13.0](https://github.com/adobe/helix-cli/compare/v14.12.1...v14.13.0) (2022-07-11)
 
 
