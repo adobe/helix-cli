@@ -17,7 +17,7 @@ commands:
             - v4-dependencies-{{ arch }}-{{ checksum "package-lock.json" }}
       - run:
           name: install latest npm
-          command: npm -g install npm
+          command: sudo npm -g install npm
       - run:
           name: Installing Dependencies
           command: npm ci
