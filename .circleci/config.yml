@@ -38,7 +38,7 @@ jobs:
           name: prepare test git user
           command: git config --global user.name "CircleCi Build"
       - checkout
-      - run: choco install nodejs-lts --version=16.16.0
+      - run: choco install nodejs-lts -y --version=16.16.0
       - run: mkdir junit
       - run:
           name: Installing Dependencies
