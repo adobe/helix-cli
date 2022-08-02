@@ -1,8 +1,8 @@
 version: 2.1
 executors:
-  node14:
+  node16:
     docker:
-      - image: cimg/node:14.19
+      - image: cimg/node:16.16
 
 orbs:
   win: circleci/windows@5.0.0
@@ -41,7 +41,7 @@ jobs:
           name: prepare test git user
           command: git config --global user.name "CircleCi Build"
       - checkout
-      - run: choco install nodejs-lts --version=14.17.6
+      - run: choco install nodejs-lts --version=16.16.0
       - run: mkdir junit
       - run:
           name: Installing Dependencies
@@ -57,7 +57,7 @@ jobs:
           path: junit
 
   build:
-    executor: node14
+    executor: node16
     working_directory: ~/repo
     steps:
       - setup
