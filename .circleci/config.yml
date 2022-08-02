@@ -38,7 +38,20 @@ jobs:
           name: prepare test git user
           command: git config --global user.name "CircleCi Build"
       - checkout
-      - run: choco install nodejs-lts -y --version=16.16.0
+      - run:
+          name: Install NVM
+          command: choco install nvm -y
+      - run:
+          name: Install Node 16.16.0
+          shell: bash.exe
+          command: |
+            nvm list
+            nvm install 16.16.0
+            nvm use 16.16.0
+      - run:
+          name: Verify Node Version
+          shell: bash.exe
+          command: node --version
       - run: mkdir junit
       - run:
           name: Installing Dependencies
