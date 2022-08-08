@@ -1,3 +1,10 @@
+## [14.13.3](https://github.com/adobe/helix-cli/compare/v14.13.2...v14.13.3) (2022-08-08)
+
+
+### Bug Fixes
+
+* local head.html doesn't work with v7 ([#2049](https://github.com/adobe/helix-cli/issues/2049)) ([73a9429](https://github.com/adobe/helix-cli/commit/73a9429816947b4b785f6b90f0349ff0f05a03c5)), closes [#2048](https://github.com/adobe/helix-cli/issues/2048)
+
 ## [14.13.2](https://github.com/adobe/helix-cli/compare/v14.13.1...v14.13.2) (2022-08-07)
 
 
