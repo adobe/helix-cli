@@ -15,7 +15,6 @@ import { resolve } from 'path';
 import { unified } from 'unified';
 import rehypeParse from 'rehype-parse';
 import { select } from 'hast-util-select';
-import rehypeFormat from 'rehype-format';
 import { fetch } from '../fetch-utils.js';
 
 export default class HeadHtmlSupport {
@@ -71,13 +70,9 @@ export default class HeadHtmlSupport {
    * @returns {Promise<HastNode>}
    */
   static async toDom(html) {
-    const $html = await unified()
+    return unified()
       .use(rehypeParse, { fragment: true })
       .parse(html);
-
-    // rehypeMinifyWhitespace()($html);
-    rehypeFormat()($html);
-    return $html;
   }
 
   constructor({ proxyUrl, directory, log }) {

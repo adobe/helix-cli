@@ -57,7 +57,6 @@
     "livereload-js": "3.4.1",
     "open": "8.4.0",
     "progress": "2.0.3",
-    "rehype-format": "4.0.1",
     "rehype-parse": "8.0.4",
     "semver": "7.3.7",
     "shelljs": "0.8.5",
