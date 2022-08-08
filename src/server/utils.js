@@ -280,7 +280,7 @@ const utils = {
         ctx.log.trace(lines.join('\n'));
       }
       if (replaceHead) {
-        textBody = opts.headHtml.replace(textBody);
+        textBody = await opts.headHtml.replace(textBody);
       }
       if (injectLR) {
         textBody = utils.injectLiveReloadScript(textBody);
