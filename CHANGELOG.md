@@ -1,3 +1,10 @@
+## [14.13.5](https://github.com/adobe/helix-cli/compare/v14.13.4...v14.13.5) (2022-08-31)
+
+
+### Bug Fixes
+
+* head hashing - support boolean properties ([#2059](https://github.com/adobe/helix-cli/issues/2059)) ([79319cf](https://github.com/adobe/helix-cli/commit/79319cf807dc81cae791be31625dfdda8368d4dc))
+
 ## [14.13.4](https://github.com/adobe/helix-cli/compare/v14.13.3...v14.13.4) (2022-08-12)
 
 
