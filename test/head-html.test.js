@@ -45,14 +45,14 @@ describe('Head.html replacement tests', () => {
 <head>
   <title></title>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <script src="/scripts/my-main-script.js" type="module" crossorigin="use-credentials"></script>
+  <script src="/scripts/my-main-script.js" type="module" crossorigin="use-credentials" defer></script>
   <link rel="stylesheet" href="/styles/my-main-styles.css"/>
   <link rel="icon" href="data:,">   
 </head>
 </html>
     `;
     const remote = `
-      <script src="/scripts/my-main-script.js" type="module" crossorigin="use-credentials"></script>
+      <script src="/scripts/my-main-script.js" type="module" crossorigin="use-credentials" defer></script>
       <link rel="stylesheet" href="/styles/my-main-styles.css"/>
     `;
     const expected = `

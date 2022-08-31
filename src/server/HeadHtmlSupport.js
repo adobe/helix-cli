@@ -36,7 +36,7 @@ export default class HeadHtmlSupport {
           if (Array.isArray(v)) {
             v = JSON.stringify(v);
           }
-          h.update(v);
+          h.update(String(v));
         }
       }
     };
