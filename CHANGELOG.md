@@ -1,3 +1,10 @@
+## [14.13.7](https://github.com/adobe/helix-cli/compare/v14.13.6...v14.13.7) (2022-09-12)
+
+
+### Bug Fixes
+
+* **deps:** update dependency uuid to v9 ([#2061](https://github.com/adobe/helix-cli/issues/2061)) ([5759057](https://github.com/adobe/helix-cli/commit/57590576ab22cc5455922407a8593302554725ba))
+
 ## [14.13.6](https://github.com/adobe/helix-cli/compare/v14.13.5...v14.13.6) (2022-09-03)
 
 
