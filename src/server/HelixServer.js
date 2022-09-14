@@ -99,7 +99,7 @@ export default class HelixServer extends EventEmitter {
         cacheDirectory: this._project.cacheDirectory,
       });
     } catch (err) {
-      log.error(`Failed to proxy franklin request ${ctx.path}: ${err.message}`);
+      log.error(`Failed to proxy Franklin request ${ctx.path}: ${err.message}`);
       res.status(502).send(`Failed to proxy franklin request: ${err.message}`);
     }
 
