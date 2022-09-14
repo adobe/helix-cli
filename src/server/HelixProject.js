@@ -179,7 +179,7 @@ export default class HelixProject {
   }
 
   async stop() {
-    this.log.debug('Stopping franklin simulation server..');
+    this.log.debug('Stopping Franklin simulation server..');
     await this._server.stop();
     if (this.liveReload) {
       this.liveReload.stop();
