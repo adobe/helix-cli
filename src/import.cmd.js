@@ -74,7 +74,7 @@ export default class ImportCommand extends AbstractCommand {
       /* c8 ignore end */
       this._project = null;
     }
-    this.log.info('Helix project stopped.');
+    this.log.info('Franklin project stopped.');
     this.emit('stopped', this);
   }
 
@@ -85,7 +85,7 @@ export default class ImportCommand extends AbstractCommand {
     const uiFolder = path.join(importerFolder, uiProjectName);
     const exists = await fse.pathExists(uiFolder);
     if (!exists) {
-      this.log.info('Helix Importer UI needs to be installed.');
+      this.log.info('Franklin Importer UI needs to be installed.');
       this.log.info(`Cloning ${this._uiRepo} in ${importerFolder}.`);
       // clone the ui project
       await git.clone({
@@ -96,9 +96,9 @@ export default class ImportCommand extends AbstractCommand {
         depth: 1,
         singleBranch: true,
       });
-      this.log.info('Helix Importer UI is ready.');
+      this.log.info('Franklin Importer UI is ready.');
     } else {
-      this.log.info('Fetching latest version of the Helix Import UI.');
+      this.log.info('Fetching latest version of the Franklin Import UI.');
       // clone the ui project
       await git.pull({
         fs: fse,
@@ -111,7 +111,7 @@ export default class ImportCommand extends AbstractCommand {
           name: 'hlx import',
         },
       });
-      this.log.info('Helix Importer UI is now up-to-date.');
+      this.log.info('Franklin Importer UI is now up-to-date.');
     }
   }
 
@@ -124,11 +124,11 @@ export default class ImportCommand extends AbstractCommand {
       .withLogger(this._logger)
       .withKill(this._kill);
 
-    this.log.info(chalk`{yellow     __ __    ___       ___                  }`);
-    this.log.info(chalk`{yellow    / // /__ / (_)_ __ / _ \\___ ____ ____ ___}`);
-    this.log.info(chalk`{yellow   / _  / -_) / /\\ \\ // ___/ _ \`/ _ \`/ -_|_-<}`);
-    this.log.info(chalk`{yellow  /_//_/\\__/_/_//_\\_\\/_/   \\_,_/\\_, /\\__/___/}`);
-    this.log.info(chalk`{yellow                               /___/ v${pkgJson.version}} - import mode`);
+    this.log.info(chalk`{yellow     ____              __    ___      ____                    __}`);
+    this.log.info(chalk`{yellow    / __/______ ____  / /__ / (_)__  /  _/_ _  ___  ___  ____/ /_}`);
+    this.log.info(chalk`{yellow   / _// __/ _ \`/ _ \\/  '_// / / _ \\_/ //  ' \\/ _ \\/ _ \\/ __/ __/}`);
+    this.log.info(chalk`{yellow  /_/ /_/  \\_,_/_//_/_/\\_\\/_/_/_//_/___/_/_/_/ .__/\\___/_/  \\__/}`);
+    this.log.info(chalk`{yellow                                            /_/  v${pkgJson.version}}`);
     this.log.info('');
 
     if (this._cache) {
@@ -147,7 +147,7 @@ export default class ImportCommand extends AbstractCommand {
     try {
       await this._project.init();
     } catch (e) {
-      throw Error(`Unable to start helix: ${e.message}`);
+      throw Error(`Unable to start Franklin: ${e.message}`);
     }
   }
 

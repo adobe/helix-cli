@@ -235,8 +235,8 @@ export default class HelixServer extends EventEmitter {
       // codecov:ignore:start
       /* c8 ignore start */
       } catch (err) {
-        log.error(`Failed to proxy helix request ${ctx.path}: ${err.message}`);
-        res.status(502).send(`Failed to proxy helix request: ${err.message}`);
+        log.error(`Failed to proxy franklin request ${ctx.path}: ${err.message}`);
+        res.status(502).send(`Failed to proxy franklin request: ${err.message}`);
       }
       // codecov:ignore:end
       /* c8 ignore end */
@@ -280,7 +280,7 @@ export default class HelixServer extends EventEmitter {
         throw new Error(`Port ${this._port} already in use by another process.`);
       }
     }
-    log.info(`Starting helix import server v${packageJson.version}`);
+    log.info(`Starting franklin import server v${packageJson.version}`);
     await new Promise((resolve, reject) => {
       this._app.use(cookieParser());
       this._server = this._app.listen(this._port, (err) => {
@@ -292,7 +292,7 @@ export default class HelixServer extends EventEmitter {
         // codecov:ignore:end
         /* c8 ignore end */
         this._port = this._server.address().port;
-        log.info(`Local Helix Dev server up and running: http://localhost:${this._port}/`);
+        log.info(`Local Franklin Dev server up and running: http://localhost:${this._port}/`);
         resolve();
       });
     });
@@ -315,7 +315,7 @@ export default class HelixServer extends EventEmitter {
         }
         // codecov:ignore:end
         /* c8 ignore end */
-        log.info('Local Helix Dev server stopped.');
+        log.info('Local Franklin Dev server stopped.');
         this._server = null;
         resolve();
       });

@@ -170,7 +170,7 @@ export default class HelixProject {
   }
 
   async start() {
-    this.log.debug('Launching helix simulation server for development...');
+    this.log.debug('Launching franklin simulation server for development...');
     await this._server.start(this);
     if (this._indexer) {
       await this._indexer.init();
@@ -179,7 +179,7 @@ export default class HelixProject {
   }
 
   async stop() {
-    this.log.debug('Stopping helix simulation server..');
+    this.log.debug('Stopping franklin simulation server..');
     await this._server.stop();
     if (this.liveReload) {
       this.liveReload.stop();

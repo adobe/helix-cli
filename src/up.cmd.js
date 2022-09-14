@@ -25,7 +25,7 @@ export default class UpCommand extends AbstractCommand {
     this._httpPort = -1;
     this._open = '/';
     this._liveReload = false;
-    this._pagesUrl = null;
+    this._url = null;
     this._cache = null;
     this._printIndex = false;
   }
@@ -45,8 +45,8 @@ export default class UpCommand extends AbstractCommand {
     return this;
   }
 
-  withPagesUrl(value) {
-    this._pagesUrl = value;
+  withUrl(value) {
+    this._url = value;
     return this;
   }
 
@@ -78,7 +78,7 @@ export default class UpCommand extends AbstractCommand {
       }
       this._project = null;
     }
-    this.log.info('Helix project stopped.');
+    this.log.info('Franklin project stopped.');
     this.emit('stopped', this);
   }
 
@@ -105,16 +105,15 @@ export default class UpCommand extends AbstractCommand {
       .withKill(this._kill)
       .withPrintIndex(this._printIndex);
 
-    this.log.info(chalk`{yellow     __ __    ___       ___                  }`);
-    this.log.info(chalk`{yellow    / // /__ / (_)_ __ / _ \\___ ____ ____ ___}`);
-    this.log.info(chalk`{yellow   / _  / -_) / /\\ \\ // ___/ _ \`/ _ \`/ -_|_-<}`);
-    this.log.info(chalk`{yellow  /_//_/\\__/_/_//_\\_\\/_/   \\_,_/\\_, /\\__/___/}`);
-    this.log.info(chalk`{yellow                               /___/ v${pkgJson.version}}`);
+    this.log.info(chalk`{yellow     ____              __    ___   v${pkgJson.version}}`);
+    this.log.info(chalk`{yellow    / __/______ ____  / /__ / (_)__  }`);
+    this.log.info(chalk`{yellow   / _// __/ _ \`/ _ \\/  '_// / / _ \\ }`);
+    this.log.info(chalk`{yellow  /_/ /_/  \\_,_/_//_/_/\\_\\/_/_/_//_/ }`);
     this.log.info('');
 
     let ref = await GitUtils.getBranch(this.directory);
     const gitUrl = await GitUtils.getOriginURL(this.directory, { ref });
-    if (!this._pagesUrl) {
+    if (!this._url) {
       // check if remote already has the `ref`
       const resp = await fetch(`${gitUrl.raw}/fstab.yaml`);
       await resp.buffer();
@@ -129,7 +128,7 @@ export default class UpCommand extends AbstractCommand {
       }
       // replace `/` by `-` in ref.
       ref = ref.replace(/\//g, '-');
-      this._pagesUrl = `https://${ref}--${gitUrl.repo}--${gitUrl.owner}.hlx.page`;
+      this._url = `https://${ref}--${gitUrl.repo}--${gitUrl.owner}.hlx.page`;
     }
 
     if (this._cache) {
@@ -137,7 +136,7 @@ export default class UpCommand extends AbstractCommand {
       this._project.withCacheDirectory(this._cache);
     }
 
-    this._project.withProxyUrl(this._pagesUrl);
+    this._project.withProxyUrl(this._url);
     if (this._httpPort >= 0) {
       this._project.withHttpPort(this._httpPort);
     }
@@ -145,7 +144,7 @@ export default class UpCommand extends AbstractCommand {
     try {
       await this._project.init();
     } catch (e) {
-      throw Error(`Unable to start helix: ${e.message}`);
+      throw Error(`Unable to start Franklin: ${e.message}`);
     }
   }
 

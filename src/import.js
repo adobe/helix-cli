@@ -19,7 +19,7 @@ export default function up() {
       executor = value;
     },
     command: 'import',
-    description: 'Run the Helix import server',
+    description: 'Run the Franklin import server',
     builder: (yargs) => {
       yargs
         .option('open', {
@@ -29,13 +29,13 @@ export default function up() {
         })
         .option('ui-repo', {
           alias: 'uiRepo',
-          describe: 'Git repository for the Helix Importer UI',
+          describe: 'Git repository for the Franklin Importer UI',
           type: 'string',
           default: 'https://github.com/adobe/helix-importer-ui',
         })
         .option('skip-ui', {
           alias: 'skipUI',
-          describe: 'Do not install the Helix Importer UI',
+          describe: 'Do not install the Franklin Importer UI',
           type: 'boolean',
           default: false,
         })
@@ -53,7 +53,7 @@ export default function up() {
         })
         .option('stop-other', {
           alias: 'stopOther',
-          describe: 'Stop other Helix CLI running on the above port',
+          describe: 'Stop other Franklin CLI running on the above port',
           type: 'boolean',
           default: true,
         })
@@ -62,7 +62,7 @@ export default function up() {
           describe: 'Path to local folder to cache the responses',
           type: 'string',
         })
-        .group(['open', 'no-open', 'cache'], 'Helix Import Options')
+        .group(['open', 'no-open', 'cache'], 'Franklin Import Options')
 
         .help();
     },
