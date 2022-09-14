@@ -280,7 +280,7 @@ export default class HelixServer extends EventEmitter {
         throw new Error(`Port ${this._port} already in use by another process.`);
       }
     }
-    log.info(`Starting franklin import server v${packageJson.version}`);
+    log.info(`Starting Franklin import server v${packageJson.version}`);
     await new Promise((resolve, reject) => {
       this._app.use(cookieParser());
       this._server = this._app.listen(this._port, (err) => {
