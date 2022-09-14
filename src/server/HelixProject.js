@@ -170,7 +170,7 @@ export default class HelixProject {
   }
 
   async start() {
-    this.log.debug('Launching franklin simulation server for development...');
+    this.log.debug('Launching Franklin simulation server for development...');
     await this._server.start(this);
     if (this._indexer) {
       await this._indexer.init();
