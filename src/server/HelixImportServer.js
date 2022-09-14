@@ -236,7 +236,7 @@ export default class HelixServer extends EventEmitter {
       /* c8 ignore start */
       } catch (err) {
         log.error(`Failed to proxy Franklin request ${ctx.path}: ${err.message}`);
-        res.status(502).send(`Failed to proxy franklin request: ${err.message}`);
+        res.status(502).send(`Failed to proxy Franklin request: ${err.message}`);
       }
       // codecov:ignore:end
       /* c8 ignore end */
