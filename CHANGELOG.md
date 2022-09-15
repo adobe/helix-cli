@@ -1,3 +1,10 @@
+# [14.14.0](https://github.com/adobe/helix-cli/compare/v14.13.8...v14.14.0) (2022-09-15)
+
+
+### Features
+
+* rename helix to franklin ([#2063](https://github.com/adobe/helix-cli/issues/2063)) ([016332d](https://github.com/adobe/helix-cli/commit/016332da7022cd73d152a41b419e4e7339ad3e7f))
+
 ## [14.13.8](https://github.com/adobe/helix-cli/compare/v14.13.7...v14.13.8) (2022-09-14)
 
 
