@@ -102,13 +102,13 @@ export default class HelixProject {
   }
 
   async start() {
-    this.log.debug('Launching helix import server for importing content...');
+    this.log.debug('Launching Franklin import server for importing content...');
     await this._server.start(this);
     return this;
   }
 
   async stop() {
-    this.log.debug('Stopping helix import server..');
+    this.log.debug('Stopping Franklin import server..');
     await this._server.stop();
     return this;
   }

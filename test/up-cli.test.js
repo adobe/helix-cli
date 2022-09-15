@@ -38,7 +38,7 @@ describe('hlx up', () => {
     mockUp.withOpen.returnsThis();
     mockUp.withLiveReload.returnsThis();
     mockUp.withHttpPort.returnsThis();
-    mockUp.withPagesUrl.returnsThis();
+    mockUp.withUrl.returnsThis();
     mockUp.withPrintIndex.returnsThis();
     mockUp.withKill.returnsThis();
     mockUp.withCache.returnsThis();
@@ -101,7 +101,7 @@ describe('hlx up', () => {
 
   it('hlx up can set pages url', async () => {
     await cli.run(['up', '--pages-url', 'https://foo--bar.hlx.page']);
-    sinon.assert.calledWith(mockUp.withPagesUrl, 'https://foo--bar.hlx.page');
+    sinon.assert.calledWith(mockUp.withUrl, 'https://foo--bar.hlx.page');
     sinon.assert.calledOnce(mockUp.run);
   });
 

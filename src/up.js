@@ -19,7 +19,7 @@ export default function up() {
       executor = value;
     },
     command: 'up',
-    description: 'Run a Helix development server',
+    description: 'Run a Franklin development server',
     builder: (yargs) => {
       yargs
         .option('open', {
@@ -53,7 +53,7 @@ export default function up() {
         })
         .option('stop-other', {
           alias: 'stopOther',
-          describe: 'Stop other Helix CLI running on the above port',
+          describe: 'Stop other Franklin CLI running on the above port',
           type: 'boolean',
           default: true,
         })
@@ -64,9 +64,9 @@ export default function up() {
           default: false,
         })
         .group(['port'], 'Server options')
-        .option('pages-url', {
-          alias: 'pagesUrl',
-          describe: 'The origin url to fetch pages content from.',
+        .option('url', {
+          alias: ['pagesUrl', 'pages-url'],
+          describe: 'The origin url to fetch content from.',
           type: 'string',
         })
         .option('alpha-cache', {
@@ -74,7 +74,7 @@ export default function up() {
           describe: 'Path to local folder to cache the responses (note: this is an alpha feature, it may be removed without notice)',
           type: 'string',
         })
-        .group(['pages-url', 'livereload', 'no-livereload', 'open', 'no-open', 'print-index', 'cache'], 'Helix Pages Options')
+        .group(['url', 'livereload', 'no-livereload', 'open', 'no-open', 'print-index', 'cache'], 'Franklin Options')
 
         .help();
     },
@@ -90,7 +90,7 @@ export default function up() {
         // this prevents the window to be opened during integration tests
         .withOpen(path.basename(argv.$0) === 'hlx' ? argv.open : false)
         .withLiveReload(argv.livereload)
-        .withPagesUrl(argv.pagesUrl)
+        .withUrl(argv.url)
         .withPrintIndex(argv.printIndex)
         .withKill(argv.stopOther)
         .withCache(argv.alphaCache)

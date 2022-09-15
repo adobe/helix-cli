@@ -99,8 +99,8 @@ export default class HelixServer extends EventEmitter {
         cacheDirectory: this._project.cacheDirectory,
       });
     } catch (err) {
-      log.error(`Failed to proxy helix request ${ctx.path}: ${err.message}`);
-      res.status(502).send(`Failed to proxy helix request: ${err.message}`);
+      log.error(`Failed to proxy Franklin request ${ctx.path}: ${err.message}`);
+      res.status(502).send(`Failed to proxy Franklin request: ${err.message}`);
     }
 
     this.emit('request', req, res, ctx);
@@ -140,14 +140,14 @@ export default class HelixServer extends EventEmitter {
         throw new Error(`Port ${this._port} already in use by another process.`);
       }
     }
-    log.info(`Starting helix-simulator v${packageJson.version}`);
+    log.info(`Starting franklin-simulator v${packageJson.version}`);
     await new Promise((resolve, reject) => {
       this._server = this._app.listen(this._port, (err) => {
         if (err) {
           reject(new Error(`Error while starting http server: ${err}`));
         }
         this._port = this._server.address().port;
-        log.info(`Local Helix Dev server up and running: http://localhost:${this._port}/`);
+        log.info(`Local Franklin Dev server up and running: http://localhost:${this._port}/`);
         if (this._project.proxyUrl) {
           log.info(`Enabled reverse proxy to ${this._project.proxyUrl}`);
         }
@@ -170,7 +170,7 @@ export default class HelixServer extends EventEmitter {
         if (err) {
           reject(new Error(`Error while stopping http server: ${err}`));
         }
-        log.info('Local Helix Dev server stopped.');
+        log.info('Local Franklin Dev server stopped.');
         this._server = null;
         resolve();
       });
