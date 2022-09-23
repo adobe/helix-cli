@@ -15,7 +15,7 @@ import path from 'path';
 import express from 'express';
 import cookieParser from 'cookie-parser';
 import { PassThrough } from 'stream';
-import { context as fetchContext } from '@adobe/helix-fetch';
+import { context as fetchContext } from '@adobe/fetch';
 import utils from './utils.js';
 import packageJson from '../package.cjs';
 import RequestContext from './RequestContext.js';
