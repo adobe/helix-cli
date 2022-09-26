@@ -1,3 +1,10 @@
+## [14.14.2](https://github.com/adobe/helix-cli/compare/v14.14.1...v14.14.2) (2022-09-26)
+
+
+### Bug Fixes
+
+* @adobe/helix-fetch -> @adobe/fetch ([#2066](https://github.com/adobe/helix-cli/issues/2066)) ([3ee538a](https://github.com/adobe/helix-cli/commit/3ee538a8d3d07f4b3ca9905280d52ab0e9a574d5))
+
 ## [14.14.1](https://github.com/adobe/helix-cli/compare/v14.14.0...v14.14.1) (2022-09-24)
 
 
