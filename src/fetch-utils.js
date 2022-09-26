@@ -9,7 +9,7 @@
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-import { h1, context as fetchContext } from '@adobe/helix-fetch';
+import { h1, context as fetchContext } from '@adobe/fetch';
 
 // create global context that is used by all commands and can be reset for CLI to terminate
 export const context = process.env.HELIX_FETCH_FORCE_HTTP1
