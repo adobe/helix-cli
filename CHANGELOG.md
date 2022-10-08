@@ -1,3 +1,10 @@
+## [14.14.4](https://github.com/adobe/helix-cli/compare/v14.14.3...v14.14.4) (2022-10-08)
+
+
+### Bug Fixes
+
+* **deps:** update dependency express to v4.18.2 ([c25fd9c](https://github.com/adobe/helix-cli/commit/c25fd9cdd03d5674d64ee65730aee10feb768ab8))
+
 ## [14.14.3](https://github.com/adobe/helix-cli/compare/v14.14.2...v14.14.3) (2022-10-01)
 
 
