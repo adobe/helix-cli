@@ -1,3 +1,10 @@
+## [14.14.7](https://github.com/adobe/helix-cli/compare/v14.14.6...v14.14.7) (2022-10-20)
+
+
+### Bug Fixes
+
+* skip dump when no last pathname is recorded ([#2078](https://github.com/adobe/helix-cli/issues/2078)) ([9e44189](https://github.com/adobe/helix-cli/commit/9e441898a232df9bca357540141b950a449259cf))
+
 ## [14.14.6](https://github.com/adobe/helix-cli/compare/v14.14.5...v14.14.6) (2022-10-14)
 
 
