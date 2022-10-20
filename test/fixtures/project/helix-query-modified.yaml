@@ -1,7 +1,7 @@
 version: 1
 
 indices:
-  blog:
+  new-blog:
     include:
       - '**'
     exclude:

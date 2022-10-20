@@ -326,4 +326,32 @@ describe('Helix Server with Livereload', () => {
       await project.stop();
     }
   });
+
+  it('livereload of a query definition should not cause an unhandled rejection when no last URL exists', async () => {
+    const rejects = [];
+    process.on('unhandledRejection', (reason) => {
+      rejects.push(reason);
+    });
+
+    const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
+    const project = new HelixProject()
+      .withCwd(cwd)
+      .withHttpPort(0)
+      .withLiveReload(true)
+      .withPrintIndex(true);
+    await project.init();
+
+    try {
+      await project.start();
+
+      await fse.copy(path.resolve(cwd, 'helix-query-modified.yaml'), path.resolve(cwd, 'helix-query.yaml'));
+      await wait(500);
+
+      if (rejects.length > 0) {
+        assert.fail(rejects[0]);
+      }
+    } finally {
+      await project.stop();
+    }
+  });
 });
