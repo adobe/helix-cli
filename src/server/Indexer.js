@@ -103,6 +103,10 @@ export default class Indexer {
       pathname,
       response,
     } = this._last;
+    if (!pathname) {
+      log.debug('No last path recorded, dump skipped.');
+      return;
+    }
     const records = await this.getRecords(pathname, response);
     if (records) {
       if (records.length) {
