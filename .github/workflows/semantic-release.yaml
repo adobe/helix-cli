@@ -16,7 +16,7 @@ jobs:
           node-version: '14.x'
       - run: npm install
       - run: git config --global user.email "test@project-helix.io" && git config --global user.name "Test Build"
-      - run: git config --global protocol.file.allow
+      - run: git config --global protocol.file.allow always
       - run: npm test
         env:
           CIRCLE_REPOSITORY_URL: dummy-url
@@ -33,7 +33,7 @@ jobs:
           node-version: '14.x'
       - run: npm install
       - run: git config --global user.email "test@project-helix.io" && git config --global user.name "Test Build"
-      - run: git config --global protocol.file.allow
+      - run: git config --global protocol.file.allow always
       - run: npm run test-ci-win
         env:
           CIRCLE_REPOSITORY_URL: dummy-url
