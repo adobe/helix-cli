@@ -1,3 +1,10 @@
+## [14.14.9](https://github.com/adobe/helix-cli/compare/v14.14.8...v14.14.9) (2022-10-25)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @adobe/fetch to v3.3.0 ([5892f56](https://github.com/adobe/helix-cli/commit/5892f566ee8b70000ca146e58ec92aed133246fa))
+
 ## [14.14.8](https://github.com/adobe/helix-cli/compare/v14.14.7...v14.14.8) (2022-10-24)
 
 
