@@ -61,7 +61,7 @@ export default class HelixServer extends EventEmitter {
     const sendFile = promisify(res.sendFile).bind(res);
     const ctx = new RequestContext(req, this._project);
     const { log } = this;
-    const { proxyUrl } = this._project;
+    const proxyUrl = new URL(this._project.proxyUrl);
 
     const { liveReload } = ctx.config;
     if (liveReload) {
@@ -92,7 +92,11 @@ export default class HelixServer extends EventEmitter {
 
     // use proxy
     try {
-      await utils.proxyRequest(ctx, new URL(ctx.url, proxyUrl).href, req, res, {
+      const url = new URL(ctx.url, proxyUrl);
+      for (const [key, value] of proxyUrl.searchParams.entries()) {
+        url.searchParams.append(key, value);
+      }
+      await utils.proxyRequest(ctx, url.href, req, res, {
         injectLiveReload: this._project.liveReload,
         headHtml: this._project.headHtml,
         indexer: this._project.indexer,

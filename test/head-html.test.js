@@ -36,9 +36,16 @@ async function init(hhs, localHtml, remoteHtml) {
   }
 }
 
+const DEFAULT_OPTS = (opts = {}) => ({
+  log: console,
+  directory: '.',
+  proxyUrl: 'https://main--helix-website--adobe.hlx.page/',
+  ...opts,
+});
+
 describe('Head.html replacement tests', () => {
   it('replaces the head html within <head> tags', async () => {
-    const hhs = new HeadHtmlSupport({ log: console, directory: '.' });
+    const hhs = new HeadHtmlSupport(DEFAULT_OPTS());
     hhs.isModified = true;
     const source = `
 <html>
@@ -70,7 +77,7 @@ describe('Head.html replacement tests', () => {
   });
 
   it('replaces the empty head html at the end', async () => {
-    const hhs = new HeadHtmlSupport({ log: console, directory: '.' });
+    const hhs = new HeadHtmlSupport(DEFAULT_OPTS());
     hhs.isModified = true;
     await init(hhs, '<title>local</title>', '');
 
@@ -80,14 +87,14 @@ describe('Head.html replacement tests', () => {
   });
 
   it('replaces the head html with empty string', async () => {
-    const hhs = new HeadHtmlSupport({ log: console, directory: '.' });
+    const hhs = new HeadHtmlSupport(DEFAULT_OPTS());
     hhs.isModified = true;
     await init(hhs, '', '<title>remote</title>');
     assert.strictEqual(await hhs.replace('<html><head><title>remote</title></head></html>'), '<html><head></head></html>');
   });
 
   it('doesnt replace html if no <head> tag', async () => {
-    const hhs = new HeadHtmlSupport({ log: console, directory: '.' });
+    const hhs = new HeadHtmlSupport(DEFAULT_OPTS());
     hhs.isModified = true;
     await init(hhs, '<title>local</title>', '<title>remote</title>');
     const source = '<html><a>remote</a></html>';
@@ -95,7 +102,7 @@ describe('Head.html replacement tests', () => {
   });
 
   it('doesnt replace html if not modified', async () => {
-    const hhs = new HeadHtmlSupport({ log: console, directory: '.' });
+    const hhs = new HeadHtmlSupport(DEFAULT_OPTS());
     hhs.isModified = false;
     const source = '<html><a>remote</a></html>';
     assert.strictEqual(await hhs.replace(source), source);
@@ -125,7 +132,7 @@ describe('Head.html loading tests', () => {
 
   it('loads local head.html', async () => {
     const directory = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
-    const hhs = new HeadHtmlSupport({ log: console, directory });
+    const hhs = new HeadHtmlSupport(DEFAULT_OPTS({ directory }));
     await hhs.loadLocal();
     assert.strictEqual(hhs.localHtml, '<!-- local head html -->\n<link rel="stylesheet" href="/styles.css"/>');
     assert.strictEqual(hhs.localStatus, 200);
@@ -133,7 +140,7 @@ describe('Head.html loading tests', () => {
 
   it('loads missing head.html', async () => {
     const directory = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
-    const hhs = new HeadHtmlSupport({ log: console, directory: `${directory}-not-exist` });
+    const hhs = new HeadHtmlSupport(DEFAULT_OPTS({ directory: `${directory}-not-exist` }));
     await hhs.loadLocal();
     assert.strictEqual(hhs.localHtml, '');
     assert.strictEqual(hhs.localStatus, 404);
@@ -240,7 +247,7 @@ describe('Head.html loading tests', () => {
   });
 
   it('init sets modified to false if local status failed', async () => {
-    const hhs = new HeadHtmlSupport({ log: console, directory: '.' });
+    const hhs = new HeadHtmlSupport(DEFAULT_OPTS());
     hhs.localHtml = '';
     hhs.remoteHtml = '';
     hhs.localStatus = 404;
@@ -250,7 +257,7 @@ describe('Head.html loading tests', () => {
   });
 
   it('init sets modified to false if remote status failed', async () => {
-    const hhs = new HeadHtmlSupport({ log: console, directory: '.' });
+    const hhs = new HeadHtmlSupport(DEFAULT_OPTS());
     hhs.localHtml = '';
     hhs.remoteHtml = '';
     hhs.localStatus = 200;

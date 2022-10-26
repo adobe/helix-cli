@@ -81,7 +81,8 @@ export default class HeadHtmlSupport {
     this.remoteStatus = 0;
     this.localHtml = '';
     this.localStatus = 0;
-    this.url = `${proxyUrl}/head.html`;
+    this.url = new URL(proxyUrl);
+    this.url.pathname = '/head.html';
     this.filePath = resolve(directory, 'head.html');
     this.log = log;
   }

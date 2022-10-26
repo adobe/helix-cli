@@ -101,7 +101,13 @@ describe('Helix Server', () => {
     const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
     const project = new HelixProject()
       .withCwd(cwd)
+      .withProxyUrl('https://main--foo--bar.hlx.page/')
       .withHttpPort(0);
+
+    nock('https://main--foo--bar.hlx.page')
+      .get('/head.html')
+      .reply(200, '<link rel="stylesheet" href="/styles.css"/>');
+
     await project.init();
     try {
       await project.start();
