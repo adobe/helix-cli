@@ -1,3 +1,10 @@
+# [14.15.0](https://github.com/adobe/helix-cli/compare/v14.14.10...v14.15.0) (2022-10-27)
+
+
+### Features
+
+* add support for local dev with authenticated sites ([#2084](https://github.com/adobe/helix-cli/issues/2084)) ([36a9fe7](https://github.com/adobe/helix-cli/commit/36a9fe77fc2768a6fa2370a4c7d42ff5fa669b73))
+
 ## [14.14.10](https://github.com/adobe/helix-cli/compare/v14.14.9...v14.14.10) (2022-10-26)
 
 
