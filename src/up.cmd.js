@@ -120,9 +120,9 @@ export default class UpCommand extends AbstractCommand {
       if (!resp.ok) {
         const friendlyUrl = `https://github.com/${gitUrl.owner}/${gitUrl.repo}/tree/${ref}`;
         if (ref === 'main') {
-          this.log.warn(chalk`Error (${resp.status}) while loading fstab.yaml from {blue ${friendlyUrl}}. Maybe not pushed yet?`);
+          this.log.warn(chalk`Unable to verify {yellow main} branch on {blue ${friendlyUrl}} (${resp.status}). Maybe not pushed yet?`);
         } else {
-          this.log.warn(chalk`Error (${resp.status}) while loading fstab.yaml from {blue ${friendlyUrl}}. Fallback to {yellow main} branch.`);
+          this.log.warn(chalk`Unable to verify {yellow ${ref}} branch on {blue ${friendlyUrl}} (${resp.status}). Fallback to {yellow main} branch.`);
           ref = 'main';
         }
       }
