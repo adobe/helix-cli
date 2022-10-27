@@ -14,6 +14,7 @@ import crypto from 'crypto';
 import path from 'path';
 import { Socket } from 'net';
 import { PassThrough } from 'stream';
+import cookie from 'cookie';
 import { fetch } from '../fetch-utils.js';
 
 const utils = {
@@ -221,10 +222,20 @@ const utils = {
     const stream = new PassThrough();
     req.pipe(stream);
     const headers = {
+      'x-forwarded-host': `localhost:${ctx.config.server.port}`,
+      'x-forwarded-scheme': 'http',
       ...req.headers,
       ...(opts.headers || {}),
     };
+    // preserve hlx-auth-token cookie
+    const cookies = cookie.parse(headers.cookie || '');
     delete headers.cookie;
+    const hlxAuthToken = cookies['hlx-auth-token'];
+    if (hlxAuthToken) {
+      headers.cookie = new URLSearchParams({
+        'hlx-auth-token': hlxAuthToken,
+      }).toString();
+    }
     delete headers.connection;
     delete headers.host;
     const ret = await fetch(url, {
