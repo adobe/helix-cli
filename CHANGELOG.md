@@ -1,3 +1,10 @@
+# [14.16.0](https://github.com/adobe/helix-cli/compare/v14.15.0...v14.16.0) (2022-10-27)
+
+
+### Features
+
+* improve error message ([#2085](https://github.com/adobe/helix-cli/issues/2085)) ([6af6f0f](https://github.com/adobe/helix-cli/commit/6af6f0fd4d55bf29d1a8ce52ffcb9500083993b8))
+
 # [14.15.0](https://github.com/adobe/helix-cli/compare/v14.14.10...v14.15.0) (2022-10-27)
 
 
