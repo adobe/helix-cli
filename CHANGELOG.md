@@ -1,3 +1,10 @@
+# [14.17.0](https://github.com/adobe/helix-cli/compare/v14.16.0...v14.17.0) (2022-11-08)
+
+
+### Features
+
+* enable compression ([645fdfa](https://github.com/adobe/helix-cli/commit/645fdfa81c4c7862e9045394fbe0191a7d4df485))
+
 # [14.16.0](https://github.com/adobe/helix-cli/compare/v14.15.0...v14.16.0) (2022-10-27)
 
 
