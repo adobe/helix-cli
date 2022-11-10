@@ -1,3 +1,10 @@
+## [14.17.1](https://github.com/adobe/helix-cli/compare/v14.17.0...v14.17.1) (2022-11-10)
+
+
+### Bug Fixes
+
+* do not forward the referrer ([#2091](https://github.com/adobe/helix-cli/issues/2091)) ([39eed86](https://github.com/adobe/helix-cli/commit/39eed86d1959d45c3ae1ef1478b7428f38dfb8d4))
+
 # [14.17.0](https://github.com/adobe/helix-cli/compare/v14.16.0...v14.17.0) (2022-11-08)
 
 
