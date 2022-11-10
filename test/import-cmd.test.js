@@ -14,9 +14,11 @@
 import assert from 'assert';
 import path from 'path';
 import fse from 'fs-extra';
+import { context as fetchContext } from '@adobe/fetch';
 import { Nock, assertHttp, createTestRoot } from './utils.js';
-import { fetch } from '../src/fetch-utils.js';
 import ImportCommand from '../src/import.cmd.js';
+
+const { fetch } = fetchContext({ rejectUnauthorized: false });
 
 const TEST_DIR = path.resolve(__rootdir, 'test', 'fixtures', 'import');
 const SAMPLE_HOST = 'http://www.sample.com';
@@ -225,6 +227,46 @@ describe('Integration test for import command', function suite() {
         try {
           const ret = await assertHttp(`http://localhost:${cmd.project.server.port}/index.html?host=${SAMPLE_HOST}`, 200);
           assert.strictEqual(ret.trim(), expected.index.trim());
+
+          await myDone();
+        } catch (e) {
+          await myDone(e);
+        }
+      })
+      .on('stopped', () => {
+        done(error);
+      })
+      .run()
+      .catch(done);
+  });
+
+  it('import command gets rid of referrer', (done) => {
+    let error = null;
+    const cmd = new ImportCommand()
+      .withDirectory(TEST_DIR)
+      .withOpen('false')
+      .withKill(false)
+      .withSkipUI(true)
+      .withHttpPort(0);
+
+    const myDone = (err) => {
+      error = err;
+      return cmd.stop();
+    };
+
+    nock(SAMPLE_HOST, {
+      badheaders: ['referer'],
+    }).get('/index.html').reply(200);
+
+    cmd
+      .on('started', async () => {
+        try {
+          const resp = await fetch(`http://localhost:${cmd.project.server.port}/index.html?host=${SAMPLE_HOST}`, {
+            headers: {
+              referer: 'http://localhost',
+            },
+          });
+          assert.strictEqual(resp.status, 200);
 
           await myDone();
         } catch (e) {
