@@ -113,10 +113,10 @@ export function Nock() {
     unmatched.push(req);
   }
 
-  function nocker(url) {
+  function nocker(url, options) {
     let scope = scopes[url];
     if (!scope) {
-      scope = nock(url);
+      scope = nock(url, options);
       scopes[url] = scope;
     }
     if (!unmatched) {

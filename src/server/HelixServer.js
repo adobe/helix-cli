@@ -13,12 +13,11 @@ import { promisify } from 'util';
 import EventEmitter from 'events';
 import path from 'path';
 import express from 'express';
+import compression from 'compression';
 import { fetch } from '../fetch-utils.js';
 import utils from './utils.js';
 import packageJson from '../package.cjs';
 import RequestContext from './RequestContext.js';
-import compression  from 'compression';
-
 
 const DEFAULT_PORT = 3000;
 
