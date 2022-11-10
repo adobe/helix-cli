@@ -133,7 +133,6 @@ export default class HelixServer extends EventEmitter {
     delete headers.connection;
     delete headers.host;
     delete headers.referer;
-    delete headers.referrer;
 
     const ret = await fetch(url, {
       method: req.method,
