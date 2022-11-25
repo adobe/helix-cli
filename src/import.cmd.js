@@ -38,7 +38,9 @@ export default class ImportCommand extends AbstractCommand {
   }
 
   withCache(value) {
-    this._cache = value;
+    this._cache = value
+      ? path.resolve(process.cwd(), value)
+      : '';
     return this;
   }
 

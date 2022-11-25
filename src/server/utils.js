@@ -191,18 +191,25 @@ const utils = {
   },
 
   /**
+   * @typedef ProxyRequestOptions
+   * @property {boolean} injectLiveReload
+   * @property {string} headHtml
+   * @property {Indexer} indexer
+   * @property {string} cacheDirectory
+   * @property {boolean} preferCache
+   *
    * Fetches the content from the url  and streams it back to the response.
    * @param {RequestContext} ctx Context
    * @param {string} url The url to fetch from
    * @param {Request} req The original express request
    * @param {Response} res The express response
-   * @param {object} opts additional request options
+   * @param {ProxyRequestOptions} opts additional request options
    * @return {Promise} A promise that resolves when the stream is done.
    */
   async proxyRequest(ctx, url, req, res, opts = {}) {
     ctx.log.debug(`Proxy ${req.method} request to ${url}`);
 
-    if (opts.cacheDirectory) {
+    if (opts.cacheDirectory && opts.preferCache) {
       const cached = await utils.getFromCache(url, opts.cacheDirectory, ctx.log);
       if (cached) {
         res

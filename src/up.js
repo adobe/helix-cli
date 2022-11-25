@@ -69,12 +69,24 @@ export default function up() {
           describe: 'The origin url to fetch content from.',
           type: 'string',
         })
-        .option('alpha-cache', {
-          alias: 'alphaCache',
-          describe: 'Path to local folder to cache the responses (note: this is an alpha feature, it may be removed without notice)',
+        .option('cache', {
+          describe: 'Path to local folder to cache the proxy responses',
           type: 'string',
+          default: '.hlx/cache',
         })
-        .group(['url', 'livereload', 'no-livereload', 'open', 'no-open', 'print-index', 'cache'], 'Franklin Options')
+        .option('cache-mode', {
+          alias: 'cacheMode',
+          describe: 'Cache mode. use "auto" to automatically respond from cache when network is down.',
+          type: 'string',
+          choices: ['auto', 'always'], // todo: maybe have a mode that checks with admin when documents are previewed
+          default: 'auto',
+        })
+        .option('no-cache', {
+          alias: 'noCache',
+          describe: 'Disables the proxy cache.',
+          type: 'boolean',
+        })
+        .group(['url', 'livereload', 'no-livereload', 'open', 'no-open', 'print-index', 'cache', 'no-cache', 'cache-mode'], 'Franklin Options')
 
         .help();
     },
@@ -93,7 +105,8 @@ export default function up() {
         .withUrl(argv.url)
         .withPrintIndex(argv.printIndex)
         .withKill(argv.stopOther)
-        .withCache(argv.alphaCache)
+        .withCache(argv.cache)
+        .withCacheMode(argv.cacheMode)
         .run();
     },
   };

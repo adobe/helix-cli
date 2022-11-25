@@ -59,10 +59,16 @@ export default function up() {
         })
         .group(['port', 'stop-other'], 'Server options')
         .option('cache', {
-          describe: 'Path to local folder to cache the responses',
+          describe: 'Path to local folder to cache the proxy responses',
           type: 'string',
+          default: '.hlx/cache',
         })
-        .group(['open', 'no-open', 'cache'], 'Franklin Import Options')
+        .option('no-cache', {
+          alias: 'noCache',
+          describe: 'Disables the proxy cache.',
+          type: 'boolean',
+        })
+        .group(['open', 'no-open', 'cache', 'no-cache'], 'Franklin Import Options')
 
         .help();
     },

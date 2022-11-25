@@ -98,12 +98,22 @@ export default class HelixServer extends EventEmitter {
       for (const [key, value] of proxyUrl.searchParams.entries()) {
         url.searchParams.append(key, value);
       }
-      await utils.proxyRequest(ctx, url.href, req, res, {
+      const opts = {
         injectLiveReload: this._project.liveReload,
         headHtml: this._project.headHtml,
         indexer: this._project.indexer,
         cacheDirectory: this._project.cacheDirectory,
-      });
+        preferCache: this._project.preferCache,
+      };
+      await utils.proxyRequest(ctx, url.href, req, res, opts);
+      if (!this._project.preferCache) {
+        this._project.netState.onProxyStatus(res.statusCode);
+        // if cache is now preferred, try again
+        if (this._project.preferCache) {
+          opts.preferCache = true;
+          await utils.proxyRequest(ctx, url.href, req, res, opts);
+        }
+      }
     } catch (err) {
       log.error(`Failed to proxy Franklin request ${ctx.path}: ${err.message}`);
       res.status(502).send(`Failed to proxy Franklin request: ${err.message}`);
@@ -156,6 +166,10 @@ export default class HelixServer extends EventEmitter {
         log.info(`Local Franklin Dev server up and running: http://localhost:${this._port}/`);
         if (this._project.proxyUrl) {
           log.info(`Enabled reverse proxy to ${this._project.proxyUrl}`);
+        }
+        if (this._project.cacheDirectory) {
+          const mode = this._project.cacheMode === 'auto' ? 'auto-' : '';
+          log.info(`Enabled proxy ${mode}cache using ${path.relative(process.cwd(), this._project.cacheDirectory)}`);
         }
         resolve();
       });
