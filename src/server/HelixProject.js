@@ -14,6 +14,7 @@ import HelixServer from './HelixServer.js';
 import LiveReload from './LiveReload.js';
 import HeadHtmlSupport from './HeadHtmlSupport.js';
 import Indexer from './Indexer.js';
+import NetworkState from './NetworkState.js';
 
 export default class HelixProject {
   constructor() {
@@ -24,6 +25,7 @@ export default class HelixProject {
     this._enableLiveReload = false;
     this._proxyUrl = null;
     this._cacheDirectory = null;
+    this._cacheMode = null;
     this._headHtml = null;
     this._indexer = null;
     this._printIndex = false;
@@ -65,6 +67,11 @@ export default class HelixProject {
     return this;
   }
 
+  withCacheMode(value) {
+    this._cacheMode = value;
+    return this;
+  }
+
   withPrintIndex(value) {
     this._printIndex = value;
     return this;
@@ -88,6 +95,21 @@ export default class HelixProject {
 
   get cacheDirectory() {
     return this._cacheDirectory;
+  }
+
+  get cacheMode() {
+    return this._cacheMode;
+  }
+
+  get netState() {
+    return this._netState;
+  }
+
+  get preferCache() {
+    if (this._cacheMode === 'always') {
+      return true;
+    }
+    return this._netState.down;
   }
 
   get directory() {
@@ -175,6 +197,7 @@ export default class HelixProject {
     if (this._indexer) {
       await this._indexer.init();
     }
+    this._netState = new NetworkState(this.log);
     return this;
   }
 
@@ -187,6 +210,7 @@ export default class HelixProject {
     if (this._indexer) {
       await this._indexer.close();
     }
+    await this._netState.close();
     return this;
   }
 }

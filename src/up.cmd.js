@@ -27,6 +27,7 @@ export default class UpCommand extends AbstractCommand {
     this._liveReload = false;
     this._url = null;
     this._cache = null;
+    this._cacheMode = 'auto';
     this._printIndex = false;
   }
 
@@ -51,7 +52,14 @@ export default class UpCommand extends AbstractCommand {
   }
 
   withCache(value) {
-    this._cache = value;
+    this._cache = value
+      ? path.resolve(process.cwd(), value)
+      : '';
+    return this;
+  }
+
+  withCacheMode(value) {
+    this._cacheMode = value;
     return this;
   }
 
@@ -134,6 +142,7 @@ export default class UpCommand extends AbstractCommand {
     if (this._cache) {
       await fse.ensureDir(this._cache);
       this._project.withCacheDirectory(this._cache);
+      this._project.withCacheMode(this._cacheMode);
     }
 
     this._project.withProxyUrl(this._url);
