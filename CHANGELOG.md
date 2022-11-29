@@ -1,3 +1,10 @@
+## [14.17.2](https://github.com/adobe/helix-cli/compare/v14.17.1...v14.17.2) (2022-11-29)
+
+
+### Bug Fixes
+
+* **deps:** update external major (major) ([#2100](https://github.com/adobe/helix-cli/issues/2100)) ([2ae4650](https://github.com/adobe/helix-cli/commit/2ae4650a9c0851fb464c78dc27f858b738bded73))
+
 ## [14.17.1](https://github.com/adobe/helix-cli/compare/v14.17.0...v14.17.1) (2022-11-10)
 
 
