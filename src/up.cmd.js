@@ -13,6 +13,7 @@ import path from 'path';
 import fse from 'fs-extra';
 import opn from 'open';
 import chalk from 'chalk-template';
+import chokidar from 'chokidar';
 import HelixProject from './server/HelixProject.js';
 import GitUtils from './git-utils.js';
 import pkgJson from './package.cjs';
@@ -111,24 +112,11 @@ export default class UpCommand extends AbstractCommand {
     this.log.info(chalk`{yellow  /_/ /_/  \\_,_/_//_/_/\\_\\/_/_/_//_/ }`);
     this.log.info('');
 
-    let ref = await GitUtils.getBranch(this.directory);
+    const ref = await GitUtils.getBranch(this.directory);
     const gitUrl = await GitUtils.getOriginURL(this.directory, { ref });
     if (!this._url) {
       // check if remote already has the `ref`
-      const resp = await fetch(`${gitUrl.raw}/fstab.yaml`);
-      await resp.buffer();
-      if (!resp.ok) {
-        const friendlyUrl = `https://github.com/${gitUrl.owner}/${gitUrl.repo}/tree/${ref}`;
-        if (ref === 'main') {
-          this.log.warn(chalk`Unable to verify {yellow main} branch on {blue ${friendlyUrl}} (${resp.status}). Maybe not pushed yet?`);
-        } else {
-          this.log.warn(chalk`Unable to verify {yellow ${ref}} branch on {blue ${friendlyUrl}} (${resp.status}). Fallback to {yellow main} branch.`);
-          ref = 'main';
-        }
-      }
-      // replace `/` by `-` in ref.
-      ref = ref.replace(/\//g, '-');
-      this._url = `https://${ref}--${gitUrl.repo}--${gitUrl.owner}.hlx.page`;
+      await this.verifyUrl(gitUrl, ref);
     }
 
     if (this._cache) {
@@ -143,9 +131,62 @@ export default class UpCommand extends AbstractCommand {
 
     try {
       await this._project.init();
+
+      this.watchGit();
     } catch (e) {
       throw Error(`Unable to start Franklin: ${e.message}`);
     }
+  }
+
+  async verifyUrl(gitUrl, inref) {
+    let ref = inref;
+    const resp = await fetch(`${gitUrl.raw}/fstab.yaml`);
+    await resp.buffer();
+    if (!resp.ok) {
+      const friendlyUrl = `https://github.com/${gitUrl.owner}/${gitUrl.repo}/tree/${ref}`;
+      if (ref === 'main') {
+        this.log.warn(chalk`Unable to verify {yellow main} branch on {blue ${friendlyUrl}} (${resp.status}). Maybe not pushed yet?`);
+      } else {
+        this.log.warn(chalk`Unable to verify {yellow ${ref}} branch on {blue ${friendlyUrl}} (${resp.status}). Fallback to {yellow main} branch.`);
+        ref = 'main';
+      }
+    }
+    // replace `/` by `-` in ref.
+    ref = ref.replace(/\//g, '-');
+    this._url = `https://${ref}--${gitUrl.repo}--${gitUrl.owner}.hlx.page`;
+  }
+
+  /**
+   * Watches the git repository for changes and restarts the server if necessary.
+   */
+  watchGit() {
+    let timer = null;
+
+    this._watcher = chokidar.watch(path.resolve(this._project.directory, '.git'), {
+      persistent: true,
+      ignoreInitial: true,
+    });
+
+    this._watcher.on('all', (eventType, file) => {
+      if (file.endsWith('.git/HEAD') || file.match(/\.git\/refs\/heads\/.+/)) {
+        if (timer) {
+          clearTimeout(timer);
+        }
+        // debounce a bit in case several files are changed at once
+        timer = setTimeout(async () => {
+          timer = null;
+
+          // restart if any of the files is not ignored
+          this.log.info('git HEAD or remotes changed, restarting server...');
+          const ref = await GitUtils.getBranch(this.directory);
+          const gitUrl = await GitUtils.getOriginURL(this.directory, { ref });
+          await this.verifyUrl(gitUrl, ref);
+          this._project.withProxyUrl(this._url);
+          this._project.initHeadHtml();
+          this.log.info(`Updated proxy to ${this._url}`);
+        }, 100);
+      }
+    });
   }
 
   async run() {
