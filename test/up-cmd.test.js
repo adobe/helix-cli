@@ -15,7 +15,7 @@ import assert from 'assert';
 import path from 'path';
 import fse from 'fs-extra';
 import {
-  Nock, assertHttp, createTestRoot, initGit,
+  Nock, assertHttp, createTestRoot, initGit, switchBranch,
 } from './utils.js';
 import UpCommand from '../src/up.cmd.js';
 
@@ -165,6 +165,66 @@ describe('Integration test for up command with helix pages', function suite() {
           ret = await assertHttp(`http://localhost:${cmd.project.server.port}/local.txt`, 200);
           assert.strictEqual(ret.trim(), 'Hello, world.');
           await assertHttp(`http://localhost:${cmd.project.server.port}/not-found.txt`, 404);
+          await myDone();
+        } catch (e) {
+          await myDone(e);
+        }
+      })
+      .on('stopped', () => {
+        done(error);
+      })
+      .run()
+      .catch(done);
+  });
+
+  it('up command reloads when git branch changes.', (done) => {
+    initGit(testDir, 'https://github.com/adobe/dummy-foo.git');
+    let error = null;
+    const cmd = new UpCommand()
+      .withLiveReload(false)
+      .withDirectory(testDir)
+      .withOpen(false)
+      .withHttpPort(0);
+
+    const myDone = (err) => {
+      error = err;
+      return cmd.stop();
+    };
+
+    nock('https://main--dummy-foo--adobe.hlx.page')
+      .get('/index.html')
+      .reply(200, '## Welcome')
+      .get('/not-found.txt')
+      .reply(404)
+      .get('/head.html')
+      .reply(200, '<link rel="stylesheet" href="/styles.css"/>');
+
+    nock('https://raw.githubusercontent.com')
+      .get('/adobe/dummy-foo/master/fstab.yaml')
+      .reply(404, 'dummy');
+
+    nock('https://raw.githubusercontent.com')
+      .get('/adobe/dummy-foo/new-branch/fstab.yaml')
+      .reply(200, 'yep!');
+
+    nock('https://new-branch--dummy-foo--adobe.hlx.page')
+      .get('/head.html')
+      .reply(200, '## Welcome');
+
+    cmd
+      .on('started', async () => {
+        try {
+          let ret = await assertHttp(`http://localhost:${cmd.project.server.port}/index.html`, 200);
+          assert.strictEqual(ret.trim(), '## Welcome');
+          ret = await assertHttp(`http://localhost:${cmd.project.server.port}/local.txt`, 200);
+          assert.strictEqual(ret.trim(), 'Hello, world.');
+          await assertHttp(`http://localhost:${cmd.project.server.port}/not-found.txt`, 404);
+          // now switch to a new branch
+          switchBranch(testDir, 'new-branch');
+          // wait 1 second for the git branch to be detected
+          await new Promise((resolve) => {
+            setTimeout(resolve, 1000);
+          });
           await myDone();
         } catch (e) {
           await myDone(e);
