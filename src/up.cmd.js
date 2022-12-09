@@ -114,7 +114,9 @@ export default class UpCommand extends AbstractCommand {
 
     const ref = await GitUtils.getBranch(this.directory);
     const gitUrl = await GitUtils.getOriginURL(this.directory, { ref });
+    let explicitURL = true;
     if (!this._url) {
+      explicitURL = false;
       // check if remote already has the `ref`
       await this.verifyUrl(gitUrl, ref);
     }
@@ -132,7 +134,9 @@ export default class UpCommand extends AbstractCommand {
     try {
       await this._project.init();
 
-      this.watchGit();
+      if (!explicitURL) {
+        this.watchGit();
+      }
     } catch (e) {
       throw Error(`Unable to start Franklin: ${e.message}`);
     }
