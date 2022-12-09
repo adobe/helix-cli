@@ -172,7 +172,7 @@ export default class UpCommand extends AbstractCommand {
     });
 
     this._watcher.on('all', (eventType, file) => {
-      if (file.endsWith('.git/HEAD') || file.match(/\.git[/\\]refs[/\\]heads[/\\].+/)) {
+      if (file.endsWith('.git/HEAD') || file.endsWith('.git\\HEAD') || file.match(/\.git[/\\]refs[/\\]heads[/\\].+/)) {
         if (timer) {
           clearTimeout(timer);
         }
