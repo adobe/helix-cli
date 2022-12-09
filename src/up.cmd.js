@@ -177,7 +177,7 @@ export default class UpCommand extends AbstractCommand {
           timer = null;
 
           // restart if any of the files is not ignored
-          this.log.info('git HEAD or remotes changed, restarting server...');
+          this.log.info('git HEAD or remotes changed, reconfiguring server...');
           const ref = await GitUtils.getBranch(this.directory);
           const gitUrl = await GitUtils.getOriginURL(this.directory, { ref });
           await this.verifyUrl(gitUrl, ref);
