@@ -221,9 +221,9 @@ describe('Integration test for up command with helix pages', function suite() {
           await assertHttp(`http://localhost:${cmd.project.server.port}/not-found.txt`, 404);
           // now switch to a new branch
           switchBranch(testDir, 'new-branch');
-          // wait 1 second for the git branch to be detected
+          // wait 5 seconds for the git branch to be detected
           await new Promise((resolve) => {
-            setTimeout(resolve, 1000);
+            setTimeout(resolve, 5000);
           });
           await myDone();
         } catch (e) {
