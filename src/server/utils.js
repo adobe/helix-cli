@@ -237,6 +237,7 @@ const utils = {
       }).toString();
     }
     delete headers.connection;
+    delete headers['proxy-connection'];
     delete headers.host;
     const ret = await fetch(url, {
       method: req.method,
