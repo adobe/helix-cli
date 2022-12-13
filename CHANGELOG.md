@@ -1,3 +1,18 @@
+# [14.18.0](https://github.com/adobe/helix-cli/compare/v14.17.4...v14.18.0) (2022-12-13)
+
+
+### Bug Fixes
+
+* **up:** accept path pattern with forward and backward slashes ([9c6e178](https://github.com/adobe/helix-cli/commit/9c6e1782215c82bc49d90a598f26ed1cc68d3b83))
+* **up:** improve log message ([f3c938c](https://github.com/adobe/helix-cli/commit/f3c938cce917c23d1fd98876f30bcfe119c5667d))
+* **up:** more windows case handling ([c9faf6a](https://github.com/adobe/helix-cli/commit/c9faf6a37e38a112a05d18933552bf9010aca29a))
+
+
+### Features
+
+* **up:** only watch git repository to enable restarts if no url was provided explicitly ([5b6c820](https://github.com/adobe/helix-cli/commit/5b6c82097ce5fe0231d0f0b00eda6a59317dfd8b))
+* **up:** update proxy url when get head or remotes change ([e751e95](https://github.com/adobe/helix-cli/commit/e751e95b736d399d16134530d9adae2de3d7f8bd))
+
 ## [14.17.4](https://github.com/adobe/helix-cli/compare/v14.17.3...v14.17.4) (2022-12-13)
 
 
