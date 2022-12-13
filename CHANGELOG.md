@@ -1,3 +1,10 @@
+## [14.17.4](https://github.com/adobe/helix-cli/compare/v14.17.3...v14.17.4) (2022-12-13)
+
+
+### Bug Fixes
+
+* **proxy:** drop proxy-connection header ([642819c](https://github.com/adobe/helix-cli/commit/642819c523d8da97f7b681aed0b7c88b350fa518))
+
 ## [14.17.3](https://github.com/adobe/helix-cli/compare/v14.17.2...v14.17.3) (2022-11-29)
 
 
