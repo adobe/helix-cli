@@ -37,6 +37,14 @@ export function initGit(dir, remote, branch) {
   shell.cd(pwd);
 }
 
+export function switchBranch(dir, branch) {
+  const pwd = shell.pwd();
+  shell.cd(dir);
+  shell.exec(`git checkout -b ${branch}`);
+  shell.cd(pwd);
+  console.log(`switched to branch ${branch} in ${dir}`);
+}
+
 export function clearHelixEnv() {
   const deleted = {};
   Object.keys(process.env).filter((key) => key.startsWith('HLX_')).forEach((key) => {
