@@ -93,7 +93,8 @@ const utils = {
         newbody += `<script>
 window.LiveReloadOptions = { 
   host: new URL(location.href).hostname.replace(/-[0-9]+\\.preview\\.app\\.github\\.dev/, '-35729-preview.app.github.dev'), 
-  port: 443 
+  port: 443,
+  https: true,
 };
 </script>`;
       }
