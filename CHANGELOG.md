@@ -1,3 +1,11 @@
+## [14.18.2](https://github.com/adobe/helix-cli/compare/v14.18.1...v14.18.2) (2022-12-24)
+
+
+### Bug Fixes
+
+* **deps:** update dependency ignore to v5.2.4 ([#2109](https://github.com/adobe/helix-cli/issues/2109)) ([554d521](https://github.com/adobe/helix-cli/commit/554d521d9cb0de9b98c5fe7c01b0a778a0903559))
+* **deps:** update external fixes ([a40f38a](https://github.com/adobe/helix-cli/commit/a40f38a0314f74a57159a2dcf351b3918247befb))
+
 ## [14.18.1](https://github.com/adobe/helix-cli/compare/v14.18.0...v14.18.1) (2022-12-13)
 
 
