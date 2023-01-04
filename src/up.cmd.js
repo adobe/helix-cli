@@ -162,9 +162,10 @@ export default class UpCommand extends AbstractCommand {
     if (this._url.split('.')
       .map((part) => part.replace(/^https:\/\//, ''))
       .some((part) => part.length > 63)) {
-      this.log.error(chalk`{red Error:} URL {yellow ${this._url}} exceeds the 63 character limit for DNS labels.`);
-      this.log.error(chalk`{red Error:} Please use a shorter branch name or a shorter repository name.`);
+      this.log.error(chalk`URL {yellow ${this._url}} exceeds the 63 character limit for DNS labels.`);
+      this.log.error(chalk`Please use a shorter branch name or a shorter repository name.`);
       this._project.stop();
+      throw Error('branch name too long');
     }
   }
 
