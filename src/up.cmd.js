@@ -158,6 +158,14 @@ export default class UpCommand extends AbstractCommand {
     // replace `/` by `-` in ref.
     ref = ref.replace(/\//g, '-');
     this._url = `https://${ref}--${gitUrl.repo}--${gitUrl.owner}.hlx.page`;
+    // check length limit
+    if (this._url.split('.')
+      .map((part) => part.replace(/^https:\/\//, ''))
+      .some((part) => part.length > 63)) {
+      this.log.error(chalk`{red Error:} URL {yellow ${this._url}} exceeds the 63 character limit for DNS labels.`);
+      this.log.error(chalk`{red Error:} Please use a shorter branch name or a shorter repository name.`);
+      this._project.stop();
+    }
   }
 
   /**
