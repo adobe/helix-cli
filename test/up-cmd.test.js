@@ -236,6 +236,57 @@ describe('Integration test for up command with helix pages', function suite() {
       .run()
       .catch(done);
   });
+
+  it('up command stops when git branch changes to something too long', (done) => {
+    initGit(testDir, 'https://github.com/adobe/dummy-foo.git');
+    const cmd = new UpCommand()
+      .withLiveReload(false)
+      .withDirectory(testDir)
+      .withOpen(false)
+      .withHttpPort(0);
+
+    nock('https://main--dummy-foo--adobe.hlx.page')
+      .get('/index.html')
+      .reply(200, '## Welcome')
+      .get('/not-found.txt')
+      .reply(404)
+      .get('/head.html')
+      .reply(200, '<link rel="stylesheet" href="/styles.css"/>');
+
+    nock('https://raw.githubusercontent.com')
+      .get('/adobe/dummy-foo/master/fstab.yaml')
+      .reply(404, 'dummy');
+
+    nock('https://raw.githubusercontent.com')
+      .get('/adobe/dummy-foo/new-and-totally-unreasonably-long-in-fact-too-long-branch/fstab.yaml')
+      .reply(200, 'yep!');
+
+    cmd
+      .on('started', async () => {
+        try {
+          let ret = await assertHttp(`http://localhost:${cmd.project.server.port}/index.html`, 200);
+          assert.strictEqual(ret.trim(), '## Welcome');
+          ret = await assertHttp(`http://localhost:${cmd.project.server.port}/local.txt`, 200);
+          assert.strictEqual(ret.trim(), 'Hello, world.');
+          await assertHttp(`http://localhost:${cmd.project.server.port}/not-found.txt`, 404);
+          // now switch to a new branch
+          switchBranch(testDir, 'new-and-totally-unreasonably-long-in-fact-too-long-branch');
+          // wait 5 seconds for the git branch to be detected
+          await new Promise((resolve) => {
+            setTimeout(resolve, 5000);
+          });
+          assert.ok(!cmd.project.started, 'project should have stopped');
+          done();
+        } catch (e) {
+          await done(e);
+        }
+      })
+      .on('stopped', () => {
+        done();
+      })
+      .run()
+      .catch(done);
+  });
 });
 
 describe('Integration test for up command with cache', function suite() {
