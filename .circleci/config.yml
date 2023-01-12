@@ -1,8 +1,8 @@
 version: 2.1
 executors:
-  node16:
+  node18:
     docker:
-      - image: cimg/node:16.16
+      - image: cimg/node:18.2
 
 orbs:
   win: circleci/windows@5.0.0
@@ -67,7 +67,7 @@ jobs:
           path: junit
 
   build:
-    executor: node16
+    executor: node18
     working_directory: ~/repo
     steps:
       - setup
