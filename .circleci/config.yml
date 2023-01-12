@@ -28,7 +28,7 @@ commands:
 
 jobs:
   build_win:
-    executor: node18
+    executor: win/default
     steps:
       - run: git config --global core.autocrlf false
       - run:
