@@ -28,14 +28,17 @@ const require = createRequire(import.meta.url);
 describe('Helix Server with Livereload', () => {
   let testRoot;
   let nock;
+  let CODESPACES_ORIGINAL;
 
   beforeEach(async () => {
     nock = new Nock();
     nock.enableNetConnect(/localhost/);
     testRoot = await createTestRoot();
+    CODESPACES_ORIGINAL = process.env.CODESPACES;
   });
 
   afterEach(async () => {
+    process.env.CODESPACES = CODESPACES_ORIGINAL;
     if (os.platform() === 'win32') {
       // Note: the async variant of remove hangs on windows, probably due to open filehandle to
       // logs/request.log
@@ -108,6 +111,33 @@ describe('Helix Server with Livereload', () => {
     try {
       await project.start();
       await assertHttp(`http://localhost:${project.server.port}/live/index.html`, 200, 'expected_index_w_lr_nohead.html');
+    } finally {
+      await project.stop();
+    }
+  });
+
+  it('deliver rendered resource with live reload injected in body for codespaces', async () => {
+    process.env.CODESPACES = 'true';
+    const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
+    const project = new HelixProject()
+      .withCwd(cwd)
+      .withHttpPort(0)
+      .withLiveReload(true)
+      .withProxyUrl('http://main--foo--bar.hlx.page');
+    await project.init();
+
+    nock('http://main--foo--bar.hlx.page')
+      .get('/live/index.html')
+      .optionally(true)
+      .reply(200, '<html><body>Hello, world. path=/index.md, strain=default</body></html>', {
+        'content-type': 'text/html',
+      })
+      .get('/head.html')
+      .reply(200, '<link rel="stylesheet" href="/styles.css"/>');
+
+    try {
+      await project.start();
+      await assertHttp(`http://localhost:${project.server.port}/live/index.html`, 200, 'expected_index_w_lr_nohead_codespaces.html');
     } finally {
       await project.stop();
     }

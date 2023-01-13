@@ -88,7 +88,19 @@ const utils = {
     if (match) {
       const { index } = match;
       // eslint-disable-next-line no-param-reassign
-      body = `${body.substring(0, index)}<script src="/__internal__/livereload.js"></script>${body.substring(index)}`;
+      let newbody = body.substring(0, index);
+      if (process.env.CODESPACES === 'true') {
+        newbody += `<script>
+window.LiveReloadOptions = { 
+  host: new URL(location.href).hostname.replace(/-[0-9]+\\.preview\\.app\\.github\\.dev/, '-35729.preview.app.github.dev'), 
+  port: 443,
+  https: true,
+};
+</script>`;
+      }
+      newbody += '<script src="/__internal__/livereload.js"></script>';
+      newbody += body.substring(index);
+      return newbody;
     }
     return body;
   },
