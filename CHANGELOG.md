@@ -1,3 +1,16 @@
+# [14.19.0](https://github.com/adobe/helix-cli/compare/v14.18.4...v14.19.0) (2023-01-13)
+
+
+### Bug Fixes
+
+* **deps:** update adobe fixes ([e4be83b](https://github.com/adobe/helix-cli/commit/e4be83b2c47ed2a496d6b5e10a3459527e1f467a))
+
+
+### Features
+
+* **livereload:** add compatibility with codespaces ([#2107](https://github.com/adobe/helix-cli/issues/2107)) ([79d4dfa](https://github.com/adobe/helix-cli/commit/79d4dfa46eeaedf077bd36fbec09d63d9800ef47))
+* **up:** check branch name length and exit server if it exceeds the maximum ([82f4274](https://github.com/adobe/helix-cli/commit/82f427461b275a6510536c59b8d57b81addc883a)), closes [#2096](https://github.com/adobe/helix-cli/issues/2096)
+
 ## [14.18.4](https://github.com/adobe/helix-cli/compare/v14.18.3...v14.18.4) (2023-01-07)
 
 
