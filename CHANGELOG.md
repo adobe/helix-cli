@@ -1,3 +1,10 @@
+## [14.19.1](https://github.com/adobe/helix-cli/compare/v14.19.0...v14.19.1) (2023-01-15)
+
+
+### Bug Fixes
+
+* **deps:** update dependency glob to v8.1.0 ([e1a4e70](https://github.com/adobe/helix-cli/commit/e1a4e7088048f730a090a64dffb73f0781ef721e))
+
 # [14.19.0](https://github.com/adobe/helix-cli/compare/v14.18.4...v14.19.0) (2023-01-13)
 
 
