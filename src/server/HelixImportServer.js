@@ -150,7 +150,8 @@ export default class HelixServer extends EventEmitter {
     const respHeaders = ret.headers.plain();
     delete respHeaders['content-encoding'];
     delete respHeaders['content-length'];
-    // remove security headers
+
+    // remove security "constraints"
     delete respHeaders['x-frame-options'];
     delete respHeaders['content-security-policy'];
     respHeaders['access-control-allow-origin'] = '*';
