@@ -1,3 +1,10 @@
+# [14.20.0](https://github.com/adobe/helix-cli/compare/v14.19.1...v14.20.0) (2023-01-19)
+
+
+### Features
+
+* **import:** remove security headers ([#2121](https://github.com/adobe/helix-cli/issues/2121)) ([ff539e4](https://github.com/adobe/helix-cli/commit/ff539e4a2ae6bce612f1d1e5711e55eebf86cfcc))
+
 ## [14.19.1](https://github.com/adobe/helix-cli/compare/v14.19.0...v14.19.1) (2023-01-15)
 
 
