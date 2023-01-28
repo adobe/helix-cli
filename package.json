@@ -52,7 +52,7 @@
     "fs-extra": "11.1.0",
     "glob": "8.1.0",
     "glob-to-regexp": "0.4.1",
-    "hast-util-select": "5.0.4",
+    "hast-util-select": "5.0.5",
     "ignore": "5.2.4",
     "ini": "3.0.1",
     "isomorphic-git": "1.21.0",
