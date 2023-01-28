@@ -1,3 +1,11 @@
+## [14.20.1](https://github.com/adobe/helix-cli/compare/v14.20.0...v14.20.1) (2023-01-28)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @adobe/fetch to v3.6.0 ([5a22367](https://github.com/adobe/helix-cli/commit/5a22367b238233ca548ec7e6adafd43e4552e39e))
+* **deps:** update dependency hast-util-select to v5.0.5 ([e2a8c63](https://github.com/adobe/helix-cli/commit/e2a8c63a680d6aaf6e4a38ee76e9105e9ae35403))
+
 # [14.20.0](https://github.com/adobe/helix-cli/compare/v14.19.1...v14.20.0) (2023-01-19)
 
 
