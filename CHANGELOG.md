@@ -1,3 +1,10 @@
+## [14.20.2](https://github.com/adobe/helix-cli/compare/v14.20.1...v14.20.2) (2023-02-01)
+
+
+### Bug Fixes
+
+* **deps:** update adobe major ([#2125](https://github.com/adobe/helix-cli/issues/2125)) ([af4823d](https://github.com/adobe/helix-cli/commit/af4823d44742222c80939d1e51d2954c47dc0201))
+
 ## [14.20.1](https://github.com/adobe/helix-cli/compare/v14.20.0...v14.20.1) (2023-01-28)
 
 
