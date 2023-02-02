@@ -51,6 +51,18 @@ export default function up() {
           type: 'int',
           default: 3000,
         })
+        .option('tls-cert', {
+          alias: 'tlsCert',
+          describe: 'File location for your .pem file for local TLS support',
+          type: 'string',
+          default: undefined,
+        })
+        .option('tls-key', {
+          alias: 'tlsKey',
+          describe: 'File location for your .key file for local TLS support',
+          type: 'string',
+          default: undefined,
+        })
         .option('stop-other', {
           alias: 'stopOther',
           describe: 'Stop other Franklin CLI running on the above port',
@@ -84,8 +96,10 @@ export default function up() {
         const UpCommand = (await import('./up.cmd.js')).default; // lazy load the handler to speed up execution time
         executor = new UpCommand(getOrCreateLogger(argv));
       }
+
       await executor
         .withHttpPort(argv.port)
+        .withTLS(argv.tlsKey, argv.tlsCert)
         // only open  browser window when executable is `hlx`
         // this prevents the window to be opened during integration tests
         .withOpen(path.basename(argv.$0) === 'hlx' ? argv.open : false)

@@ -158,7 +158,7 @@ export default class LiveReload extends EventEmitter {
     }
   }
 
-  init(app, httpServer) {
+  async init(app, httpServer) {
     this._server = httpServer;
     app.get('/__internal__/livereload.js', this._serveLiveReload.bind(this));
     httpServer.on('upgrade', this._onSvrUpgrade.bind(this));

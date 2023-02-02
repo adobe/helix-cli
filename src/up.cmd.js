@@ -9,6 +9,7 @@
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
+import fs from 'fs';
 import path from 'path';
 import fse from 'fs-extra';
 import opn from 'open';
@@ -24,6 +25,9 @@ export default class UpCommand extends AbstractCommand {
   constructor(logger) {
     super(logger);
     this._httpPort = -1;
+    this._tls = false;
+    this._tlsCertPath = undefined;
+    this._tlsKeyPath = undefined;
     this._open = '/';
     this._liveReload = false;
     this._url = null;
@@ -33,6 +37,13 @@ export default class UpCommand extends AbstractCommand {
 
   withHttpPort(p) {
     this._httpPort = p;
+    return this;
+  }
+
+  withTLS(tlsKeyPath, tlsCertPath) {
+    this._tls = true;
+    this._tlsKeyPath = tlsKeyPath;
+    this._tlsCertPath = tlsCertPath;
     return this;
   }
 
@@ -126,6 +137,28 @@ export default class UpCommand extends AbstractCommand {
       this._project.withCacheDirectory(this._cache);
     }
 
+    if (this._tls) {
+      if (
+        !this._tlsCertPath
+        || !this._tlsKeyPath
+      ) {
+        throw Error(chalk`{redIf using TLS, you must provide both tls cert and tls key...one or both not found`);
+      }
+
+      // this.log.info(chalk`{yellow TLS Enabled...Automatically Switching port to 443`);
+      // this._httpPort = 443;
+
+      // read each file
+      try {
+        const key = fs.readFileSync(this._tlsKeyPath);
+        const cert = fs.readFileSync(this._tlsCertPath);
+
+        this._project.withTLS(key, cert);
+      } catch (e) {
+        throw Error(chalk`{redUnable to read the tls key key or cert file.`);
+      }
+    }
+
     this._project.withProxyUrl(this._url);
     if (this._httpPort >= 0) {
       this._project.withHttpPort(this._httpPort);
@@ -208,7 +241,7 @@ export default class UpCommand extends AbstractCommand {
     this.emit('started', this);
     if (this._open) {
       const url = this._open.startsWith('/')
-        ? `http://localhost:${this._project.server.port}${this._open}`
+        ? `${this._tls ? 'https' : 'http'}://localhost:${this._project.server.port}${this._open}`
         : this._open;
       opn(url, { url: true });
     }

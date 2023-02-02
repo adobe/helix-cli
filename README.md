@@ -33,6 +33,8 @@ Options:
   --log-level, --logLevel  Log level
         [string] [choices: "silly", "debug", "verbose", "info", "warn", "error"]
                                                                [default: "info"]
+  --tls-key, --tlsKey      Path to .key file (for enabling TLS)        [string]
+  --tls-cert, --tlsCert    Path to .pem file (for enabling TLS)        [string]
   --help                   Show help                                   [boolean]
 
 use <command> --help to get command specific details.
@@ -82,6 +84,8 @@ HLX_PAGES_URL=https://stage.myproject.com
 | `--no-livereload` | `HLX_NO_LIVERELOAD` | `false` | Disable live-reload. |
 | `--open` | `HLX_OPEN` | `/` | Open a browser window at specified path after server start. |
 | `--no-open` | `HLX_NO_OPEN` | `false` | Disable automatic opening of browser window. |
+| `--tls-key` | -- | undefined | Path to .key file (for enabling TLS) |
+| `--tls-cert` | -- | undefined | Path to .pem file (for enabling TLS) |
 
 # Developing Helix CLI
 

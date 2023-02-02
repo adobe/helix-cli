@@ -76,7 +76,7 @@ const utils = {
    * @param {string} body the html body
    * @returns {string} the modified body
    */
-  injectLiveReloadScript(body) {
+  injectLiveReloadScript(body, port) {
     let match = body.match(/<\/head>/i);
     if (!match) {
       match = body.match(/<\/body>/i);
@@ -95,6 +95,14 @@ window.LiveReloadOptions = {
   host: new URL(location.href).hostname.replace(/-[0-9]+\\.preview\\.app\\.github\\.dev/, '-35729.preview.app.github.dev'), 
   port: 443,
   https: true,
+};
+</script>`;
+      } else {
+        newbody += `<script>
+window.LiveReloadOptions = { 
+  host: location.hostname, 
+  port: Number(${port}),
+  https: location.protocol,
 };
 </script>`;
       }
@@ -263,7 +271,7 @@ window.LiveReloadOptions = {
     ctx.log[level](`Proxy ${req.method} request to ${url}: ${ret.status} (${contentType})`);
 
     const isHTML = ret.status === 200 && contentType.indexOf('text/html') === 0;
-    const injectLR = isHTML && opts.injectLiveReload;
+    const livereload = isHTML && opts.injectLiveReload;
     const replaceHead = isHTML && opts.headHtml && opts.headHtml.isModified;
     const doIndex = isHTML && opts.indexer && url.indexOf('.plain.html') < 0;
 
@@ -306,8 +314,9 @@ window.LiveReloadOptions = {
       if (replaceHead) {
         textBody = await opts.headHtml.replace(textBody);
       }
-      if (injectLR) {
-        textBody = utils.injectLiveReloadScript(textBody);
+      if (livereload) {
+        // eslint-disable-next-line no-underscore-dangle
+        textBody = utils.injectLiveReloadScript(textBody, livereload._server?.address().port);
       }
       textBody = utils.injectMeta(textBody, {
         'hlx:proxyUrl': url,
