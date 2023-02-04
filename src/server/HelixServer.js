@@ -162,6 +162,7 @@ export default class HelixServer extends EventEmitter {
     });
     await this._project.initLiveReload(this._app, this._server);
     await this._project.initHeadHtml();
+    await this._project.initWatches();
     await this.setupApp();
   }
 

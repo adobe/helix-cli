@@ -12,9 +12,11 @@
 // eslint-disable-next-line max-classes-per-file
 import fs from 'fs';
 import chokidar from 'chokidar';
+import minimatch from 'minimatch';
 import WebSocket from 'faye-websocket';
 import { EventEmitter } from 'events';
 import { createRequire } from 'module';
+import { execSync } from 'child_process';
 
 const require = createRequire(import.meta.url);
 
@@ -119,6 +121,8 @@ export default class LiveReload extends EventEmitter {
     // client connections
     this._connections = {};
     this._liveReloadJSPath = require.resolve('livereload-js/dist/livereload.js');
+
+    this._watchCommandsMap = new Map();
   }
 
   get log() {
@@ -147,6 +151,13 @@ export default class LiveReload extends EventEmitter {
     files.forEach((file) => {
       this._fileMapping.set(file, pathName);
     });
+  }
+
+  registerWatches(watchCommandsMap) {
+    this._watchCommandsMap = watchCommandsMap;
+    for (const glob of watchCommandsMap.keys()) {
+      this._watcher.add(glob);
+    }
   }
 
   registerFile(requestId, filePath) {
@@ -236,7 +247,17 @@ export default class LiveReload extends EventEmitter {
 
   async changed(files) {
     this.log.debug(`changed files: ${files}`);
-
+    files.forEach((file) => {
+      for (const glob of this._watchCommandsMap.keys()) {
+        if (minimatch(file, glob)) {
+          this._watchCommandsMap.get(glob).forEach((command) => {
+            this.log.debug(`[Glob-Watcher]Executing ${command} as ${file} changed and matched watched glob ${glob}`);
+            const execResult = execSync(command, { encoding: 'utf8' });
+            this.log.debug(`[Glob-Watcher]Execution result: ${execResult}`);
+          });
+        }
+      }
+    });
     // map each file to the registered source
     const sources = new Set();
     files.forEach((file) => {

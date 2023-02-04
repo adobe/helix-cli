@@ -57,6 +57,7 @@
     "ini": "3.0.1",
     "isomorphic-git": "1.21.0",
     "livereload-js": "3.4.1",
+    "minimatch": "^6.1.6",
     "open": "8.4.0",
     "progress": "2.0.3",
     "rehype-parse": "8.0.4",
