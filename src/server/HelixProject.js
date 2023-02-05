@@ -172,23 +172,26 @@ export default class HelixProject {
   }
 
   async initWatches() {
-    const pkg = fs.readFileSync(path.resolve(this.directory, 'package.json'));
-    const pkgObj = JSON.parse(pkg);
-    const { watches } = pkgObj;
-    if (watches !== undefined) {
-      this.log.debug(`[Glob-Watcher]Registering watches: ${JSON.stringify(watches, null, 2)}`);
-      const watchMap = new Map();
-      watches.forEach((watch) => {
-        if (watch.globs !== undefined && watch.command !== undefined) {
-          watch.globs.forEach((glob) => {
-            if (watchMap.get(glob) === undefined) {
-              watchMap.set(glob, []);
-            }
-            watchMap.get(glob).push(watch.command);
-          });
-        }
-      });
-      this.liveReload.registerWatches(watchMap);
+    const pkgFile = path.resolve(this.directory, 'package.json');
+    if (fs.existsSync(pkgFile)) {
+      const pkg = fs.readFileSync(pkgFile);
+      const pkgObj = JSON.parse(pkg);
+      const { watches } = pkgObj;
+      if (watches !== undefined) {
+        this.log.debug(`[Glob-Watcher]Registering watches: ${JSON.stringify(watches, null, 2)}`);
+        const watchMap = new Map();
+        watches.forEach((watch) => {
+          if (watch.globs !== undefined && watch.command !== undefined) {
+            watch.globs.forEach((glob) => {
+              if (watchMap.get(glob) === undefined) {
+                watchMap.set(glob, []);
+              }
+              watchMap.get(glob).push(watch.command);
+            });
+          }
+        });
+        this.liveReload.registerWatches(watchMap);
+      }
     }
   }
 
