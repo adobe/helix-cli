@@ -142,7 +142,7 @@ export default class UpCommand extends AbstractCommand {
         !this._tlsCertPath
         || !this._tlsKeyPath
       ) {
-        throw Error(chalk`{redIf using TLS, you must provide both tls cert and tls key...one or both not found`);
+        throw Error(chalk`{red If using TLS, you must provide both tls cert and tls key...one or both not found }`);
       }
 
       // this.log.info(chalk`{yellow TLS Enabled...Automatically Switching port to 443`);
@@ -155,7 +155,7 @@ export default class UpCommand extends AbstractCommand {
 
         this._project.withTLS(key, cert);
       } catch (e) {
-        throw Error(chalk`{redUnable to read the tls key key or cert file.`);
+        throw Error(chalk`{red Unable to read the tls key key or cert file. }`);
       }
     }
 
