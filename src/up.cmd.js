@@ -9,7 +9,7 @@
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-import fs from 'fs';
+import fs from 'fs/promises';
 import path from 'path';
 import fse from 'fs-extra';
 import opn from 'open';
@@ -150,8 +150,8 @@ export default class UpCommand extends AbstractCommand {
 
       // read each file
       try {
-        const key = fs.readFileSync(this._tlsKeyPath);
-        const cert = fs.readFileSync(this._tlsCertPath);
+        const key = await fs.readFile(this._tlsKeyPath);
+        const cert = await fs.readFile(this._tlsCertPath);
 
         this._project.withTLS(key, cert);
       } catch (e) {
