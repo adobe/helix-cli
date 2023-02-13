@@ -101,7 +101,7 @@ window.LiveReloadOptions = {
         newbody += `<script>
 window.LiveReloadOptions = { 
   host: location.hostname, 
-  port: Number(${port}),
+  port: ${Number(port)},
   https: location.protocol,
 };
 </script>`;
