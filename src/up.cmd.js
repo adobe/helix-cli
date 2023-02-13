@@ -28,6 +28,7 @@ export default class UpCommand extends AbstractCommand {
     this._tls = false;
     this._tlsCertPath = undefined;
     this._tlsKeyPath = undefined;
+    this._scheme = 'http';
     this._open = '/';
     this._liveReload = false;
     this._url = null;
@@ -144,16 +145,13 @@ export default class UpCommand extends AbstractCommand {
       ) {
         throw Error(chalk`{red If using TLS, you must provide both tls cert and tls key...one or both not found }`);
       }
-
-      // this.log.info(chalk`{yellow TLS Enabled...Automatically Switching port to 443`);
-      // this._httpPort = 443;
-
       // read each file
       try {
         const key = await fs.readFile(this._tlsKeyPath);
         const cert = await fs.readFile(this._tlsCertPath);
-
         this._project.withTLS(key, cert);
+        // if all of that works, switch to https scheme
+        this._scheme = 'https';
       } catch (e) {
         throw Error(chalk`{red Unable to read the tls key key or cert file. }`);
       }
@@ -241,7 +239,7 @@ export default class UpCommand extends AbstractCommand {
     this.emit('started', this);
     if (this._open) {
       const url = this._open.startsWith('/')
-        ? `${this._tls ? 'https' : 'http'}://localhost:${this._project.server.port}${this._open}`
+        ? `${this._scheme}://localhost:${this._project.server.port}${this._open}`
         : this._open;
       opn(url, { url: true });
     }
