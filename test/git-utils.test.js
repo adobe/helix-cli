@@ -80,28 +80,30 @@ describe('Testing GitUtils', () => {
   });
 
   // windows has somehow problems with adding file:// submodules. so we skip for now.
-  condit('isDirty #unit with submodules', isNotWindows, async () => {
-    // https://github.com/adobe/helix-cli/issues/614
-    const moduleRoot = await createTestRoot();
-
-    await fse.writeFile(path.resolve(moduleRoot, 'README.md'), 'Hello\n', 'utf-8');
-    const currentPwd = shell.pwd();
-    shell.cd(moduleRoot);
-    shell.exec('git init');
-    shell.exec('git checkout -b master');
-    shell.exec('git add -A');
-    shell.exec('git commit -m"initial commit."');
-    shell.cd(currentPwd);
-
-    assert.equal(await GitUtils.isDirty(testRoot, GIT_USER_HOME), false);
-    shell.exec(`git submodule add file://${moduleRoot}`);
-    assert.equal(await GitUtils.isDirty(testRoot, GIT_USER_HOME), true);
-    shell.exec('git add -A');
-    shell.exec('git commit -m "added submodule"');
-    assert.equal(await GitUtils.isDirty(testRoot, GIT_USER_HOME), false);
-
-    await fse.remove(moduleRoot);
-  }).timeout(5000);
+  // we skip this test, as using the file:// protocol is a security risk and would need to
+  // be enabled via 'git config --global protocol.file.allow always'.
+  // condit('isDirty #unit with submodules', isNotWindows, async () => {
+  //   // https://github.com/adobe/helix-cli/issues/614
+  //   const moduleRoot = await createTestRoot();
+  //
+  //   await fse.writeFile(path.resolve(moduleRoot, 'README.md'), 'Hello\n', 'utf-8');
+  //   const currentPwd = shell.pwd();
+  //   shell.cd(moduleRoot);
+  //   shell.exec('git init');
+  //   shell.exec('git checkout -b master');
+  //   shell.exec('git add -A');
+  //   shell.exec('git commit -m"initial commit."');
+  //   shell.cd(currentPwd);
+  //
+  //   assert.equal(await GitUtils.isDirty(testRoot, GIT_USER_HOME), false);
+  //   shell.exec(`git submodule add file://${moduleRoot}`);
+  //   assert.equal(await GitUtils.isDirty(testRoot, GIT_USER_HOME), true);
+  //   shell.exec('git add -A');
+  //   shell.exec('git commit -m "added submodule"');
+  //   assert.equal(await GitUtils.isDirty(testRoot, GIT_USER_HOME), false);
+  //
+  //   await fse.remove(moduleRoot);
+  // }).timeout(5000);
 
   it('isDirty #unit with new file', async () => {
     assert.equal(await GitUtils.isDirty(testRoot, GIT_USER_HOME), false);

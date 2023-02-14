@@ -61,6 +61,7 @@ export default class Indexer {
   async close() {
     if (this._watcher) {
       await this._watcher.close();
+      delete this._watcher;
     }
   }
 

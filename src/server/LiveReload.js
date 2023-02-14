@@ -185,11 +185,14 @@ export default class LiveReload extends EventEmitter {
       // debounce a bit in case several files are changed at once
       timer = setTimeout(async () => {
         timer = null;
-        const files = Object.keys(modifiedFiles);
-        modifiedFiles = {};
+        // only proceed if watcher not closed.
+        if (this._watcher) {
+          const files = Object.keys(modifiedFiles);
+          modifiedFiles = {};
 
-        // inform clients
-        await this.changed(files);
+          // inform clients
+          await this.changed(files);
+        }
       }, 100);
     });
   }
@@ -197,7 +200,7 @@ export default class LiveReload extends EventEmitter {
   async stop() {
     if (this._watcher) {
       await this._watcher.close();
-      this._watcher = null;
+      delete this._watcher;
     }
     this._onSvrClose();
   }
