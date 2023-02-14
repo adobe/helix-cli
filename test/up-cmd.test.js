@@ -261,27 +261,24 @@ describe('Integration test for up command with helix pages', function suite() {
       .get('/adobe/dummy-foo/new-and-totally-unreasonably-long-in-fact-too-long-branch/fstab.yaml')
       .reply(200, 'yep!');
 
+    let timer;
     cmd
       .on('started', async () => {
-        try {
-          let ret = await assertHttp(`http://localhost:${cmd.project.server.port}/index.html`, 200);
-          assert.strictEqual(ret.trim(), '## Welcome');
-          ret = await assertHttp(`http://localhost:${cmd.project.server.port}/local.txt`, 200);
-          assert.strictEqual(ret.trim(), 'Hello, world.');
-          await assertHttp(`http://localhost:${cmd.project.server.port}/not-found.txt`, 404);
-          // now switch to a new branch
-          switchBranch(testDir, 'new-and-totally-unreasonably-long-in-fact-too-long-branch');
-          // wait 5 seconds for the git branch to be detected
-          await new Promise((resolve) => {
-            setTimeout(resolve, 5000);
-          });
-          assert.ok(!cmd.project.started, 'project should have stopped');
-          done();
-        } catch (e) {
-          await done(e);
-        }
+        let ret = await assertHttp(`http://localhost:${cmd.project.server.port}/index.html`, 200);
+        assert.strictEqual(ret.trim(), '## Welcome');
+        ret = await assertHttp(`http://localhost:${cmd.project.server.port}/local.txt`, 200);
+        assert.strictEqual(ret.trim(), 'Hello, world.');
+        await assertHttp(`http://localhost:${cmd.project.server.port}/not-found.txt`, 404);
+        // now switch to a new branch
+        switchBranch(testDir, 'new-and-totally-unreasonably-long-in-fact-too-long-branch');
+        // wait 5 seconds for the git branch to be detected
+        await new Promise((resolve) => {
+          timer = setTimeout(resolve, 5000);
+        });
+        assert.ok(!cmd.project.started, 'project should have stopped');
       })
       .on('stopped', () => {
+        clearTimeout(timer);
         done();
       })
       .run()

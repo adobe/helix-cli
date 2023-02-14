@@ -79,6 +79,10 @@ export default class UpCommand extends AbstractCommand {
       }
       this._project = null;
     }
+    if (this._watcher) {
+      await this._watcher.close();
+      delete this._watcher;
+    }
     this.log.info('Franklin project stopped.');
     this.emit('stopped', this);
   }
@@ -164,7 +168,7 @@ export default class UpCommand extends AbstractCommand {
       .some((part) => part.length > 63)) {
       this.log.error(chalk`URL {yellow ${this._url}} exceeds the 63 character limit for DNS labels.`);
       this.log.error(chalk`Please use a shorter branch name or a shorter repository name.`);
-      this._project.stop();
+      await this.stop();
       throw Error('branch name too long');
     }
   }
@@ -188,15 +192,22 @@ export default class UpCommand extends AbstractCommand {
         // debounce a bit in case several files are changed at once
         timer = setTimeout(async () => {
           timer = null;
-
-          // restart if any of the files is not ignored
-          this.log.info('git HEAD or remotes changed, reconfiguring server...');
-          const ref = await GitUtils.getBranch(this.directory);
-          const gitUrl = await GitUtils.getOriginURL(this.directory, { ref });
-          await this.verifyUrl(gitUrl, ref);
-          this._project.withProxyUrl(this._url);
-          this._project.initHeadHtml();
-          this.log.info(`Updated proxy to ${this._url}`);
+          if (!this._watcher) {
+            // watcher was closed in the meantime
+            return;
+          }
+          try {
+            // restart if any of the files is not ignored
+            this.log.info('git HEAD or remotes changed, reconfiguring server...');
+            const ref = await GitUtils.getBranch(this.directory);
+            const gitUrl = await GitUtils.getOriginURL(this.directory, { ref });
+            await this.verifyUrl(gitUrl, ref);
+            this._project.withProxyUrl(this._url);
+            this._project.initHeadHtml();
+            this.log.info(`Updated proxy to ${this._url}`);
+          } catch {
+            // ignore
+          }
         }, 100);
       }
     });
