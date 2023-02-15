@@ -36,6 +36,7 @@ describe('hlx up', () => {
     deleted = clearHelixEnv();
     mockUp = sinon.createStubInstance(UpCommand);
     mockUp.withOpen.returnsThis();
+    mockUp.withTLS.returnsThis();
     mockUp.withLiveReload.returnsThis();
     mockUp.withHttpPort.returnsThis();
     mockUp.withUrl.returnsThis();

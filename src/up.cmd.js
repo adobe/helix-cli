@@ -42,9 +42,11 @@ export default class UpCommand extends AbstractCommand {
   }
 
   withTLS(tlsKeyPath, tlsCertPath) {
-    this._tls = true;
-    this._tlsKeyPath = tlsKeyPath;
-    this._tlsCertPath = tlsCertPath;
+    if (tlsKeyPath && tlsCertPath) {
+      this._tls = true;
+      this._tlsKeyPath = tlsKeyPath;
+      this._tlsCertPath = tlsCertPath;
+    }
     return this;
   }
 

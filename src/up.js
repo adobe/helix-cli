@@ -99,10 +99,10 @@ export default function up() {
 
       await executor
         .withHttpPort(argv.port)
-        .withTLS(argv.tlsKey, argv.tlsCert)
         // only open  browser window when executable is `hlx`
         // this prevents the window to be opened during integration tests
         .withOpen(path.basename(argv.$0) === 'hlx' ? argv.open : false)
+        .withTLS(argv.tlsKey, argv.tlsCert)
         .withLiveReload(argv.livereload)
         .withUrl(argv.url)
         .withPrintIndex(argv.printIndex)

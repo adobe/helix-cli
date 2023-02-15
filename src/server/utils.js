@@ -76,7 +76,7 @@ const utils = {
    * @param {string} body the html body
    * @returns {string} the modified body
    */
-  injectLiveReloadScript(body, port) {
+  injectLiveReloadScript(body) {
     let match = body.match(/<\/head>/i);
     if (!match) {
       match = body.match(/<\/body>/i);
@@ -98,13 +98,7 @@ window.LiveReloadOptions = {
 };
 </script>`;
       } else {
-        newbody += `<script>
-window.LiveReloadOptions = { 
-  host: location.hostname, 
-  port: ${Number(port)},
-  https: location.protocol,
-};
-</script>`;
+        newbody += '<script>window.LiveReloadOptions={host:location.hostname,port:location.port||(location.protocol===\'https:\'?443:80),https:location.protocol};</script>';
       }
       newbody += '<script src="/__internal__/livereload.js"></script>';
       newbody += body.substring(index);
@@ -315,8 +309,7 @@ window.LiveReloadOptions = {
         textBody = await opts.headHtml.replace(textBody);
       }
       if (livereload) {
-        // eslint-disable-next-line no-underscore-dangle
-        textBody = utils.injectLiveReloadScript(textBody, livereload._server?.address().port);
+        textBody = utils.injectLiveReloadScript(textBody);
       }
       textBody = utils.injectMeta(textBody, {
         'hlx:proxyUrl': url,
