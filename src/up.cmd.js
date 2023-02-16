@@ -181,17 +181,7 @@ export default class UpCommand extends AbstractCommand {
 
   async verifyUrl(gitUrl, inref) {
     let ref = inref;
-    const resp = await fetch(`${gitUrl.raw}/fstab.yaml`);
-    await resp.buffer();
-    if (!resp.ok) {
-      const friendlyUrl = `https://github.com/${gitUrl.owner}/${gitUrl.repo}/tree/${ref}`;
-      if (ref === 'main') {
-        this.log.warn(chalk`Unable to verify {yellow main} branch on {blue ${friendlyUrl}} (${resp.status}). Maybe not pushed yet?`);
-      } else {
-        this.log.warn(chalk`Unable to verify {yellow ${ref}} branch on {blue ${friendlyUrl}} (${resp.status}). Fallback to {yellow main} branch.`);
-        ref = 'main';
-      }
-    }
+
     // replace `/` by `-` in ref.
     ref = ref.replace(/\//g, '-');
     this._url = `https://${ref}--${gitUrl.repo}--${gitUrl.owner}.hlx.page`;
@@ -203,6 +193,18 @@ export default class UpCommand extends AbstractCommand {
       this.log.error(chalk`Please use a shorter branch name or a shorter repository name.`);
       await this.stop();
       throw Error('branch name too long');
+    }
+
+    const fstabUrl = `${this._url}/fstab.yaml`;
+    const resp = await fetch(fstabUrl);
+    await resp.buffer();
+    if (!resp.ok) {
+      if (ref === 'main') {
+        this.log.warn(chalk`Unable to verify {yellow main} branch via {blue ${fstabUrl}} (${resp.status}). Maybe not pushed yet?`);
+      } else {
+        this.log.warn(chalk`Unable to verify {yellow ${ref}} branch on {blue ${fstabUrl}} (${resp.status}). Fallback to {yellow main} branch.`);
+        this._url = `https://main--${gitUrl.repo}--${gitUrl.owner}.hlx.page`;
+      }
     }
   }
 
@@ -236,8 +238,9 @@ export default class UpCommand extends AbstractCommand {
             const gitUrl = await GitUtils.getOriginURL(this.directory, { ref });
             await this.verifyUrl(gitUrl, ref);
             this._project.withProxyUrl(this._url);
-            this._project.initHeadHtml();
+            await this._project.initHeadHtml();
             this.log.info(`Updated proxy to ${this._url}`);
+            this.emit('changed', this);
           } catch {
             // ignore
           }

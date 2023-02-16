@@ -15,7 +15,7 @@ import assert from 'assert';
 import path from 'path';
 import fse from 'fs-extra';
 import {
-  Nock, assertHttp, createTestRoot, initGit, switchBranch,
+  Nock, assertHttp, createTestRoot, initGit, switchBranch, signal,
 } from './utils.js';
 import UpCommand from '../src/up.cmd.js';
 
@@ -55,16 +55,14 @@ describe('Integration test for up command with helix pages', function suite() {
     };
 
     nock('https://master--dummy-foo--adobe.hlx.page')
+      .get('/fstab.yaml')
+      .reply(200, 'dummy')
       .get('/index.html')
       .reply(200, '## Welcome')
       .get('/not-found.txt')
       .reply(404)
       .get('/head.html')
       .reply(200, '<link rel="stylesheet" href="/styles.css"/>');
-
-    nock('https://raw.githubusercontent.com')
-      .get('/adobe/dummy-foo/master/fstab.yaml')
-      .reply(200, 'dummy');
 
     cmd
       .on('started', async () => {
@@ -101,15 +99,14 @@ describe('Integration test for up command with helix pages', function suite() {
     };
 
     nock('https://tripod-test--dummy-foo--adobe.hlx.page')
+      .get('/fstab.yaml')
+      .reply(200, 'dummy')
       .get('/index.html')
       .reply(200, '## Welcome')
       .get('/not-found.txt')
       .reply(404)
       .get('/head.html')
       .reply(200, '<link rel="stylesheet" href="/styles.css"/>');
-    nock('https://raw.githubusercontent.com')
-      .get('/adobe/dummy-foo/tripod/test/fstab.yaml')
-      .reply(200, 'dummy');
 
     cmd
       .on('started', async () => {
@@ -153,8 +150,8 @@ describe('Integration test for up command with helix pages', function suite() {
       .get('/head.html')
       .reply(200, '<link rel="stylesheet" href="/styles.css"/>');
 
-    nock('https://raw.githubusercontent.com')
-      .get('/adobe/dummy-foo/master/fstab.yaml')
+    nock('https://master--dummy-foo--adobe.hlx.page')
+      .get('/fstab.yaml')
       .reply(404, 'dummy');
 
     cmd
@@ -199,18 +196,17 @@ describe('Integration test for up command with helix pages', function suite() {
       .get('/head.html')
       .reply(200, '<link rel="stylesheet" href="/styles.css"/>');
 
-    nock('https://raw.githubusercontent.com')
-      .get('/adobe/dummy-foo/master/fstab.yaml')
+    nock('https://master--dummy-foo--adobe.hlx.page')
+      .get('/fstab.yaml')
       .reply(404, 'dummy');
 
-    nock('https://raw.githubusercontent.com')
-      .get('/adobe/dummy-foo/new-branch/fstab.yaml')
-      .reply(200, 'yep!');
-
     nock('https://new-branch--dummy-foo--adobe.hlx.page')
+      .get('/fstab.yaml')
+      .reply(200, 'yep!')
       .get('/head.html')
       .reply(200, '## Welcome');
 
+    let timer;
     cmd
       .on('started', async () => {
         try {
@@ -222,9 +218,10 @@ describe('Integration test for up command with helix pages', function suite() {
           // now switch to a new branch
           switchBranch(testDir, 'new-branch');
           // wait 5 seconds for the git branch to be detected
-          await new Promise((resolve) => {
-            setTimeout(resolve, 5000);
-          });
+          timer = signal(5000);
+          await timer;
+          // eslint-disable-next-line no-underscore-dangle
+          assert.strictEqual(cmd._url, 'https://new-branch--dummy-foo--adobe.hlx.page');
           await myDone();
         } catch (e) {
           await myDone(e);
@@ -232,6 +229,9 @@ describe('Integration test for up command with helix pages', function suite() {
       })
       .on('stopped', () => {
         done(error);
+      })
+      .on('changed', () => {
+        timer?.cancel();
       })
       .run()
       .catch(done);
@@ -253,13 +253,9 @@ describe('Integration test for up command with helix pages', function suite() {
       .get('/head.html')
       .reply(200, '<link rel="stylesheet" href="/styles.css"/>');
 
-    nock('https://raw.githubusercontent.com')
-      .get('/adobe/dummy-foo/master/fstab.yaml')
+    nock('https://master--dummy-foo--adobe.hlx.page')
+      .get('/fstab.yaml')
       .reply(404, 'dummy');
-
-    nock('https://raw.githubusercontent.com')
-      .get('/adobe/dummy-foo/new-and-totally-unreasonably-long-in-fact-too-long-branch/fstab.yaml')
-      .reply(200, 'yep!');
 
     let timer;
     cmd
@@ -272,13 +268,12 @@ describe('Integration test for up command with helix pages', function suite() {
         // now switch to a new branch
         switchBranch(testDir, 'new-and-totally-unreasonably-long-in-fact-too-long-branch');
         // wait 5 seconds for the git branch to be detected
-        await new Promise((resolve) => {
-          timer = setTimeout(resolve, 5000);
-        });
+        timer = signal(5000);
+        await timer;
         assert.ok(!cmd.project.started, 'project should have stopped');
       })
       .on('stopped', () => {
-        clearTimeout(timer);
+        timer?.cancel();
         done();
       })
       .run()
@@ -326,6 +321,8 @@ describe('Integration test for up command with cache', function suite() {
       plain: 'Some plain content',
     };
     nock('https://master--dummy-foo--adobe.hlx.page')
+      .get('/fstab.yaml')
+      .reply(200, 'dummy')
       .get('/index.html')
       .reply(200, content.index)
       .get('/folder/page.html?foo=bar&baz=qux')
@@ -338,10 +335,6 @@ describe('Integration test for up command with cache', function suite() {
       .reply(200, content.plain, { 'Content-Type': 'text/html' })
       .get('/head.html')
       .reply(200, '<link rel="stylesheet" href="/styles.css"/>');
-
-    nock('https://raw.githubusercontent.com')
-      .get('/adobe/dummy-foo/master/fstab.yaml')
-      .reply(200, 'dummy');
 
     nock.enableNetConnect(/localhost/);
 

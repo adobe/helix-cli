@@ -157,3 +157,17 @@ export function Nock() {
 
   return nocker;
 }
+
+export function signal(timeout) {
+  let res;
+  let timer;
+  const p = new Promise((resolve) => {
+    timer = setTimeout(resolve, timeout);
+    res = resolve;
+  });
+  p.cancel = () => {
+    clearTimeout(timer);
+    res();
+  };
+  return p;
+}
