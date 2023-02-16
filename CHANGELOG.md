@@ -1,3 +1,10 @@
+## [14.21.1](https://github.com/adobe/helix-cli/compare/v14.21.0...v14.21.1) (2023-02-16)
+
+
+### Bug Fixes
+
+* improve branch check ([#2137](https://github.com/adobe/helix-cli/issues/2137)) ([0e33ec0](https://github.com/adobe/helix-cli/commit/0e33ec04ed6880122ae96e7a18d4dd9c3eb3a92e)), closes [#2133](https://github.com/adobe/helix-cli/issues/2133)
+
 # [14.21.0](https://github.com/adobe/helix-cli/compare/v14.20.6...v14.21.0) (2023-02-16)
 
 
