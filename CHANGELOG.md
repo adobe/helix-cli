@@ -1,3 +1,10 @@
+# [14.21.0](https://github.com/adobe/helix-cli/compare/v14.20.6...v14.21.0) (2023-02-16)
+
+
+### Features
+
+* **tls:** Support for TLS for ability to run a local https server ([cd565b7](https://github.com/adobe/helix-cli/commit/cd565b74694b6fe45989cb7a10e6687b468419b4)), closes [#1865](https://github.com/adobe/helix-cli/issues/1865)
+
 ## [14.20.6](https://github.com/adobe/helix-cli/compare/v14.20.5...v14.20.6) (2023-02-14)
 
 
