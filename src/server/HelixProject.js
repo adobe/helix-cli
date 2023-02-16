@@ -45,6 +45,11 @@ export default class HelixProject {
     return this;
   }
 
+  withTLS(key, cert) {
+    this._server.withTLS(key, cert);
+    return this;
+  }
+
   withLogger(logger) {
     this._logger = logger;
     return this;
@@ -141,9 +146,9 @@ export default class HelixProject {
     return this;
   }
 
-  initLiveReload(app, server) {
+  async initLiveReload(app, server) {
     if (this.liveReload) {
-      this.liveReload.init(app, server);
+      await this.liveReload.init(app, server);
     }
   }
 

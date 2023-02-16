@@ -9,6 +9,7 @@
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
+import fs from 'fs/promises';
 import path from 'path';
 import fse from 'fs-extra';
 import opn from 'open';
@@ -24,6 +25,10 @@ export default class UpCommand extends AbstractCommand {
   constructor(logger) {
     super(logger);
     this._httpPort = -1;
+    this._tls = false;
+    this._tlsCertPath = undefined;
+    this._tlsKeyPath = undefined;
+    this._scheme = 'http';
     this._open = '/';
     this._liveReload = false;
     this._url = null;
@@ -33,6 +38,15 @@ export default class UpCommand extends AbstractCommand {
 
   withHttpPort(p) {
     this._httpPort = p;
+    return this;
+  }
+
+  withTLS(tlsKeyPath, tlsCertPath) {
+    if (tlsKeyPath && tlsCertPath) {
+      this._tls = true;
+      this._tlsKeyPath = tlsKeyPath;
+      this._tlsCertPath = tlsCertPath;
+    }
     return this;
   }
 
@@ -130,6 +144,25 @@ export default class UpCommand extends AbstractCommand {
       this._project.withCacheDirectory(this._cache);
     }
 
+    if (this._tls) {
+      if (
+        !this._tlsCertPath
+        || !this._tlsKeyPath
+      ) {
+        throw Error(chalk`{red If using TLS, you must provide both tls cert and tls key...one or both not found }`);
+      }
+      // read each file
+      try {
+        const key = await fs.readFile(this._tlsKeyPath);
+        const cert = await fs.readFile(this._tlsCertPath);
+        this._project.withTLS(key, cert);
+        // if all of that works, switch to https scheme
+        this._scheme = 'https';
+      } catch (e) {
+        throw Error(chalk`{red Unable to read the tls key key or cert file. }`);
+      }
+    }
+
     this._project.withProxyUrl(this._url);
     if (this._httpPort >= 0) {
       this._project.withHttpPort(this._httpPort);
@@ -219,7 +252,7 @@ export default class UpCommand extends AbstractCommand {
     this.emit('started', this);
     if (this._open) {
       const url = this._open.startsWith('/')
-        ? `http://localhost:${this._project.server.port}${this._open}`
+        ? `${this._scheme}://localhost:${this._project.server.port}${this._open}`
         : this._open;
       opn(url, { url: true });
     }

@@ -9,6 +9,7 @@
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
+import https from 'https';
 import { promisify } from 'util';
 import EventEmitter from 'events';
 import path from 'path';
@@ -43,6 +44,10 @@ export default class HelixServer extends EventEmitter {
     this._app = express();
     this._app.use(compression());
     this._port = DEFAULT_PORT;
+    this._tls = false;
+    this._scheme = 'http';
+    this._key = '';
+    this._cert = '';
     this._server = null;
   }
 
@@ -127,6 +132,14 @@ export default class HelixServer extends EventEmitter {
     return this;
   }
 
+  withTLS(key, cert) {
+    this._tls = true;
+    this._scheme = 'https';
+    this._key = key;
+    this._cert = cert;
+    return this;
+  }
+
   isStarted() {
     return this._server !== null;
   }
@@ -139,7 +152,7 @@ export default class HelixServer extends EventEmitter {
     const { log } = this;
     if (this._port !== 0) {
       if (this._project.kill && await utils.checkPortInUse(this._port)) {
-        await fetch(`http://localhost:${this._port}/.kill`);
+        await fetch(`${this._scheme}://localhost:${this._port}/.kill`);
       }
       const inUse = await utils.checkPortInUse(this._port);
       if (inUse) {
@@ -148,17 +161,26 @@ export default class HelixServer extends EventEmitter {
     }
     log.info(`Starting franklin-simulator v${packageJson.version}`);
     await new Promise((resolve, reject) => {
-      this._server = this._app.listen(this._port, (err) => {
+      const listenCb = (err) => {
         if (err) {
-          reject(new Error(`Error while starting http server: ${err}`));
+          reject(new Error(`Error while starting ${this._scheme} server: ${err}`));
         }
         this._port = this._server.address().port;
-        log.info(`Local Franklin Dev server up and running: http://localhost:${this._port}/`);
+        log.info(`Local Franklin Dev server up and running: ${this._scheme}://localhost:${this._port}/`);
         if (this._project.proxyUrl) {
           log.info(`Enabled reverse proxy to ${this._project.proxyUrl}`);
         }
         resolve();
-      });
+      };
+      if (this._tls) {
+        this._server = https.createServer({
+          key: this._key,
+          cert: this._cert,
+        }, this._app);
+        this._server.listen(this._port, listenCb);
+      } else {
+        this._server = this._app.listen(this._port, listenCb);
+      }
     });
     await this._project.initLiveReload(this._app, this._server);
     await this._project.initHeadHtml();

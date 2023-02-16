@@ -97,6 +97,8 @@ window.LiveReloadOptions = {
   https: true,
 };
 </script>`;
+      } else {
+        newbody += '<script>window.LiveReloadOptions={host:location.hostname,port:location.port||(location.protocol===\'https:\'?443:80),https:location.protocol};</script>';
       }
       newbody += '<script src="/__internal__/livereload.js"></script>';
       newbody += body.substring(index);
@@ -263,7 +265,7 @@ window.LiveReloadOptions = {
     ctx.log[level](`Proxy ${req.method} request to ${url}: ${ret.status} (${contentType})`);
 
     const isHTML = ret.status === 200 && contentType.indexOf('text/html') === 0;
-    const injectLR = isHTML && opts.injectLiveReload;
+    const livereload = isHTML && opts.injectLiveReload;
     const replaceHead = isHTML && opts.headHtml && opts.headHtml.isModified;
     const doIndex = isHTML && opts.indexer && url.indexOf('.plain.html') < 0;
 
@@ -306,7 +308,7 @@ window.LiveReloadOptions = {
       if (replaceHead) {
         textBody = await opts.headHtml.replace(textBody);
       }
-      if (injectLR) {
+      if (livereload) {
         textBody = utils.injectLiveReloadScript(textBody);
       }
       textBody = utils.injectMeta(textBody, {
