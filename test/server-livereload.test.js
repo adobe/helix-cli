@@ -84,7 +84,10 @@ describe('Helix Server with Livereload', () => {
 
     try {
       await project.start();
-      await assertHttp(`http://localhost:${project.server.port}/live/index.html`, 200, 'expected_index_w_lr.html');
+      await assertHttp(`http://localhost:${project.server.port}/live/index.html`, 200, 'expected_index_w_lr.html', [{
+        pattern: 'PORT',
+        with: project.server.port,
+      }]);
     } finally {
       await project.stop();
     }
@@ -110,7 +113,10 @@ describe('Helix Server with Livereload', () => {
 
     try {
       await project.start();
-      await assertHttp(`http://localhost:${project.server.port}/live/index.html`, 200, 'expected_index_w_lr_nohead.html');
+      await assertHttp(`http://localhost:${project.server.port}/live/index.html`, 200, 'expected_index_w_lr_nohead.html', [{
+        pattern: 'PORT',
+        with: project.server.port,
+      }]);
     } finally {
       await project.stop();
     }
@@ -163,7 +169,10 @@ describe('Helix Server with Livereload', () => {
 
     try {
       await project.start();
-      await assertHttp(`http://localhost:${project.server.port}/live/index.html`, 200, 'expected_index_w_lr_nobody.html');
+      await assertHttp(`http://localhost:${project.server.port}/live/index.html`, 200, 'expected_index_w_lr_nobody.html', [{
+        pattern: 'PORT',
+        with: project.server.port,
+      }]);
     } finally {
       await project.stop();
     }
@@ -214,7 +223,10 @@ describe('Helix Server with Livereload', () => {
     try {
       await project.start();
 
-      await assertHttp(`http://localhost:${project.server.port}/live/index.html`, 200, 'expected_index_w_lr.html');
+      await assertHttp(`http://localhost:${project.server.port}/live/index.html`, 200, 'expected_index_w_lr.html', [{
+        pattern: 'PORT',
+        with: project.server.port,
+      }]);
 
       const ws = new WebSocket.Client(`ws://localhost:${project.server.port}/`);
       let wsReloadData = null;
@@ -297,7 +309,10 @@ describe('Helix Server with Livereload', () => {
 
     try {
       await project.start();
-      await assertHttp(`http://localhost:${project.server.port}/live/index.html`, 200, 'expected_index_w_lr.html');
+      await assertHttp(`http://localhost:${project.server.port}/live/index.html`, 200, 'expected_index_w_lr.html', [{
+        pattern: 'PORT',
+        with: project.server.port,
+      }]);
 
       const ws = new WebSocket.Client(`ws://localhost:${project.server.port}/`);
       let wsAlertData = null;
