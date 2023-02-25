@@ -57,14 +57,14 @@
     "ini": "3.0.1",
     "isomorphic-git": "1.21.0",
     "livereload-js": "3.4.1",
-    "open": "8.4.1",
+    "open": "8.4.2",
     "progress": "2.0.3",
     "rehype-parse": "8.0.4",
     "semver": "7.3.8",
     "shelljs": "0.8.5",
     "unified": "10.1.2",
     "uuid": "9.0.0",
-    "yargs": "17.7.0"
+    "yargs": "17.7.1"
   },
   "devDependencies": {
     "@adobe/eslint-config-helix": "2.0.1",
