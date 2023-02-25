@@ -148,6 +148,10 @@ export default class HelixServer extends EventEmitter {
     return this._port;
   }
 
+  get scheme() {
+    return this._scheme;
+  }
+
   async start() {
     const { log } = this;
     if (this._port !== 0) {
