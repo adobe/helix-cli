@@ -1,3 +1,10 @@
+## [14.21.4](https://github.com/adobe/helix-cli/compare/v14.21.3...v14.21.4) (2023-02-25)
+
+
+### Bug Fixes
+
+* livereload should use correct port ([#2141](https://github.com/adobe/helix-cli/issues/2141)) ([29fce33](https://github.com/adobe/helix-cli/commit/29fce3356e1f0c2740d9be3d71fcb7235910812d))
+
 ## [14.21.3](https://github.com/adobe/helix-cli/compare/v14.21.2...v14.21.3) (2023-02-25)
 
 
