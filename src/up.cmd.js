@@ -15,16 +15,17 @@ import fse from 'fs-extra';
 import opn from 'open';
 import chalk from 'chalk-template';
 import chokidar from 'chokidar';
-import HelixProject from './server/HelixProject.js';
+import { HelixProject } from './server/HelixProject.js';
 import GitUtils from './git-utils.js';
 import pkgJson from './package.cjs';
-import { fetch } from './fetch-utils.js';
+import { fetch, context } from './fetch-utils.js';
 import AbstractCommand from './abstract.cmd.js';
 
 export default class UpCommand extends AbstractCommand {
   constructor(logger) {
     super(logger);
     this._httpPort = -1;
+    this._bindAddr = null;
     this._tls = false;
     this._tlsCertPath = undefined;
     this._tlsKeyPath = undefined;
@@ -34,10 +35,16 @@ export default class UpCommand extends AbstractCommand {
     this._url = null;
     this._cache = null;
     this._printIndex = false;
+    this._stopping = false;
   }
 
   withHttpPort(p) {
     this._httpPort = p;
+    return this;
+  }
+
+  withBindAddr(a) {
+    this._bindAddr = a;
     return this;
   }
 
@@ -85,18 +92,20 @@ export default class UpCommand extends AbstractCommand {
   }
 
   async stop() {
+    if (this._stopping) {
+      return;
+    }
+    this._stopping = true;
     if (this._project) {
-      try {
-        await this._project.stop();
-      } catch (e) {
-        // ignore
-      }
-      this._project = null;
+      await this._project.stop();
+      delete this._project;
     }
     if (this._watcher) {
-      await this._watcher.close();
+      const watcher = this._watcher;
       delete this._watcher;
+      await watcher.close();
     }
+    await context.reset();
     this.log.info('Franklin project stopped.');
     this.emit('stopped', this);
   }
@@ -167,6 +176,9 @@ export default class UpCommand extends AbstractCommand {
     if (this._httpPort >= 0) {
       this._project.withHttpPort(this._httpPort);
     }
+    if (this._bindAddr) {
+      this._project.withBindAddr(this._bindAddr);
+    }
 
     try {
       await this._project.init();
@@ -177,6 +189,10 @@ export default class UpCommand extends AbstractCommand {
     } catch (e) {
       throw Error(`Unable to start Franklin: ${e.message}`);
     }
+
+    this._project.on('stopped', async () => {
+      await this.stop();
+    });
   }
 
   async verifyUrl(gitUrl, inref) {
@@ -257,7 +273,7 @@ export default class UpCommand extends AbstractCommand {
       const url = this._open.startsWith('/')
         ? `${this._scheme}://localhost:${this._project.server.port}${this._open}`
         : this._open;
-      opn(url, { url: true });
+      await opn(url);
     }
   }
 }

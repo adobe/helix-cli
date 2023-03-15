@@ -39,6 +39,7 @@ describe('hlx up', () => {
     mockUp.withTLS.returnsThis();
     mockUp.withLiveReload.returnsThis();
     mockUp.withHttpPort.returnsThis();
+    mockUp.withBindAddr.returnsThis();
     mockUp.withUrl.returnsThis();
     mockUp.withPrintIndex.returnsThis();
     mockUp.withKill.returnsThis();
@@ -68,6 +69,7 @@ describe('hlx up', () => {
     sinon.assert.calledWith(mockUp.withOpen, 'false');
     sinon.assert.calledWith(mockUp.withLiveReload, false);
     sinon.assert.calledWith(mockUp.withHttpPort, 1234);
+    sinon.assert.calledWith(mockUp.withBindAddr, '*');
     sinon.assert.calledOnce(mockUp.run);
   });
 
@@ -97,6 +99,12 @@ describe('hlx up', () => {
   it('hlx up can specify port number to run development server on', async () => {
     await cli.run(['up', '--port', '3210']);
     sinon.assert.calledWith(mockUp.withHttpPort, 3210);
+    sinon.assert.calledOnce(mockUp.run);
+  });
+
+  it('hlx up can specify bind address to run development server on', async () => {
+    await cli.run(['up', '--addr', '192.168.1.7']);
+    sinon.assert.calledWith(mockUp.withBindAddr, '192.168.1.7');
     sinon.assert.calledOnce(mockUp.run);
   });
 

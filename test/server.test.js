@@ -16,7 +16,7 @@ import os from 'os';
 import assert from 'assert';
 import fse from 'fs-extra';
 import path from 'path';
-import HelixProject from '../src/server/HelixProject.js';
+import { HelixProject } from '../src/server/HelixProject.js';
 import {
   Nock, assertHttp, createTestRoot, setupProject,
 } from './utils.js';
@@ -28,7 +28,7 @@ describe('Helix Server', () => {
 
   beforeEach(async () => {
     nock = new Nock();
-    nock.enableNetConnect(/localhost/);
+    nock.enableNetConnect(/127.0.0.1/);
     testRoot = await createTestRoot();
   });
 
@@ -111,7 +111,7 @@ describe('Helix Server', () => {
     await project.init();
     try {
       await project.start();
-      await assertHttp(`http://localhost:${project.server.port}/welcome.txt`, 200, 'expected_welcome.txt');
+      await assertHttp(`http://127.0.0.1:${project.server.port}/welcome.txt`, 200, 'expected_welcome.txt');
     } finally {
       await project.stop();
     }
@@ -125,7 +125,7 @@ describe('Helix Server', () => {
     await project.init();
     try {
       await project.start();
-      await assertHttp(`http://localhost:${project.server.port}/.kill`, 200, 'expected_goodbye.txt');
+      await assertHttp(`http://127.0.0.1:${project.server.port}/.kill`, 200, 'expected_goodbye.txt');
     } finally {
       assert.ok(!project.server.isStarted());
       await project.stop();
@@ -149,7 +149,7 @@ describe('Helix Server', () => {
 
     try {
       await project.start();
-      await assertHttp(`http://localhost:${project.server.port}/notfound.css`, 404);
+      await assertHttp(`http://127.0.0.1:${project.server.port}/notfound.css`, 404);
     } finally {
       await project.stop();
     }
@@ -173,7 +173,7 @@ describe('Helix Server', () => {
 
     try {
       await project.start();
-      const resp = await fetch(`http://localhost:${project.server.port}/local.html`, {
+      const resp = await fetch(`http://127.0.0.1:${project.server.port}/local.html`, {
         cache: 'no-store',
       });
       const ret = await resp.text();
@@ -208,7 +208,7 @@ describe('Helix Server', () => {
 
     try {
       await project.start();
-      const resp = await fetch(`http://localhost:${project.server.port}/readme.html`, {
+      const resp = await fetch(`http://127.0.0.1:${project.server.port}/readme.html`, {
         cache: 'no-store',
       });
       const ret = await resp.text();
@@ -244,7 +244,7 @@ describe('Helix Server', () => {
 
     try {
       await project.start();
-      const resp = await fetch(`http://localhost:${project.server.port}/readme.html`, {
+      const resp = await fetch(`http://127.0.0.1:${project.server.port}/readme.html`, {
         cache: 'no-store',
       });
       const ret = await resp.text();
@@ -283,7 +283,7 @@ describe('Helix Server', () => {
 
     try {
       await project.start();
-      const resp = await fetch(`http://localhost:${project.server.port}/subfolder/query-index.json?sheet=foo&limit=20`, {
+      const resp = await fetch(`http://127.0.0.1:${project.server.port}/subfolder/query-index.json?sheet=foo&limit=20`, {
         cache: 'no-store',
       });
       assert.strictEqual(resp.status, 200);

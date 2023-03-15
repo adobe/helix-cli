@@ -13,7 +13,7 @@
 /* eslint-env mocha */
 import assert from 'assert';
 import path from 'path';
-import HelixProject from '../src/server/HelixProject.js';
+import { HelixProject } from '../src/server/HelixProject.js';
 
 const SPEC_ROOT = path.resolve(__rootdir, 'test', 'specs');
 

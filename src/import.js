@@ -51,13 +51,18 @@ export default function up() {
           type: 'int',
           default: 3001,
         })
+        .option('addr', {
+          describe: 'Bind import server on addr. use * to bind to any address and allow external connections.',
+          type: 'string',
+          default: '127.0.0.1',
+        })
         .option('stop-other', {
           alias: 'stopOther',
           describe: 'Stop other Franklin CLI running on the above port',
           type: 'boolean',
           default: true,
         })
-        .group(['port', 'stop-other'], 'Server options')
+        .group(['port', 'addr', 'stop-other'], 'Server options')
         .option('cache', {
           describe: 'Path to local folder to cache the responses',
           type: 'string',
@@ -78,6 +83,7 @@ export default function up() {
       /* c8 ignore end */
       await executor
         .withHttpPort(argv.port)
+        .withBindAddr(argv.addr)
         // only open  browser window when executable is `hlx`
         // this prevents the window to be opened during integration tests
         .withOpen(path.basename(argv.$0) === 'hlx' ? argv.open : false)

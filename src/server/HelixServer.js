@@ -9,54 +9,29 @@
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-import https from 'https';
 import { promisify } from 'util';
-import EventEmitter from 'events';
 import path from 'path';
-import express from 'express';
 import compression from 'compression';
-import { fetch } from '../fetch-utils.js';
 import utils from './utils.js';
-import packageJson from '../package.cjs';
 import RequestContext from './RequestContext.js';
+import { asyncHandler, BaseServer } from './BaseServer.js';
+import LiveReload from './LiveReload.js';
 
-const DEFAULT_PORT = 3000;
-
-/**
- * Wraps the route middleware so it can catch potential promise rejections
- * during the async invocation.
- *
- * @param {ExpressMiddleware} fn an extended express middleware function
- * @returns {ExpressMiddleware} an express middleware function.
- */
-function asyncHandler(fn) {
-  return (req, res, next) => (Promise.resolve(fn(req, res, next)).catch(next));
-}
-
-export default class HelixServer extends EventEmitter {
+export class HelixServer extends BaseServer {
   /**
    * Creates a new HelixServer for the given project.
    * @param {HelixProject} project
    */
   constructor(project) {
-    super();
-    this._project = project;
-    this._app = express();
+    super(project);
+    this._liveReload = null;
+    this._enableLiveReload = false;
     this._app.use(compression());
-    this._port = DEFAULT_PORT;
-    this._tls = false;
-    this._scheme = 'http';
-    this._key = '';
-    this._cert = '';
-    this._server = null;
   }
 
-  /**
-   * Returns the logger.
-   * @returns {Logger} the logger.
-   */
-  get log() {
-    return this._project.log;
+  withLiveReload(value) {
+    this._enableLiveReload = value;
+    return this;
   }
 
   /**
@@ -70,7 +45,7 @@ export default class HelixServer extends EventEmitter {
     const { log } = this;
     const proxyUrl = new URL(this._project.proxyUrl);
 
-    const { liveReload } = ctx.config;
+    const liveReload = this._liveReload;
     if (liveReload) {
       liveReload.startRequest(ctx.requestId, ctx.path);
     }
@@ -118,94 +93,21 @@ export default class HelixServer extends EventEmitter {
   }
 
   async setupApp() {
+    await super.setupApp();
+    if (this._enableLiveReload) {
+      this._liveReload = new LiveReload(this.log);
+      await this._liveReload.init(this.app, this._server);
+    }
     const handler = asyncHandler(this.handleProxyModeRequest.bind(this));
-    this._app.get('/.kill', (req, res) => {
-      res.send('Goodbye!');
-      this.stop();
-    });
-    this._app.get('*', handler);
-    this._app.post('*', handler);
+    this.app.get('*', handler);
+    this.app.post('*', handler);
   }
 
-  withPort(port) {
-    this._port = port;
-    return this;
-  }
-
-  withTLS(key, cert) {
-    this._tls = true;
-    this._scheme = 'https';
-    this._key = key;
-    this._cert = cert;
-    return this;
-  }
-
-  isStarted() {
-    return this._server !== null;
-  }
-
-  get port() {
-    return this._port;
-  }
-
-  get scheme() {
-    return this._scheme;
-  }
-
-  async start() {
-    const { log } = this;
-    if (this._port !== 0) {
-      if (this._project.kill && await utils.checkPortInUse(this._port)) {
-        await fetch(`${this._scheme}://localhost:${this._port}/.kill`);
-      }
-      const inUse = await utils.checkPortInUse(this._port);
-      if (inUse) {
-        throw new Error(`Port ${this._port} already in use by another process.`);
-      }
+  async doStop() {
+    await super.stop();
+    if (this._liveReload) {
+      await this._liveReload.stop();
+      delete this._liveReload;
     }
-    log.info(`Starting franklin-simulator v${packageJson.version}`);
-    await new Promise((resolve, reject) => {
-      const listenCb = (err) => {
-        if (err) {
-          reject(new Error(`Error while starting ${this._scheme} server: ${err}`));
-        }
-        this._port = this._server.address().port;
-        log.info(`Local Franklin Dev server up and running: ${this._scheme}://localhost:${this._port}/`);
-        if (this._project.proxyUrl) {
-          log.info(`Enabled reverse proxy to ${this._project.proxyUrl}`);
-        }
-        resolve();
-      };
-      if (this._tls) {
-        this._server = https.createServer({
-          key: this._key,
-          cert: this._cert,
-        }, this._app);
-        this._server.listen(this._port, listenCb);
-      } else {
-        this._server = this._app.listen(this._port, listenCb);
-      }
-    });
-    await this._project.initLiveReload(this._app, this._server);
-    await this._project.initHeadHtml();
-    await this.setupApp();
-  }
-
-  async stop() {
-    const { log } = this;
-    if (!this._server) {
-      log.warn('server not started.');
-      return true;
-    }
-    return new Promise((resolve, reject) => {
-      this._server.close((err) => {
-        if (err) {
-          reject(new Error(`Error while stopping http server: ${err}`));
-        }
-        log.info('Local Franklin Dev server stopped.');
-        this._server = null;
-        resolve();
-      });
-    });
   }
 }

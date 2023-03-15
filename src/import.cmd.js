@@ -15,20 +15,28 @@ import opn from 'open';
 import chalk from 'chalk-template';
 import git from 'isomorphic-git';
 import http from 'isomorphic-git/http/node/index.js';
-import HelixImportProject from './server/HelixImportProject.js';
+import { HelixImportProject } from './server/HelixImportProject.js';
 import pkgJson from './package.cjs';
 import AbstractCommand from './abstract.cmd.js';
+import { context } from './fetch-utils.js';
 
 export default class ImportCommand extends AbstractCommand {
   constructor(logger) {
     super(logger);
     this._httpPort = -1;
+    this._bindAddr = null;
     this._importerSubPath = 'tools/importer';
+    this._stopping = false;
     this._cache = null;
   }
 
   withHttpPort(p) {
     this._httpPort = p;
+    return this;
+  }
+
+  withBindAddr(a) {
+    this._bindAddr = a;
     return this;
   }
 
@@ -62,18 +70,15 @@ export default class ImportCommand extends AbstractCommand {
   }
 
   async stop() {
-    if (this._project) {
-      try {
-        await this._project.stop();
-      // codecov:ignore:start
-      /* c8 ignore start */
-      } catch (e) {
-        // ignore
-      }
-      // codecov:ignore:end
-      /* c8 ignore end */
-      this._project = null;
+    if (this._stopping) {
+      return;
     }
+    this._stopping = true;
+    if (this._project) {
+      await this._project.stop();
+      delete this._project;
+    }
+    await context.reset();
     this.log.info('Franklin project stopped.');
     this.emit('stopped', this);
   }
@@ -139,6 +144,9 @@ export default class ImportCommand extends AbstractCommand {
     if (this._httpPort >= 0) {
       this._project.withHttpPort(this._httpPort);
     }
+    if (this._bindAddr) {
+      this._project.withBindAddr(this._bindAddr);
+    }
 
     if (!this._skipUI) {
       await this.setupImporterUI();
@@ -149,6 +157,10 @@ export default class ImportCommand extends AbstractCommand {
     } catch (e) {
       throw Error(`Unable to start Franklin: ${e.message}`);
     }
+
+    this._project.on('server-killed', async () => {
+      await this.stop();
+    });
   }
 
   async run() {
@@ -159,7 +171,7 @@ export default class ImportCommand extends AbstractCommand {
       const url = this._open.startsWith('/')
         ? `http://localhost:${this._project.server.port}${this._open}`
         : this._open;
-      opn(url, { url: true });
+      await opn(url);
     }
   }
 }

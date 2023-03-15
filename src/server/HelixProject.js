@@ -9,54 +9,22 @@
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-import { ConsoleLogger, deriveLogger, SimpleInterface } from '@adobe/helix-log';
-import HelixServer from './HelixServer.js';
-import LiveReload from './LiveReload.js';
+import { HelixServer } from './HelixServer.js';
+import { BaseProject } from './BaseProject.js';
 import HeadHtmlSupport from './HeadHtmlSupport.js';
 import Indexer from './Indexer.js';
 
-export default class HelixProject {
+export class HelixProject extends BaseProject {
   constructor() {
-    this._cwd = process.cwd();
-    this._server = new HelixServer(this);
-    this._logger = null;
-    this._liveReload = null;
-    this._enableLiveReload = false;
+    super(HelixServer);
     this._proxyUrl = null;
-    this._cacheDirectory = null;
     this._headHtml = null;
     this._indexer = null;
     this._printIndex = false;
-    this._kill = false;
-  }
-
-  withCwd(cwd) {
-    this._cwd = cwd;
-    return this;
-  }
-
-  withKill(kill) {
-    this._kill = !!kill;
-    return this;
-  }
-
-  withHttpPort(port) {
-    this._server.withPort(port);
-    return this;
-  }
-
-  withTLS(key, cert) {
-    this._server.withTLS(key, cert);
-    return this;
-  }
-
-  withLogger(logger) {
-    this._logger = logger;
-    return this;
   }
 
   withLiveReload(value) {
-    this._enableLiveReload = value;
+    this._server.withLiveReload(value);
     return this;
   }
 
@@ -65,80 +33,26 @@ export default class HelixProject {
     return this;
   }
 
-  withCacheDirectory(value) {
-    this._cacheDirectory = value;
-    return this;
-  }
-
   withPrintIndex(value) {
     this._printIndex = value;
     return this;
-  }
-
-  get log() {
-    return this._logger;
-  }
-
-  get started() {
-    return this._server.isStarted();
-  }
-
-  get liveReload() {
-    return this._liveReload;
   }
 
   get proxyUrl() {
     return this._proxyUrl;
   }
 
-  get cacheDirectory() {
-    return this._cacheDirectory;
-  }
-
-  get directory() {
-    return this._cwd;
-  }
-
   get indexer() {
     return this._indexer;
   }
 
-  get kill() {
-    return this._kill;
-  }
-
-  /**
-   * Returns the helix server
-   * @returns {HelixServer}
-   */
-  get server() {
-    return this._server;
+  get liveReload() {
+    // eslint-disable-next-line no-underscore-dangle
+    return this._server._liveReload;
   }
 
   async init() {
-    if (!this._logger) {
-      this._logger = new SimpleInterface({
-        logger: new ConsoleLogger(),
-        level: 'debug',
-        defaultFields: {
-          category: 'hlx',
-        },
-        filter: (fields) => {
-          // eslint-disable-next-line no-param-reassign
-          fields.message[0] = `[${fields.category}] ${fields.message[0]}`;
-          // eslint-disable-next-line no-param-reassign
-          delete fields.category;
-          return fields;
-        },
-      });
-    } else {
-      this._logger = deriveLogger(this._logger, {
-        defaultFields: {
-          category: 'hlx',
-        },
-      });
-    }
-    this._liveReload = this._enableLiveReload ? new LiveReload(this._logger) : null;
+    await super.init();
     this._indexer = new Indexer()
       .withLogger(this._logger)
       .withCwd(this._cwd)
@@ -146,28 +60,22 @@ export default class HelixProject {
     return this;
   }
 
-  async initLiveReload(app, server) {
-    if (this.liveReload) {
-      await this.liveReload.init(app, server);
-    }
-  }
-
   async initHeadHtml() {
     if (this.proxyUrl) {
-      this.headHtml = new HeadHtmlSupport({
+      this._headHtml = new HeadHtmlSupport({
         directory: this.directory,
         log: this.log,
         proxyUrl: this.proxyUrl,
       });
-      await this.headHtml.init();
+      await this._headHtml.init();
 
       // register local head in live-reload
       if (this.liveReload) {
-        this.liveReload.registerFiles([this.headHtml.filePath], '/');
+        this.liveReload.registerFiles([this._headHtml.filePath], '/');
         this.liveReload.on('modified', async (modified) => {
           if (modified.indexOf('/') >= 0) {
-            await this.headHtml.loadLocal();
-            await this.headHtml.init();
+            await this._headHtml.loadLocal();
+            await this._headHtml.init();
           }
         });
       }
@@ -175,23 +83,21 @@ export default class HelixProject {
   }
 
   async start() {
-    this.log.debug('Launching Franklin simulation server for development...');
-    await this._server.start(this);
+    this.log.debug('Launching Franklin dev server...');
+    await super.start();
+    await this.initHeadHtml();
     if (this._indexer) {
       await this._indexer.init();
     }
     return this;
   }
 
-  async stop() {
-    this.log.debug('Stopping Franklin simulation server..');
-    await this._server.stop();
-    if (this.liveReload) {
-      this.liveReload.stop();
-    }
+  async doStop() {
+    this.log.debug('Stopping Franklin dev server...');
+    await super.doStop();
     if (this._indexer) {
       await this._indexer.close();
+      delete this._indexer;
     }
-    return this;
   }
 }

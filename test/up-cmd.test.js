@@ -31,7 +31,7 @@ describe('Integration test for up command with helix pages', function suite() {
     testRoot = await createTestRoot();
     testDir = path.resolve(testRoot, 'project');
     nock = new Nock();
-    nock.enableNetConnect(/localhost/);
+    nock.enableNetConnect(/127.0.0.1/);
     await fse.copy(TEST_DIR, testDir);
   });
 
@@ -67,11 +67,11 @@ describe('Integration test for up command with helix pages', function suite() {
     cmd
       .on('started', async () => {
         try {
-          let ret = await assertHttp(`http://localhost:${cmd.project.server.port}/index.html`, 200);
+          let ret = await assertHttp(`http://127.0.0.1:${cmd.project.server.port}/index.html`, 200);
           assert.strictEqual(ret.trim(), '## Welcome');
-          ret = await assertHttp(`http://localhost:${cmd.project.server.port}/local.txt`, 200);
+          ret = await assertHttp(`http://127.0.0.1:${cmd.project.server.port}/local.txt`, 200);
           assert.strictEqual(ret.trim(), 'Hello, world.');
-          await assertHttp(`http://localhost:${cmd.project.server.port}/not-found.txt`, 404);
+          await assertHttp(`http://127.0.0.1:${cmd.project.server.port}/not-found.txt`, 404);
           await myDone();
         } catch (e) {
           await myDone(e);
@@ -111,11 +111,11 @@ describe('Integration test for up command with helix pages', function suite() {
     cmd
       .on('started', async () => {
         try {
-          let ret = await assertHttp(`http://localhost:${cmd.project.server.port}/index.html`, 200);
+          let ret = await assertHttp(`http://127.0.0.1:${cmd.project.server.port}/index.html`, 200);
           assert.strictEqual(ret.trim(), '## Welcome');
-          ret = await assertHttp(`http://localhost:${cmd.project.server.port}/local.txt`, 200);
+          ret = await assertHttp(`http://127.0.0.1:${cmd.project.server.port}/local.txt`, 200);
           assert.strictEqual(ret.trim(), 'Hello, world.');
-          await assertHttp(`http://localhost:${cmd.project.server.port}/not-found.txt`, 404);
+          await assertHttp(`http://127.0.0.1:${cmd.project.server.port}/not-found.txt`, 404);
           await myDone();
         } catch (e) {
           await myDone(e);
@@ -157,11 +157,11 @@ describe('Integration test for up command with helix pages', function suite() {
     cmd
       .on('started', async () => {
         try {
-          let ret = await assertHttp(`http://localhost:${cmd.project.server.port}/index.html`, 200);
+          let ret = await assertHttp(`http://127.0.0.1:${cmd.project.server.port}/index.html`, 200);
           assert.strictEqual(ret.trim(), '## Welcome');
-          ret = await assertHttp(`http://localhost:${cmd.project.server.port}/local.txt`, 200);
+          ret = await assertHttp(`http://127.0.0.1:${cmd.project.server.port}/local.txt`, 200);
           assert.strictEqual(ret.trim(), 'Hello, world.');
-          await assertHttp(`http://localhost:${cmd.project.server.port}/not-found.txt`, 404);
+          await assertHttp(`http://127.0.0.1:${cmd.project.server.port}/not-found.txt`, 404);
           await myDone();
         } catch (e) {
           await myDone(e);
@@ -210,11 +210,11 @@ describe('Integration test for up command with helix pages', function suite() {
     cmd
       .on('started', async () => {
         try {
-          let ret = await assertHttp(`http://localhost:${cmd.project.server.port}/index.html`, 200);
+          let ret = await assertHttp(`http://127.0.0.1:${cmd.project.server.port}/index.html`, 200);
           assert.strictEqual(ret.trim(), '## Welcome');
-          ret = await assertHttp(`http://localhost:${cmd.project.server.port}/local.txt`, 200);
+          ret = await assertHttp(`http://127.0.0.1:${cmd.project.server.port}/local.txt`, 200);
           assert.strictEqual(ret.trim(), 'Hello, world.');
-          await assertHttp(`http://localhost:${cmd.project.server.port}/not-found.txt`, 404);
+          await assertHttp(`http://127.0.0.1:${cmd.project.server.port}/not-found.txt`, 404);
           // now switch to a new branch
           switchBranch(testDir, 'new-branch');
           // wait 5 seconds for the git branch to be detected
@@ -260,11 +260,11 @@ describe('Integration test for up command with helix pages', function suite() {
     let timer;
     cmd
       .on('started', async () => {
-        let ret = await assertHttp(`http://localhost:${cmd.project.server.port}/index.html`, 200);
+        let ret = await assertHttp(`http://127.0.0.1:${cmd.project.server.port}/index.html`, 200);
         assert.strictEqual(ret.trim(), '## Welcome');
-        ret = await assertHttp(`http://localhost:${cmd.project.server.port}/local.txt`, 200);
+        ret = await assertHttp(`http://127.0.0.1:${cmd.project.server.port}/local.txt`, 200);
         assert.strictEqual(ret.trim(), 'Hello, world.');
-        await assertHttp(`http://localhost:${cmd.project.server.port}/not-found.txt`, 404);
+        await assertHttp(`http://127.0.0.1:${cmd.project.server.port}/not-found.txt`, 404);
         // now switch to a new branch
         switchBranch(testDir, 'new-and-totally-unreasonably-long-in-fact-too-long-branch');
         // wait 5 seconds for the git branch to be detected
@@ -336,25 +336,25 @@ describe('Integration test for up command with cache', function suite() {
       .get('/head.html')
       .reply(200, '<link rel="stylesheet" href="/styles.css"/>');
 
-    nock.enableNetConnect(/localhost/);
+    nock.enableNetConnect(/127.0.0.1/);
 
     cmd
       .on('started', async () => {
         try {
           const assertRequests = async () => {
-            let ret = await assertHttp(`http://localhost:${cmd.project.server.port}/index.html`, 200);
+            let ret = await assertHttp(`http://127.0.0.1:${cmd.project.server.port}/index.html`, 200);
             assert.strictEqual(ret.trim(), content.index);
-            ret = await assertHttp(`http://localhost:${cmd.project.server.port}/`, 200);
+            ret = await assertHttp(`http://127.0.0.1:${cmd.project.server.port}/`, 200);
             assert.strictEqual(ret.trim(), content.index);
-            ret = await assertHttp(`http://localhost:${cmd.project.server.port}/folder/page.html?foo=bar&baz=qux`, 200);
+            ret = await assertHttp(`http://127.0.0.1:${cmd.project.server.port}/folder/page.html?foo=bar&baz=qux`, 200);
             assert.strictEqual(ret.trim(), content.page1);
-            ret = await assertHttp(`http://localhost:${cmd.project.server.port}/folder/page.html?foo=bar&baz=othervalue`, 200);
+            ret = await assertHttp(`http://127.0.0.1:${cmd.project.server.port}/folder/page.html?foo=bar&baz=othervalue`, 200);
             assert.strictEqual(ret.trim(), content.page2);
-            await assertHttp(`http://localhost:${cmd.project.server.port}/not-found.txt`, 404);
-            ret = await assertHttp(`http://localhost:${cmd.project.server.port}/page.plain.html`, 200);
+            await assertHttp(`http://127.0.0.1:${cmd.project.server.port}/not-found.txt`, 404);
+            ret = await assertHttp(`http://127.0.0.1:${cmd.project.server.port}/page.plain.html`, 200);
             assert.strictEqual(ret.trim(), content.plain);
 
-            ret = await assertHttp(`http://localhost:${cmd.project.server.port}/local.txt`, 200);
+            ret = await assertHttp(`http://127.0.0.1:${cmd.project.server.port}/local.txt`, 200);
             assert.strictEqual(ret.trim(), 'Hello, world.');
           };
 

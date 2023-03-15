@@ -10,52 +10,17 @@
  * governing permissions and limitations under the License.
  */
 import { promisify } from 'util';
-import EventEmitter from 'events';
 import path from 'path';
-import express from 'express';
-import cookieParser from 'cookie-parser';
 import { PassThrough } from 'stream';
 import { context as fetchContext } from '@adobe/fetch';
 import utils from './utils.js';
-import packageJson from '../package.cjs';
 import RequestContext from './RequestContext.js';
+import { asyncHandler, BaseServer } from './BaseServer.js';
 
-const { fetch } = fetchContext({ rejectUnauthorized: false });
+const context = fetchContext({ rejectUnauthorized: false });
+const { fetch } = context;
 
-const DEFAULT_PORT = 3001;
-
-/**
- * Wraps the route middleware so it can catch potential promise rejections
- * during the async invocation.
- *
- * @param {ExpressMiddleware} fn an extended express middleware function
- * @returns {ExpressMiddleware} an express middleware function.
- */
-function asyncHandler(fn) {
-  return (req, res, next) => (Promise.resolve(fn(req, res, next)).catch(next));
-}
-
-export default class HelixServer extends EventEmitter {
-  /**
-   * Creates a new HelixServer for the given project.
-   * @param {HelixProject} project
-   */
-  constructor(project) {
-    super();
-    this._project = project;
-    this._app = express();
-    this._port = DEFAULT_PORT;
-    this._server = null;
-  }
-
-  /**
-   * Returns the logger.
-   * @returns {Logger} the logger.
-   */
-  get log() {
-    return this._project.log;
-  }
-
+export class HelixImportServer extends BaseServer {
   /**
    * Proxy Mode route handler
    * @param {Express.Request} req request
@@ -251,79 +216,15 @@ export default class HelixServer extends EventEmitter {
   }
 
   async setupApp() {
-    this._app.get('/.kill', (req, res) => {
-      res.send('Goodbye!');
-      this.stop();
-    });
-
-    this._app.get('/tools/*', asyncHandler(this.handleToolsRequest.bind(this)));
-    this._app.get('*', asyncHandler(this.handleProxyModeRequest.bind(this)));
-    this._app.post('*', asyncHandler(this.handleProxyModeRequest.bind(this)));
+    await super.setupApp();
+    this.app.get('/tools/*', asyncHandler(this.handleToolsRequest.bind(this)));
+    const handler = asyncHandler(this.handleProxyModeRequest.bind(this));
+    this.app.get('*', handler);
+    this.app.post('*', handler);
   }
 
-  withPort(port) {
-    this._port = port;
-    return this;
-  }
-
-  isStarted() {
-    return this._server !== null;
-  }
-
-  get port() {
-    return this._port;
-  }
-
-  async start() {
-    const { log } = this;
-    if (this._port !== 0) {
-      if (this._project.kill && await utils.checkPortInUse(this._port)) {
-        await fetch(`http://localhost:${this._port}/.kill`);
-      }
-      const inUse = await utils.checkPortInUse(this._port);
-      if (inUse) {
-        throw new Error(`Port ${this._port} already in use by another process.`);
-      }
-    }
-    log.info(`Starting Franklin import server v${packageJson.version}`);
-    await new Promise((resolve, reject) => {
-      this._app.use(cookieParser());
-      this._server = this._app.listen(this._port, (err) => {
-        /* c8 ignore start */
-        // codecov:ignore:start
-        if (err) {
-          reject(new Error(`Error while starting http server: ${err}`));
-        }
-        // codecov:ignore:end
-        /* c8 ignore end */
-        this._port = this._server.address().port;
-        log.info(`Local Franklin Dev server up and running: http://localhost:${this._port}/`);
-        resolve();
-      });
-    });
-
-    await this.setupApp();
-  }
-
-  async stop() {
-    const { log } = this;
-    if (!this._server) {
-      log.warn('server not started.');
-      return true;
-    }
-    return new Promise((resolve, reject) => {
-      this._server.close((err) => {
-        /* c8 ignore start */
-        // codecov:ignore:start
-        if (err) {
-          reject(new Error(`Error while stopping http server: ${err}`));
-        }
-        // codecov:ignore:end
-        /* c8 ignore end */
-        log.info('Local Franklin Dev server stopped.');
-        this._server = null;
-        resolve();
-      });
-    });
+  async doStop() {
+    await super.doStop();
+    await context.reset();
   }
 }

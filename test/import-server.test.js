@@ -16,7 +16,7 @@ import os from 'os';
 import assert from 'assert';
 import fse from 'fs-extra';
 import path from 'path';
-import HelixImportProject from '../src/server/HelixImportProject.js';
+import { HelixImportProject } from '../src/server/HelixImportProject.js';
 import { assertHttp, createTestRoot, setupProject } from './utils.js';
 
 const TEST_DIR = path.resolve(__rootdir, 'test', 'fixtures', 'import');
@@ -42,23 +42,38 @@ describe('Helix Server', () => {
     const cwd = await setupProject(TEST_DIR, testRoot);
     const project = new HelixImportProject()
       .withCwd(cwd)
-      .withLogger(console)
-      .withHttpPort(56789);
+      .withHttpPort(0)
+      .withLogger(console);
     await project.init();
     try {
       await project.start();
-
       const project2 = new HelixImportProject()
         .withCwd(cwd)
         .withKill(false)
         .withHttpPort(project.server.port);
       await project2.init();
-      try {
-        await project2.start();
-        assert.fail('server should detect port in use.');
-      } catch (e) {
-        assert.equal(e.message, `Port ${project.server.port} already in use by another process.`);
-      }
+      await assert.rejects(project2.start(), Error(`Port ${project.server.port} already in use by another process.`));
+    } finally {
+      await project.stop();
+    }
+  });
+
+  it('does not start on occupied port on ADDR_ANY', async () => {
+    const cwd = await setupProject(TEST_DIR, testRoot);
+    const project = new HelixImportProject()
+      .withCwd(cwd)
+      .withHttpPort(0)
+      .withBindAddr('*')
+      .withLogger(console);
+    await project.init();
+    try {
+      await project.start();
+      const project2 = new HelixImportProject()
+        .withCwd(cwd)
+        .withKill(false)
+        .withHttpPort(project.server.port);
+      await project2.init();
+      await assert.rejects(project2.start(), Error(`Port ${project.server.port} already in use by another process.`));
     } finally {
       await project.stop();
     }
@@ -90,7 +105,7 @@ describe('Helix Server', () => {
     } finally {
       await project.stop();
     }
-  });
+  }).timeout(5000);
 
   it('deliver static content resource', async () => {
     const cwd = await setupProject(TEST_DIR, testRoot);
@@ -100,7 +115,7 @@ describe('Helix Server', () => {
     await project.init();
     try {
       await project.start();
-      await assertHttp(`http://localhost:${project.server.port}/tools/importer/import.js`, 200);
+      await assertHttp(`http://127.0.0.1:${project.server.port}/tools/importer/import.js`, 200);
     } finally {
       await project.stop();
     }
@@ -114,7 +129,7 @@ describe('Helix Server', () => {
     await project.init();
     try {
       await project.start();
-      await assertHttp(`http://localhost:${project.server.port}/.kill`, 200, 'expected_goodbye.txt');
+      await assertHttp(`http://127.0.0.1:${project.server.port}/.kill`, 200, 'expected_goodbye.txt');
     } finally {
       assert.ok(!project.server.isStarted());
       await project.stop();
