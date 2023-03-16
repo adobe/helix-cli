@@ -14,6 +14,7 @@
 import assert from 'assert';
 import path from 'path';
 import fse from 'fs-extra';
+import esmock from 'esmock';
 import {
   Nock, assertHttp, createTestRoot, initGit, switchBranch, signal,
 } from './utils.js';
@@ -40,19 +41,21 @@ describe('Integration test for up command with helix pages', function suite() {
     nock.done();
   });
 
-  it('up command delivers correct response.', (done) => {
+  it('up command opens browser and delivers correct response.', async () => {
+    let opened;
+    const MockedCommand = await esmock('../src/up.cmd.js', {
+      '../src/abstract-server.cmd.js': await esmock('../src/abstract-server.cmd.js', {
+        open: (url) => {
+          opened = url;
+        },
+      }),
+    });
     initGit(testDir, 'https://github.com/adobe/dummy-foo.git');
-    let error = null;
-    const cmd = new UpCommand()
+    const cmd = new MockedCommand()
       .withLiveReload(false)
       .withDirectory(testDir)
-      .withOpen(false)
+      .withOpen('/')
       .withHttpPort(0);
-
-    const myDone = (err) => {
-      error = err;
-      return cmd.stop();
-    };
 
     nock('https://master--dummy-foo--adobe.hlx.page')
       .get('/fstab.yaml')
@@ -64,24 +67,33 @@ describe('Integration test for up command with helix pages', function suite() {
       .get('/head.html')
       .reply(200, '<link rel="stylesheet" href="/styles.css"/>');
 
-    cmd
-      .on('started', async () => {
-        try {
-          let ret = await assertHttp(`http://127.0.0.1:${cmd.project.server.port}/index.html`, 200);
-          assert.strictEqual(ret.trim(), '## Welcome');
-          ret = await assertHttp(`http://127.0.0.1:${cmd.project.server.port}/local.txt`, 200);
-          assert.strictEqual(ret.trim(), 'Hello, world.');
-          await assertHttp(`http://127.0.0.1:${cmd.project.server.port}/not-found.txt`, 404);
-          await myDone();
-        } catch (e) {
-          await myDone(e);
-        }
-      })
-      .on('stopped', () => {
-        done(error);
-      })
-      .run()
-      .catch(done);
+    let port;
+    await new Promise((resolve, reject) => {
+      let error = null;
+      cmd
+        .on('started', async () => {
+          try {
+            port = cmd.project.server.port;
+            let ret = await assertHttp(`http://127.0.0.1:${port}/index.html`, 200);
+            assert.strictEqual(ret.trim(), '## Welcome');
+            ret = await assertHttp(`http://127.0.0.1:${port}/local.txt`, 200);
+            assert.strictEqual(ret.trim(), 'Hello, world.');
+            await assertHttp(`http://127.0.0.1:${port}/not-found.txt`, 404);
+          } catch (e) {
+            error = e;
+          }
+          await cmd.stop();
+        })
+        .on('stopped', () => {
+          if (error) {
+            reject(error);
+          }
+          resolve();
+        })
+        .run()
+        .catch(reject);
+    });
+    assert.strictEqual(opened, `http://localhost:${port}/`);
   });
 
   it('up command delivers correct response (branch with slash).', (done) => {

@@ -96,6 +96,12 @@ export class BaseServer extends EventEmitter {
     return this._addr;
   }
 
+  get hostname() {
+    return this._addr === '127.0.0.1' || this._addr === '0.0.0.0'
+      ? 'localhost'
+      : this._addr;
+  }
+
   get scheme() {
     return this._scheme;
   }
@@ -135,10 +141,7 @@ export class BaseServer extends EventEmitter {
         }
         this._port = this._server.address().port;
         this._addr = this._server.address().address;
-        this._addrName = this._addr === '127.0.0.1' || this._addr === '0.0.0.0'
-          ? 'localhost'
-          : this._addr;
-        log.info(`Local Franklin dev server up and running: ${this._scheme}://${this._addrName}:${this._port}/`);
+        log.info(`Local Franklin dev server up and running: ${this.scheme}://${this.hostname}:${this.port}/`);
         if (this._project.proxyUrl) {
           log.info(`Enabled reverse proxy to ${this._project.proxyUrl}`);
         }

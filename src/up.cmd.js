@@ -12,56 +12,15 @@
 import fs from 'fs/promises';
 import path from 'path';
 import fse from 'fs-extra';
-import opn from 'open';
 import chalk from 'chalk-template';
 import chokidar from 'chokidar';
 import { HelixProject } from './server/HelixProject.js';
 import GitUtils from './git-utils.js';
 import pkgJson from './package.cjs';
-import { fetch, context } from './fetch-utils.js';
-import AbstractCommand from './abstract.cmd.js';
+import { fetch } from './fetch-utils.js';
+import { AbstractServerCommand } from './abstract-server.cmd.js';
 
-export default class UpCommand extends AbstractCommand {
-  constructor(logger) {
-    super(logger);
-    this._httpPort = -1;
-    this._bindAddr = null;
-    this._tls = false;
-    this._tlsCertPath = undefined;
-    this._tlsKeyPath = undefined;
-    this._scheme = 'http';
-    this._open = '/';
-    this._liveReload = false;
-    this._url = null;
-    this._cache = null;
-    this._printIndex = false;
-    this._stopping = false;
-  }
-
-  withHttpPort(p) {
-    this._httpPort = p;
-    return this;
-  }
-
-  withBindAddr(a) {
-    this._bindAddr = a;
-    return this;
-  }
-
-  withTLS(tlsKeyPath, tlsCertPath) {
-    if (tlsKeyPath && tlsCertPath) {
-      this._tls = true;
-      this._tlsKeyPath = tlsKeyPath;
-      this._tlsCertPath = tlsCertPath;
-    }
-    return this;
-  }
-
-  withOpen(o) {
-    this._open = o === 'false' ? false : o;
-    return this;
-  }
-
+export default class UpCommand extends AbstractServerCommand {
   withLiveReload(value) {
     this._liveReload = value;
     return this;
@@ -72,45 +31,21 @@ export default class UpCommand extends AbstractCommand {
     return this;
   }
 
-  withCache(value) {
-    this._cache = value;
-    return this;
-  }
-
   withPrintIndex(value) {
     this._printIndex = value;
     return this;
   }
 
-  withKill(value) {
-    this._kill = value;
-    return this;
-  }
-
-  get project() {
-    return this._project;
-  }
-
-  async stop() {
-    if (this._stopping) {
-      return;
-    }
-    this._stopping = true;
-    if (this._project) {
-      await this._project.stop();
-      delete this._project;
-    }
+  async doStop() {
+    await super.doStop();
     if (this._watcher) {
       const watcher = this._watcher;
       delete this._watcher;
       await watcher.close();
     }
-    await context.reset();
-    this.log.info('Franklin project stopped.');
-    this.emit('stopped', this);
   }
 
-  async setup() {
+  async init() {
     await super.init();
     // check for git repository
     try {
@@ -263,17 +198,5 @@ export default class UpCommand extends AbstractCommand {
         }, 100);
       }
     });
-  }
-
-  async run() {
-    await this.setup();
-    await this._project.start();
-    this.emit('started', this);
-    if (this._open) {
-      const url = this._open.startsWith('/')
-        ? `${this._scheme}://localhost:${this._project.server.port}${this._open}`
-        : this._open;
-      await opn(url);
-    }
   }
 }

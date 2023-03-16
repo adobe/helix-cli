@@ -11,48 +11,17 @@
  */
 import fse from 'fs-extra';
 import path from 'path';
-import opn from 'open';
 import chalk from 'chalk-template';
 import git from 'isomorphic-git';
 import http from 'isomorphic-git/http/node/index.js';
 import { HelixImportProject } from './server/HelixImportProject.js';
 import pkgJson from './package.cjs';
-import AbstractCommand from './abstract.cmd.js';
-import { context } from './fetch-utils.js';
+import { AbstractServerCommand } from './abstract-server.cmd.js';
 
-export default class ImportCommand extends AbstractCommand {
+export default class ImportCommand extends AbstractServerCommand {
   constructor(logger) {
     super(logger);
-    this._httpPort = -1;
-    this._bindAddr = null;
     this._importerSubPath = 'tools/importer';
-    this._stopping = false;
-    this._cache = null;
-  }
-
-  withHttpPort(p) {
-    this._httpPort = p;
-    return this;
-  }
-
-  withBindAddr(a) {
-    this._bindAddr = a;
-    return this;
-  }
-
-  withOpen(o) {
-    this._open = o === 'false' ? false : o;
-    return this;
-  }
-
-  withCache(value) {
-    this._cache = value;
-    return this;
-  }
-
-  withKill(value) {
-    this._kill = value;
-    return this;
   }
 
   withSkipUI(value) {
@@ -63,24 +32,6 @@ export default class ImportCommand extends AbstractCommand {
   withUIRepo(value) {
     this._uiRepo = value;
     return this;
-  }
-
-  get project() {
-    return this._project;
-  }
-
-  async stop() {
-    if (this._stopping) {
-      return;
-    }
-    this._stopping = true;
-    if (this._project) {
-      await this._project.stop();
-      delete this._project;
-    }
-    await context.reset();
-    this.log.info('Franklin project stopped.');
-    this.emit('stopped', this);
   }
 
   async setupImporterUI() {
@@ -120,7 +71,7 @@ export default class ImportCommand extends AbstractCommand {
     }
   }
 
-  async setup() {
+  async init() {
     await super.init();
 
     // init dev default file params
@@ -156,22 +107,6 @@ export default class ImportCommand extends AbstractCommand {
       await this._project.init();
     } catch (e) {
       throw Error(`Unable to start Franklin: ${e.message}`);
-    }
-
-    this._project.on('server-killed', async () => {
-      await this.stop();
-    });
-  }
-
-  async run() {
-    await this.setup();
-    await this._project.start();
-    this.emit('started', this);
-    if (this._open) {
-      const url = this._open.startsWith('/')
-        ? `http://localhost:${this._project.server.port}${this._open}`
-        : this._open;
-      await opn(url);
     }
   }
 }

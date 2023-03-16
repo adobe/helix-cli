@@ -12,7 +12,7 @@
 import EventEmitter from 'events';
 import { getOrCreateLogger } from './log-common.js';
 
-export default class AbstractCommand extends EventEmitter {
+export class AbstractCommand extends EventEmitter {
   constructor(logger) {
     super();
     this._initialized = false;

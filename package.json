@@ -19,7 +19,8 @@
     "require": "test/setup-env.js",
     "recursive": "true",
     "reporter": "mocha-multi-reporters",
-    "reporter-options": "configFile=.mocha-multi.json"
+    "reporter-options": "configFile=.mocha-multi.json",
+    "loader": "esmock"
   },
   "repository": {
     "type": "git",
@@ -74,6 +75,7 @@
     "@semantic-release/git": "10.0.1",
     "c8": "7.13.0",
     "eslint": "8.36.0",
+    "esmock": "2.1.0",
     "husky": "8.0.3",
     "junit-report-builder": "3.0.1",
     "lint-staged": "13.2.0",
