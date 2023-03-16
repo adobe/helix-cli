@@ -390,9 +390,9 @@ window.LiveReloadOptions = {
    * Checks if the given port is already in use on any addr. This is used to prevent starting a
    * server on the same port with an existing socket bound to 0.0.0.0 and SO_REUSEADDR.
    * @param port
-   * @return {Promise} that resolves `true` if the port is in use.
+   @param addr   * @return {Promise} that resolves `true` if the port is in use.
    */
-  checkPortInUse(port) {
+  checkPortInUse(port, addr = '0.0.0.0') {
     return new Promise((resolve, reject) => {
       let socket;
 
@@ -417,7 +417,7 @@ window.LiveReloadOptions = {
         cleanUp();
       });
 
-      socket.connect(port, () => {
+      socket.connect(port, addr, () => {
         resolve(true);
         cleanUp();
       });

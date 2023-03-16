@@ -11,7 +11,7 @@
  */
 import chalk from 'chalk-template';
 import opn from 'open';
-import AbstractCommand from './abstract.cmd.js';
+import { AbstractCommand } from './abstract.cmd.js';
 
 export default class HackCommand extends AbstractCommand {
   constructor(logger) {
@@ -37,9 +37,9 @@ export default class HackCommand extends AbstractCommand {
 
   async run() {
     await this.init();
-    const url = `https://github.com/adobe/helix-home/tree/main/hackathons/${this._hackathon}.md`;
+    const url = `https://github.com/adobe/helix-home/tree/main/hackathons/${encodeURIComponent(this._hackathon)}.md`;
     if (this._open) {
-      opn(url, { url: true });
+      await opn(url);
     } else {
       // eslint-disable-next-line no-console
       this.log.info(chalk`Check out the Franklin Hackathon at {blue ${url}}`);

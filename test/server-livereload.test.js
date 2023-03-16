@@ -18,7 +18,7 @@ import assert from 'assert';
 import fse from 'fs-extra';
 import path from 'path';
 import WebSocket from 'faye-websocket';
-import HelixProject from '../src/server/HelixProject.js';
+import { HelixProject } from '../src/server/HelixProject.js';
 import {
   assertHttp, createTestRoot, Nock, setupProject, wait,
 } from './utils.js';
@@ -32,7 +32,7 @@ describe('Helix Server with Livereload', () => {
 
   beforeEach(async () => {
     nock = new Nock();
-    nock.enableNetConnect(/localhost/);
+    nock.enableNetConnect(/127.0.0.1/);
     testRoot = await createTestRoot();
     CODESPACES_ORIGINAL = process.env.CODESPACES;
   });
@@ -58,7 +58,7 @@ describe('Helix Server with Livereload', () => {
     await project.init();
     try {
       await project.start();
-      await assertHttp(`http://localhost:${project.server.port}/__internal__/livereload.js`, 200, require.resolve('livereload-js/dist/livereload.js'));
+      await assertHttp(`http://127.0.0.1:${project.server.port}/__internal__/livereload.js`, 200, require.resolve('livereload-js/dist/livereload.js'));
     } finally {
       await project.stop();
     }
@@ -84,7 +84,7 @@ describe('Helix Server with Livereload', () => {
 
     try {
       await project.start();
-      await assertHttp(`http://localhost:${project.server.port}/live/index.html`, 200, 'expected_index_w_lr.html', [{
+      await assertHttp(`http://127.0.0.1:${project.server.port}/live/index.html`, 200, 'expected_index_w_lr.html', [{
         pattern: 'PORT',
         with: project.server.port,
       }]);
@@ -113,7 +113,7 @@ describe('Helix Server with Livereload', () => {
 
     try {
       await project.start();
-      await assertHttp(`http://localhost:${project.server.port}/live/index.html`, 200, 'expected_index_w_lr_nohead.html', [{
+      await assertHttp(`http://127.0.0.1:${project.server.port}/live/index.html`, 200, 'expected_index_w_lr_nohead.html', [{
         pattern: 'PORT',
         with: project.server.port,
       }]);
@@ -143,7 +143,7 @@ describe('Helix Server with Livereload', () => {
 
     try {
       await project.start();
-      await assertHttp(`http://localhost:${project.server.port}/live/index.html`, 200, 'expected_index_w_lr_nohead_codespaces.html');
+      await assertHttp(`http://127.0.0.1:${project.server.port}/live/index.html`, 200, 'expected_index_w_lr_nohead_codespaces.html');
     } finally {
       await project.stop();
     }
@@ -169,7 +169,7 @@ describe('Helix Server with Livereload', () => {
 
     try {
       await project.start();
-      await assertHttp(`http://localhost:${project.server.port}/live/index.html`, 200, 'expected_index_w_lr_nobody.html', [{
+      await assertHttp(`http://127.0.0.1:${project.server.port}/live/index.html`, 200, 'expected_index_w_lr_nobody.html', [{
         pattern: 'PORT',
         with: project.server.port,
       }]);
@@ -198,7 +198,7 @@ describe('Helix Server with Livereload', () => {
     await project.init();
     try {
       await project.start();
-      await assertHttp(`http://localhost:${project.server.port}/live/index.html`, 200, 'expected_index_w_lr_nohtml.html');
+      await assertHttp(`http://127.0.0.1:${project.server.port}/live/index.html`, 200, 'expected_index_w_lr_nohtml.html');
     } finally {
       await project.stop();
     }
@@ -223,12 +223,12 @@ describe('Helix Server with Livereload', () => {
     try {
       await project.start();
 
-      await assertHttp(`http://localhost:${project.server.port}/live/index.html`, 200, 'expected_index_w_lr.html', [{
+      await assertHttp(`http://127.0.0.1:${project.server.port}/live/index.html`, 200, 'expected_index_w_lr.html', [{
         pattern: 'PORT',
         with: project.server.port,
       }]);
 
-      const ws = new WebSocket.Client(`ws://localhost:${project.server.port}/`);
+      const ws = new WebSocket.Client(`ws://127.0.0.1:${project.server.port}/`);
       let wsReloadData = null;
       let wsHelloData = null;
       const wsOpenPromise = new Promise((resolve, reject) => {
@@ -239,7 +239,7 @@ describe('Helix Server with Livereload', () => {
           ws.send(JSON.stringify({
             command: 'info',
             plugins: [],
-            url: `http://localhost:${project.server.port}/styles.css`,
+            url: `http://127.0.0.1:${project.server.port}/styles.css`,
           }));
           resolve();
         });
@@ -262,7 +262,7 @@ describe('Helix Server with Livereload', () => {
         ws.on('close', resolve);
       });
 
-      await assertHttp(`http://localhost:${project.server.port}/styles.css`, 200, 'expected_styles.css');
+      await assertHttp(`http://127.0.0.1:${project.server.port}/styles.css`, 200, 'expected_styles.css');
       await wsOpenPromise;
       await fse.copy(path.resolve(cwd, 'styles-modified.css'), path.resolve(cwd, 'styles.css'));
       await wait(500);
@@ -309,12 +309,12 @@ describe('Helix Server with Livereload', () => {
 
     try {
       await project.start();
-      await assertHttp(`http://localhost:${project.server.port}/live/index.html`, 200, 'expected_index_w_lr.html', [{
+      await assertHttp(`http://127.0.0.1:${project.server.port}/live/index.html`, 200, 'expected_index_w_lr.html', [{
         pattern: 'PORT',
         with: project.server.port,
       }]);
 
-      const ws = new WebSocket.Client(`ws://localhost:${project.server.port}/`);
+      const ws = new WebSocket.Client(`ws://127.0.0.1:${project.server.port}/`);
       let wsAlertData = null;
       let wsHelloData = null;
       const wsOpenPromise = new Promise((resolve, reject) => {
@@ -325,7 +325,7 @@ describe('Helix Server with Livereload', () => {
           ws.send(JSON.stringify({
             command: 'info',
             plugins: [],
-            url: `http://localhost:${project.server.port}/index.html`,
+            url: `http://127.0.0.1:${project.server.port}/index.html`,
           }));
           resolve();
         });
@@ -349,7 +349,7 @@ describe('Helix Server with Livereload', () => {
       });
 
       await wsOpenPromise;
-      project._liveReload.alert('hello alert');
+      project.liveReload.alert('hello alert');
       await wait(500);
       ws.close();
       // ensure socket properly closes

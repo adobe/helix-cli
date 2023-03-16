@@ -102,6 +102,10 @@ class ClientConnection extends EventEmitter {
       message,
     });
   }
+
+  close() {
+    this._onClose({});
+  }
 }
 
 /**
@@ -203,6 +207,7 @@ export default class LiveReload extends EventEmitter {
       delete this._watcher;
     }
     this._onSvrClose();
+    this.log.debug('livereload stopped.');
   }
 
   _onSvrUpgrade(req, socket, head) {
@@ -210,10 +215,10 @@ export default class LiveReload extends EventEmitter {
     this._connections[cx.id] = cx;
 
     socket.on('error', (e) => {
-      if (e.code === 'ECONNRESET') {
+      if (e.code === 'ECONNRESET' || e.code === 'EBADF') {
         return;
       }
-      this._error(e);
+      this._onSvrError(e);
     });
 
     cx.once('end', () => {
@@ -224,7 +229,11 @@ export default class LiveReload extends EventEmitter {
 
   _onSvrClose() {
     Object.values(this._connections).forEach((cx) => {
-      cx.close();
+      try {
+        cx.close();
+      } catch (e) {
+        this.log.error('error closing connection', e);
+      }
     }, this);
   }
 

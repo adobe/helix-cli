@@ -51,6 +51,11 @@ export default function up() {
           type: 'int',
           default: 3000,
         })
+        .option('addr', {
+          describe: 'Bind development server on addr. use * to bind to any address and allow external connections.',
+          type: 'string',
+          default: '127.0.0.1',
+        })
         .option('tls-cert', {
           alias: 'tlsCert',
           describe: 'File location for your .pem file for local TLS support',
@@ -75,7 +80,7 @@ export default function up() {
           type: 'boolean',
           default: false,
         })
-        .group(['port'], 'Server options')
+        .group(['port', 'add'], 'Server options')
         .option('url', {
           alias: ['pagesUrl', 'pages-url'],
           describe: 'The origin url to fetch content from.',
@@ -99,6 +104,7 @@ export default function up() {
 
       await executor
         .withHttpPort(argv.port)
+        .withBindAddr(argv.addr)
         // only open  browser window when executable is `hlx`
         // this prevents the window to be opened during integration tests
         .withOpen(path.basename(argv.$0) === 'hlx' ? argv.open : false)

@@ -12,6 +12,7 @@
 /* eslint-env mocha */
 import assert from 'assert';
 import path from 'path';
+import net from 'net';
 import shell from 'shelljs';
 import crypto from 'crypto';
 import fse from 'fs-extra';
@@ -99,6 +100,27 @@ export async function setupProject(srcDir, root) {
 export async function wait(time) {
   return new Promise((resolve) => {
     setTimeout(resolve, time);
+  });
+}
+
+export async function rawGet(host, port, pathname) {
+  return new Promise((resolve, reject) => {
+    const response = [];
+    const client = net.createConnection({
+      host,
+      port,
+    }, () => {
+      client.write(`GET ${pathname}\r\n\r\n`);
+    });
+    client.on('data', (data) => {
+      response.push(data);
+    });
+    client.on('end', () => {
+      resolve(Buffer.concat(response));
+    });
+    client.on('error', (err) => {
+      reject(err);
+    });
   });
 }
 

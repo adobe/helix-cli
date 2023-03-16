@@ -11,40 +11,17 @@
  */
 import fse from 'fs-extra';
 import path from 'path';
-import opn from 'open';
 import chalk from 'chalk-template';
 import git from 'isomorphic-git';
 import http from 'isomorphic-git/http/node/index.js';
-import HelixImportProject from './server/HelixImportProject.js';
+import { HelixImportProject } from './server/HelixImportProject.js';
 import pkgJson from './package.cjs';
-import AbstractCommand from './abstract.cmd.js';
+import { AbstractServerCommand } from './abstract-server.cmd.js';
 
-export default class ImportCommand extends AbstractCommand {
+export default class ImportCommand extends AbstractServerCommand {
   constructor(logger) {
     super(logger);
-    this._httpPort = -1;
     this._importerSubPath = 'tools/importer';
-    this._cache = null;
-  }
-
-  withHttpPort(p) {
-    this._httpPort = p;
-    return this;
-  }
-
-  withOpen(o) {
-    this._open = o === 'false' ? false : o;
-    return this;
-  }
-
-  withCache(value) {
-    this._cache = value;
-    return this;
-  }
-
-  withKill(value) {
-    this._kill = value;
-    return this;
   }
 
   withSkipUI(value) {
@@ -55,27 +32,6 @@ export default class ImportCommand extends AbstractCommand {
   withUIRepo(value) {
     this._uiRepo = value;
     return this;
-  }
-
-  get project() {
-    return this._project;
-  }
-
-  async stop() {
-    if (this._project) {
-      try {
-        await this._project.stop();
-      // codecov:ignore:start
-      /* c8 ignore start */
-      } catch (e) {
-        // ignore
-      }
-      // codecov:ignore:end
-      /* c8 ignore end */
-      this._project = null;
-    }
-    this.log.info('Franklin project stopped.');
-    this.emit('stopped', this);
   }
 
   async setupImporterUI() {
@@ -115,7 +71,7 @@ export default class ImportCommand extends AbstractCommand {
     }
   }
 
-  async setup() {
+  async init() {
     await super.init();
 
     // init dev default file params
@@ -139,6 +95,9 @@ export default class ImportCommand extends AbstractCommand {
     if (this._httpPort >= 0) {
       this._project.withHttpPort(this._httpPort);
     }
+    if (this._bindAddr) {
+      this._project.withBindAddr(this._bindAddr);
+    }
 
     if (!this._skipUI) {
       await this.setupImporterUI();
@@ -148,18 +107,6 @@ export default class ImportCommand extends AbstractCommand {
       await this._project.init();
     } catch (e) {
       throw Error(`Unable to start Franklin: ${e.message}`);
-    }
-  }
-
-  async run() {
-    await this.setup();
-    await this._project.start();
-    this.emit('started', this);
-    if (this._open) {
-      const url = this._open.startsWith('/')
-        ? `http://localhost:${this._project.server.port}${this._open}`
-        : this._open;
-      opn(url, { url: true });
     }
   }
 }

@@ -12,6 +12,7 @@
 /* eslint-env mocha */
 import assert from 'assert';
 import { logging } from '@adobe/helix-testutils';
+import esmock from 'esmock';
 import hack from '../src/hack.js';
 import CLI from '../src/cli.js';
 import HackCommand from '../src/hack.cmd.js';
@@ -32,5 +33,19 @@ describe('Test hlx hack', () => {
       .run();
     const log = logger.getOutput();
     assert.ok(log.indexOf(`/hackathons/${hackathon}.md`) > 0);
+  });
+
+  it('hlx hack opens browser', async () => {
+    let opened;
+    const MockedCommand = await esmock('../src/hack.cmd.js', {
+      open: (url) => {
+        opened = url;
+      },
+    });
+    await new MockedCommand()
+      .withHackathon('test$(calc.exe)test')
+      .withOpen(true)
+      .run();
+    assert.strictEqual(opened, 'https://github.com/adobe/helix-home/tree/main/hackathons/test%24(calc.exe)test.md');
   });
 });

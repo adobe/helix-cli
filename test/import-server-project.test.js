@@ -13,24 +13,29 @@
 /* eslint-env mocha */
 import assert from 'assert';
 import path from 'path';
-import HelixImportProject from '../src/server/HelixImportProject.js';
+import { HelixImportProject } from '../src/server/HelixImportProject.js';
 
 const SPEC_ROOT = path.resolve(__rootdir, 'test', 'specs');
 
 describe('Helix Project', () => {
-  it('can set port', async () => {
+  it('can set port and bind address', async () => {
     const cwd = path.join(SPEC_ROOT, 'fixtures', 'import');
     const project = await new HelixImportProject()
       .withCwd(cwd)
       .withHttpPort(0)
+      .withBindAddr('*')
       .init();
 
     await project.start();
-    assert.equal(true, project.started);
-    assert.notEqual(project.server.port, 0);
-    assert.notEqual(project.server.port, 3000);
-    await project.stop();
-    assert.equal(false, project.started);
+    try {
+      assert.strictEqual(project.started, true);
+      assert.notStrictEqual(project.server.port, 0);
+      assert.notStrictEqual(project.server.port, 3000);
+      assert.strictEqual(project.server.addr, '0.0.0.0');
+    } finally {
+      await project.stop();
+    }
+    assert.strictEqual(project.started, false);
   });
 
   it('can start and stop local project', async () => {
@@ -41,8 +46,11 @@ describe('Helix Project', () => {
       .init();
 
     await project.start();
-    assert.equal(true, project.started);
-    await project.stop();
-    assert.equal(false, project.started);
+    try {
+      assert.strictEqual(project.started, true);
+    } finally {
+      await project.stop();
+    }
+    assert.strictEqual(project.started, false);
   });
 });

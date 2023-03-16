@@ -37,6 +37,7 @@ describe('hlx import', () => {
     mockImport = sinon.createStubInstance(ImportCommand);
     mockImport.withOpen.returnsThis();
     mockImport.withHttpPort.returnsThis();
+    mockImport.withBindAddr.returnsThis();
     mockImport.withKill.returnsThis();
     mockImport.withCache.returnsThis();
     mockImport.withSkipUI.returnsThis();
@@ -102,6 +103,12 @@ describe('hlx import', () => {
   it('hlx import can specify port number to run proxy server on', async () => {
     await cli.run(['import', '--port', '3210']);
     sinon.assert.calledWith(mockImport.withHttpPort, 3210);
+    sinon.assert.calledOnce(mockImport.run);
+  });
+
+  it('hlx import can specify bind address to run development server on', async () => {
+    await cli.run(['import', '--addr', '192.168.1.7']);
+    sinon.assert.calledWith(mockImport.withBindAddr, '192.168.1.7');
     sinon.assert.calledOnce(mockImport.run);
   });
 

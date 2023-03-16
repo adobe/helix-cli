@@ -9,107 +9,22 @@
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-import { ConsoleLogger, deriveLogger, SimpleInterface } from '@adobe/helix-log';
-import HelixImportServer from './HelixImportServer.js';
+import { HelixImportServer } from './HelixImportServer.js';
+import { BaseProject } from './BaseProject.js';
 
-export default class HelixProject {
+export class HelixImportProject extends BaseProject {
   constructor() {
-    this._cwd = process.cwd();
-    this._server = new HelixImportServer(this);
-    this._logger = null;
-    this._cacheDirectory = null;
-    this._kill = false;
-  }
-
-  withCwd(cwd) {
-    this._cwd = cwd;
-    return this;
-  }
-
-  withKill(kill) {
-    this._kill = !!kill;
-    return this;
-  }
-
-  withHttpPort(port) {
-    this._server.withPort(port);
-    return this;
-  }
-
-  withLogger(logger) {
-    this._logger = logger;
-    return this;
-  }
-
-  withCacheDirectory(value) {
-    this._cacheDirectory = value;
-    return this;
-  }
-
-  get log() {
-    return this._logger;
-  }
-
-  get started() {
-    return this._server.isStarted();
-  }
-
-  get cacheDirectory() {
-    return this._cacheDirectory;
-  }
-
-  get directory() {
-    return this._cwd;
-  }
-
-  get kill() {
-    return this._kill;
-  }
-
-  /**
-   * Returns the helix server
-   * @returns {HelixImportServer}
-   */
-  get server() {
-    return this._server;
-  }
-
-  async init() {
-    if (!this._logger) {
-      this._logger = new SimpleInterface({
-        logger: new ConsoleLogger(),
-        level: 'debug',
-        defaultFields: {
-          category: 'hlx',
-        },
-        filter: (fields) => {
-          // eslint-disable-next-line no-param-reassign
-          fields.message[0] = `[${fields.category}] ${fields.message[0]}`;
-          // eslint-disable-next-line no-param-reassign
-          delete fields.category;
-          return fields;
-        },
-      });
-    } else {
-      this._logger = deriveLogger(this._logger, {
-        defaultFields: {
-          category: 'hlx',
-        },
-      });
-    }
-
-    return this;
+    super(HelixImportServer);
   }
 
   async start() {
     this.log.debug('Launching Franklin import server for importing content...');
-    await this._server.start(this);
+    await super.start();
     return this;
   }
 
-  async stop() {
+  async doStop() {
     this.log.debug('Stopping Franklin import server..');
-    await this._server.stop();
-    return this;
+    await super.doStop();
   }
 }
