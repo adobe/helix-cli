@@ -1,3 +1,15 @@
+# [14.22.0](https://github.com/adobe/helix-cli/compare/v14.21.5...v14.22.0) (2023-03-16)
+
+
+### Bug Fixes
+
+* **deps:** update dependency glob to v9 ([#2155](https://github.com/adobe/helix-cli/issues/2155)) ([e8fa1e3](https://github.com/adobe/helix-cli/commit/e8fa1e37dd38cf62e01dc119d1d012bde9950a27))
+
+
+### Features
+
+* security improvements ([#2156](https://github.com/adobe/helix-cli/issues/2156)) ([a298886](https://github.com/adobe/helix-cli/commit/a2988861cc48e6eeae0b55080e3b80032c2887b0)), closes [#2153](https://github.com/adobe/helix-cli/issues/2153) [#2149](https://github.com/adobe/helix-cli/issues/2149) [#2150](https://github.com/adobe/helix-cli/issues/2150)
+
 ## [14.21.5](https://github.com/adobe/helix-cli/compare/v14.21.4...v14.21.5) (2023-03-14)
 
 
