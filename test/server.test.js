@@ -18,7 +18,7 @@ import fse from 'fs-extra';
 import path from 'path';
 import { HelixProject } from '../src/server/HelixProject.js';
 import {
-  Nock, assertHttp, createTestRoot, setupProject,
+  Nock, assertHttp, createTestRoot, setupProject, rawGet,
 } from './utils.js';
 import { fetch } from '../src/fetch-utils.js';
 
@@ -112,6 +112,27 @@ describe('Helix Server', () => {
     try {
       await project.start();
       await assertHttp(`http://127.0.0.1:${project.server.port}/welcome.txt`, 200, 'expected_welcome.txt');
+    } finally {
+      await project.stop();
+    }
+  });
+
+  it('rejects path outside project directory', async () => {
+    const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
+    const project = new HelixProject()
+      .withCwd(cwd)
+      .withProxyUrl('https://main--foo--bar.hlx.page/')
+      .withHttpPort(0);
+
+    nock('https://main--foo--bar.hlx.page')
+      .get('/head.html')
+      .reply(200, '<link rel="stylesheet" href="/styles.css"/>');
+
+    await project.init();
+    try {
+      await project.start();
+      const response = await rawGet('127.0.0.1', project.server.port, '/../../../win.ini');
+      assert.strictEqual(response.toString().startsWith('HTTP/1.1 403 Forbidden'), true);
     } finally {
       await project.stop();
     }

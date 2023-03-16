@@ -34,6 +34,11 @@ export class HelixImportServer extends BaseServer {
     // try to serve static
     try {
       const filePath = path.join(this._project.directory, ctx.path);
+      if (path.relative(this._project.directory, filePath).startsWith('..')) {
+        log.info(`refuse to serve file outside the project directory: ${filePath}`);
+        res.status(403).send('');
+        return;
+      }
       log.debug('trying to serve local file', filePath);
       await sendFile(filePath, {
         dotfiles: 'allow',

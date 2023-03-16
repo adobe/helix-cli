@@ -17,7 +17,9 @@ import assert from 'assert';
 import fse from 'fs-extra';
 import path from 'path';
 import { HelixImportProject } from '../src/server/HelixImportProject.js';
-import { assertHttp, createTestRoot, setupProject } from './utils.js';
+import {
+  assertHttp, createTestRoot, rawGet, setupProject,
+} from './utils.js';
 
 const TEST_DIR = path.resolve(__rootdir, 'test', 'fixtures', 'import');
 
@@ -116,6 +118,22 @@ describe('Helix Server', () => {
     try {
       await project.start();
       await assertHttp(`http://127.0.0.1:${project.server.port}/tools/importer/import.js`, 200);
+    } finally {
+      await project.stop();
+    }
+  });
+
+  it('rejects path outside project directory', async () => {
+    const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
+    const project = new HelixImportProject()
+      .withCwd(cwd)
+      .withHttpPort(0);
+
+    await project.init();
+    try {
+      await project.start();
+      const response = await rawGet('127.0.0.1', project.server.port, '/tools/../../../win.ini');
+      assert.strictEqual(response.toString().startsWith('HTTP/1.1 403 Forbidden'), true);
     } finally {
       await project.stop();
     }
