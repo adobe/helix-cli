@@ -1,3 +1,10 @@
+## [14.22.1](https://github.com/adobe/helix-cli/compare/v14.22.0...v14.22.1) (2023-03-18)
+
+
+### Bug Fixes
+
+* **deps:** update external fixes ([1379e10](https://github.com/adobe/helix-cli/commit/1379e1066e5460466ab198855bd984a84f64dd81))
+
 # [14.22.0](https://github.com/adobe/helix-cli/compare/v14.21.5...v14.22.0) (2023-03-16)
 
 
