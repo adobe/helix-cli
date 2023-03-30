@@ -1,3 +1,10 @@
+## [14.22.5](https://github.com/adobe/helix-cli/compare/v14.22.4...v14.22.5) (2023-03-30)
+
+
+### Bug Fixes
+
+* add tls options to import ([#2165](https://github.com/adobe/helix-cli/issues/2165)) ([3ecfd9d](https://github.com/adobe/helix-cli/commit/3ecfd9dbc73905ec6bed8d4e04f5b1a128dc3a37))
+
 ## [14.22.4](https://github.com/adobe/helix-cli/compare/v14.22.3...v14.22.4) (2023-03-28)
 
 
