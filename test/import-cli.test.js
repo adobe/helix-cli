@@ -36,6 +36,7 @@ describe('hlx import', () => {
     deleted = clearHelixEnv();
     mockImport = sinon.createStubInstance(ImportCommand);
     mockImport.withOpen.returnsThis();
+    mockImport.withTLS.returnsThis();
     mockImport.withHttpPort.returnsThis();
     mockImport.withBindAddr.returnsThis();
     mockImport.withKill.returnsThis();

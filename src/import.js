@@ -62,12 +62,24 @@ export default function up() {
           type: 'boolean',
           default: true,
         })
-        .group(['port', 'addr', 'stop-other'], 'Server options')
+        .option('tls-cert', {
+          alias: 'tlsCert',
+          describe: 'File location for your .pem file for local TLS support',
+          type: 'string',
+          default: undefined,
+        })
+        .option('tls-key', {
+          alias: 'tlsKey',
+          describe: 'File location for your .key file for local TLS support',
+          type: 'string',
+          default: undefined,
+        })
+        .group(['port', 'addr', 'stop-other', 'tls-cert', 'tls-key'], 'Server options')
         .option('cache', {
           describe: 'Path to local folder to cache the responses',
           type: 'string',
         })
-        .group(['open', 'no-open', 'cache'], 'Franklin Import Options')
+        .group(['open', 'no-open', 'cache', 'ui-repo', 'skip-ui'], 'Franklin Import Options')
 
         .help();
     },
@@ -87,6 +99,7 @@ export default function up() {
         // only open  browser window when executable is `hlx`
         // this prevents the window to be opened during integration tests
         .withOpen(path.basename(argv.$0) === 'hlx' ? argv.open : false)
+        .withTLS(argv.tlsKey, argv.tlsCert)
         .withKill(argv.stopOther)
         .withCache(argv.cache)
         .withSkipUI(argv.skipUI)

@@ -87,17 +87,7 @@ export default class ImportCommand extends AbstractServerCommand {
     this.log.info(chalk`{yellow                                            /_/  v${pkgJson.version}}`);
     this.log.info('');
 
-    if (this._cache) {
-      await fse.ensureDir(this._cache);
-      this._project.withCacheDirectory(this._cache);
-    }
-
-    if (this._httpPort >= 0) {
-      this._project.withHttpPort(this._httpPort);
-    }
-    if (this._bindAddr) {
-      this._project.withBindAddr(this._bindAddr);
-    }
+    await this.initSeverOptions();
 
     if (!this._skipUI) {
       await this.setupImporterUI();
