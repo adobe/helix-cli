@@ -9,7 +9,6 @@
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-import fs from 'fs/promises';
 import path from 'path';
 import fse from 'fs-extra';
 import chalk from 'chalk-template';
@@ -82,38 +81,8 @@ export default class UpCommand extends AbstractServerCommand {
       // check if remote already has the `ref`
       await this.verifyUrl(gitUrl, ref);
     }
-
-    if (this._cache) {
-      await fse.ensureDir(this._cache);
-      this._project.withCacheDirectory(this._cache);
-    }
-
-    if (this._tls) {
-      if (
-        !this._tlsCertPath
-        || !this._tlsKeyPath
-      ) {
-        throw Error(chalk`{red If using TLS, you must provide both tls cert and tls key...one or both not found }`);
-      }
-      // read each file
-      try {
-        const key = await fs.readFile(this._tlsKeyPath);
-        const cert = await fs.readFile(this._tlsCertPath);
-        this._project.withTLS(key, cert);
-        // if all of that works, switch to https scheme
-        this._scheme = 'https';
-      } catch (e) {
-        throw Error(chalk`{red Unable to read the tls key key or cert file. }`);
-      }
-    }
-
     this._project.withProxyUrl(this._url);
-    if (this._httpPort >= 0) {
-      this._project.withHttpPort(this._httpPort);
-    }
-    if (this._bindAddr) {
-      this._project.withBindAddr(this._bindAddr);
-    }
+    await this.initSeverOptions();
 
     try {
       await this._project.init();

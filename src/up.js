@@ -80,7 +80,7 @@ export default function up() {
           type: 'boolean',
           default: false,
         })
-        .group(['port', 'add'], 'Server options')
+        .group(['port', 'addr', 'stop-other', 'tls-cert', 'tls-key'], 'Server options')
         .option('url', {
           alias: ['pagesUrl', 'pages-url'],
           describe: 'The origin url to fetch content from.',
