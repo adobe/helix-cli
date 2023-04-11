@@ -1,3 +1,10 @@
+## [14.22.6](https://github.com/adobe/helix-cli/compare/v14.22.5...v14.22.6) (2023-04-11)
+
+
+### Bug Fixes
+
+* **deps:** update dependency glob to v10 ([#2169](https://github.com/adobe/helix-cli/issues/2169)) ([749ae65](https://github.com/adobe/helix-cli/commit/749ae65fe8a24994dbe93dc22a5cc9622168deb8))
+
 ## [14.22.5](https://github.com/adobe/helix-cli/compare/v14.22.4...v14.22.5) (2023-03-30)
 
 
