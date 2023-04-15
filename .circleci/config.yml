@@ -2,7 +2,7 @@ version: 2.1
 executors:
   node18:
     docker:
-      - image: cimg/node:18.15
+      - image: cimg/node:18.16
 
 orbs:
   win: circleci/windows@5.0.0
