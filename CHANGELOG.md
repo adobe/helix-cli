@@ -1,3 +1,10 @@
+# [14.23.0](https://github.com/adobe/helix-cli/compare/v14.22.13...v14.23.0) (2023-04-20)
+
+
+### Features
+
+* remove content-security-policy header for localhost ([#2179](https://github.com/adobe/helix-cli/issues/2179)) ([ce3261c](https://github.com/adobe/helix-cli/commit/ce3261c1348aae6727df7abe6f7ee94c903f0aad)), closes [#2178](https://github.com/adobe/helix-cli/issues/2178)
+
 ## [14.22.13](https://github.com/adobe/helix-cli/compare/v14.22.12...v14.22.13) (2023-04-16)
 
 
