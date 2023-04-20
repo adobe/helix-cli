@@ -274,6 +274,8 @@ window.LiveReloadOptions = {
     const respHeaders = ret.headers.plain();
     delete respHeaders['content-encoding'];
     delete respHeaders['content-length'];
+    delete respHeaders['x-frame-options'];
+    delete respHeaders['content-security-policy'];
     respHeaders['access-control-allow-origin'] = '*';
     respHeaders.via = `${ret.httpVersion ?? '1.0'} ${new URL(url).hostname}`;
 

@@ -221,6 +221,7 @@ describe('Helix Server', () => {
       .get('/readme.html')
       .reply(200, 'hello readme', {
         'content-type': 'text/html',
+        'content-security-policy': 'self;',
       })
       .get('/head.html')
       .reply(200, '<link rel="stylesheet" href="/styles.css"/>', {
@@ -236,6 +237,7 @@ describe('Helix Server', () => {
       assert.strictEqual(resp.status, 200);
       assert.strictEqual(ret.trim(), 'hello readme');
       assert.strictEqual(resp.headers.get('access-control-allow-origin'), '*');
+      assert.strictEqual(resp.headers.get('content-security-policy'), null);
       assert.strictEqual(resp.headers.get('via'), '1.0 main--foo--bar.hlx.page');
     } finally {
       await project.stop();
