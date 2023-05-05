@@ -14,7 +14,7 @@
 import assert from 'assert';
 import path from 'path';
 import fse from 'fs-extra';
-import { context as fetchContext } from '@adobe/fetch';
+import { h1 as fetchContext } from '@adobe/fetch';
 import { Nock, assertHttp, createTestRoot } from './utils.js';
 import ImportCommand from '../src/import.cmd.js';
 
