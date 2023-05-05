@@ -1,3 +1,10 @@
+## [14.23.3](https://github.com/adobe/helix-cli/compare/v14.23.2...v14.23.3) (2023-05-05)
+
+
+### Bug Fixes
+
+* disable h2 to avoid potential tls connection errors ([#2185](https://github.com/adobe/helix-cli/issues/2185)) ([cf6d4f8](https://github.com/adobe/helix-cli/commit/cf6d4f8ebf0299bd09ecf8cfbd94c705141e8da5)), closes [#2183](https://github.com/adobe/helix-cli/issues/2183)
+
 ## [14.23.2](https://github.com/adobe/helix-cli/compare/v14.23.1...v14.23.2) (2023-05-04)
 
 
