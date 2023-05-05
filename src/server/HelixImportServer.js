@@ -12,7 +12,7 @@
 import { promisify } from 'util';
 import path from 'path';
 import { PassThrough } from 'stream';
-import { context as fetchContext } from '@adobe/fetch';
+import { keepAlive as fetchContext } from '@adobe/fetch';
 import utils from './utils.js';
 import RequestContext from './RequestContext.js';
 import { asyncHandler, BaseServer } from './BaseServer.js';
