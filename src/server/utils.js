@@ -265,11 +265,6 @@ window.LiveReloadOptions = {
     const level = utils.status2level(ret.status, true);
     ctx.log[level](`Proxy ${req.method} request to ${url}: ${ret.status} (${contentType})`);
 
-    const isHTML = ret.status === 200 && contentType.indexOf('text/html') === 0;
-    const livereload = isHTML && opts.injectLiveReload;
-    const replaceHead = isHTML && opts.headHtml && opts.headHtml.isModified;
-    const doIndex = isHTML && opts.indexer && url.indexOf('.plain.html') < 0;
-
     // because fetch decodes the response, we need to reset content encoding and length
     const respHeaders = ret.headers.plain();
     delete respHeaders['content-encoding'];
@@ -278,6 +273,24 @@ window.LiveReloadOptions = {
     delete respHeaders['content-security-policy'];
     respHeaders['access-control-allow-origin'] = '*';
     respHeaders.via = `${ret.httpVersion ?? '1.0'} ${new URL(url).hostname}`;
+
+    if (ret.status === 404 && contentType.indexOf('text/html') === 0 && opts.file404html) {
+      ctx.log.debug('serve local 404.html', opts.file404html);
+      let textBody = await fs.readFile(opts.file404html, 'utf-8');
+      if (opts.injectLiveReload) {
+        textBody = utils.injectLiveReloadScript(textBody, ctx.config.server);
+      }
+      res
+        .status(404)
+        .set(respHeaders)
+        .send(textBody);
+      return;
+    }
+
+    const isHTML = ret.status === 200 && contentType.indexOf('text/html') === 0;
+    const livereload = isHTML && opts.injectLiveReload;
+    const replaceHead = isHTML && opts.headHtml && opts.headHtml.isModified;
+    const doIndex = isHTML && opts.indexer && url.indexOf('.plain.html') < 0;
 
     if (isHTML) {
       let respBody;

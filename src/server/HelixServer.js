@@ -89,6 +89,7 @@ export class HelixServer extends BaseServer {
         headHtml: this._project.headHtml,
         indexer: this._project.indexer,
         cacheDirectory: this._project.cacheDirectory,
+        file404html: this._project.file404html,
       });
     } catch (err) {
       log.error(`Failed to proxy Franklin request ${ctx.path}: ${err.message}`);

@@ -9,6 +9,8 @@
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
+import { resolve } from 'path';
+import { lstat } from 'fs/promises';
 import { HelixServer } from './HelixServer.js';
 import { BaseProject } from './BaseProject.js';
 import HeadHtmlSupport from './HeadHtmlSupport.js';
@@ -21,6 +23,7 @@ export class HelixProject extends BaseProject {
     this._headHtml = null;
     this._indexer = null;
     this._printIndex = false;
+    this._file404html = null;
   }
 
   withLiveReload(value) {
@@ -49,6 +52,10 @@ export class HelixProject extends BaseProject {
   get liveReload() {
     // eslint-disable-next-line no-underscore-dangle
     return this._server._liveReload;
+  }
+
+  get file404html() {
+    return this._file404html;
   }
 
   async init() {
@@ -82,10 +89,26 @@ export class HelixProject extends BaseProject {
     }
   }
 
+  async init404Html() {
+    if (this.proxyUrl) {
+      this._file404html = resolve(this.directory, '404.html');
+      try {
+        await lstat(this._file404html);
+        this.log.debug('detected local 404.html');
+        if (this.liveReload) {
+          this.liveReload.registerFiles([this._file404html], '/');
+        }
+      } catch (e) {
+        this._file404html = null;
+      }
+    }
+  }
+
   async start() {
     this.log.debug('Launching Franklin dev server...');
     await super.start();
     await this.initHeadHtml();
+    await this.init404Html();
     if (this._indexer) {
       await this._indexer.init();
     }
