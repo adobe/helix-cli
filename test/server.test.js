@@ -206,6 +206,37 @@ describe('Helix Server', () => {
     }
   });
 
+  it('delivers local 404.html.', async () => {
+    const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
+    const project = new HelixProject()
+      .withCwd(cwd)
+      .withHttpPort(0)
+      .withProxyUrl('http://main--foo--bar.hlx.page');
+
+    await project.init();
+
+    nock('http://main--foo--bar.hlx.page')
+      .get('/missing')
+      .reply(404, 'server 404 html', {
+        'content-type': 'text/html',
+      })
+      .get('/head.html')
+      .reply(200, '<link rel="stylesheet" href="/styles.css"/>');
+
+    try {
+      await project.start();
+      const resp = await fetch(`http://127.0.0.1:${project.server.port}/missing`, {
+        cache: 'no-store',
+      });
+      const ret = await resp.text();
+      assert.strictEqual(resp.status, 404);
+      assert.strictEqual(ret.trim(), '<html>\n<head><title>Not found</title></head>\n<main>404</main>\n</html>');
+      assert.strictEqual(resp.headers.get('access-control-allow-origin'), '*');
+    } finally {
+      await project.stop();
+    }
+  });
+
   it('delivers from proxy.', async () => {
     const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
     const project = new HelixProject()
