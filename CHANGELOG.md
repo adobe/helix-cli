@@ -1,3 +1,10 @@
+# [14.24.0](https://github.com/adobe/helix-cli/compare/v14.23.7...v14.24.0) (2023-05-30)
+
+
+### Features
+
+* serve local 404.html if present ([#2198](https://github.com/adobe/helix-cli/issues/2198)) ([e6c71e4](https://github.com/adobe/helix-cli/commit/e6c71e4d9f7bd01c07d3c32554b7f5507418e180)), closes [#2195](https://github.com/adobe/helix-cli/issues/2195)
+
 ## [14.23.7](https://github.com/adobe/helix-cli/compare/v14.23.6...v14.23.7) (2023-05-28)
 
 
