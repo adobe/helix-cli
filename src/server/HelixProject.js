@@ -58,6 +58,10 @@ export class HelixProject extends BaseProject {
     return this._file404html;
   }
 
+  get headHtml() {
+    return this._headHtml;
+  }
+
   async init() {
     await super.init();
     this._indexer = new Indexer()
