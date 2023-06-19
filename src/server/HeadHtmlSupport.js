@@ -97,7 +97,7 @@ export default class HeadHtmlSupport {
       this.remoteHtml = (await resp.text()).trim();
       this.remoteDom = await HeadHtmlSupport.toDom(this.remoteHtml);
       HeadHtmlSupport.hash(this.remoteDom);
-      this.log.debug('loaded remote head.html from from', this.url);
+      this.log.debug(`loaded remote head.html from from ${this.url}`);
     } else {
       this.log.error(`error while loading head.html from ${this.url}: ${resp.status}`);
     }

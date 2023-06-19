@@ -311,6 +311,43 @@ describe('Helix Server', () => {
     }
   });
 
+  it('delivers from proxy (with modified local head).', async () => {
+    const cwd = await setupProject(path.resolve(__rootdir, 'test', 'fixtures', 'project'), testRoot);
+    await fse.copy(path.resolve(cwd, 'head-modified.html'), path.resolve(cwd, 'head.html'));
+    const project = new HelixProject()
+      .withCwd(cwd)
+      .withHttpPort(0)
+      .withPrintIndex(true)
+      .withProxyUrl('http://main--foo--bar.hlx.page');
+
+    await project.init();
+    project.log.level = 'silly';
+
+    nock('http://main--foo--bar.hlx.page')
+      .get('/readme.html')
+      .reply(200, '<html><head><link rel="stylesheet" href="/styles.css"/></head><body>hello readme</body></html>', {
+        'content-type': 'text/html',
+      })
+      .get('/head.html')
+      .reply(200, '<link rel="stylesheet" href="/styles.css"/>', {
+        'content-type': 'text/html',
+      });
+
+    try {
+      await project.start();
+      const resp = await fetch(`http://127.0.0.1:${project.server.port}/readme.html`, {
+        cache: 'no-store',
+      });
+      const ret = await resp.text();
+      assert.strictEqual(resp.status, 200);
+      assert.strictEqual(ret.trim(), '<html><head><!-- local head html -->\n<link rel="stylesheet" href="/styles.css"/>\n<meta content="test-head"/><meta property="hlx:proxyUrl" content="http://main--foo--bar.hlx.page/readme.html"></head><body>hello readme</body></html>');
+      assert.strictEqual(resp.headers.get('access-control-allow-origin'), '*');
+      assert.strictEqual(resp.headers.get('via'), '1.0 main--foo--bar.hlx.page');
+    } finally {
+      await project.stop();
+    }
+  });
+
   it('delivers filtered json from proxy.', async () => {
     const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
     const project = new HelixProject()
