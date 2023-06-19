@@ -1,3 +1,10 @@
+## [14.24.3](https://github.com/adobe/helix-cli/compare/v14.24.2...v14.24.3) (2023-06-19)
+
+
+### Bug Fixes
+
+* local head.html changes not reflected ([#2202](https://github.com/adobe/helix-cli/issues/2202)) ([26feb05](https://github.com/adobe/helix-cli/commit/26feb05feecd9dbe568a570a8a527fd1531e825f))
+
 ## [14.24.2](https://github.com/adobe/helix-cli/compare/v14.24.1...v14.24.2) (2023-06-18)
 
 
