@@ -72,7 +72,12 @@ describe('Testing GitUtils', () => {
     assert.equal(await GitUtils.getBranch(testRoot), 'newbranch');
     shell.exec('git tag v0.0.0');
     assert.equal(await GitUtils.getBranch(testRoot), 'v0.0.0');
-    shell.exec('git checkout HEAD^');
+  });
+
+  it('getBranch #unit (detached)', async () => {
+    shell.exec('git checkout -b newbranch');
+    assert.equal(await GitUtils.getBranch(testRoot), 'newbranch');
+    shell.exec('git checkout --detach HEAD^');
     assert.equal(await GitUtils.getBranch(testRoot), 'main');
     assert.equal(await GitUtils.getBranch(testRoot, 'customFallbackValue'), 'customFallbackValue');
   });
