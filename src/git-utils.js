@@ -135,14 +135,13 @@ export default class GitUtils {
 
   /**
    * Returns the name of the current branch. If `HEAD` is at a tag, the name of the tag
-   * will be returned instead.
+   * will be returned instead, if head is at a commit, fallback will be returned.
    *
    * @param {string} dir working tree directory path of the git repo
+   * @param {string} fallback fallback value if no branch or tag is found
    * @returns {Promise<string>} current branch or tag
    */
-  static async getBranch(dir) {
-    // current branch name
-    const currentBranch = await git.currentBranch({ fs, dir, fullname: false });
+  static async getBranch(dir, fallback = 'main') {
     // current commit sha
     const rev = await git.resolveRef({ fs, dir, ref: 'HEAD' });
     // reverse-lookup tag from commit sha
@@ -162,22 +161,13 @@ export default class GitUtils {
         return tag;
       }
     }
-    // HEAD is not at a tag, return current branch
-    return currentBranch;
-  }
 
-  /**
-   * Returns `dirty` if the working tree directory contains uncommitted/unstaged changes.
-   * Otherwise returns the encoded (any non word character replaced by `-`)
-   * current branch or tag.
-   *
-   * @param {string} dir working tree directory path of the git repo
-   * @returns {Promise<string>} `dirty` or encoded current branch/tag
-  */
-  static async getBranchFlag(dir) {
-    const dirty = await GitUtils.isDirty(dir);
-    const branch = await GitUtils.getBranch(dir);
-    return dirty ? 'dirty' : branch.replace(/[\W]/g, '-');
+    const currentBranch = await git.currentBranch({ fs, dir, fullname: false });
+    if (currentBranch) {
+      return currentBranch;
+    }
+
+    return fallback;
   }
 
   /**

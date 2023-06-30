@@ -47,6 +47,7 @@ describe('Testing GitUtils', () => {
     shell.exec('git checkout -b master');
     shell.exec('git add -A');
     shell.exec('git commit -m"initial commit."');
+    shell.exec('git commit -m"second commit." --allow-empty');
   });
 
   afterEach(async () => {
@@ -71,6 +72,9 @@ describe('Testing GitUtils', () => {
     assert.equal(await GitUtils.getBranch(testRoot), 'newbranch');
     shell.exec('git tag v0.0.0');
     assert.equal(await GitUtils.getBranch(testRoot), 'v0.0.0');
+    shell.exec('git checkout HEAD^');
+    assert.equal(await GitUtils.getBranch(testRoot), 'main');
+    assert.equal(await GitUtils.getBranch(testRoot, 'customFallbackValue'), 'customFallbackValue');
   });
 
   it('isDirty #unit', async () => {
@@ -141,12 +145,6 @@ describe('Testing GitUtils', () => {
     });
 
     assert.equal(await GitUtils.isDirty(testRoot, GIT_USER_HOME), false);
-  });
-
-  it('getBranchFlag #unit', async () => {
-    assert.equal(await GitUtils.getBranchFlag(testRoot), 'master');
-    await fse.writeFile(path.resolve(testRoot, 'README.md'), 'Hello, world.\n', 'utf-8');
-    assert.equal(await GitUtils.getBranchFlag(testRoot), 'dirty');
   });
 
   it('getRepository #unit', async () => {
