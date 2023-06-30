@@ -1,3 +1,11 @@
+## [14.24.5](https://github.com/adobe/helix-cli/compare/v14.24.4...v14.24.5) (2023-06-30)
+
+
+### Bug Fixes
+
+* default to main when `hlx up` is used on detached head state ([e11f816](https://github.com/adobe/helix-cli/commit/e11f81600ca5aa0580e0cf1cff4002ed8f33a491)), closes [#2204](https://github.com/adobe/helix-cli/issues/2204)
+* tests ([eb37621](https://github.com/adobe/helix-cli/commit/eb37621cc92dc11b0fb05a23b61c050805c74a88))
+
 ## [14.24.4](https://github.com/adobe/helix-cli/compare/v14.24.3...v14.24.4) (2023-06-24)
 
 
