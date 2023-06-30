@@ -74,6 +74,7 @@ describe('Testing GitUtils', () => {
     assert.equal(await GitUtils.getBranch(testRoot), 'v0.0.0');
     shell.exec('git checkout HEAD^');
     assert.equal(await GitUtils.getBranch(testRoot), 'main');
+    assert.equal(await GitUtils.getBranch(testRoot, 'customFallbackValue'), 'customFallbackValue');
   });
 
   it('isDirty #unit', async () => {

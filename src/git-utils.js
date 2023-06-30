@@ -135,12 +135,13 @@ export default class GitUtils {
 
   /**
    * Returns the name of the current branch. If `HEAD` is at a tag, the name of the tag
-   * will be returned instead, if head is at a commit, main will be returned.
+   * will be returned instead, if head is at a commit, fallback will be returned.
    *
    * @param {string} dir working tree directory path of the git repo
+   * @param {string} fallback fallback value if no branch or tag is found
    * @returns {Promise<string>} current branch or tag
    */
-  static async getBranch(dir) {
+  static async getBranch(dir, fallback = 'main') {
     // current commit sha
     const rev = await git.resolveRef({ fs, dir, ref: 'HEAD' });
     // reverse-lookup tag from commit sha
@@ -166,7 +167,7 @@ export default class GitUtils {
       return currentBranch;
     }
 
-    return 'main';
+    return fallback;
   }
 
   /**
