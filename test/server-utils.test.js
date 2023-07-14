@@ -280,4 +280,43 @@ describe('Utils Test', () => {
       });
     });
   });
+
+  describe('URL Rewrite', () => {
+    function test(html, expected) {
+      const actual = utils.rewriteUrl(Buffer.from(html), 'https://www.example.com').toString('utf-8');
+      assert.strictEqual(actual, expected);
+    }
+
+    it('replaces host in src', () => {
+      test('<img src="https://www.example.com/foo.png">', '<img src="/foo.png">');
+    });
+
+    it('replaces host in src (single quotes)', () => {
+      test("<img src = 'https://www.example.com/foo.png' width='200'>", "<img src='/foo.png' width='200'>");
+    });
+
+    it('replaces host in href', () => {
+      test('<a href="https://www.example.com">', '<a href="/">');
+    });
+
+    it('replaces host in href with slash', () => {
+      test('<a href="https://www.example.com/">', '<a href="/">');
+    });
+
+    it('replaces host in href', () => {
+      test('<a href="https://www.example.com">', '<a href="/">');
+    });
+
+    it('does proper matching', () => {
+      test('<a href="https://www.example.comm">', '<a href="https://www.example.comm">');
+    });
+
+    it('does not replace host in query params', () => {
+      test('<a href="https://facebook.com?u=https://www.example.com">', '<a href="https://facebook.com?u=https://www.example.com">');
+    });
+
+    it('does not replace the host in text', () => {
+      test('<a href="https://www.example.com">https://www.example.com</a>', '<a href="/">https://www.example.com</a>');
+    });
+  });
 });
