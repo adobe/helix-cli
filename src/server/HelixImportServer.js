@@ -134,9 +134,12 @@ export class HelixImportServer extends BaseServer {
       }
     }
 
-    let buffer;
+    let buffer = await ret.buffer();
+    if (contentType.includes('html') || contentType.includes('text')) {
+      buffer = utils.rewriteUrl(buffer, host);
+    }
+
     if (!isBodyReq && this._project.cacheDirectory) {
-      buffer = await ret.buffer();
       await utils.writeToCache(
         url,
         this._project.cacheDirectory,
@@ -149,40 +152,12 @@ export class HelixImportServer extends BaseServer {
       );
     }
 
-    if (contentType.includes('html') || contentType.includes('text')) {
-      // make urls relative
-      let text;
-      if (buffer) {
-        text = buffer.toString();
-      } else {
-        text = await ret.text();
-      }
-      let replacer = new RegExp(`${host}/`, 'gm');
-      text = text.replace(replacer, '/');
-      replacer = new RegExp(host, 'gm');
-      text = text.replace(replacer, '/');
-      res
-        .status(ret.status)
-        .set(respHeaders)
-        .cookie('hlx-proxyhost', host)
-        .send(text);
-      ret.body.pipe(res);
-      return;
-    }
-
-    if (buffer) {
-      res
-        .status(ret.status)
-        .set(respHeaders)
-        .cookie('hlx-proxyhost', host)
-        .send(buffer);
-      ret.body.pipe(res);
-    } else {
-      res
-        .status(ret.status)
-        .set(respHeaders);
-      ret.body.pipe(res);
-    }
+    res
+      .status(ret.status)
+      .set(respHeaders)
+      .cookie('hlx-proxyhost', host)
+      .send(buffer);
+    ret.body.pipe(res);
   }
 
   /**

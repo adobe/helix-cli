@@ -438,6 +438,20 @@ window.LiveReloadOptions = {
       });
     });
   },
+
+  /**
+   * Rewrites all absolute urls to the proxy host with relative ones.
+   * @param {Buffer} html
+   * @param {string} host
+   * @returns {Buffer}
+   */
+  rewriteUrl(html, host) {
+    const hostPattern = host.replaceAll('.', '\\.');
+    let text = html.toString('utf-8');
+    const re = new RegExp(`(src|href)\\s*=\\s*(["'])${hostPattern}(/.*?)?(['"])`, 'gm');
+    text = text.replaceAll(re, (match, arg, q1, value, q2) => (`${arg}=${q1}${value || '/'}${q2}`));
+    return Buffer.from(text, 'utf-8');
+  },
 };
 
 export default Object.freeze(utils);
