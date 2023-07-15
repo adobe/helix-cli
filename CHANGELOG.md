@@ -1,3 +1,10 @@
+## [14.24.7](https://github.com/adobe/helix-cli/compare/v14.24.6...v14.24.7) (2023-07-15)
+
+
+### Bug Fixes
+
+* improve link rewrite ([#2213](https://github.com/adobe/helix-cli/issues/2213)) ([e4a4ce7](https://github.com/adobe/helix-cli/commit/e4a4ce7e152db3dcab2610185336453fbee1fe9b)), closes [#2212](https://github.com/adobe/helix-cli/issues/2212)
+
 ## [14.24.6](https://github.com/adobe/helix-cli/compare/v14.24.5...v14.24.6) (2023-07-08)
 
 
