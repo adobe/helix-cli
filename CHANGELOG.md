@@ -1,3 +1,10 @@
+## [14.24.12](https://github.com/adobe/helix-cli/compare/v14.24.11...v14.24.12) (2023-08-22)
+
+
+### Bug Fixes
+
+* **deps:** update dependency unified to v11 ([#2230](https://github.com/adobe/helix-cli/issues/2230)) ([cc5ab0f](https://github.com/adobe/helix-cli/commit/cc5ab0fede9ace5b10807c543305b22c5916a0c1))
+
 ## [14.24.11](https://github.com/adobe/helix-cli/compare/v14.24.10...v14.24.11) (2023-08-21)
 
 
