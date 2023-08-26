@@ -74,15 +74,15 @@
     "@semantic-release/changelog": "6.0.3",
     "@semantic-release/git": "10.0.1",
     "c8": "8.0.1",
-    "eslint": "8.47.0",
+    "eslint": "8.48.0",
     "esmock": "2.3.8",
     "husky": "8.0.3",
     "junit-report-builder": "3.0.1",
-    "lint-staged": "14.0.0",
+    "lint-staged": "14.0.1",
     "mocha": "10.2.0",
     "mocha-multi-reporters": "1.5.1",
     "nock": "13.3.3",
-    "semantic-release": "21.0.7",
+    "semantic-release": "21.1.1",
     "sinon": "15.2.0"
   },
   "lint-staged": {
