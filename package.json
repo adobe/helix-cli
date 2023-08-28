@@ -60,7 +60,7 @@
     "livereload-js": "4.0.1",
     "open": "9.1.0",
     "progress": "2.0.3",
-    "rehype-parse": "8.0.5",
+    "rehype-parse": "9.0.0",
     "semver": "7.5.4",
     "shelljs": "0.8.5",
     "unified": "11.0.2",
