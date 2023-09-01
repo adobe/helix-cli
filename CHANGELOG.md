@@ -1,3 +1,10 @@
+## [14.24.15](https://github.com/adobe/helix-cli/compare/v14.24.14...v14.24.15) (2023-09-01)
+
+
+### Bug Fixes
+
+* **deps:** update dependency rehype-parse to v9 ([#2233](https://github.com/adobe/helix-cli/issues/2233)) ([d346d80](https://github.com/adobe/helix-cli/commit/d346d80478334dcf674a272bef545277eebc9312))
+
 ## [14.24.14](https://github.com/adobe/helix-cli/compare/v14.24.13...v14.24.14) (2023-08-30)
 
 
