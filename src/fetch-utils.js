@@ -20,9 +20,6 @@ const CONTEXT_CACHE = {
   insecure: null,
 };
 
-process.env.HTTP_PROXY = 'http://127.0.0.1:8888';
-process.env.HTTPS_PROXY = 'http://127.0.0.1:8888';
-
 /**
  * @type {ProxyHandler}
  */

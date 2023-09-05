@@ -98,6 +98,26 @@ HLX_PORT=8080
 HLX_PAGES_URL=https://stage.myproject.com
 ```
 
+#### HTTP Proxy
+
+In order to use a HTTP proxy (eg behind a corporate firewall), you can set the respective headers:
+
+`NO_PROXY` is a list of host names (optionally with a port). If the input URL matches any of the entries in `NO_PROXY`, then the input URL should be fetched by a direct request (i.e. without a proxy).
+
+Matching follows the following rules:
+
+`NO_PROXY=*` disables all proxies.
+Space and commas may be used to separate the entries in the `NO_PROXY` list.
+If `NO_PROXY` does not contain any entries, then proxies are never disabled.
+If a port is added after the host name, then the ports must match. If the URL does not have an explicit port name, the protocol's default port is used.
+Generally, the proxy is only disabled if the host name is an exact match for an entry in the `NO_PROXY` list. The only exceptions are entries that start with a dot or with a wildcard; then the proxy is disabled if the host name ends with the entry.
+See test.js for examples of what should match and what does not.
+
+`*_PROXY`
+The environment variable used for the proxy depends on the protocol of the URL. For example, https://example.com uses the "https" protocol, and therefore the proxy to be used is `HTTPS_PROXY` (NOT `HTTP_PROXY`, which is only used for http:-URLs).
+
+If present, `ALL_PROXY` is used as fallback if there is no other match.
+
 #### Global
 
 | option | variable | default | description |
