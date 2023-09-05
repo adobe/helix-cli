@@ -26,7 +26,7 @@ const CONTEXT_CACHE = {
 const httpProxyHandler = {
   apply(target, thisArg, argArray) {
     // check if HTTP proxy is defined for the url
-    const /** @type URL */ [url, init] = argArray;
+    const /** @type URL */ [url, init = {}] = argArray;
     const href = String(url); // ensure string
     const proxyUrl = getProxyForUrl(href);
     if (proxyUrl) {
@@ -40,16 +40,16 @@ const httpProxyHandler = {
         agent,
       });
     }
-    return target.apply(this, argArray);
+    return target.apply(thisArg, argArray);
   },
 };
 
 // create global context that is used by all commands and can be reset for CLI to terminate
-export function getFetch(rejectUnauthorized) {
-  const cacheName = rejectUnauthorized ? 'insecure' : 'default';
+export function getFetch(allowUnauthorized) {
+  const cacheName = allowUnauthorized ? 'insecure' : 'default';
   let cache = CONTEXT_CACHE[cacheName];
   if (!cache) {
-    const context = keepAlive({ rejectUnauthorized: false });
+    const context = keepAlive({ rejectUnauthorized: !allowUnauthorized });
     cache = {
       context,
       fetch: new Proxy(context.fetch, httpProxyHandler),
