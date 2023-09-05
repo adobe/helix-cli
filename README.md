@@ -100,7 +100,7 @@ HLX_PAGES_URL=https://stage.myproject.com
 
 #### HTTP Proxy
 
-In order to use a HTTP proxy (eg behind a corporate firewall), you can set the respective headers:
+In order to use a HTTP proxy (eg behind a corporate firewall), you can set the respective environment variables:
 
 `NO_PROXY` is a list of host names (optionally with a port). If the input URL matches any of the entries in `NO_PROXY`, then the input URL should be fetched by a direct request (i.e. without a proxy).
 
