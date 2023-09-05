@@ -114,7 +114,7 @@ export class HelixImportServer extends BaseServer {
     ctx.log[level](`Proxy ${req.method} request to ${url}: ${ret.status} (${contentType})`);
 
     // because fetch decodes the response, we need to reset content encoding and length
-    const respHeaders = ret.headers.plain();
+    const respHeaders = Object.fromEntries(ret.headers.entries());
     delete respHeaders['content-encoding'];
     delete respHeaders['content-length'];
 

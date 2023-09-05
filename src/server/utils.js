@@ -266,7 +266,7 @@ window.LiveReloadOptions = {
     ctx.log[level](`Proxy ${req.method} request to ${url}: ${ret.status} (${contentType})`);
 
     // because fetch decodes the response, we need to reset content encoding and length
-    const respHeaders = ret.headers.plain();
+    const respHeaders = Object.fromEntries(ret.headers.entries());
     delete respHeaders['content-encoding'];
     delete respHeaders['content-length'];
     delete respHeaders['x-frame-options'];
@@ -310,7 +310,7 @@ window.LiveReloadOptions = {
         lines.push('<-----------------------------');
         lines.push('');
         lines.push(`http/${ret.httpVersion} ${ret.status} ${ret.statusText}`);
-        Object.entries(ret.headers.plain()).forEach(([name, value]) => {
+        ret.headers.forEach((name, value) => {
           lines.push(`${name}: ${value}`);
         });
         lines.push('');

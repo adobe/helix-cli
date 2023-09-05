@@ -10,24 +10,59 @@
  * governing permissions and limitations under the License.
  */
 import { keepAlive } from '@adobe/fetch';
+import { getProxyForUrl } from 'proxy-from-env';
+import nodeFetch from 'node-fetch';
+import { HttpProxyAgent } from 'http-proxy-agent';
+import { HttpsProxyAgent } from 'https-proxy-agent';
 
 const CONTEXT_CACHE = {
   default: null,
   insecure: null,
 };
 
+process.env.HTTP_PROXY = 'http://127.0.0.1:8888';
+process.env.HTTPS_PROXY = 'http://127.0.0.1:8888';
+
+/**
+ * @type {ProxyHandler}
+ */
+const httpProxyHandler = {
+  apply(target, thisArg, argArray) {
+    // check if HTTP proxy is defined for the url
+    const /** @type URL */ [url, init] = argArray;
+    const href = String(url); // ensure string
+    const proxyUrl = getProxyForUrl(href);
+    if (proxyUrl) {
+      const agent = href.startsWith('https://')
+        ? new HttpsProxyAgent(proxyUrl)
+        : new HttpProxyAgent(proxyUrl);
+      // eslint-disable-next-line no-console
+      console.debug(`using proxy ${proxyUrl}`);
+      return nodeFetch(url, {
+        ...init,
+        agent,
+      });
+    }
+    return target.apply(this, argArray);
+  },
+};
+
 // create global context that is used by all commands and can be reset for CLI to terminate
 export function getFetch(rejectUnauthorized) {
   const cacheName = rejectUnauthorized ? 'insecure' : 'default';
-  let context = CONTEXT_CACHE[cacheName];
-  if (!context) {
-    context = keepAlive({ rejectUnauthorized: false });
-    CONTEXT_CACHE[cacheName] = context;
+  let cache = CONTEXT_CACHE[cacheName];
+  if (!cache) {
+    const context = keepAlive({ rejectUnauthorized: false });
+    cache = {
+      context,
+      fetch: new Proxy(context.fetch, httpProxyHandler),
+    };
+    CONTEXT_CACHE[cacheName] = cache;
   }
-  return context.fetch;
+  return cache.fetch;
 }
 
 export async function resetContext() {
-  await CONTEXT_CACHE.default?.reset();
-  await CONTEXT_CACHE.insecure?.reset();
+  await CONTEXT_CACHE.default?.context.reset();
+  await CONTEXT_CACHE.insecure?.context.reset();
 }
