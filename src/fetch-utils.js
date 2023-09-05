@@ -11,7 +11,23 @@
  */
 import { keepAlive } from '@adobe/fetch';
 
-// create global context that is used by all commands and can be reset for CLI to terminate
-export const context = keepAlive();
+const CONTEXT_CACHE = {
+  default: null,
+  insecure: null,
+};
 
-export const { fetch } = context;
+// create global context that is used by all commands and can be reset for CLI to terminate
+export function getFetch(rejectUnauthorized) {
+  const cacheName = rejectUnauthorized ? 'insecure' : 'default';
+  let context = CONTEXT_CACHE[cacheName];
+  if (!context) {
+    context = keepAlive({ rejectUnauthorized: false });
+    CONTEXT_CACHE[cacheName] = context;
+  }
+  return context.fetch;
+}
+
+export async function resetContext() {
+  await CONTEXT_CACHE.default?.reset();
+  await CONTEXT_CACHE.insecure?.reset();
+}

@@ -13,7 +13,7 @@ import opn from 'open';
 import chalk from 'chalk-template';
 import fs from 'fs/promises';
 import fse from 'fs-extra';
-import { context } from './fetch-utils.js';
+import { resetContext } from './fetch-utils.js';
 import { AbstractCommand } from './abstract.cmd.js';
 
 export class AbstractServerCommand extends AbstractCommand {
@@ -72,7 +72,7 @@ export class AbstractServerCommand extends AbstractCommand {
       await this._project.stop();
       delete this._project;
     }
-    await context.reset();
+    await resetContext();
   }
 
   async stop() {

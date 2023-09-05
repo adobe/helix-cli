@@ -17,7 +17,7 @@ import shell from 'shelljs';
 import crypto from 'crypto';
 import fse from 'fs-extra';
 import nock from 'nock';
-import { fetch } from '../src/fetch-utils.js';
+import { getFetch } from '../src/fetch-utils.js';
 
 /**
  * init git in integration so that helix-simulator can run
@@ -56,7 +56,7 @@ export function clearHelixEnv() {
 }
 
 export async function assertHttp(url, status, spec, replacements = []) {
-  const resp = await fetch(url, {
+  const resp = await getFetch()(url, {
     cache: 'no-store',
   });
   assert.strictEqual(resp.status, status);

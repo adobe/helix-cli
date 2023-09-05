@@ -23,7 +23,7 @@ import {
 
 const TEST_DIR = path.resolve(__rootdir, 'test', 'fixtures', 'import');
 
-describe('Helix Server', () => {
+describe('Helix Import Server', () => {
   let testRoot;
 
   beforeEach(async () => {
@@ -148,6 +148,8 @@ describe('Helix Server', () => {
     try {
       await project.start();
       await assertHttp(`http://127.0.0.1:${project.server.port}/.kill`, 200, 'expected_goodbye.txt');
+    } catch {
+      // ignore in case server closes connection
     } finally {
       assert.ok(!project.server.isStarted());
       await project.stop();

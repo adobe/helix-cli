@@ -15,7 +15,7 @@ import path from 'path';
 import { Socket } from 'net';
 import { PassThrough } from 'stream';
 import cookie from 'cookie';
-import { fetch } from '../fetch-utils.js';
+import { getFetch } from '../fetch-utils.js';
 
 const utils = {
   status2level(status, debug3xx) {
@@ -58,7 +58,7 @@ const utils = {
     if (auth) {
       headers.authorization = `Bearer ${auth}`;
     }
-    const res = await fetch(uri, {
+    const res = await getFetch()(uri, {
       cache: 'no-store',
       headers,
     });
@@ -254,7 +254,7 @@ window.LiveReloadOptions = {
     delete headers.connection;
     delete headers['proxy-connection'];
     delete headers.host;
-    const ret = await fetch(url, {
+    const ret = await getFetch()(url, {
       method: req.method,
       headers,
       cache: 'no-store',

@@ -13,7 +13,7 @@ import https from 'https';
 import EventEmitter from 'events';
 import express from 'express';
 import cookieParser from 'cookie-parser';
-import { fetch } from '../fetch-utils.js';
+import { getFetch } from '../fetch-utils.js';
 import utils from './utils.js';
 import packageJson from '../package.cjs';
 
@@ -115,8 +115,12 @@ export class BaseServer extends EventEmitter {
     if (this._port !== 0) {
       let retries = 1;
       if (this._project.kill && await utils.checkPortInUse(this._port, this._addr)) {
-        const res = await fetch(`${this._scheme}://${this._addr}:${this._port}/.kill`);
-        await res.text();
+        try {
+          const res = await getFetch()(`${this._scheme}://${this._addr}:${this._port}/.kill`);
+          await res.text();
+        } catch (e) {
+          // ignore errors, in case the other server closes connection
+        }
         retries = 10;
       }
       let inUse = true;
