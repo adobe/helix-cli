@@ -1,3 +1,10 @@
+# [14.25.0](https://github.com/adobe/helix-cli/compare/v14.24.17...v14.25.0) (2023-09-06)
+
+
+### Features
+
+* add support for http proxy ([#2239](https://github.com/adobe/helix-cli/issues/2239)) ([e039318](https://github.com/adobe/helix-cli/commit/e039318b67522306806f37fb86a725dc56ed3a83)), closes [#2222](https://github.com/adobe/helix-cli/issues/2222)
+
 ## [14.24.17](https://github.com/adobe/helix-cli/compare/v14.24.16...v14.24.17) (2023-09-04)
 
 
