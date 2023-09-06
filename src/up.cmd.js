@@ -16,7 +16,7 @@ import chokidar from 'chokidar';
 import { HelixProject } from './server/HelixProject.js';
 import GitUtils from './git-utils.js';
 import pkgJson from './package.cjs';
-import { fetch } from './fetch-utils.js';
+import { getFetch } from './fetch-utils.js';
 import { AbstractServerCommand } from './abstract-server.cmd.js';
 
 export default class UpCommand extends AbstractServerCommand {
@@ -116,7 +116,7 @@ export default class UpCommand extends AbstractServerCommand {
     }
 
     const fstabUrl = `${this._url}/fstab.yaml`;
-    const resp = await fetch(fstabUrl);
+    const resp = await getFetch()(fstabUrl);
     await resp.buffer();
     if (!resp.ok) {
       if (ref === 'main') {

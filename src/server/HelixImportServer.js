@@ -12,13 +12,10 @@
 import { promisify } from 'util';
 import path from 'path';
 import { PassThrough } from 'stream';
-import { keepAlive as fetchContext } from '@adobe/fetch';
+import { getFetch, resetContext } from '../fetch-utils.js';
 import utils from './utils.js';
 import RequestContext from './RequestContext.js';
 import { asyncHandler, BaseServer } from './BaseServer.js';
-
-const context = fetchContext({ rejectUnauthorized: false });
-const { fetch } = context;
 
 export class HelixImportServer extends BaseServer {
   /**
@@ -104,7 +101,7 @@ export class HelixImportServer extends BaseServer {
     delete headers.host;
     delete headers.referer;
 
-    const ret = await fetch(url, {
+    const ret = await getFetch(true)(url, {
       method: req.method,
       headers,
       cache: 'no-store',
@@ -117,7 +114,7 @@ export class HelixImportServer extends BaseServer {
     ctx.log[level](`Proxy ${req.method} request to ${url}: ${ret.status} (${contentType})`);
 
     // because fetch decodes the response, we need to reset content encoding and length
-    const respHeaders = ret.headers.plain();
+    const respHeaders = Object.fromEntries(ret.headers.entries());
     delete respHeaders['content-encoding'];
     delete respHeaders['content-length'];
 
@@ -205,6 +202,6 @@ export class HelixImportServer extends BaseServer {
 
   async doStop() {
     await super.doStop();
-    await context.reset();
+    await resetContext();
   }
 }

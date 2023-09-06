@@ -10,8 +10,56 @@
  * governing permissions and limitations under the License.
  */
 import { keepAlive } from '@adobe/fetch';
+import { getProxyForUrl } from 'proxy-from-env';
+import nodeFetch from 'node-fetch';
+import { HttpProxyAgent } from 'http-proxy-agent';
+import { HttpsProxyAgent } from 'https-proxy-agent';
+
+const CONTEXT_CACHE = {
+  default: null,
+  insecure: null,
+};
+
+/**
+ * @type {ProxyHandler}
+ */
+const httpProxyHandler = {
+  apply(target, thisArg, argArray) {
+    // check if HTTP proxy is defined for the url
+    const /** @type URL */ [url, init = {}] = argArray;
+    const href = String(url); // ensure string
+    const proxyUrl = getProxyForUrl(href);
+    if (proxyUrl) {
+      const agent = href.startsWith('https://')
+        ? new HttpsProxyAgent(proxyUrl)
+        : new HttpProxyAgent(proxyUrl);
+      // eslint-disable-next-line no-console
+      console.debug(`using proxy ${proxyUrl}`);
+      return nodeFetch(url, {
+        ...init,
+        agent,
+      });
+    }
+    return target.apply(thisArg, argArray);
+  },
+};
 
 // create global context that is used by all commands and can be reset for CLI to terminate
-export const context = keepAlive();
+export function getFetch(allowUnauthorized) {
+  const cacheName = allowUnauthorized ? 'insecure' : 'default';
+  let cache = CONTEXT_CACHE[cacheName];
+  if (!cache) {
+    const context = keepAlive({ rejectUnauthorized: !allowUnauthorized });
+    cache = {
+      context,
+      fetch: new Proxy(context.fetch, httpProxyHandler),
+    };
+    CONTEXT_CACHE[cacheName] = cache;
+  }
+  return cache.fetch;
+}
 
-export const { fetch } = context;
+export async function resetContext() {
+  await CONTEXT_CACHE.default?.context.reset();
+  await CONTEXT_CACHE.insecure?.context.reset();
+}

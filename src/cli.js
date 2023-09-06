@@ -11,7 +11,7 @@
  */
 import yargs from 'yargs';
 import camelcase from 'camelcase';
-import { context as fetchContext } from './fetch-utils.js';
+import { resetContext } from './fetch-utils.js';
 
 const MIN_MSG = 'You need at least one command.';
 
@@ -123,6 +123,6 @@ export default class CLI {
       .parse(args);
 
     // reset fetch connections so that process can terminate
-    fetchContext.reset();
+    await resetContext();
   }
 }

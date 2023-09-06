@@ -15,7 +15,7 @@ import { resolve } from 'path';
 import { unified } from 'unified';
 import rehypeParse from 'rehype-parse';
 import { select } from 'hast-util-select';
-import { fetch } from '../fetch-utils.js';
+import { getFetch } from '../fetch-utils.js';
 
 export default class HeadHtmlSupport {
   /**
@@ -89,7 +89,7 @@ export default class HeadHtmlSupport {
 
   async loadRemote() {
     // load head from server
-    const resp = await fetch(this.url, {
+    const resp = await getFetch()(this.url, {
       cache: 'no-store',
     });
     this.remoteStatus = resp.status;
