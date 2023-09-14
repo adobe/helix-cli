@@ -1,4 +1,4 @@
-# Helix Command Line Interface (`hlx`)
+# Helix/AEM Command Line Interface (`hlx` or `aem`)
 
 ## Status
 
@@ -8,17 +8,18 @@
 [![GitHub issues](https://img.shields.io/github/issues/adobe/helix-cli.svg)](https://github.com/adobe/helix-cli/issues)
 [![LGTM Code Quality Grade: JavaScript](https://img.shields.io/lgtm/grade/javascript/g/adobe/helix-cli.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/adobe/helix-cli)
 
-The Helix Command Line Interface allows web developers to create, develop, and deploy digital experiences using Project Helix
+The Helix Command Line Interface allows web developers to create, develop, and deploy digital experiences using Adobe Experience Manager Sites 'Edge Delivery Services' f.k.a 'Project Helix'
 
 ## Installation
 
-Install `hlx` as a global command. You need Node 12.11 or newer.
+Install `hlx` or `aem` as a global command. You need Node 12.11 or newer.
 
 ```bash
 $ npm install -g @adobe/helix-cli
 ```
 
 ## Quick Start
+You can interchange `hlx` and `aem` in the examples listed below.
 
 ```
 $ hlx --help
