@@ -1,3 +1,11 @@
+## [14.25.1](https://github.com/adobe/helix-cli/compare/v14.25.0...v14.25.1) (2023-09-14)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @adobe/fetch to v4.1.0 ([#2241](https://github.com/adobe/helix-cli/issues/2241)) ([5bf0e7f](https://github.com/adobe/helix-cli/commit/5bf0e7f85276561da451308c39b400094b4f7763))
+* **deps:** update dependency @adobe/helix-shared-indexer to v2.0.13 ([#2242](https://github.com/adobe/helix-cli/issues/2242)) ([6af6ad6](https://github.com/adobe/helix-cli/commit/6af6ad669b55d5984ea61c43864a9fea5f67463e))
+
 # [14.25.0](https://github.com/adobe/helix-cli/compare/v14.24.17...v14.25.0) (2023-09-06)
 
 
