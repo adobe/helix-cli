@@ -1,3 +1,10 @@
+# [14.26.0](https://github.com/adobe/helix-cli/compare/v14.25.1...v14.26.0) (2023-09-15)
+
+
+### Features
+
+* adding aem in addition to hlx ([#2243](https://github.com/adobe/helix-cli/issues/2243)) ([4ab0e91](https://github.com/adobe/helix-cli/commit/4ab0e912d198ae12582bb832a48699400c9271bc)), closes [#2064](https://github.com/adobe/helix-cli/issues/2064)
+
 ## [14.25.1](https://github.com/adobe/helix-cli/compare/v14.25.0...v14.25.1) (2023-09-14)
 
 
