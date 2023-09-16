@@ -70,7 +70,7 @@
     "semver": "7.5.4",
     "shelljs": "0.8.5",
     "unified": "11.0.2",
-    "uuid": "9.0.0",
+    "uuid": "9.0.1",
     "yargs": "17.7.2"
   },
   "devDependencies": {
@@ -81,14 +81,14 @@
     "@semantic-release/git": "10.0.1",
     "c8": "8.0.1",
     "eslint": "8.49.0",
-    "esmock": "2.4.1",
+    "esmock": "2.5.1",
     "husky": "8.0.3",
     "junit-report-builder": "3.0.1",
     "lint-staged": "14.0.1",
     "mocha": "10.2.0",
     "mocha-multi-reporters": "1.5.1",
     "nock": "13.3.3",
-    "semantic-release": "21.1.1",
+    "semantic-release": "21.1.2",
     "sinon": "15.2.0"
   },
   "lint-staged": {
