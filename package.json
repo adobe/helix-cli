@@ -88,8 +88,8 @@
     "mocha": "10.2.0",
     "mocha-multi-reporters": "1.5.1",
     "nock": "13.3.3",
-    "semantic-release": "21.1.2",
-    "sinon": "15.2.0"
+    "semantic-release": "22.0.0",
+    "sinon": "16.0.0"
   },
   "lint-staged": {
     "*.js": "eslint"
