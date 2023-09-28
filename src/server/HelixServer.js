@@ -92,8 +92,8 @@ export class HelixServer extends BaseServer {
         file404html: this._project.file404html,
       });
     } catch (err) {
-      log.error(`Failed to proxy Franklin request ${ctx.path}: ${err.message}`);
-      res.status(502).send(`Failed to proxy Franklin request: ${err.message}`);
+      log.error(`Failed to proxy AEM request ${ctx.path}: ${err.message}`);
+      res.status(502).send(`Failed to proxy AEM request: ${err.message}`);
     }
 
     this.emit('request', req, res, ctx);

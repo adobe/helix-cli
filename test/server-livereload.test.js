@@ -276,7 +276,7 @@ describe('Helix Server with Livereload', () => {
         protocols: [
           'http://livereload.com/protocols/official-7',
         ],
-        serverName: 'franklin-simulator',
+        serverName: 'aem-simulator',
       });
       assert.deepEqual(wsReloadData, {
         command: 'reload',
@@ -361,7 +361,7 @@ describe('Helix Server with Livereload', () => {
         protocols: [
           'http://livereload.com/protocols/official-7',
         ],
-        serverName: 'franklin-simulator',
+        serverName: 'aem-simulator',
       });
       assert.deepEqual(wsAlertData, {
         command: 'alert',

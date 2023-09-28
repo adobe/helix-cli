@@ -182,8 +182,8 @@ export class HelixImportServer extends BaseServer {
       // codecov:ignore:start
       /* c8 ignore start */
       } catch (err) {
-        log.error(`Failed to proxy Franklin request ${ctx.path}: ${err.message}`);
-        res.status(502).send(`Failed to proxy Franklin request: ${err.message}`);
+        log.error(`Failed to proxy AEM request ${ctx.path}: ${err.message}`);
+        res.status(502).send(`Failed to proxy AEM request: ${err.message}`);
       }
       // codecov:ignore:end
       /* c8 ignore end */

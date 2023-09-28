@@ -11,6 +11,8 @@
  */
 import yargs from 'yargs';
 import camelcase from 'camelcase';
+import path from 'path';
+import chalk from 'chalk-template';
 import { resetContext } from './fetch-utils.js';
 
 const MIN_MSG = 'You need at least one command.';
@@ -21,9 +23,13 @@ function envAwareStrict(args, aliases) {
   const hlxEnv = {};
   Object
     .keys(process.env)
-    .filter((key) => key.startsWith('HLX_'))
     .forEach((key) => {
-      hlxEnv[camelcase(key.substring(4))] = key;
+      if (key.startsWith('HLX_')) {
+        throw new Error(chalk`{red warning:} The environment prefix "HLX_" is not supported anymore. Please use "AEM_" instead.`);
+      }
+      if (key.startsWith('AEM_')) {
+        hlxEnv[camelcase(key.substring(4))] = key;
+      }
     });
 
   const unknown = [];
@@ -35,6 +41,9 @@ function envAwareStrict(args, aliases) {
 
   if (unknown.length > 0) {
     return unknown.length === 1 ? `Unknown argument: ${unknown[0]}` : `Unknown arguments: ${unknown.join(', ')}`;
+  }
+  if (path.basename(process.argv[1]) === 'hlx') {
+    return chalk`{red warning:} The "hlx" command is deprecated. Please use "aem" instead.`;
   }
   return true;
 }
@@ -109,10 +118,10 @@ export default class CLI {
 
     logArgs(argv)
       .strictCommands(true)
-      .scriptName('hlx')
+      .scriptName('aem')
       .usage('Usage: $0 <command> [options]')
       .parserConfiguration({ 'camel-case-expansion': false })
-      .env('HLX')
+      .env('AEM')
       .check((a) => envAwareStrict(a, argv.parsed.aliases))
       .showHelpOnFail(true)
       .fail(this._failFn)

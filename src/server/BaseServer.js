@@ -137,7 +137,7 @@ export class BaseServer extends EventEmitter {
         throw new Error(`Port ${this._port} already in use by another process.`);
       }
     }
-    log.info(`Starting Franklin dev server v${packageJson.version}`);
+    log.info(`Starting AEM dev server v${packageJson.version}`);
     await new Promise((resolve, reject) => {
       const listenCb = (err) => {
         if (err) {
@@ -145,7 +145,7 @@ export class BaseServer extends EventEmitter {
         }
         this._port = this._server.address().port;
         this._addr = this._server.address().address;
-        log.info(`Local Franklin dev server up and running: ${this.scheme}://${this.hostname}:${this.port}/`);
+        log.info(`Local AEM dev server up and running: ${this.scheme}://${this.hostname}:${this.port}/`);
         if (this._project.proxyUrl) {
           log.info(`Enabled reverse proxy to ${this._project.proxyUrl}`);
         }
@@ -186,7 +186,7 @@ export class BaseServer extends EventEmitter {
     this._server = null;
     this.emit('stopping');
     await new Promise((resolve, reject) => {
-      this.log.debug('Stopping Franklin dev server..');
+      this.log.debug('Stopping AEM dev server..');
       for (const socket of this._sockets) {
         socket.destroy();
         this._sockets.delete(socket);
@@ -195,7 +195,7 @@ export class BaseServer extends EventEmitter {
         if (err) {
           reject(new Error(`Error while stopping http server: ${err}`));
         }
-        this.log.info('Franklin dev server stopped.');
+        this.log.info('AEM dev server stopped.');
         resolve();
       });
     });

@@ -66,11 +66,12 @@ export default class UpCommand extends AbstractServerCommand {
       .withLogger(this._logger)
       .withKill(this._kill)
       .withPrintIndex(this._printIndex);
-
-    this.log.info(chalk`{yellow     ____              __    ___   v${pkgJson.version}}`);
-    this.log.info(chalk`{yellow    / __/______ ____  / /__ / (_)__  }`);
-    this.log.info(chalk`{yellow   / _// __/ _ \`/ _ \\/  '_// / / _ \\ }`);
-    this.log.info(chalk`{yellow  /_/ /_/  \\_,_/_//_/_/\\_\\/_/_/_//_/ }`);
+    const version = `v${pkgJson.version}`;
+    this.log.info(chalk`{yellow     ___   ______  ___  ____   __         ___      ___}`);
+    this.log.info(chalk`{yellow    / _ | / __/  |/  / / __/__/ /__ ____ / _ \\___ / (_)  _____ ______ __}`);
+    this.log.info(chalk`{yellow   / __ |/ _// /|_/ / / _// _  / _ \`/ -_) // / -_) / / |/ / -_) __/ // /}`);
+    this.log.info(chalk`{yellow  /_/ |_/___/_/  /_/ /___/\\_,_/\\_, /\\__/____/\\__/_/_/|___/\\__/_/  \\_, /}`);
+    this.log.info(chalk`{yellow                              /___/    ${version.padStart(26, ' ')} ___/}`);
     this.log.info('');
 
     const ref = await GitUtils.getBranch(this.directory);
@@ -91,7 +92,7 @@ export default class UpCommand extends AbstractServerCommand {
         this.watchGit();
       }
     } catch (e) {
-      throw Error(`Unable to start Franklin: ${e.message}`);
+      throw Error(`Unable to start AEM: ${e.message}`);
     }
 
     this._project.on('stopped', async () => {

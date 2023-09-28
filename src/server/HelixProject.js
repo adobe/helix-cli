@@ -109,7 +109,7 @@ export class HelixProject extends BaseProject {
   }
 
   async start() {
-    this.log.debug('Launching Franklin dev server...');
+    this.log.debug('Launching AEM dev server...');
     await super.start();
     await this.initHeadHtml();
     await this.init404Html();
@@ -120,7 +120,7 @@ export class HelixProject extends BaseProject {
   }
 
   async doStop() {
-    this.log.debug('Stopping Franklin dev server...');
+    this.log.debug('Stopping AEM dev server...');
     await super.doStop();
     if (this._indexer) {
       await this._indexer.close();

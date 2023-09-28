@@ -19,7 +19,7 @@ export default function up() {
       executor = value;
     },
     command: 'up',
-    description: 'Run a Franklin development server',
+    description: 'Run a AEM development server',
     builder: (yargs) => {
       yargs
         .option('open', {
@@ -70,7 +70,7 @@ export default function up() {
         })
         .option('stop-other', {
           alias: 'stopOther',
-          describe: 'Stop other Franklin CLI running on the above port',
+          describe: 'Stop other AEM CLI running on the above port',
           type: 'boolean',
           default: true,
         })
@@ -91,7 +91,7 @@ export default function up() {
           describe: 'Path to local folder to cache the responses (note: this is an alpha feature, it may be removed without notice)',
           type: 'string',
         })
-        .group(['url', 'livereload', 'no-livereload', 'open', 'no-open', 'print-index', 'cache'], 'Franklin Options')
+        .group(['url', 'livereload', 'no-livereload', 'open', 'no-open', 'print-index', 'cache'], 'AEM Options')
 
         .help();
     },
@@ -105,9 +105,9 @@ export default function up() {
       await executor
         .withHttpPort(argv.port)
         .withBindAddr(argv.addr)
-        // only open  browser window when executable is `hlx`
+        // only open  browser window when executable is `aem`
         // this prevents the window to be opened during integration tests
-        .withOpen(path.basename(argv.$0) === 'hlx' ? argv.open : false)
+        .withOpen(path.basename(argv.$0) === 'hlx' || path.basename(argv.$0) === 'aem' ? argv.open : false)
         .withTLS(argv.tlsKey, argv.tlsCert)
         .withLiveReload(argv.livereload)
         .withUrl(argv.url)

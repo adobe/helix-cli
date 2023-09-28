@@ -66,7 +66,7 @@ class ClientConnection extends EventEmitter {
       protocols: [
         'http://livereload.com/protocols/official-7',
       ],
-      serverName: 'franklin-simulator',
+      serverName: 'aem-simulator',
     });
   }
 

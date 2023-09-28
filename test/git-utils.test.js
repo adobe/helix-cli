@@ -35,7 +35,7 @@ describe('Testing GitUtils', () => {
     testRoot = await createTestRoot();
     await fse.writeFile(path.resolve(testRoot, 'README.md'), 'Hello\n', 'utf-8');
     await fse.writeFile(path.resolve(testRoot, '.gitignore'), '.env\n', 'utf-8');
-    await fse.writeFile(path.resolve(testRoot, '.env'), 'HLX_BLA=123\n', 'utf-8');
+    await fse.writeFile(path.resolve(testRoot, '.env'), 'AEM_BLA=123\n', 'utf-8');
 
     // throw a Javascript error when any shell.js command encounters an error
     shell.config.fatal = true;

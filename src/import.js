@@ -19,7 +19,7 @@ export default function up() {
       executor = value;
     },
     command: 'import',
-    description: 'Run the Franklin import server',
+    description: 'Run the AEM import server',
     builder: (yargs) => {
       yargs
         .option('open', {
@@ -29,13 +29,13 @@ export default function up() {
         })
         .option('ui-repo', {
           alias: 'uiRepo',
-          describe: 'Git repository for the Franklin Importer UI',
+          describe: 'Git repository for the AEM Importer UI',
           type: 'string',
           default: 'https://github.com/adobe/helix-importer-ui',
         })
         .option('skip-ui', {
           alias: 'skipUI',
-          describe: 'Do not install the Franklin Importer UI',
+          describe: 'Do not install the AEM Importer UI',
           type: 'boolean',
           default: false,
         })
@@ -58,7 +58,7 @@ export default function up() {
         })
         .option('stop-other', {
           alias: 'stopOther',
-          describe: 'Stop other Franklin CLI running on the above port',
+          describe: 'Stop other AEM CLI running on the above port',
           type: 'boolean',
           default: true,
         })
@@ -79,7 +79,7 @@ export default function up() {
           describe: 'Path to local folder to cache the responses',
           type: 'string',
         })
-        .group(['open', 'no-open', 'cache', 'ui-repo', 'skip-ui'], 'Franklin Import Options')
+        .group(['open', 'no-open', 'cache', 'ui-repo', 'skip-ui'], 'AEM Import Options')
 
         .help();
     },
@@ -96,9 +96,9 @@ export default function up() {
       await executor
         .withHttpPort(argv.port)
         .withBindAddr(argv.addr)
-        // only open  browser window when executable is `hlx`
+        // only open  browser window when executable is `aem`
         // this prevents the window to be opened during integration tests
-        .withOpen(path.basename(argv.$0) === 'hlx' ? argv.open : false)
+        .withOpen(path.basename(argv.$0) === 'hlx' || path.basename(argv.$0) === 'aem' ? argv.open : false)
         .withTLS(argv.tlsKey, argv.tlsCert)
         .withKill(argv.stopOther)
         .withCache(argv.cache)

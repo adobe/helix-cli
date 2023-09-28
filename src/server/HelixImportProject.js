@@ -18,13 +18,13 @@ export class HelixImportProject extends BaseProject {
   }
 
   async start() {
-    this.log.debug('Launching Franklin import server for importing content...');
+    this.log.debug('Launching AEM import server for importing content...');
     await super.start();
     return this;
   }
 
   async doStop() {
-    this.log.debug('Stopping Franklin import server..');
+    this.log.debug('Stopping AEM import server..');
     await super.doStop();
   }
 }
