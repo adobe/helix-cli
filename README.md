@@ -25,7 +25,7 @@ $ aem --help
 Usage: aem <command> [options]
 
 Commands:
-  aem up  Run a Helix development server
+  aem up  Run a AEM development server
 
 Options:
   --version                Show version number                         [boolean]
