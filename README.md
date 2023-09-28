@@ -1,4 +1,4 @@
-# Helix/AEM Command Line Interface (`aem` or `aem`)
+# Helix/AEM Command Line Interface (`aem`)
 
 ## Status
 
