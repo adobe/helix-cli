@@ -107,7 +107,7 @@ export default function up() {
         .withBindAddr(argv.addr)
         // only open  browser window when executable is `aem`
         // this prevents the window to be opened during integration tests
-        .withOpen(path.basename(argv.$0) === 'hlx' || path.basename(argv.$0) === 'aem' ? argv.open : false)
+        .withOpen(path.basename(argv.$0) === 'aem' ? argv.open : false)
         .withTLS(argv.tlsKey, argv.tlsCert)
         .withLiveReload(argv.livereload)
         .withUrl(argv.url)
