@@ -79,7 +79,7 @@ export default function up() {
           describe: 'Path to local folder to cache the responses',
           type: 'string',
         })
-        .group(['open', 'no-open', 'cache', 'ui-repo', 'skip-ui'], 'AEM Import Options')
+        .group(['open', 'no-open', 'cache', 'ui-repo', 'skip-ui'], 'AEM Importer Options')
 
         .help();
     },
