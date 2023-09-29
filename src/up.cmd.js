@@ -66,10 +66,11 @@ export default class UpCommand extends AbstractServerCommand {
       .withLogger(this._logger)
       .withKill(this._kill)
       .withPrintIndex(this._printIndex);
-    this.log.info(chalk`{yellow     ___   ______  ___  _____            __     __  v${pkgJson.version}}`);
-    this.log.info(chalk`{yellow    / _ | / __/  |/  / / __(_)_ _  __ __/ /__ _/ /____  ____}`);
-    this.log.info(chalk`{yellow   / __ |/ _// /|_/ / _\\ \\/ /  ' \\/ // / / _ \`/ __/ _ \\/ __/}`);
-    this.log.info(chalk`{yellow  /_/ |_/___/_/  /_/ /___/_/_/_/_/\\_,_/_/\\_,_/\\__/\\___/_/}`);
+    this.log.info(chalk`{yellow     ___    ________  ___                          __      __ v${pkgJson.version}}`);
+    this.log.info(chalk`{yellow    /   |  / ____/  |/  /  _____(_)___ ___  __  __/ /___ _/ /_____  _____}`);
+    this.log.info(chalk`{yellow   / /| | / __/ / /|_/ /  / ___/ / __ \`__ \\/ / / / / __ \`/ __/ __ \\/ ___/}`);
+    this.log.info(chalk`{yellow  / ___ |/ /___/ /  / /  (__  ) / / / / / / /_/ / / /_/ / /_/ /_/ / /}`);
+    this.log.info(chalk`{yellow /_/  |_/_____/_/  /_/  /____/_/_/ /_/ /_/\\__,_/_/\\__,_/\\__/\\____/_/}`);
     this.log.info('');
 
     const ref = await GitUtils.getBranch(this.directory);

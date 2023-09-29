@@ -80,11 +80,12 @@ export default class ImportCommand extends AbstractServerCommand {
       .withCwd(this.directory)
       .withLogger(this._logger)
       .withKill(this._kill);
-    this.log.info(chalk`{yellow    ___   ______  ___  ____                    __ }`);
-    this.log.info(chalk`{yellow   / _ | / __/  |/  / /  _/_ _  ___  ___  ____/ /____ ____}`);
-    this.log.info(chalk`{yellow  / __ |/ _// /|_/ / _/ //  ' \\/ _ \\/ _ \\/ __/ __/ -_) __/}`);
-    this.log.info(chalk`{yellow /_/ |_/___/_/  /_/ /___/_/_/_/ .__/\\___/_/  \\__/\\__/_/}`);
-    this.log.info(chalk`{yellow                             /_/  v${pkgJson.version}}`);
+    this.log.info(chalk`{yellow     ___    ________  ___                                __}`);
+    this.log.info(chalk`{yellow    /   |  / ____/  |/  /  (_)___ ___  ____  ____  _____/ /____  _____}`);
+    this.log.info(chalk`{yellow   / /| | / __/ / /|_/ /  / / __ \`__ \\/ __ \\/ __ \\/ ___/ __/ _ \\/ ___/}`);
+    this.log.info(chalk`{yellow  / ___ |/ /___/ /  / /  / / / / / / / /_/ / /_/ / /  / /_/  __/ /}`);
+    this.log.info(chalk`{yellow /_/  |_/_____/_/  /_/  /_/_/ /_/ /_/ .___/\\____/_/   \\__/\\___/_/}`);
+    this.log.info(chalk`{yellow                                   /_/ v${pkgJson.version}}`);
     this.log.info('');
 
     await this.initSeverOptions();
