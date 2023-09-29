@@ -1,7 +1,7 @@
 {
-  "name": "@adobe/helix-cli",
+  "name": "@adobe/aem-cli",
   "version": "14.26.0",
-  "description": "Project Helix CLI",
+  "description": "AEM CLI",
   "main": "index.js",
   "type": "module",
   "bin": {

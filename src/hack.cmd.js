@@ -42,7 +42,7 @@ export default class HackCommand extends AbstractCommand {
       await opn(url);
     } else {
       // eslint-disable-next-line no-console
-      this.log.info(chalk`Check out the Franklin Hackathon at {blue ${url}}`);
+      this.log.info(chalk`Check out the AEM Hackathon at {blue ${url}}`);
     }
   }
 }

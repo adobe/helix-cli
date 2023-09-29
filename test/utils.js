@@ -48,7 +48,7 @@ export function switchBranch(dir, branch) {
 
 export function clearHelixEnv() {
   const deleted = {};
-  Object.keys(process.env).filter((key) => key.startsWith('HLX_')).forEach((key) => {
+  Object.keys(process.env).filter((key) => key.startsWith(('AEM_'))).forEach((key) => {
     deleted[key] = process.env[key];
     delete process.env[key];
   });

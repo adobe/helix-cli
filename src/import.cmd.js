@@ -39,9 +39,10 @@ export default class ImportCommand extends AbstractServerCommand {
     await fse.ensureDir(importerFolder);
     const uiProjectName = path.basename(this._uiRepo, '.git');
     const uiFolder = path.join(importerFolder, uiProjectName);
+    const getUIVersion = async () => ((await fse.readJson(path.resolve(uiFolder, 'package.json'))).version);
     const exists = await fse.pathExists(uiFolder);
     if (!exists) {
-      this.log.info('Franklin Importer UI needs to be installed.');
+      this.log.info('AEM Importer UI needs to be installed.');
       this.log.info(`Cloning ${this._uiRepo} in ${importerFolder}.`);
       // clone the ui project
       await git.clone({
@@ -52,9 +53,9 @@ export default class ImportCommand extends AbstractServerCommand {
         depth: 1,
         singleBranch: true,
       });
-      this.log.info('Franklin Importer UI is ready.');
+      this.log.info(`AEM Importer UI is ready. v${await getUIVersion()}`);
     } else {
-      this.log.info('Fetching latest version of the Franklin Import UI.');
+      this.log.info('Fetching latest version of the AEM Importer UI...');
       // clone the ui project
       await git.pull({
         fs: fse,
@@ -67,7 +68,7 @@ export default class ImportCommand extends AbstractServerCommand {
           name: 'hlx import',
         },
       });
-      this.log.info('Franklin Importer UI is now up-to-date.');
+      this.log.info(`AEM Importer UI is up-to-date. v${await getUIVersion()}`);
     }
   }
 
@@ -79,12 +80,11 @@ export default class ImportCommand extends AbstractServerCommand {
       .withCwd(this.directory)
       .withLogger(this._logger)
       .withKill(this._kill);
-
-    this.log.info(chalk`{yellow     ____              __    ___      ____                    __}`);
-    this.log.info(chalk`{yellow    / __/______ ____  / /__ / (_)__  /  _/_ _  ___  ___  ____/ /_}`);
-    this.log.info(chalk`{yellow   / _// __/ _ \`/ _ \\/  '_// / / _ \\_/ //  ' \\/ _ \\/ _ \\/ __/ __/}`);
-    this.log.info(chalk`{yellow  /_/ /_/  \\_,_/_//_/_/\\_\\/_/_/_//_/___/_/_/_/ .__/\\___/_/  \\__/}`);
-    this.log.info(chalk`{yellow                                            /_/  v${pkgJson.version}}`);
+    this.log.info(chalk`{yellow    ___   ______  ___  ____                    __ }`);
+    this.log.info(chalk`{yellow   / _ | / __/  |/  / /  _/_ _  ___  ___  ____/ /____ ____}`);
+    this.log.info(chalk`{yellow  / __ |/ _// /|_/ / _/ //  ' \\/ _ \\/ _ \\/ __/ __/ -_) __/}`);
+    this.log.info(chalk`{yellow /_/ |_/___/_/  /_/ /___/_/_/_/ .__/\\___/_/  \\__/\\__/_/}`);
+    this.log.info(chalk`{yellow                             /_/  v${pkgJson.version}}`);
     this.log.info('');
 
     await this.initSeverOptions();
@@ -96,7 +96,7 @@ export default class ImportCommand extends AbstractServerCommand {
     try {
       await this._project.init();
     } catch (e) {
-      throw Error(`Unable to start Franklin: ${e.message}`);
+      throw Error(`Unable to start AEM: ${e.message}`);
     }
   }
 }

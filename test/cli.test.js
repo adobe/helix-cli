@@ -126,7 +126,7 @@ describe('hlx command line', () => {
     };
     await cli.run(['up', '--log-level', 'silly', '--log-file', 'foo.log']);
     sinon.assert.calledWith(upCmd.handler, {
-      $0: 'hlx',
+      $0: 'aem',
       _: ['up'],
       'log-file': ['foo.log'],
       'log-level': 'silly',

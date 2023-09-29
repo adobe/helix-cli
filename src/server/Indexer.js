@@ -76,7 +76,7 @@ export default class Indexer {
       log.error(`Error in helix-query.yaml: ${e.message}`);
     }
     if (this._printIndex && this._index.indices.length === 0) {
-      log.warn(chalk`Franklin CLI started with {gray --print-index} but no valid {gray helix-query.yaml} found.`);
+      log.warn(chalk`AEM CLI started with {gray --print-index} but no valid {gray helix-query.yaml} found.`);
     }
   }
 
