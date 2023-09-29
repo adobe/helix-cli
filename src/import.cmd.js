@@ -55,7 +55,7 @@ export default class ImportCommand extends AbstractServerCommand {
       });
       this.log.info(`AEM Importer UI is ready. v${await getUIVersion()}`);
     } else {
-      this.log.info('Fetching latest version of the AEM Import UI...');
+      this.log.info('Fetching latest version of the AEM Importer UI...');
       // clone the ui project
       await git.pull({
         fs: fse,
