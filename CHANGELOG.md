@@ -1,3 +1,11 @@
+## [14.26.1](https://github.com/adobe/helix-cli/compare/v14.26.0...v14.26.1) (2023-09-29)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @adobe/helix-shared-indexer to v2.0.14 ([3292cb1](https://github.com/adobe/helix-cli/commit/3292cb1e6fd44692e3dec1d8ce68e99336971a7d))
+* more AEM branding and deploy to @adobe/aem-cli ([a58fd43](https://github.com/adobe/helix-cli/commit/a58fd438c9078d035eb51d01c58fd24988e79fe2))
+
 # [14.26.0](https://github.com/adobe/helix-cli/compare/v14.25.1...v14.26.0) (2023-09-15)
 
 
