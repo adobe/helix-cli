@@ -1,3 +1,15 @@
+# [15.0.0](https://github.com/adobe/helix-cli/compare/v14.26.1...v15.0.0) (2023-09-29)
+
+
+### Bug Fixes
+
+* rebanding to AEM ([ada179a](https://github.com/adobe/helix-cli/commit/ada179a27bad5449b740b453495c1b09e3e8918a))
+
+
+### BREAKING CHANGES
+
+* 'hlx' is deprecated. use 'aem'
+
 ## [14.26.1](https://github.com/adobe/helix-cli/compare/v14.26.0...v14.26.1) (2023-09-29)
 
 
