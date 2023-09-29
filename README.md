@@ -8,7 +8,7 @@
 [![GitHub issues](https://img.shields.io/github/issues/adobe/helix-cli.svg)](https://github.com/adobe/helix-cli/issues)
 [![LGTM Code Quality Grade: JavaScript](https://img.shields.io/lgtm/grade/javascript/g/adobe/helix-cli.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/adobe/helix-cli)
 
-The AEM Command Line Interface allows web developers to create, develop, and deploy digital experiences using Adobe Experience Manager Sites 'Edge Delivery Services' f.k.a 'Project Franklin' f.k.a 'Project Helix'
+The AEM Command Line Interface allows web developers to create, develop, and deploy digital experiences using the Adobe Experience Manager Sites feature Edge Delivery Services. Some of this functionality was known as Franklin or Project Helix before.
 
 ## Installation
 
