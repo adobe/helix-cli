@@ -66,7 +66,7 @@ export default class UpCommand extends AbstractServerCommand {
       .withLogger(this._logger)
       .withKill(this._kill)
       .withPrintIndex(this._printIndex);
-    this.log.info(chalk`{yellow     ___   ______  ___  _____            __     __ ${pkgJson.version}}`);
+    this.log.info(chalk`{yellow     ___   ______  ___  _____            __     __  v${pkgJson.version}}`);
     this.log.info(chalk`{yellow    / _ | / __/  |/  / / __(_)_ _  __ __/ /__ _/ /____  ____}`);
     this.log.info(chalk`{yellow   / __ |/ _// /|_/ / _\\ \\/ /  ' \\/ // / / _ \`/ __/ _ \\/ __/}`);
     this.log.info(chalk`{yellow  /_/ |_/___/_/  /_/ /___/_/_/_/_/\\_,_/_/\\_,_/\\__/\\___/_/}`);
