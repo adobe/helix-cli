@@ -6,7 +6,7 @@ executors:
 
 orbs:
   win: circleci/windows@5.0.0
-  codecov: codecov/codecov@3.2.5
+  codecov: codecov/codecov@3.3.0
 
 commands:
   setup:

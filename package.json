@@ -52,9 +52,9 @@
     "express": "4.18.2",
     "faye-websocket": "0.11.4",
     "fs-extra": "11.1.1",
-    "glob": "10.3.6",
+    "glob": "10.3.10",
     "glob-to-regexp": "0.4.1",
-    "hast-util-select": "6.0.0",
+    "hast-util-select": "6.0.1",
     "http-proxy-agent": "7.0.0",
     "https-proxy-agent": "7.0.2",
     "ignore": "5.2.4",
@@ -69,7 +69,7 @@
     "rehype-parse": "9.0.0",
     "semver": "7.5.4",
     "shelljs": "0.8.5",
-    "unified": "11.0.2",
+    "unified": "11.0.3",
     "uuid": "9.0.1",
     "yargs": "17.7.2"
   },
@@ -88,7 +88,7 @@
     "mocha": "10.2.0",
     "mocha-multi-reporters": "1.5.1",
     "nock": "13.3.3",
-    "semantic-release": "22.0.4",
+    "semantic-release": "22.0.5",
     "sinon": "16.0.0"
   },
   "lint-staged": {
