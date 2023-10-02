@@ -47,3 +47,14 @@ You might encounter unexpected errors.
 `);
   }
 }
+/**
+ * Checks if the current cli
+ */
+export function checkCLIVersion() {
+  process.stderr.write(chalk`{red warning:} The @adobe/helix-cli is no longer supported. please install the {cyan aem-cli} instead:
+
+npm install -g @adobe/aem-cli   
+
+`);
+  process.exit(1);
+}
