@@ -13,7 +13,7 @@
  */
 
 import CLI from './src/cli.js';
-import { checkNodeVersion, validateDotEnv } from './src/config/config-utils.js';
+import { checkCLIVersion, checkNodeVersion, validateDotEnv } from './src/config/config-utils.js';
 import { config } from 'dotenv';
 
 config();
@@ -21,5 +21,6 @@ config();
 (async () => {
   await checkNodeVersion();
   await validateDotEnv();
+  await checkCLIVersion();
   await new CLI().run(process.argv.slice(2));
 })();
