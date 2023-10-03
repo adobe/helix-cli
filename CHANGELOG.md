@@ -1,3 +1,10 @@
+## [15.0.1](https://github.com/adobe/helix-cli/compare/v15.0.0...v15.0.1) (2023-10-03)
+
+
+### Bug Fixes
+
+* switch order of binaries ([#2252](https://github.com/adobe/helix-cli/issues/2252)) ([64152db](https://github.com/adobe/helix-cli/commit/64152db0a61c776aea6ae49b6ea37d498614a47a))
+
 # [15.0.0](https://github.com/adobe/helix-cli/compare/v14.26.1...v15.0.0) (2023-09-29)
 
 
