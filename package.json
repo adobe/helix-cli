@@ -80,7 +80,7 @@
     "@semantic-release/changelog": "6.0.3",
     "@semantic-release/git": "10.0.1",
     "c8": "8.0.1",
-    "eslint": "8.50.0",
+    "eslint": "8.51.0",
     "esmock": "2.5.1",
     "husky": "8.0.3",
     "junit-report-builder": "3.0.1",
@@ -89,7 +89,7 @@
     "mocha-multi-reporters": "1.5.1",
     "nock": "13.3.3",
     "semantic-release": "22.0.5",
-    "sinon": "16.0.0"
+    "sinon": "16.1.0"
   },
   "lint-staged": {
     "*.js": "eslint"
