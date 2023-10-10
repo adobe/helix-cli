@@ -1,4 +1,4 @@
-# Helix/AEM Command Line Interface (`aem`)
+# AEM Command Line Interface (`aem`)
 
 ## Status
 
@@ -139,7 +139,7 @@ If present, `ALL_PROXY` is used as fallback if there is no other match.
 | `--tls-key`       | `AEM_TLS_KEY`       | undefined   | Path to .key file (for enabling TLS)                        |
 | `--tls-cert`      | `AEM_TLS_CERT`      | undefined   | Path to .pem file (for enabling TLS)                        |
 
-# Developing Helix CLI
+# Developing AEM CLI
 
 ## Testing
 
