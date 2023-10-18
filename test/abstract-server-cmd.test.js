@@ -30,6 +30,20 @@ describe('AbstractServerCommand test', () => {
     await assert.rejects(cmd.open('file://etc/passwd'), Error('refuse to open non http(s) url (--open): file://etc/passwd'));
   });
 
+  it('open rejects invalid hostname argument', async () => {
+    const cmd = new AbstractServerCommand();
+    // eslint-disable-next-line no-underscore-dangle
+    cmd._project = { server: { hostname: 'localhost', scheme: 'http', port: 3000 } };
+    await assert.rejects(cmd.open('https://$(calc.exe)'), Error('refuse to open unsafe url (--open): https://$(calc.exe)/'));
+  });
+
+  it('open rejects invalid url argument', async () => {
+    const cmd = new AbstractServerCommand();
+    // eslint-disable-next-line no-underscore-dangle
+    cmd._project = { server: { hostname: 'localhost', scheme: 'http', port: 3000 } };
+    await assert.rejects(cmd.open('/"; Start calc.exe; echo "foo'), Error('refuse to open unsafe url (--open): http://localhost:3000/%22;%20Start%20calc.exe;%20echo%20%22foo'));
+  });
+
   it('constructs valid url from path', async () => {
     let opened;
     const { AbstractServerCommand: MockedCommand } = await esmock('../src/abstract-server.cmd.js', {
@@ -40,7 +54,7 @@ describe('AbstractServerCommand test', () => {
     const cmd = new MockedCommand();
     // eslint-disable-next-line no-underscore-dangle
     cmd._project = { server: { hostname: 'localhost', scheme: 'http', port: 3000 } };
-    await cmd.open('/"; Start calc.exe; echo "foo');
-    assert.strictEqual(opened, 'http://localhost:3000/%22;%20Start%20calc.exe;%20echo%20%22foo');
+    await cmd.open('/test page');
+    assert.strictEqual(opened, 'http://localhost:3000/test%20page');
   });
 });

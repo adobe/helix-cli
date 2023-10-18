@@ -137,6 +137,9 @@ export class AbstractServerCommand extends AbstractCommand {
     if (url.protocol !== 'http:' && url.protocol !== 'https:') {
       throw Error(`refuse to open non http(s) url (--open): ${url}`);
     }
+    if (!url.href.match(/^[a-zA-Z0-9._:/?%=&-]+$/)) {
+      throw Error(`refuse to open unsafe url (--open): ${url}`);
+    }
     this.log.info(`opening default browser: ${url.href}`);
     await opn(url.href);
   }
