@@ -1,3 +1,10 @@
+## [15.0.2](https://github.com/adobe/helix-cli/compare/v15.0.1...v15.0.2) (2023-10-18)
+
+
+### Bug Fixes
+
+* reject dangerous url characters (--open) ([#2258](https://github.com/adobe/helix-cli/issues/2258)) ([25df8e8](https://github.com/adobe/helix-cli/commit/25df8e88eea4875dc9a21d14df811fda55259717)), closes [#2257](https://github.com/adobe/helix-cli/issues/2257)
+
 ## [15.0.1](https://github.com/adobe/helix-cli/compare/v15.0.0...v15.0.1) (2023-10-03)
 
 
