@@ -70,6 +70,7 @@ describe('hlx up', () => {
     sinon.assert.calledWith(mockUp.withLiveReload, false);
     sinon.assert.calledWith(mockUp.withHttpPort, 1234);
     sinon.assert.calledWith(mockUp.withBindAddr, '*');
+    sinon.assert.calledWith(mockUp.withPrintIndex, true);
     sinon.assert.calledOnce(mockUp.run);
   });
 

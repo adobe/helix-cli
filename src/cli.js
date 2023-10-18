@@ -121,7 +121,7 @@ export default class CLI {
       .scriptName('aem')
       .usage('Usage: $0 <command> [options]')
       .parserConfiguration({ 'camel-case-expansion': false })
-      .env('AEM')
+      .env('AEM_')
       .check((a) => envAwareStrict(a, argv.parsed.aliases))
       .showHelpOnFail(true)
       .fail(this._failFn)
