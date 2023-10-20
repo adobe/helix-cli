@@ -1,3 +1,20 @@
+# [16.0.0](https://github.com/adobe/helix-cli/compare/v15.0.2...v16.0.0) (2023-10-20)
+
+
+### Bug Fixes
+
+* ensure proper env prefix ([#2260](https://github.com/adobe/helix-cli/issues/2260)) ([29a42ba](https://github.com/adobe/helix-cli/commit/29a42ba5d182fa6d7410da6fac87327b293618c2)), closes [#2259](https://github.com/adobe/helix-cli/issues/2259)
+
+
+### Features
+
+* major release attempt ([44298af](https://github.com/adobe/helix-cli/commit/44298af8d9aa4191c0819f0e0e48e5f668eff8e2))
+
+
+### BREAKING CHANGES
+
+* switch to aws backend (#19) (fe09eca)
+
 ## [15.0.2](https://github.com/adobe/helix-cli/compare/v15.0.1...v15.0.2) (2023-10-18)
 
 
