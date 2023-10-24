@@ -1,3 +1,10 @@
+## [16.0.2](https://github.com/adobe/helix-cli/compare/v16.0.1...v16.0.2) (2023-10-24)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @adobe/helix-log to v6.0.1 ([#2264](https://github.com/adobe/helix-cli/issues/2264)) ([23adfa2](https://github.com/adobe/helix-cli/commit/23adfa21d6f3ee3ed164914c5de4117adc77b46c))
+
 ## [16.0.1](https://github.com/adobe/helix-cli/compare/v16.0.0...v16.0.1) (2023-10-20)
 
 
