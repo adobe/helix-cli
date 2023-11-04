@@ -59,7 +59,7 @@
     "https-proxy-agent": "7.0.2",
     "ignore": "5.2.4",
     "ini": "4.1.1",
-    "isomorphic-git": "1.24.5",
+    "isomorphic-git": "1.25.0",
     "livereload-js": "4.0.2",
     "node-fetch": "3.3.2",
     "open": "9.1.0",
@@ -80,16 +80,16 @@
     "@semantic-release/changelog": "6.0.3",
     "@semantic-release/git": "10.0.1",
     "c8": "8.0.1",
-    "eslint": "8.52.0",
-    "esmock": "2.5.8",
+    "eslint": "8.53.0",
+    "esmock": "2.5.9",
     "husky": "8.0.3",
     "junit-report-builder": "3.1.0",
     "lint-staged": "15.0.2",
     "mocha": "10.2.0",
     "mocha-multi-reporters": "1.5.1",
-    "nock": "13.3.6",
-    "semantic-release": "22.0.5",
-    "sinon": "17.0.0"
+    "nock": "13.3.8",
+    "semantic-release": "22.0.7",
+    "sinon": "17.0.1"
   },
   "lint-staged": {
     "*.js": "eslint"
