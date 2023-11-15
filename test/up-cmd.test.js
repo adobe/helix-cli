@@ -63,9 +63,7 @@ describe('Integration test for up command with helix pages', function suite() {
       .get('/index.html')
       .reply(200, '## Welcome')
       .get('/not-found.txt')
-      .reply(404)
-      .get('/head.html')
-      .reply(200, '<link rel="stylesheet" href="/styles.css"/>');
+      .reply(404);
 
     let port;
     await new Promise((resolve, reject) => {
@@ -116,9 +114,7 @@ describe('Integration test for up command with helix pages', function suite() {
       .get('/index.html')
       .reply(200, '## Welcome')
       .get('/not-found.txt')
-      .reply(404)
-      .get('/head.html')
-      .reply(200, '<link rel="stylesheet" href="/styles.css"/>');
+      .reply(404);
 
     cmd
       .on('started', async () => {
@@ -158,9 +154,7 @@ describe('Integration test for up command with helix pages', function suite() {
       .get('/index.html')
       .reply(200, '## Welcome')
       .get('/not-found.txt')
-      .reply(404)
-      .get('/head.html')
-      .reply(200, '<link rel="stylesheet" href="/styles.css"/>');
+      .reply(404);
 
     nock('https://master--dummy-foo--adobe.hlx.page')
       .get('/fstab.yaml')
@@ -204,9 +198,7 @@ describe('Integration test for up command with helix pages', function suite() {
       .get('/index.html')
       .reply(200, '## Welcome')
       .get('/not-found.txt')
-      .reply(404)
-      .get('/head.html')
-      .reply(200, '<link rel="stylesheet" href="/styles.css"/>');
+      .reply(404);
 
     nock('https://master--dummy-foo--adobe.hlx.page')
       .get('/fstab.yaml')
@@ -214,9 +206,7 @@ describe('Integration test for up command with helix pages', function suite() {
 
     nock('https://new-branch--dummy-foo--adobe.hlx.page')
       .get('/fstab.yaml')
-      .reply(200, 'yep!')
-      .get('/head.html')
-      .reply(200, '## Welcome');
+      .reply(200, 'yep!');
 
     let timer;
     cmd
@@ -261,9 +251,7 @@ describe('Integration test for up command with helix pages', function suite() {
       .get('/index.html')
       .reply(200, '## Welcome')
       .get('/not-found.txt')
-      .reply(404)
-      .get('/head.html')
-      .reply(200, '<link rel="stylesheet" href="/styles.css"/>');
+      .reply(404);
 
     nock('https://master--dummy-foo--adobe.hlx.page')
       .get('/fstab.yaml')

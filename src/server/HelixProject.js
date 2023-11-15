@@ -78,15 +78,13 @@ export class HelixProject extends BaseProject {
         log: this.log,
         proxyUrl: this.proxyUrl,
       });
-      await this._headHtml.init();
 
       // register local head in live-reload
       if (this.liveReload) {
         this.liveReload.registerFiles([this._headHtml.filePath], '/');
         this.liveReload.on('modified', async (modified) => {
           if (modified.indexOf('/') >= 0) {
-            await this._headHtml.loadLocal();
-            await this._headHtml.init();
+            this._headHtml.invalidateLocal();
           }
         });
       }
