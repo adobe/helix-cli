@@ -224,6 +224,43 @@ describe('Head.html loading tests', () => {
     await hhs.update();
   });
 
+  it('update loads remote head.html with cookie', async () => {
+    const directory = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
+
+    nock('https://main--blog--adobe.hlx.page')
+      .get('/head.html')
+      .reply(function request() {
+        assert.strictEqual(this.req.headers.cookie, 'foobar');
+        return [200, '<!-- remote head html --><a>fooo</a>\n'];
+      });
+
+    const hhs = new HeadHtmlSupport({
+      log: console,
+      proxyUrl: 'https://main--blog--adobe.hlx.page',
+      directory,
+    });
+    hhs.localStatus = 200;
+    hhs.setCookie('foobar');
+    await hhs.update();
+  });
+
+  it('update loads remote head.html can handle errors', async () => {
+    const directory = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
+
+    nock('https://main--blog--adobe.hlx.page')
+      .get('/head.html')
+      .reply(404);
+
+    const hhs = new HeadHtmlSupport({
+      log: console,
+      proxyUrl: 'https://main--blog--adobe.hlx.page',
+      directory,
+    });
+    hhs.localStatus = 200;
+    await hhs.update();
+    assert.strictEqual(hhs.remoteStatus, 404);
+  });
+
   it('update loads local and remote head.html (not modified)', async () => {
     const directory = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
 
@@ -255,6 +292,13 @@ describe('Head.html loading tests', () => {
     hhs.remoteStatus = 200;
     await hhs.update();
     assert.strictEqual(hhs.isModified, false);
+  });
+
+  it('invalidate local invalidates the status', async () => {
+    const hhs = new HeadHtmlSupport(DEFAULT_OPTS());
+    hhs.localStatus = 404;
+    hhs.invalidateLocal();
+    assert.strictEqual(hhs.localStatus, 0);
   });
 
   it('update sets modified to false if remote status failed', async () => {
