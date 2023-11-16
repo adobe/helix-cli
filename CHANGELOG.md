@@ -1,3 +1,10 @@
+## [16.0.7](https://github.com/adobe/helix-cli/compare/v16.0.6...v16.0.7) (2023-11-16)
+
+
+### Bug Fixes
+
+* defer loading of head.html to allow inclusion of request cookie  ([1a8d2ac](https://github.com/adobe/helix-cli/commit/1a8d2ac65af58f07e2ad8911f8e9c3619f83ac7b)), closes [#2274](https://github.com/adobe/helix-cli/issues/2274)
+
 ## [16.0.6](https://github.com/adobe/helix-cli/compare/v16.0.5...v16.0.6) (2023-11-13)
 
 
