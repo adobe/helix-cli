@@ -29,7 +29,9 @@ function removePosition(tree) {
 
 async function init(hhs, localHtml, remoteHtml) {
   hhs.localHtml = localHtml;
+  hhs.localStatus = 200;
   hhs.remoteHtml = remoteHtml;
+  hhs.remoteStatus = 200;
   if (remoteHtml) {
     hhs.remoteDom = await HeadHtmlSupport.toDom(hhs.remoteHtml);
     HeadHtmlSupport.hash(hhs.remoteDom);
@@ -149,7 +151,7 @@ describe('Head.html loading tests', () => {
   it('loads remote head.html', async () => {
     const directory = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
 
-    const scope = nock('https://main--blog--adobe.hlx.page')
+    nock('https://main--blog--adobe.hlx.page')
       .get('/head.html')
       .reply(200, '<!-- remote head html -->   <script>a=1;</script>');
 
@@ -180,13 +182,12 @@ describe('Head.html loading tests', () => {
       type: 'root',
     });
     assert.strictEqual(hhs.remoteStatus, 200);
-    scope.done();
   });
 
   it('loads missing remote head.html', async () => {
     const directory = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
 
-    const scope = nock('https://main--blog--adobe.hlx.page')
+    nock('https://main--blog--adobe.hlx.page')
       .get('/head.html')
       .reply(404);
 
@@ -198,10 +199,9 @@ describe('Head.html loading tests', () => {
     await hhs.loadRemote();
     assert.strictEqual(hhs.remoteDom, null);
     assert.strictEqual(hhs.remoteStatus, 404);
-    scope.done();
   });
 
-  it('init loads local and remote head.html', async () => {
+  it('update loads local and remote head.html', async () => {
     const directory = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
 
     nock('https://main--blog--adobe.hlx.page')
@@ -213,20 +213,58 @@ describe('Head.html loading tests', () => {
       proxyUrl: 'https://main--blog--adobe.hlx.page',
       directory,
     });
-    await hhs.init();
+    await hhs.update();
     assert.strictEqual(hhs.remoteHtml, '<!-- remote head html --><a>fooo</a>');
     assert.strictEqual(hhs.remoteStatus, 200);
     assert.strictEqual(hhs.localHtml, '<!-- local head html -->\n<link rel="stylesheet" href="/styles.css"/>');
     assert.strictEqual(hhs.localStatus, 200);
     assert.strictEqual(hhs.isModified, true);
 
-    await hhs.init(); // only once
+    // only once
+    await hhs.update();
   });
 
-  it('init loads local and remote head.html (not modified)', async () => {
+  it('update loads remote head.html with cookie', async () => {
     const directory = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
 
-    const scope = nock('https://main--blog--adobe.hlx.page')
+    nock('https://main--blog--adobe.hlx.page')
+      .get('/head.html')
+      .reply(function request() {
+        assert.strictEqual(this.req.headers.cookie, 'foobar');
+        return [200, '<!-- remote head html --><a>fooo</a>\n'];
+      });
+
+    const hhs = new HeadHtmlSupport({
+      log: console,
+      proxyUrl: 'https://main--blog--adobe.hlx.page',
+      directory,
+    });
+    hhs.localStatus = 200;
+    hhs.setCookie('foobar');
+    await hhs.update();
+  });
+
+  it('update loads remote head.html can handle errors', async () => {
+    const directory = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
+
+    nock('https://main--blog--adobe.hlx.page')
+      .get('/head.html')
+      .reply(404);
+
+    const hhs = new HeadHtmlSupport({
+      log: console,
+      proxyUrl: 'https://main--blog--adobe.hlx.page',
+      directory,
+    });
+    hhs.localStatus = 200;
+    await hhs.update();
+    assert.strictEqual(hhs.remoteStatus, 404);
+  });
+
+  it('update loads local and remote head.html (not modified)', async () => {
+    const directory = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
+
+    nock('https://main--blog--adobe.hlx.page')
       .get('/head.html')
       .reply(200, '<!-- local head html -->\n<link rel="stylesheet" href="/styles.css"/>');
 
@@ -235,34 +273,41 @@ describe('Head.html loading tests', () => {
       proxyUrl: 'https://main--blog--adobe.hlx.page',
       directory,
     });
-    await hhs.init();
+    await hhs.update();
     assert.strictEqual(hhs.remoteHtml, '<!-- local head html -->\n<link rel="stylesheet" href="/styles.css"/>');
     assert.strictEqual(hhs.remoteStatus, 200);
     assert.strictEqual(hhs.localHtml, '<!-- local head html -->\n<link rel="stylesheet" href="/styles.css"/>');
     assert.strictEqual(hhs.localStatus, 200);
     assert.strictEqual(hhs.isModified, false);
 
-    await hhs.init(); // only once
-    scope.done();
+    // only once
+    await hhs.update();
   });
 
-  it('init sets modified to false if local status failed', async () => {
+  it('update sets modified to false if local status failed', async () => {
     const hhs = new HeadHtmlSupport(DEFAULT_OPTS());
     hhs.localHtml = '';
     hhs.remoteHtml = '';
     hhs.localStatus = 404;
     hhs.remoteStatus = 200;
-    await hhs.init();
+    await hhs.update();
     assert.strictEqual(hhs.isModified, false);
   });
 
-  it('init sets modified to false if remote status failed', async () => {
+  it('invalidate local invalidates the status', async () => {
+    const hhs = new HeadHtmlSupport(DEFAULT_OPTS());
+    hhs.localStatus = 404;
+    hhs.invalidateLocal();
+    assert.strictEqual(hhs.localStatus, 0);
+  });
+
+  it('update sets modified to false if remote status failed', async () => {
     const hhs = new HeadHtmlSupport(DEFAULT_OPTS());
     hhs.localHtml = '';
     hhs.remoteHtml = '';
     hhs.localStatus = 200;
     hhs.remoteStatus = 404;
-    await hhs.init();
+    await hhs.update();
     assert.strictEqual(hhs.isModified, false);
   });
 });

@@ -289,7 +289,7 @@ window.LiveReloadOptions = {
 
     const isHTML = ret.status === 200 && contentType.indexOf('text/html') === 0;
     const livereload = isHTML && opts.injectLiveReload;
-    const replaceHead = isHTML && opts.headHtml && opts.headHtml.isModified;
+    const replaceHead = isHTML && opts.headHtml;
     const doIndex = isHTML && opts.indexer && url.indexOf('.plain.html') < 0;
 
     if (isHTML) {
@@ -322,6 +322,7 @@ window.LiveReloadOptions = {
         ctx.log.trace(lines.join('\n'));
       }
       if (replaceHead) {
+        await opts.headHtml.setCookie(req.headers.cookie);
         textBody = await opts.headHtml.replace(textBody);
       }
       if (livereload) {

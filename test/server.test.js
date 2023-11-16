@@ -104,10 +104,6 @@ describe('Helix Server', () => {
       .withProxyUrl('https://main--foo--bar.hlx.page/')
       .withHttpPort(0);
 
-    nock('https://main--foo--bar.hlx.page')
-      .get('/head.html')
-      .reply(200, '<link rel="stylesheet" href="/styles.css"/>');
-
     await project.init();
     try {
       await project.start();
@@ -123,10 +119,6 @@ describe('Helix Server', () => {
       .withCwd(cwd)
       .withProxyUrl('https://main--foo--bar.hlx.page/')
       .withHttpPort(0);
-
-    nock('https://main--foo--bar.hlx.page')
-      .get('/head.html')
-      .reply(200, '<link rel="stylesheet" href="/styles.css"/>');
 
     await project.init();
     try {
@@ -164,9 +156,7 @@ describe('Helix Server', () => {
 
     nock('http://main--foo--bar.hlx.page')
       .get('/notfound.css')
-      .reply(404)
-      .get('/head.html')
-      .reply(200, '<link rel="stylesheet" href="/styles.css"/>');
+      .reply(404);
 
     try {
       await project.start();
@@ -188,9 +178,7 @@ describe('Helix Server', () => {
     nock('http://main--foo--bar.hlx.page')
       .get('/local.html')
       .optionally(true)
-      .reply(200, 'foo')
-      .get('/head.html')
-      .reply(200, '<link rel="stylesheet" href="/styles.css"/>');
+      .reply(200, 'foo');
 
     try {
       await project.start();
@@ -219,9 +207,7 @@ describe('Helix Server', () => {
       .get('/missing')
       .reply(404, 'server 404 html', {
         'content-type': 'text/html',
-      })
-      .get('/head.html')
-      .reply(200, '<link rel="stylesheet" href="/styles.css"/>');
+      });
 
     try {
       await project.start();
@@ -366,10 +352,6 @@ describe('Helix Server', () => {
         // a request like: /subfolder/query-index.json?sheet=foo&limit=20?sheet=foo&limit=20
         assert.strictEqual(uri, '/subfolder/query-index.json?sheet=foo&limit=20');
         return [200, '{ "data": [] }', { 'content-type': 'application/json' }];
-      })
-      .get('/head.html')
-      .reply(200, '<link rel="stylesheet" href="/styles.css"/>', {
-        'content-type': 'text/html',
       });
 
     try {

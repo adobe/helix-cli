@@ -119,7 +119,9 @@ export default class UpCommand extends AbstractServerCommand {
     const resp = await getFetch()(fstabUrl);
     await resp.buffer();
     if (!resp.ok) {
-      if (ref === 'main') {
+      if (resp.status === 401) {
+        this.log.warn(chalk`Unable to verify {yellow ${ref}} branch via {blue ${fstabUrl}} for authenticated sites.`);
+      } else if (ref === 'main') {
         this.log.warn(chalk`Unable to verify {yellow main} branch via {blue ${fstabUrl}} (${resp.status}). Maybe not pushed yet?`);
       } else {
         this.log.warn(chalk`Unable to verify {yellow ${ref}} branch on {blue ${fstabUrl}} (${resp.status}). Fallback to {yellow main} branch.`);

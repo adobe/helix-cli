@@ -81,6 +81,7 @@ export default class HeadHtmlSupport {
     this.remoteStatus = 0;
     this.localHtml = '';
     this.localStatus = 0;
+    this.cookie = '';
     this.url = new URL(proxyUrl);
     this.url.pathname = '/head.html';
     this.filePath = resolve(directory, 'head.html');
@@ -89,8 +90,13 @@ export default class HeadHtmlSupport {
 
   async loadRemote() {
     // load head from server
+    const headers = {};
+    if (this.cookie) {
+      headers.cookie = this.cookie;
+    }
     const resp = await getFetch()(this.url, {
       cache: 'no-store',
+      headers,
     });
     this.remoteStatus = resp.status;
     if (resp.ok) {
@@ -101,6 +107,18 @@ export default class HeadHtmlSupport {
     } else {
       this.log.error(`error while loading head.html from ${this.url}: ${resp.status}`);
     }
+  }
+
+  setCookie(cookie) {
+    if (this.cookie !== cookie) {
+      this.log.trace('registering head-html cookie to ', cookie);
+      this.cookie = cookie;
+      this.remoteStatus = 0;
+    }
+  }
+
+  invalidateLocal() {
+    this.localStatus = 0;
   }
 
   async loadLocal() {
@@ -114,7 +132,7 @@ export default class HeadHtmlSupport {
     }
   }
 
-  async init() {
+  async update() {
     if (!this.localStatus) {
       await this.loadLocal();
     }
@@ -127,6 +145,7 @@ export default class HeadHtmlSupport {
   }
 
   async replace(source) {
+    await this.update();
     if (!this.isModified) {
       this.log.trace('head.html ignored: not modified locally.');
       return source;
