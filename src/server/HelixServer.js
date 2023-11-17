@@ -42,6 +42,7 @@ export class HelixServer extends BaseServer {
   async handleProxyModeRequest(req, res) {
     const sendFile = promisify(res.sendFile).bind(res);
     const ctx = new RequestContext(req, this._project);
+    const { id } = ctx;
     const { log } = this;
     const proxyUrl = new URL(this._project.proxyUrl);
 
@@ -56,10 +57,19 @@ export class HelixServer extends BaseServer {
     if (liveReload) {
       liveReload.startRequest(ctx.requestId, ctx.path);
     }
+    const pfx = log.level === 'silly' ? `[${id}] ` : '';
+
+    if (log.level === 'silly') {
+      log.trace(`${pfx}>>>--------------------------`);
+      log.trace(`${pfx}> ${req.method} ${req.url}`);
+      Object.entries(req.headers).forEach(([name, value]) => {
+        log.trace(`${pfx}> ${name}: ${value}`);
+      });
+      log.trace(`[${id}]`);
+    }
 
     // try to serve static
     try {
-      log.debug('trying to serve local file', filePath);
       await sendFile(filePath, {
         dotfiles: 'allow',
         headers: {
@@ -69,9 +79,13 @@ export class HelixServer extends BaseServer {
       if (liveReload) {
         liveReload.registerFile(ctx.requestId, filePath);
       }
+      log.debug(`${pfx}served local file ${filePath}`);
       return;
     } catch (e) {
-      log.debug(`Error while delivering resource ${ctx.path} - ${e.stack || e}`);
+      log.debug(`${pfx}unable to deliver local file ${ctx.path} - ${e.stack || e}`);
+      if (res.headersSent) {
+        return;
+      }
     } finally {
       if (liveReload) {
         liveReload.endRequest(ctx.requestId);
@@ -92,7 +106,7 @@ export class HelixServer extends BaseServer {
         file404html: this._project.file404html,
       });
     } catch (err) {
-      log.error(`Failed to proxy AEM request ${ctx.path}: ${err.message}`);
+      log.error(`${pfx}failed to proxy AEM request ${ctx.path}: ${err.message}`);
       res.status(502).send(`Failed to proxy AEM request: ${err.message}`);
     }
 

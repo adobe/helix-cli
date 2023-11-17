@@ -215,7 +215,8 @@ window.LiveReloadOptions = {
    * @return {Promise} A promise that resolves when the stream is done.
    */
   async proxyRequest(ctx, url, req, res, opts = {}) {
-    ctx.log.debug(`Proxy ${req.method} request to ${url}`);
+    const { id } = ctx;
+    ctx.log.debug(`[${id}] Proxy ${req.method} request to ${url}`);
 
     if (opts.cacheDirectory) {
       const cached = await utils.getFromCache(url, opts.cacheDirectory, ctx.log);
@@ -263,7 +264,7 @@ window.LiveReloadOptions = {
     });
     const contentType = ret.headers.get('content-type') || 'text/plain';
     const level = utils.status2level(ret.status, true);
-    ctx.log[level](`Proxy ${req.method} request to ${url}: ${ret.status} (${contentType})`);
+    ctx.log[level](`[${id}] Proxy ${req.method} request to ${url}: ${ret.status} (${contentType})`);
 
     // because fetch decodes the response, we need to reset content encoding and length
     const respHeaders = Object.fromEntries(ret.headers.entries());
@@ -271,11 +272,12 @@ window.LiveReloadOptions = {
     delete respHeaders['content-length'];
     delete respHeaders['x-frame-options'];
     delete respHeaders['content-security-policy'];
+    delete respHeaders.connection;
     respHeaders['access-control-allow-origin'] = '*';
     respHeaders.via = `${ret.httpVersion ?? '1.0'} ${new URL(url).hostname}`;
 
     if (ret.status === 404 && contentType.indexOf('text/html') === 0 && opts.file404html) {
-      ctx.log.debug('serve local 404.html', opts.file404html);
+      ctx.log.debug(`[${id}] serve local 404.html ${opts.file404html}`);
       let textBody = await fs.readFile(opts.file404html, 'utf-8');
       if (opts.injectLiveReload) {
         textBody = utils.injectLiveReloadScript(textBody, ctx.config.server);
@@ -292,34 +294,19 @@ window.LiveReloadOptions = {
     const replaceHead = isHTML && opts.headHtml;
     const doIndex = isHTML && opts.indexer && url.indexOf('.plain.html') < 0;
 
+    if (ctx.log.level === 'silly') {
+      ctx.log.trace(`[${id}] -----------------------------`);
+      ctx.log.trace(`[${id}] < http/${ret.httpVersion} ${ret.status} ${ret.statusText}`);
+      Object.entries(ret.headers.raw()).forEach(([name, value]) => {
+        ctx.log.trace(`[${id}] < ${name}: ${value}`);
+      });
+    }
+
     if (isHTML) {
-      let respBody;
-      let textBody;
-      if (contentType.startsWith('text/')) {
-        textBody = await ret.text();
-      } else {
-        respBody = await ret.buffer();
-      }
-      const lines = ['----------------------------->'];
+      let textBody = await ret.text();
       if (ctx.log.level === 'silly') {
-        lines.push(`${req.method} ${url}`);
-        Object.entries(headers).forEach(([name, value]) => {
-          lines.push(`${name}: ${value}`);
-        });
-        lines.push('');
-        lines.push('<-----------------------------');
-        lines.push('');
-        lines.push(`http/${ret.httpVersion} ${ret.status} ${ret.statusText}`);
-        ret.headers.forEach((name, value) => {
-          lines.push(`${name}: ${value}`);
-        });
-        lines.push('');
-        if (respBody) {
-          lines.push(`<binary ${respBody.length} bytes>`);
-        } else {
-          lines.push(textBody);
-        }
-        ctx.log.trace(lines.join('\n'));
+        ctx.log.trace(textBody);
+        ctx.log.trace(`[${id}] <<<--------------------------`);
       }
       if (replaceHead) {
         await opts.headHtml.setCookie(req.headers.cookie);
@@ -344,7 +331,7 @@ window.LiveReloadOptions = {
           url,
           opts.cacheDirectory,
           {
-            body: respBody || textBody,
+            body: textBody,
             headers: respHeaders,
             status: ret.status,
           },
@@ -353,10 +340,14 @@ window.LiveReloadOptions = {
       }
 
       res
-        .status(ret.status)
         .set(respHeaders)
-        .send(respBody || textBody);
+        .status(ret.status)
+        .send(textBody);
       return;
+    }
+
+    if (ctx.log.level === 'silly') {
+      ctx.log.trace(`[${id}] <<<--------------------------`);
     }
 
     if (opts.cacheDirectory) {
