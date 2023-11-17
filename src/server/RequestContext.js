@@ -12,6 +12,8 @@
 import { parse } from 'url';
 import utils from './utils.js';
 
+let id = 0;
+
 /**
  * Context that is used during request handling.
  *
@@ -26,6 +28,8 @@ export default class RequestContext {
     const { url } = req;
     this._cfg = cfg || {};
     this._url = url;
+    // eslint-disable-next-line no-plusplus
+    this._id = id++;
     const purl = parse(url);
     this._path = purl.pathname || '/';
     this._queryString = purl.search || '';
@@ -72,6 +76,14 @@ export default class RequestContext {
     }
 
     this._resourcePath = relPath;
+  }
+
+  /**
+   * returns the request id / counter
+   * @return {*|number}
+   */
+  get id() {
+    return this._id;
   }
 
   /**
