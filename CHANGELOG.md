@@ -1,3 +1,10 @@
+## [16.0.8](https://github.com/adobe/helix-cli/compare/v16.0.7...v16.0.8) (2023-11-17)
+
+
+### Bug Fixes
+
+* don't respond when headers already sent ([#2278](https://github.com/adobe/helix-cli/issues/2278)) ([6be2f00](https://github.com/adobe/helix-cli/commit/6be2f00c9bf540433eb7836af7a1b7dcfbc174b4)), closes [#2276](https://github.com/adobe/helix-cli/issues/2276)
+
 ## [16.0.7](https://github.com/adobe/helix-cli/compare/v16.0.6...v16.0.7) (2023-11-16)
 
 
