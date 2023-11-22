@@ -89,6 +89,7 @@
     "mocha-multi-reporters": "1.5.1",
     "nock": "13.3.8",
     "semantic-release": "22.0.8",
+    "semantic-release-discord-bot": "^1.1.0",
     "sinon": "17.0.1"
   },
   "lint-staged": {
