@@ -1,3 +1,10 @@
+## [16.1.1](https://github.com/adobe/helix-cli/compare/v16.1.0...v16.1.1) (2023-11-22)
+
+
+### Bug Fixes
+
+* **release:** send release notifications on main branch ([329a60b](https://github.com/adobe/helix-cli/commit/329a60b28c6be063561c8fbcda9030bd9a2df419))
+
 # [16.1.0](https://github.com/adobe/helix-cli/compare/v16.0.8...v16.1.0) (2023-11-22)
 
 
