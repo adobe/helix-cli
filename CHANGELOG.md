@@ -1,3 +1,15 @@
+# [16.1.0](https://github.com/adobe/helix-cli/compare/v16.0.8...v16.1.0) (2023-11-22)
+
+
+### Bug Fixes
+
+* **release:** use correct package name for discord notifications ([7d0f1ab](https://github.com/adobe/helix-cli/commit/7d0f1abfc13f4eff8c52b62c3d59051f9afc41b9))
+
+
+### Features
+
+* **release:** announce releases on discord ([699740a](https://github.com/adobe/helix-cli/commit/699740a1c3a93f7e14dd462999b54bc056c77322))
+
 ## [16.0.8](https://github.com/adobe/helix-cli/compare/v16.0.7...v16.0.8) (2023-11-17)
 
 
