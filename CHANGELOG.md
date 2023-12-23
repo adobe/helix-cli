@@ -1,3 +1,10 @@
+## [16.1.4](https://github.com/adobe/helix-cli/compare/v16.1.3...v16.1.4) (2023-12-23)
+
+
+### Bug Fixes
+
+* **deps:** update dependency open to v10.0.1 ([69cc381](https://github.com/adobe/helix-cli/commit/69cc381d820f7a7fdf0e17dab95bdaec080c6a61))
+
 ## [16.1.3](https://github.com/adobe/helix-cli/compare/v16.1.2...v16.1.3) (2023-12-09)
 
 
