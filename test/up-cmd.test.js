@@ -364,6 +364,10 @@ describe('Integration test for up command with cache', function suite() {
       .get('/head.html')
       .reply(200, '<link rel="stylesheet" href="/styles.css"/>');
 
+    nock('https://admin.hlx.page:443')
+      .get('/sidekick/dummy-foo/adobe/master/config.json')
+      .reply(404);
+
     nock.enableNetConnect(/127.0.0.1/);
 
     cmd
