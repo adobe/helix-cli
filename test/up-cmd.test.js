@@ -65,6 +65,10 @@ describe('Integration test for up command with helix pages', function suite() {
       .get('/not-found.txt')
       .reply(404);
 
+    nock('https://admin.hlx.page:443')
+      .get('/sidekick/dummy-foo/adobe/master/config.json')
+      .reply(404);
+
     let port;
     await new Promise((resolve, reject) => {
       let error = null;
@@ -116,6 +120,10 @@ describe('Integration test for up command with helix pages', function suite() {
       .get('/not-found.txt')
       .reply(404);
 
+    nock('https://admin.hlx.page:443')
+      .get('/sidekick/dummy-foo/adobe/tripod/test/config.json')
+      .reply(404);
+
     cmd
       .on('started', async () => {
         try {
@@ -159,6 +167,10 @@ describe('Integration test for up command with helix pages', function suite() {
     nock('https://master--dummy-foo--adobe.hlx.page')
       .get('/fstab.yaml')
       .reply(404, 'dummy');
+
+    nock('https://admin.hlx.page:443')
+      .get('/sidekick/dummy-foo/adobe/master/config.json')
+      .reply(404);
 
     cmd
       .on('started', async () => {
@@ -208,6 +220,14 @@ describe('Integration test for up command with helix pages', function suite() {
       .get('/fstab.yaml')
       .reply(200, 'yep!');
 
+    nock('https://admin.hlx.page:443')
+      .get('/sidekick/dummy-foo/adobe/master/config.json')
+      .reply(404);
+
+    nock('https://admin.hlx.page:443')
+      .get('/sidekick/dummy-foo/adobe/new-branch/config.json')
+      .reply(404);
+
     let timer;
     cmd
       .on('started', async () => {
@@ -256,6 +276,14 @@ describe('Integration test for up command with helix pages', function suite() {
     nock('https://master--dummy-foo--adobe.hlx.page')
       .get('/fstab.yaml')
       .reply(404, 'dummy');
+
+    nock('https://admin.hlx.page:443')
+      .get('/sidekick/dummy-foo/adobe/master/config.json')
+      .reply(404);
+
+    nock('https://admin.hlx.page:443')
+      .get('/sidekick/dummy-foo/adobe/new-and-totally-unreasonably-long-in-fact-too-long-branch/config.json')
+      .reply(404);
 
     let timer;
     cmd
