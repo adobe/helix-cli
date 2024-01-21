@@ -28,8 +28,9 @@ jobs:
       - name: Semantic Release (Dry Run)
         run: npm run semantic-release-dry
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.ADOBE_BOT_NPM_TOKEN }}
+          DISCORD_WEBHOOK: ${{ secrets.HELIX_RELEASE_DISCORD_WEBHOOK }}
 
   test_win:
     name: Test (Windows)
