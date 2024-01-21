@@ -15,7 +15,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '18.x'
-      - run: npm install
+      - run: npm ci
       - run: git config --global user.email "test@project-helix.io" && git config --global user.name "Test Build"
       - run: git config --global protocol.file.allow always
       - run: npm run lint
@@ -42,7 +42,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '18.x'
-      - run: npm install
+      - run: npm ci
       - run: git config --global user.email "test@project-helix.io" && git config --global user.name "Test Build"
       - run: git config --global protocol.file.allow always
       - run: npm run test-ci-win
@@ -56,11 +56,13 @@ jobs:
     needs: [test, test_win]
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - name: Use Node.js 18.x
         uses: actions/setup-node@v4
         with:
           node-version: '18.x'
-      - run: npm install
+      - run: npm ci
       - run: npm run semantic-release
         env:
           GITHUB_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}
