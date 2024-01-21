@@ -18,7 +18,7 @@ jobs:
       - run: npm install
       - run: git config --global user.email "test@project-helix.io" && git config --global user.name "Test Build"
       - run: git config --global protocol.file.allow always
-      - run: npm lint
+      - run: npm run lint
       - run: npm test
         env:
           CIRCLE_REPOSITORY_URL: dummy-url
