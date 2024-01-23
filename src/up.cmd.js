@@ -100,11 +100,39 @@ export default class UpCommand extends AbstractServerCommand {
   }
 
   async verifyUrl(gitUrl, inref) {
+    // check if the site is on helix5
+    // https://admin.hlx.page/sidekick/adobe/www-aem-live/main/config.json
+    // {
+    //   "host": "aem.live",
+    //     "liveHost": "main--www-aem-live--adobe.aem.live",
+    //       "plugins": [
+    //         {
+    //           "id": "doc",
+    //           "title": "Documentation",
+    //           "url": "https://www.aem.live/docs/"
+    //         }
+    //       ],
+    //         "previewHost": "main--www-aem-live--adobe.aem.page",
+    //           "project": "Helix Website (AEM Live)",
+    //             "testProperty": "header";
+    // }
+    const configUrl = `https://admin.hlx.page/sidekick/${gitUrl.repo}/${gitUrl.owner}/${inref}/config.json`;
+    const configResp = await getFetch()(configUrl);
+    let previewHostBase = 'hlx.page';
+    if (configResp.ok) {
+      // this is best effort for now
+      const config = await configResp.json();
+      const { previewHost } = config;
+      if (previewHost && previewHost.endsWith('.aem.page')) {
+        previewHostBase = 'aem.page';
+      }
+    }
+
     let ref = inref;
 
     // replace `/` by `-` in ref.
     ref = ref.replace(/\//g, '-');
-    this._url = `https://${ref}--${gitUrl.repo}--${gitUrl.owner}.hlx.page`;
+    this._url = `https://${ref}--${gitUrl.repo}--${gitUrl.owner}.${previewHostBase}`;
     // check length limit
     if (this._url.split('.')
       .map((part) => part.replace(/^https:\/\//, ''))
@@ -125,7 +153,7 @@ export default class UpCommand extends AbstractServerCommand {
         this.log.warn(chalk`Unable to verify {yellow main} branch via {blue ${fstabUrl}} (${resp.status}). Maybe not pushed yet?`);
       } else {
         this.log.warn(chalk`Unable to verify {yellow ${ref}} branch on {blue ${fstabUrl}} (${resp.status}). Fallback to {yellow main} branch.`);
-        this._url = `https://main--${gitUrl.repo}--${gitUrl.owner}.hlx.page`;
+        this._url = `https://main--${gitUrl.repo}--${gitUrl.owner}.${previewHostBase}`;
       }
     }
   }
