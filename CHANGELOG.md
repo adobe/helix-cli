@@ -1,3 +1,10 @@
+# [16.2.0](https://github.com/adobe/helix-cli/compare/v16.1.6...v16.2.0) (2024-01-23)
+
+
+### Features
+
+* **up:** check if the site is on helix 5, and use aem.page as preview host if that's the case ([adc2837](https://github.com/adobe/helix-cli/commit/adc2837a242af82582a7d382c966520bcfd90677))
+
 ## [16.1.6](https://github.com/adobe/helix-cli/compare/v16.1.5...v16.1.6) (2024-01-21)
 
 
