@@ -139,7 +139,10 @@ window.LiveReloadOptions = {
   computePathForCache(url, directory) {
     const u = new URL(url);
     const { pathname, search } = u;
-    let fileName = pathname.substring(1) || 'index.html';
+    let fileName = pathname.substring(1);
+    if (fileName.endsWith('/') || fileName === '') {
+      fileName += 'index.html';
+    }
     if (search) {
       let qs = search.substring(1); // remove leading '?'
       if (fileName.length + qs.length > 255) {
