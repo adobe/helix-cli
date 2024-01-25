@@ -205,6 +205,8 @@ describe('Utils Test', () => {
 
   describe('Cache', () => {
     it('compute path for cache', () => {
+      assert.equal(utils.computePathForCache('https://www.sample.com/', '/target/'), path.resolve('/target', 'index.html'));
+      assert.equal(utils.computePathForCache('https://www.sample.com/folder/', '/target/'), path.resolve('/target/folder', 'index.html'));
       assert.equal(utils.computePathForCache('https://www.sample.com/index.html', '/target/'), path.resolve('/target', 'index.html'));
       assert.equal(utils.computePathForCache('https://www.sample.com/folder/index.html', '/target/'), path.resolve('/target', 'folder/index.html'));
       assert.equal(utils.computePathForCache('https://www.sample.com/script.js', '/target/'), path.resolve('/target', 'script.js'));
