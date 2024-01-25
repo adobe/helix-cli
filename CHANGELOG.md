@@ -1,3 +1,10 @@
+## [16.2.1](https://github.com/adobe/helix-cli/compare/v16.2.0...v16.2.1) (2024-01-25)
+
+
+### Bug Fixes
+
+* **cache:** proper root filename handling for subfolders ([#2305](https://github.com/adobe/helix-cli/issues/2305)) ([e7e2d34](https://github.com/adobe/helix-cli/commit/e7e2d3423b371846f87b23e93cbb25c37197899f))
+
 # [16.2.0](https://github.com/adobe/helix-cli/compare/v16.1.6...v16.2.0) (2024-01-23)
 
 
