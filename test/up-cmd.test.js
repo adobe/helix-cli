@@ -66,7 +66,7 @@ describe('Integration test for up command with helix pages', function suite() {
       .reply(404);
 
     nock('https://admin.hlx.page:443')
-      .get('/sidekick/dummy-foo/adobe/master/config.json')
+      .get('/sidekick/adobe/dummy-foo/master/config.json')
       .reply(404);
 
     let port;
@@ -123,7 +123,7 @@ describe('Integration test for up command with helix pages', function suite() {
       .reply(404);
 
     nock('https://admin.hlx.page:443')
-      .get('/sidekick/dummy-foo/adobe/master/config.json')
+      .get('/sidekick/adobe/dummy-foo/master/config.json')
       .reply(200, {
         host: 'example.com',
         liveHost: 'master--dummy-foo--adobe.aem.live',
@@ -184,7 +184,7 @@ describe('Integration test for up command with helix pages', function suite() {
       .reply(404);
 
     nock('https://admin.hlx.page:443')
-      .get('/sidekick/dummy-foo/adobe/tripod/test/config.json')
+      .get('/sidekick/adobe/dummy-foo/tripod/test/config.json')
       .reply(404);
 
     cmd
@@ -232,7 +232,7 @@ describe('Integration test for up command with helix pages', function suite() {
       .reply(404, 'dummy');
 
     nock('https://admin.hlx.page:443')
-      .get('/sidekick/dummy-foo/adobe/master/config.json')
+      .get('/sidekick/adobe/dummy-foo/master/config.json')
       .reply(404);
 
     cmd
@@ -284,11 +284,11 @@ describe('Integration test for up command with helix pages', function suite() {
       .reply(200, 'yep!');
 
     nock('https://admin.hlx.page:443')
-      .get('/sidekick/dummy-foo/adobe/master/config.json')
+      .get('/sidekick/adobe/dummy-foo/master/config.json')
       .reply(404);
 
     nock('https://admin.hlx.page:443')
-      .get('/sidekick/dummy-foo/adobe/new-branch/config.json')
+      .get('/sidekick/adobe/dummy-foo/new-branch/config.json')
       .reply(404);
 
     let timer;
@@ -341,11 +341,11 @@ describe('Integration test for up command with helix pages', function suite() {
       .reply(404, 'dummy');
 
     nock('https://admin.hlx.page:443')
-      .get('/sidekick/dummy-foo/adobe/master/config.json')
+      .get('/sidekick/adobe/dummy-foo/master/config.json')
       .reply(404);
 
     nock('https://admin.hlx.page:443')
-      .get('/sidekick/dummy-foo/adobe/new-and-totally-unreasonably-long-in-fact-too-long-branch/config.json')
+      .get('/sidekick/adobe/dummy-foo/new-and-totally-unreasonably-long-in-fact-too-long-branch/config.json')
       .reply(404);
 
     let timer;
@@ -428,7 +428,7 @@ describe('Integration test for up command with cache', function suite() {
       .reply(200, '<link rel="stylesheet" href="/styles.css"/>');
 
     nock('https://admin.hlx.page:443')
-      .get('/sidekick/dummy-foo/adobe/master/config.json')
+      .get('/sidekick/adobe/dummy-foo/master/config.json')
       .reply(404);
 
     nock.enableNetConnect(/127.0.0.1/);
