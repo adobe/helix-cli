@@ -1,3 +1,10 @@
+## [16.2.4](https://github.com/adobe/helix-cli/compare/v16.2.3...v16.2.4) (2024-02-01)
+
+
+### Bug Fixes
+
+* **up:** improve detection of helix5 repos ([a4dc193](https://github.com/adobe/helix-cli/commit/a4dc193607b78bf935d021ae43dfc5067a1f4e3b))
+
 ## [16.2.3](https://github.com/adobe/helix-cli/compare/v16.2.2...v16.2.3) (2024-01-28)
 
 
