@@ -116,7 +116,7 @@ export default class UpCommand extends AbstractServerCommand {
     //           "project": "Helix Website (AEM Live)",
     //             "testProperty": "header";
     // }
-    const configUrl = `https://admin.hlx.page/sidekick/${gitUrl.repo}/${gitUrl.owner}/${inref}/config.json`;
+    const configUrl = `https://admin.hlx.page/sidekick/${gitUrl.owner}/${gitUrl.repo}/${inref}/config.json`;
     const configResp = await getFetch()(configUrl);
     let previewHostBase = 'hlx.page';
     if (configResp.ok) {
