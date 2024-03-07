@@ -31,6 +31,11 @@ function envAwareStrict(args, aliases) {
         hlxEnv[camelcase(key.substring(4))] = key;
       }
     });
+  // setting the AEM_NO_OPEN doesn't seem to set args.open to false automatically...
+  if (args.noOpen) {
+    // eslint-disable-next-line no-param-reassign
+    args.open = false;
+  }
 
   const unknown = [];
   Object.keys(args).forEach((key) => {

@@ -102,6 +102,9 @@ export default function up() {
         executor = new UpCommand(getOrCreateLogger(argv));
       }
 
+      console.log('   open', argv.open);
+      console.log('no-open', argv.noOpen);
+
       await executor
         .withHttpPort(argv.port)
         .withBindAddr(argv.addr)

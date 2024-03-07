@@ -66,7 +66,7 @@ describe('hlx up', () => {
   it('hlx up can use env', async () => {
     dotenv.config({ path: path.resolve(__rootdir, 'test', 'fixtures', 'all.env') });
     await cli.run(['up']);
-    sinon.assert.calledWith(mockUp.withOpen, 'false');
+    sinon.assert.calledWith(mockUp.withOpen, false);
     sinon.assert.calledWith(mockUp.withLiveReload, false);
     sinon.assert.calledWith(mockUp.withHttpPort, 1234);
     sinon.assert.calledWith(mockUp.withBindAddr, '*');
