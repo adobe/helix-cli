@@ -1,3 +1,10 @@
+## [16.2.11](https://github.com/adobe/helix-cli/compare/v16.2.10...v16.2.11) (2024-03-07)
+
+
+### Bug Fixes
+
+* remove leftover console.log statements ([#2325](https://github.com/adobe/helix-cli/issues/2325)) ([23b9c5d](https://github.com/adobe/helix-cli/commit/23b9c5d6d9c8a5c1f28ce39a52162767d9d70750))
+
 ## [16.2.10](https://github.com/adobe/helix-cli/compare/v16.2.9...v16.2.10) (2024-03-07)
 
 
