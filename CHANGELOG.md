@@ -1,3 +1,10 @@
+## [16.2.10](https://github.com/adobe/helix-cli/compare/v16.2.9...v16.2.10) (2024-03-07)
+
+
+### Bug Fixes
+
+* ensure that AEM_NO_OPEN works as expected ([#2324](https://github.com/adobe/helix-cli/issues/2324)) ([c985c13](https://github.com/adobe/helix-cli/commit/c985c138cb343d0fbb729e1121029921915eb4d1)), closes [#2323](https://github.com/adobe/helix-cli/issues/2323)
+
 ## [16.2.9](https://github.com/adobe/helix-cli/compare/v16.2.8...v16.2.9) (2024-03-02)
 
 
