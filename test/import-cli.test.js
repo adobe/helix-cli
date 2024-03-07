@@ -67,7 +67,7 @@ describe('hlx import', () => {
   it('hlx import can use env', async () => {
     dotenv.config({ path: path.resolve(__rootdir, 'test', 'fixtures', 'all.env') });
     await cli.run(['import']);
-    sinon.assert.calledWith(mockImport.withOpen, 'false');
+    sinon.assert.calledWith(mockImport.withOpen, false);
     sinon.assert.calledWith(mockImport.withHttpPort, 1234);
     sinon.assert.calledOnce(mockImport.run);
   });
