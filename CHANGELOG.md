@@ -1,3 +1,10 @@
+# [16.3.0](https://github.com/adobe/helix-cli/compare/v16.2.14...v16.3.0) (2024-03-19)
+
+
+### Features
+
+* always proxy from main branch by default ([#2333](https://github.com/adobe/helix-cli/issues/2333)) ([e0b9be2](https://github.com/adobe/helix-cli/commit/e0b9be2f3d21f429c3b1b206145d50debacbac3c)), closes [#2331](https://github.com/adobe/helix-cli/issues/2331) [#2328](https://github.com/adobe/helix-cli/issues/2328)
+
 ## [16.2.14](https://github.com/adobe/helix-cli/compare/v16.2.13...v16.2.14) (2024-03-14)
 
 
