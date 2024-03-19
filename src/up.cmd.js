@@ -74,22 +74,16 @@ export default class UpCommand extends AbstractServerCommand {
     this.log.info('');
 
     const ref = await GitUtils.getBranch(this.directory);
-    const gitUrl = await GitUtils.getOriginURL(this.directory, { ref });
-    let explicitURL = true;
+    this._gitUrl = await GitUtils.getOriginURL(this.directory, { ref });
     if (!this._url) {
-      explicitURL = false;
-      // check if remote already has the `ref`
-      await this.verifyUrl(gitUrl, ref);
+      await this.verifyUrl(this._gitUrl, ref);
     }
     this._project.withProxyUrl(this._url);
     await this.initSeverOptions();
 
     try {
       await this._project.init();
-
-      if (!explicitURL) {
-        this.watchGit();
-      }
+      this.watchGit();
     } catch (e) {
       throw Error(`Unable to start AEM: ${e.message}`);
     }
@@ -99,7 +93,7 @@ export default class UpCommand extends AbstractServerCommand {
     });
   }
 
-  async verifyUrl(gitUrl, inref) {
+  async verifyUrl(gitUrl, ref) {
     // check if the site is on helix5
     // https://admin.hlx.page/sidekick/adobe/www-aem-live/main/config.json
     // {
@@ -116,7 +110,7 @@ export default class UpCommand extends AbstractServerCommand {
     //           "project": "Helix Website (AEM Live)",
     //             "testProperty": "header";
     // }
-    const configUrl = `https://admin.hlx.page/sidekick/${gitUrl.owner}/${gitUrl.repo}/${inref}/config.json`;
+    const configUrl = `https://admin.hlx.page/sidekick/${gitUrl.owner}/${gitUrl.repo}/main/config.json`;
     const configResp = await getFetch()(configUrl);
     let previewHostBase = 'hlx.page';
     if (configResp.ok) {
@@ -128,34 +122,17 @@ export default class UpCommand extends AbstractServerCommand {
       }
     }
 
-    let ref = inref;
-
-    // replace `/` by `-` in ref.
-    ref = ref.replace(/\//g, '-');
-    this._url = `https://${ref}--${gitUrl.repo}--${gitUrl.owner}.${previewHostBase}`;
+    const dnsName = `${ref.replace(/\//g, '-')}--${gitUrl.repo}--${gitUrl.owner}`;
     // check length limit
-    if (this._url.split('.')
-      .map((part) => part.replace(/^https:\/\//, ''))
-      .some((part) => part.length > 63)) {
-      this.log.error(chalk`URL {yellow ${this._url}} exceeds the 63 character limit for DNS labels.`);
+    if (dnsName.length > 63) {
+      this.log.error(chalk`URL {yellow https://${dnsName}.${previewHostBase}} exceeds the 63 character limit for DNS labels.`);
       this.log.error(chalk`Please use a shorter branch name or a shorter repository name.`);
       await this.stop();
       throw Error('branch name too long');
     }
 
-    const fstabUrl = `${this._url}/fstab.yaml`;
-    const resp = await getFetch()(fstabUrl);
-    await resp.buffer();
-    if (!resp.ok) {
-      if (resp.status === 401) {
-        this.log.warn(chalk`Unable to verify {yellow ${ref}} branch via {blue ${fstabUrl}} for authenticated sites.`);
-      } else if (ref === 'main') {
-        this.log.warn(chalk`Unable to verify {yellow main} branch via {blue ${fstabUrl}} (${resp.status}). Maybe not pushed yet?`);
-      } else {
-        this.log.warn(chalk`Unable to verify {yellow ${ref}} branch on {blue ${fstabUrl}} (${resp.status}). Fallback to {yellow main} branch.`);
-        this._url = `https://main--${gitUrl.repo}--${gitUrl.owner}.${previewHostBase}`;
-      }
-    }
+    // always proxy to main
+    this._url = `https://main--${gitUrl.repo}--${gitUrl.owner}.${previewHostBase}`;
   }
 
   /**
@@ -183,14 +160,17 @@ export default class UpCommand extends AbstractServerCommand {
           }
           try {
             // restart if any of the files is not ignored
-            this.log.info('git HEAD or remotes changed, reconfiguring server...');
             const ref = await GitUtils.getBranch(this.directory);
             const gitUrl = await GitUtils.getOriginURL(this.directory, { ref });
-            await this.verifyUrl(gitUrl, ref);
-            this._project.withProxyUrl(this._url);
-            await this._project.initHeadHtml();
-            this.log.info(`Updated proxy to ${this._url}`);
-            this.emit('changed', this);
+            if (gitUrl.toString() !== this._gitUrl.toString()) {
+              this.log.info('git HEAD or remotes changed, reconfiguring server...');
+              this._gitUrl = gitUrl;
+              await this.verifyUrl(gitUrl, ref);
+              this._project.withProxyUrl(this._url);
+              await this._project.initHeadHtml();
+              this.log.info(`Updated proxy to ${this._url}`);
+              this.emit('changed', this);
+            }
           } catch {
             // ignore
           }
