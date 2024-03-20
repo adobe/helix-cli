@@ -14,7 +14,7 @@ The AEM Command Line Interface allows web developers to create, develop, and dep
 Install `aem` as a global command. You need Node 12.11 or newer.
 
 ```bash
-$ npm install -g @adobe/aem-cli
+npm install -g @adobe/aem-cli
 ```
 
 ## Quick Start
