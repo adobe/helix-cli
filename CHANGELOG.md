@@ -1,3 +1,10 @@
+## [16.3.1](https://github.com/adobe/helix-cli/compare/v16.3.0...v16.3.1) (2024-03-23)
+
+
+### Bug Fixes
+
+* **deps:** update dependency express to v4.19.1 ([c6a4299](https://github.com/adobe/helix-cli/commit/c6a429947a6adea4307de5a89a48e6783c4088b7))
+
 # [16.3.0](https://github.com/adobe/helix-cli/compare/v16.2.14...v16.3.0) (2024-03-19)
 
 
