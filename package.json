@@ -50,7 +50,7 @@
     "cookie": "0.6.0",
     "cookie-parser": "1.4.6",
     "dotenv": "16.4.5",
-    "express": "4.18.3",
+    "express": "4.19.1",
     "faye-websocket": "0.11.4",
     "fs-extra": "11.2.0",
     "glob": "10.3.10",
