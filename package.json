@@ -60,7 +60,7 @@
     "https-proxy-agent": "7.0.4",
     "ignore": "5.3.1",
     "ini": "4.1.2",
-    "isomorphic-git": "1.25.6",
+    "isomorphic-git": "1.25.7",
     "livereload-js": "4.0.2",
     "node-fetch": "3.3.2",
     "open": "10.1.0",
