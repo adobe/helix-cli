@@ -1,3 +1,10 @@
+## [16.3.5](https://github.com/adobe/helix-cli/compare/v16.3.4...v16.3.5) (2024-04-06)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @adobe/helix-shared-indexer to v2.0.21 ([c412f16](https://github.com/adobe/helix-cli/commit/c412f160b9f7aa2c6f5c7304e9f570e11c6345c5))
+
 ## [16.3.4](https://github.com/adobe/helix-cli/compare/v16.3.3...v16.3.4) (2024-04-06)
 
 
