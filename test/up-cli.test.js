@@ -42,7 +42,7 @@ describe('hlx up', () => {
     mockUp.withBindAddr.returnsThis();
     mockUp.withUrl.returnsThis();
     mockUp.withPrintIndex.returnsThis();
-    mockUp.withAllowUnauthorized.returnsThis();
+    mockUp.withAllowInsecure.returnsThis();
     mockUp.withKill.returnsThis();
     mockUp.withCache.returnsThis();
     mockUp.run.returnsThis();
@@ -122,9 +122,9 @@ describe('hlx up', () => {
     sinon.assert.calledOnce(mockUp.run);
   });
 
-  it('hlx up can enable allow unauthorized', async () => {
-    await cli.run(['up', '--allow-unauthorized']);
-    sinon.assert.calledWith(mockUp.withAllowUnauthorized, true);
+  it('hlx up can enable allow insecure', async () => {
+    await cli.run(['up', '--allow-insecure']);
+    sinon.assert.calledWith(mockUp.withAllowInsecure, true);
     sinon.assert.calledOnce(mockUp.run);
   });
 

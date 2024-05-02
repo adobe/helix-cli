@@ -42,8 +42,8 @@ export class HelixProject extends BaseProject {
     return this;
   }
 
-  withAllowUnauthorized(value) {
-    this._allowUnauthorized = value;
+  withAllowInsecure(value) {
+    this._allowInsecure = value;
     return this;
   }
 
@@ -51,8 +51,8 @@ export class HelixProject extends BaseProject {
     return this._proxyUrl;
   }
 
-  get allowUnauthorized() {
-    return this._allowUnauthorized;
+  get allowInsecure() {
+    return this._allowInsecure;
   }
 
   get indexer() {
@@ -87,7 +87,7 @@ export class HelixProject extends BaseProject {
         directory: this.directory,
         log: this.log,
         proxyUrl: this.proxyUrl,
-        allowUnauthorized: this.allowUnauthorized,
+        allowInsecure: this.allowInsecure,
       });
 
       // register local head in live-reload

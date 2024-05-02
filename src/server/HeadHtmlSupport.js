@@ -76,7 +76,7 @@ export default class HeadHtmlSupport {
   }
 
   constructor({
-    proxyUrl, directory, allowUnauthorized, log,
+    proxyUrl, directory, allowInsecure, log,
   }) {
     this.remoteHtml = '';
     this.remoteDom = null;
@@ -87,7 +87,7 @@ export default class HeadHtmlSupport {
     this.url = new URL(proxyUrl);
     this.url.pathname = '/head.html';
     this.filePath = resolve(directory, 'head.html');
-    this.allowUnauthorized = allowUnauthorized;
+    this.allowInsecure = allowInsecure;
     this.log = log;
   }
 
@@ -97,7 +97,7 @@ export default class HeadHtmlSupport {
     if (this.cookie) {
       headers.cookie = this.cookie;
     }
-    const resp = await getFetch(this.allowUnauthorized)(this.url, {
+    const resp = await getFetch(this.allowInsecure)(this.url, {
       cache: 'no-store',
       headers,
     });
