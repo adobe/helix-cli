@@ -80,6 +80,12 @@ export default function up() {
           type: 'string',
         })
         .group(['open', 'no-open', 'cache', 'ui-repo', 'skip-ui'], 'AEM Importer Options')
+        .option('allow-insecure', {
+          alias: 'allowInsecure',
+          describe: 'Whether to allow insecure requests to the server',
+          type: 'boolean',
+          default: true,
+        })
 
         .help();
     },
@@ -100,6 +106,7 @@ export default function up() {
         // this prevents the window to be opened during integration tests
         .withOpen(path.basename(argv.$0) === 'aem' ? argv.open : false)
         .withTLS(argv.tlsKey, argv.tlsCert)
+        .withAllowInsecure(argv.allowInsecure)
         .withKill(argv.stopOther)
         .withCache(argv.cache)
         .withSkipUI(argv.skipUI)

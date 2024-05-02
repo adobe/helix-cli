@@ -23,7 +23,7 @@ export class HelixProject extends BaseProject {
     this._headHtml = null;
     this._indexer = null;
     this._printIndex = false;
-    this._allowUnauthorized = false;
+    this._allowInsecure = false;
     this._file404html = null;
   }
 
