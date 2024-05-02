@@ -58,7 +58,7 @@ const utils = {
     if (auth) {
       headers.authorization = `Bearer ${auth}`;
     }
-    const res = await getFetch()(uri, {
+    const res = await getFetch(ctx.config.allowUnauthorized)(uri, {
       cache: 'no-store',
       headers,
     });

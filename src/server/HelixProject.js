@@ -87,6 +87,7 @@ export class HelixProject extends BaseProject {
         directory: this.directory,
         log: this.log,
         proxyUrl: this.proxyUrl,
+        allowUnauthorized: this.allowUnauthorized,
       });
 
       // register local head in live-reload
