@@ -258,7 +258,7 @@ window.LiveReloadOptions = {
     delete headers.connection;
     delete headers['proxy-connection'];
     delete headers.host;
-    const ret = await getFetch()(url, {
+    const ret = await getFetch(ctx.config.allowUnauthorized)(url, {
       method: req.method,
       headers,
       cache: 'no-store',

@@ -23,6 +23,7 @@ export class HelixProject extends BaseProject {
     this._headHtml = null;
     this._indexer = null;
     this._printIndex = false;
+    this._allowUnauthorized = false;
     this._file404html = null;
   }
 
@@ -41,8 +42,17 @@ export class HelixProject extends BaseProject {
     return this;
   }
 
+  withAllowUnauthorized(value) {
+    this._allowUnauthorized = value;
+    return this;
+  }
+
   get proxyUrl() {
     return this._proxyUrl;
+  }
+
+  get allowUnauthorized() {
+    return this._allowUnauthorized;
   }
 
   get indexer() {
