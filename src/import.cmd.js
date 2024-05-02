@@ -88,7 +88,7 @@ export default class ImportCommand extends AbstractServerCommand {
     this.log.info(chalk`{yellow                                   /_/ v${pkgJson.version}}`);
     this.log.info('');
 
-    await this.initSeverOptions();
+    await this.initServerOptions();
 
     if (!this._skipUI) {
       await this.setupImporterUI();

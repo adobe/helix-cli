@@ -35,6 +35,11 @@ export default class UpCommand extends AbstractServerCommand {
     return this;
   }
 
+  withAllowUnauthorized(value) {
+    this._allowUnauthorized = value;
+    return this;
+  }
+
   async doStop() {
     await super.doStop();
     if (this._watcher) {
@@ -79,7 +84,7 @@ export default class UpCommand extends AbstractServerCommand {
       await this.verifyUrl(this._gitUrl, ref);
     }
     this._project.withProxyUrl(this._url);
-    await this.initSeverOptions();
+    await this.initServerOptions();
 
     try {
       await this._project.init();
@@ -111,7 +116,7 @@ export default class UpCommand extends AbstractServerCommand {
     //             "testProperty": "header";
     // }
     const configUrl = `https://admin.hlx.page/sidekick/${gitUrl.owner}/${gitUrl.repo}/main/config.json`;
-    const configResp = await getFetch()(configUrl);
+    const configResp = await getFetch(this._allowUnauthorized)(configUrl);
     let previewHostBase = 'hlx.page';
     if (configResp.ok) {
       // this is best effort for now

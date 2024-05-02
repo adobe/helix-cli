@@ -92,6 +92,12 @@ export default function up() {
           type: 'string',
         })
         .group(['url', 'livereload', 'no-livereload', 'open', 'no-open', 'print-index', 'cache'], 'AEM Options')
+        .option('allow-unauthorized', {
+          alias: 'allowUnauthorized',
+          describe: 'Whether to allow unauthorized access to server',
+          type: 'boolean',
+          default: false,
+        })
 
         .help();
     },
@@ -112,6 +118,7 @@ export default function up() {
         .withLiveReload(argv.livereload)
         .withUrl(argv.url)
         .withPrintIndex(argv.printIndex)
+        .withAllowUnauthorized(argv.allowUnauthorized)
         .withKill(argv.stopOther)
         .withCache(argv.alphaCache)
         .run();
