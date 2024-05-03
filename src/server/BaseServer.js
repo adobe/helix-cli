@@ -116,7 +116,7 @@ export class BaseServer extends EventEmitter {
       let retries = 1;
       if (this._project.kill && await utils.checkPortInUse(this._port, this._addr)) {
         try {
-          const res = await getFetch()(`${this._scheme}://${this._addr}:${this._port}/.kill`);
+          const res = await getFetch(true)(`${this._scheme}://${this._addr}:${this._port}/.kill`);
           await res.text();
         } catch (e) {
           // ignore errors, in case the other server closes connection

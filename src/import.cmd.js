@@ -22,6 +22,12 @@ export default class ImportCommand extends AbstractServerCommand {
   constructor(logger) {
     super(logger);
     this._importerSubPath = 'tools/importer';
+    this._allowInsecure = true;
+  }
+
+  withAllowInsecure(value) {
+    this._allowInsecure = value;
+    return this;
   }
 
   withSkipUI(value) {
@@ -79,7 +85,8 @@ export default class ImportCommand extends AbstractServerCommand {
     this._project = new HelixImportProject()
       .withCwd(this.directory)
       .withLogger(this._logger)
-      .withKill(this._kill);
+      .withKill(this._kill)
+      .withAllowInsecure(this._allowInsecure);
     this.log.info(chalk`{yellow     ___    ________  ___                                __}`);
     this.log.info(chalk`{yellow    /   |  / ____/  |/  /  (_)___ ___  ____  ____  _____/ /____  _____}`);
     this.log.info(chalk`{yellow   / /| | / __/ / /|_/ /  / / __ \`__ \\/ __ \\/ __ \\/ ___/ __/ _ \\/ ___/}`);
@@ -88,7 +95,7 @@ export default class ImportCommand extends AbstractServerCommand {
     this.log.info(chalk`{yellow                                   /_/ v${pkgJson.version}}`);
     this.log.info('');
 
-    await this.initSeverOptions();
+    await this.initServerOptions();
 
     if (!this._skipUI) {
       await this.setupImporterUI();

@@ -92,6 +92,12 @@ export default function up() {
           type: 'string',
         })
         .group(['url', 'livereload', 'no-livereload', 'open', 'no-open', 'print-index', 'cache'], 'AEM Options')
+        .option('allow-insecure', {
+          alias: 'allowInsecure',
+          describe: 'Whether to allow insecure requests to the server',
+          type: 'boolean',
+          default: false,
+        })
 
         .help();
     },
@@ -112,6 +118,7 @@ export default function up() {
         .withLiveReload(argv.livereload)
         .withUrl(argv.url)
         .withPrintIndex(argv.printIndex)
+        .withAllowInsecure(argv.allowInsecure)
         .withKill(argv.stopOther)
         .withCache(argv.alphaCache)
         .run();

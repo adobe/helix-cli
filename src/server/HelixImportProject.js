@@ -15,6 +15,17 @@ import { BaseProject } from './BaseProject.js';
 export class HelixImportProject extends BaseProject {
   constructor() {
     super(HelixImportServer);
+
+    this._allowInsecure = true;
+  }
+
+  withAllowInsecure(value) {
+    this._allowInsecure = value;
+    return this;
+  }
+
+  get allowInsecure() {
+    return this._allowInsecure;
   }
 
   async start() {

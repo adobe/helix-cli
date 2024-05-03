@@ -45,11 +45,11 @@ const httpProxyHandler = {
 };
 
 // create global context that is used by all commands and can be reset for CLI to terminate
-export function getFetch(allowUnauthorized) {
-  const cacheName = allowUnauthorized ? 'insecure' : 'default';
+export function getFetch(allowInsecure) {
+  const cacheName = allowInsecure ? 'insecure' : 'default';
   let cache = CONTEXT_CACHE[cacheName];
   if (!cache) {
-    const context = keepAlive({ rejectUnauthorized: !allowUnauthorized });
+    const context = keepAlive({ rejectUnauthorized: !allowInsecure });
     cache = {
       context,
       fetch: new Proxy(context.fetch, httpProxyHandler),

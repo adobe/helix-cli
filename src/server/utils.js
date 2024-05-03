@@ -58,7 +58,7 @@ const utils = {
     if (auth) {
       headers.authorization = `Bearer ${auth}`;
     }
-    const res = await getFetch()(uri, {
+    const res = await getFetch(ctx.config.allowInsecure)(uri, {
       cache: 'no-store',
       headers,
     });
@@ -258,7 +258,7 @@ window.LiveReloadOptions = {
     delete headers.connection;
     delete headers['proxy-connection'];
     delete headers.host;
-    const ret = await getFetch()(url, {
+    const ret = await getFetch(ctx.config.allowInsecure)(url, {
       method: req.method,
       headers,
       cache: 'no-store',

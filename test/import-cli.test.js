@@ -43,6 +43,7 @@ describe('hlx import', () => {
     mockImport.withCache.returnsThis();
     mockImport.withSkipUI.returnsThis();
     mockImport.withUIRepo.returnsThis();
+    mockImport.withAllowInsecure.returnsThis();
     mockImport.run.returnsThis();
     cli = (await new CLI().initCommands()).withCommandExecutor('import', mockImport);
   });

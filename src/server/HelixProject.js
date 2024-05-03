@@ -23,6 +23,7 @@ export class HelixProject extends BaseProject {
     this._headHtml = null;
     this._indexer = null;
     this._printIndex = false;
+    this._allowInsecure = false;
     this._file404html = null;
   }
 
@@ -41,8 +42,17 @@ export class HelixProject extends BaseProject {
     return this;
   }
 
+  withAllowInsecure(value) {
+    this._allowInsecure = value;
+    return this;
+  }
+
   get proxyUrl() {
     return this._proxyUrl;
+  }
+
+  get allowInsecure() {
+    return this._allowInsecure;
   }
 
   get indexer() {
@@ -77,6 +87,7 @@ export class HelixProject extends BaseProject {
         directory: this.directory,
         log: this.log,
         proxyUrl: this.proxyUrl,
+        allowInsecure: this.allowInsecure,
       });
 
       // register local head in live-reload

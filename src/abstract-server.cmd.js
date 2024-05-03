@@ -84,7 +84,7 @@ export class AbstractServerCommand extends AbstractCommand {
     this.emit('stopped', this);
   }
 
-  async initSeverOptions() {
+  async initServerOptions() {
     if (this._cache) {
       await fse.ensureDir(this._cache);
       this._project.withCacheDirectory(this._cache);
