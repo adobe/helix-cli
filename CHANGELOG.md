@@ -1,3 +1,10 @@
+## [16.3.11](https://github.com/adobe/helix-cli/compare/v16.3.10...v16.3.11) (2024-05-03)
+
+
+### Bug Fixes
+
+* support allow-unauthorized in aem up ([#2352](https://github.com/adobe/helix-cli/issues/2352)) ([e5cdac0](https://github.com/adobe/helix-cli/commit/e5cdac053e76df305925ec415e3b767176f0d8b1))
+
 ## [16.3.10](https://github.com/adobe/helix-cli/compare/v16.3.9...v16.3.10) (2024-04-27)
 
 
