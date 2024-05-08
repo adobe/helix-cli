@@ -125,11 +125,7 @@ export class HelixImportServer extends BaseServer {
     delete respHeaders['set-cookie'];
 
     if (respHeaders.location && (respHeaders.location.startsWith('http') || respHeaders.location.startsWith('//'))) {
-      if (respHeaders.location.startsWith('//')) {
-        const protocol = url.split('://')[0];
-        respHeaders.location = `${protocol}:${respHeaders.location}`;
-      }
-      const u = new URL(respHeaders.location);
+      const u = new URL(respHeaders.location, url);
       if (u.origin === host) {
         respHeaders.location = u.pathname;
       }

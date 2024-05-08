@@ -71,6 +71,8 @@ describe('Integration test for import command', function suite() {
       .reply(301, '', { Location: `${SAMPLE_HOST}/index.html` })
       .get('/redirect-with-external-host.html')
       .reply(301, '', { Location: 'https://www.somewhereelse.com' })
+      .get('/redirect-protocol-relative.html')
+      .reply(301, '', { Location: '//www.example.com' })
       .get('/index-with-cookie.html')
       .reply(200, content.index, { 'set-cookie': 'JSESSIONID=07A8BAAC4D936AEA864387BE61A4C457; Path=/; Secure; HttpOnly' })
       .get('/page-with-security.html')
@@ -141,6 +143,15 @@ describe('Integration test for import command', function suite() {
           });
           assert.strictEqual(resp.status, 301);
           assert.strictEqual(resp.headers.get('Location'), 'https://www.somewhereelse.com');
+
+          resp = await fetch(`http://127.0.0.1:${cmd.project.server.port}/redirect-protocol-relative.html`, {
+            redirect: 'manual',
+            headers: {
+              cookie: cookies,
+            },
+          });
+          assert.strictEqual(resp.status, 301);
+          assert.strictEqual(resp.headers.get('Location'), '//www.example.com');
 
           resp = await fetch(`http://127.0.0.1:${cmd.project.server.port}/index-with-cookie.html`, {
             headers: {
