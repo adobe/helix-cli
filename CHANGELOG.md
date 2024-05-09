@@ -1,3 +1,10 @@
+## [16.3.14](https://github.com/adobe/helix-cli/compare/v16.3.13...v16.3.14) (2024-05-09)
+
+
+### Bug Fixes
+
+* Resources that redirect to protocol-relative URIs are not handled correctly ([ca49c6b](https://github.com/adobe/helix-cli/commit/ca49c6bdf672e06a1b9d5f120f56ba8a01f6137f)), closes [#2354](https://github.com/adobe/helix-cli/issues/2354)
+
 ## [16.3.13](https://github.com/adobe/helix-cli/compare/v16.3.12...v16.3.13) (2024-05-04)
 
 
