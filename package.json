@@ -53,14 +53,14 @@
     "express": "4.19.2",
     "faye-websocket": "0.11.4",
     "fs-extra": "11.2.0",
-    "glob": "10.3.12",
+    "glob": "10.3.14",
     "glob-to-regexp": "0.4.1",
     "hast-util-select": "6.0.2",
     "http-proxy-agent": "7.0.2",
     "https-proxy-agent": "7.0.4",
     "ignore": "5.3.1",
     "ini": "4.1.2",
-    "isomorphic-git": "1.25.8",
+    "isomorphic-git": "1.25.10",
     "livereload-js": "4.0.2",
     "node-fetch": "3.3.2",
     "open": "10.1.0",
@@ -68,7 +68,7 @@
     "proxy-agent": "6.4.0",
     "proxy-from-env": "1.1.0",
     "rehype-parse": "9.0.0",
-    "semver": "7.6.0",
+    "semver": "7.6.2",
     "shelljs": "0.8.5",
     "unified": "11.0.4",
     "uuid": "9.0.1",
@@ -89,9 +89,9 @@
     "mocha": "10.4.0",
     "mocha-multi-reporters": "1.5.1",
     "nock": "13.5.4",
-    "semantic-release": "23.0.8",
+    "semantic-release": "23.1.1",
     "semantic-release-discord-bot": "^1.1.0",
-    "sinon": "17.0.1"
+    "sinon": "17.0.2"
   },
   "lint-staged": {
     "*.js": "eslint"
