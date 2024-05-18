@@ -53,7 +53,7 @@
     "express": "4.19.2",
     "faye-websocket": "0.11.4",
     "fs-extra": "11.2.0",
-    "glob": "10.3.14",
+    "glob": "10.3.15",
     "glob-to-regexp": "0.4.1",
     "hast-util-select": "6.0.2",
     "http-proxy-agent": "7.0.2",
