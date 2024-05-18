@@ -1,3 +1,10 @@
+## [16.3.16](https://github.com/adobe/helix-cli/compare/v16.3.15...v16.3.16) (2024-05-18)
+
+
+### Bug Fixes
+
+* **deps:** update dependency glob to v10.3.15 ([62b253a](https://github.com/adobe/helix-cli/commit/62b253af04bad9931b86914abb37de707c73dda8))
+
 ## [16.3.15](https://github.com/adobe/helix-cli/compare/v16.3.14...v16.3.15) (2024-05-11)
 
 
