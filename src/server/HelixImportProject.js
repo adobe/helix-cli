@@ -28,6 +28,11 @@ export class HelixImportProject extends BaseProject {
     return this._allowInsecure;
   }
 
+  withHeadersFile(value) {
+    this._headersFile = value;
+    return this;
+  }
+
   async start() {
     this.log.debug('Launching AEM import server for importing content...');
     await super.start();
