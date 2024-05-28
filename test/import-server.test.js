@@ -118,6 +118,9 @@ describe('Helix Import Server', () => {
     try {
       await project.start();
       await assertHttp(`http://127.0.0.1:${project.server.port}/tools/importer/import.js`, 200);
+      await assertHttp(`http://127.0.0.1:${project.server.port}/component-definition.json`, 200);
+      await assertHttp(`http://127.0.0.1:${project.server.port}/component-filters.json`, 200);
+      await assertHttp(`http://127.0.0.1:${project.server.port}/component-models.json`, 200);
     } finally {
       await project.stop();
     }
