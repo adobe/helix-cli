@@ -64,18 +64,13 @@ export class HelixImportServer extends BaseServer {
     return url.toString();
   }
 
-  async _updateHeaders(headers, log) {
+  async _updateHeaders(headers) {
     // eslint-disable-next-line no-underscore-dangle
     const filePath = this._project._headersFile;
     if (!filePath) return;
-    let cliHeaders;
-    try {
-      cliHeaders = await fs.readJSON(filePath);
-      // merge the headers defined with the CLI with those from the request
-      Object.assign(headers, cliHeaders);
-    } catch (error) {
-      log.error(`Failed to read or parse JSON file at ${filePath}: ${error.message}`);
-    }
+    const cliHeaders = await fs.readJSON(filePath);
+    // merge the headers defined with the CLI with those from the request
+    Object.assign(headers, cliHeaders);
   }
 
   async _doProxyRequest(ctx, url, host, req, res) {
@@ -115,7 +110,7 @@ export class HelixImportServer extends BaseServer {
     delete headers.connection;
     delete headers.host;
     delete headers.referer;
-    await this._updateHeaders(headers, ctx.log);
+    await this._updateHeaders(headers);
 
     const ret = await getFetch(ctx.config.allowInsecure)(url, {
       method: req.method,
