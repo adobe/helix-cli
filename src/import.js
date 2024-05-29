@@ -76,7 +76,7 @@ export default function up() {
         })
         .option('headers-file', {
           alias: 'headersFile',
-          describe: 'File location for your .json file for headers to be used in the requests',
+          describe: 'Location of a custom .json file containing headers to be used with all proxy requests',
           type: 'string',
           default: undefined,
         })

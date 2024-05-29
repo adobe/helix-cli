@@ -33,6 +33,10 @@ export class HelixImportProject extends BaseProject {
     return this;
   }
 
+  get headersFile() {
+    return this._headersFile;
+  }
+
   async start() {
     this.log.debug('Launching AEM import server for importing content...');
     await super.start();

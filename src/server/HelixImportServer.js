@@ -65,8 +65,7 @@ export class HelixImportServer extends BaseServer {
   }
 
   async _updateHeaders(headers) {
-    // eslint-disable-next-line no-underscore-dangle
-    const filePath = this._project._headersFile;
+    const filePath = this._project.headersFile;
     if (!filePath) return;
     const cliHeaders = await fs.readJSON(filePath);
     // merge the headers defined with the CLI with those from the request
