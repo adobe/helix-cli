@@ -81,6 +81,9 @@ export default class UpCommand extends AbstractServerCommand {
 
     const ref = await GitUtils.getBranch(this.directory);
     this._gitUrl = await GitUtils.getOriginURL(this.directory, { ref });
+    if (!this._gitUrl) {
+      throw Error('No git remote found. Make sure you have a remote "origin" configured.');
+    }
     if (!this._url) {
       await this.verifyUrl(this._gitUrl, ref);
     }
