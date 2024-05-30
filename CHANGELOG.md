@@ -1,3 +1,10 @@
+## [16.3.18](https://github.com/adobe/helix-cli/compare/v16.3.17...v16.3.18) (2024-05-30)
+
+
+### Bug Fixes
+
+* improve aem up error handling  ([f319855](https://github.com/adobe/helix-cli/commit/f319855d7e1ab0eea189f4fbb207dbb3510ece2f)), closes [#2369](https://github.com/adobe/helix-cli/issues/2369)
+
 ## [16.3.17](https://github.com/adobe/helix-cli/compare/v16.3.16...v16.3.17) (2024-05-25)
 
 
