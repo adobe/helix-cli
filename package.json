@@ -89,7 +89,7 @@
     "mocha": "10.4.0",
     "mocha-multi-reporters": "1.5.1",
     "nock": "13.5.4",
-    "semantic-release": "23.1.1",
+    "semantic-release": "24.0.0",
     "semantic-release-discord-bot": "^1.1.0",
     "sinon": "18.0.0"
   },
