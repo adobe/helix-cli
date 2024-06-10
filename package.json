@@ -71,7 +71,7 @@
     "semver": "7.6.2",
     "shelljs": "0.8.5",
     "unified": "11.0.4",
-    "uuid": "9.0.1",
+    "uuid": "10.0.0",
     "yargs": "17.7.2"
   },
   "devDependencies": {
@@ -80,7 +80,7 @@
     "@adobe/helix-testutils": "0.4.17",
     "@semantic-release/changelog": "6.0.3",
     "@semantic-release/git": "10.0.1",
-    "c8": "9.1.0",
+    "c8": "10.0.0",
     "eslint": "8.57.0",
     "esmock": "2.6.5",
     "husky": "9.0.11",
