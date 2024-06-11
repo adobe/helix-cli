@@ -1,3 +1,10 @@
+# [16.4.0](https://github.com/adobe/helix-cli/compare/v16.3.26...v16.4.0) (2024-06-11)
+
+
+### Features
+
+* **import:** add support for local delivery of UE configuration files ([#2367](https://github.com/adobe/helix-cli/issues/2367)) ([975547d](https://github.com/adobe/helix-cli/commit/975547d62506df5db791818c65acd5198a8675ff))
+
 ## [16.3.26](https://github.com/adobe/helix-cli/compare/v16.3.25...v16.3.26) (2024-06-09)
 
 
