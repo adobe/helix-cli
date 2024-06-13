@@ -322,7 +322,7 @@ describe('Integration test for import command', function suite() {
     nock(SAMPLE_HOST, {
       reqheaders: {
         Cookie: 'session_id=1234567890; secure',
-        Authorization: 'Bearer your_token_here',
+        Authorization_test: 'Bearer your_token_here',
       },
     })
       .get('/index.html')
