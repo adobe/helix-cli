@@ -24,6 +24,7 @@ describe('Helix Project', () => {
       .withCwd(cwd)
       .withHttpPort(0)
       .withBindAddr('*')
+      .withHeadersFile('test/fixtures/import/headers.json')
       .init();
 
     await project.start();
@@ -32,6 +33,7 @@ describe('Helix Project', () => {
       assert.notStrictEqual(project.server.port, 0);
       assert.notStrictEqual(project.server.port, 3000);
       assert.strictEqual(project.server.addr, '0.0.0.0');
+      assert.strictEqual(project.headersFile, 'test/fixtures/import/headers.json');
     } finally {
       await project.stop();
     }

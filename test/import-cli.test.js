@@ -44,6 +44,7 @@ describe('hlx import', () => {
     mockImport.withSkipUI.returnsThis();
     mockImport.withUIRepo.returnsThis();
     mockImport.withAllowInsecure.returnsThis();
+    mockImport.withHeadersFile.returnsThis();
     mockImport.run.returnsThis();
     cli = (await new CLI().initCommands()).withCommandExecutor('import', mockImport);
   });
@@ -135,6 +136,12 @@ describe('hlx import', () => {
   it('hlx import can change ui repo', async () => {
     await cli.run(['import', '--ui-repo', 'https://github.com/adobe/helix-importer-ui#somebranch']);
     sinon.assert.calledWith(mockImport.withUIRepo, 'https://github.com/adobe/helix-importer-ui#somebranch');
+    sinon.assert.calledOnce(mockImport.run);
+  });
+
+  it('hlx import can add custom headers', async () => {
+    await cli.run(['import', '--headers-file', 'headers.json']);
+    sinon.assert.calledWith(mockImport.withHeadersFile, 'headers.json');
     sinon.assert.calledOnce(mockImport.run);
   });
 });
