@@ -145,3 +145,27 @@ If present, `ALL_PROXY` is used as fallback if there is no other match.
 You can use `npm run check` to run the tests and check whether your code adheres
 to the aem-cli coding style.
 
+# Troubleshooting
+
+## `aem up` fails with `unable to get local issuer certificate`
+
+This error occurs when the server certificate is not trusted by Node.js. The typical
+cause is that connections to the server `*.aem.page` and `*.hlx.page` are intercepted
+by an enterprise proxy or firewall which is trying to inspect the traffic.
+
+These proxies use a private certificate authority (CA) to sign the certificates of the
+servers they intercept. To make Node.js trust the server certificate, you need to add
+the CA certificate to the list of trusted CAs.
+
+The CA certificate is typically provided by your IT department. You can ask them for
+the CA certificate and save it to a file, e.g. `my-ca.crt`.
+
+Then you can use the [`NODE_EXTRA_CA_CERTS`](https://nodejs.org/docs/latest/api/cli.html) environment variable to make Node.js trust
+the CA certificate:
+
+```bash
+export NODE_EXTRA_CA_CERTS=my-ca.crt
+aem up
+```
+
+This will make Node.js trust the server certificate and `aem up` should work.
