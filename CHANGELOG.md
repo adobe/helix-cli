@@ -1,3 +1,10 @@
+# [16.5.0](https://github.com/adobe/helix-cli/compare/v16.4.0...v16.5.0) (2024-06-14)
+
+
+### Features
+
+* **security:** provide more troubleshooting instructions on `aem up` ([58d3403](https://github.com/adobe/helix-cli/commit/58d340337a2f443f21befede189657b71781abdd))
+
 # [16.4.0](https://github.com/adobe/helix-cli/compare/v16.3.26...v16.4.0) (2024-06-11)
 
 
