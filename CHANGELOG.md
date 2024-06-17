@@ -1,3 +1,10 @@
+## [16.5.2](https://github.com/adobe/helix-cli/compare/v16.5.1...v16.5.2) (2024-06-17)
+
+
+### Bug Fixes
+
+* update command name in message from 'hlx' to 'aem' ([#2384](https://github.com/adobe/helix-cli/issues/2384)) ([30d3ce0](https://github.com/adobe/helix-cli/commit/30d3ce06a810ec95bb3e5ae0bc216775b1160ed6))
+
 ## [16.5.1](https://github.com/adobe/helix-cli/compare/v16.5.0...v16.5.1) (2024-06-15)
 
 
