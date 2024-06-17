@@ -59,7 +59,7 @@ export default class UpCommand extends AbstractServerCommand {
       }
     } catch (e) {
       if (e.code === 'ENOENT') {
-        throw Error('hlx up needs local git repository.');
+        throw Error('aem up needs local git repository.');
       }
       throw e;
     }
