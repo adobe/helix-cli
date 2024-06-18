@@ -9,7 +9,6 @@
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-import fs from 'fs-extra';
 import { promisify } from 'util';
 import path from 'path';
 import { PassThrough } from 'stream';
@@ -65,11 +64,8 @@ export class HelixImportServer extends BaseServer {
   }
 
   async _updateHeaders(headers) {
-    const filePath = this._project.headersFile;
-    if (!filePath) return;
-    const cliHeaders = await fs.readJSON(filePath);
     // merge the headers defined with the CLI with those from the request
-    Object.assign(headers, cliHeaders);
+    Object.assign(headers, await this._project.cliHeaders);
   }
 
   async _doProxyRequest(ctx, url, host, req, res) {
