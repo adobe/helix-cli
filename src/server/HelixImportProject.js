@@ -31,7 +31,16 @@ export class HelixImportProject extends BaseProject {
 
   withHeadersFile(value) {
     this._headersFile = value;
-    this._cliHeaders = (value) ? fs.readJSON(value) : {};
+    if (value) {
+      fs.readJSON(value).then((result) => {
+        this._cliHeaders = result;
+      }).catch((err) => {
+        this.log.error('error reading the headers file', err);
+        this._cliHeaders = {};
+      });
+    } else {
+      this._cliHeaders = {};
+    }
     return this;
   }
 
