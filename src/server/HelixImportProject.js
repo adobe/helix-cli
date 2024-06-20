@@ -31,16 +31,6 @@ export class HelixImportProject extends BaseProject {
 
   withHeadersFile(value) {
     this._headersFile = value;
-    if (value) {
-      fs.readJSON(value).then((result) => {
-        this._cliHeaders = result;
-      }).catch((err) => {
-        this.log.error('error reading the headers file', err);
-        this._cliHeaders = {};
-      });
-    } else {
-      this._cliHeaders = {};
-    }
     return this;
   }
 
@@ -55,6 +45,12 @@ export class HelixImportProject extends BaseProject {
   async start() {
     this.log.debug('Launching AEM import server for importing content...');
     await super.start();
+    try {
+      this._cliHeaders = (this._headersFile) ? await fs.readJSON(this._headersFile) : {};
+    } catch (error) {
+      this.log.error(`Failed to read headers file: ${error.message}`);
+      await this.doStop();
+    }
     return this;
   }
 

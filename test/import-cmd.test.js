@@ -345,39 +345,6 @@ describe('Integration test for import command', function suite() {
       .run()
       .catch(done);
   });
-
-  it('import command with non-existing headers file', (done) => {
-    let error = null;
-    const cmd = new ImportCommand()
-      .withDirectory(TEST_DIR)
-      .withOpen('false')
-      .withKill(false)
-      .withSkipUI(true)
-      .withHttpPort(0)
-      .withHeadersFile('non-existing-headers-file.json');
-
-    const myDone = (err) => {
-      error = err;
-      return cmd.stop();
-    };
-
-    cmd
-      .on('started', async () => {
-        try {
-          const resp = await fetch(`http://127.0.0.1:${cmd.project.server.port}/index.html?host=${SAMPLE_HOST}`, {});
-          assert.strictEqual(resp.status, 502);
-
-          await myDone();
-        } catch (e) {
-          await myDone(e);
-        }
-      })
-      .on('stopped', () => {
-        done(error);
-      })
-      .run()
-      .catch(done);
-  });
 });
 
 describe('Integration test for import command with cache', function suite() {
