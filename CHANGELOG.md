@@ -1,3 +1,10 @@
+## [16.5.3](https://github.com/adobe/helix-cli/compare/v16.5.2...v16.5.3) (2024-06-21)
+
+
+### Bug Fixes
+
+* support importing pages with authentication in importer ([aac442d](https://github.com/adobe/helix-cli/commit/aac442d4759a783695b21d41fbc0613177ca8d2d))
+
 ## [16.5.2](https://github.com/adobe/helix-cli/compare/v16.5.1...v16.5.2) (2024-06-17)
 
 
