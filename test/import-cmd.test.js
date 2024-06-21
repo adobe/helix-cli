@@ -270,7 +270,8 @@ describe('Integration test for import command', function suite() {
       .withOpen('false')
       .withKill(false)
       .withSkipUI(true)
-      .withHttpPort(0);
+      .withHttpPort(0)
+      .withHeadersFile('test/fixtures/import/headers.json');
 
     const myDone = (err) => {
       error = err;
@@ -289,6 +290,48 @@ describe('Integration test for import command', function suite() {
               referer: 'http://localhost',
             },
           });
+          assert.strictEqual(resp.status, 200);
+
+          await myDone();
+        } catch (e) {
+          await myDone(e);
+        }
+      })
+      .on('stopped', () => {
+        done(error);
+      })
+      .run()
+      .catch(done);
+  });
+
+  it('import command with headers file', (done) => {
+    let error = null;
+    const cmd = new ImportCommand()
+      .withDirectory(TEST_DIR)
+      .withOpen('false')
+      .withKill(false)
+      .withSkipUI(true)
+      .withHttpPort(0)
+      .withHeadersFile('test/fixtures/import/headers.json');
+
+    const myDone = (err) => {
+      error = err;
+      return cmd.stop();
+    };
+
+    nock(SAMPLE_HOST, {
+      reqheaders: {
+        Cookie: 'session_id=1234567890; secure',
+        Authorization_test: 'Bearer your_token_here',
+      },
+    })
+      .get('/index.html')
+      .reply(200);
+
+    cmd
+      .on('started', async () => {
+        try {
+          const resp = await fetch(`http://127.0.0.1:${cmd.project.server.port}/index.html?host=${SAMPLE_HOST}`, {});
           assert.strictEqual(resp.status, 200);
 
           await myDone();

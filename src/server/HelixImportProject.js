@@ -9,6 +9,7 @@
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
+import fs from 'fs-extra';
 import { HelixImportServer } from './HelixImportServer.js';
 import { BaseProject } from './BaseProject.js';
 
@@ -28,9 +29,28 @@ export class HelixImportProject extends BaseProject {
     return this._allowInsecure;
   }
 
+  withHeadersFile(value) {
+    this._headersFile = value;
+    return this;
+  }
+
+  get headersFile() {
+    return this._headersFile;
+  }
+
+  get cliHeaders() {
+    return this._cliHeaders;
+  }
+
   async start() {
     this.log.debug('Launching AEM import server for importing content...');
     await super.start();
+    try {
+      this._cliHeaders = (this._headersFile) ? await fs.readJSON(this._headersFile) : {};
+    } catch (error) {
+      this.log.error(`Failed to read headers file: ${error.message}`);
+      await this.doStop();
+    }
     return this;
   }
 

@@ -40,6 +40,11 @@ export default class ImportCommand extends AbstractServerCommand {
     return this;
   }
 
+  withHeadersFile(value) {
+    this._headersFile = value;
+    return this;
+  }
+
   async setupImporterUI() {
     const importerFolder = path.join(this.directory, this._importerSubPath);
     await fse.ensureDir(importerFolder);
@@ -86,7 +91,8 @@ export default class ImportCommand extends AbstractServerCommand {
       .withCwd(this.directory)
       .withLogger(this._logger)
       .withKill(this._kill)
-      .withAllowInsecure(this._allowInsecure);
+      .withAllowInsecure(this._allowInsecure)
+      .withHeadersFile(this._headersFile);
     this.log.info(chalk`{yellow     ___    ________  ___                                __}`);
     this.log.info(chalk`{yellow    /   |  / ____/  |/  /  (_)___ ___  ____  ____  _____/ /____  _____}`);
     this.log.info(chalk`{yellow   / /| | / __/ / /|_/ /  / / __ \`__ \\/ __ \\/ __ \\/ ___/ __/ _ \\/ ___/}`);

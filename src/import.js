@@ -74,12 +74,18 @@ export default function up() {
           type: 'string',
           default: undefined,
         })
+        .option('headers-file', {
+          alias: 'headersFile',
+          describe: 'Location of a custom .json file containing headers to be used with all proxy requests',
+          type: 'string',
+          default: undefined,
+        })
         .group(['port', 'addr', 'stop-other', 'tls-cert', 'tls-key'], 'Server options')
         .option('cache', {
           describe: 'Path to local folder to cache the responses',
           type: 'string',
         })
-        .group(['open', 'no-open', 'cache', 'ui-repo', 'skip-ui'], 'AEM Importer Options')
+        .group(['open', 'no-open', 'cache', 'ui-repo', 'skip-ui', 'headers-file'], 'AEM Importer Options')
         .option('allow-insecure', {
           alias: 'allowInsecure',
           describe: 'Whether to allow insecure requests to the server',
@@ -111,6 +117,7 @@ export default function up() {
         .withCache(argv.cache)
         .withSkipUI(argv.skipUI)
         .withUIRepo(argv.uiRepo)
+        .withHeadersFile(argv.headersFile)
         .run();
     },
   };

@@ -63,6 +63,11 @@ export class HelixImportServer extends BaseServer {
     return url.toString();
   }
 
+  async _updateHeaders(headers) {
+    // merge the headers defined with the CLI with those from the request
+    Object.assign(headers, await this._project.cliHeaders);
+  }
+
   async _doProxyRequest(ctx, url, host, req, res) {
     ctx.log.debug(`Proxy ${req.method} request to ${url}`);
 
@@ -100,6 +105,7 @@ export class HelixImportServer extends BaseServer {
     delete headers.connection;
     delete headers.host;
     delete headers.referer;
+    await this._updateHeaders(headers);
 
     const ret = await getFetch(ctx.config.allowInsecure)(url, {
       method: req.method,

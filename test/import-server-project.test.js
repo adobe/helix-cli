@@ -24,6 +24,7 @@ describe('Helix Project', () => {
       .withCwd(cwd)
       .withHttpPort(0)
       .withBindAddr('*')
+      .withHeadersFile('test/fixtures/import/headers.json')
       .init();
 
     await project.start();
@@ -32,6 +33,11 @@ describe('Helix Project', () => {
       assert.notStrictEqual(project.server.port, 0);
       assert.notStrictEqual(project.server.port, 3000);
       assert.strictEqual(project.server.addr, '0.0.0.0');
+      assert.strictEqual(project.headersFile, 'test/fixtures/import/headers.json');
+      assert.deepStrictEqual(project.cliHeaders, {
+        Cookie: 'session_id=1234567890; secure',
+        Authorization_test: 'Bearer your_token_here',
+      });
     } finally {
       await project.stop();
     }
@@ -51,6 +57,18 @@ describe('Helix Project', () => {
     } finally {
       await project.stop();
     }
+    assert.strictEqual(project.started, false);
+  });
+
+  it('the project should stop when the headers file is undefined', async () => {
+    const cwd = path.join(SPEC_ROOT, 'fixtures', 'import');
+    const project = await new HelixImportProject()
+      .withCwd(cwd)
+      .withHttpPort(0)
+      .withHeadersFile('non-existing-headers-file.json')
+      .init();
+
+    await project.start();
     assert.strictEqual(project.started, false);
   });
 });
