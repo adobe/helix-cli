@@ -1,6 +1,6 @@
 {
   "name": "@adobe/aem-cli",
-  "version": "16.5.7",
+  "version": "16.5.8",
   "description": "AEM CLI",
   "main": "index.js",
   "type": "module",
