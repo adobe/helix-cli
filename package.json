@@ -86,7 +86,7 @@
     "husky": "9.1.1",
     "junit-report-builder": "3.2.1",
     "lint-staged": "15.2.7",
-    "mocha": "10.6.0",
+    "mocha": "10.7.0",
     "mocha-multi-reporters": "1.5.1",
     "nock": "13.5.4",
     "semantic-release": "24.0.0",
