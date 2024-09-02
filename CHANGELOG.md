@@ -1,3 +1,10 @@
+# [16.6.0](https://github.com/adobe/helix-cli/compare/v16.5.19...v16.6.0) (2024-09-02)
+
+
+### Features
+
+* **up:** support urls with variables ([#2413](https://github.com/adobe/helix-cli/issues/2413)) ([3256d4a](https://github.com/adobe/helix-cli/commit/3256d4a2515ede2ce8977e470b05480b364494da))
+
 ## [16.5.19](https://github.com/adobe/helix-cli/compare/v16.5.18...v16.5.19) (2024-08-31)
 
 
