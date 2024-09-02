@@ -167,9 +167,9 @@ describe('Integration test for up command with helix pages', function suite() {
       .withDirectory(testDir)
       .withOpen(false)
       .withHttpPort(0)
-      .withUrl('https://main--{{repo}}--{{owner}}.hlx.page');
+      .withUrl('https://main--{{repo}}--{{owner}}.example.com');
 
-    nock('https://main--dummy-foo--adobe.hlx.page')
+    nock('https://main--dummy-foo--adobe.example.com')
       .get('/index.html')
       .reply(200, '## Welcome');
 
@@ -180,7 +180,7 @@ describe('Integration test for up command with helix pages', function suite() {
         .on('started', async () => {
           try {
             // eslint-disable-next-line no-underscore-dangle
-            assert.equal(cmd._url, 'https://main--dummy-foo--adobe.hlx.page');
+            assert.equal(cmd._url, 'https://main--dummy-foo--adobe.example.com');
             port = cmd.project.server.port;
             const ret = await assertHttp(`http://127.0.0.1:${port}/index.html`, 200);
             assert.strictEqual(ret.trim(), '## Welcome');

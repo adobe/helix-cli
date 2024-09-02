@@ -87,10 +87,9 @@ export default class UpCommand extends AbstractServerCommand {
     if (!this._url) {
       await this.verifyUrl(this._gitUrl, ref);
     } else if (/\{\{(owner|repo)+\}\}/.test(this._url)) {
-      const { owner, repo } = await GitUtils.getOriginURL(this.directory);
       this._url = this._url
-        .replace(/\{\{owner\}\}/, owner)
-        .replace(/\{\{repo\}\}/, repo);
+        .replace(/\{\{owner\}\}/, this._gitUrl.owner)
+        .replace(/\{\{repo\}\}/, this._gitUrl.repo);
     }
     this._project.withProxyUrl(this._url);
     await this.initServerOptions();
