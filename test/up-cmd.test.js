@@ -157,6 +157,49 @@ describe('Integration test for up command with helix pages', function suite() {
     assert.strictEqual(opened, `http://localhost:${port}/`);
   });
 
+  it('up command correctly replaces variables in url', async () => {
+    const MockedCommand = await esmock('../src/up.cmd.js', {
+      '../src/abstract-server.cmd.js': await esmock('../src/abstract-server.cmd.js'),
+    });
+    initGit(testDir, 'https://github.com/adobe/dummy-foo.git', 'test');
+    const cmd = new MockedCommand()
+      .withLiveReload(false)
+      .withDirectory(testDir)
+      .withOpen(false)
+      .withHttpPort(0)
+      .withUrl('https://main--{{repo}}--{{owner}}.example.com');
+
+    nock('https://main--dummy-foo--adobe.example.com')
+      .get('/index.html')
+      .reply(200, '## Welcome');
+
+    let port;
+    await new Promise((resolve, reject) => {
+      let error = null;
+      cmd
+        .on('started', async () => {
+          try {
+            // eslint-disable-next-line no-underscore-dangle
+            assert.equal(cmd._url, 'https://main--dummy-foo--adobe.example.com');
+            port = cmd.project.server.port;
+            const ret = await assertHttp(`http://127.0.0.1:${port}/index.html`, 200);
+            assert.strictEqual(ret.trim(), '## Welcome');
+          } catch (e) {
+            error = e;
+          }
+          await cmd.stop();
+        })
+        .on('stopped', () => {
+          if (error) {
+            reject(error);
+          }
+          resolve();
+        })
+        .run()
+        .catch(reject);
+    });
+  });
+
   it('up command delivers correct response (branch with slash).', (done) => {
     initGit(testDir, 'https://github.com/adobe/dummy-foo.git', 'tripod/test');
     let error = null;
