@@ -15,7 +15,7 @@
     "lint": "eslint .",
     "semantic-release": "semantic-release",
     "semantic-release-dry": "semantic-release --dry-run --branches $CI_BRANCH",
-    "prepare": "husky install"
+    "prepare": "husky"
   },
   "mocha": {
     "require": "test/setup-env.js",
@@ -35,7 +35,7 @@
   },
   "homepage": "https://github.com/adobe/helix-cli#readme",
   "engines": {
-    "node": ">=14"
+    "node": ">=18"
   },
   "dependencies": {
     "@adobe/fetch": "4.1.8",
