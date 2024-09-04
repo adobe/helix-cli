@@ -35,7 +35,7 @@
   },
   "homepage": "https://github.com/adobe/helix-cli#readme",
   "engines": {
-    "node": ">=14"
+    "node": ">=18"
   },
   "dependencies": {
     "@adobe/fetch": "4.1.8",
