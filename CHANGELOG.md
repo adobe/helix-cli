@@ -1,3 +1,10 @@
+# [16.7.0](https://github.com/adobe/helix-cli/compare/v16.6.0...v16.7.0) (2024-09-04)
+
+
+### Features
+
+* set minimum node version to 18 ([e42a0d9](https://github.com/adobe/helix-cli/commit/e42a0d9ad5551450124d41e0a92a7b3a3c921a6b)), closes [#2415](https://github.com/adobe/helix-cli/issues/2415)
+
 # [16.6.0](https://github.com/adobe/helix-cli/compare/v16.5.19...v16.6.0) (2024-09-02)
 
 
