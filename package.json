@@ -40,8 +40,8 @@
   "dependencies": {
     "@adobe/fetch": "4.1.8",
     "@adobe/helix-log": "6.0.3",
-    "@adobe/helix-shared-config": "10.6.7",
-    "@adobe/helix-shared-git": "3.0.13",
+    "@adobe/helix-shared-config": "10.6.8",
+    "@adobe/helix-shared-git": "3.0.14",
     "@adobe/helix-shared-indexer": "2.1.4",
     "camelcase": "8.0.0",
     "chalk-template": "1.1.0",
@@ -75,7 +75,7 @@
     "yargs": "17.7.2"
   },
   "devDependencies": {
-    "@adobe/eslint-config-helix": "2.0.6",
+    "@adobe/eslint-config-helix": "2.0.7",
     "@adobe/helix-shared-dom": "2.0.7",
     "@adobe/helix-testutils": "0.4.17",
     "@semantic-release/changelog": "6.0.3",
