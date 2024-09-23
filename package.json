@@ -58,7 +58,7 @@
     "hast-util-select": "6.0.2",
     "http-proxy-agent": "7.0.2",
     "https-proxy-agent": "7.0.5",
-    "ignore": "5.3.2",
+    "ignore": "6.0.2",
     "ini": "5.0.0",
     "isomorphic-git": "1.27.1",
     "livereload-js": "4.0.2",
