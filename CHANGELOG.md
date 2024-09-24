@@ -1,3 +1,10 @@
+## [16.7.6](https://github.com/adobe/helix-cli/compare/v16.7.5...v16.7.6) (2024-09-24)
+
+
+### Bug Fixes
+
+* **deps:** update dependency ignore to v6 ([#2427](https://github.com/adobe/helix-cli/issues/2427)) ([17bc981](https://github.com/adobe/helix-cli/commit/17bc9811b6fc2a225eb6a3d4fbdfb798392ce053))
+
 ## [16.7.5](https://github.com/adobe/helix-cli/compare/v16.7.4...v16.7.5) (2024-09-21)
 
 
