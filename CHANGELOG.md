@@ -1,3 +1,10 @@
+## [16.7.9](https://github.com/adobe/helix-cli/compare/v16.7.8...v16.7.9) (2024-09-26)
+
+
+### Bug Fixes
+
+* show errors found in IndexConfig ([d570e9a](https://github.com/adobe/helix-cli/commit/d570e9a4fb4c2d13bb058883eefcb421631bc199))
+
 ## [16.7.8](https://github.com/adobe/helix-cli/compare/v16.7.7...v16.7.8) (2024-09-25)
 
 
