@@ -72,8 +72,15 @@ export default class Indexer {
         .withDirectory(this._cwd)
         .withLogger(log)
         .init();
+      const errors = this._index.getErrors();
+      if (errors.length) {
+        const detail = errors.map(({ message }) => (message)).join('\n');
+        throw new Error(`
+          ${detail}`);
+      }
     } catch (e) {
       log.error(`Error in helix-query.yaml: ${e.message}`);
+      return;
     }
     if (this._printIndex && this._index.indices.length === 0) {
       log.warn(chalk`AEM CLI started with {gray --print-index} but no valid {gray helix-query.yaml} found.`);
