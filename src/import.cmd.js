@@ -14,6 +14,7 @@ import path from 'path';
 import chalk from 'chalk-template';
 import git from 'isomorphic-git';
 import http from 'isomorphic-git/http/node/index.js';
+import GitUtils from './git-utils.js';
 import { HelixImportProject } from './server/HelixImportProject.js';
 import pkgJson from './package.cjs';
 import { AbstractServerCommand } from './abstract-server.cmd.js';
@@ -37,6 +38,15 @@ export default class ImportCommand extends AbstractServerCommand {
 
   withUIRepo(value) {
     this._uiRepo = value;
+    this._uiBranch = GitUtils.DEFAULT_BRANCH;
+    if (value.includes('#')) {
+      // eslint-disable-next-line prefer-destructuring
+      this._uiRepo = value.split('#')[0];
+      if (value.split('#')[1].length > 0) {
+        // eslint-disable-next-line prefer-destructuring
+        this._uiBranch = value.split('#')[1];
+      }
+    }
     return this;
   }
 
@@ -45,11 +55,41 @@ export default class ImportCommand extends AbstractServerCommand {
     return this;
   }
 
+  /**
+   * Ensure the UI branch the caller specified (or defaulted to) is the one being used.
+   * @param uiFolder
+   * @returns {Promise<void>}
+   */
+  async handleUIBranch(uiFolder) {
+    let branch = GitUtils.DEFAULT_BRANCH;
+    try {
+      branch = await GitUtils.getBranch(uiFolder);
+
+      if (branch !== this._uiBranch) {
+        this.log.info(chalk`AEM Importer UI was on branch {yellow ${branch}}. Switching to {green ${this._uiBranch}}.`);
+        // This checkout will produce an error if the uiBranch does not exist (or fails to switch),
+        // will announce the error to the user, and exit the execution.
+        // Error examples:
+        // - "Your local changes to the following files would be overwritten by checkout: <file>"
+        // - "Could not find bad-branch."
+        await git.checkout({
+          fs: fse,
+          http,
+          dir: uiFolder,
+          ref: this._uiBranch,
+        });
+      }
+    } catch (e) {
+      // ignore
+    }
+  }
+
   async setupImporterUI() {
     const importerFolder = path.join(this.directory, this._importerSubPath);
     await fse.ensureDir(importerFolder);
     const uiProjectName = path.basename(this._uiRepo, '.git');
     const uiFolder = path.join(importerFolder, uiProjectName);
+    await this.handleUIBranch(uiFolder);
     const getUIVersion = async () => ((await fse.readJson(path.resolve(uiFolder, 'package.json'))).version);
     const exists = await fse.pathExists(uiFolder);
     if (!exists) {
@@ -61,10 +101,11 @@ export default class ImportCommand extends AbstractServerCommand {
         http,
         dir: uiFolder,
         url: this._uiRepo,
+        ref: this._uiBranch,
         depth: 1,
         singleBranch: true,
       });
-      this.log.info(`AEM Importer UI is ready. v${await getUIVersion()}`);
+      this.log.info(`AEM Importer UI is ready. v${await getUIVersion()} ${this._uiBranch ? `(Branch: ${this._uiBranch})` : ''}`);
     } else {
       this.log.info('Fetching latest version of the AEM Importer UI...');
       // clone the ui project
@@ -73,13 +114,15 @@ export default class ImportCommand extends AbstractServerCommand {
         http,
         dir: uiFolder,
         url: this._uiRepo,
+        ref: this._uiBranch,
         depth: 1,
         singleBranch: true,
         author: {
           name: 'hlx import',
         },
       });
-      this.log.info(`AEM Importer UI is up-to-date. v${await getUIVersion()}`);
+      this.log.info(`AEM Importer UI is up-to-date. v${await getUIVersion()} ${this._uiBranch
+        ? `(Branch: ${this._uiBranch})` : ''}`);
     }
   }
 

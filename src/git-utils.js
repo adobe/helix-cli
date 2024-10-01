@@ -23,6 +23,8 @@ import git from 'isomorphic-git';
 const cache = {};
 
 export default class GitUtils {
+  static DEFAULT_BRANCH = 'main';
+
   /**
    * Determines whether the working tree directory contains uncommitted or unstaged changes.
    *
@@ -141,7 +143,7 @@ export default class GitUtils {
    * @param {string} fallback fallback value if no branch or tag is found
    * @returns {Promise<string>} current branch or tag
    */
-  static async getBranch(dir, fallback = 'main') {
+  static async getBranch(dir, fallback = this.DEFAULT_BRANCH) {
     // current commit sha
     const rev = await git.resolveRef({ fs, dir, ref: 'HEAD' });
     // reverse-lookup tag from commit sha

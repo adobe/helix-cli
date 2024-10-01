@@ -15,7 +15,12 @@ import assert from 'assert';
 import path from 'path';
 import fse from 'fs-extra';
 import { h1NoCache as fetchContext } from '@adobe/fetch';
-import { Nock, assertHttp, createTestRoot } from './utils.js';
+import {
+  Nock,
+  assertHttp,
+  createTestRoot,
+  getBranch,
+} from './utils.js';
 import ImportCommand from '../src/import.cmd.js';
 
 const { fetch } = fetchContext({ rejectUnauthorized: false });
@@ -576,6 +581,39 @@ describe('Import command - importer ui', function suite() {
         try {
           assert.ok(await fse.pathExists(`${testDir}/tools/importer/helix-importer-ui/index.html`), 'helix-importer-ui project has been cloned');
           await assertHttp(`http://127.0.0.1:${cmd.project.server.port}/tools/importer/helix-importer-ui/index.html`, 200);
+
+          await myDone();
+        } catch (e) {
+          await myDone(e);
+        }
+      })
+      .on('stopped', () => {
+        done(error);
+      })
+      .run()
+      .catch(done);
+  });
+
+  it('import command installs a importer ui branch', (done) => {
+    // This assumes the branch 'origin/test' will exist and be available.
+    let error = null;
+    const cmd = new ImportCommand()
+      .withDirectory(testDir)
+      .withOpen(false)
+      .withUIRepo('https://github.com/adobe/helix-importer-ui#test')
+      .withHttpPort(0);
+
+    const myDone = (err) => {
+      error = err;
+      return cmd.stop();
+    };
+
+    cmd
+      .on('started', async () => {
+        try {
+          assert.ok(await fse.pathExists(`${testDir}/tools/importer/helix-importer-ui/index.html`), 'helix-importer-ui project has been cloned');
+          await assertHttp(`http://127.0.0.1:${cmd.project.server.port}/tools/importer/helix-importer-ui/index.html`, 200);
+          assert.equal(getBranch(`${testDir}/tools/importer/helix-importer-ui`), 'test');
 
           await myDone();
         } catch (e) {

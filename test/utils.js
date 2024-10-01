@@ -43,7 +43,19 @@ export function switchBranch(dir, branch) {
   shell.cd(dir);
   shell.exec(`git checkout -b ${branch}`);
   shell.cd(pwd);
+  // eslint-disable-next-line no-console
   console.log(`switched to branch ${branch} in ${dir}`);
+}
+
+export function getBranch(dir) {
+  const pwd = shell.pwd();
+  shell.cd(dir);
+  const { stdout } = shell.exec('git rev-parse --abbrev-ref HEAD');
+  shell.cd(pwd);
+  // eslint-disable-next-line no-console
+  console.log(`The current branch is ${stdout.trim()} in ${dir}`);
+
+  return stdout.trim();
 }
 
 export function clearHelixEnv() {
