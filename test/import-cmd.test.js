@@ -563,7 +563,7 @@ describe('Import command - importer ui', function suite() {
 
   this.timeout(240000);
 
-  it('import command installs the importer ui', (done) => {
+  it('import command installs the main importer ui', (done) => {
     let error = null;
     const cmd = new ImportCommand()
       .withDirectory(testDir)
@@ -581,6 +581,7 @@ describe('Import command - importer ui', function suite() {
         try {
           assert.ok(await fse.pathExists(`${testDir}/tools/importer/helix-importer-ui/index.html`), 'helix-importer-ui project has been cloned');
           await assertHttp(`http://127.0.0.1:${cmd.project.server.port}/tools/importer/helix-importer-ui/index.html`, 200);
+          assert.equal(getBranch(`${testDir}/tools/importer/helix-importer-ui`), 'main');
 
           await myDone();
         } catch (e) {
@@ -625,5 +626,51 @@ describe('Import command - importer ui', function suite() {
       })
       .run()
       .catch(done);
+  });
+
+  it('import command fails to install a importer ui branch', (done) => {
+    // This assumes the branch 'origin/bad' does not exist.
+    let error = null;
+    const cmd = new ImportCommand()
+      .withDirectory(testDir)
+      .withOpen(false)
+      .withUIRepo('https://github.com/adobe/helix-importer-ui#bad')
+      .withHttpPort(0);
+
+    const myDone = (err) => {
+      error = err;
+      return cmd.stop();
+    };
+
+    cmd
+      .on('started', async () => {
+        try {
+          assert.fail('Should not have been able to clone the importer ui');
+          await myDone();
+        } catch (e) {
+          await myDone(e);
+        }
+      })
+      .on('stopped', () => {
+        done(error);
+      })
+      .run()
+      .catch(() => {
+        done();
+        assert.success('Importer UI branch does not exist - exception expected.');
+      });
+  });
+
+  it('import command fails to install an invalid ui-repo', (done) => {
+    try {
+      new ImportCommand()
+        .withDirectory(testDir)
+        .withOpen(false)
+        .withUIRepo('not a url#hash')
+        .withHttpPort(0);
+    } catch (e) {
+      done();
+      assert.success('Importer UI repo URL was invalid - exception expected.');
+    }
   });
 });

@@ -39,14 +39,21 @@ export default class ImportCommand extends AbstractServerCommand {
   withUIRepo(value) {
     this._uiRepo = value;
     this._uiBranch = GitUtils.DEFAULT_BRANCH;
-    if (value.includes('#')) {
-      // eslint-disable-next-line prefer-destructuring
-      this._uiRepo = value.split('#')[0];
-      if (value.split('#')[1].length > 0) {
+    try {
+      const url = new URL(value);
+      if (url.hash) {
         // eslint-disable-next-line prefer-destructuring
-        this._uiBranch = value.split('#')[1];
+        this._uiRepo = `${url.origin}${url.pathname}`;
+        if (url.hash.length > 1) {
+          // eslint-disable-next-line prefer-destructuring
+          this._uiBranch = url.hash.substring(1);
+        }
       }
+    } catch (e) {
+      this.log.error(`Could not process UI Repo correctly: ${value} - ${e.message}`);
+      throw e;
     }
+
     return this;
   }
 
@@ -61,12 +68,13 @@ export default class ImportCommand extends AbstractServerCommand {
    * @returns {Promise<void>}
    */
   async handleUIBranch(uiFolder) {
-    let branch = GitUtils.DEFAULT_BRANCH;
     try {
-      branch = await GitUtils.getBranch(uiFolder);
+      const branch = await GitUtils.getBranch(uiFolder);
 
       if (branch !== this._uiBranch) {
-        this.log.info(chalk`AEM Importer UI was on branch {yellow ${branch}}. Switching to {green ${this._uiBranch}}.`);
+        this.log.info(
+          chalk`AEM Importer UI was on branch {yellow ${branch}}. Switching to {green ${this._uiBranch}}.`,
+        );
         // This checkout will produce an error if the uiBranch does not exist (or fails to switch),
         // will announce the error to the user, and exit the execution.
         // Error examples:
@@ -80,7 +88,7 @@ export default class ImportCommand extends AbstractServerCommand {
         });
       }
     } catch (e) {
-      // ignore
+      // ignore - fall back to default (main)
     }
   }
 
@@ -89,26 +97,33 @@ export default class ImportCommand extends AbstractServerCommand {
     await fse.ensureDir(importerFolder);
     const uiProjectName = path.basename(this._uiRepo, '.git');
     const uiFolder = path.join(importerFolder, uiProjectName);
-    await this.handleUIBranch(uiFolder);
     const getUIVersion = async () => ((await fse.readJson(path.resolve(uiFolder, 'package.json'))).version);
     const exists = await fse.pathExists(uiFolder);
     if (!exists) {
       this.log.info('AEM Importer UI needs to be installed.');
-      this.log.info(`Cloning ${this._uiRepo} in ${importerFolder}.`);
+      this.log.info(`Cloning ${this._uiRepo} (branch: ${this._uiBranch}) in ${importerFolder}.`);
       // clone the ui project
-      await git.clone({
-        fs: fse,
-        http,
-        dir: uiFolder,
-        url: this._uiRepo,
-        ref: this._uiBranch,
-        depth: 1,
-        singleBranch: true,
-      });
-      this.log.info(`AEM Importer UI is ready. v${await getUIVersion()} ${this._uiBranch ? `(Branch: ${this._uiBranch})` : ''}`);
+      try {
+        await git.clone({
+          fs: fse,
+          http,
+          dir: uiFolder,
+          url: this._uiRepo,
+          ref: this._uiBranch,
+          depth: 1,
+          singleBranch: true,
+        });
+
+        this.log.info(`AEM Importer UI is ready. v${await getUIVersion()} (branch: ${this._uiBranch})`);
+      } catch (e) {
+        this.log.error(`AEM Importer UI clone failed: ${e.message}`);
+        throw e;
+      }
     } else {
       this.log.info('Fetching latest version of the AEM Importer UI...');
-      // clone the ui project
+      await this.handleUIBranch(uiFolder);
+
+      // Pull the ui project
       await git.pull({
         fs: fse,
         http,
@@ -121,8 +136,7 @@ export default class ImportCommand extends AbstractServerCommand {
           name: 'hlx import',
         },
       });
-      this.log.info(`AEM Importer UI is up-to-date. v${await getUIVersion()} ${this._uiBranch
-        ? `(Branch: ${this._uiBranch})` : ''}`);
+      this.log.info(`AEM Importer UI is up-to-date. v${await getUIVersion()} (branch: ${this._uiBranch})`);
     }
   }
 
