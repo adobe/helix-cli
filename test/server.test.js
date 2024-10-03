@@ -16,6 +16,8 @@ import os from 'os';
 import assert from 'assert';
 import fse from 'fs-extra';
 import path from 'path';
+import { h1NoCache } from '@adobe/fetch';
+import * as http from 'node:http';
 import { HelixProject } from '../src/server/HelixProject.js';
 import {
   Nock, assertHttp, createTestRoot, setupProject, rawGet,
@@ -258,6 +260,77 @@ describe('Helix Server', () => {
       assert.strictEqual(resp.headers.get('via'), '1.0 main--foo--bar.hlx.page');
     } finally {
       await project.stop();
+    }
+  });
+
+  it('delivers from proxy (via http proxy).', async () => {
+    const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
+    const project = new HelixProject()
+      .withCwd(cwd)
+      .withHttpPort(0)
+      .withPrintIndex(true)
+      .withProxyUrl('http://main--foo--bar.hlx.page');
+
+    await project.init();
+    project.log.level = 'silly';
+
+    // create a http proxy server
+    process.env.ALL_PROXY = 'http://127.0.0.1:8002';
+    const proxyRequests = [];
+    const proxy = await new Promise((resolve) => {
+      const p = http
+        .createServer(async (req, res) => {
+          try {
+            // Delete accept header due to nock conflict
+            delete req.headers.accept;
+            console.log('http proxy request', req.url);
+            const resp = await h1NoCache().fetch(req.url, {});
+            console.log('http proxy response for', req.url, resp.status);
+            res.writeHead(resp.status, resp.headers.plain());
+            res.write(await resp.buffer());
+            res.end();
+            proxyRequests.push(req.url);
+          } catch (e) {
+            console.error('http proxy error:', e);
+            res.writeHead(500);
+            res.end();
+          }
+        })
+        .listen(8002, '127.0.0.1', () => {
+          console.log('http proxy server listening on port 8002');
+          resolve(p);
+        });
+    });
+
+    nock('http://main--foo--bar.hlx.page')
+      .get('/readme.html')
+      .reply(200, 'hello readme', {
+        'content-type': 'text/html',
+        'content-security-policy': 'self;',
+      })
+      .get('/head.html')
+      .reply(200, '<link rel="stylesheet" href="/styles.css"/>', {
+        'content-type': 'text/html',
+      });
+
+    try {
+      await project.start();
+      const resp = await getFetch()(`http://127.0.0.1:${project.server.port}/readme.html`, {
+        cache: 'no-store',
+      });
+      const ret = await resp.text();
+      assert.strictEqual(resp.status, 200);
+      assert.strictEqual(ret.trim(), 'hello readme');
+      assert.strictEqual(resp.headers.get('access-control-allow-origin'), '*');
+      assert.strictEqual(resp.headers.get('content-security-policy'), null);
+      assert.strictEqual(resp.headers.get('via'), '1.0 main--foo--bar.hlx.page');
+
+      // ensure that request went through http proxy
+      assert.deepStrictEqual(proxyRequests, [`http://127.0.0.1:${project.server.port}/readme.html`]);
+    } finally {
+      proxy.close();
+      await project.stop();
+      delete process.env.ALL_PROXY;
     }
   });
 
