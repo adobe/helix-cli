@@ -37,18 +37,15 @@ export default class ImportCommand extends AbstractServerCommand {
   }
 
   withUIRepo(value) {
-    this._uiRepo = value;
     this._uiBranch = GitUtils.DEFAULT_BRANCH;
     try {
       const url = new URL(value);
       if (url.hash) {
-        // eslint-disable-next-line prefer-destructuring
-        this._uiRepo = `${url.origin}${url.pathname}`;
-        if (url.hash.length > 1) {
-          // eslint-disable-next-line prefer-destructuring
-          this._uiBranch = url.hash.substring(1);
-        }
+        this._uiBranch = url.hash.substring(1);
       }
+      // Ensure a dangling hash does not create an invalid uiRepo.
+      url.hash = '';
+      this._uiRepo = url.href;
     } catch (e) {
       this.log.error(`Could not process UI Repo correctly: ${value} - ${e.message}`);
       throw e;
@@ -68,27 +65,18 @@ export default class ImportCommand extends AbstractServerCommand {
    * @returns {Promise<void>}
    */
   async handleUIBranch(uiFolder) {
-    try {
-      const branch = await GitUtils.getBranch(uiFolder);
+    const branch = await GitUtils.getBranch(uiFolder);
 
-      if (branch !== this._uiBranch) {
-        this.log.info(
-          chalk`AEM Importer UI was on branch {yellow ${branch}}. Switching to {green ${this._uiBranch}}.`,
-        );
-        // This checkout will produce an error if the uiBranch does not exist (or fails to switch),
-        // will announce the error to the user, and exit the execution.
-        // Error examples:
-        // - "Your local changes to the following files would be overwritten by checkout: <file>"
-        // - "Could not find bad-branch."
-        await git.checkout({
-          fs: fse,
-          http,
-          dir: uiFolder,
-          ref: this._uiBranch,
-        });
-      }
-    } catch (e) {
-      // ignore - fall back to default (main)
+    if (branch !== this._uiBranch) {
+      this.log.info(
+        chalk`AEM Importer UI was on branch {yellow ${branch}}. Switching to {green ${this._uiBranch}}.`,
+      );
+      await git.checkout({
+        fs: fse,
+        http,
+        dir: uiFolder,
+        ref: this._uiBranch,
+      });
     }
   }
 
@@ -111,7 +99,6 @@ export default class ImportCommand extends AbstractServerCommand {
           url: this._uiRepo,
           ref: this._uiBranch,
           depth: 1,
-          singleBranch: true,
         });
 
         this.log.info(`AEM Importer UI is ready. v${await getUIVersion()} (branch: ${this._uiBranch})`);
