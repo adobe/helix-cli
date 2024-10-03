@@ -35,6 +35,7 @@ const httpProxyHandler = {
         : new HttpProxyAgent(proxyUrl);
       // eslint-disable-next-line no-console
       console.debug(`using proxy ${proxyUrl}`);
+      // we need to use `node-fetch` directly to pass the agent. adobe-fetch does not support it.
       return nodeFetch(url, {
         ...init,
         agent,
