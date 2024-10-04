@@ -29,7 +29,7 @@ export default function up() {
         })
         .option('ui-repo', {
           alias: 'uiRepo',
-          describe: 'Git repository for the AEM Importer UI',
+          describe: 'Git repository for the AEM Importer UI. A fragment may be used to indicated a branch other than main.',
           type: 'string',
           default: 'https://github.com/adobe/helix-importer-ui',
         })

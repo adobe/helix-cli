@@ -15,7 +15,13 @@ import assert from 'assert';
 import path from 'path';
 import fse from 'fs-extra';
 import { h1NoCache as fetchContext } from '@adobe/fetch';
-import { Nock, assertHttp, createTestRoot } from './utils.js';
+import GitUtils from '../src/git-utils.js';
+import {
+  Nock,
+  assertHttp,
+  createTestRoot,
+  getBranch,
+} from './utils.js';
 import ImportCommand from '../src/import.cmd.js';
 
 const { fetch } = fetchContext({ rejectUnauthorized: false });
@@ -558,7 +564,7 @@ describe('Import command - importer ui', function suite() {
 
   this.timeout(240000);
 
-  it('import command installs the importer ui', (done) => {
+  it('import command installs the main importer ui', (done) => {
     let error = null;
     const cmd = new ImportCommand()
       .withDirectory(testDir)
@@ -576,6 +582,7 @@ describe('Import command - importer ui', function suite() {
         try {
           assert.ok(await fse.pathExists(`${testDir}/tools/importer/helix-importer-ui/index.html`), 'helix-importer-ui project has been cloned');
           await assertHttp(`http://127.0.0.1:${cmd.project.server.port}/tools/importer/helix-importer-ui/index.html`, 200);
+          assert.equal(getBranch(`${testDir}/tools/importer/helix-importer-ui`), 'main');
 
           await myDone();
         } catch (e) {
@@ -587,5 +594,143 @@ describe('Import command - importer ui', function suite() {
       })
       .run()
       .catch(done);
+  });
+
+  it('import command installs a importer ui test branch', (done) => {
+    // This assumes the branch 'origin/test' will exist and be available.
+    let error = null;
+    const cmd = new ImportCommand()
+      .withDirectory(testDir)
+      .withOpen(false)
+      .withUIRepo('https://github.com/adobe/helix-importer-ui#test')
+      .withHttpPort(0);
+
+    const myDone = (err) => {
+      error = err;
+      return cmd.stop();
+    };
+
+    cmd
+      .on('started', async () => {
+        try {
+          assert.ok(await fse.pathExists(`${testDir}/tools/importer/helix-importer-ui/index.html`), 'helix-importer-ui project has been cloned');
+          await assertHttp(`http://127.0.0.1:${cmd.project.server.port}/tools/importer/helix-importer-ui/index.html`, 200);
+          assert.equal(getBranch(`${testDir}/tools/importer/helix-importer-ui`), 'test');
+
+          await myDone();
+        } catch (e) {
+          await myDone(e);
+        }
+      })
+      .on('stopped', () => {
+        done(error);
+      })
+      .run()
+      .catch(done);
+  });
+
+  it('import command fails to install a bad branch', (done) => {
+    // This assumes the branch 'origin/bad' does not exist.
+    let error = null;
+    const cmd = new ImportCommand()
+      .withDirectory(testDir)
+      .withOpen(false)
+      .withUIRepo('https://github.com/adobe/helix-importer-ui#bad')
+      .withHttpPort(0);
+
+    const myDone = (err) => {
+      error = err;
+      return cmd.stop();
+    };
+
+    cmd
+      .on('started', async () => {
+        try {
+          assert.fail('Should not have been able to clone the importer ui');
+          await myDone();
+        } catch (e) {
+          await myDone(e);
+        }
+      })
+      .on('stopped', () => {
+        done(error);
+      })
+      .run()
+      .catch(() => {
+        done();
+      });
+  });
+
+  it('import command fails to install an invalid ui-repo', () => {
+    try {
+      new ImportCommand()
+        .withDirectory(testDir)
+        .withOpen(false)
+        .withUIRepo('not a url#hash')
+        .withHttpPort(0);
+      assert.fail('Importer UI repo URL was invalid - exception expected.');
+    } catch (e) {
+      assert.equal(e.message, 'Invalid URL');
+    }
+  });
+
+  /**
+   * Testing starting the importer on the default (main) branch, and switching it to a test
+   * branch.
+   */
+  it('import command handles an empty branch', () => {
+    try {
+      const cmd = new ImportCommand()
+        .withDirectory(testDir)
+        .withOpen(false)
+        .withUIRepo('https://github.com/adobe/helix-importer-ui#')
+        .withHttpPort(0);
+      // eslint-disable-next-line no-underscore-dangle
+      assert.equal(cmd._uiRepo, 'https://github.com/adobe/helix-importer-ui');
+      // eslint-disable-next-line no-underscore-dangle
+      assert.equal(cmd._uiBranch, GitUtils.DEFAULT_BRANCH);
+    } catch (e) {
+      assert.fail('Importer UI repo URL was valid - exception not expected.');
+    }
+  });
+
+  it('import command switches branch', (done) => {
+    const cmd = new ImportCommand()
+      .withDirectory(testDir)
+      .withOpen(false)
+      .withUIRepo('https://github.com/adobe/helix-importer-ui#')
+      .withHttpPort(0);
+    cmd
+      .on('started', async () => {
+        const mainBranch = await getBranch(`${testDir}/tools/importer/helix-importer-ui`);
+        assert.equal(mainBranch, 'main');
+
+        await cmd.stop();
+      })
+      .on('stopped', async () => {
+        // Main branch server has stopped.  Now switch it to 'test'.
+        const cmd2 = new ImportCommand()
+          .withDirectory(testDir)
+          .withOpen(false)
+          .withUIRepo('https://github.com/adobe/helix-importer-ui#test')
+          .withHttpPort(0);
+        cmd2
+          .on('started', async () => {
+            const testBranch = await getBranch(`${testDir}/tools/importer/helix-importer-ui`);
+            assert.equal(testBranch, 'test');
+            await cmd2.stop();
+          })
+          .on('stopped', () => {
+            done();
+          })
+          .run()
+          .catch((e) => {
+            done(e);
+          });
+      })
+      .run()
+      .catch((e) => {
+        done(e);
+      });
   });
 });

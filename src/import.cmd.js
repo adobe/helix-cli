@@ -14,6 +14,7 @@ import path from 'path';
 import chalk from 'chalk-template';
 import git from 'isomorphic-git';
 import http from 'isomorphic-git/http/node/index.js';
+import GitUtils from './git-utils.js';
 import { HelixImportProject } from './server/HelixImportProject.js';
 import pkgJson from './package.cjs';
 import { AbstractServerCommand } from './abstract-server.cmd.js';
@@ -36,13 +37,47 @@ export default class ImportCommand extends AbstractServerCommand {
   }
 
   withUIRepo(value) {
-    this._uiRepo = value;
+    this._uiBranch = GitUtils.DEFAULT_BRANCH;
+    try {
+      const url = new URL(value);
+      if (url.hash) {
+        this._uiBranch = url.hash.substring(1);
+      }
+      // Ensure a dangling hash does not create an invalid uiRepo.
+      url.hash = '';
+      this._uiRepo = url.href;
+    } catch (e) {
+      this.log.error(`Could not process UI Repo correctly: ${value} - ${e.message}`);
+      throw e;
+    }
+
     return this;
   }
 
   withHeadersFile(value) {
     this._headersFile = value;
     return this;
+  }
+
+  /**
+   * Ensure the UI branch the caller specified (or defaulted to) is the one being used.
+   * @param uiFolder
+   * @returns {Promise<void>}
+   */
+  async handleUIBranch(uiFolder) {
+    const branch = await GitUtils.getBranch(uiFolder);
+
+    if (branch !== this._uiBranch) {
+      this.log.info(
+        chalk`AEM Importer UI was on branch {yellow ${branch}}. Switching to {green ${this._uiBranch}}.`,
+      );
+      await git.checkout({
+        fs: fse,
+        http,
+        dir: uiFolder,
+        ref: this._uiBranch,
+      });
+    }
   }
 
   async setupImporterUI() {
@@ -54,32 +89,41 @@ export default class ImportCommand extends AbstractServerCommand {
     const exists = await fse.pathExists(uiFolder);
     if (!exists) {
       this.log.info('AEM Importer UI needs to be installed.');
-      this.log.info(`Cloning ${this._uiRepo} in ${importerFolder}.`);
+      this.log.info(`Cloning ${this._uiRepo} (branch: ${this._uiBranch}) in ${importerFolder}.`);
       // clone the ui project
-      await git.clone({
-        fs: fse,
-        http,
-        dir: uiFolder,
-        url: this._uiRepo,
-        depth: 1,
-        singleBranch: true,
-      });
-      this.log.info(`AEM Importer UI is ready. v${await getUIVersion()}`);
+      try {
+        await git.clone({
+          fs: fse,
+          http,
+          dir: uiFolder,
+          url: this._uiRepo,
+          ref: this._uiBranch,
+          depth: 1,
+        });
+
+        this.log.info(`AEM Importer UI is ready. v${await getUIVersion()} (branch: ${this._uiBranch})`);
+      } catch (e) {
+        this.log.error(`AEM Importer UI clone failed: ${e.message}`);
+        throw e;
+      }
     } else {
       this.log.info('Fetching latest version of the AEM Importer UI...');
-      // clone the ui project
+      await this.handleUIBranch(uiFolder);
+
+      // Pull the ui project
       await git.pull({
         fs: fse,
         http,
         dir: uiFolder,
         url: this._uiRepo,
+        ref: this._uiBranch,
         depth: 1,
         singleBranch: true,
         author: {
           name: 'hlx import',
         },
       });
-      this.log.info(`AEM Importer UI is up-to-date. v${await getUIVersion()}`);
+      this.log.info(`AEM Importer UI is up-to-date. v${await getUIVersion()} (branch: ${this._uiBranch})`);
     }
   }
 
