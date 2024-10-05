@@ -47,7 +47,7 @@
     "chalk-template": "1.1.0",
     "chokidar": "4.0.1",
     "compression": "1.7.4",
-    "cookie": "0.6.0",
+    "cookie": "0.7.1",
     "cookie-parser": "1.4.6",
     "dotenv": "16.4.5",
     "express": "4.21.0",
