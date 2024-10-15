@@ -1,3 +1,10 @@
+## [16.7.14](https://github.com/adobe/helix-cli/compare/v16.7.13...v16.7.14) (2024-10-15)
+
+
+### Bug Fixes
+
+* **deps:** update dependency cookie to v1 ([#2439](https://github.com/adobe/helix-cli/issues/2439)) ([85a5e0a](https://github.com/adobe/helix-cli/commit/85a5e0a17562b35b859a252eb9ee4e0f806aefb7))
+
 ## [16.7.13](https://github.com/adobe/helix-cli/compare/v16.7.12...v16.7.13) (2024-10-12)
 
 
