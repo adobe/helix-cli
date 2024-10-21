@@ -15,8 +15,7 @@ import path from 'path';
 import net from 'net';
 import fse from 'fs-extra';
 import shell from 'shelljs';
-import { condit } from '@adobe/helix-testutils';
-import { createTestRoot } from './utils.js';
+import { createTestRoot, condit } from './utils.js';
 import GitUtils from '../src/git-utils.js';
 
 const GIT_USER_HOME = path.resolve(__rootdir, 'test', 'fixtures', 'gitutils');

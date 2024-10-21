@@ -11,8 +11,8 @@
  */
 /* eslint-env mocha */
 import assert from 'assert';
-import { logging } from '@adobe/helix-testutils';
 import esmock from 'esmock';
+import { createTestLogger } from '@adobe/helix-log';
 import hack from '../src/hack.js';
 import CLI from '../src/cli.js';
 import HackCommand from '../src/hack.cmd.js';
@@ -26,7 +26,7 @@ describe('Test hlx hack', () => {
     assert.equal(hack().executor = null, undefined);
 
     const hackathon = '5-bsl';
-    const logger = logging.createTestLogger();
+    const logger = createTestLogger();
     await new HackCommand(logger)
       .withHackathon(hackathon)
       .withOpen(false)
