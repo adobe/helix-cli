@@ -39,7 +39,7 @@
   },
   "dependencies": {
     "@adobe/fetch": "4.1.9",
-    "@adobe/helix-log": "6.0.4",
+    "@adobe/helix-log": "6.0.5",
     "@adobe/helix-shared-config": "11.0.6",
     "@adobe/helix-shared-git": "3.0.15",
     "@adobe/helix-shared-indexer": "2.1.7",
