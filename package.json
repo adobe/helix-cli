@@ -39,7 +39,7 @@
   },
   "dependencies": {
     "@adobe/fetch": "4.1.9",
-    "@adobe/helix-log": "6.0.4",
+    "@adobe/helix-log": "6.0.5",
     "@adobe/helix-shared-config": "11.0.6",
     "@adobe/helix-shared-git": "3.0.15",
     "@adobe/helix-shared-indexer": "2.1.7",
@@ -77,7 +77,6 @@
   "devDependencies": {
     "@adobe/eslint-config-helix": "2.0.8",
     "@adobe/helix-shared-dom": "2.0.8",
-    "@adobe/helix-testutils": "0.4.17",
     "@semantic-release/changelog": "6.0.3",
     "@semantic-release/git": "10.0.1",
     "c8": "10.1.2",

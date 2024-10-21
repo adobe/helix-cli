@@ -205,3 +205,27 @@ export function signal(timeout) {
   };
   return p;
 }
+
+export function condit(name, condition, mochafn) {
+  if (condition()) {
+    return it(name, mochafn);
+  }
+  return it.skip(`${name} (${condition.description || 'condition not met'})`, mochafn);
+}
+
+condit.hasenv = (name) => {
+  const fn = function env() {
+    return !!process.env[name];
+  };
+  fn.description = `env var ${name} must be set`;
+  return fn;
+};
+
+condit.hasenvs = (names) => {
+  const fn = function envs() {
+    return names.reduce((p, c) => p && !!process.env[c], true);
+  };
+
+  fn.description = `env vars ${names.join(', ')} must be set`;
+  return fn;
+};
