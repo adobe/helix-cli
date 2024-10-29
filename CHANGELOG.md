@@ -1,3 +1,10 @@
+## [16.7.17](https://github.com/adobe/helix-cli/compare/v16.7.16...v16.7.17) (2024-10-29)
+
+
+### Bug Fixes
+
+* **deps:** update dependency uuid to v11 ([#2446](https://github.com/adobe/helix-cli/issues/2446)) ([2ffc761](https://github.com/adobe/helix-cli/commit/2ffc761f59704147416d15a6bb4830a02158ddae))
+
 ## [16.7.16](https://github.com/adobe/helix-cli/compare/v16.7.15...v16.7.16) (2024-10-19)
 
 
