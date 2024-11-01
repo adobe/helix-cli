@@ -25,6 +25,7 @@ Usage: aem <command> [options]
 
 Commands:
   aem up  Run a AEM development server
+  aem import  Run the AEM import server
 
 Options:
   --version                Show version number                         [boolean]
@@ -137,6 +138,17 @@ If present, `ALL_PROXY` is used as fallback if there is no other match.
 | `--no-open`       | `AEM_NO_OPEN`       | `false`     | Disable automatic opening of browser window.                |
 | `--tls-key`       | `AEM_TLS_KEY`       | undefined   | Path to .key file (for enabling TLS)                        |
 | `--tls-cert`      | `AEM_TLS_CERT`      | undefined   | Path to .pem file (for enabling TLS)                        |
+
+## Starting an import
+
+The AEM Importer is an application that supports importing content to AEM.
+
+```
+$ cd <my-cool-project>
+$ aem import
+```
+
+Read the full AEM Importer [documentation](https://github.com/adobe/helix-importer-ui).
 
 # Developing AEM CLI
 
