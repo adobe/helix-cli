@@ -22,7 +22,7 @@ jobs:
       - run: npm test
         env:
           CIRCLE_REPOSITORY_URL: dummy-url
-      - uses: codecov/codecov-action@v4
+      - uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
       - name: Semantic Release (Dry Run)
