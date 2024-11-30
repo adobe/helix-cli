@@ -1,3 +1,10 @@
+## [16.7.26](https://github.com/adobe/helix-cli/compare/v16.7.25...v16.7.26) (2024-11-30)
+
+
+### Bug Fixes
+
+* **deps:** update dependency isomorphic-git to v1.27.2 ([#2458](https://github.com/adobe/helix-cli/issues/2458)) ([713424f](https://github.com/adobe/helix-cli/commit/713424f950fb28411d6edd93d869a3b223a119af))
+
 ## [16.7.25](https://github.com/adobe/helix-cli/compare/v16.7.24...v16.7.25) (2024-11-23)
 
 
