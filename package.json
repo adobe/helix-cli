@@ -38,7 +38,7 @@
     "node": ">=18"
   },
   "dependencies": {
-    "@adobe/fetch": "4.1.10",
+    "@adobe/fetch": "4.1.11",
     "@adobe/helix-log": "6.0.5",
     "@adobe/helix-shared-config": "11.0.11",
     "@adobe/helix-shared-git": "3.0.16",
