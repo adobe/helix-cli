@@ -348,6 +348,20 @@ window.LiveReloadOptions = {
         .send(textBody);
       return;
     }
+    if (ret.status === 401) {
+      let textBody = await ret.text();
+      textBody = `<html>
+  <head><meta property="hlx:proxyUrl" content="${url}"></head>
+  <p>${textBody}</p>
+</html>
+`;
+      respHeaders['content-type'] = 'text/html';
+      res
+        .set(respHeaders)
+        .status(ret.status)
+        .send(textBody);
+      return;
+    }
 
     if (ctx.log.level === 'silly') {
       ctx.log.trace(`[${id}] <<<--------------------------`);
