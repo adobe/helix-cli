@@ -352,7 +352,7 @@ window.LiveReloadOptions = {
       let textBody = await ret.text();
       textBody = `<html>
   <head><meta property="hlx:proxyUrl" content="${url}"></head>
-  <p>${textBody}</p>
+  <body><pre>${textBody}</pre></body>
 </html>
 `;
       respHeaders['content-type'] = 'text/html';
