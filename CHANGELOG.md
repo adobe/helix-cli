@@ -1,3 +1,10 @@
+## [16.7.31](https://github.com/adobe/helix-cli/compare/v16.7.30...v16.7.31) (2024-12-11)
+
+
+### Bug Fixes
+
+* include proxy url in 401 responses ([#2464](https://github.com/adobe/helix-cli/issues/2464)) ([3cdb533](https://github.com/adobe/helix-cli/commit/3cdb533061472ca079b07aef5ad3cb41c345a3cc))
+
 ## [16.7.30](https://github.com/adobe/helix-cli/compare/v16.7.29...v16.7.30) (2024-12-07)
 
 
