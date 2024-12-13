@@ -45,6 +45,7 @@ describe('hlx up', () => {
     mockUp.withAllowInsecure.returnsThis();
     mockUp.withKill.returnsThis();
     mockUp.withCache.returnsThis();
+    mockUp.withSiteToken.returnsThis();
     mockUp.run.returnsThis();
     cli = (await new CLI().initCommands()).withCommandExecutor('up', mockUp);
   });
@@ -72,6 +73,7 @@ describe('hlx up', () => {
     sinon.assert.calledWith(mockUp.withHttpPort, 1234);
     sinon.assert.calledWith(mockUp.withBindAddr, '*');
     sinon.assert.calledWith(mockUp.withPrintIndex, true);
+    // sinon.assert.calledWith(mockUp.withSiteToken, 'secret-site-token');
     sinon.assert.calledOnce(mockUp.run);
   });
 

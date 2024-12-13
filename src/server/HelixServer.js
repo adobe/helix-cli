@@ -34,6 +34,11 @@ export class HelixServer extends BaseServer {
     return this;
   }
 
+  withSiteToken(value) {
+    this._siteToken = value;
+    return this;
+  }
+
   /**
    * Proxy Mode route handler
    * @param {Express.Request} req request
@@ -98,12 +103,14 @@ export class HelixServer extends BaseServer {
       for (const [key, value] of proxyUrl.searchParams.entries()) {
         url.searchParams.append(key, value);
       }
+
       await utils.proxyRequest(ctx, url.href, req, res, {
         injectLiveReload: this._project.liveReload,
         headHtml: this._project.headHtml,
         indexer: this._project.indexer,
         cacheDirectory: this._project.cacheDirectory,
         file404html: this._project.file404html,
+        siteToken: this._siteToken,
       });
     } catch (err) {
       log.error(`${pfx}failed to proxy AEM request ${ctx.path}: ${err.message}`);

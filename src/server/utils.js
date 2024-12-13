@@ -246,6 +246,12 @@ window.LiveReloadOptions = {
       ...req.headers,
       ...(opts.headers || {}),
     };
+
+    // hlx 5 site auth
+    if (opts.siteToken) {
+      headers.authorization = `token ${opts.siteToken}`;
+    }
+
     // preserve hlx-auth-token cookie
     const cookies = cookie.parse(headers.cookie || '');
     delete headers.cookie;
@@ -255,6 +261,7 @@ window.LiveReloadOptions = {
         'hlx-auth-token': hlxAuthToken,
       }).toString();
     }
+
     delete headers.connection;
     delete headers['proxy-connection'];
     delete headers.host;

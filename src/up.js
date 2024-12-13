@@ -51,6 +51,11 @@ export default function up() {
           type: 'int',
           default: 3000,
         })
+        .option('site-token', {
+          alias: 'siteToken',
+          describe: 'Site token to be used by the cli to access the website',
+          type: 'string',
+        })
         .option('addr', {
           describe: 'Bind development server on addr. use * to bind to any address and allow external connections.',
           type: 'string',
@@ -116,6 +121,7 @@ export default function up() {
         .withOpen(path.basename(argv.$0) === 'aem' ? argv.open : false)
         .withTLS(argv.tlsKey, argv.tlsCert)
         .withLiveReload(argv.livereload)
+        .withSiteToken(argv.siteToken)
         .withUrl(argv.url)
         .withPrintIndex(argv.printIndex)
         .withAllowInsecure(argv.allowInsecure)

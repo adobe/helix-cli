@@ -32,6 +32,11 @@ export class HelixProject extends BaseProject {
     return this;
   }
 
+  withSiteToken(value) {
+    this._server.withSiteToken(value);
+    return this;
+  }
+
   withProxyUrl(value) {
     this._proxyUrl = value;
     return this;
@@ -88,6 +93,7 @@ export class HelixProject extends BaseProject {
         log: this.log,
         proxyUrl: this.proxyUrl,
         allowInsecure: this.allowInsecure,
+        siteToken: this.siteToken,
       });
 
       // register local head in live-reload
