@@ -73,7 +73,7 @@ describe('hlx up', () => {
     sinon.assert.calledWith(mockUp.withHttpPort, 1234);
     sinon.assert.calledWith(mockUp.withBindAddr, '*');
     sinon.assert.calledWith(mockUp.withPrintIndex, true);
-    // sinon.assert.calledWith(mockUp.withSiteToken, 'secret-site-token');
+    sinon.assert.calledWith(mockUp.withSiteToken, 'secret-site-token');
     sinon.assert.calledOnce(mockUp.run);
   });
 
@@ -139,6 +139,12 @@ describe('hlx up', () => {
   it('hlx up can disable kill', async () => {
     await cli.run(['up', '--stop-other', 'false']);
     sinon.assert.calledWith(mockUp.withKill, false);
+    sinon.assert.calledOnce(mockUp.run);
+  });
+
+  it('aem up can set site token', async () => {
+    await cli.run(['up', '--site-token', 'secret-site-token']);
+    sinon.assert.calledWith(mockUp.withSiteToken, 'secret-site-token');
     sinon.assert.calledOnce(mockUp.run);
   });
 });
