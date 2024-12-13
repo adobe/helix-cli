@@ -245,12 +245,13 @@ describe('Head.html loading tests', () => {
   });
 
   it('update loads remote head.html with site token', async () => {
+    const siteToken = 'hlxtst_site-token';
     const directory = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
 
     nock('https://main--blog--adobe.hlx.page')
       .get('/head.html')
       .reply(function request() {
-        assert.strictEqual(this.req.headers.authorization, 'token hlxtst_site-token');
+        assert.strictEqual(this.req.headers.authorization, `token ${siteToken}`);
         return [200, '<!-- remote head html --><a>fooo</a>\n'];
       });
 
@@ -258,7 +259,7 @@ describe('Head.html loading tests', () => {
       log: console,
       proxyUrl: 'https://main--blog--adobe.hlx.page',
       directory,
-      siteToken: 'hlxtst_site-token',
+      siteToken,
     });
     hhs.localStatus = 200;
     await hhs.update();
