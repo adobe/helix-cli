@@ -99,6 +99,17 @@ export default class UpCommand extends AbstractServerCommand {
         .replace(/\{\{repo\}\}/, this._gitUrl.repo);
     }
     this._project.withProxyUrl(this._url);
+    const { site, org } = this.extractSiteAndOrg(this._url);
+    if (site && org) {
+      this._project
+        .withSite(site)
+        .withOrg(org)
+        .withSiteLoginUrl(
+          // TODO switch to production URL
+          `https://admin-ci.hlx.page/login/${org}/${site}/main?client_id=aem-cli&redirect_uri=${encodeURIComponent(`http://localhost:${this._httpPort}/.aem/cli/login/ack`)}`,
+        );
+    }
+
     await this.initServerOptions();
 
     try {
@@ -111,6 +122,21 @@ export default class UpCommand extends AbstractServerCommand {
     this._project.on('stopped', async () => {
       await this.stop();
     });
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  extractSiteAndOrg(url) {
+    const { hostname } = new URL(url);
+    const parts = hostname.split('.');
+    const errorResult = { site: null, org: null };
+    if (parts.length < 3) {
+      return errorResult;
+    }
+    if (!['live', 'page'].includes(parts[2]) || !['hlx', 'aem'].includes(parts[1])) {
+      return errorResult;
+    }
+    const [, site, org] = parts[0].split('--');
+    return { site, org };
   }
 
   async verifyUrl(gitUrl, ref) {
