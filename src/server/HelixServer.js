@@ -17,6 +17,7 @@ import utils from './utils.js';
 import RequestContext from './RequestContext.js';
 import { asyncHandler, BaseServer } from './BaseServer.js';
 import LiveReload from './LiveReload.js';
+import { writeSiteTokenToEnv } from '../config/config-utils.js';
 
 /* eslint-disable max-classes-per-file */
 class LoginNeeded extends Error {}
@@ -47,9 +48,11 @@ export class HelixServer extends BaseServer {
   async handleLoginAck(req, res) {
     if (req.query?.site_token) {
       if (this._loginOAuthState === req.query.state) {
-        this.withSiteToken(req.query.site_token);
-        this._project.headHtml.setSiteToken(req.query.site_token);
-        this.log.info('Site token received.');
+        const siteToken = req.query.site_token;
+        this.withSiteToken(siteToken);
+        this._project.headHtml.setSiteToken(siteToken);
+        await writeSiteTokenToEnv(siteToken);
+        this.log.info('Site token received and saved to .env file.');
       } else {
         this.log.warn('OAuth state mismatch. Discarding site token.');
       }
