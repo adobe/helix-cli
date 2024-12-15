@@ -37,6 +37,21 @@ export class HelixProject extends BaseProject {
     return this;
   }
 
+  withSite(site) {
+    this._site = site;
+    return this;
+  }
+
+  withOrg(org) {
+    this._org = org;
+    return this;
+  }
+
+  withSiteLoginUrl(value) {
+    this._siteLoginUrl = value;
+    return this;
+  }
+
   withProxyUrl(value) {
     this._proxyUrl = value;
     return this;
@@ -67,6 +82,10 @@ export class HelixProject extends BaseProject {
   get liveReload() {
     // eslint-disable-next-line no-underscore-dangle
     return this._server._liveReload;
+  }
+
+  get siteLoginUrl() {
+    return this._siteLoginUrl;
   }
 
   get file404html() {

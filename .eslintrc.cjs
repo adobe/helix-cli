@@ -13,4 +13,7 @@
 module.exports = {
   root: true,
   extends: '@adobe/helix',
+  rules: {
+    'max-classes-per-file': 'off',
+  },
 };

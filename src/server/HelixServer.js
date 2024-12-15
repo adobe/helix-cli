@@ -9,6 +9,7 @@
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
+import crypto from 'crypto';
 import { promisify } from 'util';
 import path from 'path';
 import compression from 'compression';
@@ -16,6 +17,9 @@ import utils from './utils.js';
 import RequestContext from './RequestContext.js';
 import { asyncHandler, BaseServer } from './BaseServer.js';
 import LiveReload from './LiveReload.js';
+
+/* eslint-disable max-classes-per-file */
+class LoginNeeded extends Error {}
 
 export class HelixServer extends BaseServer {
   /**
@@ -27,6 +31,7 @@ export class HelixServer extends BaseServer {
     this._liveReload = null;
     this._enableLiveReload = false;
     this._app.use(compression());
+    this._loginAttempted = false;
   }
 
   withLiveReload(value) {
@@ -37,6 +42,51 @@ export class HelixServer extends BaseServer {
   withSiteToken(value) {
     this._siteToken = value;
     return this;
+  }
+
+  async handleLoginAck(req, res) {
+    if (req.query?.site_token) {
+      if (this._loginOAuthState === req.query.state) {
+        this.withSiteToken(req.query.site_token);
+        this._project.headHtml.setSiteToken(req.query.site_token);
+        this.log.info('Site token received.');
+      } else {
+        this.log.warn('OAuth state mismatch. Discarding site token.');
+      }
+
+      res.status(200).set('content-type', 'application/json').send(
+        JSON.stringify({
+          location: this._resumeUrl?.pathname || '/',
+        }),
+      );
+      return;
+    }
+
+    /*
+     In the oauth implicit flow the token is returned in the hash fragment
+     we use a small script to send it to the server using a fetch request
+    */
+    res.status(200)
+      .send(`
+        <html>
+          <head>
+            <script>
+              async function sendToken() {
+                if (window.location.hash) {
+                  const response = await fetch(window.location.href.replace('#', '?'));
+                  if (!response.ok) {
+                    window.location.href = '/';
+                  }
+                    
+                  const data = await response.json();
+                  window.location.href = data.location;
+                }
+              }
+              sendToken();
+            </script>
+          </head>
+        </html>
+    `);
   }
 
   /**
@@ -98,12 +148,12 @@ export class HelixServer extends BaseServer {
     }
 
     // use proxy
-    try {
-      const url = new URL(ctx.url, proxyUrl);
-      for (const [key, value] of proxyUrl.searchParams.entries()) {
-        url.searchParams.append(key, value);
-      }
+    const url = new URL(ctx.url, proxyUrl);
+    for (const [key, value] of proxyUrl.searchParams.entries()) {
+      url.searchParams.append(key, value);
+    }
 
+    try {
       await utils.proxyRequest(ctx, url.href, req, res, {
         injectLiveReload: this._project.liveReload,
         headHtml: this._project.headHtml,
@@ -111,8 +161,19 @@ export class HelixServer extends BaseServer {
         cacheDirectory: this._project.cacheDirectory,
         file404html: this._project.file404html,
         siteToken: this._siteToken,
+        throwOnLoginNeeded: !this._loginAttempted ? LoginNeeded : undefined,
       });
     } catch (err) {
+      if (err instanceof LoginNeeded && !this._loginAttempted) {
+        this._resumeUrl = url;
+        this._loginAttempted = true;
+        this._loginOAuthState = crypto.randomUUID();
+        ctx.log.info(`[${id}] Attempting to login...`);
+        const loginUrl = `${this._project.siteLoginUrl}&state=${this._loginOAuthState}`;
+        res.status(302).set('location', loginUrl).send('');
+        return;
+      }
+
       log.error(`${pfx}failed to proxy AEM request ${ctx.path}: ${err.message}`);
       res.status(502).send(`Failed to proxy AEM request: ${err.message}`);
     }
@@ -126,6 +187,7 @@ export class HelixServer extends BaseServer {
       this._liveReload = new LiveReload(this.log);
       await this._liveReload.init(this.app, this._server);
     }
+    this.app.get('/.aem/cli/ack', asyncHandler(this.handleLoginAck.bind(this)));
     const handler = asyncHandler(this.handleProxyModeRequest.bind(this));
     this.app.get('*', handler);
     this.app.post('*', handler);

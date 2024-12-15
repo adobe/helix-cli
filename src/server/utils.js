@@ -355,7 +355,12 @@ window.LiveReloadOptions = {
         .send(textBody);
       return;
     }
-    if (ret.status === 401) {
+    if (ret.status === 401 || ret.status === 403) {
+      if (opts.throwOnLoginNeeded) {
+        // eslint-disable-next-line new-cap
+        throw new opts.throwOnLoginNeeded();
+      }
+
       let textBody = await ret.text();
       textBody = `<html>
   <head><meta property="hlx:proxyUrl" content="${url}"></head>
