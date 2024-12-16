@@ -71,11 +71,7 @@ export class HelixServer extends BaseServer {
       }
       this._loginOAuthState = null;
 
-      res.status(200).set('content-type', 'application/json').send(
-        JSON.stringify({
-          location: this._resumeUrl?.pathname || '/',
-        }),
-      );
+      res.status(200).send('Login successful. You can resume your work.');
       return;
     }
 
