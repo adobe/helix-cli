@@ -1,3 +1,10 @@
+# [16.8.0](https://github.com/adobe/helix-cli/compare/v16.7.32...v16.8.0) (2024-12-16)
+
+
+### Features
+
+* Allow passing site token for hlx5 authenticated sites ([#2465](https://github.com/adobe/helix-cli/issues/2465)) ([f3bde8f](https://github.com/adobe/helix-cli/commit/f3bde8f1b5c3f9763bb4039159ae89a85ec23c28))
+
 ## [16.7.32](https://github.com/adobe/helix-cli/compare/v16.7.31...v16.7.32) (2024-12-15)
 
 
