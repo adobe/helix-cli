@@ -105,7 +105,8 @@ export default class UpCommand extends AbstractServerCommand {
         .withSite(site)
         .withOrg(org)
         .withSiteLoginUrl(
-          `https://admin-ci.hlx.page/login/${org}/${site}/main?client_id=aem-cli&redirect_uri=${encodeURIComponent(`http://localhost:${this._httpPort}/.aem/cli/ack`)}`,
+          // TODO switch to production URL
+          `https://admin-ci.hlx.page/login/${org}/${site}/main?client_id=aem-cli&response_type=site_token&redirect_uri=${encodeURIComponent(`http://localhost:${this._httpPort}/.aem/cli/login/ack`)}`,
         );
     }
 

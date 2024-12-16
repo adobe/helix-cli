@@ -356,7 +356,12 @@ window.LiveReloadOptions = {
       return;
     }
     if (ret.status === 401 || ret.status === 403) {
-      if (opts.throwOnLoginNeeded) {
+      const reqHeaders = req.headers;
+      if (reqHeaders?.['sec-fetch-dest'] === 'document'
+        && reqHeaders?.['sec-fetch-mode'] === 'navigate'
+        && opts.throwOnLoginNeeded
+      ) {
+        // try to automatically login
         // eslint-disable-next-line new-cap
         throw new opts.throwOnLoginNeeded();
       }
@@ -364,7 +369,10 @@ window.LiveReloadOptions = {
       let textBody = await ret.text();
       textBody = `<html>
   <head><meta property="hlx:proxyUrl" content="${url}"></head>
-  <body><pre>${textBody}</pre></body>
+  <body>
+    <pre>${textBody}</pre>
+    <p>Click <b><a href="${opts.loginPath}">here</a><b> to login.</p>
+  </body>
 </html>
 `;
       respHeaders['content-type'] = 'text/html';
