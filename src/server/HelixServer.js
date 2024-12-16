@@ -80,13 +80,18 @@ export class HelixServer extends BaseServer {
      we use a small script to send it to the server using a fetch request
     */
     res.status(200)
+      /*
+       ensure that the referrer does not accidentally leak tokens
+       although browsers should not sent fragments
+      */
+      .set('referrer-policy', 'no-referrer')
       .send(`
         <html>
           <head>
             <script>
               async function sendToken() {
                 if (window.location.hash) {
-                  const response = await fetch(window.location.href.replace('#', '?'));
+                  await fetch(window.location.href.replace('#', '?'));
                   window.location.href = '/';
                 }
               }
