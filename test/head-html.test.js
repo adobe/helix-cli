@@ -244,6 +244,27 @@ describe('Head.html loading tests', () => {
     await hhs.update();
   });
 
+  it('update loads remote head.html with site token', async () => {
+    const siteToken = 'hlxtst_site-token';
+    const directory = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
+
+    nock('https://main--blog--adobe.hlx.page')
+      .get('/head.html')
+      .reply(function request() {
+        assert.strictEqual(this.req.headers.authorization, `token ${siteToken}`);
+        return [200, '<!-- remote head html --><a>fooo</a>\n'];
+      });
+
+    const hhs = new HeadHtmlSupport({
+      log: console,
+      proxyUrl: 'https://main--blog--adobe.hlx.page',
+      directory,
+      siteToken,
+    });
+    hhs.localStatus = 200;
+    await hhs.update();
+  });
+
   it('update loads remote head.html can handle errors', async () => {
     const directory = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
 

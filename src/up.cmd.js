@@ -40,6 +40,11 @@ export default class UpCommand extends AbstractServerCommand {
     return this;
   }
 
+  withSiteToken(value) {
+    this._siteToken = value;
+    return this;
+  }
+
   async doStop() {
     await super.doStop();
     if (this._watcher) {
@@ -71,7 +76,9 @@ export default class UpCommand extends AbstractServerCommand {
       .withLogger(this._logger)
       .withKill(this._kill)
       .withPrintIndex(this._printIndex)
-      .withAllowInsecure(this._allowInsecure);
+      .withAllowInsecure(this._allowInsecure)
+      .withSiteToken(this._siteToken);
+
     this.log.info(chalk`{yellow     ___    ________  ___                          __      __ v${pkgJson.version}}`);
     this.log.info(chalk`{yellow    /   |  / ____/  |/  /  _____(_)___ ___  __  __/ /___ _/ /_____  _____}`);
     this.log.info(chalk`{yellow   / /| | / __/ / /|_/ /  / ___/ / __ \`__ \\/ / / / / __ \`/ __/ __ \\/ ___/}`);
