@@ -19,9 +19,6 @@ import { asyncHandler, BaseServer } from './BaseServer.js';
 import LiveReload from './LiveReload.js';
 import { writeSiteTokenToEnv } from '../config/config-utils.js';
 
-/* eslint-disable max-classes-per-file */
-class LoginNeeded extends Error {}
-
 const LOGIN_ROUTE = '/.aem/cli/login';
 const LOGIN_ACK_ROUTE = '/.aem/cli/login/ack';
 
@@ -35,7 +32,7 @@ export class HelixServer extends BaseServer {
     this._liveReload = null;
     this._enableLiveReload = false;
     this._app.use(compression());
-    this._autoLoginAttempted = false;
+    this._autoLogin = true;
   }
 
   withLiveReload(value) {
@@ -49,6 +46,7 @@ export class HelixServer extends BaseServer {
   }
 
   async handleLogin(req, res) {
+    this._autoLogin = false; // disable autologin if this was called at least once
     if (!this._project.siteLoginUrl) {
       res.status(404).send('Login not supported. Could not extract site and org information.');
       return;
@@ -91,12 +89,7 @@ export class HelixServer extends BaseServer {
               async function sendToken() {
                 if (window.location.hash) {
                   const response = await fetch(window.location.href.replace('#', '?'));
-                  if (!response.ok) {
-                    window.location.href = '/';
-                  }
-                    
-                  const data = await response.json();
-                  window.location.href = data.location;
+                  window.location.href = '/';
                 }
               }
               sendToken();
@@ -179,17 +172,9 @@ export class HelixServer extends BaseServer {
         file404html: this._project.file404html,
         siteToken: this._siteToken,
         loginPath: LOGIN_ROUTE,
-        throwOnLoginNeeded: !this._autoLoginAttempted ? LoginNeeded : undefined,
+        autoLogin: this._autoLogin,
       });
     } catch (err) {
-      if (err instanceof LoginNeeded) {
-        this._resumeUrl = url;
-        this._autoLoginAttempted = true;
-        ctx.log.info(`[${id}] Attempting to auto login...`);
-        res.status(302).set('location', LOGIN_ROUTE).send('');
-        return;
-      }
-
       log.error(`${pfx}failed to proxy AEM request ${ctx.path}: ${err.message}`);
       res.status(502).send(`Failed to proxy AEM request: ${err.message}`);
     }
