@@ -46,7 +46,9 @@ export class HelixServer extends BaseServer {
   }
 
   async handleLogin(req, res) {
-    this._autoLogin = false; // disable autologin if this was called at least once
+    // disable autologin if login was called at least once
+    this._autoLogin = false;
+
     if (!this._project.siteLoginUrl) {
       res.status(404).send('Login not supported. Could not extract site and org information.');
       return;
