@@ -54,7 +54,7 @@ export async function writeSiteTokenToEnv(siteToken) {
     process.stdout.write(chalk`
 {redBright Warning:} Added your {cyan '.env'} file to .gitignore, because it now contains your site token.
 Please make sure the site token is not stored in the git repository.
-      `);
+`);
   }
 
   let env = fs.readFileSync(envFile, 'utf8');

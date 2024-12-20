@@ -10,6 +10,7 @@
  * governing permissions and limitations under the License.
  */
 import crypto from 'crypto';
+import express from 'express';
 import { promisify } from 'util';
 import path from 'path';
 import compression from 'compression';
@@ -48,58 +49,71 @@ export class HelixServer extends BaseServer {
   async handleLogin(req, res) {
     // disable autologin if login was called at least once
     this._autoLogin = false;
+    // clear any previous login errors
+    delete this.loginError;
 
     if (!this._project.siteLoginUrl) {
       res.status(404).send('Login not supported. Could not extract site and org information.');
       return;
     }
-    this._loginOAuthState = crypto.randomUUID();
-    const loginUrl = `${this._project.siteLoginUrl}&state=${this._loginOAuthState}`;
+
+    this.log.info(`Starting login process for : ${this._project.org}/${this._project.site}. Redirecting...`);
+    this._loginState = crypto.randomUUID();
+    const loginUrl = `${this._project.siteLoginUrl}&state=${this._loginState}`;
     res.status(302).set('location', loginUrl).send('');
   }
 
   async handleLoginAck(req, res) {
-    if (req.query?.site_token) {
-      if (this._loginOAuthState === req.query.state) {
-        const siteToken = req.query.site_token;
+    const CORS_HEADERS = {
+      'access-control-allow-methods': 'POST, OPTIONS',
+      'access-control-allow-headers': 'content-type',
+    };
+
+    const { origin } = req.headers;
+    if (['https://admin.hlx.page', 'https://admin-ci.hlx.page'].includes(origin)) {
+      CORS_HEADERS['access-control-allow-origin'] = origin;
+    }
+
+    if (req.method === 'OPTIONS') {
+      res.status(200).set(CORS_HEADERS).send('');
+      return;
+    }
+
+    if (req.method === 'POST') {
+      const { state, siteToken } = req.body;
+      try {
+        if (!this._loginState || this._loginState !== state) {
+          this.loginError = { message: 'Login Failed: We received an invalid state.' };
+          this.log.warn('State mismatch. Discarding site token.');
+          res.status(400).set(CORS_HEADERS).send('Invalid state');
+          return;
+        }
+
+        if (!siteToken) {
+          this.loginError = { message: 'Login Failed: We received an invalid state.' };
+          res.status(400).set(CORS_HEADERS).send('Missing site token');
+          return;
+        }
+
         this.withSiteToken(siteToken);
         this._project.headHtml.setSiteToken(siteToken);
         await writeSiteTokenToEnv(siteToken);
         this.log.info('Site token received and saved to .env file.');
-      } else {
-        this.log.warn('OAuth state mismatch. Discarding site token.');
-      }
-      this._loginOAuthState = null;
 
-      res.status(200).send('Login successful. You can resume your work.');
+        res.status(200).set(CORS_HEADERS).send('Login successful.');
+        return;
+      } finally {
+        this._loginState = null;
+      }
+    }
+
+    if (this.loginError) {
+      res.status(400).send(this.loginError.message);
+      delete this.loginError;
       return;
     }
 
-    /*
-     In the oauth implicit flow the token is returned in the hash fragment
-     we use a small script to send it to the server using a fetch request
-    */
-    res.status(200)
-      /*
-       ensure that the referrer does not accidentally leak tokens
-       although browsers should not sent fragments
-      */
-      .set('referrer-policy', 'no-referrer')
-      .send(`
-        <html>
-          <head>
-            <script>
-              async function sendToken() {
-                if (window.location.hash) {
-                  await fetch(window.location.href.replace('#', '?'));
-                  window.location.href = '/';
-                }
-              }
-              sendToken();
-            </script>
-          </head>
-        </html>
-    `);
+    res.status(302).set('location', '/').send('');
   }
 
   /**
@@ -194,6 +208,9 @@ export class HelixServer extends BaseServer {
 
     this.app.get(LOGIN_ROUTE, asyncHandler(this.handleLogin.bind(this)));
     this.app.get(LOGIN_ACK_ROUTE, asyncHandler(this.handleLoginAck.bind(this)));
+    this.app.post(LOGIN_ACK_ROUTE, express.json(), asyncHandler(this.handleLoginAck.bind(this)));
+    this.app.options(LOGIN_ACK_ROUTE, asyncHandler(this.handleLoginAck.bind(this)));
+
     const handler = asyncHandler(this.handleProxyModeRequest.bind(this));
     this.app.get('*', handler);
     this.app.post('*', handler);

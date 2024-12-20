@@ -84,6 +84,14 @@ export class HelixProject extends BaseProject {
     return this._server._liveReload;
   }
 
+  get org() {
+    return this._org;
+  }
+
+  get site() {
+    return this._site;
+  }
+
   get siteLoginUrl() {
     return this._siteLoginUrl;
   }
