@@ -1,3 +1,10 @@
+## [16.8.1](https://github.com/adobe/helix-cli/compare/v16.8.0...v16.8.1) (2024-12-21)
+
+
+### Bug Fixes
+
+* **deps:** update dependency chokidar to v4.0.3 ([#2468](https://github.com/adobe/helix-cli/issues/2468)) ([4225436](https://github.com/adobe/helix-cli/commit/4225436b38f180510b1d472119452286b2bc186d))
+
 # [16.8.0](https://github.com/adobe/helix-cli/compare/v16.7.32...v16.8.0) (2024-12-16)
 
 
