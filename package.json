@@ -45,7 +45,7 @@
     "@adobe/helix-shared-indexer": "2.2.2",
     "camelcase": "8.0.0",
     "chalk-template": "1.1.0",
-    "chokidar": "4.0.1",
+    "chokidar": "4.0.3",
     "compression": "1.7.5",
     "cookie": "1.0.2",
     "cookie-parser": "1.4.7",
