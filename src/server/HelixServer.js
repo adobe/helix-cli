@@ -34,6 +34,7 @@ export class HelixServer extends BaseServer {
     this._enableLiveReload = false;
     this._app.use(compression());
     this._autoLogin = true;
+    this._saveSiteTokenToDotEnv = true;
   }
 
   withLiveReload(value) {
@@ -64,6 +65,7 @@ export class HelixServer extends BaseServer {
   }
 
   async handleLoginAck(req, res) {
+    const CACHE_CONTROL = 'no-store, private, must-revalidate';
     const CORS_HEADERS = {
       'access-control-allow-methods': 'POST, OPTIONS',
       'access-control-allow-headers': 'content-type',
@@ -85,35 +87,51 @@ export class HelixServer extends BaseServer {
         if (!this._loginState || this._loginState !== state) {
           this.loginError = { message: 'Login Failed: We received an invalid state.' };
           this.log.warn('State mismatch. Discarding site token.');
-          res.status(400).set(CORS_HEADERS).send('Invalid state');
+          res.status(400)
+            .set(CORS_HEADERS)
+            .set('cache-control', CACHE_CONTROL)
+            .send('Invalid state');
           return;
         }
 
         if (!siteToken) {
-          this.loginError = { message: 'Login Failed: We received an invalid state.' };
-          res.status(400).set(CORS_HEADERS).send('Missing site token');
+          this.loginError = { message: 'Login Failed: Missing site token.' };
+          res.status(400)
+            .set('cache-control', CACHE_CONTROL)
+            .set(CORS_HEADERS)
+            .send('Missing site token');
           return;
         }
 
         this.withSiteToken(siteToken);
         this._project.headHtml.setSiteToken(siteToken);
-        await writeSiteTokenToEnv(siteToken);
+        if (this._saveSiteTokenToDotEnv) {
+          await writeSiteTokenToEnv(siteToken);
+        }
         this.log.info('Site token received and saved to .env file.');
 
-        res.status(200).set(CORS_HEADERS).send('Login successful.');
+        res.status(200)
+          .set('cache-control', CACHE_CONTROL)
+          .set(CORS_HEADERS)
+          .send('Login successful.');
         return;
       } finally {
-        this._loginState = null;
+        delete this._loginState;
       }
     }
 
     if (this.loginError) {
-      res.status(400).send(this.loginError.message);
+      res.status(400)
+        .set('cache-control', CACHE_CONTROL)
+        .send(this.loginError.message);
       delete this.loginError;
       return;
     }
 
-    res.status(302).set('location', '/').send('');
+    res.status(302)
+      .set('cache-control', CACHE_CONTROL)
+      .set('location', '/')
+      .send('');
   }
 
   /**
@@ -174,13 +192,13 @@ export class HelixServer extends BaseServer {
       }
     }
 
-    // use proxy
-    const url = new URL(ctx.url, proxyUrl);
-    for (const [key, value] of proxyUrl.searchParams.entries()) {
-      url.searchParams.append(key, value);
-    }
-
     try {
+      // use proxy
+      const url = new URL(ctx.url, proxyUrl);
+      for (const [key, value] of proxyUrl.searchParams.entries()) {
+        url.searchParams.append(key, value);
+      }
+
       await utils.proxyRequest(ctx, url.href, req, res, {
         injectLiveReload: this._project.liveReload,
         headHtml: this._project.headHtml,

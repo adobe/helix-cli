@@ -440,4 +440,233 @@ describe('Helix Server', () => {
       await project.stop();
     }
   });
+
+  it('starts login', async () => {
+    const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
+    const project = new HelixProject()
+      .withCwd(cwd)
+      .withHttpPort(3000)
+      .withProxyUrl('http://main--foo--bar.aem.page')
+      .withSiteLoginUrl('https://admin.hlx.page/login/bar/foo/main?client_id=aem-cli&response_type=site_token&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2F.aem%2Fcli%2Flogin%2Fack');
+
+    await project.init();
+    project.log.level = 'silly';
+
+    try {
+      await project.start();
+      const resp = await getFetch()(`http://127.0.0.1:${project.server.port}/.aem/cli/login`, {
+        cache: 'no-store',
+        redirect: 'manual',
+      });
+      assert.strictEqual(resp.status, 302);
+      assert.ok(
+        resp.headers.get('location').startsWith('https://admin.hlx.page/login/bar/foo/main?client_id=aem-cli&response_type=site_token&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2F.aem%2Fcli%2Flogin%2Fack&state='),
+      );
+    } finally {
+      await project.stop();
+    }
+  });
+
+  it('starts auto login when receiving 401 during navigation', async () => {
+    const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
+    const project = new HelixProject()
+      .withCwd(cwd)
+      .withHttpPort(3000)
+      .withProxyUrl('http://main--foo--bar.aem.page')
+      .withSiteLoginUrl('https://admin.hlx.page/login/bar/foo/main?client_id=aem-cli&response_type=site_token&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2F.aem%2Fcli%2Flogin%2Fack');
+
+    await project.init();
+    project.log.level = 'silly';
+
+    nock('http://main--foo--bar.aem.page').get('/').reply(401, 'Unauthorized');
+
+    try {
+      await project.start();
+      const resp = await getFetch()(`http://127.0.0.1:${project.server.port}/`, {
+        cache: 'no-store',
+        redirect: 'manual',
+        // emulate browser navigation
+        headers: {
+          'sec-fetch-mode': 'navigate',
+          'sec-fetch-dest': 'document',
+        },
+      });
+      assert.strictEqual(resp.status, 302);
+      assert.strictEqual(resp.headers.get('location'), '/.aem/cli/login');
+    } finally {
+      await project.stop();
+    }
+  });
+
+  it('receives site token, saves it and uses it', async () => {
+    const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
+    const project = new HelixProject()
+      .withCwd(cwd)
+      .withHttpPort(3000)
+      .withProxyUrl('http://main--foo--bar.aem.page')
+      .withSiteLoginUrl('https://admin.hlx.page/login/bar/foo/main?client_id=aem-cli&response_type=site_token&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2F.aem%2Fcli%2Flogin%2Fack');
+
+    await project.init();
+    project.log.level = 'silly';
+
+    nock('http://main--foo--bar.aem.page')
+      .get('/')
+      .reply(function fn() {
+        assert.strictEqual(this.req.headers.authorization, 'token test-site-token');
+        return [200, 'hello', { 'content-type': 'text/html' }];
+      })
+      .get('/head.html')
+      .reply(function fn() {
+        assert.strictEqual(this.req.headers.authorization, 'token test-site-token');
+        return [200, '<script src="aem.js" type="module">', { 'content-type': 'text/html' }];
+      });
+
+    // Don't alter the file system during tests
+    project._server._saveSiteTokenToDotEnv = false;
+    project._server._loginState = 'test-state';
+
+    try {
+      await project.start();
+      // pre-flight
+      const respPreflight = await getFetch()(`http://127.0.0.1:${project.server.port}/.aem/cli/login/ack`, {
+        method: 'OPTIONS',
+        headers: {
+          'Content-Type': 'application/json',
+          Origin: 'https://admin.hlx.page',
+        },
+        cache: 'no-store',
+      });
+      assert.strictEqual(respPreflight.status, 200);
+      assert.strictEqual(respPreflight.headers.get('access-control-allow-origin'), 'https://admin.hlx.page');
+      assert.strictEqual(respPreflight.headers.get('access-control-allow-methods'), 'POST, OPTIONS');
+      assert.strictEqual(respPreflight.headers.get('access-control-allow-headers'), 'content-type');
+
+      // receives and saves token
+      const respAck = await getFetch()(`http://127.0.0.1:${project.server.port}/.aem/cli/login/ack`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Origin: 'https://admin.hlx.page',
+        },
+        body: JSON.stringify({
+          state: 'test-state',
+          siteToken: 'test-site-token',
+        }),
+        cache: 'no-store',
+      });
+      assert.strictEqual(respAck.status, 200);
+      assert.strictEqual(await respAck.text(), 'Login successful.');
+      assert.strictEqual(respAck.headers.get('access-control-allow-origin'), 'https://admin.hlx.page');
+      assert.strictEqual(respAck.headers.get('access-control-allow-methods'), 'POST, OPTIONS');
+      assert.strictEqual(respAck.headers.get('access-control-allow-headers'), 'content-type');
+
+      // redirects to home
+      const respRedirect = await getFetch()(`http://127.0.0.1:${project.server.port}/.aem/cli/login/ack`, {
+        cache: 'no-store',
+        redirect: 'manual',
+      });
+      assert.strictEqual(respRedirect.status, 302);
+      assert.strictEqual(respRedirect.headers.get('location'), '/');
+
+      // content request uses token
+      const respContent = await getFetch()(`http://127.0.0.1:${project.server.port}/`, {
+        cache: 'no-store',
+      });
+      assert.strictEqual(respContent.status, 200);
+      assert.strictEqual(await respContent.text(), 'hello');
+    } finally {
+      await project.stop();
+    }
+  });
+
+  it('discards the token on state mismatch', async () => {
+    const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
+    const project = new HelixProject()
+      .withCwd(cwd)
+      .withHttpPort(3000)
+      .withProxyUrl('http://main--foo--bar.aem.page')
+      .withSiteLoginUrl('https://admin.hlx.page/login/bar/foo/main?client_id=aem-cli&response_type=site_token&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2F.aem%2Fcli%2Flogin%2Fack');
+
+    await project.init();
+    project.log.level = 'silly';
+
+    project._server._loginState = 'test-state';
+
+    try {
+      await project.start();
+      let resp = await getFetch()(`http://127.0.0.1:${project.server.port}/.aem/cli/login/ack`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          state: 'different-state',
+          siteToken: 'test-site-token',
+        }),
+        cache: 'no-store',
+      });
+      assert.strictEqual(resp.status, 400);
+      assert.ok(!resp.headers.get('access-control-allow-origin'));
+      assert.strictEqual(resp.headers.get('access-control-allow-methods'), 'POST, OPTIONS');
+      assert.strictEqual(resp.headers.get('access-control-allow-headers'), 'content-type');
+
+      resp = await getFetch()(`http://127.0.0.1:${project.server.port}/.aem/cli/login/ack`, {
+        cache: 'no-store',
+      });
+
+      assert.strictEqual(resp.status, 400);
+      const text = await resp.text();
+      assert.ok(text.includes('Login Failed') && text.includes('invalid state'));
+    } finally {
+      await project.stop();
+    }
+
+    assert.strictEqual(project._server._loginState, undefined);
+    assert.strictEqual(project._server._siteToken, undefined);
+  });
+
+  it('login fails when token is missing', async () => {
+    const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
+    const project = new HelixProject()
+      .withCwd(cwd)
+      .withHttpPort(3000)
+      .withProxyUrl('http://main--foo--bar.aem.page')
+      .withSiteLoginUrl('https://admin.hlx.page/login/bar/foo/main?client_id=aem-cli&response_type=site_token&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2F.aem%2Fcli%2Flogin%2Fack');
+
+    await project.init();
+    project.log.level = 'silly';
+
+    project._server._loginState = 'test-state';
+
+    try {
+      await project.start();
+      let resp = await getFetch()(`http://127.0.0.1:${project.server.port}/.aem/cli/login/ack`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          state: 'test-state',
+        }),
+        cache: 'no-store',
+      });
+      assert.strictEqual(resp.status, 400);
+      assert.ok(!resp.headers.get('access-control-allow-origin'));
+      assert.strictEqual(resp.headers.get('access-control-allow-methods'), 'POST, OPTIONS');
+      assert.strictEqual(resp.headers.get('access-control-allow-headers'), 'content-type');
+
+      resp = await getFetch()(`http://127.0.0.1:${project.server.port}/.aem/cli/login/ack`, {
+        cache: 'no-store',
+      });
+
+      assert.strictEqual(resp.status, 400);
+      const text = await resp.text();
+      assert.ok(text.includes('Login Failed') && text.includes('Missing site token'));
+    } finally {
+      await project.stop();
+    }
+
+    assert.strictEqual(project._server._loginState, undefined);
+    assert.strictEqual(project._server._siteToken, undefined);
+  });
 });
