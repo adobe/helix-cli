@@ -355,11 +355,24 @@ window.LiveReloadOptions = {
         .send(textBody);
       return;
     }
-    if (ret.status === 401) {
+    if (ret.status === 401 || ret.status === 403) {
+      const reqHeaders = req.headers;
+      if (opts.autoLogin && opts.loginPath
+        && reqHeaders?.['sec-fetch-dest'] === 'document'
+        && reqHeaders?.['sec-fetch-mode'] === 'navigate'
+      ) {
+        // try to automatically login
+        res.set('location', opts.loginPath).status(302).send();
+        return;
+      }
+
       let textBody = await ret.text();
       textBody = `<html>
   <head><meta property="hlx:proxyUrl" content="${url}"></head>
-  <body><pre>${textBody}</pre></body>
+  <body>
+    <pre>${textBody}</pre>
+    <p>Click <b><a href="${opts.loginPath}">here</a></b> to login.</p>
+  </body>
 </html>
 `;
       respHeaders['content-type'] = 'text/html';

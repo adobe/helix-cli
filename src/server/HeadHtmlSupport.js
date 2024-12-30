@@ -125,6 +125,10 @@ export default class HeadHtmlSupport {
     }
   }
 
+  setSiteToken(siteToken) {
+    this.siteToken = siteToken;
+  }
+
   invalidateLocal() {
     this.localStatus = 0;
   }
