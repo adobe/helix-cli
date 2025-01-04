@@ -60,7 +60,7 @@
     "https-proxy-agent": "7.0.6",
     "ignore": "6.0.2",
     "ini": "5.0.0",
-    "isomorphic-git": "1.27.2",
+    "isomorphic-git": "1.27.3",
     "livereload-js": "4.0.2",
     "node-fetch": "3.3.2",
     "open": "10.1.0",
@@ -88,7 +88,7 @@
     "mocha": "11.0.1",
     "mocha-multi-reporters": "1.5.1",
     "nock": "13.5.6",
-    "semantic-release": "24.2.0",
+    "semantic-release": "24.2.1",
     "semantic-release-discord-bot": "^1.1.0",
     "sinon": "19.0.2"
   },
