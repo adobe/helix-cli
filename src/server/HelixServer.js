@@ -18,7 +18,7 @@ import utils from './utils.js';
 import RequestContext from './RequestContext.js';
 import { asyncHandler, BaseServer } from './BaseServer.js';
 import LiveReload from './LiveReload.js';
-import { writeSiteTokenToEnv } from '../config/config-utils.js';
+import { writeSiteTokenToDotEnv } from '../config/config-utils.js';
 
 const LOGIN_ROUTE = '/.aem/cli/login';
 const LOGIN_ACK_ROUTE = '/.aem/cli/login/ack';
@@ -106,7 +106,7 @@ export class HelixServer extends BaseServer {
         this.withSiteToken(siteToken);
         this._project.headHtml.setSiteToken(siteToken);
         if (this._saveSiteTokenToDotEnv) {
-          await writeSiteTokenToEnv(siteToken);
+          await writeSiteTokenToDotEnv(siteToken);
         }
         this.log.info('Site token received and saved to .env file.');
 

@@ -38,33 +38,33 @@ which should never be stored in the git repository.
  *
  * @param {string} siteToken
  */
-export async function writeSiteTokenToEnv(siteToken) {
+export async function writeSiteTokenToDotEnv(siteToken) {
   if (!siteToken) {
     return;
   }
 
-  const envFile = '.env';
-  if (!fs.existsSync('.env')) {
-    // make sure .env exists, so we can check if it is ignored by git
-    fs.writeFileSync(envFile, '', 'utf8');
-  }
-
-  if (!(await validateDotEnv(process.cwd()))) {
-    fs.appendFileSync('.gitignore', '\n.env\n', 'utf8');
-    process.stdout.write(chalk`
+  const envFile = fs.openSync('.env', 'a+');
+  try {
+    if (!(await validateDotEnv(process.cwd()))) {
+      fs.appendFileSync('.gitignore', '\n.env\n', 'utf8');
+      process.stdout.write(chalk`
 {redBright Warning:} Added your {cyan '.env'} file to .gitignore, because it now contains your site token.
 Please make sure the site token is not stored in the git repository.
 `);
-  }
+    }
 
-  let env = fs.readFileSync(envFile, 'utf8');
-  if (env.includes('AEM_SITE_TOKEN')) {
-    env = env.replace(/AEM_SITE_TOKEN=.*/, `AEM_SITE_TOKEN=${siteToken}`);
-  } else {
-    env += `\nAEM_SITE_TOKEN=${siteToken}\n`;
-  }
+    let env = fs.readFileSync(envFile, 'utf8');
+    if (env.includes('AEM_SITE_TOKEN')) {
+      env = env.replace(/AEM_SITE_TOKEN=.*/, `AEM_SITE_TOKEN=${siteToken}`);
+    } else {
+      env += `\nAEM_SITE_TOKEN=${siteToken}\n`;
+    }
 
-  fs.writeFileSync(envFile, env, 'utf8');
+    fs.ftruncateSync(envFile);
+    fs.writeFileSync(envFile, env, 'utf8');
+  } finally {
+    fs.closeSync(envFile);
+  }
 }
 
 /**
