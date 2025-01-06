@@ -1,3 +1,10 @@
+## [16.8.4](https://github.com/adobe/helix-cli/compare/v16.8.3...v16.8.4) (2025-01-06)
+
+
+### Bug Fixes
+
+* **deps:** update dependency ignore to v7 ([#2469](https://github.com/adobe/helix-cli/issues/2469)) ([6ebd807](https://github.com/adobe/helix-cli/commit/6ebd80748bda6dff4618d22ad74fe592c5623e7a))
+
 ## [16.8.3](https://github.com/adobe/helix-cli/compare/v16.8.2...v16.8.3) (2025-01-04)
 
 
