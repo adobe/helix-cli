@@ -40,7 +40,7 @@
   "dependencies": {
     "@adobe/fetch": "4.1.11",
     "@adobe/helix-log": "6.0.5",
-    "@adobe/helix-shared-config": "11.0.12",
+    "@adobe/helix-shared-config": "11.0.13",
     "@adobe/helix-shared-git": "3.0.17",
     "@adobe/helix-shared-indexer": "2.2.2",
     "camelcase": "8.0.0",
