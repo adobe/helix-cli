@@ -1,3 +1,31 @@
+## [16.8.5](https://github.com/adobe/helix-cli/compare/v16.8.4...v16.8.5) (2025-01-06)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @adobe/helix-shared-config to v11.0.13 ([#2474](https://github.com/adobe/helix-cli/issues/2474)) ([5dbd2e9](https://github.com/adobe/helix-cli/commit/5dbd2e9d3ff3a0eefba22f38b5aa6ae9cfea24ea))
+
+## [16.8.4](https://github.com/adobe/helix-cli/compare/v16.8.3...v16.8.4) (2025-01-06)
+
+
+### Bug Fixes
+
+* **deps:** update dependency ignore to v7 ([#2469](https://github.com/adobe/helix-cli/issues/2469)) ([6ebd807](https://github.com/adobe/helix-cli/commit/6ebd80748bda6dff4618d22ad74fe592c5623e7a))
+
+## [16.8.3](https://github.com/adobe/helix-cli/compare/v16.8.2...v16.8.3) (2025-01-04)
+
+
+### Bug Fixes
+
+* **deps:** update adobe fixes ([#2473](https://github.com/adobe/helix-cli/issues/2473)) ([fad5b4c](https://github.com/adobe/helix-cli/commit/fad5b4c83323da1b504eed8ac4c313d9d2540651))
+
+## [16.8.2](https://github.com/adobe/helix-cli/compare/v16.8.1...v16.8.2) (2025-01-04)
+
+
+### Bug Fixes
+
+* **deps:** update external fixes ([#2472](https://github.com/adobe/helix-cli/issues/2472)) ([513a507](https://github.com/adobe/helix-cli/commit/513a507f518a1878b1de11f1769500fa3a682ea0))
+
 ## [16.8.1](https://github.com/adobe/helix-cli/compare/v16.8.0...v16.8.1) (2024-12-21)
 
 
