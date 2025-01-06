@@ -12,6 +12,7 @@
 import chalk from 'chalk-template';
 import fs from 'fs';
 import semver from 'semver';
+import { decodeJwt } from 'jose';
 import GitUtils from '../git-utils.js';
 import pkgJson from '../package.cjs';
 
@@ -43,10 +44,30 @@ export async function writeSiteTokenToDotEnv(siteToken) {
     return;
   }
 
+  /*
+   don't allow writing arbitrary data to the file system.
+   validate and write only valid site tokens to the .env file
+  */
+  if (siteToken.startsWith('hlxtst_')) {
+    try {
+      decodeJwt(siteToken.substring(7));
+    } catch (e) {
+      process.stdout.write(chalk`
+{redBright Error:} The provided site token is not a valid JWT, it will not be written to your .env file.
+`);
+      return;
+    }
+  } else {
+    process.stdout.write(chalk`
+{redBright Error:} The provided site token is not a recognised token format, it will not be written to your .env file.
+`);
+    return;
+  }
+
   const envFile = fs.openSync('.env', 'a+');
   try {
     if (!(await validateDotEnv(process.cwd()))) {
-      fs.appendFileSync('.gitignore', '\n.env\n', 'utf8');
+      fs.appendFileSync('.gitignore', '\r\n.env\r\n', 'utf8');
       process.stdout.write(chalk`
 {redBright Warning:} Added your {cyan '.env'} file to .gitignore, because it now contains your site token.
 Please make sure the site token is not stored in the git repository.
@@ -57,7 +78,7 @@ Please make sure the site token is not stored in the git repository.
     if (env.includes('AEM_SITE_TOKEN')) {
       env = env.replace(/AEM_SITE_TOKEN=.*/, `AEM_SITE_TOKEN=${siteToken}`);
     } else {
-      env += `\nAEM_SITE_TOKEN=${siteToken}\n`;
+      env += `\r\nAEM_SITE_TOKEN=${siteToken}\r\n`;
     }
 
     fs.ftruncateSync(envFile);
