@@ -18,7 +18,7 @@ import utils from './utils.js';
 import RequestContext from './RequestContext.js';
 import { asyncHandler, BaseServer } from './BaseServer.js';
 import LiveReload from './LiveReload.js';
-import { writeSiteTokenToDotEnv } from '../config/config-utils.js';
+import { saveSiteTokenToFile } from '../config/config-utils.js';
 
 const LOGIN_ROUTE = '/.aem/cli/login';
 const LOGIN_ACK_ROUTE = '/.aem/cli/login/ack';
@@ -34,7 +34,6 @@ export class HelixServer extends BaseServer {
     this._enableLiveReload = false;
     this._app.use(compression());
     this._autoLogin = true;
-    this._saveSiteTokenToDotEnv = true;
   }
 
   withLiveReload(value) {
@@ -105,10 +104,8 @@ export class HelixServer extends BaseServer {
 
         this.withSiteToken(siteToken);
         this._project.headHtml.setSiteToken(siteToken);
-        if (this._saveSiteTokenToDotEnv) {
-          await writeSiteTokenToDotEnv(siteToken);
-        }
-        this.log.info('Site token received and saved to .env file.');
+        await saveSiteTokenToFile(siteToken);
+        this.log.info('Site token received and saved to file.');
 
         res.status(200)
           .set('cache-control', CACHE_CONTROL)

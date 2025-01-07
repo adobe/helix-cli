@@ -11,6 +11,8 @@
  */
 import chalk from 'chalk-template';
 import fs from 'fs';
+import os from 'os';
+import path from 'path';
 import semver from 'semver';
 import { decodeJwt } from 'jose';
 import GitUtils from '../git-utils.js';
@@ -33,59 +35,77 @@ which should never be stored in the git repository.
   return false;
 }
 
+const hlxFolder = '.hlx';
+const tokenFileName = '.hlx-token';
+const tokenFilePath = path.join(hlxFolder, tokenFileName);
+
 /**
- * Writes the site token to the .env file.
- * Checks if the .env file is ignored by git and adds it to the .gitignore file if necessary.
+ * Writes the site token to the .hlx/.hlx-token file.
+ * Checks if the .hlx file is ignored by git and adds it to the .gitignore file if necessary.
  *
  * @param {string} siteToken
  */
-export async function writeSiteTokenToDotEnv(siteToken) {
+export async function saveSiteTokenToFile(siteToken) {
   if (!siteToken) {
     return;
   }
 
   /*
    don't allow writing arbitrary data to the file system.
-   validate and write only valid site tokens to the .env file
+   validate and write only valid site tokens to the file
   */
   if (siteToken.startsWith('hlxtst_')) {
     try {
       decodeJwt(siteToken.substring(7));
     } catch (e) {
       process.stdout.write(chalk`
-{redBright Error:} The provided site token is not a valid JWT, it will not be written to your .env file.
+{redBright Error:} The provided site token is not a valid JWT, it will not be written to your .hlx-token file.
 `);
       return;
     }
   } else {
     process.stdout.write(chalk`
-{redBright Error:} The provided site token is not a recognised token format, it will not be written to your .env file.
+{redBright Error:} The provided site token is not a recognised token format, it will not be written to your .hlx-token file.
 `);
     return;
   }
 
-  const envFile = fs.openSync('.env', 'a+');
+  if (!fs.existsSync(hlxFolder)) {
+    fs.mkdirSync(hlxFolder);
+  }
+
+  const tokenFile = fs.openSync(tokenFilePath, 'w+');
   try {
-    if (!(await validateDotEnv(process.cwd()))) {
-      fs.appendFileSync('.gitignore', '\r\n.env\r\n', 'utf8');
+    if (!(await GitUtils.isIgnored(process.cwd(), tokenFilePath))) {
+      fs.appendFileSync('.gitignore', `${os.EOL}${tokenFileName}${os.EOL}`, 'utf8');
       process.stdout.write(chalk`
-{redBright Warning:} Added your {cyan '.env'} file to .gitignore, because it now contains your site token.
-Please make sure the site token is not stored in the git repository.
+{redBright Warning:} Added your {cyan '.hlx-token'} file to .gitignore, because it now contains your token.
+Please make sure the token is not stored in the git repository.
 `);
     }
 
-    let env = fs.readFileSync(envFile, 'utf8');
-    if (env.includes('AEM_SITE_TOKEN')) {
-      env = env.replace(/AEM_SITE_TOKEN=.*/, `AEM_SITE_TOKEN=${siteToken}`);
-    } else {
-      env += `\r\nAEM_SITE_TOKEN=${siteToken}\r\n`;
-    }
-
-    fs.ftruncateSync(envFile);
-    fs.writeFileSync(envFile, env, 'utf8');
+    fs.writeFileSync(tokenFile, JSON.stringify({ siteToken }, null, 2), 'utf8');
   } finally {
-    fs.closeSync(envFile);
+    fs.closeSync(tokenFile);
   }
+}
+
+export async function getSiteTokenFromFile() {
+  if (!fs.existsSync(tokenFilePath)) {
+    return null;
+  }
+
+  try {
+    const tokenInfo = JSON.parse(fs.readFileSync(tokenFilePath, 'utf8'));
+    return tokenInfo.siteToken;
+  } catch (e) {
+    process.stdout.write(chalk`
+{redBright Error:} The site token could not be read from the {cyan '.hlx-token'} file.
+`);
+    process.stdout.write(`${e.stack}\n`);
+  }
+
+  return null;
 }
 
 /**

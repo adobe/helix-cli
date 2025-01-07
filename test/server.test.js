@@ -14,7 +14,9 @@
 /* eslint-disable no-underscore-dangle */
 import os from 'os';
 import assert from 'assert';
+import fs from 'fs';
 import fse from 'fs-extra';
+import { UnsecuredJWT } from 'jose';
 import path from 'path';
 import { h1NoCache } from '@adobe/fetch';
 import * as http from 'node:http';
@@ -23,6 +25,7 @@ import {
   Nock, assertHttp, createTestRoot, setupProject, rawGet,
 } from './utils.js';
 import { getFetch } from '../src/fetch-utils.js';
+import { getSiteTokenFromFile } from '../src/config/config-utils.js';
 
 describe('Helix Server', () => {
   let nock;
@@ -499,6 +502,8 @@ describe('Helix Server', () => {
   });
 
   it('receives site token, saves it and uses it', async () => {
+    const siteToken = `hlxtst_${new UnsecuredJWT({ email: 'test@example.com' }).encode()}`;
+
     const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
     const project = new HelixProject()
       .withCwd(cwd)
@@ -512,17 +517,15 @@ describe('Helix Server', () => {
     nock('http://main--foo--bar.aem.page')
       .get('/')
       .reply(function fn() {
-        assert.strictEqual(this.req.headers.authorization, 'token test-site-token');
+        assert.strictEqual(this.req.headers.authorization, `token ${siteToken}`);
         return [200, 'hello', { 'content-type': 'text/html' }];
       })
       .get('/head.html')
       .reply(function fn() {
-        assert.strictEqual(this.req.headers.authorization, 'token test-site-token');
+        assert.strictEqual(this.req.headers.authorization, `token ${siteToken}`);
         return [200, '<script src="aem.js" type="module">', { 'content-type': 'text/html' }];
       });
 
-    // Don't alter the file system during tests
-    project._server._saveSiteTokenToDotEnv = false;
     project._server._loginState = 'test-state';
 
     try {
@@ -550,7 +553,7 @@ describe('Helix Server', () => {
         },
         body: JSON.stringify({
           state: 'test-state',
-          siteToken: 'test-site-token',
+          siteToken,
         }),
         cache: 'no-store',
       });
@@ -574,7 +577,10 @@ describe('Helix Server', () => {
       });
       assert.strictEqual(respContent.status, 200);
       assert.strictEqual(await respContent.text(), 'hello');
+
+      assert.strictEqual(await getSiteTokenFromFile(), siteToken);
     } finally {
+      fs.rmSync(path.resolve(__rootdir, '.hlx'), { force: true, recursive: true });
       await project.stop();
     }
   });

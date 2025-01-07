@@ -33,6 +33,7 @@ export class HelixProject extends BaseProject {
   }
 
   withSiteToken(value) {
+    this.siteToken = value;
     this._server.withSiteToken(value);
     return this;
   }

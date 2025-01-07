@@ -11,6 +11,7 @@
  */
 import path from 'path';
 import { getOrCreateLogger } from './log-common.js';
+import { getSiteTokenFromFile } from './config/config-utils.js';
 
 export default function up() {
   let executor;
@@ -121,7 +122,7 @@ export default function up() {
         .withOpen(path.basename(argv.$0) === 'aem' ? argv.open : false)
         .withTLS(argv.tlsKey, argv.tlsCert)
         .withLiveReload(argv.livereload)
-        .withSiteToken(argv.siteToken)
+        .withSiteToken(argv.siteToken || await getSiteTokenFromFile())
         .withUrl(argv.url)
         .withPrintIndex(argv.printIndex)
         .withAllowInsecure(argv.allowInsecure)
