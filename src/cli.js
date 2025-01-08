@@ -121,7 +121,7 @@ export default class CLI {
     Object.values(this._commands)
       .forEach((cmd) => argv.command(cmd));
 
-    logArgs(argv)
+    await logArgs(argv)
       .strictCommands(true)
       .scriptName('aem')
       .usage('Usage: $0 <command> [options]')

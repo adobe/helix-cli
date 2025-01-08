@@ -10,7 +10,8 @@
  * governing permissions and limitations under the License.
  */
 import chalk from 'chalk-template';
-import fs from 'fs';
+import fs from 'fs/promises';
+import fse from 'fs-extra';
 import os from 'os';
 import path from 'path';
 import semver from 'semver';
@@ -70,33 +71,28 @@ export async function saveSiteTokenToFile(siteToken) {
     return;
   }
 
-  if (!fs.existsSync(hlxFolder)) {
-    fs.mkdirSync(hlxFolder);
-  }
+  await fs.mkdir(hlxFolder, { recursive: true });
 
-  const tokenFile = fs.openSync(tokenFilePath, 'w+');
   try {
+    await fs.writeFile(tokenFilePath, JSON.stringify({ siteToken }, null, 2), 'utf8');
+  } finally {
     if (!(await GitUtils.isIgnored(process.cwd(), tokenFilePath))) {
-      fs.appendFileSync('.gitignore', `${os.EOL}${tokenFileName}${os.EOL}`, 'utf8');
+      await fs.appendFile('.gitignore', `${os.EOL}${tokenFileName}${os.EOL}`, 'utf8');
       process.stdout.write(chalk`
 {redBright Warning:} Added your {cyan '.hlx-token'} file to .gitignore, because it now contains your token.
 Please make sure the token is not stored in the git repository.
 `);
     }
-
-    fs.writeFileSync(tokenFile, JSON.stringify({ siteToken }, null, 2), 'utf8');
-  } finally {
-    fs.closeSync(tokenFile);
   }
 }
 
 export async function getSiteTokenFromFile() {
-  if (!fs.existsSync(tokenFilePath)) {
+  if (!(await fse.pathExists(tokenFilePath))) {
     return null;
   }
 
   try {
-    const tokenInfo = JSON.parse(fs.readFileSync(tokenFilePath, 'utf8'));
+    const tokenInfo = JSON.parse(await fs.readFile(tokenFilePath, 'utf8'));
     return tokenInfo.siteToken;
   } catch (e) {
     process.stdout.write(chalk`

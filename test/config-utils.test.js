@@ -12,15 +12,16 @@
 
 /* eslint-env mocha */
 import assert from 'assert';
-import fs from 'fs';
+import fs from 'fs/promises';
+import fse from 'fs-extra';
 import { UnsecuredJWT } from 'jose';
 
 import path from 'path';
 import { getSiteTokenFromFile, saveSiteTokenToFile } from '../src/config/config-utils.js';
 
 describe('.hlx-token', () => {
-  afterEach(() => {
-    fs.rmSync(path.resolve(__rootdir, '.hlx'), { force: true, recursive: true });
+  afterEach(async () => {
+    await fs.rm(path.resolve(__rootdir, '.hlx'), { force: true, recursive: true });
   });
 
   it('saves token to file', async () => {
@@ -32,17 +33,17 @@ describe('.hlx-token', () => {
 
   it('does not save invalid token to file', async () => {
     await saveSiteTokenToFile('invalid-token');
-    assert.ok(!fs.existsSync(path.resolve(__rootdir, '.hlx', '.hlx-token')));
+    assert.ok(!(await fse.pathExists(path.resolve(__rootdir, '.hlx', '.hlx-token'))));
   });
 
   it('does not save invalid non JWT TST token to file', async () => {
     await saveSiteTokenToFile('hlxtst_invalid-token');
-    assert.ok(!fs.existsSync(path.resolve(__rootdir, '.hlx', '.hlx-token')));
+    assert.ok(!(await fse.pathExists(path.resolve(__rootdir, '.hlx', '.hlx-token'))));
   });
 
   it('does not save null token to file', async () => {
     await saveSiteTokenToFile(null);
-    assert.ok(!fs.existsSync(path.resolve(__rootdir, '.hlx', '.hlx-token')));
+    assert.ok(!(await fse.pathExists(path.resolve(__rootdir, '.hlx', '.hlx-token'))));
   });
 
   it('does not throw if token file does not exist, returns null', async () => {
@@ -50,8 +51,8 @@ describe('.hlx-token', () => {
   });
 
   it('invalid file format does not throw, returns null', async () => {
-    fs.mkdirSync(path.resolve(__rootdir, '.hlx'));
-    fs.writeFileSync(path.resolve(__rootdir, '.hlx', '.hlx-token'), 'this-is-a-token');
+    await fs.mkdir(path.resolve(__rootdir, '.hlx'));
+    await fs.writeFile(path.resolve(__rootdir, '.hlx', '.hlx-token'), 'this-is-a-token');
     assert.strictEqual(await getSiteTokenFromFile(), null);
   });
 });

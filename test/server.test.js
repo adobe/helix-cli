@@ -14,7 +14,7 @@
 /* eslint-disable no-underscore-dangle */
 import os from 'os';
 import assert from 'assert';
-import fs from 'fs';
+import fs from 'fs/promises';
 import fse from 'fs-extra';
 import { UnsecuredJWT } from 'jose';
 import path from 'path';
@@ -580,7 +580,7 @@ describe('Helix Server', () => {
 
       assert.strictEqual(await getSiteTokenFromFile(), siteToken);
     } finally {
-      fs.rmSync(path.resolve(__rootdir, '.hlx'), { force: true, recursive: true });
+      await fs.rm(path.resolve(__rootdir, '.hlx'), { force: true, recursive: true });
       await project.stop();
     }
   });

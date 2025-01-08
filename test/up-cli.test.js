@@ -13,7 +13,7 @@
 /* eslint-env mocha */
 import sinon from 'sinon';
 import dotenv from 'dotenv';
-import fs from 'fs';
+import fs from 'fs/promises';
 import { UnsecuredJWT } from 'jose';
 
 import path from 'path';
@@ -88,7 +88,7 @@ describe('hlx up', () => {
       await cli.run(['up']);
       sinon.assert.calledWith(mockUp.withSiteToken, mockToken);
     } finally {
-      fs.rmSync(path.resolve(__rootdir, '.hlx'), { force: true, recursive: true });
+      await fs.rm(path.resolve(__rootdir, '.hlx'), { recursive: true, force: true });
     }
   });
 
