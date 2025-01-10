@@ -196,7 +196,7 @@ describe('Integration test for up command with helix pages', function suite() {
               resp.headers
                 .get('location')
                 .startsWith(
-                  'https://admin-ci.hlx.page/login/adobe/dummy-foo/main?client_id=aem-cli&redirect_uri=http%3A%2F%2Flocalhost%3A0%2F.aem%2Fcli%2Flogin%2Fack&state=',
+                  'https://admin.hlx.page/login/adobe/dummy-foo/main?client_id=aem-cli&redirect_uri=http%3A%2F%2Flocalhost%3A0%2F.aem%2Fcli%2Flogin%2Fack&state=',
                 ),
             );
           } catch (e) {
@@ -256,7 +256,7 @@ describe('Integration test for up command with helix pages', function suite() {
               resp.headers
                 .get('location')
                 .startsWith(
-                  'https://admin-ci.hlx.page/login/adobe/dummy/main?client_id=aem-cli&redirect_uri=http%3A%2F%2Flocalhost%3A0%2F.aem%2Fcli%2Flogin%2Fack&state=',
+                  'https://admin.hlx.page/login/adobe/dummy/main?client_id=aem-cli&redirect_uri=http%3A%2F%2Flocalhost%3A0%2F.aem%2Fcli%2Flogin%2Fack&state=',
                 ),
             );
           } catch (e) {
