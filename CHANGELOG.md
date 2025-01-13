@@ -1,3 +1,10 @@
+# [16.9.0](https://github.com/adobe/helix-cli/compare/v16.8.6...v16.9.0) (2025-01-13)
+
+
+### Features
+
+* Allow AEM CLI to obtain site token ([#2471](https://github.com/adobe/helix-cli/issues/2471)) ([a937bc7](https://github.com/adobe/helix-cli/commit/a937bc7fe1b28ea6221dfdeb4c4f547a355991aa))
+
 ## [16.8.6](https://github.com/adobe/helix-cli/compare/v16.8.5...v16.8.6) (2025-01-06)
 
 
