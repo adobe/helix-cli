@@ -13,10 +13,14 @@
 /* eslint-env mocha */
 import sinon from 'sinon';
 import dotenv from 'dotenv';
+import fs from 'fs/promises';
+import { UnsecuredJWT } from 'jose';
+
 import path from 'path';
 import { clearHelixEnv } from './utils.js';
 import CLI from '../src/cli.js';
 import UpCommand from '../src/up.cmd.js';
+import { saveSiteTokenToFile } from '../src/config/config-utils.js';
 
 describe('hlx up', () => {
   // mocked command instance
@@ -75,6 +79,17 @@ describe('hlx up', () => {
     sinon.assert.calledWith(mockUp.withPrintIndex, true);
     sinon.assert.calledWith(mockUp.withSiteToken, 'secret-site-token');
     sinon.assert.calledOnce(mockUp.run);
+  });
+
+  it('hlx up reads token from .hlx-token', async () => {
+    try {
+      const mockToken = `hlxtst_${new UnsecuredJWT({ email: 'test@example.com' }).encode()}`;
+      await saveSiteTokenToFile(mockToken);
+      await cli.run(['up']);
+      sinon.assert.calledWith(mockUp.withSiteToken, mockToken);
+    } finally {
+      await fs.rm(path.resolve(__rootdir, '.hlx'), { recursive: true, force: true });
+    }
   });
 
   it('hlx up fails with non env extra argument', async () => {

@@ -8,3 +8,4 @@ logs
 .DS_Store
 test-results.xml
 .idea/
+.hlx

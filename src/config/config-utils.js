@@ -10,7 +10,12 @@
  * governing permissions and limitations under the License.
  */
 import chalk from 'chalk-template';
+import fs from 'fs/promises';
+import fse from 'fs-extra';
+import os from 'os';
+import path from 'path';
 import semver from 'semver';
+import { decodeJwt } from 'jose';
 import GitUtils from '../git-utils.js';
 import pkgJson from '../package.cjs';
 
@@ -21,14 +26,82 @@ import pkgJson from '../package.cjs';
  */
 export async function validateDotEnv(dir = process.cwd()) {
   if (await GitUtils.isIgnored(dir, '.env')) {
-    return;
+    return true;
   }
   process.stdout.write(chalk`
 {yellowBright Warning:} Your {cyan '.env'} file is currently not ignored by git. 
 This is typically not good because it might contain secrets 
 which should never be stored in the git repository.
-
 `);
+  return false;
+}
+
+const hlxFolder = '.hlx';
+const tokenFileName = '.hlx-token';
+const tokenFilePath = path.join(hlxFolder, tokenFileName);
+
+/**
+ * Writes the site token to the .hlx/.hlx-token file.
+ * Checks if the .hlx file is ignored by git and adds it to the .gitignore file if necessary.
+ *
+ * @param {string} siteToken
+ */
+export async function saveSiteTokenToFile(siteToken) {
+  if (!siteToken) {
+    return;
+  }
+
+  /*
+   don't allow writing arbitrary data to the file system.
+   validate and write only valid site tokens to the file
+  */
+  if (siteToken.startsWith('hlxtst_')) {
+    try {
+      decodeJwt(siteToken.substring(7));
+    } catch (e) {
+      process.stdout.write(chalk`
+{redBright Error:} The provided site token is not a valid JWT, it will not be written to your .hlx-token file.
+`);
+      return;
+    }
+  } else {
+    process.stdout.write(chalk`
+{redBright Error:} The provided site token is not a recognised token format, it will not be written to your .hlx-token file.
+`);
+    return;
+  }
+
+  await fs.mkdir(hlxFolder, { recursive: true });
+
+  try {
+    await fs.writeFile(tokenFilePath, JSON.stringify({ siteToken }, null, 2), 'utf8');
+  } finally {
+    if (!(await GitUtils.isIgnored(process.cwd(), tokenFilePath))) {
+      await fs.appendFile('.gitignore', `${os.EOL}${tokenFileName}${os.EOL}`, 'utf8');
+      process.stdout.write(chalk`
+{redBright Warning:} Added your {cyan '.hlx-token'} file to .gitignore, because it now contains your token.
+Please make sure the token is not stored in the git repository.
+`);
+    }
+  }
+}
+
+export async function getSiteTokenFromFile() {
+  if (!(await fse.pathExists(tokenFilePath))) {
+    return null;
+  }
+
+  try {
+    const tokenInfo = JSON.parse(await fs.readFile(tokenFilePath, 'utf8'));
+    return tokenInfo.siteToken;
+  } catch (e) {
+    process.stdout.write(chalk`
+{redBright Error:} The site token could not be read from the {cyan '.hlx-token'} file.
+`);
+    process.stdout.write(`${e.stack}\n`);
+  }
+
+  return null;
 }
 
 /**
