@@ -1,3 +1,136 @@
+## [16.9.2](https://github.com/adobe/helix-cli/compare/v16.9.1...v16.9.2) (2025-01-13)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @adobe/helix-shared-config to v11.0.14 ([#2477](https://github.com/adobe/helix-cli/issues/2477)) ([f8f0cec](https://github.com/adobe/helix-cli/commit/f8f0cecebc0b199fe12d0843121bb89816a46c1d))
+
+## [16.9.1](https://github.com/adobe/helix-cli/compare/v16.9.0...v16.9.1) (2025-01-13)
+
+
+### Bug Fixes
+
+* **deps:** update external fixes ([#2476](https://github.com/adobe/helix-cli/issues/2476)) ([d7b04fa](https://github.com/adobe/helix-cli/commit/d7b04faef82a4304ae9634f283de78aff57048b2))
+
+# [16.9.0](https://github.com/adobe/helix-cli/compare/v16.8.6...v16.9.0) (2025-01-13)
+
+
+### Features
+
+* Allow AEM CLI to obtain site token ([#2471](https://github.com/adobe/helix-cli/issues/2471)) ([a937bc7](https://github.com/adobe/helix-cli/commit/a937bc7fe1b28ea6221dfdeb4c4f547a355991aa))
+
+## [16.8.6](https://github.com/adobe/helix-cli/compare/v16.8.5...v16.8.6) (2025-01-06)
+
+
+### Bug Fixes
+
+* **deps:** update external fixes ([#2475](https://github.com/adobe/helix-cli/issues/2475)) ([ca6c33f](https://github.com/adobe/helix-cli/commit/ca6c33f223770b5bedf793c454aec2f5537fdbf1))
+
+## [16.8.5](https://github.com/adobe/helix-cli/compare/v16.8.4...v16.8.5) (2025-01-06)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @adobe/helix-shared-config to v11.0.13 ([#2474](https://github.com/adobe/helix-cli/issues/2474)) ([5dbd2e9](https://github.com/adobe/helix-cli/commit/5dbd2e9d3ff3a0eefba22f38b5aa6ae9cfea24ea))
+
+## [16.8.4](https://github.com/adobe/helix-cli/compare/v16.8.3...v16.8.4) (2025-01-06)
+
+
+### Bug Fixes
+
+* **deps:** update dependency ignore to v7 ([#2469](https://github.com/adobe/helix-cli/issues/2469)) ([6ebd807](https://github.com/adobe/helix-cli/commit/6ebd80748bda6dff4618d22ad74fe592c5623e7a))
+
+## [16.8.3](https://github.com/adobe/helix-cli/compare/v16.8.2...v16.8.3) (2025-01-04)
+
+
+### Bug Fixes
+
+* **deps:** update adobe fixes ([#2473](https://github.com/adobe/helix-cli/issues/2473)) ([fad5b4c](https://github.com/adobe/helix-cli/commit/fad5b4c83323da1b504eed8ac4c313d9d2540651))
+
+## [16.8.2](https://github.com/adobe/helix-cli/compare/v16.8.1...v16.8.2) (2025-01-04)
+
+
+### Bug Fixes
+
+* **deps:** update external fixes ([#2472](https://github.com/adobe/helix-cli/issues/2472)) ([513a507](https://github.com/adobe/helix-cli/commit/513a507f518a1878b1de11f1769500fa3a682ea0))
+
+## [16.8.1](https://github.com/adobe/helix-cli/compare/v16.8.0...v16.8.1) (2024-12-21)
+
+
+### Bug Fixes
+
+* **deps:** update dependency chokidar to v4.0.3 ([#2468](https://github.com/adobe/helix-cli/issues/2468)) ([4225436](https://github.com/adobe/helix-cli/commit/4225436b38f180510b1d472119452286b2bc186d))
+
+# [16.8.0](https://github.com/adobe/helix-cli/compare/v16.7.32...v16.8.0) (2024-12-16)
+
+
+### Features
+
+* Allow passing site token for hlx5 authenticated sites ([#2465](https://github.com/adobe/helix-cli/issues/2465)) ([f3bde8f](https://github.com/adobe/helix-cli/commit/f3bde8f1b5c3f9763bb4039159ae89a85ec23c28))
+
+## [16.7.32](https://github.com/adobe/helix-cli/compare/v16.7.31...v16.7.32) (2024-12-15)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @adobe/helix-shared-indexer to v2.2.2 ([#2467](https://github.com/adobe/helix-cli/issues/2467)) ([88fad1e](https://github.com/adobe/helix-cli/commit/88fad1e6bde79200eacde7bd6d37b8af6372951b))
+
+## [16.7.31](https://github.com/adobe/helix-cli/compare/v16.7.30...v16.7.31) (2024-12-11)
+
+
+### Bug Fixes
+
+* include proxy url in 401 responses ([#2464](https://github.com/adobe/helix-cli/issues/2464)) ([3cdb533](https://github.com/adobe/helix-cli/commit/3cdb533061472ca079b07aef5ad3cb41c345a3cc))
+
+## [16.7.30](https://github.com/adobe/helix-cli/compare/v16.7.29...v16.7.30) (2024-12-07)
+
+
+### Bug Fixes
+
+* **deps:** update external fixes ([#2463](https://github.com/adobe/helix-cli/issues/2463)) ([1ab2b55](https://github.com/adobe/helix-cli/commit/1ab2b55c28acdcbe747e7ecbe4ac3b13cd258754))
+
+## [16.7.29](https://github.com/adobe/helix-cli/compare/v16.7.28...v16.7.29) (2024-12-07)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @adobe/fetch to v4.1.11 ([#2462](https://github.com/adobe/helix-cli/issues/2462)) ([20f5855](https://github.com/adobe/helix-cli/commit/20f5855de4632f164b05686de014e0b8c345aabe))
+
+## [16.7.28](https://github.com/adobe/helix-cli/compare/v16.7.27...v16.7.28) (2024-12-05)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @adobe/fetch to v4.1.10 ([#2461](https://github.com/adobe/helix-cli/issues/2461)) ([30c8ac6](https://github.com/adobe/helix-cli/commit/30c8ac69d14b8a9af3b3a0fc4fcdc68dd19de209))
+
+## [16.7.27](https://github.com/adobe/helix-cli/compare/v16.7.26...v16.7.27) (2024-12-03)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @adobe/helix-shared-config to v11.0.11 ([#2460](https://github.com/adobe/helix-cli/issues/2460)) ([8ce0a8b](https://github.com/adobe/helix-cli/commit/8ce0a8be6e8495a0af4ddfa68f0cb602072f4250))
+
+## [16.7.26](https://github.com/adobe/helix-cli/compare/v16.7.25...v16.7.26) (2024-11-30)
+
+
+### Bug Fixes
+
+* **deps:** update dependency isomorphic-git to v1.27.2 ([#2458](https://github.com/adobe/helix-cli/issues/2458)) ([713424f](https://github.com/adobe/helix-cli/commit/713424f950fb28411d6edd93d869a3b223a119af))
+
+## [16.7.25](https://github.com/adobe/helix-cli/compare/v16.7.24...v16.7.25) (2024-11-23)
+
+
+### Bug Fixes
+
+* **deps:** update adobe fixes ([#2457](https://github.com/adobe/helix-cli/issues/2457)) ([f9a6954](https://github.com/adobe/helix-cli/commit/f9a69549dbd23034a7974f760f41aed49a490b3f))
+
+## [16.7.24](https://github.com/adobe/helix-cli/compare/v16.7.23...v16.7.24) (2024-11-23)
+
+
+### Bug Fixes
+
+* **deps:** update external fixes ([#2456](https://github.com/adobe/helix-cli/issues/2456)) ([dad318e](https://github.com/adobe/helix-cli/commit/dad318e58d2ec92b09ffe0eeda03c6ac7476884e))
+
 ## [16.7.23](https://github.com/adobe/helix-cli/compare/v16.7.22...v16.7.23) (2024-11-16)
 
 

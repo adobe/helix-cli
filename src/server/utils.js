@@ -248,6 +248,12 @@ window.LiveReloadOptions = {
       ...req.headers,
       ...(opts.headers || {}),
     };
+
+    // hlx 5 site auth
+    if (opts.siteToken) {
+      headers.authorization = `token ${opts.siteToken}`;
+    }
+
     // preserve hlx-auth-token cookie
     const cookies = cookie.parse(headers.cookie || '');
     delete headers.cookie;
@@ -257,6 +263,7 @@ window.LiveReloadOptions = {
         'hlx-auth-token': hlxAuthToken,
       }).toString();
     }
+
     delete headers.connection;
     delete headers['proxy-connection'];
     delete headers.host;
@@ -344,6 +351,33 @@ window.LiveReloadOptions = {
         );
       }
 
+      res
+        .set(respHeaders)
+        .status(ret.status)
+        .send(textBody);
+      return;
+    }
+    if (ret.status === 401 || ret.status === 403) {
+      const reqHeaders = req.headers;
+      if (opts.autoLogin && opts.loginPath
+        && reqHeaders?.['sec-fetch-dest'] === 'document'
+        && reqHeaders?.['sec-fetch-mode'] === 'navigate'
+      ) {
+        // try to automatically login
+        res.set('location', opts.loginPath).status(302).send();
+        return;
+      }
+
+      let textBody = await ret.text();
+      textBody = `<html>
+  <head><meta property="hlx:proxyUrl" content="${url}"></head>
+  <body>
+    <pre>${textBody}</pre>
+    <p>Click <b><a href="${opts.loginPath}">here</a></b> to login.</p>
+  </body>
+</html>
+`;
+      respHeaders['content-type'] = 'text/html';
       res
         .set(respHeaders)
         .status(ret.status)

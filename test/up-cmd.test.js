@@ -19,6 +19,7 @@ import {
   Nock, assertHttp, createTestRoot, initGit, switchBranch, signal,
 } from './utils.js';
 import UpCommand from '../src/up.cmd.js';
+import { getFetch } from '../src/fetch-utils.js';
 
 const TEST_DIR = path.resolve(__rootdir, 'test', 'fixtures', 'project');
 
@@ -117,6 +118,205 @@ describe('Integration test for up command with helix pages', function suite() {
       .reply(200, '## Welcome')
       .get('/not-found.txt')
       .reply(404);
+
+    nock('https://admin.hlx.page:443')
+      .get('/sidekick/adobe/dummy-foo/main/config.json')
+      .reply(200, {
+        host: 'example.com',
+        liveHost: 'main--dummy-foo--adobe.aem.live',
+        previewHost: 'main--dummy-foo--adobe..aem.page',
+        project: 'Example Project on Helix 5',
+        testProperty: 'header',
+      });
+
+    let port;
+    await new Promise((resolve, reject) => {
+      let error = null;
+      cmd
+        .on('started', async () => {
+          try {
+            port = cmd.project.server.port;
+            let ret = await assertHttp(`http://127.0.0.1:${port}/index.html`, 200);
+            assert.strictEqual(ret.trim(), '## Welcome');
+            ret = await assertHttp(`http://127.0.0.1:${port}/local.txt`, 200);
+            assert.strictEqual(ret.trim(), 'Hello, world.');
+            await assertHttp(`http://127.0.0.1:${port}/not-found.txt`, 404);
+          } catch (e) {
+            error = e;
+          }
+          await cmd.stop();
+        })
+        .on('stopped', () => {
+          if (error) {
+            reject(error);
+          }
+          resolve();
+        })
+        .run()
+        .catch(reject);
+    });
+    assert.strictEqual(opened, `http://localhost:${port}/`);
+  });
+
+  it('up command creates the correct login url', async () => {
+    let opened;
+    const MockedCommand = await esmock('../src/up.cmd.js', {
+      '../src/abstract-server.cmd.js': await esmock(
+        '../src/abstract-server.cmd.js',
+        {
+          open: (url) => {
+            opened = url;
+          },
+        },
+      ),
+    });
+    initGit(testDir, 'https://github.com/adobe/dummy-foo.git');
+    const cmd = new MockedCommand()
+      .withLiveReload(false)
+      .withDirectory(testDir)
+      .withOpen('/')
+      .withHttpPort(0);
+
+    let port;
+    await new Promise((resolve, reject) => {
+      let error = null;
+      cmd
+        .on('started', async () => {
+          try {
+            port = cmd.project.server.port;
+            const resp = await getFetch()(
+              `http://127.0.0.1:${port}/.aem/cli/login`,
+              {
+                cache: 'no-store',
+                redirect: 'manual',
+              },
+            );
+            assert.strictEqual(resp.status, 302);
+            assert.ok(
+              resp.headers
+                .get('location')
+                .startsWith(
+                  'https://admin.hlx.page/login/adobe/dummy-foo/main?client_id=aem-cli&redirect_uri=http%3A%2F%2Flocalhost%3A0%2F.aem%2Fcli%2Flogin%2Fack&state=',
+                ),
+            );
+          } catch (e) {
+            error = e;
+          }
+          await cmd.stop();
+        })
+        .on('stopped', () => {
+          if (error) {
+            reject(error);
+          }
+          resolve();
+        })
+        .run()
+        .catch(reject);
+    });
+
+    assert.strictEqual(opened, `http://localhost:${port}/`);
+  });
+
+  it('up command creates the correct login with custom url', async () => {
+    let opened;
+    const MockedCommand = await esmock('../src/up.cmd.js', {
+      '../src/abstract-server.cmd.js': await esmock(
+        '../src/abstract-server.cmd.js',
+        {
+          open: (url) => {
+            opened = url;
+          },
+        },
+      ),
+    });
+    initGit(testDir, 'https://github.com/adobe/dummy-foo.git');
+    const cmd = new MockedCommand()
+      .withLiveReload(false)
+      .withDirectory(testDir)
+      .withOpen('/')
+      .withHttpPort(0)
+      .withUrl('https://main--dummy--adobe.aem.page');
+
+    let port;
+    await new Promise((resolve, reject) => {
+      let error = null;
+      cmd
+        .on('started', async () => {
+          try {
+            port = cmd.project.server.port;
+            const resp = await getFetch()(
+              `http://127.0.0.1:${port}/.aem/cli/login`,
+              {
+                cache: 'no-store',
+                redirect: 'manual',
+              },
+            );
+            assert.strictEqual(resp.status, 302);
+            assert.ok(
+              resp.headers
+                .get('location')
+                .startsWith(
+                  'https://admin.hlx.page/login/adobe/dummy/main?client_id=aem-cli&redirect_uri=http%3A%2F%2Flocalhost%3A0%2F.aem%2Fcli%2Flogin%2Fack&state=',
+                ),
+            );
+          } catch (e) {
+            error = e;
+          }
+          await cmd.stop();
+        })
+        .on('stopped', () => {
+          if (error) {
+            reject(error);
+          }
+          resolve();
+        })
+        .run()
+        .catch(reject);
+    });
+
+    assert.strictEqual(opened, `http://localhost:${port}/`);
+  });
+
+  it('up command opens browser and delivers correct response on helix 5 with auth.', async () => {
+    const TOKEN = 'secret-site-token';
+    function checkTokenAndReply(req, response) {
+      const { authorization } = req.headers;
+      if (!authorization) {
+        return [401, 'Unauthorized'];
+      }
+
+      if (authorization !== `token ${TOKEN}`) {
+        return [403, 'Forbidden'];
+      }
+
+      return response;
+    }
+
+    let opened;
+    const MockedCommand = await esmock('../src/up.cmd.js', {
+      '../src/abstract-server.cmd.js': await esmock('../src/abstract-server.cmd.js', {
+        open: (url) => {
+          opened = url;
+        },
+      }),
+    });
+    initGit(testDir, 'https://github.com/adobe/dummy-foo.git');
+    const cmd = new MockedCommand()
+      .withLiveReload(false)
+      .withDirectory(testDir)
+      .withOpen('/')
+      .withHttpPort(0)
+      .withSiteToken(TOKEN);
+
+    nock('https://main--dummy-foo--adobe.aem.page')
+      .get('/index.html')
+      .reply(function f() {
+        return checkTokenAndReply(this.req, [200, '## Welcome']);
+      })
+      .get('/not-found.txt')
+      .reply(function f() {
+        return checkTokenAndReply(this.req, [404, 'Not Found']);
+      });
 
     nock('https://admin.hlx.page:443')
       .get('/sidekick/adobe/dummy-foo/main/config.json')

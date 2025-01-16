@@ -82,7 +82,7 @@ export default class HeadHtmlSupport {
   }
 
   constructor({
-    proxyUrl, directory, allowInsecure, log,
+    proxyUrl, directory, allowInsecure, log, siteToken,
   }) {
     this.remoteHtml = '';
     this.remoteDom = null;
@@ -90,6 +90,7 @@ export default class HeadHtmlSupport {
     this.localHtml = '';
     this.localStatus = 0;
     this.cookie = '';
+    this.siteToken = siteToken;
     this.url = new URL(proxyUrl);
     this.url.pathname = '/head.html';
     this.filePath = resolve(directory, 'head.html');
@@ -102,6 +103,10 @@ export default class HeadHtmlSupport {
     const headers = {};
     if (this.cookie) {
       headers.cookie = this.cookie;
+    }
+    // hlx 5 site auth
+    if (this.siteToken) {
+      headers.authorization = `token ${this.siteToken}`;
     }
     const resp = await getFetch(this.allowInsecure)(this.url, {
       cache: 'no-store',
@@ -124,6 +129,10 @@ export default class HeadHtmlSupport {
       this.cookie = cookie;
       this.remoteStatus = 0;
     }
+  }
+
+  setSiteToken(siteToken) {
+    this.siteToken = siteToken;
   }
 
   invalidateLocal() {

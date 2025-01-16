@@ -11,6 +11,7 @@
  */
 import path from 'path';
 import { getOrCreateLogger } from './log-common.js';
+import { getSiteTokenFromFile } from './config/config-utils.js';
 
 export default function up() {
   let executor;
@@ -50,6 +51,11 @@ export default function up() {
           describe: 'Start development server on port',
           type: 'int',
           default: 3000,
+        })
+        .option('site-token', {
+          alias: 'siteToken',
+          describe: 'Site token to be used by the cli to access the website',
+          type: 'string',
         })
         .option('addr', {
           describe: 'Bind development server on addr. use * to bind to any address and allow external connections.',
@@ -116,6 +122,7 @@ export default function up() {
         .withOpen(path.basename(argv.$0) === 'aem' ? argv.open : false)
         .withTLS(argv.tlsKey, argv.tlsCert)
         .withLiveReload(argv.livereload)
+        .withSiteToken(argv.siteToken || await getSiteTokenFromFile())
         .withUrl(argv.url)
         .withPrintIndex(argv.printIndex)
         .withAllowInsecure(argv.allowInsecure)
