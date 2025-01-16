@@ -31,6 +31,12 @@ export default class HeadHtmlSupport {
     const update = (obj, keys) => {
       keys.sort();
       for (const k of keys) {
+        if (k === 'nonce') {
+          // ignore nonce attribute, because it can change on every request
+          // eslint-disable-next-line no-continue
+          continue;
+        }
+
         let v = obj[k];
         if (v !== undefined) {
           if (Array.isArray(v)) {

@@ -93,7 +93,7 @@ const utils = {
       const nonce = nonceMatch ? ` nonce="${nonceMatch[1]}"` : '';
       let newbody = body.substring(0, index);
       if (process.env.CODESPACES === 'true') {
-        newbody += `<script ${nonce}>
+        newbody += `<script${nonce}>
 window.LiveReloadOptions = { 
   host: new URL(location.href).hostname.replace(/-[0-9]+\\.preview\\.app\\.github\\.dev/, '-35729.preview.app.github.dev'), 
   port: 443,
@@ -101,9 +101,9 @@ window.LiveReloadOptions = {
 };
 </script>`;
       } else {
-        newbody += `<script ${nonce}>window.LiveReloadOptions={port:${server.port},host:location.hostname,https:${server.scheme === 'https'}};</script>`;
+        newbody += `<script${nonce}>window.LiveReloadOptions={port:${server.port},host:location.hostname,https:${server.scheme === 'https'}};</script>`;
       }
-      newbody += `<script ${nonce} src="/__internal__/livereload.js"></script>`;
+      newbody += `<script${nonce} src="/__internal__/livereload.js"></script>`;
       newbody += body.substring(index);
       return newbody;
     }
