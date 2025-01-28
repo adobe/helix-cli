@@ -450,7 +450,7 @@ describe('Helix Server', () => {
       .withCwd(cwd)
       .withHttpPort(3000)
       .withProxyUrl('http://main--foo--bar.aem.page')
-      .withSiteLoginUrl('https://admin.hlx.page/login/bar/foo/main?client_id=aem-cli&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2F.aem%2Fcli%2Flogin%2Fack');
+      .withSiteLoginUrl('https://admin.hlx.page/login/bar/foo/main?client_id=aem-cli&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2F.aem%2Fcli%2Flogin%2Fack&selectAccount=true');
 
     await project.init();
     project.log.level = 'silly';
@@ -463,7 +463,7 @@ describe('Helix Server', () => {
       });
       assert.strictEqual(resp.status, 302);
       assert.ok(
-        resp.headers.get('location').startsWith('https://admin.hlx.page/login/bar/foo/main?client_id=aem-cli&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2F.aem%2Fcli%2Flogin%2Fack&state='),
+        resp.headers.get('location').startsWith('https://admin.hlx.page/login/bar/foo/main?client_id=aem-cli&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2F.aem%2Fcli%2Flogin%2Fack&selectAccount=true&state='),
       );
     } finally {
       await project.stop();
@@ -476,7 +476,7 @@ describe('Helix Server', () => {
       .withCwd(cwd)
       .withHttpPort(3000)
       .withProxyUrl('http://main--foo--bar.aem.page')
-      .withSiteLoginUrl('https://admin.hlx.page/login/bar/foo/main?client_id=aem-cli&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2F.aem%2Fcli%2Flogin%2Fack');
+      .withSiteLoginUrl('https://admin.hlx.page/login/bar/foo/main?client_id=aem-cli&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2F.aem%2Fcli%2Flogin%2Fack&selectAccount=true');
 
     await project.init();
     project.log.level = 'silly';
@@ -509,7 +509,7 @@ describe('Helix Server', () => {
       .withCwd(cwd)
       .withHttpPort(3000)
       .withProxyUrl('http://main--foo--bar.aem.page')
-      .withSiteLoginUrl('https://admin.hlx.page/login/bar/foo/main?client_id=aem-cli&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2F.aem%2Fcli%2Flogin%2Fack');
+      .withSiteLoginUrl('https://admin.hlx.page/login/bar/foo/main?client_id=aem-cli&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2F.aem%2Fcli%2Flogin%2Fack&selectAccount=true');
 
     await project.init();
     project.log.level = 'silly';
@@ -591,7 +591,7 @@ describe('Helix Server', () => {
       .withCwd(cwd)
       .withHttpPort(3000)
       .withProxyUrl('http://main--foo--bar.aem.page')
-      .withSiteLoginUrl('https://admin.hlx.page/login/bar/foo/main?client_id=aem-cli&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2F.aem%2Fcli%2Flogin%2Fack');
+      .withSiteLoginUrl('https://admin.hlx.page/login/bar/foo/main?client_id=aem-cli&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2F.aem%2Fcli%2Flogin%2Fack&selectAccount=true');
 
     await project.init();
     project.log.level = 'silly';
@@ -637,7 +637,7 @@ describe('Helix Server', () => {
       .withCwd(cwd)
       .withHttpPort(3000)
       .withProxyUrl('http://main--foo--bar.aem.page')
-      .withSiteLoginUrl('https://admin.hlx.page/login/bar/foo/main?client_id=aem-cli&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2F.aem%2Fcli%2Flogin%2Fack');
+      .withSiteLoginUrl('https://admin.hlx.page/login/bar/foo/main?client_id=aem-cli&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2F.aem%2Fcli%2Flogin%2Fack&selectAccount=true');
 
     await project.init();
     project.log.level = 'silly';
