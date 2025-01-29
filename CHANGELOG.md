@@ -1,3 +1,10 @@
+## [16.9.5](https://github.com/adobe/helix-cli/compare/v16.9.4...v16.9.5) (2025-01-29)
+
+
+### Bug Fixes
+
+* Force Selecting Account when logging in via the CLI ([#2484](https://github.com/adobe/helix-cli/issues/2484)) ([c0e9c41](https://github.com/adobe/helix-cli/commit/c0e9c415706302590edc50c4df598d0d70f22cb3))
+
 ## [16.9.4](https://github.com/adobe/helix-cli/compare/v16.9.3...v16.9.4) (2025-01-28)
 
 
