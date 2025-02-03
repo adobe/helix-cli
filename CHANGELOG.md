@@ -1,3 +1,10 @@
+## [16.9.6](https://github.com/adobe/helix-cli/compare/v16.9.5...v16.9.6) (2025-02-03)
+
+
+### Bug Fixes
+
+* **deps:** update dependency semver to v7.7.0 ([#2486](https://github.com/adobe/helix-cli/issues/2486)) ([94536dc](https://github.com/adobe/helix-cli/commit/94536dc151009bfe74927d63aaa137315a597e6b))
+
 ## [16.9.5](https://github.com/adobe/helix-cli/compare/v16.9.4...v16.9.5) (2025-01-29)
 
 
