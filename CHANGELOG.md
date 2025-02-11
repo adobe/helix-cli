@@ -1,3 +1,10 @@
+## [16.9.8](https://github.com/adobe/helix-cli/compare/v16.9.7...v16.9.8) (2025-02-11)
+
+
+### Bug Fixes
+
+* **deps:** update dependency compression to v1.8.0 ([#2490](https://github.com/adobe/helix-cli/issues/2490)) ([adf0651](https://github.com/adobe/helix-cli/commit/adf0651bc839c4b87c8666af1382d636713346da))
+
 ## [16.9.7](https://github.com/adobe/helix-cli/compare/v16.9.6...v16.9.7) (2025-02-10)
 
 
