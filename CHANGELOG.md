@@ -1,3 +1,10 @@
+# [16.10.0](https://github.com/adobe/helix-cli/compare/v16.9.8...v16.10.0) (2025-02-13)
+
+
+### Features
+
+* add CSP with nonce support ([#2478](https://github.com/adobe/helix-cli/issues/2478)) ([53786dc](https://github.com/adobe/helix-cli/commit/53786dc0f184bff8392391cb392158debd7ada1f))
+
 ## [16.9.8](https://github.com/adobe/helix-cli/compare/v16.9.7...v16.9.8) (2025-02-11)
 
 
