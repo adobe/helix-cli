@@ -17,6 +17,23 @@ Install `aem` as a global command. You need Node 12.11 or newer.
 npm install -g @adobe/aem-cli
 ```
 
+### Migrating from older version
+
+Starting with version 15.0.0, this tool is named `aem` and published as `@adobe/aem-cli`. If you previously had installed this tool under its old name `hlx` aka `@adobe/helix-cli` you might get an error like:
+
+```
+npm error EEXIST: file already exists
+npm error File exists: /opt/homebrew/bin/hlx
+npm error Remove the existing file and try again, or run npm
+```
+
+To solve, first uninstall the old version, then try again:
+
+```
+npm uninstall -g @adobe/helix-cli
+npm install -g @adobe/aem-cli
+```
+
 ## Quick Start
 
 ```
