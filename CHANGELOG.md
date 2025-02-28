@@ -1,3 +1,10 @@
+## [16.10.6](https://github.com/adobe/helix-cli/compare/v16.10.5...v16.10.6) (2025-02-28)
+
+
+### Bug Fixes
+
+* **docs:** how to migrate from @adobe/helix-cli ([#2497](https://github.com/adobe/helix-cli/issues/2497)) ([0a8f5fe](https://github.com/adobe/helix-cli/commit/0a8f5fed043a0f3af00e8de6dbf6ae45654a88bc))
+
 ## [16.10.5](https://github.com/adobe/helix-cli/compare/v16.10.4...v16.10.5) (2025-02-25)
 
 
