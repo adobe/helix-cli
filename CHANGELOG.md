@@ -1,3 +1,10 @@
+## [16.10.7](https://github.com/adobe/helix-cli/compare/v16.10.6...v16.10.7) (2025-03-03)
+
+
+### Bug Fixes
+
+* **deps:** update dependency jose to v6.0.8 ([#2499](https://github.com/adobe/helix-cli/issues/2499)) ([51a613b](https://github.com/adobe/helix-cli/commit/51a613b74f533a699c6716c01d9fa59b34607e68))
+
 ## [16.10.6](https://github.com/adobe/helix-cli/compare/v16.10.5...v16.10.6) (2025-02-28)
 
 
