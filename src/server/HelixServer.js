@@ -47,6 +47,18 @@ export class HelixServer extends BaseServer {
   }
 
   async handleLogin(req, res) {
+    const userAgent = req.headers['user-agent']?.toLowerCase();
+    if (userAgent?.includes('safari') && !userAgent?.includes('chrome')) {
+      res.status(403).send(`
+<p>It looks like you are using Safari to login via the AEM CLI...</p>
+<p>The login flow is not supported at the moment in Safari. You can follow the progress at the following <a href="https://github.com/adobe/helix-cli/issues/2498">Github issue</a>.</p>
+<p>Please use Google Chrome or Mozilla Firefox in the meantime for login.</p>
+<p>You can use <strong>--no-open</strong> cli option to start the server without automatically opening the browser, in order to avoid changing your default browser.</p>
+<p>Once you are logged in, the token is available for 24h and you can do the rest of your work in your favorite browser.</p>
+`);
+      return;
+    }
+
     // disable autologin if login was called at least once
     this._autoLogin = false;
     // clear any previous login errors
