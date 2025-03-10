@@ -1,3 +1,10 @@
+## [16.10.9](https://github.com/adobe/helix-cli/compare/v16.10.8...v16.10.9) (2025-03-10)
+
+
+### Bug Fixes
+
+* **deps:** update dependency shelljs to v0.9.1 ([#2502](https://github.com/adobe/helix-cli/issues/2502)) ([8852f43](https://github.com/adobe/helix-cli/commit/8852f438ba4b42fbe5bfd5c589b9c752d821f979))
+
 ## [16.10.8](https://github.com/adobe/helix-cli/compare/v16.10.7...v16.10.8) (2025-03-04)
 
 
