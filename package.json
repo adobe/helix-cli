@@ -91,7 +91,7 @@
     "nock": "13.5.6",
     "semantic-release": "24.2.3",
     "semantic-release-discord-bot": "^1.1.0",
-    "sinon": "19.0.5"
+    "sinon": "20.0.0"
   },
   "lint-staged": {
     "*.js": "eslint"
