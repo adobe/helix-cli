@@ -142,6 +142,7 @@ export class BaseServer extends EventEmitter {
       const listenCb = (err) => {
         if (err) {
           reject(new Error(`Error while starting ${this._scheme} server: ${err}`));
+          return;
         }
         this._port = this._server.address().port;
         this._addr = this._server.address().address;

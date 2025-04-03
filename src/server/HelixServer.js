@@ -227,8 +227,8 @@ export class HelixServer extends BaseServer {
     this.app.options(LOGIN_ACK_ROUTE, asyncHandler(this.handleLoginAck.bind(this)));
 
     const handler = asyncHandler(this.handleProxyModeRequest.bind(this));
-    this.app.get('*', handler);
-    this.app.post('*', handler);
+    this.app.get(/.*/, handler);
+    this.app.post(/.*/, handler);
   }
 
   async doStop() {

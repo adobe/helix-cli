@@ -200,13 +200,13 @@ export class HelixImportServer extends BaseServer {
 
   async setupApp() {
     await super.setupApp();
-    const localFiles = ['/tools/*', '/component-definition.json', '/component-filters.json', '/component-models.json'];
+    const localFiles = [/\/tools\/.*/, '/component-definition.json', '/component-filters.json', '/component-models.json'];
     localFiles.forEach((file) => {
       this.app.get(file, asyncHandler(this.handleToolsRequest.bind(this)));
     });
     const handler = asyncHandler(this.handleProxyModeRequest.bind(this));
-    this.app.get('*', handler);
-    this.app.post('*', handler);
+    this.app.get(/.*/, handler);
+    this.app.post(/.*/, handler);
   }
 
   async doStop() {

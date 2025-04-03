@@ -35,14 +35,14 @@ export default class RequestContext {
     this._queryString = purl.search || '';
     this._selector = '';
     this._extension = '';
-    this._headers = req.headers || {};
-    this._method = req.method || 'GET';
-    this._params = req.query || {};
+    this._headers = request.headers || {};
+    this._method = request.method || 'GET';
+    this._params = request.query || {};
     this._requestId = utils.randomChars(32);
     this._logger = cfg.log;
 
-    if (req.body && Object.entries(req.body).length > 0) {
-      this._body = req.body;
+    if (request.body && Object.entries(request.body).length > 0) {
+      this._body = request.body;
     }
     const lastSlash = this._path.lastIndexOf('/');
     if (lastSlash === this._path.length - 1) {
