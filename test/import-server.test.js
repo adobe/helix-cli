@@ -16,6 +16,7 @@ import os from 'os';
 import assert from 'assert';
 import fse from 'fs-extra';
 import path from 'path';
+import nock from 'nock';
 import { HelixImportProject } from '../src/server/HelixImportProject.js';
 import {
   assertHttp, createTestRoot, rawGet, setupProject,
@@ -155,6 +156,35 @@ describe('Helix Import Server', () => {
       // ignore in case server closes connection
     } finally {
       assert.ok(!project.server.isStarted());
+      await project.stop();
+    }
+  });
+
+  it('removes accept-encoding header is the defaultsupported by node', async () => {
+    const cwd = await setupProject(TEST_DIR, testRoot);
+    const project = new HelixImportProject()
+      .withCwd(cwd)
+      .withHttpPort(0);
+    await project.init();
+    try {
+      await project.start();
+
+      // Mock the proxy target
+      nock('http://example.com')
+        .get('/')
+        .reply(() => {
+          assert.strictEqual(this.req.headers['accept-encoding'], 'gzip, deflate, br');
+          return [200, 'OK'];
+        });
+
+      const response = await rawGet('127.0.0.1', project.server.port, '/?host=http://example.com', {
+        // header includes zstd, which is not supported by node
+        'accept-encoding': 'gzip, deflate, br, zstd',
+      });
+
+      // Check that the request was successful
+      assert.match(response.toString(), /^HTTP\/1\.1 200 OK/);
+    } finally {
       await project.stop();
     }
   });

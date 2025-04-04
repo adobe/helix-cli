@@ -105,6 +105,7 @@ export class HelixImportServer extends BaseServer {
     delete headers.connection;
     delete headers.host;
     delete headers.referer;
+    delete headers['accept-encoding'];
     await this._updateHeaders(headers);
 
     const ret = await getFetch(ctx.config.allowInsecure)(url, {

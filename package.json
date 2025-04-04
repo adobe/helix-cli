@@ -13,6 +13,7 @@
     "test": "c8 mocha",
     "test-ci-win": "npx mocha --reporter xunit test --reporter-options output=junit/test.xml -t 5000",
     "lint": "eslint .",
+    "lint:fix": "eslint --fix .",
     "semantic-release": "semantic-release",
     "semantic-release-dry": "semantic-release --dry-run --branches $CI_BRANCH",
     "prepare": "husky"
