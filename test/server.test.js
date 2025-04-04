@@ -106,7 +106,7 @@ describe('Helix Server', () => {
     const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
     const project = new HelixProject()
       .withCwd(cwd)
-      .withProxyUrl('https://main--foo--bar.hlx.page/')
+      .withProxyUrl('https://main--foo--bar.aem.page/')
       .withHttpPort(0);
 
     await project.init();
@@ -122,7 +122,7 @@ describe('Helix Server', () => {
     const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
     const project = new HelixProject()
       .withCwd(cwd)
-      .withProxyUrl('https://main--foo--bar.hlx.page/')
+      .withProxyUrl('https://main--foo--bar.aem.page/')
       .withHttpPort(0);
 
     await project.init();
@@ -155,11 +155,11 @@ describe('Helix Server', () => {
     const project = new HelixProject()
       .withCwd(cwd)
       .withHttpPort(0)
-      .withProxyUrl('http://main--foo--bar.hlx.page');
+      .withProxyUrl('http://main--foo--bar.aem.page');
 
     await project.init();
 
-    nock('http://main--foo--bar.hlx.page')
+    nock('http://main--foo--bar.aem.page')
       .get('/notfound.css')
       .reply(404);
 
@@ -176,11 +176,11 @@ describe('Helix Server', () => {
     const project = new HelixProject()
       .withCwd(cwd)
       .withHttpPort(0)
-      .withProxyUrl('http://main--foo--bar.hlx.page');
+      .withProxyUrl('http://main--foo--bar.aem.page');
 
     await project.init();
 
-    nock('http://main--foo--bar.hlx.page')
+    nock('http://main--foo--bar.aem.page')
       .get('/local.html')
       .optionally(true)
       .reply(200, 'foo');
@@ -204,11 +204,11 @@ describe('Helix Server', () => {
     const project = new HelixProject()
       .withCwd(cwd)
       .withHttpPort(0)
-      .withProxyUrl('http://main--foo--bar.hlx.page');
+      .withProxyUrl('http://main--foo--bar.aem.page');
 
     await project.init();
 
-    nock('http://main--foo--bar.hlx.page')
+    nock('http://main--foo--bar.aem.page')
       .get('/missing')
       .reply(404, 'server 404 html', {
         'content-type': 'text/html',
@@ -234,12 +234,12 @@ describe('Helix Server', () => {
       .withCwd(cwd)
       .withHttpPort(0)
       .withPrintIndex(true)
-      .withProxyUrl('http://main--foo--bar.hlx.page');
+      .withProxyUrl('http://main--foo--bar.aem.page');
 
     await project.init();
     project.log.level = 'silly';
 
-    nock('http://main--foo--bar.hlx.page')
+    nock('http://main--foo--bar.aem.page')
       .get('/readme.html')
       .reply(200, 'hello readme', {
         'content-type': 'text/html',
@@ -260,7 +260,7 @@ describe('Helix Server', () => {
       assert.strictEqual(ret.trim(), 'hello readme');
       assert.strictEqual(resp.headers.get('access-control-allow-origin'), '*');
       assert.strictEqual(resp.headers.get('content-security-policy'), null);
-      assert.strictEqual(resp.headers.get('via'), '1.0 main--foo--bar.hlx.page');
+      assert.strictEqual(resp.headers.get('via'), '1.0 main--foo--bar.aem.page');
     } finally {
       await project.stop();
     }
@@ -272,7 +272,7 @@ describe('Helix Server', () => {
       .withCwd(cwd)
       .withHttpPort(0)
       .withPrintIndex(true)
-      .withProxyUrl('http://main--foo--bar.hlx.page');
+      .withProxyUrl('http://main--foo--bar.aem.page');
 
     await project.init();
     project.log.level = 'silly';
@@ -305,7 +305,7 @@ describe('Helix Server', () => {
         });
     });
 
-    nock('http://main--foo--bar.hlx.page')
+    nock('http://main--foo--bar.aem.page')
       .get('/readme.html')
       .reply(200, 'hello readme', {
         'content-type': 'text/html',
@@ -326,7 +326,7 @@ describe('Helix Server', () => {
       assert.strictEqual(ret.trim(), 'hello readme');
       assert.strictEqual(resp.headers.get('access-control-allow-origin'), '*');
       assert.strictEqual(resp.headers.get('content-security-policy'), null);
-      assert.strictEqual(resp.headers.get('via'), '1.0 main--foo--bar.hlx.page');
+      assert.strictEqual(resp.headers.get('via'), '1.0 main--foo--bar.aem.page');
 
       // ensure that request went through http proxy
       assert.deepStrictEqual(proxyRequests, [`http://127.0.0.1:${project.server.port}/readme.html`]);
@@ -343,12 +343,12 @@ describe('Helix Server', () => {
       .withCwd(cwd)
       .withHttpPort(0)
       .withPrintIndex(true)
-      .withProxyUrl('http://main--foo--bar.hlx.page');
+      .withProxyUrl('http://main--foo--bar.aem.page');
 
     await project.init();
     project.log.level = 'silly';
 
-    nock('http://main--foo--bar.hlx.page')
+    nock('http://main--foo--bar.aem.page')
       .get('/readme.html')
       .reply(200, '<html><head></head><body>hello readme</body></html>', {
         'content-type': 'text/html',
@@ -365,9 +365,9 @@ describe('Helix Server', () => {
       });
       const ret = await resp.text();
       assert.strictEqual(resp.status, 200);
-      assert.strictEqual(ret.trim(), '<html><head><meta property="hlx:proxyUrl" content="http://main--foo--bar.hlx.page/readme.html"></head><body>hello readme</body></html>');
+      assert.strictEqual(ret.trim(), '<html><head><meta property="hlx:proxyUrl" content="http://main--foo--bar.aem.page/readme.html"></head><body>hello readme</body></html>');
       assert.strictEqual(resp.headers.get('access-control-allow-origin'), '*');
-      assert.strictEqual(resp.headers.get('via'), '1.0 main--foo--bar.hlx.page');
+      assert.strictEqual(resp.headers.get('via'), '1.0 main--foo--bar.aem.page');
     } finally {
       await project.stop();
     }
@@ -380,12 +380,12 @@ describe('Helix Server', () => {
       .withCwd(cwd)
       .withHttpPort(0)
       .withPrintIndex(true)
-      .withProxyUrl('http://main--foo--bar.hlx.page');
+      .withProxyUrl('http://main--foo--bar.aem.page');
 
     await project.init();
     project.log.level = 'silly';
 
-    nock('http://main--foo--bar.hlx.page')
+    nock('http://main--foo--bar.aem.page')
       .get('/readme.html')
       .reply(200, '<html><head><link rel="stylesheet" href="/styles.css"/></head><body>hello readme</body></html>', {
         'content-type': 'text/html',
@@ -402,9 +402,9 @@ describe('Helix Server', () => {
       });
       const ret = await resp.text();
       assert.strictEqual(resp.status, 200);
-      assert.strictEqual(ret.trim(), '<html><head><!-- local head html -->\n<link rel="stylesheet" href="/styles.css"/>\n<meta content="test-head"/><meta property="hlx:proxyUrl" content="http://main--foo--bar.hlx.page/readme.html"></head><body>hello readme</body></html>');
+      assert.strictEqual(ret.trim(), '<html><head><!-- local head html -->\n<link rel="stylesheet" href="/styles.css"/>\n<meta content="test-head"/><meta property="hlx:proxyUrl" content="http://main--foo--bar.aem.page/readme.html"></head><body>hello readme</body></html>');
       assert.strictEqual(resp.headers.get('access-control-allow-origin'), '*');
-      assert.strictEqual(resp.headers.get('via'), '1.0 main--foo--bar.hlx.page');
+      assert.strictEqual(resp.headers.get('via'), '1.0 main--foo--bar.aem.page');
     } finally {
       await project.stop();
     }
@@ -416,12 +416,12 @@ describe('Helix Server', () => {
       .withCwd(cwd)
       .withHttpPort(0)
       .withPrintIndex(true)
-      .withProxyUrl('http://main--foo--bar.hlx.page');
+      .withProxyUrl('http://main--foo--bar.aem.page');
 
     await project.init();
     project.log.level = 'silly';
 
-    nock('http://main--foo--bar.hlx.page')
+    nock('http://main--foo--bar.aem.page')
       .get('/subfolder/query-index.json?sheet=foo&limit=20')
       .reply((uri) => {
         // note: nock has problems with malformed query strings. in fact, it should not match
@@ -438,7 +438,7 @@ describe('Helix Server', () => {
       assert.strictEqual(resp.status, 200);
       assert.deepStrictEqual(await resp.json(), { data: [] });
       assert.strictEqual(resp.headers.get('access-control-allow-origin'), '*');
-      assert.strictEqual(resp.headers.get('via'), '1.0 main--foo--bar.hlx.page');
+      assert.strictEqual(resp.headers.get('via'), '1.0 main--foo--bar.aem.page');
     } finally {
       await project.stop();
     }
