@@ -41,7 +41,7 @@ async function init(hhs, localHtml, remoteHtml) {
 const DEFAULT_OPTS = (opts = {}) => ({
   log: console,
   directory: '.',
-  proxyUrl: 'https://main--helix-website--adobe.hlx.page/',
+  proxyUrl: 'https://main--helix-website--adobe.aem.page/',
   ...opts,
 });
 
@@ -151,13 +151,13 @@ describe('Head.html loading tests', () => {
   it('loads remote head.html', async () => {
     const directory = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
 
-    nock('https://main--blog--adobe.hlx.page')
+    nock('https://main--blog--adobe.aem.page')
       .get('/head.html')
       .reply(200, '<!-- remote head html -->   <script>a=1;</script>');
 
     const hhs = new HeadHtmlSupport({
       log: console,
-      proxyUrl: 'https://main--blog--adobe.hlx.page',
+      proxyUrl: 'https://main--blog--adobe.aem.page',
       directory,
     });
     await hhs.loadRemote();
@@ -187,13 +187,13 @@ describe('Head.html loading tests', () => {
   it('loads missing remote head.html', async () => {
     const directory = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
 
-    nock('https://main--blog--adobe.hlx.page')
+    nock('https://main--blog--adobe.aem.page')
       .get('/head.html')
       .reply(404);
 
     const hhs = new HeadHtmlSupport({
       log: console,
-      proxyUrl: 'https://main--blog--adobe.hlx.page',
+      proxyUrl: 'https://main--blog--adobe.aem.page',
       directory,
     });
     await hhs.loadRemote();
@@ -204,13 +204,13 @@ describe('Head.html loading tests', () => {
   it('update loads local and remote head.html', async () => {
     const directory = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
 
-    nock('https://main--blog--adobe.hlx.page')
+    nock('https://main--blog--adobe.aem.page')
       .get('/head.html')
       .reply(200, '<!-- remote head html --><a>fooo</a>\n');
 
     const hhs = new HeadHtmlSupport({
       log: console,
-      proxyUrl: 'https://main--blog--adobe.hlx.page',
+      proxyUrl: 'https://main--blog--adobe.aem.page',
       directory,
     });
     await hhs.update();
@@ -227,7 +227,7 @@ describe('Head.html loading tests', () => {
   it('update loads remote head.html with cookie', async () => {
     const directory = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
 
-    nock('https://main--blog--adobe.hlx.page')
+    nock('https://main--blog--adobe.aem.page')
       .get('/head.html')
       .reply(function request() {
         assert.strictEqual(this.req.headers.cookie, 'foobar');
@@ -236,7 +236,7 @@ describe('Head.html loading tests', () => {
 
     const hhs = new HeadHtmlSupport({
       log: console,
-      proxyUrl: 'https://main--blog--adobe.hlx.page',
+      proxyUrl: 'https://main--blog--adobe.aem.page',
       directory,
     });
     hhs.localStatus = 200;
@@ -248,7 +248,7 @@ describe('Head.html loading tests', () => {
     const siteToken = 'hlxtst_site-token';
     const directory = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
 
-    nock('https://main--blog--adobe.hlx.page')
+    nock('https://main--blog--adobe.aem.page')
       .get('/head.html')
       .reply(function request() {
         assert.strictEqual(this.req.headers.authorization, `token ${siteToken}`);
@@ -257,7 +257,7 @@ describe('Head.html loading tests', () => {
 
     const hhs = new HeadHtmlSupport({
       log: console,
-      proxyUrl: 'https://main--blog--adobe.hlx.page',
+      proxyUrl: 'https://main--blog--adobe.aem.page',
       directory,
       siteToken,
     });
@@ -268,13 +268,13 @@ describe('Head.html loading tests', () => {
   it('update loads remote head.html can handle errors', async () => {
     const directory = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
 
-    nock('https://main--blog--adobe.hlx.page')
+    nock('https://main--blog--adobe.aem.page')
       .get('/head.html')
       .reply(404);
 
     const hhs = new HeadHtmlSupport({
       log: console,
-      proxyUrl: 'https://main--blog--adobe.hlx.page',
+      proxyUrl: 'https://main--blog--adobe.aem.page',
       directory,
     });
     hhs.localStatus = 200;
@@ -285,13 +285,13 @@ describe('Head.html loading tests', () => {
   it('update loads local and remote head.html (not modified)', async () => {
     const directory = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
 
-    nock('https://main--blog--adobe.hlx.page')
+    nock('https://main--blog--adobe.aem.page')
       .get('/head.html')
       .reply(200, '<!-- local head html -->\n<link rel="stylesheet" href="/styles.css"/>');
 
     const hhs = new HeadHtmlSupport({
       log: console,
-      proxyUrl: 'https://main--blog--adobe.hlx.page',
+      proxyUrl: 'https://main--blog--adobe.aem.page',
       directory,
     });
     await hhs.update();

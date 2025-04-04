@@ -16,7 +16,6 @@ import chokidar from 'chokidar';
 import { HelixProject } from './server/HelixProject.js';
 import GitUtils from './git-utils.js';
 import pkgJson from './package.cjs';
-import { getFetch } from './fetch-utils.js';
 import { AbstractServerCommand } from './abstract-server.cmd.js';
 
 export default class UpCommand extends AbstractServerCommand {
@@ -140,58 +139,17 @@ export default class UpCommand extends AbstractServerCommand {
   }
 
   async verifyUrl(gitUrl, ref) {
-    // check if the site is on helix5
-    // https://admin.hlx.page/sidekick/adobe/www-aem-live/main/config.json
-    // {
-    //   "host": "aem.live",
-    //     "liveHost": "main--www-aem-live--adobe.aem.live",
-    //       "plugins": [
-    //         {
-    //           "id": "doc",
-    //           "title": "Documentation",
-    //           "url": "https://www.aem.live/docs/"
-    //         }
-    //       ],
-    //         "previewHost": "main--www-aem-live--adobe.aem.page",
-    //           "project": "Helix Website (AEM Live)",
-    //             "testProperty": "header";
-    // }
-    let previewHostBase = 'hlx.page';
-    const configUrl = `https://admin.hlx.page/sidekick/${gitUrl.owner}/${gitUrl.repo}/main/config.json`;
-    try {
-      const configResp = await getFetch(this._allowInsecure)(configUrl);
-      if (configResp.ok) {
-      // this is best effort for now
-        const config = await configResp.json();
-        const { previewHost } = config;
-        if (previewHost && previewHost.endsWith('.aem.page')) {
-          previewHostBase = 'aem.page';
-        }
-      }
-      /* c8 ignore start */
-      // this is notoriously hard to test, so we ignore it for now
-      // but if you want to give it a try, set up a local server with a self-signed cert
-      // change, /etc/hosts to point admin.hlx.page to localhost and run the test
-    } catch (e) {
-      if (e.code === 'UNABLE_TO_GET_ISSUER_CERT_LOCALLY' || e.code === 'DEPTH_ZERO_SELF_SIGNED_CERT') {
-        await this.stop();
-        this.log.error(chalk`{yellow ${configUrl}} is using an invalid certificate, please check https://github.com/adobe/helix-cli#troubleshooting for help.`);
-        throw Error(e.message);
-      }
-    }
-    /* c8 ignore stop */
-
     const dnsName = `${ref.replace(/\//g, '-')}--${gitUrl.repo}--${gitUrl.owner}`;
     // check length limit
     if (dnsName.length > 63) {
-      this.log.error(chalk`URL {yellow https://${dnsName}.${previewHostBase}} exceeds the 63 character limit for DNS labels.`);
+      this.log.error(chalk`URL {yellow https://${dnsName}.aem.page} exceeds the 63 character limit for DNS labels.`);
       this.log.error(chalk`Please use a shorter branch name or a shorter repository name.`);
       await this.stop();
       throw Error('branch name too long');
     }
 
     // always proxy to main
-    this._url = `https://main--${gitUrl.repo}--${gitUrl.owner}.${previewHostBase}`;
+    this._url = `https://main--${gitUrl.repo}--${gitUrl.owner}.aem.page`;
   }
 
   /**
