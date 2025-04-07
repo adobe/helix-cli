@@ -1,3 +1,11 @@
+## [16.10.15](https://github.com/adobe/helix-cli/compare/v16.10.14...v16.10.15) (2025-04-07)
+
+
+### Bug Fixes
+
+* always open aem.page ([7c33338](https://github.com/adobe/helix-cli/commit/7c333381af5317bb2c957185aa9357b6bb26007e))
+* Remove accept-encoding in proxy call to use nodejs defaults ([#2513](https://github.com/adobe/helix-cli/issues/2513)) ([f91c8ad](https://github.com/adobe/helix-cli/commit/f91c8adc645a3b70c92efcf0e469c40760ef6f7a))
+
 ## [16.10.14](https://github.com/adobe/helix-cli/compare/v16.10.13...v16.10.14) (2025-04-03)
 
 
