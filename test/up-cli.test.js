@@ -128,8 +128,8 @@ describe('hlx up', () => {
   });
 
   it('hlx up can set pages url', async () => {
-    await cli.run(['up', '--pages-url', 'https://foo--bar.hlx.page']);
-    sinon.assert.calledWith(mockUp.withUrl, 'https://foo--bar.hlx.page');
+    await cli.run(['up', '--pages-url', 'https://foo--bar.aem.page']);
+    sinon.assert.calledWith(mockUp.withUrl, 'https://foo--bar.aem.page');
     sinon.assert.calledOnce(mockUp.run);
   });
 

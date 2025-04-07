@@ -160,7 +160,7 @@ describe('Helix Import Server', () => {
     }
   });
 
-  it('removes accept-encoding header is the defaultsupported by node', async () => {
+  it('removes accept-encoding header is the default supported by node', async () => {
     const cwd = await setupProject(TEST_DIR, testRoot);
     const project = new HelixImportProject()
       .withCwd(cwd)
@@ -172,8 +172,8 @@ describe('Helix Import Server', () => {
       // Mock the proxy target
       nock('http://example.com')
         .get('/')
-        .reply(() => {
-          assert.strictEqual(this.req.headers['accept-encoding'], 'gzip, deflate, br');
+        .reply(function () {
+          assert.strictEqual(this.req.headers['accept-encoding'], 'gzip,deflate,br');
           return [200, 'OK'];
         });
 

@@ -58,14 +58,10 @@ describe('Integration test for up command with helix pages', function suite() {
       .withOpen('/')
       .withHttpPort(0);
 
-    nock('https://main--dummy-foo--adobe.hlx.page')
+    nock('https://main--dummy-foo--adobe.aem.page')
       .get('/index.html')
       .reply(200, '## Welcome')
       .get('/not-found.txt')
-      .reply(404);
-
-    nock('https://admin.hlx.page:443')
-      .get('/sidekick/adobe/dummy-foo/main/config.json')
       .reply(404);
 
     let port;
@@ -118,16 +114,6 @@ describe('Integration test for up command with helix pages', function suite() {
       .reply(200, '## Welcome')
       .get('/not-found.txt')
       .reply(404);
-
-    nock('https://admin.hlx.page:443')
-      .get('/sidekick/adobe/dummy-foo/main/config.json')
-      .reply(200, {
-        host: 'example.com',
-        liveHost: 'main--dummy-foo--adobe.aem.live',
-        previewHost: 'main--dummy-foo--adobe..aem.page',
-        project: 'Example Project on Helix 5',
-        testProperty: 'header',
-      });
 
     let port;
     await new Promise((resolve, reject) => {
@@ -318,16 +304,6 @@ describe('Integration test for up command with helix pages', function suite() {
         return checkTokenAndReply(this.req, [404, 'Not Found']);
       });
 
-    nock('https://admin.hlx.page:443')
-      .get('/sidekick/adobe/dummy-foo/main/config.json')
-      .reply(200, {
-        host: 'example.com',
-        liveHost: 'main--dummy-foo--adobe.aem.live',
-        previewHost: 'main--dummy-foo--adobe..aem.page',
-        project: 'Example Project on Helix 5',
-        testProperty: 'header',
-      });
-
     let port;
     await new Promise((resolve, reject) => {
       let error = null;
@@ -414,14 +390,10 @@ describe('Integration test for up command with helix pages', function suite() {
       return cmd.stop();
     };
 
-    nock('https://main--dummy-foo--adobe.hlx.page')
+    nock('https://main--dummy-foo--adobe.aem.page')
       .get('/index.html')
       .reply(200, '## Welcome')
       .get('/not-found.txt')
-      .reply(404);
-
-    nock('https://admin.hlx.page:443')
-      .get('/sidekick/adobe/dummy-foo/main/config.json')
       .reply(404);
 
     cmd
@@ -458,15 +430,10 @@ describe('Integration test for up command with helix pages', function suite() {
       return cmd.stop();
     };
 
-    nock('https://main--dummy-foo--adobe.hlx.page')
+    nock('https://main--dummy-foo--adobe.aem.page')
       .get('/index.html')
       .reply(200, '## Welcome')
       .get('/not-found.txt')
-      .reply(404);
-
-    nock('https://admin.hlx.page:443')
-      .get('/sidekick/adobe/dummy-foo/main/config.json')
-      .twice()
       .reply(404);
 
     let timer;
@@ -484,7 +451,7 @@ describe('Integration test for up command with helix pages', function suite() {
           timer = signal(5000);
           await timer;
           // eslint-disable-next-line no-underscore-dangle
-          assert.strictEqual(cmd._url, 'https://main--dummy-foo--adobe.hlx.page');
+          assert.strictEqual(cmd._url, 'https://main--dummy-foo--adobe.aem.page');
           await myDone();
         } catch (e) {
           await myDone(e);
@@ -508,15 +475,10 @@ describe('Integration test for up command with helix pages', function suite() {
       .withOpen(false)
       .withHttpPort(0);
 
-    nock('https://main--dummy-foo--adobe.hlx.page')
+    nock('https://main--dummy-foo--adobe.aem.page')
       .get('/index.html')
       .reply(200, '## Welcome')
       .get('/not-found.txt')
-      .reply(404);
-
-    nock('https://admin.hlx.page:443')
-      .get('/sidekick/adobe/dummy-foo/main/config.json')
-      .twice()
       .reply(404);
 
     let timer;
@@ -582,7 +544,7 @@ describe('Integration test for up command with cache', function suite() {
       page2: '## Some different content for different qs',
       plain: 'Some plain content',
     };
-    nock('https://main--dummy-foo--adobe.hlx.page')
+    nock('https://main--dummy-foo--adobe.aem.page')
       .get('/index.html')
       .reply(200, content.index)
       .get('/folder/page.html?foo=bar&baz=qux')
@@ -595,10 +557,6 @@ describe('Integration test for up command with cache', function suite() {
       .reply(200, content.plain, { 'Content-Type': 'text/html' })
       .get('/head.html')
       .reply(200, '<link rel="stylesheet" href="/styles.css"/>');
-
-    nock('https://admin.hlx.page:443')
-      .get('/sidekick/adobe/dummy-foo/main/config.json')
-      .reply(404);
 
     nock.enableNetConnect(/127.0.0.1/);
 
