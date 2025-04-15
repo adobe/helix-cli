@@ -78,7 +78,7 @@
   },
   "devDependencies": {
     "@adobe/eslint-config-helix": "2.0.9",
-    "@adobe/helix-shared-dom": "2.0.8",
+    "@adobe/helix-shared-dom": "2.0.9",
     "@semantic-release/changelog": "6.0.3",
     "@semantic-release/git": "10.0.1",
     "c8": "10.1.3",
