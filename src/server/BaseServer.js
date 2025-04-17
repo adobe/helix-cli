@@ -63,6 +63,13 @@ export class BaseServer extends EventEmitter {
       res.send('Goodbye!');
       this.stop();
     });
+    this._app.get('/version', async (req, res) => {
+      res.set('Content-Type', 'application/json');
+      res.json({
+        version: packageJson.version,
+        name: packageJson.name,
+      });
+    });
   }
 
   withPort(port) {

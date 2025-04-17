@@ -12,6 +12,7 @@
 
 /* eslint-env mocha */
 /* eslint-disable no-underscore-dangle */
+/* eslint-disable func-names */
 import os from 'os';
 import assert from 'assert';
 import fse from 'fs-extra';
