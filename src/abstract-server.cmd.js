@@ -123,6 +123,11 @@ export class AbstractServerCommand extends AbstractCommand {
     if (this._open) {
       await this.open(this._open);
     }
+
+    // Handle SIGINT (Ctrl+C) to gracefully shut down the server
+    process.on('SIGINT', async () => {
+      await this.stop();
+    });
   }
 
   async open(href) {

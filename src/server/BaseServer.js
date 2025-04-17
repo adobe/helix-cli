@@ -12,6 +12,8 @@
 import https from 'https';
 import EventEmitter from 'events';
 import express from 'express';
+import path from 'path';
+import fs from 'fs-extra';
 import cookieParser from 'cookie-parser';
 import { getFetch } from '../fetch-utils.js';
 import utils from './utils.js';
@@ -46,6 +48,7 @@ export class BaseServer extends EventEmitter {
     this._key = '';
     this._cert = '';
     this._server = null;
+    this._token = null;
     this._sockets = new Set();
   }
 
@@ -63,6 +66,115 @@ export class BaseServer extends EventEmitter {
       res.send('Goodbye!');
       this.stop();
     });
+
+    // eslint-disable-next-line consistent-return
+    this._app.use((req, res, next) => {
+      if ((req.method === 'POST' || req.method === 'GET') && req.path === '/tools/importer' && this.token) {
+        const token = req.headers['x-auth-token'];
+        if (token !== this.token) {
+          return res.status(403).json({ error: 'Forbidden' });
+        }
+      }
+      next();
+    });
+
+    // Add GET route handler for /tools/importer
+    this._app.get('/tools/importer', asyncHandler(async (req, res) => {
+      const importDir = path.join(this._project.directory, 'tools', 'importer');
+
+      // Get file path from query parameter
+      let filePath = req.query.path ? decodeURIComponent(req.query.path) : null;
+
+      if (!filePath) {
+        res.status(400).send('Missing required query parameter: path');
+        return;
+      }
+
+      // Convert all backslashes to forward slashes for consistent path handling
+      filePath = filePath.replace(/\\/g, '/');
+      // Normalize the path
+      filePath = path.normalize(filePath);
+
+      const fullPath = path.join(importDir, filePath);
+
+      // Security check - prevent reading outside tools/import directory
+      if (path.relative(importDir, fullPath).startsWith('..')) {
+        res.status(403).send('Access denied');
+        return;
+      }
+
+      try {
+        // Check if file exists
+        if (!await fs.pathExists(fullPath)) {
+          res.status(404).send('File not found');
+          return;
+        }
+
+        // Get file stats to determine content type
+        const stats = await fs.stat(fullPath);
+        if (stats.isDirectory()) {
+          res.status(400).send('Cannot read directory');
+          return;
+        }
+
+        // Set appropriate content type based on file extension
+        const ext = path.extname(fullPath).toLowerCase();
+        const contentType = {
+          '.txt': 'text/plain',
+          '.json': 'application/json',
+          '.html': 'text/html',
+          '.css': 'text/css',
+          '.js': 'application/javascript',
+          '.png': 'image/png',
+          '.jpg': 'image/jpeg',
+          '.jpeg': 'image/jpeg',
+          '.gif': 'image/gif',
+          '.svg': 'image/svg+xml',
+        }[ext] || 'application/octet-stream';
+
+        // Read and send file
+        const content = await fs.readFile(fullPath);
+        res.set('Content-Type', contentType);
+        res.send(content);
+      } catch (error) {
+        this._project.log.error(`Error reading file ${fullPath}: ${error.message}`);
+        res.status(500).send(`Error reading file: ${error.message}`);
+      }
+    }));
+
+    // Add POST route handler for /tools/importer that accepts raw body content
+    this._app.post('/tools/importer', express.raw({ type: '*/*' }), asyncHandler(async (req, res) => {
+      const importDir = path.join(this._project.directory, 'tools', 'importer');
+
+      // Get file path from query parameter
+      const filePath = req.query.path;
+      if (!filePath) {
+        res.status(400).send('Missing required query parameter: path');
+        return;
+      }
+
+      const fullPath = path.join(importDir, filePath);
+
+      // Security check - prevent writing outside tools/import directory
+      if (path.relative(importDir, fullPath).startsWith('..')) {
+        res.status(403).send('Can only write files to the tools/import directory');
+        return;
+      }
+
+      try {
+        // Ensure directory exists
+        await fs.ensureDir(path.dirname(fullPath));
+
+        // Write file content
+        const content = req.body;
+        await fs.writeFile(fullPath, content);
+
+        res.status(200).send();
+      } catch (error) {
+        this._project.log.error(`Error writing file ${fullPath}: ${error.message}`);
+        res.status(500).send(`Error writing file: ${error.message}`);
+      }
+    }));
   }
 
   withPort(port) {
@@ -104,6 +216,10 @@ export class BaseServer extends EventEmitter {
 
   get scheme() {
     return this._scheme;
+  }
+
+  get token() {
+    return this._token;
   }
 
   get app() {

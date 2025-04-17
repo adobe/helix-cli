@@ -9,8 +9,10 @@
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-import { promisify } from 'util';
+
 import path from 'path';
+import crypto from 'crypto';
+import { promisify } from 'util';
 import { PassThrough } from 'stream';
 import { getFetch, resetContext } from '../fetch-utils.js';
 import utils from './utils.js';
@@ -18,6 +20,15 @@ import RequestContext from './RequestContext.js';
 import { asyncHandler, BaseServer } from './BaseServer.js';
 
 export class HelixImportServer extends BaseServer {
+  constructor(project) {
+    super(project);
+    this._token = crypto.randomBytes(32).toString('hex');
+  }
+
+  get token() {
+    return this._token;
+  }
+
   /**
    * Proxy Mode route handler
    * @param {Express.Request} req request
@@ -186,8 +197,8 @@ export class HelixImportServer extends BaseServer {
         host = new URL(host).origin;
         const url = this._makeProxyURL(ctx.url, host);
         await this._doProxyRequest(ctx, url, host, req, res);
-      // codecov:ignore:start
-      /* c8 ignore start */
+        // codecov:ignore:start
+        /* c8 ignore start */
       } catch (err) {
         log.error(`Failed to proxy AEM request ${ctx.path}: ${err.message}`);
         res.status(502).send(`Failed to proxy AEM request: ${err.message}`);

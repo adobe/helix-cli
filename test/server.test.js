@@ -12,6 +12,7 @@
 
 /* eslint-env mocha */
 /* eslint-disable no-underscore-dangle */
+/* eslint-disable no-console */
 import os from 'os';
 import assert from 'assert';
 import fs from 'fs/promises';
@@ -674,5 +675,118 @@ describe('Helix Server', () => {
 
     assert.strictEqual(project._server._loginState, undefined);
     assert.strictEqual(project._server._siteToken, undefined);
+  });
+
+  it('handles file import through /tools/importer endpoint', async () => {
+    const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
+    const project = new HelixProject()
+      .withCwd(cwd)
+      .withHttpPort(3000);
+
+    await project.init();
+    try {
+      await project.start();
+
+      // Test writing a text file
+      const textResponse = await getFetch()(`http://127.0.0.1:${project.server.port}/tools/importer?path=test.txt`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'text/plain',
+          'x-auth-token': project.server.token,
+        },
+        body: 'Hello World',
+      });
+      assert.strictEqual(textResponse.status, 200);
+
+      // Test reading the text file
+      const getTextResponse = await getFetch()(`http://127.0.0.1:${project.server.port}/tools/importer?path=test.txt`, {
+        headers: {
+          'x-auth-token': project.server.token,
+        },
+      });
+      assert.strictEqual(getTextResponse.status, 200);
+      assert.strictEqual(await getTextResponse.text(), 'Hello World');
+      assert.strictEqual(getTextResponse.headers.get('content-type'), 'text/plain; charset=utf-8');
+
+      // Test writing a JSON file in a subfolder
+      const jsonResponse = await getFetch()(`http://127.0.0.1:${project.server.port}/tools/importer?path=subfolder/data.json`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-auth-token': project.server.token,
+        },
+        body: JSON.stringify({ key: 'value' }),
+      });
+      assert.strictEqual(jsonResponse.status, 200);
+
+      // Test reading the JSON file
+      const getJsonResponse = await getFetch()(`http://127.0.0.1:${project.server.port}/tools/importer?path=subfolder/data.json`, {
+        headers: {
+          'x-auth-token': project.server.token,
+        },
+      });
+      assert.strictEqual(getJsonResponse.status, 200);
+      assert.deepEqual(await getJsonResponse.json(), { key: 'value' });
+      assert.strictEqual(getJsonResponse.headers.get('content-type'), 'application/json; charset=utf-8');
+
+      // Test reading non-existent file
+      const notFoundResponse = await getFetch()(`http://127.0.0.1:${project.server.port}/tools/importer?path=nonexistent.txt`, {
+        headers: {
+          'x-auth-token': project.server.token,
+        },
+      });
+      assert.strictEqual(notFoundResponse.status, 404);
+
+      // Test various path traversal attempts
+      const traversalAttempts = [
+        '../outside.txt',
+        '../../../../etc/passwd',
+        'subfolder/../../outside.txt',
+        'subfolder/../../../etc/passwd',
+        '..\\outside.txt',
+        'subfolder\\..\\..\\outside.txt',
+        '%2e%2e%2foutside.txt',
+        'subfolder/%2e%2e%2f%2e%2e%2foutside.txt',
+        'subfolder/./../../outside.txt',
+        'subfolder/././../../outside.txt',
+        'subfolder/../subfolder/../../outside.txt',
+      ];
+
+      for (const p of traversalAttempts) {
+        // eslint-disable-next-line no-await-in-loop
+        const response = await getFetch()(`http://127.0.0.1:${project.server.port}/tools/importer?path=${encodeURIComponent(p)}`, {
+          headers: {
+            'x-auth-token': project.server.token,
+          },
+        });
+        assert.strictEqual(response.status, 403, `Path traversal attempt "${path}" should be blocked`);
+      }
+
+      // Test reading directory (should fail)
+      const dirResponse = await getFetch()(`http://127.0.0.1:${project.server.port}/tools/importer?path=subfolder`, {
+        headers: {
+          'x-auth-token': project._server.token,
+        },
+      });
+      assert.strictEqual(dirResponse.status, 400);
+
+      // Test missing path parameter
+      const missingPathResponse = await getFetch()(`http://127.0.0.1:${project.server.port}/tools/importer`, {
+        headers: {
+          'x-auth-token': project.server.token,
+        },
+      });
+      assert.strictEqual(missingPathResponse.status, 400);
+
+      // Test empty path parameter
+      const emptyPathResponse = await getFetch()(`http://127.0.0.1:${project.server.port}/tools/importer?path=`, {
+        headers: {
+          'x-auth-token': project.server.token,
+        },
+      });
+      assert.strictEqual(emptyPathResponse.status, 400);
+    } finally {
+      await project.stop();
+    }
   });
 });
