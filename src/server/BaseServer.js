@@ -63,7 +63,7 @@ export class BaseServer extends EventEmitter {
       res.send('Goodbye!');
       this.stop();
     });
-    this._app.get('/version', async (req, res) => {
+    this._app.get('/.hlx/version', async (req, res) => {
       res.set('Content-Type', 'application/json');
       res.json({
         version: packageJson.version,

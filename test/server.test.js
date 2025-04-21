@@ -687,7 +687,7 @@ describe('Helix Server', () => {
     await project.init();
     try {
       await project.start();
-      const resp = await getFetch()(`http://127.0.0.1:${project.server.port}/version`);
+      const resp = await getFetch()(`http://127.0.0.1:${project.server.port}/.hlx/version`);
       assert.strictEqual(resp.status, 200);
       assert.strictEqual(resp.headers.get('Content-Type'), 'application/json; charset=utf-8');
       const json = await resp.json();
