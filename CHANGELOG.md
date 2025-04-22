@@ -1,3 +1,10 @@
+## [16.10.19](https://github.com/adobe/helix-cli/compare/v16.10.18...v16.10.19) (2025-04-22)
+
+
+### Bug Fixes
+
+* **2520:** Provide version information about the current aem-cli ([#2521](https://github.com/adobe/helix-cli/issues/2521)) ([58548df](https://github.com/adobe/helix-cli/commit/58548dfcae26fd6d4e96a432850bd0ba5fdc6836))
+
 ## [16.10.18](https://github.com/adobe/helix-cli/compare/v16.10.17...v16.10.18) (2025-04-21)
 
 
