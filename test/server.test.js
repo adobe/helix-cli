@@ -12,6 +12,7 @@
 
 /* eslint-env mocha */
 /* eslint-disable no-underscore-dangle */
+/* eslint-disable no-console */
 import os from 'os';
 import assert from 'assert';
 import fs from 'fs/promises';
@@ -26,6 +27,7 @@ import {
 } from './utils.js';
 import { getFetch } from '../src/fetch-utils.js';
 import { getSiteTokenFromFile } from '../src/config/config-utils.js';
+import packageJson from '../src/package.cjs';
 
 describe('Helix Server', () => {
   let nock;
@@ -674,5 +676,25 @@ describe('Helix Server', () => {
 
     assert.strictEqual(project._server._loginState, undefined);
     assert.strictEqual(project._server._siteToken, undefined);
+  });
+
+  it('returns version information', async () => {
+    const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
+    const project = new HelixProject()
+      .withCwd(cwd)
+      .withHttpPort(0);
+
+    await project.init();
+    try {
+      await project.start();
+      const resp = await getFetch()(`http://127.0.0.1:${project.server.port}/.hlx/version`);
+      assert.strictEqual(resp.status, 200);
+      assert.strictEqual(resp.headers.get('Content-Type'), 'application/json; charset=utf-8');
+      const json = await resp.json();
+      assert.strictEqual(json.name, '@adobe/aem-cli');
+      assert.strictEqual(json.version, packageJson.version);
+    } finally {
+      await project.stop();
+    }
   });
 });
