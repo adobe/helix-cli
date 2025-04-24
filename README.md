@@ -71,6 +71,14 @@ $ aem up
 The `--open` argument takes a path, eg `--open=/products/`, will cause the browser to be openend
 at the specific location. Disable with `--no-open'.`
 
+### Using AEM as an MCP Server
+
+AEM can be used as an MCP Server in GitHub Copilot, Cursor, Claude Code and other tools that support Model Protocol (MCP).
+
+To use AEM as an MCP server, add the following command to your IDE: `npx @adobe/aem-cli mcp`. No additional configuration is required.
+
+You can then ask your AI assistant to start or stop an AEM server in your working directory or retrieve the logs of the current server.
+
 ### setting up a self-signed cert for using https
 
 1. create the certificate
