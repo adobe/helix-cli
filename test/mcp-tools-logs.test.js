@@ -95,6 +95,26 @@ describe('MCP Tools - logs', () => {
     assert.strictEqual(parsedContent[0].message, 'Test log message');
   });
 
+  it('handles empty log entries by returning a default message', async () => {
+    // Mock getLogs to return null, which would make JSON.stringify(null) be 'null' (truthy)
+    // but we need to test the case where the JSON string is falsy
+    getLogsStub.returns(null);
+
+    // Create a special stub for JSON.stringify that returns a falsy value
+    const originalStringify = JSON.stringify;
+    JSON.stringify = sinon.stub().returns('');
+
+    const result = await logsTool.default.execute({});
+
+    // Restore JSON.stringify
+    JSON.stringify = originalStringify;
+
+    assert.strictEqual(result.isError, false);
+    assert.ok(Array.isArray(result.content));
+    assert.strictEqual(result.content[0].type, 'text');
+    assert.strictEqual(result.content[0].text, 'No log entries found.');
+  });
+
   it('handles errors gracefully', async () => {
     const error = new Error('Test error');
     getLogsStub.throws(error);
