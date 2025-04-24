@@ -85,7 +85,7 @@ const stopTool = {
       }
 
       // Stop a specific server
-      const port = args.port || '3000';
+      const port = args.port ? args.port.toString() : '3000';
       const server = runningServers.get(port);
 
       if (!server) {
