@@ -76,6 +76,14 @@ export function getLogs(lines = MAX_LOG_ENTRIES, filter = '', seconds = null, le
 }
 
 /**
+ * Reset the log buffer (primarily for testing)
+ * @returns {void}
+ */
+export function resetLogs() {
+  LOG_BUFFER.length = 0;
+}
+
+/**
  * Create a logger that implements the Helix Logging SimpleInterface
  * and stores logs in memory
  * @param {string} [category='mcp'] Logger category
@@ -115,4 +123,5 @@ export function createLoggerFactory() {
 export default {
   createLogger: createInMemoryLogger,
   getLogs,
+  resetLogs,
 };

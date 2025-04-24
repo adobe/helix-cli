@@ -114,6 +114,7 @@ export default class MCPCommand extends AbstractCommand {
       result,
     };
     this.log.debug(`Sending response: ${JSON.stringify(response)}`);
+    // eslint-disable-next-line no-console
     console.log(JSON.stringify(response));
   }
 
@@ -127,6 +128,7 @@ export default class MCPCommand extends AbstractCommand {
       },
     };
     this.log.debug(`Sending error response: ${JSON.stringify(response)}`);
+    // eslint-disable-next-line no-console
     console.log(JSON.stringify(response));
   }
 }
