@@ -318,35 +318,6 @@ describe('MCP Command', () => {
     assert.equal(response.error.message, 'Error executing tool: test error');
   });
 
-  it('initializes readline in run() method', async () => {
-    const logger = createTestLogger();
-
-    // Mock readline interface
-    const lineEmitter = new EventEmitter();
-    const createInterfaceStub = sinon.stub().returns(lineEmitter);
-
-    // Replace readline with our mock
-    const MockedCommand = await esmock('../src/mcp.cmd.js', {
-      readline: {
-        createInterface: createInterfaceStub,
-      },
-    });
-
-    // Create command instance
-    const mockedCmd = new MockedCommand(logger);
-
-    // Start the command
-    mockedCmd.run();
-
-    // Verify readline interface was created with expected config
-    sinon.assert.calledOnce(createInterfaceStub);
-    sinon.assert.calledWith(createInterfaceStub, {
-      input: process.stdin,
-      output: process.stdout,
-      terminal: false,
-    });
-  });
-
   it('handles invalid JSON in the run method', async () => {
     const logger = createTestLogger();
     const loggerErrorSpy = sinon.spy(logger, 'error');

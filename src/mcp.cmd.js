@@ -10,6 +10,8 @@
  * governing permissions and limitations under the License.
  */
 import readline from 'readline';
+import fs from 'fs';
+import path from 'path';
 import { AbstractCommand } from './abstract.cmd.js';
 
 export default class MCPCommand extends AbstractCommand {
@@ -25,6 +27,34 @@ export default class MCPCommand extends AbstractCommand {
 
   async run() {
     this.log.info('Starting MCP server...');
+    // Cursor starts MCP servers in a temp directory, but the Helix server wants a folder
+    // with a proper git repository, so we use the WORKSPACE_FOLDER_PATHS environment variable
+    // and make an educated guess if we are in a git repository.
+    const workspaceFolderPaths = process.env.WORKSPACE_FOLDER_PATHS;
+    // Combine workspace paths with current directory, ensure string, and split
+    const pathsToCheck = (`${workspaceFolderPaths},${process.cwd()}`)
+      .split(',')
+      .map((p) => p.trim())
+      .filter(Boolean);
+
+    // Use Promise.allSettled to check all paths and ignore errors
+    const results = await Promise.allSettled(
+      pathsToCheck.map(async (dirPath) => {
+        const gitPath = path.join(dirPath, '.git');
+        return fs.existsSync(gitPath) && fs.statSync(gitPath).isDirectory() && dirPath;
+      }),
+    );
+
+    // Filter out rejected promises and falsy values to find the first valid working directory
+    const workingDir = results
+      .filter((result) => result.status === 'fulfilled')
+      .map((result) => result.value)
+      .find(Boolean);
+
+    if (workingDir) {
+      this.log.info(`Found git repository at ${workingDir}, changing directory`);
+      process.chdir(workingDir);
+    }
 
     const rl = readline.createInterface({
       input: process.stdin,
