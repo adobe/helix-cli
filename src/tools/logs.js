@@ -40,7 +40,7 @@ const logsTool = {
         type: 'array',
         default: ['info', 'warn', 'error'],
         items: {
-          enum: ['silly', 'debug', 'info', 'warn', 'error'],
+          enum: ['trace', 'silly', 'debug', 'info', 'warn', 'error'],
         },
         description: 'Optional array of log levels to filter',
       },

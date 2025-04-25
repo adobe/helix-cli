@@ -34,26 +34,31 @@ describe('MCP Logger', () => {
 
   it('logs messages with different levels', () => {
     const logger = createInMemoryLogger('test');
+    logger.trace('Trace message');
     logger.debug('Debug message');
     logger.info('Info message');
     logger.warn('Warning message');
     logger.error('Error message');
 
     const logs = getLogs();
-    assert.strictEqual(logs.length, 4);
+    assert.strictEqual(logs.length, 5);
 
-    assert.strictEqual(logs[0].level, 'debug');
-    assert.strictEqual(logs[0].message, 'Debug message');
+    assert.strictEqual(logs[0].level, 'trace');
+    assert.strictEqual(logs[0].message, 'Trace message');
     assert.strictEqual(logs[0].context.category, 'test');
 
-    assert.strictEqual(logs[1].level, 'info');
-    assert.strictEqual(logs[1].message, 'Info message');
+    assert.strictEqual(logs[1].level, 'debug');
+    assert.strictEqual(logs[1].message, 'Debug message');
+    assert.strictEqual(logs[1].context.category, 'test');
 
-    assert.strictEqual(logs[2].level, 'warn');
-    assert.strictEqual(logs[2].message, 'Warning message');
+    assert.strictEqual(logs[2].level, 'info');
+    assert.strictEqual(logs[2].message, 'Info message');
 
-    assert.strictEqual(logs[3].level, 'error');
-    assert.strictEqual(logs[3].message, 'Error message');
+    assert.strictEqual(logs[3].level, 'warn');
+    assert.strictEqual(logs[3].message, 'Warning message');
+
+    assert.strictEqual(logs[4].level, 'error');
+    assert.strictEqual(logs[4].message, 'Error message');
   });
 
   it('logs messages with additional context', () => {
@@ -219,6 +224,28 @@ describe('MCP Logger', () => {
     const debugLogs = getLogs(10, null, null, ['debug']);
     assert.strictEqual(debugLogs.length, 1);
     assert.strictEqual(debugLogs[0].level, 'debug');
+  });
+
+  it('filters logs by log levels including trace', () => {
+    const logger = createInMemoryLogger('test');
+
+    logger.trace('Trace message');
+    logger.debug('Debug message');
+    logger.info('Info message');
+    logger.warn('Warning message');
+    logger.error('Error message');
+
+    // Filter only trace level
+    const traceLogs = getLogs(10, null, null, ['trace']);
+    assert.strictEqual(traceLogs.length, 1);
+    assert.strictEqual(traceLogs[0].level, 'trace');
+    assert.strictEqual(traceLogs[0].message, 'Trace message');
+
+    // Filter multiple levels including trace
+    const lowLevelLogs = getLogs(10, null, null, ['trace', 'debug']);
+    assert.strictEqual(lowLevelLogs.length, 2);
+    assert.strictEqual(lowLevelLogs[0].level, 'trace');
+    assert.strictEqual(lowLevelLogs[1].level, 'debug');
   });
 
   it('combines all filters - text, seconds, and levels', () => {

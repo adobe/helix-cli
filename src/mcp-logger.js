@@ -96,7 +96,7 @@ export function createInMemoryLogger(category = 'mcp') {
   };
 
   // Add log methods for each level
-  ['debug', 'info', 'warn', 'error'].forEach((level) => {
+  ['trace', 'debug', 'info', 'warn', 'error'].forEach((level) => {
     logger[level] = (message, context = {}) => {
       // Add category to context if not already present
       const contextWithCategory = { ...context };
