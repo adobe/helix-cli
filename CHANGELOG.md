@@ -1,3 +1,10 @@
+## [16.10.23](https://github.com/adobe/helix-cli/compare/v16.10.22...v16.10.23) (2025-05-05)
+
+
+### Bug Fixes
+
+* **deps:** update external fixes ([#2527](https://github.com/adobe/helix-cli/issues/2527)) ([5559984](https://github.com/adobe/helix-cli/commit/5559984876fb6dc3ba49ddc805579ab8295222a0))
+
 ## [16.10.22](https://github.com/adobe/helix-cli/compare/v16.10.21...v16.10.22) (2025-05-05)
 
 
