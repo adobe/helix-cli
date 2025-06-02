@@ -74,7 +74,7 @@
     "shelljs": "0.10.0",
     "unified": "11.0.5",
     "uuid": "11.1.0",
-    "yargs": "17.7.2"
+    "yargs": "18.0.0"
   },
   "devDependencies": {
     "@adobe/eslint-config-helix": "2.0.9",
