@@ -1,8 +1,0 @@
-index.js
-.vscode/*
-logs/*
-demos/*
-test/fixtures
-test/tmp/*
-tmp/*
-coverage/*
