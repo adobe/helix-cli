@@ -1,3 +1,10 @@
+## [16.10.32](https://github.com/adobe/helix-cli/compare/v16.10.31...v16.10.32) (2025-06-04)
+
+
+### Bug Fixes
+
+* **deps:** update dependency yargs to v18 ([#2539](https://github.com/adobe/helix-cli/issues/2539)) ([3f40db6](https://github.com/adobe/helix-cli/commit/3f40db6e6c3074117e3a517abf27cd77dcb915dd))
+
 ## [16.10.31](https://github.com/adobe/helix-cli/compare/v16.10.30...v16.10.31) (2025-06-03)
 
 
