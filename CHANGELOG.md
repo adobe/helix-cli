@@ -1,3 +1,10 @@
+## [16.10.33](https://github.com/adobe/helix-cli/compare/v16.10.32...v16.10.33) (2025-06-13)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @adobe/helix-shared-config to v11.1.8 ([#2543](https://github.com/adobe/helix-cli/issues/2543)) ([10eb7a8](https://github.com/adobe/helix-cli/commit/10eb7a84b8b26db6429a16a90f5f53d20c49e5db))
+
 ## [16.10.32](https://github.com/adobe/helix-cli/compare/v16.10.31...v16.10.32) (2025-06-04)
 
 
