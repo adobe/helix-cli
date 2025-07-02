@@ -82,6 +82,12 @@ $ openssl req -new -newkey rsa:4096 -x509 -sha256 -days 365 -nodes -out server.c
 
 this will create 2 files: `server.crt` and `server.key`
 
+Alternatively, if your browser does not trust the certificate, you can use mkcert to generate a trusted certificate:
+```bash
+# Install mkcert via Homebrew or your preferred method, then run:
+mkcert -cert-file server.crt -key-file server.key localhost 127.0.0.1
+```
+
 2. start aem with tls support
 
 ```
