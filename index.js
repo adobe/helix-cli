@@ -16,7 +16,7 @@ import CLI from './src/cli.js';
 import { checkNodeVersion, validateDotEnv } from './src/config/config-utils.js';
 import { config } from 'dotenv';
 
-config();
+config({ quiet: true });
 
 (async () => {
   await checkNodeVersion();
