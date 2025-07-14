@@ -1,3 +1,11 @@
+## [16.10.39](https://github.com/adobe/helix-cli/compare/v16.10.38...v16.10.39) (2025-07-14)
+
+
+### Bug Fixes
+
+* **deps:** update external fixes ([#2557](https://github.com/adobe/helix-cli/issues/2557)) ([fbcb860](https://github.com/adobe/helix-cli/commit/fbcb860a8d8f7beed94d5ff40f7a926d8652c891))
+* remove shared dom ([#2558](https://github.com/adobe/helix-cli/issues/2558)) ([788d140](https://github.com/adobe/helix-cli/commit/788d1409a4f15a6fbbb45440484464f6fb24c772))
+
 ## [16.10.38](https://github.com/adobe/helix-cli/compare/v16.10.37...v16.10.38) (2025-07-08)
 
 
