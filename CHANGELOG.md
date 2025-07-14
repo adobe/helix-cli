@@ -1,3 +1,10 @@
+## [16.10.40](https://github.com/adobe/helix-cli/compare/v16.10.39...v16.10.40) (2025-07-14)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @adobe/helix-log to v7 ([#2559](https://github.com/adobe/helix-cli/issues/2559)) ([808a020](https://github.com/adobe/helix-cli/commit/808a0200f6c0f328310591a9a0fea0649d21679c))
+
 ## [16.10.39](https://github.com/adobe/helix-cli/compare/v16.10.38...v16.10.39) (2025-07-14)
 
 
