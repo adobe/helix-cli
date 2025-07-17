@@ -47,7 +47,7 @@
     "camelcase": "8.0.0",
     "chalk-template": "1.1.0",
     "chokidar": "4.0.3",
-    "compression": "1.8.0",
+    "compression": "1.8.1",
     "cookie": "1.0.2",
     "cookie-parser": "1.4.7",
     "dotenv": "17.2.0",
