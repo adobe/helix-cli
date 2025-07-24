@@ -3,6 +3,9 @@ on:
     branches-ignore:
       - 'main'
 
+permissions:
+  pull-requests: write
+
 jobs:
   ci_trigger:
     runs-on: ubuntu-latest
