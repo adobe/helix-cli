@@ -1,6 +1,6 @@
 {
   "name": "@adobe/aem-cli",
-  "version": "16.10.41",
+  "version": "16.10.42",
   "description": "AEM CLI",
   "main": "index.js",
   "type": "module",
@@ -62,7 +62,7 @@
     "ignore": "7.0.5",
     "ini": "5.0.0",
     "isomorphic-git": "1.32.1",
-    "jose": "6.0.11",
+    "jose": "6.0.12",
     "livereload-js": "4.0.2",
     "node-fetch": "3.3.2",
     "open": "10.2.0",
