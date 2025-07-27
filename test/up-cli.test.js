@@ -42,6 +42,7 @@ describe('hlx up', () => {
     mockUp.withOpen.returnsThis();
     mockUp.withTLS.returnsThis();
     mockUp.withLiveReload.returnsThis();
+    mockUp.withForwardBrowserLogs.returnsThis();
     mockUp.withHttpPort.returnsThis();
     mockUp.withBindAddr.returnsThis();
     mockUp.withUrl.returnsThis();
@@ -161,6 +162,18 @@ describe('hlx up', () => {
   it('aem up can set site token', async () => {
     await cli.run(['up', '--site-token', 'secret-site-token']);
     sinon.assert.calledWith(mockUp.withSiteToken, 'secret-site-token');
+    sinon.assert.calledOnce(mockUp.run);
+  });
+
+  it('hlx up can enable forward browser logs', async () => {
+    await cli.run(['up', '--forward-browser-logs']);
+    sinon.assert.calledWith(mockUp.withForwardBrowserLogs, true);
+    sinon.assert.calledOnce(mockUp.run);
+  });
+
+  it('hlx up can use forwardBrowserLogs camelCase option', async () => {
+    await cli.run(['up', '--forwardBrowserLogs']);
+    sinon.assert.calledWith(mockUp.withForwardBrowserLogs, true);
     sinon.assert.calledOnce(mockUp.run);
   });
 });

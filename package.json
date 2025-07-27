@@ -19,14 +19,16 @@
     "lint:fix": "eslint --fix .",
     "semantic-release": "semantic-release",
     "semantic-release-dry": "semantic-release --dry-run --branches $CI_BRANCH",
-    "prepare": "husky"
+    "prepare": "husky",
+    "postinstall": "npx playwright install"
   },
   "mocha": {
     "require": "test/setup-env.js",
     "recursive": "true",
     "reporter": "mocha-multi-reporters",
     "reporter-options": "configFile=.mocha-multi.json",
-    "loader": "esmock"
+    "loader": "esmock",
+    "exclude": ["test/browser/**"]
   },
   "repository": {
     "type": "git",
@@ -81,6 +83,7 @@
   },
   "devDependencies": {
     "@adobe/eslint-config-helix": "3.0.9",
+    "@esm-bundle/chai": "4.3.4-fix.0",
     "@eslint/config-helpers": "0.3.0",
     "@semantic-release/changelog": "6.0.3",
     "@semantic-release/git": "10.0.1",
