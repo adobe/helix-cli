@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Browser Console Log Forwarding Tests</title>
+  <script type="module">
+    import { expect } from '@esm-bundle/chai';
+    import { executeServerCommand } from '@web/test-runner-commands';
+
+    describe('Browser Console Log Forwarding', () => {
+      let ws;
+      let messages = [];
+      let originalConsole = {};
+
+      // Mock WebSocket connection
+      beforeEach(() => {
+        // Store original console methods
+        originalConsole = {
+          log: console.log,
+          error: console.error,
+          warn: console.warn,
+          info: console.info
+        };
+
+        // Set up WebSocket mock
+        messages = [];
+        ws = {
+          readyState: 1, // OPEN
+          send: (data) => {
+            messages.push(JSON.parse(data));
+          }
+        };
+
+        // Set up LiveReload mock
+        window.LiveReload = {
+          connector: {
+            socket: ws
+          }
+        };
+      });
+
+      afterEach(() => {
+        // Restore console
+        Object.assign(console, originalConsole);
+        delete window.LiveReload;
+      });
+
+      it('should intercept console.log and forward to WebSocket', async () => {
+        // Inject the console interceptor script (similar to what utils.js does)
+        const script = document.createElement('script');
+        script.textContent = `
+          (function() {
+            // Store original console methods
+            var originalConsole = {
+              log: console.log,
+              error: console.error,
+              warn: console.warn,
+              info: console.info
+            };
+
+            // Helper to safely serialize arguments
+            function serializeArgs(args) {
+              return Array.from(args).map(function(arg) {
+                try {
+                  if (arg instanceof Error) {
+                    return { type: 'Error', message: arg.message, stack: arg.stack };
+                  }
+                  return JSON.parse(JSON.stringify(arg));
+                } catch (e) {
+                  return String(arg);
+                }
+              });
+            }
+
+            // Get current file location
+            function getLocation() {
+              try {
+                var stack = new Error().stack;
+                var match = stack.match(/at.*?((https?:\\/\\/[^\\s]+?):(\\d+):(\\d+))/);
+                if (match) {
+                  return { url: match[2], line: match[3] };
+                }
+              } catch (e) {}
+              return { url: window.location.href, line: 0 };
+            }
+
+            // Intercept console methods
+            ['log', 'error', 'warn', 'info'].forEach(function(level) {
+              console[level] = function() {
+                // Call original method
+                originalConsole[level].apply(console, arguments);
+
+                // Forward to server if connected
+                if (window.LiveReload && window.LiveReload.connector && window.LiveReload.connector.socket && window.LiveReload.connector.socket.readyState === 1) {
+                  var location = getLocation();
+                  window.LiveReload.connector.socket.send(JSON.stringify({
+                    command: 'log',
+                    level: level,
+                    args: serializeArgs(arguments),
+                    url: location.url,
+                    line: location.line
+                  }));
+                }
+              };
+            });
+          })();
+        `;
+        document.body.appendChild(script);
+
+        // Test console.log
+        console.log('Test message', { foo: 'bar' });
+
+        // Check that message was sent
+        expect(messages).to.have.lengthOf(1);
+        expect(messages[0].command).to.equal('log');
+        expect(messages[0].level).to.equal('log');
+        expect(messages[0].args).to.deep.equal(['Test message', { foo: 'bar' }]);
+        expect(messages[0].url).to.include('http');
+      });
+
+      it('should handle different console levels', async () => {
+        // Inject the interceptor script
+        const script = document.createElement('script');
+        script.textContent = `
+          (function() {
+            var originalConsole = {
+              log: console.log,
+              error: console.error,
+              warn: console.warn,
+              info: console.info
+            };
+
+            function serializeArgs(args) {
+              return Array.from(args).map(function(arg) {
+                try {
+                  if (arg instanceof Error) {
+                    return { type: 'Error', message: arg.message, stack: arg.stack };
+                  }
+                  return JSON.parse(JSON.stringify(arg));
+                } catch (e) {
+                  return String(arg);
+                }
+              });
+            }
+
+            function getLocation() {
+              return { url: window.location.href, line: 0 };
+            }
+
+            ['log', 'error', 'warn', 'info'].forEach(function(level) {
+              console[level] = function() {
+                originalConsole[level].apply(console, arguments);
+                if (window.LiveReload && window.LiveReload.connector && window.LiveReload.connector.socket && window.LiveReload.connector.socket.readyState === 1) {
+                  window.LiveReload.connector.socket.send(JSON.stringify({
+                    command: 'log',
+                    level: level,
+                    args: serializeArgs(arguments),
+                    url: getLocation().url,
+                    line: getLocation().line
+                  }));
+                }
+              };
+            });
+          })();
+        `;
+        document.body.appendChild(script);
+
+        // Test different levels
+        console.log('Log message');
+        console.error('Error message');
+        console.warn('Warning message');
+        console.info('Info message');
+
+        // Check messages
+        expect(messages).to.have.lengthOf(4);
+        expect(messages[0].level).to.equal('log');
+        expect(messages[1].level).to.equal('error');
+        expect(messages[2].level).to.equal('warn');
+        expect(messages[3].level).to.equal('info');
+      });
+
+      it('should handle errors and circular references', async () => {
+        // Inject the interceptor script
+        const script = document.createElement('script');
+        script.textContent = `
+          (function() {
+            var originalConsole = { error: console.error };
+
+            function serializeArgs(args) {
+              return Array.from(args).map(function(arg) {
+                try {
+                  if (arg instanceof Error) {
+                    return { type: 'Error', message: arg.message, stack: arg.stack };
+                  }
+                  return JSON.parse(JSON.stringify(arg));
+                } catch (e) {
+                  return String(arg);
+                }
+              });
+            }
+
+            console.error = function() {
+              originalConsole.error.apply(console, arguments);
+              if (window.LiveReload && window.LiveReload.connector && window.LiveReload.connector.socket && window.LiveReload.connector.socket.readyState === 1) {
+                window.LiveReload.connector.socket.send(JSON.stringify({
+                  command: 'log',
+                  level: 'error',
+                  args: serializeArgs(arguments),
+                  url: window.location.href,
+                  line: 0
+                }));
+              }
+            };
+          })();
+        `;
+        document.body.appendChild(script);
+
+        // Test with Error object
+        const error = new Error('Test error');
+        console.error('Error occurred:', error);
+
+        // Test with circular reference
+        const circular = { a: 1 };
+        circular.self = circular;
+        console.error('Circular:', circular);
+
+        // Check messages
+        expect(messages).to.have.lengthOf(2);
+        
+        // Check error serialization
+        expect(messages[0].args[0]).to.equal('Error occurred:');
+        expect(messages[0].args[1]).to.have.property('type', 'Error');
+        expect(messages[0].args[1]).to.have.property('message', 'Test error');
+
+        // Check circular reference handling
+        expect(messages[1].args[0]).to.equal('Circular:');
+        expect(messages[1].args[1]).to.equal('[object Object]');
+      });
+
+      it('should not send logs when WebSocket is not connected', async () => {
+        // Set WebSocket to disconnected state
+        ws.readyState = 0; // CONNECTING
+
+        // Inject the interceptor script
+        const script = document.createElement('script');
+        script.textContent = `
+          (function() {
+            var originalConsole = { log: console.log };
+
+            console.log = function() {
+              originalConsole.log.apply(console, arguments);
+              if (window.LiveReload && window.LiveReload.connector && window.LiveReload.connector.socket && window.LiveReload.connector.socket.readyState === 1) {
+                window.LiveReload.connector.socket.send(JSON.stringify({
+                  command: 'log',
+                  level: 'log',
+                  args: Array.from(arguments),
+                  url: window.location.href,
+                  line: 0
+                }));
+              }
+            };
+          })();
+        `;
+        document.body.appendChild(script);
+
+        // Try to log
+        console.log('This should not be sent');
+
+        // Check that no messages were sent
+        expect(messages).to.have.lengthOf(0);
+      });
+    });
+  </script>
+</head>
+<body>
+  <h1>Browser Console Log Forwarding Tests</h1>
+</body>
+</html>
