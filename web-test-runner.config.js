@@ -33,7 +33,11 @@ export default {
   browsers: [
     playwrightLauncher({ product: 'chromium' }),
     playwrightLauncher({ product: 'firefox' }),
-    playwrightLauncher({ product: 'webkit' }),
+    // WebKit requires additional system dependencies on Linux CI
+    // Only run WebKit tests on macOS and Windows
+    ...(process.platform !== 'linux' || !process.env.CI
+      ? [playwrightLauncher({ product: 'webkit' })]
+      : []),
   ],
   coverageConfig: {
     report: true,
