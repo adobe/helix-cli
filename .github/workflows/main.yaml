@@ -32,6 +32,8 @@ jobs:
       - uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./coverage/lcov.info,./coverage-browser/lcov.info
+          flags: unittests,browsertests
       - name: Semantic Release (Dry Run)
         run: npm run semantic-release-dry
         env:
