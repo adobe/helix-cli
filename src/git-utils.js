@@ -258,10 +258,10 @@ export default class GitUtils {
    * @throws {Errors.NotFoundError}: resource not found or invalid reference
    */
   static async getRawContent(dir, ref, pathName) {
-    return GitUtils.resolveCommit(dir, ref)
-      .then((oid) => git.readObject({
-        fs, dir, oid, filepath: pathName, format: 'content', cache,
-      }))
-      .then((obj) => obj.object);
+    const oid = await GitUtils.resolveCommit(dir, ref);
+    const { blob } = await git.readBlob({
+      fs, dir, oid, filepath: pathName, cache,
+    });
+    return Buffer.from(blob);
   }
 }

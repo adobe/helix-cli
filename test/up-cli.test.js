@@ -48,8 +48,9 @@ describe('hlx up', () => {
     mockUp.withPrintIndex.returnsThis();
     mockUp.withAllowInsecure.returnsThis();
     mockUp.withKill.returnsThis();
-    mockUp.withCache.returnsThis();
     mockUp.withSiteToken.returnsThis();
+    mockUp.withForwardBrowserLogs.returnsThis();
+    mockUp.withCache.returnsThis();
     mockUp.run.returnsThis();
     cli = (await new CLI().initCommands()).withCommandExecutor('up', mockUp);
   });

@@ -1,0 +1,862 @@
+
+> @adobe/aem-cli@16.10.42 test
+> c8 mocha && npm run test:browser --reporter json
+
+(node:10670) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+--import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("esmock", pathToFileURL("./"));'
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+
+  AbstractServerCommand test
+    ✔ open rejects invalid path argument
+    ✔ open rejects invalid scheme argument
+    ✔ open rejects invalid hostname argument
+    ✔ open rejects invalid url argument
+    ✔ constructs valid url from path
+
+  hlx command line
+You need at least one command.
+
+Usage: aem <command> [options]
+
+Commands:
+  aem up      Run a AEM development server
+  aem import  Run the AEM import server
+
+Options:
+  --version                Show version number                         [boolean]
+  --log-file, --logFile    Log file (use "-" for stdout)  [array] [default: "-"]
+  --log-level, --logLevel  Log level
+        [string] [choices: "silly", "debug", "verbose", "info", "warn", "error"]
+                                                               [default: "info"]
+  --help                   Show help                                   [boolean]
+
+use <command> --help to get command specific details.
+
+for more information, find our manual at https://github.com/adobe/helix-cli
+    ✔ hlx w/o arguments shows help and exits with != 0 (776ms)
+16.10.42
+    ✔ hlx --version shows version (819ms)
+Unknown command: foo
+    ✔ hlx with unknown command shows help and exists with != 0 (735ms)
+Unknown argument: foo
+
+aem up
+
+Run a AEM development server
+
+Server options
+  --port                     Start development server on port    [default: 3000]
+  --addr                     Bind development server on addr. use * to bind to
+                             any address and allow external connections.
+                                                 [string] [default: "127.0.0.1"]
+  --stop-other, --stopOther  Stop other AEM CLI running on the above port
+                                                       [boolean] [default: true]
+  --tls-cert, --tlsCert      File location for your .pem file for local TLS
+                             support                                    [string]
+  --tls-key, --tlsKey        File location for your .key file for local TLS
+                             support                                    [string]
+
+AEM Options
+  --url, --pagesUrl, --pages-url            The origin url to fetch content
+                                            from.                       [string]
+  --livereload                              Enable automatic reloading of
+                                            modified sources in browser.
+                                                       [boolean] [default: true]
+  --no-livereload, --noLiveReload           Disable live-reload        [boolean]
+  --open                                    Open a browser window at specified
+                                            path         [string] [default: "/"]
+  --no-open, --noOpen                       Disable automatic opening of browser
+                                            window                     [boolean]
+  --print-index, --printIndex               Prints the indexed records for the
+                                            current page.
+                                                      [boolean] [default: false]
+  --cache
+  --forward-browser-logs,                   Forward browser console logs to
+  --forwardBrowserLogs                      terminal  [boolean] [default: false]
+
+Options:
+  --version                          Show version number               [boolean]
+  --log-file, --logFile              Log file (use "-" for stdout)
+                                                          [array] [default: "-"]
+  --log-level, --logLevel            Log level
+        [string] [choices: "silly", "debug", "verbose", "info", "warn", "error"]
+                                                               [default: "info"]
+  --site-token, --siteToken          Site token to be used by the cli to access
+                                     the website                        [string]
+  --alpha-cache, --alphaCache        Path to local folder to cache the responses
+                                     (note: this is an alpha feature, it may be
+                                     removed without notice)            [string]
+  --allow-insecure, --allowInsecure  Whether to allow insecure requests to the
+                                     server           [boolean] [default: false]
+  --help                             Show help                         [boolean]
+    ✔ hlx up with unknown argument shows help and exists with != 0 (881ms)
+hint: Using 'master' as the name for the initial branch. This default branch name
+hint: is subject to change. To configure the initial branch name to use in all
+hint: of your new repositories, which will suppress this warning, call:
+hint: 
+hint: 	git config --global init.defaultBranch <name>
+hint: 
+hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+hint: 'development'. The just-created branch can be renamed via this command:
+hint: 
+hint: 	git branch -m <name>
+Initialized empty Git repository in /root/repo/test/tmp/2a684b99eb272fba7bc3f239e9a47704/.git/
+Switched to a new branch 'master'
+[master (root-commit) eff7bd3] initial
+ Committer: root <root@e2b.local>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly:
+
+    git config --global user.name "Your Name"
+    git config --global user.email you@example.com
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+ 1 file changed, 1 insertion(+)
+ create mode 100644 .env
+
+Warning: Your '.env' file is currently not ignored by git. 
+This is typically not good because it might contain secrets 
+which should never be stored in the git repository.
+16.10.42
+    ✔ not-ignored .env should give warning (1071ms)
+    ✔ un-supported node version should give warning
+    ✔ can set log-level and log-file (59ms)
+
+  .hlx-token
+    ✔ saves token to file
+
+Error: The provided site token is not a recognised token format, it will not be written to your .hlx-token file.
+    ✔ does not save invalid token to file
+
+Error: The provided site token is not a valid JWT, it will not be written to your .hlx-token file.
+    ✔ does not save invalid non JWT TST token to file
+    ✔ does not save null token to file
+    ✔ does not throw if token file does not exist, returns null
+
+Error: The site token could not be read from the '.hlx-token' file.
+SyntaxError: Unexpected token 'h', "this-is-a-token" is not valid JSON
+    at JSON.parse (<anonymous>)
+    at getSiteTokenFromFile (file:///root/repo/src/config/config-utils.js:95:28)
+    at async Context.<anonymous> (file:///root/repo/test/config-utils.test.js:56:24)
+    ✔ invalid file format does not throw, returns null
+
+  Testing GitUtils
+hint: Using 'master' as the name for the initial branch. This default branch name
+hint: is subject to change. To configure the initial branch name to use in all
+hint: of your new repositories, which will suppress this warning, call:
+hint: 
+hint: 	git config --global init.defaultBranch <name>
+hint: 
+hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+hint: 'development'. The just-created branch can be renamed via this command:
+hint: 
+hint: 	git branch -m <name>
+Initialized empty Git repository in /root/repo/test/tmp/1ad06d44cafac8b848cfd228f6768366/.git/
+Switched to a new branch 'master'
+[master (root-commit) 5ae7214] initial commit.
+ Committer: root <root@e2b.local>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly:
+
+    git config --global user.name "Your Name"
+    git config --global user.email you@example.com
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+ 2 files changed, 2 insertions(+)
+ create mode 100644 .gitignore
+ create mode 100644 README.md
+[master 5a6d4e3] second commit.
+ Committer: root <root@e2b.local>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly:
+
+    git config --global user.name "Your Name"
+    git config --global user.email you@example.com
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+    ✔ getOrigin #unit (77ms)
+hint: Using 'master' as the name for the initial branch. This default branch name
+hint: is subject to change. To configure the initial branch name to use in all
+hint: of your new repositories, which will suppress this warning, call:
+hint: 
+hint: 	git config --global init.defaultBranch <name>
+hint: 
+hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+hint: 'development'. The just-created branch can be renamed via this command:
+hint: 
+hint: 	git branch -m <name>
+Initialized empty Git repository in /root/repo/test/tmp/db8c6e0d01f44a7dffe5eb8e7d703139/.git/
+Switched to a new branch 'master'
+[master (root-commit) 5ae7214] initial commit.
+ Committer: root <root@e2b.local>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly:
+
+    git config --global user.name "Your Name"
+    git config --global user.email you@example.com
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+ 2 files changed, 2 insertions(+)
+ create mode 100644 .gitignore
+ create mode 100644 README.md
+[master 5a6d4e3] second commit.
+ Committer: root <root@e2b.local>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly:
+
+    git config --global user.name "Your Name"
+    git config --global user.email you@example.com
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+    ✔ getOriginURL #unit (76ms)
+hint: Using 'master' as the name for the initial branch. This default branch name
+hint: is subject to change. To configure the initial branch name to use in all
+hint: of your new repositories, which will suppress this warning, call:
+hint: 
+hint: 	git config --global init.defaultBranch <name>
+hint: 
+hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+hint: 'development'. The just-created branch can be renamed via this command:
+hint: 
+hint: 	git branch -m <name>
+Initialized empty Git repository in /root/repo/test/tmp/b04c993a03caf174913a565059f51bbc/.git/
+Switched to a new branch 'master'
+[master (root-commit) 8b33228] initial commit.
+ Committer: root <root@e2b.local>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly:
+
+    git config --global user.name "Your Name"
+    git config --global user.email you@example.com
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+ 2 files changed, 2 insertions(+)
+ create mode 100644 .gitignore
+ create mode 100644 README.md
+[master 7b5889f] second commit.
+ Committer: root <root@e2b.local>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly:
+
+    git config --global user.name "Your Name"
+    git config --global user.email you@example.com
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+Switched to a new branch 'newbranch'
+    ✔ getBranch #unit (185ms)
+hint: Using 'master' as the name for the initial branch. This default branch name
+hint: is subject to change. To configure the initial branch name to use in all
+hint: of your new repositories, which will suppress this warning, call:
+hint: 
+hint: 	git config --global init.defaultBranch <name>
+hint: 
+hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+hint: 'development'. The just-created branch can be renamed via this command:
+hint: 
+hint: 	git branch -m <name>
+Initialized empty Git repository in /root/repo/test/tmp/48b055296ddc06c3ddac18da3589a640/.git/
+Switched to a new branch 'master'
+[master (root-commit) 8b33228] initial commit.
+ Committer: root <root@e2b.local>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly:
+
+    git config --global user.name "Your Name"
+    git config --global user.email you@example.com
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+ 2 files changed, 2 insertions(+)
+ create mode 100644 .gitignore
+ create mode 100644 README.md
+[master 7b5889f] second commit.
+ Committer: root <root@e2b.local>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly:
+
+    git config --global user.name "Your Name"
+    git config --global user.email you@example.com
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+Switched to a new branch 'newbranch'
+HEAD is now at 8b33228 initial commit.
+    ✔ getBranch #unit (detached) (181ms)
+hint: Using 'master' as the name for the initial branch. This default branch name
+hint: is subject to change. To configure the initial branch name to use in all
+hint: of your new repositories, which will suppress this warning, call:
+hint: 
+hint: 	git config --global init.defaultBranch <name>
+hint: 
+hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+hint: 'development'. The just-created branch can be renamed via this command:
+hint: 
+hint: 	git branch -m <name>
+Initialized empty Git repository in /root/repo/test/tmp/b9041b2f06d597f78eedb9998b32eb57/.git/
+Switched to a new branch 'master'
+[master (root-commit) 8700e22] initial commit.
+ Committer: root <root@e2b.local>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly:
+
+    git config --global user.name "Your Name"
+    git config --global user.email you@example.com
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+ 2 files changed, 2 insertions(+)
+ create mode 100644 .gitignore
+ create mode 100644 README.md
+[master 9c17327] second commit.
+ Committer: root <root@e2b.local>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly:
+
+    git config --global user.name "Your Name"
+    git config --global user.email you@example.com
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+    ✔ isDirty #unit
+hint: Using 'master' as the name for the initial branch. This default branch name
+hint: is subject to change. To configure the initial branch name to use in all
+hint: of your new repositories, which will suppress this warning, call:
+hint: 
+hint: 	git config --global init.defaultBranch <name>
+hint: 
+hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+hint: 'development'. The just-created branch can be renamed via this command:
+hint: 
+hint: 	git branch -m <name>
+Initialized empty Git repository in /root/repo/test/tmp/0b35c261a1dc0e08a239f510b73759dd/.git/
+Switched to a new branch 'master'
+[master (root-commit) 8700e22] initial commit.
+ Committer: root <root@e2b.local>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly:
+
+    git config --global user.name "Your Name"
+    git config --global user.email you@example.com
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+ 2 files changed, 2 insertions(+)
+ create mode 100644 .gitignore
+ create mode 100644 README.md
+[master 9c17327] second commit.
+ Committer: root <root@e2b.local>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly:
+
+    git config --global user.name "Your Name"
+    git config --global user.email you@example.com
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+    ✔ isDirty #unit with new file
+hint: Using 'master' as the name for the initial branch. This default branch name
+hint: is subject to change. To configure the initial branch name to use in all
+hint: of your new repositories, which will suppress this warning, call:
+hint: 
+hint: 	git config --global init.defaultBranch <name>
+hint: 
+hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+hint: 'development'. The just-created branch can be renamed via this command:
+hint: 
+hint: 	git branch -m <name>
+Initialized empty Git repository in /root/repo/test/tmp/a3e0f5667b2f6dfc4aec2edbfbdad352/.git/
+Switched to a new branch 'master'
+[master (root-commit) 71f95fe] initial commit.
+ Committer: root <root@e2b.local>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly:
+
+    git config --global user.name "Your Name"
+    git config --global user.email you@example.com
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+ 2 files changed, 2 insertions(+)
+ create mode 100644 .gitignore
+ create mode 100644 README.md
+[master 7c668ca] second commit.
+ Committer: root <root@e2b.local>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly:
+
+    git config --global user.name "Your Name"
+    git config --global user.email you@example.com
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+    ✔ isDirty #unit with staged file (94ms)
+hint: Using 'master' as the name for the initial branch. This default branch name
+hint: is subject to change. To configure the initial branch name to use in all
+hint: of your new repositories, which will suppress this warning, call:
+hint: 
+hint: 	git config --global init.defaultBranch <name>
+hint: 
+hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+hint: 'development'. The just-created branch can be renamed via this command:
+hint: 
+hint: 	git branch -m <name>
+Initialized empty Git repository in /root/repo/test/tmp/80aefe52e4d90bc0697f92aca1219b60/.git/
+Switched to a new branch 'master'
+[master (root-commit) 71f95fe] initial commit.
+ Committer: root <root@e2b.local>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly:
+
+    git config --global user.name "Your Name"
+    git config --global user.email you@example.com
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+ 2 files changed, 2 insertions(+)
+ create mode 100644 .gitignore
+ create mode 100644 README.md
+[master 7c668ca] second commit.
+ Committer: root <root@e2b.local>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly:
+
+    git config --global user.name "Your Name"
+    git config --global user.email you@example.com
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+    ✔ isDirty #unit with deleted file
+hint: Using 'master' as the name for the initial branch. This default branch name
+hint: is subject to change. To configure the initial branch name to use in all
+hint: of your new repositories, which will suppress this warning, call:
+hint: 
+hint: 	git config --global init.defaultBranch <name>
+hint: 
+hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+hint: 'development'. The just-created branch can be renamed via this command:
+hint: 
+hint: 	git branch -m <name>
+Initialized empty Git repository in /root/repo/test/tmp/b34261fcebb09a2a50899c63b009c175/.git/
+Switched to a new branch 'master'
+[master (root-commit) 2f1a998] initial commit.
+ Committer: root <root@e2b.local>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly:
+
+    git config --global user.name "Your Name"
+    git config --global user.email you@example.com
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+ 2 files changed, 2 insertions(+)
+ create mode 100644 .gitignore
+ create mode 100644 README.md
+[master 8f8e863] second commit.
+ Committer: root <root@e2b.local>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly:
+
+    git config --global user.name "Your Name"
+    git config --global user.email you@example.com
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+    ✔ isDirty #unit with globally excluded file
+hint: Using 'master' as the name for the initial branch. This default branch name
+hint: is subject to change. To configure the initial branch name to use in all
+hint: of your new repositories, which will suppress this warning, call:
+hint: 
+hint: 	git config --global init.defaultBranch <name>
+hint: 
+hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+hint: 'development'. The just-created branch can be renamed via this command:
+hint: 
+hint: 	git branch -m <name>
+Initialized empty Git repository in /root/repo/test/tmp/6d18f54934395bcd0be729f8fc9a6785/.git/
+Switched to a new branch 'master'
+[master (root-commit) 2f1a998] initial commit.
+ Committer: root <root@e2b.local>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly:
+
+    git config --global user.name "Your Name"
+    git config --global user.email you@example.com
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+ 2 files changed, 2 insertions(+)
+ create mode 100644 .gitignore
+ create mode 100644 README.md
+[master 8f8e863] second commit.
+ Committer: root <root@e2b.local>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly:
+
+    git config --global user.name "Your Name"
+    git config --global user.email you@example.com
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+    ✔ isDirty #unit with unix socket
+hint: Using 'master' as the name for the initial branch. This default branch name
+hint: is subject to change. To configure the initial branch name to use in all
+hint: of your new repositories, which will suppress this warning, call:
+hint: 
+hint: 	git config --global init.defaultBranch <name>
+hint: 
+hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+hint: 'development'. The just-created branch can be renamed via this command:
+hint: 
+hint: 	git branch -m <name>
+Initialized empty Git repository in /root/repo/test/tmp/3e009b8eb3c9fdcfafd7021f50265f0c/.git/
+Switched to a new branch 'master'
+[master (root-commit) 2f1a998] initial commit.
+ Committer: root <root@e2b.local>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly:
+
+    git config --global user.name "Your Name"
+    git config --global user.email you@example.com
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+ 2 files changed, 2 insertions(+)
+ create mode 100644 .gitignore
+ create mode 100644 README.md
+[master 8f8e863] second commit.
+ Committer: root <root@e2b.local>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly:
+
+    git config --global user.name "Your Name"
+    git config --global user.email you@example.com
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+    ✔ getRepository #unit (75ms)
+hint: Using 'master' as the name for the initial branch. This default branch name
+hint: is subject to change. To configure the initial branch name to use in all
+hint: of your new repositories, which will suppress this warning, call:
+hint: 
+hint: 	git config --global init.defaultBranch <name>
+hint: 
+hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+hint: 'development'. The just-created branch can be renamed via this command:
+hint: 
+hint: 	git branch -m <name>
+Initialized empty Git repository in /root/repo/test/tmp/d1e599aa2972ef1c14ea2450e9e7813e/.git/
+Switched to a new branch 'master'
+[master (root-commit) a422120] initial commit.
+ Committer: root <root@e2b.local>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly:
+
+    git config --global user.name "Your Name"
+    git config --global user.email you@example.com
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+ 2 files changed, 2 insertions(+)
+ create mode 100644 .gitignore
+ create mode 100644 README.md
+[master a9de4a8] second commit.
+ Committer: root <root@e2b.local>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly:
+
+    git config --global user.name "Your Name"
+    git config --global user.email you@example.com
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+    ✔ getRepository (local) #unit
+hint: Using 'master' as the name for the initial branch. This default branch name
+hint: is subject to change. To configure the initial branch name to use in all
+hint: of your new repositories, which will suppress this warning, call:
+hint: 
+hint: 	git config --global init.defaultBranch <name>
+hint: 
+hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+hint: 'development'. The just-created branch can be renamed via this command:
+hint: 
+hint: 	git branch -m <name>
+Initialized empty Git repository in /root/repo/test/tmp/cd0165ac82659782bd6d86ba9ad39f57/.git/
+Switched to a new branch 'master'
+[master (root-commit) a422120] initial commit.
+ Committer: root <root@e2b.local>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly:
+
+    git config --global user.name "Your Name"
+    git config --global user.email you@example.com
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+ 2 files changed, 2 insertions(+)
+ create mode 100644 .gitignore
+ create mode 100644 README.md
+[master a9de4a8] second commit.
+ Committer: root <root@e2b.local>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly:
+
+    git config --global user.name "Your Name"
+    git config --global user.email you@example.com
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+    ✔ getCurrentRevision #unit
+hint: Using 'master' as the name for the initial branch. This default branch name
+hint: is subject to change. To configure the initial branch name to use in all
+hint: of your new repositories, which will suppress this warning, call:
+hint: 
+hint: 	git config --global init.defaultBranch <name>
+hint: 
+hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+hint: 'development'. The just-created branch can be renamed via this command:
+hint: 
+hint: 	git branch -m <name>
+Initialized empty Git repository in /root/repo/test/tmp/d431bf1ce6608570fcec507b6077da40/.git/
+Switched to a new branch 'master'
+[master (root-commit) 803d28b] initial commit.
+ Committer: root <root@e2b.local>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly:
+
+    git config --global user.name "Your Name"
+    git config --global user.email you@example.com
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+ 2 files changed, 2 insertions(+)
+ create mode 100644 .gitignore
+ create mode 100644 README.md
+[master e39efba] second commit.
+ Committer: root <root@e2b.local>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly:
+
+    git config --global user.name "Your Name"
+    git config --global user.email you@example.com
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+    ✔ isIgnored
+hint: Using 'master' as the name for the initial branch. This default branch name
+hint: is subject to change. To configure the initial branch name to use in all
+hint: of your new repositories, which will suppress this warning, call:
+hint: 
+hint: 	git config --global init.defaultBranch <name>
+hint: 
+hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+hint: 'development'. The just-created branch can be renamed via this command:
+hint: 
+hint: 	git branch -m <name>
+Initialized empty Git repository in /root/repo/test/tmp/46a6cac88236ab0f30d1b6481b12ec28/.git/
+Switched to a new branch 'master'
+[master (root-commit) 803d28b] initial commit.
+ Committer: root <root@e2b.local>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly:
+
+    git config --global user.name "Your Name"
+    git config --global user.email you@example.com
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+ 2 files changed, 2 insertions(+)
+ create mode 100644 .gitignore
+ create mode 100644 README.md
+[master e39efba] second commit.
+ Committer: root <root@e2b.local>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly:
+
+    git config --global user.name "Your Name"
+    git config --global user.email you@example.com
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+    ✔ isIgnored works outside git
+
+  Tests against the helix-cli repo
+    ✔ resolveCommit resolves the correct commit for tags
+    ✔ resolveCommit resolves the correct commit for shortened OID
+    ✔ resolveCommit throws for unknown ref
+    ✔ resolveCommit throws for invalid argument type
+    1) getRawContent gets the correct version
+
+  Test hlx hack
+    ✔ hlx hack works (53ms)
+    ✔ hlx hack opens browser
+
+  Head.html replacement tests
+    ✔ replaces the head html within <head> tags
+    ✔ replaces the empty head html at the end
+    ✔ replaces the head html with empty string
+head.html ignored: remote not found in HTML.
+    ✔ doesnt replace html if no <head> tag
+error while loading local head.html from /root/repo/head.html: ENOENT
+error while loading head.html from https://main--helix-website--adobe.aem.page/head.html: 401
+Trace: head.html ignored: not modified locally.
+    at HeadHtmlSupport.replace (file:///root/repo/src/server/HeadHtmlSupport.js:168:16)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async Context.<anonymous> (file:///root/repo/test/head-html.test.js:110:24)
+    ✔ doesnt replace html if not modified (446ms)
+
+  Head.html loading tests
+loaded local head.html from from /root/repo/test/tmp/8be6fa2009033867848581e7f7ffd8b9/project/head.html
+    ✔ loads local head.html
+error while loading local head.html from /root/repo/test/tmp/c6cfabbc5f807f8b86d722131b33e907/project-not-exist/head.html: ENOENT
+    ✔ loads missing head.html
+loaded remote head.html from from https://main--blog--adobe.aem.page/head.html
+    ✔ loads remote head.html
+error while loading head.html from https://main--blog--adobe.aem.page/head.html: 404
+    ✔ loads missing remote head.html
+loaded local head.html from from /root/repo/test/tmp/4b15d592e0617ba2c913e041e9bc8b81/project/head.html
+loaded remote head.html from from https://main--blog--adobe.aem.page/head.html
+    ✔ update loads local and remote head.html
+Trace: registering head-html cookie to  foobar
+    at HeadHtmlSupport.setCookie (file:///root/repo/src/server/HeadHtmlSupport.js:128:16)
+    at Context.<anonymous> (file:///root/repo/test/head-html.test.js:243:9)
+loaded remote head.html from from https://main--blog--adobe.aem.page/head.html
+    ✔ update loads remote head.html with cookie
+loaded remote head.html from from https://main--blog--adobe.aem.page/head.html
+    ✔ update loads remote head.html with site token
+error while loading head.html from https://main--blog--adobe.aem.page/head.html: 404
+    ✔ update loads remote head.html can handle errors
+loaded local head.html from from /root/repo/test/tmp/cbaffb68684b39a6c6655f2e87b8cbe9/project/head.html
+loaded remote head.html from from https://main--blog--adobe.aem.page/head.html
+    ✔ update loads local and remote head.html (not modified)
+    ✔ update sets modified to false if local status failed
+    ✔ invalidate local invalidates the status
+    ✔ update sets modified to false if remote status failed
+
+  hlx import
+    ✔ hlx import runs w/o arguments (87ms)
+[dotenv@17.2.0] injecting env (39) from test/fixtures/all.env (tip: 🔐 prevent committing .env to code: https://dotenvx.com/precommit)
+    ✔ hlx import can use env (101ms)
+    ✔ hlx import fails with non env extra argument (81ms)
+    ✔ hlx import can disable open browser with --no-open option (85ms)
+    ✔ hlx import can disable open browser with --open option (83ms)
+    ✔ hlx import can open browser with custom url (90ms)
+    ✔ hlx import can specify port number to run proxy server on (82ms)
+    ✔ hlx import can specify bind address to run development server on (79ms)
+    ✔ hlx import can enable cache (79ms)
+    ✔ hlx import can disable kill (89ms)
+    ✔ hlx import can skip ui install (81ms)
+    ✔ hlx import can change ui repo (79ms)
+    ✔ hlx import can add custom headers (80ms)
+
+  Integration test for import command
+    ✔ import command delivers correct response without cache (103ms)
+    ✔ import command delivers correct response with update host 
+    ✔ import command gets rid of referrer
+    ✔ import command with headers file
+
+  Integration test for import command with cache
+    ✔ up command delivers correct cached response. (154ms)
+    ✔ up command delivers POST requests.
+
+  Import command - importer ui
