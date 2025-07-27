@@ -13,11 +13,14 @@ import readline from 'readline';
 import fs from 'fs';
 import path from 'path';
 import { AbstractCommand } from './abstract.cmd.js';
+import { getFetch } from './fetch-utils.js';
 
 export default class MCPCommand extends AbstractCommand {
   constructor(logger) {
     super(logger);
     this._tools = [];
+    this._resources = [];
+    this._resourcesFetched = false;
   }
 
   withTools(tools) {
@@ -99,9 +102,9 @@ export default class MCPCommand extends AbstractCommand {
         tools: this._tools,
       });
     } else if (method === 'resources/list') {
-      this.sendResponse(id, {
-        resources: [],
-      });
+      this.handleResourcesList(id);
+    } else if (method === 'resources/read') {
+      this.handleResourcesRead(request, id);
     } else if (method === 'prompts/list') {
       this.sendResponse(id, {
         prompts: [],
@@ -112,6 +115,93 @@ export default class MCPCommand extends AbstractCommand {
       this.sendResponse(id, {});
     } else {
       this.sendErrorResponse(id, -32601, 'Method not found');
+    }
+  }
+
+  async fetchDocResources() {
+    if (this._resourcesFetched) {
+      return this._resources;
+    }
+
+    try {
+      const fetch = getFetch();
+      const response = await fetch('https://www.aem.live/docpages-index.json');
+
+      if (!response.ok) {
+        this.log.error(`Failed to fetch documentation: ${response.status} ${response.statusText}`);
+        return [];
+      }
+
+      const data = await response.json();
+
+      if (data && Array.isArray(data.data)) {
+        // Transform the data into the format required by MCP
+        this._resources = data.data.map((doc) => ({
+          uri: `https://www.aem.live${doc.path}.md`,
+          name: doc.title,
+          description: doc.description,
+          mimeType: 'text/markdown',
+        }));
+
+        this._resourcesFetched = true;
+      }
+    } catch (error) {
+      this.log.error(`Error fetching documentation resources: ${error.message}`);
+    }
+
+    return this._resources;
+  }
+
+  async handleResourcesList(id) {
+    await this.fetchDocResources();
+    this.sendResponse(id, {
+      resources: this._resources,
+    });
+  }
+
+  async handleResourcesRead(request, id) {
+    const { uri } = request.params;
+
+    if (!uri || typeof uri !== 'string') {
+      this.sendErrorResponse(id, -32602, 'Invalid params: uri is required');
+      return;
+    }
+
+    try {
+      const fetch = getFetch();
+      // Extract the path from the URI
+      // URI format: https://www.aem.live/path/to/resource.md
+      const aemLivePrefix = 'https://www.aem.live';
+
+      if (!uri.startsWith(aemLivePrefix)) {
+        this.sendErrorResponse(id, -32602, `Invalid URI: ${uri}`);
+        return;
+      }
+
+      // Fetch the resource content using the full URI
+      const response = await fetch(uri);
+
+      if (!response.ok) {
+        this.log.error(`Failed to fetch resource: ${response.status} ${response.statusText}`);
+        this.sendErrorResponse(id, -32603, `Failed to fetch resource: ${response.status} ${response.statusText}`);
+        return;
+      }
+
+      // Get the content as text
+      const text = await response.text();
+
+      this.sendResponse(id, {
+        contents: [
+          {
+            uri,
+            mimeType: 'text/markdown',
+            text,
+          },
+        ],
+      });
+    } catch (error) {
+      this.log.error(`Error reading resource: ${error.message}`);
+      this.sendErrorResponse(id, -32603, `Error reading resource: ${error.message}`);
     }
   }
 
