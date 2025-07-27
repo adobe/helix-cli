@@ -21,6 +21,8 @@ jobs:
         with:
           node-version: '22.x'
       - run: npm ci
+      - name: Install Playwright dependencies
+        run: npx playwright install-deps
       - run: git config --global user.email "test@project-helix.io" && git config --global user.name "Test Build"
       - run: git config --global protocol.file.allow always
       - run: npm run lint
