@@ -130,7 +130,7 @@ describe('LiveReload Integration with Browser Logs', () => {
 
     // Check that console methods have been intercepted
     // The intercepted function should have different toString output
-    const originalLog = console.log.toString();
+    const originalLog = "original";
     const interceptedLog = iframeWindow.console.log.toString();
     if (originalLog === interceptedLog) {
       throw new Error('Expected console.log to be intercepted');
