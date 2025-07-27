@@ -134,7 +134,6 @@ describe('LiveReload Integration with Browser Logs', () => {
 
     // Check that console methods have been intercepted
     // The intercepted function should have different toString output
-    const originalLog = 'original';
     const interceptedLog = iframeWindow.console.log.toString();
     if (!interceptedLog || interceptedLog.includes('native code')) {
       throw new Error('Expected console.log to be intercepted');
@@ -144,4 +143,3 @@ describe('LiveReload Integration with Browser Logs', () => {
     document.body.removeChild(iframe);
   });
 });
-

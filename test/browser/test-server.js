@@ -31,7 +31,7 @@ export async function testServerCommand(command, payload) {
 
       // Create test project directory
       const testProjectDir = path.join(dirname, '../fixtures/test-browser-project');
-      
+
       // Create a test logger that captures logs
       const logs = [];
       const testLogger = {
@@ -52,7 +52,7 @@ export async function testServerCommand(command, payload) {
 
       await project.init();
       await project.start();
-      
+
       testServer = project;
 
       return {
