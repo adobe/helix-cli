@@ -10,9 +10,9 @@
  * governing permissions and limitations under the License.
  */
 
-import { HelixProject } from '../../src/server/HelixProject.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { HelixProject } from '../../src/server/HelixProject.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -31,7 +31,7 @@ export async function testServerCommand(command, payload) {
 
       // Create test project directory
       const testProjectDir = path.join(__dirname, '../fixtures/test-browser-project');
-      
+
       // Create a test logger that captures logs
       const logs = [];
       const testLogger = {
@@ -52,7 +52,7 @@ export async function testServerCommand(command, payload) {
 
       await project.init();
       await project.start();
-      
+
       testServer = project;
 
       return {

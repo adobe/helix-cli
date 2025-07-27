@@ -11,8 +11,8 @@
  */
 
 /* eslint-env mocha, browser */
+/* global window, document */
 
-import { expect } from '@esm-bundle/chai';
 import { executeServerCommand } from '@web/test-runner-commands';
 
 describe('LiveReload Integration with Browser Logs', () => {
@@ -39,9 +39,15 @@ describe('LiveReload Integration with Browser Logs', () => {
     const html = await response.text();
 
     // Check that the interceptor script is injected
-    expect(html).to.include('// Store original console methods');
-    expect(html).to.include('function serializeArgs');
-    expect(html).to.include('window.LiveReload.connector.socket.send');
+    if (!html.includes('// Store original console methods')) {
+      throw new Error('Expected HTML to include console interceptor script');
+    }
+    if (!html.includes('function serializeArgs')) {
+      throw new Error('Expected HTML to include serializeArgs function');
+    }
+    if (!html.includes('window.LiveReload.connector.socket.send')) {
+      throw new Error('Expected HTML to include WebSocket send code');
+    }
   });
 
   it('should establish WebSocket connection and receive log commands', async () => {
@@ -72,23 +78,31 @@ describe('LiveReload Integration with Browser Logs', () => {
     }));
 
     // Wait for processing
-    await new Promise(resolve => setTimeout(resolve, 100));
+    await new Promise((resolve) => setTimeout(resolve, 100));
 
     // Close connection
     ws.close();
 
     // Check that hello response was received
-    const helloResponse = messages.find(m => m.command === 'hello');
-    expect(helloResponse).to.exist;
-    expect(helloResponse.serverName).to.equal('aem-simulator');
+    const helloResponse = messages.find((m) => m.command === 'hello');
+    if (!helloResponse) {
+      throw new Error('Expected to receive hello response');
+    }
+    if (helloResponse.serverName !== 'aem-simulator') {
+      throw new Error(`Expected serverName to be 'aem-simulator', got '${helloResponse.serverName}'`);
+    }
   });
 
   it('should load livereload.js script', async () => {
     const response = await fetch(`http://localhost:${testPort}/__internal__/livereload.js`);
-    expect(response.status).to.equal(200);
-    
+    if (response.status !== 200) {
+      throw new Error(`Expected status 200, got ${response.status}`);
+    }
+
     const script = await response.text();
-    expect(script).to.include('LiveReload');
+    if (!script.includes('LiveReload')) {
+      throw new Error('Expected livereload.js to include LiveReload');
+    }
   });
 
   it('should handle page with injected script and console forwarding', async () => {
@@ -115,7 +129,12 @@ describe('LiveReload Integration with Browser Logs', () => {
     });
 
     // Check that console methods have been intercepted
-    expect(iframeWindow.console.log).to.not.equal(iframeWindow.console.log.toString());
+    // The intercepted function should have different toString output
+    const originalLog = console.log.toString();
+    const interceptedLog = iframeWindow.console.log.toString();
+    if (originalLog === interceptedLog) {
+      throw new Error('Expected console.log to be intercepted');
+    }
 
     // Clean up
     document.body.removeChild(iframe);

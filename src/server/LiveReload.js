@@ -82,7 +82,9 @@ class ClientConnection extends EventEmitter {
   }
 
   _cmdLog(data) {
-    const { level = 'log', args = [], url = 'unknown', line } = data;
+    const {
+      level = 'log', args = [], url = 'unknown', line,
+    } = data;
     const timestamp = new Date().toISOString();
     const location = line ? `${url}:${line}` : url;
 
@@ -90,7 +92,7 @@ class ClientConnection extends EventEmitter {
     const prefix = `[Browser:${level}] ${timestamp} ${location}`;
 
     // Serialize args safely
-    const message = args.map(arg => {
+    const message = args.map((arg) => {
       try {
         return typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg);
       } catch (e) {

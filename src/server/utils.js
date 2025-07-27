@@ -104,7 +104,7 @@ window.LiveReloadOptions = {
         newbody += `<script${nonce}>window.LiveReloadOptions={port:${server.port},host:location.hostname,https:${server.scheme === 'https'}};</script>`;
       }
       newbody += `<script${nonce} src="/__internal__/livereload.js"></script>`;
-      
+
       // Inject console interceptor if browser log forwarding is enabled
       if (server.forwardBrowserLogs) {
         newbody += `<script${nonce}>
@@ -172,7 +172,7 @@ window.LiveReloadOptions = {
 })();
 </script>`;
       }
-      
+
       newbody += body.substring(index);
       return newbody;
     }
