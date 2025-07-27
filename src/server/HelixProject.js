@@ -32,6 +32,11 @@ export class HelixProject extends BaseProject {
     return this;
   }
 
+  withForwardBrowserLogs(value) {
+    this._server.withForwardBrowserLogs(value);
+    return this;
+  }
+
   withSiteToken(value) {
     this.siteToken = value;
     this._server.withSiteToken(value);

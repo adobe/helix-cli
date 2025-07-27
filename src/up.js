@@ -97,10 +97,16 @@ export default function up() {
           describe: 'Path to local folder to cache the responses (note: this is an alpha feature, it may be removed without notice)',
           type: 'string',
         })
-        .group(['url', 'livereload', 'no-livereload', 'open', 'no-open', 'print-index', 'cache'], 'AEM Options')
+        .group(['url', 'livereload', 'no-livereload', 'open', 'no-open', 'print-index', 'cache', 'forward-browser-logs'], 'AEM Options')
         .option('allow-insecure', {
           alias: 'allowInsecure',
           describe: 'Whether to allow insecure requests to the server',
+          type: 'boolean',
+          default: false,
+        })
+        .option('forward-browser-logs', {
+          alias: 'forwardBrowserLogs',
+          describe: 'Forward browser console logs to terminal',
           type: 'boolean',
           default: false,
         })
@@ -122,6 +128,7 @@ export default function up() {
         .withOpen(path.basename(argv.$0) === 'aem' ? argv.open : false)
         .withTLS(argv.tlsKey, argv.tlsCert)
         .withLiveReload(argv.livereload)
+        .withForwardBrowserLogs(argv.forwardBrowserLogs)
         .withSiteToken(argv.siteToken || await getSiteTokenFromFile())
         .withUrl(argv.url)
         .withPrintIndex(argv.printIndex)

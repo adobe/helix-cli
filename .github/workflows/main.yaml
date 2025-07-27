@@ -21,6 +21,8 @@ jobs:
         with:
           node-version: '22.x'
       - run: npm ci
+      - name: Install Playwright dependencies
+        run: npx playwright install-deps
       - run: git config --global user.email "test@project-helix.io" && git config --global user.name "Test Build"
       - run: git config --global protocol.file.allow always
       - run: npm run lint
@@ -30,6 +32,8 @@ jobs:
       - uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./coverage/lcov.info,./coverage-browser/lcov.info
+          flags: unittests,browsertests
       - name: Semantic Release (Dry Run)
         run: npm run semantic-release-dry
         env:
