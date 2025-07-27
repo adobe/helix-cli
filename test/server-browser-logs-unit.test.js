@@ -33,46 +33,36 @@ describe('Browser Log Forwarding (Unit Tests)', () => {
 
   describe('LiveReload log command handling', () => {
     it('should process log command with proper formatting', () => {
-      
-      
-      // Create a mock client connection with the _cmdLog method
-      const ClientConnection = function(req, socket, head, logger) {
-        this.id = 'test-1';
-        this.log = logger;
-      };
-      
-      // Copy the _cmdLog method from LiveReload's ClientConnection
-      // We'll test it by creating a minimal connection object
-      const connection = new ClientConnection(null, null, null, testLogger);
-      
-      // Manually invoke the log handling logic
+      // Manually invoke the log handling logic (simulating _cmdLog method)
       const data = {
         level: 'error',
         args: ['Test error', { foo: 'bar' }],
         url: 'http://localhost:3000/test.js',
         line: '42',
       };
-      
+
       // Simulate what _cmdLog does
-      const { level = 'log', args = [], url = 'unknown', line } = data;
+      const {
+        level = 'log', args = [], url = 'unknown', line,
+      } = data;
       const timestamp = new Date().toISOString();
       const location = line ? `${url}:${line}` : url;
       const prefix = `[Browser:${level}] ${timestamp} ${location}`;
-      const message = args.map(arg => {
+      const message = args.map((arg) => {
         try {
           return typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg);
         } catch (e) {
           return '[Circular or Complex Object]';
         }
       }).join(' ');
-      
+
       const logMethod = testLogger[level] || testLogger.info;
       logMethod(`${prefix} ${message}`);
 
       assert(logs.length > 0, 'Log should be captured');
       const logEntry = logs[0];
       assert.equal(logEntry.level, 'error', 'Should use error level');
-      
+
       const logMessage = logEntry.args.join(' ');
       assert(logMessage.includes('[Browser:error]'), 'Should have browser prefix');
       assert(logMessage.includes('http://localhost:3000/test.js:42'), 'Should include location');
@@ -85,19 +75,21 @@ describe('Browser Log Forwarding (Unit Tests)', () => {
       const data = {
         args: ['Simple message'],
       };
-      
-      const { level = 'log', args = [], url = 'unknown', line } = data;
+
+      const {
+        level = 'log', args = [], url = 'unknown', line,
+      } = data;
       const timestamp = new Date().toISOString();
       const location = line ? `${url}:${line}` : url;
       const prefix = `[Browser:${level}] ${timestamp} ${location}`;
-      const message = args.map(arg => String(arg)).join(' ');
-      
+      const message = args.map((arg) => String(arg)).join(' ');
+
       const logMethod = testLogger[level] || testLogger.info;
       logMethod(`${prefix} ${message}`);
 
       const logEntry = logs[0];
       assert.equal(logEntry.level, 'log', 'Should default to log level');
-      
+
       const logMessage = logEntry.args.join(' ');
       assert(logMessage.includes('[Browser:log]'), 'Should default to log level');
       assert(logMessage.includes('unknown'), 'Should use unknown for missing URL');
@@ -115,19 +107,21 @@ describe('Browser Log Forwarding (Unit Tests)', () => {
         url: 'test.js',
         line: '10',
       };
-      
-      const { level = 'log', args = [], url = 'unknown', line } = data;
+
+      const {
+        level = 'log', args = [], url = 'unknown', line,
+      } = data;
       const timestamp = new Date().toISOString();
       const location = line ? `${url}:${line}` : url;
       const prefix = `[Browser:${level}] ${timestamp} ${location}`;
-      const message = args.map(arg => {
+      const message = args.map((arg) => {
         try {
           return typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg);
         } catch (e) {
           return '[Circular or Complex Object]';
         }
       }).join(' ');
-      
+
       const logMethod = testLogger[level] || testLogger.info;
       logMethod(`${prefix} ${message}`);
 
@@ -188,12 +182,12 @@ describe('Browser Log Forwarding (Unit Tests)', () => {
   describe('Configuration propagation', () => {
     it('should propagate forwardBrowserLogs through LiveReload methods', () => {
       const liveReload = new LiveReload(testLogger);
-      
+
       assert.equal(liveReload.forwardBrowserLogs, false, 'Should default to false');
-      
+
       liveReload.withForwardBrowserLogs(true);
       assert.equal(liveReload.forwardBrowserLogs, true, 'Should be enabled');
-      
+
       liveReload.withForwardBrowserLogs(false);
       assert.equal(liveReload.forwardBrowserLogs, false, 'Should be disabled');
     });
