@@ -78,7 +78,11 @@ describe('LiveReload Integration with Browser Logs', () => {
     }));
 
     // Wait for processing
-    await new Promise((resolve) => setTimeout(resolve, 100));
+    await new Promise((resolve) => {
+      setTimeout(() => {
+        resolve();
+      }, 100);
+    });
 
     // Close connection
     ws.close();
@@ -130,7 +134,7 @@ describe('LiveReload Integration with Browser Logs', () => {
 
     // Check that console methods have been intercepted
     // The intercepted function should have different toString output
-    const originalLog = "original";
+    const originalLog = 'original';
     const interceptedLog = iframeWindow.console.log.toString();
     if (originalLog === interceptedLog) {
       throw new Error('Expected console.log to be intercepted');

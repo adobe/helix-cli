@@ -12,9 +12,9 @@
  * governing permissions and limitations under the License.
  */
 
+import { config } from 'dotenv';
 import CLI from './src/cli.js';
 import { checkNodeVersion, validateDotEnv } from './src/config/config-utils.js';
-import { config } from 'dotenv';
 
 config({ quiet: true });
 
