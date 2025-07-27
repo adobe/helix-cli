@@ -33,17 +33,18 @@ describe('Browser Log Forwarding (Unit Tests)', () => {
 
   describe('LiveReload log command handling', () => {
     it('should process log command with proper formatting', () => {
-      const liveReload = new LiveReload(testLogger);
+      // Create LiveReload instance (not used directly but validates initialization)
+      const _liveReload = new LiveReload(testLogger);
       
       // Create a mock client connection with the _cmdLog method
-      const ClientConnection = function(req, socket, head, logger) {
+      const ClientConnection = function ClientConnectionMock(req, socket, head, logger) {
         this.id = 'test-1';
         this.log = logger;
       };
       
       // Copy the _cmdLog method from LiveReload's ClientConnection
       // We'll test it by creating a minimal connection object
-      const connection = new ClientConnection(null, null, null, testLogger);
+      const _connection = new ClientConnection(null, null, null, testLogger);
       
       // Manually invoke the log handling logic
       const data = {

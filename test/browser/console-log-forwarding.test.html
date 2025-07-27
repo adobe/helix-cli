@@ -4,8 +4,45 @@
   <meta charset="UTF-8">
   <title>Browser Console Log Forwarding Tests</title>
   <script type="module">
-    import { expect } from '@esm-bundle/chai';
     import { executeServerCommand } from '@web/test-runner-commands';
+    
+    // Simple assertion helpers
+    const expect = (actual) => ({
+      to: {
+        equal: (expected) => {
+          if (actual !== expected) {
+            throw new Error(`Expected ${actual} to equal ${expected}`);
+          }
+        },
+        deep: {
+          equal: (expected) => {
+            if (JSON.stringify(actual) !== JSON.stringify(expected)) {
+              throw new Error(`Expected ${JSON.stringify(actual)} to deep equal ${JSON.stringify(expected)}`);
+            }
+          }
+        },
+        have: {
+          lengthOf: (length) => {
+            if (actual.length !== length) {
+              throw new Error(`Expected length ${actual.length} to equal ${length}`);
+            }
+          },
+          property: (prop, value) => {
+            if (!(prop in actual)) {
+              throw new Error(`Expected object to have property ${prop}`);
+            }
+            if (value !== undefined && actual[prop] !== value) {
+              throw new Error(`Expected property ${prop} to equal ${value}, got ${actual[prop]}`);
+            }
+          }
+        },
+        include: (substring) => {
+          if (!actual.includes(substring)) {
+            throw new Error(`Expected "${actual}" to include "${substring}"`);
+          }
+        }
+      }
+    });
 
     describe('Browser Console Log Forwarding', () => {
       let ws;

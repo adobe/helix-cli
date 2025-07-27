@@ -10,11 +10,11 @@
  * governing permissions and limitations under the License.
  */
 
-import { HelixProject } from '../../src/server/HelixProject.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { HelixProject } from '../../src/server/HelixProject.js';
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const dirname = path.dirname(fileURLToPath(import.meta.url));
 
 // Test server instance
 let testServer = null;
@@ -30,7 +30,7 @@ export async function testServerCommand(command, payload) {
       }
 
       // Create test project directory
-      const testProjectDir = path.join(__dirname, '../fixtures/test-browser-project');
+      const testProjectDir = path.join(dirname, '../fixtures/test-browser-project');
       
       // Create a test logger that captures logs
       const logs = [];
@@ -74,7 +74,9 @@ export async function testServerCommand(command, payload) {
       if (!testServer) {
         throw new Error('No test server running');
       }
-      return { logs: testServer._logger.logs || [] };
+      // Access logger logs if available
+      const serverLogger = testServer.logger || {};
+      return { logs: serverLogger.logs || [] };
     }
 
     default:
