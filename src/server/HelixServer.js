@@ -32,6 +32,7 @@ export class HelixServer extends BaseServer {
     super(project);
     this._liveReload = null;
     this._enableLiveReload = false;
+    this._forwardBrowserLogs = false;
     this._app.use(compression());
     this._autoLogin = true;
     this._cookies = false;
@@ -40,6 +41,15 @@ export class HelixServer extends BaseServer {
   withLiveReload(value) {
     this._enableLiveReload = value;
     return this;
+  }
+
+  withForwardBrowserLogs(value) {
+    this._forwardBrowserLogs = value;
+    return this;
+  }
+
+  get forwardBrowserLogs() {
+    return this._forwardBrowserLogs;
   }
 
   withSiteToken(value) {
@@ -225,6 +235,7 @@ export class HelixServer extends BaseServer {
     await super.setupApp();
     if (this._enableLiveReload) {
       this._liveReload = new LiveReload(this.log);
+      this._liveReload.withForwardBrowserLogs(this._forwardBrowserLogs);
       await this._liveReload.init(this.app, this._server);
     }
 

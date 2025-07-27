@@ -56,6 +56,24 @@ $ aem up
 The `--open` argument takes a path, eg `--open=/products/`, will cause the browser to be openend
 at the specific location. Disable with `--no-open'.`
 
+### browser console log forwarding
+
+The `--forward-browser-logs` flag enables forwarding of browser console messages (log, error, warn, info) to the terminal. This is particularly useful for debugging client-side issues without having to open the browser's developer tools.
+
+```
+$ aem up --forward-browser-logs
+```
+
+When enabled, browser console messages will appear in your terminal with the following format:
+```
+[Browser:error] 2025-07-27T10:30:45.123Z http://localhost:3000/script.js:42 Error message here
+```
+
+This feature is especially helpful when:
+- Debugging JavaScript errors in a headless environment
+- Monitoring client-side behavior during development
+- Working with AI coding assistants that need visibility into both server and client logs
+
 ### setting up a self-signed cert for using https
 
 1. create the certificate
@@ -142,6 +160,7 @@ If present, `ALL_PROXY` is used as fallback if there is no other match.
 | `--addr`          | `AEM_ADDR`          | `127.0.0.1` | Development server bind address                             |
 | `--livereload`    | `AEM_LIVERELOAD`    | `true`      | Enable automatic reloading of modified sources in browser.  |
 | `--no-livereload` | `AEM_NO_LIVERELOAD` | `false`     | Disable live-reload.                                        |
+| `--forward-browser-logs` | `AEM_FORWARD_BROWSER_LOGS` | `false` | Forward browser console logs to terminal.            |
 | `--open`          | `AEM_OPEN`          | `/`         | Open a browser window at specified path after server start. |
 | `--no-open`       | `AEM_NO_OPEN`       | `false`     | Disable automatic opening of browser window.                |
 | `--tls-key`       | `AEM_TLS_KEY`       | undefined   | Path to .key file (for enabling TLS)                        |
