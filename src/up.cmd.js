@@ -24,6 +24,11 @@ export default class UpCommand extends AbstractServerCommand {
     return this;
   }
 
+  withForwardBrowserLogs(value) {
+    this._forwardBrowserLogs = value;
+    return this;
+  }
+
   withUrl(value) {
     this._url = value;
     return this;
@@ -72,6 +77,7 @@ export default class UpCommand extends AbstractServerCommand {
     this._project = new HelixProject()
       .withCwd(this.directory)
       .withLiveReload(this._liveReload)
+      .withForwardBrowserLogs(this._forwardBrowserLogs)
       .withLogger(this._logger)
       .withKill(this._kill)
       .withPrintIndex(this._printIndex)
