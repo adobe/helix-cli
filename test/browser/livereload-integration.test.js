@@ -79,7 +79,9 @@ describe('LiveReload Integration with Browser Logs', () => {
 
     // Wait for processing
     await new Promise((resolve) => {
-      setTimeout(resolve, 100);
+      setTimeout(() => {
+        resolve();
+      }, 100);
     });
 
     // Close connection
@@ -142,3 +144,4 @@ describe('LiveReload Integration with Browser Logs', () => {
     document.body.removeChild(iframe);
   });
 });
+
