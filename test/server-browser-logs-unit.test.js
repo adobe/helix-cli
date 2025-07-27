@@ -33,7 +33,7 @@ describe('Browser Log Forwarding (Unit Tests)', () => {
 
   describe('LiveReload log command handling', () => {
     it('should process log command with proper formatting', () => {
-      const liveReload = new LiveReload(testLogger);
+      
       
       // Create a mock client connection with the _cmdLog method
       const ClientConnection = function(req, socket, head, logger) {
