@@ -1,0 +1,254 @@
+/*
+ * Copyright 2025 Adobe. All rights reserved.
+ * This file is licensed to you under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License. You may obtain a copy
+ * of the License at http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under
+ * the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR REPRESENTATIONS
+ * OF ANY KIND, either express or implied. See the License for the specific language
+ * governing permissions and limitations under the License.
+ */
+import readline from 'readline';
+import fs from 'fs';
+import path from 'path';
+import { AbstractCommand } from './abstract.cmd.js';
+import { getFetch } from './fetch-utils.js';
+
+export default class MCPCommand extends AbstractCommand {
+  constructor(logger) {
+    super(logger);
+    this._tools = [];
+    this._resources = [];
+    this._resourcesFetched = false;
+  }
+
+  withTools(tools) {
+    this._tools = tools || [];
+    return this;
+  }
+
+  async run() {
+    this.log.info('Starting MCP server...');
+    // Cursor starts MCP servers in a temp directory, but the Helix server wants a folder
+    // with a proper git repository, so we use the WORKSPACE_FOLDER_PATHS environment variable
+    // and make an educated guess if we are in a git repository.
+    const workspaceFolderPaths = process.env.WORKSPACE_FOLDER_PATHS;
+    // Combine workspace paths with current directory, ensure string, and split
+    const pathsToCheck = (`${workspaceFolderPaths},${process.cwd()}`)
+      .split(',')
+      .map((p) => p.trim())
+      .filter(Boolean);
+
+    // Use Promise.allSettled to check all paths and ignore errors
+    const results = await Promise.allSettled(
+      pathsToCheck.map(async (dirPath) => {
+        const gitPath = path.join(dirPath, '.git');
+        return fs.existsSync(gitPath) && fs.statSync(gitPath).isDirectory() && dirPath;
+      }),
+    );
+
+    // Filter out rejected promises and falsy values to find the first valid working directory
+    const workingDir = results
+      .filter((result) => result.status === 'fulfilled')
+      .map((result) => result.value)
+      .find(Boolean);
+
+    if (workingDir) {
+      this.log.info(`Found git repository at ${workingDir}, changing directory`);
+      process.chdir(workingDir);
+    }
+
+    const rl = readline.createInterface({
+      input: process.stdin,
+      output: process.stdout,
+      terminal: false,
+    });
+
+    rl.on('line', (line) => {
+      try {
+        const request = JSON.parse(line);
+        this.handleRequest(request);
+      } catch (error) {
+        this.log.error(`Error processing request: ${error.message}`);
+        this.sendErrorResponse(-32700, 'Parse error', null);
+      }
+    });
+
+    this.log.info('MCP server ready. Reading from stdin...');
+  }
+
+  handleRequest(request) {
+    const { method, id } = request;
+
+    if (method === 'initialize') {
+      this.sendResponse(id, {
+        protocolVersion: '2024-11-05',
+        capabilities: {
+          experimental: {},
+          prompts: { listChanged: false },
+          resources: { subscribe: false, listChanged: false },
+          tools: { listChanged: false },
+        },
+        serverInfo: {
+          name: 'helix-cli-mcp',
+          version: '0.0.1',
+        },
+      });
+    } else if (method === 'notifications/initialized') {
+      // Do nothing
+    } else if (method === 'tools/list') {
+      this.sendResponse(id, {
+        tools: this._tools,
+      });
+    } else if (method === 'resources/list') {
+      this.handleResourcesList(id);
+    } else if (method === 'resources/read') {
+      this.handleResourcesRead(request, id);
+    } else if (method === 'prompts/list') {
+      this.sendResponse(id, {
+        prompts: [],
+      });
+    } else if (method === 'tools/call') {
+      this.handleToolCall(request, id);
+    } else if (method === 'ping') {
+      this.sendResponse(id, {});
+    } else {
+      this.sendErrorResponse(id, -32601, 'Method not found');
+    }
+  }
+
+  async fetchDocResources() {
+    if (this._resourcesFetched) {
+      return this._resources;
+    }
+
+    try {
+      const fetch = getFetch();
+      const response = await fetch('https://www.aem.live/docpages-index.json');
+
+      if (!response.ok) {
+        this.log.error(`Failed to fetch documentation: ${response.status} ${response.statusText}`);
+        return [];
+      }
+
+      const data = await response.json();
+
+      if (data && Array.isArray(data.data)) {
+        // Transform the data into the format required by MCP
+        this._resources = data.data.map((doc) => ({
+          uri: `https://www.aem.live${doc.path}.md`,
+          name: doc.title,
+          description: doc.description,
+          mimeType: 'text/markdown',
+        }));
+
+        this._resourcesFetched = true;
+      }
+    } catch (error) {
+      this.log.error(`Error fetching documentation resources: ${error.message}`);
+    }
+
+    return this._resources;
+  }
+
+  async handleResourcesList(id) {
+    await this.fetchDocResources();
+    this.sendResponse(id, {
+      resources: this._resources,
+    });
+  }
+
+  async handleResourcesRead(request, id) {
+    const { uri } = request.params;
+
+    if (!uri || typeof uri !== 'string') {
+      this.sendErrorResponse(id, -32602, 'Invalid params: uri is required');
+      return;
+    }
+
+    try {
+      const fetch = getFetch();
+      // Extract the path from the URI
+      // URI format: https://www.aem.live/path/to/resource.md
+      const aemLivePrefix = 'https://www.aem.live';
+
+      if (!uri.startsWith(aemLivePrefix)) {
+        this.sendErrorResponse(id, -32602, `Invalid URI: ${uri}`);
+        return;
+      }
+
+      // Fetch the resource content using the full URI
+      const response = await fetch(uri);
+
+      if (!response.ok) {
+        this.log.error(`Failed to fetch resource: ${response.status} ${response.statusText}`);
+        this.sendErrorResponse(id, -32603, `Failed to fetch resource: ${response.status} ${response.statusText}`);
+        return;
+      }
+
+      // Get the content as text
+      const text = await response.text();
+
+      this.sendResponse(id, {
+        contents: [
+          {
+            uri,
+            mimeType: 'text/markdown',
+            text,
+          },
+        ],
+      });
+    } catch (error) {
+      this.log.error(`Error reading resource: ${error.message}`);
+      this.sendErrorResponse(id, -32603, `Error reading resource: ${error.message}`);
+    }
+  }
+
+  async handleToolCall(request, id) {
+    const { name, arguments: args } = request.params;
+    const tool = this._tools.find((t) => t.name === name);
+
+    if (!tool) {
+      this.sendErrorResponse(id, -32601, `Tool '${name}' not found`);
+      return;
+    }
+
+    try {
+      if (typeof tool.execute === 'function') {
+        const result = await Promise.resolve(tool.execute(args));
+        this.sendResponse(id, result);
+      } else {
+        this.sendErrorResponse(id, -32603, `Tool '${name}' does not have an execute function`);
+      }
+    } catch (error) {
+      this.log.error(`Error executing tool ${name}: ${error.message}`);
+      this.sendErrorResponse(id, -32603, `Error executing tool: ${error.message}`);
+    }
+  }
+
+  sendResponse(id, result) {
+    const response = {
+      jsonrpc: '2.0',
+      id,
+      result,
+    };
+    this.log.debug(`Sending response: ${JSON.stringify(response)}`);
+    // eslint-disable-next-line no-console
+    console.log(JSON.stringify(response));
+  }
+
+  sendErrorResponse(id, code, message) {
+    const response = {
+      jsonrpc: '2.0',
+      id,
+      error: {
+        code,
+        message,
+      },
+    };
+    this.log.debug(`Sending error response: ${JSON.stringify(response)}`);
+    // eslint-disable-next-line no-console
+    console.log(JSON.stringify(response));
+  }
+}
