@@ -43,7 +43,7 @@
     "@adobe/helix-log": "7.0.0",
     "@adobe/helix-shared-config": "11.1.9",
     "@adobe/helix-shared-git": "3.0.20",
-    "@adobe/helix-shared-indexer": "2.2.3",
+    "@adobe/helix-shared-indexer": "2.2.4",
     "camelcase": "8.0.0",
     "chalk-template": "1.1.0",
     "chokidar": "4.0.3",
