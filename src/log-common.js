@@ -100,21 +100,21 @@ export function getOrCreateLogger(config = 'cli') {
     ? config.logFile
     : ['-', (config && config.logFile) || path.join(logsDir, `${categ}-server.log`)];
 
-  const loggers = new Map();
+  const loggers = {};
   logFiles.forEach((logFile) => {
-    const name = loggers.has('default') ? logFile : 'default';
+    const name = loggers.default ? logFile : 'default';
     if (logFile === '-') {
-      loggers.set(name, new ConsoleLogger({
+      loggers[name] = new ConsoleLogger({
         filter: categ === 'cli' ? suppressProgress : filterProgress,
         level,
         formatter: categoryAwareMessageFormatConsole,
-      }));
+      });
     } else {
       fs.ensureDirSync(path.dirname(logFile));
-      loggers.set(name, new FileLogger(logFile, {
+      loggers[name] = new FileLogger(logFile, {
         level: 'debug',
         formatter: /\.json/.test(logFile) ? messageFormatJsonString : messageFormatTechnical,
-      }));
+      });
     }
   });
 
