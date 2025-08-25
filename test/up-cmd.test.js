@@ -603,13 +603,15 @@ describe('Integration test for up command with cache', function suite() {
     const gitUrl = new GitUrl('https://github.com/adobe/test-repo.git', { ref: 'main' });
     const cmd = new UpCommand();
     cmd.withUrl('https://custom.domain.com');
-    // eslint-disable-next-line no-underscore-dangle
-    const originalUrl = cmd._url;
-    await cmd.verifyUrl(gitUrl, 'main');
 
     // eslint-disable-next-line no-underscore-dangle
-    assert.strictEqual(cmd._url, originalUrl, 'User-provided --pagesUrl should be preserved during git reconfiguration');
+    assert.strictEqual(cmd._originalUrl, 'https://custom.domain.com', 'Original URL should be stored');
     // eslint-disable-next-line no-underscore-dangle
-    assert.strictEqual(cmd._url, 'https://custom.domain.com', 'URL should remain the custom domain');
+    assert.strictEqual(cmd._url, undefined, 'URL should be undefined until initUrl() is called');
+
+    await cmd.initUrl(gitUrl, 'main');
+
+    // eslint-disable-next-line no-underscore-dangle
+    assert.strictEqual(cmd._url, 'https://custom.domain.com', 'User-provided --pagesUrl should be preserved during git reconfiguration');
   });
 });

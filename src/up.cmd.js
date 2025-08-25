@@ -25,8 +25,7 @@ export default class UpCommand extends AbstractServerCommand {
   }
 
   withUrl(value) {
-    this._url = value;
-    this._pagesUrl = value;
+    this._originalUrl = value;
     return this;
   }
 
@@ -91,13 +90,7 @@ export default class UpCommand extends AbstractServerCommand {
     if (!this._gitUrl) {
       throw Error('No git remote found. Make sure you have a remote "origin" configured.');
     }
-    if (!this._url) {
-      await this.verifyUrl(this._gitUrl, ref);
-    } else if (/\{\{(owner|repo)+\}\}/.test(this._url)) {
-      this._url = this._url
-        .replace(/\{\{owner\}\}/, this._gitUrl.owner)
-        .replace(/\{\{repo\}\}/, this._gitUrl.repo);
-    }
+    await this.initUrl(this._gitUrl, ref);
     this._project.withProxyUrl(this._url);
     const { site, org } = this.extractSiteAndOrg(this._url);
     if (site && org) {
@@ -139,7 +132,7 @@ export default class UpCommand extends AbstractServerCommand {
     return { site, org };
   }
 
-  async verifyUrl(gitUrl, ref) {
+  async initUrl(gitUrl, ref) {
     const dnsName = `${ref.replace(/\//g, '-')}--${gitUrl.repo}--${gitUrl.owner}`;
     // check length limit
     if (dnsName.length > 63) {
@@ -149,7 +142,7 @@ export default class UpCommand extends AbstractServerCommand {
       throw Error('branch name too long');
     }
 
-    const url = this._pagesUrl || 'https://main--{{repo}}--{{owner}}.aem.page';
+    const url = this._originalUrl || 'https://main--{{repo}}--{{owner}}.aem.page';
     this._url = url.replace(/\{\{(owner|repo)\}\}/g, (_, key) => gitUrl[key]);
   }
 
@@ -183,7 +176,7 @@ export default class UpCommand extends AbstractServerCommand {
             if (gitUrl.toString() !== this._gitUrl.toString()) {
               this.log.info('git HEAD or remotes changed, reconfiguring server...');
               this._gitUrl = gitUrl;
-              await this.verifyUrl(gitUrl, ref);
+              await this.initUrl(gitUrl, ref);
               this._project.withProxyUrl(this._url);
               await this._project.initHeadHtml();
               this.log.info(`Updated proxy to ${this._url}`);
