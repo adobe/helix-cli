@@ -26,6 +26,7 @@ export default class UpCommand extends AbstractServerCommand {
 
   withUrl(value) {
     this._url = value;
+    this._pagesUrl = value;
     return this;
   }
 
@@ -148,8 +149,8 @@ export default class UpCommand extends AbstractServerCommand {
       throw Error('branch name too long');
     }
 
-    // always proxy to main
-    this._url = `https://main--${gitUrl.repo}--${gitUrl.owner}.aem.page`;
+    const url = this._pagesUrl || 'https://main--{{repo}}--{{owner}}.aem.page';
+    this._url = url.replace(/\{\{(owner|repo)\}\}/g, (_, key) => gitUrl[key]);
   }
 
   /**
