@@ -15,6 +15,7 @@ import assert from 'assert';
 import path from 'path';
 import fse from 'fs-extra';
 import esmock from 'esmock';
+import { GitUrl } from '@adobe/helix-shared-git';
 import {
   Nock, assertHttp, createTestRoot, initGit, switchBranch, signal,
 } from './utils.js';
@@ -596,5 +597,21 @@ describe('Integration test for up command with cache', function suite() {
       })
       .run()
       .catch(done);
+  });
+
+  it('preserves --pagesUrl during git reconfiguration', async () => {
+    const gitUrl = new GitUrl('https://github.com/adobe/test-repo.git', { ref: 'main' });
+    const cmd = new UpCommand();
+    cmd.withUrl('https://custom.domain.com');
+
+    // eslint-disable-next-line no-underscore-dangle
+    assert.strictEqual(cmd._originalUrl, 'https://custom.domain.com', 'Original URL should be stored');
+    // eslint-disable-next-line no-underscore-dangle
+    assert.strictEqual(cmd._url, undefined, 'URL should be undefined until initUrl() is called');
+
+    await cmd.initUrl(gitUrl, 'main');
+
+    // eslint-disable-next-line no-underscore-dangle
+    assert.strictEqual(cmd._url, 'https://custom.domain.com', 'User-provided --pagesUrl should be preserved during git reconfiguration');
   });
 });
