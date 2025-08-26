@@ -1,3 +1,11 @@
+## [16.10.45](https://github.com/adobe/helix-cli/compare/v16.10.44...v16.10.45) (2025-08-26)
+
+
+### Bug Fixes
+
+* make logger compatible with helix-log v7.0.0 ([#2574](https://github.com/adobe/helix-cli/issues/2574)) ([3b937c5](https://github.com/adobe/helix-cli/commit/3b937c5bee112eadd3f5bb7b4e12b1a2651e0c03))
+* preserve --pagesUrl as proxy with git changes ([#2573](https://github.com/adobe/helix-cli/issues/2573)) ([b5f0dfc](https://github.com/adobe/helix-cli/commit/b5f0dfca2d63c2fbccce6f15f2a241a636940b7a))
+
 ## [16.10.44](https://github.com/adobe/helix-cli/compare/v16.10.43...v16.10.44) (2025-08-25)
 
 
