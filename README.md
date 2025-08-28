@@ -202,7 +202,7 @@ npm error File exists: /opt/homebrew/bin/hlx
 npm error Remove the existing file and try again, or run npm
 ```
 
-This can happen when you previously had installed this tool under its old name `hlx` aka [@adobe/helix-cli](https://www.npmjs.com/package/@adobe/helix-cli). Starting with version 15.0.0, this tool was renamed `aem` and published as `@adobe/aem-cli`. The previous `@adobe/helix-cli` has been deprecated.
+This can happen when you previously had installed this tool under its old package name [@adobe/helix-cli](https://www.npmjs.com/package/@adobe/helix-cli). Starting with version 15.0.0, this tool was renamed `aem` and published as `@adobe/aem-cli`. The previous `@adobe/helix-cli` has been deprecated. However, the new package still provides the command line binary under the old name `hlx` in addition to `aem`, for backwards compatibility, which can lead to the npm install error.
 
 To solve, first uninstall the old version, then install again with the new name:
 
