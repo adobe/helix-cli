@@ -18,6 +18,7 @@ export class HelixImportProject extends BaseProject {
     super(HelixImportServer);
 
     this._allowInsecure = true;
+    this._dumpHeaders = false;
   }
 
   withAllowInsecure(value) {
@@ -40,6 +41,15 @@ export class HelixImportProject extends BaseProject {
 
   get cliHeaders() {
     return this._cliHeaders;
+  }
+
+  withDumpHeaders(value) {
+    this._dumpHeaders = value;
+    return this;
+  }
+
+  get dumpHeaders() {
+    return this._dumpHeaders;
   }
 
   async start() {

@@ -80,6 +80,12 @@ export default function up() {
           type: 'string',
           default: undefined,
         })
+        .option('dump-headers', {
+          alias: 'dumpHeaders',
+          describe: 'Dump request headers to console for debugging',
+          type: 'boolean',
+          default: false,
+        })
         .group(['port', 'addr', 'stop-other', 'tls-cert', 'tls-key'], 'Server options')
         .option('cache', {
           describe: 'Path to local folder to cache the responses',
@@ -118,6 +124,7 @@ export default function up() {
         .withSkipUI(argv.skipUI)
         .withUIRepo(argv.uiRepo)
         .withHeadersFile(argv.headersFile)
+        .withDumpHeaders(argv.dumpHeaders)
         .run();
     },
   };
