@@ -17,22 +17,7 @@ Install `aem` as a global command. You need Node 12.11 or newer.
 npm install -g @adobe/aem-cli
 ```
 
-### Migrating from older version
-
-Starting with version 15.0.0, this tool is named `aem` and published as `@adobe/aem-cli`. If you previously had installed this tool under its old name `hlx` aka `@adobe/helix-cli` you might get an error like:
-
-```
-npm error EEXIST: file already exists
-npm error File exists: /opt/homebrew/bin/hlx
-npm error Remove the existing file and try again, or run npm
-```
-
-To solve, first uninstall the old version, then try again:
-
-```
-npm uninstall -g @adobe/helix-cli
-npm install -g @adobe/aem-cli
-```
+If this fails with `File exists: /opt/homebrew/bin/hlx`, please [see here](#npm-install-fails-with-file-exists-opthomebrewbinhlx).
 
 ## Quick Start
 
@@ -204,3 +189,25 @@ aem up
 ```
 
 This will make Node.js trust the server certificate and `aem up` should work.
+
+## `npm install` fails with `File exists: /opt/homebrew/bin/hlx`
+
+If you try to install `@adobe/aem-cli`: 
+
+```
+> npm install -g @adobe/aem-cli
+...
+npm error EEXIST: file already exists
+npm error File exists: /opt/homebrew/bin/hlx
+npm error Remove the existing file and try again, or run npm
+```
+
+This can happen when you previously had installed this tool under its old package name [@adobe/helix-cli](https://www.npmjs.com/package/@adobe/helix-cli). Starting with version 15.0.0, this tool was renamed `aem` and published as `@adobe/aem-cli`. The previous `@adobe/helix-cli` has been deprecated. However, the new package still provides the command line binary under the old name `hlx` in addition to `aem`, for backwards compatibility, which can lead to the npm install error.
+
+To solve, first uninstall the old version, then install again with the new name:
+
+```
+npm uninstall -g @adobe/helix-cli
+npm install -g @adobe/aem-cli
+```
+
