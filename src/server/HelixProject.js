@@ -68,6 +68,11 @@ export class HelixProject extends BaseProject {
     return this;
   }
 
+  withCookies(value) {
+    this._server.withCookies(value);
+    return this;
+  }
+
   get proxyUrl() {
     return this._proxyUrl;
   }
