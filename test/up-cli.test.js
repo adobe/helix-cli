@@ -49,6 +49,7 @@ describe('hlx up', () => {
     mockUp.withAllowInsecure.returnsThis();
     mockUp.withKill.returnsThis();
     mockUp.withCache.returnsThis();
+    mockUp.withCookies.returnsThis();
     mockUp.withSiteToken.returnsThis();
     mockUp.run.returnsThis();
     cli = (await new CLI().initCommands()).withCommandExecutor('up', mockUp);
