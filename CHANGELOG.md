@@ -1,3 +1,10 @@
+## [16.10.46](https://github.com/adobe/helix-cli/compare/v16.10.45...v16.10.46) (2025-08-30)
+
+
+### Bug Fixes
+
+* **2576:** provide a way to dump all headers ([#2577](https://github.com/adobe/helix-cli/issues/2577)) ([38c2275](https://github.com/adobe/helix-cli/commit/38c2275a8ceec531aa9f4abb4d3cafe66c15a222))
+
 ## [16.10.45](https://github.com/adobe/helix-cli/compare/v16.10.44...v16.10.45) (2025-08-26)
 
 
