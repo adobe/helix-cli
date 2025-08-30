@@ -24,6 +24,7 @@ export default class ImportCommand extends AbstractServerCommand {
     super(logger);
     this._importerSubPath = 'tools/importer';
     this._allowInsecure = true;
+    this._dumpHeaders = false;
   }
 
   withAllowInsecure(value) {
@@ -56,6 +57,11 @@ export default class ImportCommand extends AbstractServerCommand {
 
   withHeadersFile(value) {
     this._headersFile = value;
+    return this;
+  }
+
+  withDumpHeaders(value) {
+    this._dumpHeaders = value;
     return this;
   }
 
@@ -136,7 +142,8 @@ export default class ImportCommand extends AbstractServerCommand {
       .withLogger(this._logger)
       .withKill(this._kill)
       .withAllowInsecure(this._allowInsecure)
-      .withHeadersFile(this._headersFile);
+      .withHeadersFile(this._headersFile)
+      .withDumpHeaders(this._dumpHeaders);
     this.log.info(chalk`{yellow     ___    ________  ___                                __}`);
     this.log.info(chalk`{yellow    /   |  / ____/  |/  /  (_)___ ___  ____  ____  _____/ /____  _____}`);
     this.log.info(chalk`{yellow   / /| | / __/ / /|_/ /  / / __ \`__ \\/ __ \\/ __ \\/ ___/ __/ _ \\/ ___/}`);

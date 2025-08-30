@@ -108,6 +108,17 @@ export class HelixImportServer extends BaseServer {
     delete headers['accept-encoding'];
     await this._updateHeaders(headers);
 
+    // Dump headers if dump mode is enabled
+    if (this._project.dumpHeaders) {
+      ctx.log.info('=== REQUEST HEADERS ===');
+      ctx.log.info(`Request URL: ${url}`);
+      ctx.log.info(`Request Method: ${req.method}`);
+      Object.entries(headers).forEach(([key, value]) => {
+        ctx.log.info(`${key}: ${value}`);
+      });
+      ctx.log.info('=======================');
+    }
+
     const ret = await getFetch(ctx.config.allowInsecure)(url, {
       method: req.method,
       headers,
@@ -186,8 +197,8 @@ export class HelixImportServer extends BaseServer {
         host = new URL(host).origin;
         const url = this._makeProxyURL(ctx.url, host);
         await this._doProxyRequest(ctx, url, host, req, res);
-      // codecov:ignore:start
-      /* c8 ignore start */
+        // codecov:ignore:start
+        /* c8 ignore start */
       } catch (err) {
         log.error(`Failed to proxy AEM request ${ctx.path}: ${err.message}`);
         res.status(502).send(`Failed to proxy AEM request: ${err.message}`);

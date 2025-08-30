@@ -45,6 +45,7 @@ describe('hlx import', () => {
     mockImport.withUIRepo.returnsThis();
     mockImport.withAllowInsecure.returnsThis();
     mockImport.withHeadersFile.returnsThis();
+    mockImport.withDumpHeaders.returnsThis();
     mockImport.run.returnsThis();
     cli = (await new CLI().initCommands()).withCommandExecutor('import', mockImport);
   });
@@ -142,6 +143,12 @@ describe('hlx import', () => {
   it('hlx import can add custom headers', async () => {
     await cli.run(['import', '--headers-file', 'headers.json']);
     sinon.assert.calledWith(mockImport.withHeadersFile, 'headers.json');
+    sinon.assert.calledOnce(mockImport.run);
+  });
+
+  it('hlx import can enable dump headers', async () => {
+    await cli.run(['import', '--dump-headers']);
+    sinon.assert.calledWith(mockImport.withDumpHeaders, true);
     sinon.assert.calledOnce(mockImport.run);
   });
 });
