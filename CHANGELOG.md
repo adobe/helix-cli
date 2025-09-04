@@ -1,3 +1,10 @@
+# [16.11.0](https://github.com/adobe/helix-cli/compare/v16.10.47...v16.11.0) (2025-09-04)
+
+
+### Features
+
+* **up:** proxy all cookie and set-cookie headers ([b1d3eb2](https://github.com/adobe/helix-cli/commit/b1d3eb2c12c19e36fcd922a274ff487be4e07d53))
+
 ## [16.10.47](https://github.com/adobe/helix-cli/compare/v16.10.46...v16.10.47) (2025-09-02)
 
 
