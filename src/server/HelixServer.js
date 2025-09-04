@@ -34,6 +34,7 @@ export class HelixServer extends BaseServer {
     this._enableLiveReload = false;
     this._app.use(compression());
     this._autoLogin = true;
+    this._cookies = false;
   }
 
   withLiveReload(value) {
@@ -43,6 +44,11 @@ export class HelixServer extends BaseServer {
 
   withSiteToken(value) {
     this._siteToken = value;
+    return this;
+  }
+
+  withCookies(value) {
+    this._cookies = value;
     return this;
   }
 
@@ -205,6 +211,7 @@ export class HelixServer extends BaseServer {
         siteToken: this._siteToken,
         loginPath: LOGIN_ROUTE,
         autoLogin: this._autoLogin,
+        cookies: this._cookies,
       });
     } catch (err) {
       log.error(`${pfx}failed to proxy AEM request ${ctx.path}: ${err.message}`);

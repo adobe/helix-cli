@@ -254,14 +254,16 @@ window.LiveReloadOptions = {
       headers.authorization = `token ${opts.siteToken}`;
     }
 
-    // preserve hlx-auth-token cookie
-    const cookies = cookie.parse(headers.cookie || '');
-    delete headers.cookie;
-    const hlxAuthToken = cookies['hlx-auth-token'];
-    if (hlxAuthToken) {
-      headers.cookie = new URLSearchParams({
-        'hlx-auth-token': hlxAuthToken,
-      }).toString();
+    if (!opts.cookies) {
+      // only pass through hlx-auth-token cookie
+      const cookies = cookie.parse(headers.cookie || '');
+      delete headers.cookie;
+      const hlxAuthToken = cookies['hlx-auth-token'];
+      if (hlxAuthToken) {
+        headers.cookie = new URLSearchParams({
+          'hlx-auth-token': hlxAuthToken,
+        }).toString();
+      }
     }
 
     delete headers.connection;
@@ -278,8 +280,13 @@ window.LiveReloadOptions = {
     const level = utils.status2level(ret.status, true);
     ctx.log[level](`[${id}] Proxy ${req.method} request to ${url}: ${ret.status} (${contentType})`);
 
-    // because fetch decodes the response, we need to reset content encoding and length
     const respHeaders = Object.fromEntries(ret.headers.entries());
+    // multiple Set-Cookie headers need special handling
+    // https://www.npmjs.com/package/node-fetch#extract-set-cookie-header
+    const setCookieValues = ret.headers.raw()['set-cookie'];
+    if (setCookieValues?.length) {
+      respHeaders['set-cookie'] = setCookieValues;
+    }
     delete respHeaders['content-encoding'];
     delete respHeaders['content-length'];
     delete respHeaders['x-frame-options'];

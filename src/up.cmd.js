@@ -44,6 +44,11 @@ export default class UpCommand extends AbstractServerCommand {
     return this;
   }
 
+  withCookies(value) {
+    this._cookies = value;
+    return this;
+  }
+
   async doStop() {
     await super.doStop();
     if (this._watcher) {
@@ -76,7 +81,8 @@ export default class UpCommand extends AbstractServerCommand {
       .withKill(this._kill)
       .withPrintIndex(this._printIndex)
       .withAllowInsecure(this._allowInsecure)
-      .withSiteToken(this._siteToken);
+      .withSiteToken(this._siteToken)
+      .withCookies(this._cookies);
 
     this.log.info(chalk`{yellow     ___    ________  ___                          __      __ v${pkgJson.version}}`);
     this.log.info(chalk`{yellow    /   |  / ____/  |/  /  _____(_)___ ___  __  __/ /___ _/ /_____  _____}`);

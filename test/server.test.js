@@ -697,4 +697,87 @@ describe('Helix Server', () => {
       await project.stop();
     }
   });
+
+  it('proxies only hlx-auth-token cookie in requests', async () => {
+    const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
+    const project = new HelixProject()
+      .withCwd(cwd)
+      .withHttpPort(0)
+      .withProxyUrl('http://main--foo--bar.aem.page');
+
+    await project.init();
+    project.log.level = 'silly';
+
+    nock('http://main--foo--bar.aem.page')
+      .get('/cookie-test')
+      .matchHeader('Cookie', 'hlx-auth-token=secret')
+      .reply(() => [200, '']);
+
+    try {
+      await project.start();
+      const resp = await getFetch()(`http://127.0.0.1:${project.server.port}/cookie-test`, {
+        headers: {
+          cookie: 'hlx-auth-token=secret; cookie2=value2',
+        },
+      });
+      assert.strictEqual(resp.status, 200);
+    } finally {
+      await project.stop();
+    }
+  });
+
+  it('proxies all cookie headers in requests when --cookies is set', async () => {
+    const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
+    const project = new HelixProject()
+      .withCwd(cwd)
+      .withHttpPort(0)
+      .withProxyUrl('http://main--foo--bar.aem.page')
+      .withCookies(true);
+
+    await project.init();
+    project.log.level = 'silly';
+
+    nock('http://main--foo--bar.aem.page')
+      .get('/cookie-test')
+      .matchHeader('Cookie', 'cookie1=value1; cookie2=value2')
+      .reply(() => [200, '']);
+
+    try {
+      await project.start();
+      const resp = await getFetch()(`http://127.0.0.1:${project.server.port}/cookie-test`, {
+        headers: {
+          cookie: 'cookie1=value1; cookie2=value2',
+        },
+      });
+      assert.strictEqual(resp.status, 200);
+    } finally {
+      await project.stop();
+    }
+  });
+
+  it('proxies back multiple Set-Cookie headers in responses', async () => {
+    const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
+    const project = new HelixProject()
+      .withCwd(cwd)
+      .withHttpPort(0)
+      .withProxyUrl('http://main--foo--bar.aem.page');
+
+    await project.init();
+    project.log.level = 'silly';
+
+    nock('http://main--foo--bar.aem.page')
+      .get('/cookie-test')
+      .reply(() => [200, '', {
+        'set-cookie': ['cookie1=value1', 'cookie2=value2'],
+      }]);
+
+    try {
+      await project.start();
+      const resp = await getFetch()(`http://127.0.0.1:${project.server.port}/cookie-test`);
+      assert.strictEqual(resp.status, 200);
+      assert.deepStrictEqual(resp.headers.raw()['set-cookie'], ['cookie1=value1', 'cookie2=value2']);
+    } finally {
+      await project.stop();
+    }
+  });
 });

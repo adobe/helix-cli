@@ -104,6 +104,11 @@ export default function up() {
           type: 'boolean',
           default: false,
         })
+        .option('cookies', {
+          describe: 'Proxy all cookies in requests. By default, only the hlx-auth-token cookie is proxied.',
+          type: 'boolean',
+          default: false,
+        })
 
         .help();
     },
@@ -128,6 +133,7 @@ export default function up() {
         .withAllowInsecure(argv.allowInsecure)
         .withKill(argv.stopOther)
         .withCache(argv.alphaCache)
+        .withCookies(argv.cookies)
         .run();
     },
   };
