@@ -1,4 +1,4 @@
-# Helix Browser Injectables
+# AEM CLI Browser Injectables
 
 This sub-project contains browser scripts injected by the Helix CLI development server.
 
