@@ -55,7 +55,7 @@ Tests run in real browsers (Chromium, Firefox, WebKit) via Playwright and web-te
 
 ## Integration with Main Project
 
-The main Helix CLI references these scripts directly:
+The main AEM CLI references these scripts directly:
 - `src/server/utils.js` reads `console-interceptor.js` at startup
 - `src/server/LiveReload.js` serves `vendor/livereload.js`
 

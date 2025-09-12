@@ -12,7 +12,7 @@
 
 /* eslint-env mocha, browser */
 
-import { expect } from '@esm-bundle/chai';
+import assert from 'assert';
 
 describe('LiveReload Integration with Browser Logs', () => {
   it('should test WebSocket log command format', () => {
@@ -25,11 +25,11 @@ describe('LiveReload Integration with Browser Logs', () => {
       line: '42',
     };
 
-    expect(logCommand.command).to.equal('log');
-    expect(logCommand.level).to.equal('error');
-    expect(logCommand.args).to.deep.equal(['Test error', { foo: 'bar' }]);
-    expect(logCommand.url).to.include('http://localhost');
-    expect(logCommand.line).to.equal('42');
+    assert.strictEqual(logCommand.command, 'log');
+    assert.strictEqual(logCommand.level, 'error');
+    assert.deepStrictEqual(logCommand.args, ['Test error', { foo: 'bar' }]);
+    assert(logCommand.url.includes('http://localhost'));
+    assert.strictEqual(logCommand.line, '42');
   });
 
   it('should serialize Error objects properly', () => {
@@ -40,10 +40,10 @@ describe('LiveReload Integration with Browser Logs', () => {
       stack: error.stack,
     };
 
-    expect(serialized.type).to.equal('Error');
-    expect(serialized.message).to.equal('Test error');
-    expect(serialized.stack).to.be.a('string');
-    expect(serialized.stack.length).to.be.greaterThan(0);
+    assert.strictEqual(serialized.type, 'Error');
+    assert.strictEqual(serialized.message, 'Test error');
+    assert.strictEqual(typeof serialized.stack, 'string');
+    assert(serialized.stack.length > 0);
   });
 
   it('should handle circular references', () => {
@@ -57,6 +57,6 @@ describe('LiveReload Integration with Browser Logs', () => {
       result = '[Circular or Complex Object]';
     }
 
-    expect(result).to.equal('[Circular or Complex Object]');
+    assert.strictEqual(result, '[Circular or Complex Object]');
   });
 });

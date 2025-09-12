@@ -15,9 +15,9 @@
  * Intercepts console methods and forwards them via WebSocket to the server
  * This script is self-contained and browser-compatible (no module system)
  */
-(function() {
+(function iife() {
   // Wait for LiveReload connection
-  var checkInterval = setInterval(function() {
+  var checkInterval = setInterval(function checkLiveReload() {
     if (window.LiveReload && window.LiveReload.connector && window.LiveReload.connector.socket) {
       clearInterval(checkInterval);
 
@@ -31,7 +31,7 @@
 
       // Helper to safely serialize arguments
       function serializeArgs(args) {
-        return Array.from(args).map(function(arg) {
+        return Array.from(args).map(function mapArg(arg) {
           try {
             if (arg instanceof Error) {
               return { type: 'Error', message: arg.message, stack: arg.stack };
@@ -51,13 +51,15 @@
           if (match) {
             return { url: match[2], line: match[3] };
           }
-        } catch (e) {}
+        } catch (e) {
+          // Ignore error when getting stack
+        }
         return { url: window.location.href, line: 0 };
       }
 
       // Intercept console methods
-      ['log', 'error', 'warn', 'info'].forEach(function(level) {
-        console[level] = function() {
+      ['log', 'error', 'warn', 'info'].forEach(function interceptLevel(level) {
+        console[level] = function interceptedConsole() {
           // Call original method
           originalConsole[level].apply(console, arguments);
 
@@ -76,4 +78,4 @@
       });
     }
   }, 100);
-})();
+}());

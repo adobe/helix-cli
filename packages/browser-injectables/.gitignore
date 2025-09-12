@@ -1,0 +1,4 @@
+node_modules/
+coverage/
+coverage-browser/
+vendor/livereload.js

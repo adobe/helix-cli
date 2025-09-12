@@ -1,9 +1,9 @@
 {
-  "name": "@adobe/helix-browser-injectables",
+  "name": "@adobe/aem-cli-browser-injectables",
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "description": "Browser injectable scripts for Helix CLI development server",
+  "description": "Browser injectable scripts for AEM CLI development server",
   "scripts": {
     "lint": "eslint .",
     "test": "web-test-runner",
@@ -12,7 +12,8 @@
     "copy-vendor": "node scripts/copy-vendor.js"
   },
   "devDependencies": {
-    "@esm-bundle/chai": "4.3.4-fix.0",
+    "@adobe/eslint-config-helix": "^3.0.9",
+    "@eslint/config-helpers": "^1.0.1",
     "@web/test-runner": "0.20.2",
     "@web/test-runner-playwright": "0.11.1",
     "@web/test-runner-junit-reporter": "0.8.0",

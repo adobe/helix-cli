@@ -41,6 +41,7 @@ export default {
       'test/**',
       'node_modules/**',
       '**/*.test.js',
+      'scripts/**',
     ],
   },
   files: [

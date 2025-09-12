@@ -11,7 +11,6 @@
   "scripts": {
     "check": "npm run lint && npm run test",
     "test": "c8 mocha",
-    "test:mocha": "c8 mocha",
     "test-ci-win": "npx mocha --reporter xunit test --reporter-options output=junit/test.xml -t 5000",
     "lint": "eslint . && (cd packages/browser-injectables 2>/dev/null && npm run lint || true)",
     "lint:fix": "eslint --fix . && (cd packages/browser-injectables 2>/dev/null && npx eslint --fix . || true)",

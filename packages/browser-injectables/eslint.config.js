@@ -9,88 +9,68 @@
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
+import { defineConfig, globalIgnores } from '@eslint/config-helpers';
+import { recommended, source, test } from '@adobe/eslint-config-helix';
 
-export default [
+export default defineConfig([
+  globalIgnores([
+    'vendor/**',
+    'node_modules/**',
+    'coverage/**',
+    'coverage-browser/**',
+    'web-test-runner.config.js',
+  ]),
   {
-    ignores: ['vendor/**', 'node_modules/**', 'coverage/**', 'coverage-browser/**'],
+    extends: [recommended],
   },
   {
-    files: ['**/*.js'],
+    files: ['src/**/*.js'],
+    extends: [source],
     languageOptions: {
-      ecmaVersion: 2020,
-      sourceType: 'module',
       globals: {
-        // Browser globals
+        // Browser globals needed for injected scripts
         window: 'readonly',
         document: 'readonly',
-        console: 'readonly',
-        setInterval: 'readonly',
-        clearInterval: 'readonly',
-        setTimeout: 'readonly',
-        clearTimeout: 'readonly',
-        Error: 'readonly',
-        JSON: 'readonly',
-        Array: 'readonly',
-        String: 'readonly',
+        WebSocket: 'readonly',
+        location: 'readonly',
       },
     },
     rules: {
       // Allow console for browser debugging
       'no-console': 'off',
-      // Allow var for ES5 compatibility
+      // Allow var for ES5 compatibility in injected scripts
       'no-var': 'off',
       'vars-on-top': 'off',
       // Allow function expressions for ES5 compatibility
       'prefer-arrow-callback': 'off',
       'func-names': 'off',
-      // Allow traditional function syntax
-      'space-before-function-paren': ['error', 'never'],
       // Allow arguments object for ES5
       'prefer-rest-params': 'off',
       // Allow non-shorthand for ES5
       'object-shorthand': 'off',
       'prefer-destructuring': 'off',
-      // Standard formatting
-      'comma-dangle': ['error', 'always-multiline'],
-      'eol-last': ['error', 'always'],
-      indent: ['error', 2],
-      quotes: ['error', 'single'],
-      semi: ['error', 'always'],
-      // IIFE formatting
-      'wrap-iife': ['error', 'inside'],
-      // Allow empty catch blocks for error suppression
-      'no-empty': ['error', { allowEmptyCatch: true }],
     },
   },
   {
     files: ['test/**/*.js'],
+    extends: [test],
     languageOptions: {
       globals: {
-        // Mocha globals for tests
-        describe: 'readonly',
-        it: 'readonly',
-        before: 'readonly',
-        after: 'readonly',
-        beforeEach: 'readonly',
-        afterEach: 'readonly',
+        // Browser globals for tests
+        window: 'readonly',
+        document: 'readonly',
+        location: 'readonly',
       },
     },
   },
   {
     files: ['scripts/**/*.js'],
-    languageOptions: {
-      ecmaVersion: 2020,
-      globals: {
-        // Node.js globals for build scripts
-        process: 'readonly',
-        __dirname: 'readonly',
-        __filename: 'readonly',
-        console: 'readonly',
-      },
-    },
+    extends: [source],
     rules: {
+      // Allow __dirname in Node.js scripts
       'no-underscore-dangle': 'off',
+      // Allow console in build scripts
       'no-console': 'off',
     },
   },
-];
+]);
