@@ -10,7 +10,6 @@
  * governing permissions and limitations under the License.
  */
 
-/* eslint-disable import/no-extraneous-dependencies */
 import { defaultReporter } from '@web/test-runner';
 import { junitReporter } from '@web/test-runner-junit-reporter';
 import { playwrightLauncher } from '@web/test-runner-playwright';
@@ -45,14 +44,14 @@ export default {
     ],
   },
   files: [
-    'test/browser/**/*.test.html',
-    'test/browser/**/*.test.js',
+    'test/**/*.test.html',
+    'test/**/*.test.js',
   ],
   middleware: [
     // Serve livereload.js from node_modules
     async function serveLiveReload(context, next) {
       if (context.url === '/__internal__/livereload.js') {
-        context.url = '/node_modules/livereload-js/dist/livereload.js';
+        context.url = '/vendor/livereload.js';
       }
       await next();
     },

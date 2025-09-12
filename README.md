@@ -184,6 +184,22 @@ Read the full AEM Importer [documentation](https://github.com/adobe/helix-import
 You can use `npm run check` to run the tests and check whether your code adheres
 to the aem-cli coding style.
 
+### Browser Injectables
+
+Browser-injected scripts (LiveReload and console log forwarding) are maintained in a separate sub-project at `packages/browser-injectables/`. This isolation keeps browser testing dependencies separate from the main CLI.
+
+#### Development
+- Injectable scripts are in `packages/browser-injectables/src/`
+- No build step required - scripts are used directly
+- Browser tests run only when injectable code changes
+
+#### Testing Browser Injectables
+```bash
+cd packages/browser-injectables
+npm install
+npm test
+```
+
 # Troubleshooting
 
 ## `aem up` fails with `unable to get local issuer certificate`

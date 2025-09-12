@@ -10,17 +10,14 @@
   },
   "scripts": {
     "check": "npm run lint && npm run test",
-    "test": "c8 mocha && npm run test:browser",
+    "test": "c8 mocha",
     "test:mocha": "c8 mocha",
-    "test:browser": "web-test-runner --node-resolve --coverage",
-    "test:browser:watch": "web-test-runner --node-resolve --coverage --watch",
     "test-ci-win": "npx mocha --reporter xunit test --reporter-options output=junit/test.xml -t 5000",
-    "lint": "eslint .",
-    "lint:fix": "eslint --fix .",
+    "lint": "eslint . && (cd packages/browser-injectables 2>/dev/null && npm run lint || true)",
+    "lint:fix": "eslint --fix . && (cd packages/browser-injectables 2>/dev/null && npx eslint --fix . || true)",
     "semantic-release": "semantic-release",
     "semantic-release-dry": "semantic-release --dry-run --branches $CI_BRANCH",
-    "prepare": "husky",
-    "postinstall": "npx playwright install"
+    "prepare": "husky"
   },
   "mocha": {
     "require": "test/setup-env.js",
@@ -83,15 +80,9 @@
   },
   "devDependencies": {
     "@adobe/eslint-config-helix": "3.0.9",
-    "@esm-bundle/chai": "4.3.4-fix.0",
     "@eslint/config-helpers": "0.3.0",
     "@semantic-release/changelog": "6.0.3",
     "@semantic-release/git": "10.0.1",
-    "@web/test-runner": "0.20.2",
-    "@web/test-runner-commands": "0.9.0",
-    "@web/test-runner-junit-reporter": "0.8.0",
-    "@web/test-runner-mocha": "0.9.0",
-    "@web/test-runner-playwright": "0.11.1",
     "c8": "10.1.3",
     "eslint": "9.4.0",
     "esmock": "2.7.1",

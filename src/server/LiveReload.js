@@ -11,12 +11,10 @@
  */
 // eslint-disable-next-line max-classes-per-file
 import fs from 'fs';
+import path from 'path';
 import chokidar from 'chokidar';
 import WebSocket from 'faye-websocket';
 import { EventEmitter } from 'events';
-import { createRequire } from 'module';
-
-const require = createRequire(import.meta.url);
 
 /**
  * Client connection for the live reload server.
@@ -149,7 +147,10 @@ export default class LiveReload extends EventEmitter {
 
     // client connections
     this._connections = {};
-    this._liveReloadJSPath = require.resolve('livereload-js/dist/livereload.js');
+    // Use vendor copy from browser-injectables sub-project
+    // eslint-disable-next-line no-underscore-dangle
+    const __dirname = path.dirname(new URL(import.meta.url).pathname);
+    this._liveReloadJSPath = path.join(__dirname, '../../packages/browser-injectables/vendor/livereload.js');
     this._forwardBrowserLogs = false;
   }
 

@@ -14,8 +14,18 @@ import crypto from 'crypto';
 import path from 'path';
 import { Socket } from 'net';
 import { PassThrough } from 'stream';
+import { readFileSync } from 'fs';
+import { fileURLToPath } from 'url';
 import cookie from 'cookie';
 import { getFetch } from '../fetch-utils.js';
+
+// Load console interceptor script at startup
+// eslint-disable-next-line no-underscore-dangle
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const CONSOLE_INTERCEPTOR = readFileSync(
+  path.join(__dirname, '../../packages/browser-injectables/src/console-interceptor.js'),
+  'utf-8',
+);
 
 const utils = {
   status2level(status, debug3xx) {
@@ -107,70 +117,7 @@ window.LiveReloadOptions = {
 
       // Inject console interceptor if browser log forwarding is enabled
       if (server.forwardBrowserLogs) {
-        newbody += `<script${nonce}>
-(function() {
-  // Wait for LiveReload connection
-  var checkInterval = setInterval(function() {
-    if (window.LiveReload && window.LiveReload.connector && window.LiveReload.connector.socket) {
-      clearInterval(checkInterval);
-
-      // Store original console methods
-      var originalConsole = {
-        log: console.log,
-        error: console.error,
-        warn: console.warn,
-        info: console.info
-      };
-
-      // Helper to safely serialize arguments
-      function serializeArgs(args) {
-        return Array.from(args).map(function(arg) {
-          try {
-            if (arg instanceof Error) {
-              return { type: 'Error', message: arg.message, stack: arg.stack };
-            }
-            return JSON.parse(JSON.stringify(arg));
-          } catch (e) {
-            return String(arg);
-          }
-        });
-      }
-
-      // Get current file location
-      function getLocation() {
-        try {
-          var stack = new Error().stack;
-          var match = stack.match(/at.*?((https?:\\/\\/[^\\s]+?):(\\d+):(\\d+))/);
-          if (match) {
-            return { url: match[2], line: match[3] };
-          }
-        } catch (e) {}
-        return { url: window.location.href, line: 0 };
-      }
-
-      // Intercept console methods
-      ['log', 'error', 'warn', 'info'].forEach(function(level) {
-        console[level] = function() {
-          // Call original method
-          originalConsole[level].apply(console, arguments);
-
-          // Forward to server if connected
-          if (window.LiveReload.connector.socket.readyState === 1) {
-            var location = getLocation();
-            window.LiveReload.connector.socket.send(JSON.stringify({
-              command: 'log',
-              level: level,
-              args: serializeArgs(arguments),
-              url: location.url,
-              line: location.line
-            }));
-          }
-        };
-      });
-    }
-  }, 100);
-})();
-</script>`;
+        newbody += `<script${nonce}>${CONSOLE_INTERCEPTOR}</script>`;
       }
 
       newbody += body.substring(index);

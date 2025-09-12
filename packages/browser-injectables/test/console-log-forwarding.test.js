@@ -12,7 +12,6 @@
 
 /* eslint-env mocha, browser */
 /* global window */
-/* eslint-disable no-console */
 
 import { expect } from '@esm-bundle/chai';
 

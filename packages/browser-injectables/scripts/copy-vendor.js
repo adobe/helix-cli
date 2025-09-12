@@ -9,25 +9,20 @@
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-import { defineConfig, globalIgnores } from '@eslint/config-helpers';
-import { recommended, source, test } from '@adobe/eslint-config-helix';
 
-export default defineConfig([
-  globalIgnores([
-    'index.js',
-    '.vscode/*',
-    'logs/*',
-    'demos/*',
-    'test/fixtures',
-    'test/tmp/*',
-    'tmp/*',
-    'coverage',
-    // Browser-injectables has its own eslint config, so ignore it
-    'packages/browser-injectables/**',
-  ]),
-  {
-    extends: [recommended],
-  },
-  source,
-  test,
-]);
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+// Copy livereload.js from node_modules to vendor directory
+const source = path.join(__dirname, '../node_modules/livereload-js/dist/livereload.js');
+const dest = path.join(__dirname, '../vendor/livereload.js');
+
+// Create vendor directory if it doesn't exist
+fs.mkdirSync(path.dirname(dest), { recursive: true });
+
+// Copy the file
+fs.copyFileSync(source, dest);
+console.log('Copied livereload.js to vendor/');

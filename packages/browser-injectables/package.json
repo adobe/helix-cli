@@ -1,0 +1,24 @@
+{
+  "name": "@adobe/helix-browser-injectables",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Browser injectable scripts for Helix CLI development server",
+  "scripts": {
+    "lint": "eslint .",
+    "test": "web-test-runner",
+    "test:watch": "web-test-runner --watch",
+    "postinstall": "npm run copy-vendor && npx playwright install",
+    "copy-vendor": "node scripts/copy-vendor.js"
+  },
+  "devDependencies": {
+    "@esm-bundle/chai": "4.3.4-fix.0",
+    "@web/test-runner": "0.20.2",
+    "@web/test-runner-playwright": "0.11.1",
+    "@web/test-runner-junit-reporter": "0.8.0",
+    "@web/test-runner-mocha": "0.9.0"
+  },
+  "dependencies": {
+    "livereload-js": "4.0.2"
+  }
+}
