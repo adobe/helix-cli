@@ -12,7 +12,7 @@
 
 /* eslint-env mocha, browser */
 
-import assert from 'assert';
+import { assert } from '@esm-bundle/chai';
 
 /* eslint-disable no-console */
 describe('Browser Console Log Forwarding', () => {
@@ -75,10 +75,10 @@ describe('Browser Console Log Forwarding', () => {
     console.log('Test message', { foo: 'bar' });
 
     // Check that message was captured
-    assert.strictEqual(messages.length, 1);
-    assert.strictEqual(messages[0].command, 'log');
-    assert.strictEqual(messages[0].level, 'log');
-    assert.deepStrictEqual(messages[0].args, ['Test message', { foo: 'bar' }]);
+    assert.equal(messages.length, 1);
+    assert.equal(messages[0].command, 'log');
+    assert.equal(messages[0].level, 'log');
+    assert.deepEqual(messages[0].args, ['Test message', { foo: 'bar' }]);
   });
 
   it('should handle different console levels', () => {
@@ -108,11 +108,11 @@ describe('Browser Console Log Forwarding', () => {
     console.info('Info message');
 
     // Check messages
-    assert.strictEqual(messages.length, 4);
-    assert.strictEqual(messages[0].level, 'log');
-    assert.strictEqual(messages[1].level, 'error');
-    assert.strictEqual(messages[2].level, 'warn');
-    assert.strictEqual(messages[3].level, 'info');
+    assert.equal(messages.length, 4);
+    assert.equal(messages[0].level, 'log');
+    assert.equal(messages[1].level, 'error');
+    assert.equal(messages[2].level, 'warn');
+    assert.equal(messages[3].level, 'info');
   });
 
   it('should handle errors and circular references', () => {
@@ -154,16 +154,16 @@ describe('Browser Console Log Forwarding', () => {
     console.error('Circular:', circular);
 
     // Check messages
-    assert.strictEqual(messages.length, 2);
+    assert.equal(messages.length, 2);
 
     // Check error serialization
-    assert.strictEqual(messages[0].args[0], 'Error occurred:');
-    assert.strictEqual(messages[0].args[1].type, 'Error');
-    assert.strictEqual(messages[0].args[1].message, 'Test error');
+    assert.equal(messages[0].args[0], 'Error occurred:');
+    assert.equal(messages[0].args[1].type, 'Error');
+    assert.equal(messages[0].args[1].message, 'Test error');
 
     // Check circular reference handling
-    assert.strictEqual(messages[1].args[0], 'Circular:');
-    assert.strictEqual(messages[1].args[1], '[Circular or Complex Object]');
+    assert.equal(messages[1].args[0], 'Circular:');
+    assert.equal(messages[1].args[1], '[Circular or Complex Object]');
   });
 
   it('should only send logs when WebSocket is connected', () => {
@@ -200,12 +200,12 @@ describe('Browser Console Log Forwarding', () => {
 
     // Try to log when disconnected
     console.log('This should not be sent');
-    assert.strictEqual(messages.length, 0);
+    assert.equal(messages.length, 0);
 
     // Connect and try again
     mockWebSocket.readyState = 1; // OPEN
     console.log('This should be sent');
-    assert.strictEqual(messages.length, 1);
-    assert.strictEqual(messages[0].args[0], 'This should be sent');
+    assert.equal(messages.length, 1);
+    assert.equal(messages[0].args[0], 'This should be sent');
   });
 });
