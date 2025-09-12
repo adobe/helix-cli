@@ -4,7 +4,7 @@ This sub-project contains browser scripts injected by the AEM CLI development se
 
 ## Purpose
 
-This package isolates browser-specific code and testing infrastructure from the main Helix CLI, keeping dependencies like Playwright and web-test-runner separate from the core CLI functionality.
+This package isolates browser-specific code and testing infrastructure from the main AEM CLI, keeping dependencies like Playwright and web-test-runner separate from the core CLI functionality.
 
 ## Scripts
 
