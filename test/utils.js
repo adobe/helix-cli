@@ -27,7 +27,7 @@ export function initGit(dir, remote, branch) {
   shell.cd(dir);
   shell.exec('git init');
   shell.exec('git checkout -b master');
-  // Add files explicitly to work around AI control restrictions
+  shell.exec('git add -A');
   const knownFiles = [
     '404.html', 'defaults.env', 'defaults.json', 'fstab.yaml',
     'head-modified.html', 'head.html', 'helix-query-modified.yaml',
