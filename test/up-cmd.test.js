@@ -531,20 +531,32 @@ describe('Integration test for up command with git worktrees', function suite() 
     // Setup a regular git repo first
     initGit(testDir, 'https://github.com/adobe/dummy-foo.git');
 
-    // Create an actual worktree using git CLI
-    const worktreeDir = path.resolve(testRoot, 'worktree-feature');
-    shell.cd(testDir);
-    shell.exec(`git worktree add "${worktreeDir}" -b feature-branch`);
-    shell.cd(worktreeDir);
+    // Create an actual worktree using git CLI with unique name
+    const worktreeName = `worktree-feature-${Date.now()}`;
+    const worktreeDir = path.resolve(testRoot, worktreeName);
+    let worktreeCreated = false;
 
-    // Test that isGitWorktree correctly identifies it
-    const isWorktree = await GitUtils.isGitWorktree(worktreeDir);
-    assert(isWorktree, 'Should be identified as a worktree');
+    try {
+      shell.cd(testDir);
+      shell.exec(`git worktree add "${worktreeDir}" -b feature-branch`);
+      worktreeCreated = true;
 
-    // Test that port calculation works for a branch name
-    const port = GitUtils.hashBranchToPort('feature-branch');
-    assert(port >= 3000 && port < 4000, `Port ${port} should be in range 3000-3999`);
-    assert.notStrictEqual(port, 3000, 'Port should be different from default');
+      // Test that isGitWorktree correctly identifies it
+      const isWorktree = await GitUtils.isGitWorktree(worktreeDir);
+      assert(isWorktree, 'Should be identified as a worktree');
+
+      // Test that port calculation works for a branch name
+      const port = GitUtils.hashBranchToPort('feature-branch');
+      assert(port >= 3000 && port < 4000, `Port ${port} should be in range 3000-3999`);
+      assert.notStrictEqual(port, 3000, 'Port should be different from default');
+    } finally {
+      // Clean up worktree if it was created
+      if (worktreeCreated) {
+        shell.cd(testDir);
+        shell.exec(`git worktree remove "${worktreeDir}" --force || true`);
+      }
+      await fse.remove(worktreeDir).catch(() => {});
+    }
   });
 
   it('should reject git submodules', async () => {
@@ -575,38 +587,51 @@ describe('Integration test for up command with git worktrees', function suite() 
   it('should watch git directory correctly in worktree', async () => {
     initGit(testDir, 'https://github.com/adobe/dummy-foo.git');
 
-    // Create an actual worktree using git CLI
-    const worktreeDir = path.resolve(testRoot, 'worktree-test');
-    shell.cd(testDir);
-    shell.exec(`git worktree add "${worktreeDir}" -b test-branch`);
+    // Create an actual worktree using git CLI with unique name
+    const worktreeName = `worktree-test-${Date.now()}`;
+    const worktreeDir = path.resolve(testRoot, worktreeName);
+    let worktreeCreated = false;
 
-    const cmd = new UpCommand()
-      .withLiveReload(false)
-      .withDirectory(worktreeDir)
-      .withHttpPort(0);
+    try {
+      shell.cd(testDir);
+      shell.exec(`git worktree add "${worktreeDir}" -b test-branch`);
+      worktreeCreated = true;
 
-    nock('https://main--dummy-foo--adobe.aem.page')
-      .get('/index.html')
-      .reply(200, 'test');
+      const cmd = new UpCommand()
+        .withLiveReload(false)
+        .withDirectory(worktreeDir)
+        .withHttpPort(0);
 
-    await new Promise((resolve, reject) => {
-      cmd
-        .on('started', async () => {
-          try {
-            // Verify watcher is set up on the actual git directory
-            // eslint-disable-next-line no-underscore-dangle
-            assert(cmd._watcher, 'Watcher should be initialized');
-            // The watcher should be watching the worktree git directory, not the .git file
-            // This is implicitly tested by the fact that the server starts successfully
-            await cmd.stop();
-          } catch (e) {
-            reject(e);
-          }
-        })
-        .on('stopped', resolve)
-        .run()
-        .catch(reject);
-    });
+      nock('https://main--dummy-foo--adobe.aem.page')
+        .get('/index.html')
+        .reply(200, 'test');
+
+      await new Promise((resolve, reject) => {
+        cmd
+          .on('started', async () => {
+            try {
+              // Verify watcher is set up on the actual git directory
+              // eslint-disable-next-line no-underscore-dangle
+              assert(cmd._watcher, 'Watcher should be initialized');
+              // The watcher should be watching the worktree git directory, not the .git file
+              // This is implicitly tested by the fact that the server starts successfully
+              await cmd.stop();
+            } catch (e) {
+              reject(e);
+            }
+          })
+          .on('stopped', resolve)
+          .run()
+          .catch(reject);
+      });
+    } finally {
+      // Clean up worktree if it was created
+      if (worktreeCreated) {
+        shell.cd(testDir);
+        shell.exec(`git worktree remove "${worktreeDir}" --force || true`);
+      }
+      await fse.remove(worktreeDir).catch(() => {});
+    }
   });
 });
 

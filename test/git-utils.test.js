@@ -230,42 +230,52 @@ describe('Testing GitUtils', () => {
     });
 
     it('isGitWorktree detects actual git worktree created by git CLI', async () => {
-      // Create actual worktree using git worktree command
-      const worktreeDir = path.join(path.dirname(testRoot), 'test-worktree');
+      // Create actual worktree using git worktree command with unique name
+      const worktreeName = `test-worktree-${Date.now()}`;
+      const worktreeDir = path.join(path.dirname(testRoot), worktreeName);
       shell.cd(testRoot);
-      shell.exec(`git worktree add "${worktreeDir}" -b test-worktree-branch`);
 
-      // Test detection
-      assert.equal(await GitUtils.isGitWorktree(worktreeDir), true);
-      assert.equal(await GitUtils.isGitSubmodule(worktreeDir), false);
+      try {
+        shell.exec(`git worktree add "${worktreeDir}" -b ${worktreeName}-branch`);
 
-      // Cleanup
-      shell.exec(`git worktree remove "${worktreeDir}"`);
+        // Test detection
+        assert.equal(await GitUtils.isGitWorktree(worktreeDir), true);
+        assert.equal(await GitUtils.isGitSubmodule(worktreeDir), false);
+      } finally {
+        // Cleanup - ensure it runs even if test fails
+        shell.cd(testRoot);
+        shell.exec(`git worktree remove "${worktreeDir}" --force || true`);
+        await fse.remove(worktreeDir).catch(() => {});
+      }
     });
 
     it('isGitSubmodule detects actual git submodule created by git CLI', async () => {
-      // Create a separate repo to use as submodule
-      const submoduleRepoDir = path.join(path.dirname(testRoot), 'submodule-repo');
-      await fse.ensureDir(submoduleRepoDir);
-      await fse.writeFile(path.join(submoduleRepoDir, 'README.md'), '# Submodule\n');
+      // Create a separate repo to use as submodule with unique name
+      const submoduleName = `submodule-repo-${Date.now()}`;
+      const submoduleRepoDir = path.join(path.dirname(testRoot), submoduleName);
 
-      shell.cd(submoduleRepoDir);
-      shell.exec('git init');
-      shell.exec('git add README.md');
-      shell.exec('git commit -m "Initial commit"');
+      try {
+        await fse.ensureDir(submoduleRepoDir);
+        await fse.writeFile(path.join(submoduleRepoDir, 'README.md'), '# Submodule\n');
 
-      // Add submodule to main repo
-      shell.cd(testRoot);
-      shell.exec(`git submodule add "${submoduleRepoDir}" test-submodule`);
+        shell.cd(submoduleRepoDir);
+        shell.exec('git init');
+        shell.exec('git add README.md');
+        shell.exec('git commit -m "Initial commit"');
 
-      const submoduleDir = path.join(testRoot, 'test-submodule');
+        // Add submodule to main repo
+        shell.cd(testRoot);
+        shell.exec(`git submodule add "${submoduleRepoDir}" test-submodule`);
 
-      // Test detection
-      assert.equal(await GitUtils.isGitSubmodule(submoduleDir), true);
-      assert.equal(await GitUtils.isGitWorktree(submoduleDir), false);
+        const submoduleDir = path.join(testRoot, 'test-submodule');
 
-      // Cleanup
-      await fse.remove(submoduleRepoDir);
+        // Test detection
+        assert.equal(await GitUtils.isGitSubmodule(submoduleDir), true);
+        assert.equal(await GitUtils.isGitWorktree(submoduleDir), false);
+      } finally {
+        // Cleanup - ensure it runs even if test fails
+        await fse.remove(submoduleRepoDir).catch(() => {});
+      }
     });
 
     it('hashBranchToPort generates consistent ports', () => {
