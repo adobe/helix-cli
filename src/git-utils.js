@@ -274,12 +274,11 @@ export default class GitUtils {
   static async isGitWorktree(dir) {
     const gitPath = path.resolve(dir, '.git');
     try {
-      const stat = await fse.lstat(gitPath);
-      if (stat.isFile()) {
-        const content = await fse.readFile(gitPath, 'utf-8');
-        return content.includes('/worktrees/');
-      }
+      // Read the file directly - if it's not a file, readFile will throw
+      const content = await fse.readFile(gitPath, 'utf-8');
+      return content.includes('/worktrees/');
     } catch (e) {
+      // Either doesn't exist, is a directory, or can't be read
       // ignore
     }
     return false;
@@ -294,13 +293,12 @@ export default class GitUtils {
   static async isGitSubmodule(dir) {
     const gitPath = path.resolve(dir, '.git');
     try {
-      const stat = await fse.lstat(gitPath);
-      if (stat.isFile()) {
-        const content = await fse.readFile(gitPath, 'utf-8');
-        // Submodules have relative paths to .git/modules
-        return content.includes('/.git/modules/') || content.includes('\\.git\\modules\\');
-      }
+      // Read the file directly - if it's not a file, readFile will throw
+      const content = await fse.readFile(gitPath, 'utf-8');
+      // Submodules have relative paths to .git/modules
+      return content.includes('/.git/modules/') || content.includes('\\.git\\modules\\');
     } catch (e) {
+      // Either doesn't exist, is a directory, or can't be read
       // ignore
     }
     return false;
@@ -315,11 +313,7 @@ export default class GitUtils {
   static async getGitDirectory(dir) {
     const gitPath = path.resolve(dir, '.git');
     try {
-      const stat = await fse.lstat(gitPath);
-      if (stat.isDirectory()) {
-        return gitPath;
-      }
-      // It's a file - read the actual location
+      // Try to read as a file first (worktree/submodule case)
       const content = await fse.readFile(gitPath, 'utf-8');
       const match = content.match(/^gitdir: (.+)$/m);
       if (match) {
@@ -331,7 +325,15 @@ export default class GitUtils {
         return targetPath;
       }
     } catch (e) {
-      // ignore
+      // If readFile fails, it's likely a directory - check if it exists
+      try {
+        const stat = await fse.lstat(gitPath);
+        if (stat.isDirectory()) {
+          return gitPath;
+        }
+      } catch (statErr) {
+        // ignore
+      }
     }
     return gitPath;
   }

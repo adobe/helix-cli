@@ -15,6 +15,7 @@ import assert from 'assert';
 import path from 'path';
 import fse from 'fs-extra';
 import esmock from 'esmock';
+import shell from 'shelljs';
 import { GitUrl } from '@adobe/helix-shared-git';
 import {
   Nock, assertHttp, createTestRoot, initGit, switchBranch, signal,
@@ -530,12 +531,14 @@ describe('Integration test for up command with git worktrees', function suite() 
     // Setup a regular git repo first
     initGit(testDir, 'https://github.com/adobe/dummy-foo.git');
 
-    // Now convert it to look like a worktree by replacing .git directory with a file
-    await fse.remove(path.join(testDir, '.git'));
-    await fse.writeFile(path.join(testDir, '.git'), `gitdir: ${testRoot}/.git/worktrees/feature-branch\n`);
+    // Create an actual worktree using git CLI
+    const worktreeDir = path.resolve(testRoot, 'worktree-feature');
+    shell.cd(testDir);
+    shell.exec(`git worktree add "${worktreeDir}" -b feature-branch`);
+    shell.cd(worktreeDir);
 
     // Test that isGitWorktree correctly identifies it
-    const isWorktree = await GitUtils.isGitWorktree(testDir);
+    const isWorktree = await GitUtils.isGitWorktree(worktreeDir);
     assert(isWorktree, 'Should be identified as a worktree');
 
     // Test that port calculation works for a branch name
@@ -572,16 +575,14 @@ describe('Integration test for up command with git worktrees', function suite() 
   it('should watch git directory correctly in worktree', async () => {
     initGit(testDir, 'https://github.com/adobe/dummy-foo.git');
 
-    // Simulate a worktree
-    const worktreeGitDir = path.join(testRoot, '.git/worktrees/test-branch');
-    await fse.remove(path.join(testDir, '.git'));
-    await fse.writeFile(path.join(testDir, '.git'), `gitdir: ${worktreeGitDir}`);
-    await fse.ensureDir(worktreeGitDir);
-    await fse.writeFile(path.join(worktreeGitDir, 'HEAD'), 'ref: refs/heads/test-branch');
+    // Create an actual worktree using git CLI
+    const worktreeDir = path.resolve(testRoot, 'worktree-test');
+    shell.cd(testDir);
+    shell.exec(`git worktree add "${worktreeDir}" -b test-branch`);
 
     const cmd = new UpCommand()
       .withLiveReload(false)
-      .withDirectory(testDir)
+      .withDirectory(worktreeDir)
       .withHttpPort(0);
 
     nock('https://main--dummy-foo--adobe.aem.page')
