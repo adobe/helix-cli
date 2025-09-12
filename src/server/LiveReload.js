@@ -11,7 +11,6 @@
  */
 // eslint-disable-next-line max-classes-per-file
 import fs from 'fs';
-import path from 'path';
 import chokidar from 'chokidar';
 import WebSocket from 'faye-websocket';
 import { EventEmitter } from 'events';
