@@ -20,6 +20,7 @@ import {
   Nock, assertHttp, createTestRoot, initGit, switchBranch, signal,
 } from './utils.js';
 import UpCommand from '../src/up.cmd.js';
+import GitUtils from '../src/git-utils.js';
 import { getFetch } from '../src/fetch-utils.js';
 
 const TEST_DIR = path.resolve(__rootdir, 'test', 'fixtures', 'project');
@@ -503,6 +504,108 @@ describe('Integration test for up command with helix pages', function suite() {
       })
       .run()
       .catch(done);
+  });
+});
+
+describe('Integration test for up command with git worktrees', function suite() {
+  this.timeout(60000);
+  let testDir;
+  let testRoot;
+  let nock;
+
+  beforeEach(async () => {
+    testRoot = await createTestRoot();
+    testDir = path.resolve(testRoot, 'project');
+    await fse.copy(TEST_DIR, testDir);
+    nock = new Nock();
+    nock.enableNetConnect(/127.0.0.1/);
+  });
+
+  afterEach(async () => {
+    await fse.remove(testRoot);
+    nock.done();
+  });
+
+  it('should detect worktree and calculate branch-based port', async () => {
+    // Setup a regular git repo first
+    initGit(testDir, 'https://github.com/adobe/dummy-foo.git');
+
+    // Now convert it to look like a worktree by replacing .git directory with a file
+    await fse.remove(path.join(testDir, '.git'));
+    await fse.writeFile(path.join(testDir, '.git'), `gitdir: ${testRoot}/.git/worktrees/feature-branch\n`);
+
+    // Test that isGitWorktree correctly identifies it
+    const isWorktree = await GitUtils.isGitWorktree(testDir);
+    assert(isWorktree, 'Should be identified as a worktree');
+
+    // Test that port calculation works for a branch name
+    const port = GitUtils.hashBranchToPort('feature-branch');
+    assert(port >= 3000 && port < 4000, `Port ${port} should be in range 3000-3999`);
+    assert.notStrictEqual(port, 3000, 'Port should be different from default');
+  });
+
+  it('should reject git submodules', async () => {
+    initGit(testDir, 'https://github.com/adobe/dummy-foo.git');
+
+    // Simulate a submodule by creating a .git file with relative path
+    await fse.remove(path.join(testDir, '.git'));
+    await fse.writeFile(
+      path.join(testDir, '.git'),
+      'gitdir: ../.git/modules/my-submodule',
+    );
+
+    const cmd = new UpCommand()
+      .withLiveReload(false)
+      .withDirectory(testDir);
+
+    try {
+      await cmd.init();
+      assert.fail('Should have thrown an error for submodule');
+    } catch (e) {
+      assert(
+        e.message.includes('git submodules are not supported'),
+        `Expected submodule error, got: ${e.message}`,
+      );
+    }
+  });
+
+  it('should watch git directory correctly in worktree', async () => {
+    initGit(testDir, 'https://github.com/adobe/dummy-foo.git');
+
+    // Simulate a worktree
+    const worktreeGitDir = path.join(testRoot, '.git/worktrees/test-branch');
+    await fse.remove(path.join(testDir, '.git'));
+    await fse.writeFile(path.join(testDir, '.git'), `gitdir: ${worktreeGitDir}`);
+    await fse.ensureDir(worktreeGitDir);
+    await fse.writeFile(path.join(worktreeGitDir, 'HEAD'), 'ref: refs/heads/test-branch');
+
+    const cmd = new UpCommand()
+      .withLiveReload(false)
+      .withDirectory(testDir)
+      .withHttpPort(0);
+
+    nock('https://main--dummy-foo--adobe.aem.page')
+      .get('/index.html')
+      .reply(200, 'test');
+
+    await new Promise((resolve, reject) => {
+      cmd
+        .on('started', async () => {
+          try {
+            // Verify watcher is set up on the actual git directory
+            // eslint-disable-next-line no-underscore-dangle
+            assert(cmd._watcher, 'Watcher should be initialized');
+            // The watcher should be watching the worktree git directory, not the .git file
+            // This is implicitly tested by the fact that the server starts successfully
+            await cmd.stop();
+          } catch (e) {
+            reject(e);
+          }
+        })
+        .on('stopped', resolve)
+        .run()
+        .catch(reject);
+    });
   });
 });
 

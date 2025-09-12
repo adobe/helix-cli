@@ -264,4 +264,94 @@ export default class GitUtils {
       }))
       .then((obj) => obj.object);
   }
+
+  /**
+   * Checks if the given directory is a git worktree.
+   *
+   * @param {string} dir working tree directory path
+   * @returns {Promise<boolean>} `true` if the directory is a git worktree
+   */
+  static async isGitWorktree(dir) {
+    const gitPath = path.resolve(dir, '.git');
+    try {
+      const stat = await fse.lstat(gitPath);
+      if (stat.isFile()) {
+        const content = await fse.readFile(gitPath, 'utf-8');
+        return content.includes('/worktrees/');
+      }
+    } catch (e) {
+      // ignore
+    }
+    return false;
+  }
+
+  /**
+   * Checks if the given directory is a git submodule.
+   *
+   * @param {string} dir working tree directory path
+   * @returns {Promise<boolean>} `true` if the directory is a git submodule
+   */
+  static async isGitSubmodule(dir) {
+    const gitPath = path.resolve(dir, '.git');
+    try {
+      const stat = await fse.lstat(gitPath);
+      if (stat.isFile()) {
+        const content = await fse.readFile(gitPath, 'utf-8');
+        // Submodules have relative paths to .git/modules
+        return content.includes('/.git/modules/') || content.includes('\\.git\\modules\\');
+      }
+    } catch (e) {
+      // ignore
+    }
+    return false;
+  }
+
+  /**
+   * Gets the actual git directory, resolving through worktree/submodule redirection.
+   *
+   * @param {string} dir working tree directory path
+   * @returns {Promise<string>} path to the actual git directory
+   */
+  static async getGitDirectory(dir) {
+    const gitPath = path.resolve(dir, '.git');
+    try {
+      const stat = await fse.lstat(gitPath);
+      if (stat.isDirectory()) {
+        return gitPath;
+      }
+      // It's a file - read the actual location
+      const content = await fse.readFile(gitPath, 'utf-8');
+      const match = content.match(/^gitdir: (.+)$/m);
+      if (match) {
+        const targetPath = match[1].trim();
+        // If it's a relative path, resolve it relative to the directory
+        if (!path.isAbsolute(targetPath)) {
+          return path.resolve(dir, targetPath);
+        }
+        return targetPath;
+      }
+    } catch (e) {
+      // ignore
+    }
+    return gitPath;
+  }
+
+  /**
+   * Generates a deterministic port number based on branch name.
+   *
+   * @param {string} branchName the branch name to hash
+   * @param {number} basePort base port number (default: 3000)
+   * @param {number} range range of ports to use (default: 1000)
+   * @returns {number} port number between basePort and basePort + range - 1
+   */
+  static hashBranchToPort(branchName, basePort = 3000, range = 1000) {
+    let hash = 0;
+    for (let i = 0; i < branchName.length; i += 1) {
+      // eslint-disable-next-line no-bitwise
+      hash = ((hash << 5) - hash) + branchName.charCodeAt(i);
+      // eslint-disable-next-line no-bitwise
+      hash &= hash; // Convert to 32bit integer
+    }
+    return basePort + (Math.abs(hash) % range);
+  }
 }

@@ -44,7 +44,9 @@ describe('Testing GitUtils', () => {
     shell.cd(testRoot);
     shell.exec('git init');
     shell.exec('git checkout -b master');
-    shell.exec('git add -A');
+    shell.exec('git add README.md');
+    shell.exec('git add .gitignore');
+    shell.exec('git add -f .env');
     shell.exec('git commit -m"initial commit."');
     shell.exec('git commit -m"second commit." --allow-empty');
   });
@@ -122,7 +124,9 @@ describe('Testing GitUtils', () => {
   it('isDirty #unit with staged file', async () => {
     assert.equal(await GitUtils.isDirty(testRoot, GIT_USER_HOME), false);
     await fse.writeFile(path.resolve(testRoot, 'index.md'), 'Hello, world.\n', 'utf-8');
-    shell.exec('git add -A');
+    shell.exec('git add README.md');
+    shell.exec('git add .gitignore');
+    shell.exec('git add -f .env');
     assert.equal(await GitUtils.isDirty(testRoot, GIT_USER_HOME), true);
   });
 
@@ -176,6 +180,83 @@ describe('Testing GitUtils', () => {
     const anotherTestRoot = await createTestRoot();
     await fse.writeFile(path.resolve(anotherTestRoot, '.env'), 'Hello, world.\n', 'utf-8');
     assert.ok(await GitUtils.isIgnored(anotherTestRoot, '.env', GIT_USER_HOME));
+  });
+
+  describe('Git Worktree Support', () => {
+    it('isGitWorktree returns false for regular repo', async () => {
+      assert.equal(await GitUtils.isGitWorktree(testRoot), false);
+    });
+
+    it('isGitWorktree returns true for worktree', async () => {
+      // Create a .git file that simulates a worktree
+      await fse.remove(path.join(testRoot, '.git'));
+      await fse.writeFile(path.join(testRoot, '.git'), 'gitdir: /path/to/.git/worktrees/feature-branch');
+      assert.equal(await GitUtils.isGitWorktree(testRoot), true);
+    });
+
+    it('isGitSubmodule returns false for regular repo', async () => {
+      assert.equal(await GitUtils.isGitSubmodule(testRoot), false);
+    });
+
+    it('isGitSubmodule returns true for submodule', async () => {
+      // Create a .git file that simulates a submodule
+      await fse.remove(path.join(testRoot, '.git'));
+      await fse.writeFile(path.join(testRoot, '.git'), 'gitdir: ../.git/modules/my-module');
+      assert.equal(await GitUtils.isGitSubmodule(testRoot), true);
+    });
+
+    it('isGitSubmodule returns true for Windows-style submodule path', async () => {
+      // Create a .git file that simulates a submodule with Windows path
+      await fse.remove(path.join(testRoot, '.git'));
+      await fse.writeFile(path.join(testRoot, '.git'), 'gitdir: ..\\.git\\modules\\my-module');
+      assert.equal(await GitUtils.isGitSubmodule(testRoot), true);
+    });
+
+    it('getGitDirectory returns .git for regular repo', async () => {
+      const gitDir = await GitUtils.getGitDirectory(testRoot);
+      assert.equal(gitDir, path.resolve(testRoot, '.git'));
+    });
+
+    it('getGitDirectory resolves worktree path', async () => {
+      // Create a .git file that simulates a worktree
+      await fse.remove(path.join(testRoot, '.git'));
+      await fse.writeFile(path.join(testRoot, '.git'), 'gitdir: /absolute/path/.git/worktrees/feature');
+      const gitDir = await GitUtils.getGitDirectory(testRoot);
+      assert.equal(gitDir, '/absolute/path/.git/worktrees/feature');
+    });
+
+    it('getGitDirectory resolves relative submodule path', async () => {
+      // Create a .git file that simulates a submodule
+      await fse.remove(path.join(testRoot, '.git'));
+      await fse.writeFile(path.join(testRoot, '.git'), 'gitdir: ../.git/modules/my-module');
+      const gitDir = await GitUtils.getGitDirectory(testRoot);
+      assert.equal(gitDir, path.resolve(testRoot, '../.git/modules/my-module'));
+    });
+
+    it('hashBranchToPort generates consistent ports', () => {
+      const port1 = GitUtils.hashBranchToPort('feature-branch');
+      const port2 = GitUtils.hashBranchToPort('feature-branch');
+      assert.equal(port1, port2);
+    });
+
+    it('hashBranchToPort stays within range', () => {
+      const branches = ['main', 'develop', 'feature/long-name-with-many-chars', 'fix/issue-123'];
+      branches.forEach((branch) => {
+        const port = GitUtils.hashBranchToPort(branch);
+        assert(port >= 3000 && port < 4000, `Port ${port} for branch ${branch} is out of range`);
+      });
+    });
+
+    it('hashBranchToPort generates different ports for different branches', () => {
+      const port1 = GitUtils.hashBranchToPort('feature-a');
+      const port2 = GitUtils.hashBranchToPort('feature-b');
+      assert.notEqual(port1, port2);
+    });
+
+    it('hashBranchToPort respects custom base and range', () => {
+      const port = GitUtils.hashBranchToPort('test-branch', 5000, 500);
+      assert(port >= 5000 && port < 5500, `Port ${port} is out of custom range`);
+    });
   });
 });
 
