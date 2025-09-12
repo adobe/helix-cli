@@ -176,9 +176,7 @@ describe('Browser Console Log Forwarding', () => {
 
     // Intercept console with WebSocket state check
     console.log = function interceptedLog(...args) {
-      originalConsole.log.apply(console, args);
-
-      // Sanitize user-controlled input before forwarding
+      // Sanitize user-controlled input before forwarding/logging
       const sanitizedArgs = args.map((arg) => {
         if (typeof arg === 'string') {
           // Remove newlines and carriage returns
@@ -186,6 +184,8 @@ describe('Browser Console Log Forwarding', () => {
         }
         return arg;
       });
+
+      originalConsole.log.apply(console, sanitizedArgs);
 
       if (mockWebSocket.readyState === 1) { // OPEN
         mockWebSocket.send(JSON.stringify({
