@@ -178,11 +178,20 @@ describe('Browser Console Log Forwarding', () => {
     console.log = function interceptedLog(...args) {
       // Sanitize user-controlled input before forwarding/logging
       const sanitizedArgs = args.map((arg) => {
+        // Convert all arguments to string and remove newlines and carriage returns
+        let str = '';
         if (typeof arg === 'string') {
-          // Remove newlines and carriage returns
-          return arg.replace(/[\r\n]+/g, '');
+          str = arg;
+        } else if (typeof arg === 'object') {
+          try {
+            str = JSON.stringify(arg);
+          } catch (e) {
+            str = '[Unserializable object]';
+          }
+        } else {
+          str = String(arg);
         }
-        return arg;
+        return str.replace(/[\r\n]+/g, '');
       });
 
       originalConsole.log.apply(console, sanitizedArgs);
