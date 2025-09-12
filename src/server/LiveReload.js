@@ -147,10 +147,7 @@ export default class LiveReload extends EventEmitter {
 
     // client connections
     this._connections = {};
-    // Use vendor copy from browser-injectables sub-project
-    // eslint-disable-next-line no-underscore-dangle
-    const __dirname = path.dirname(new URL(import.meta.url).pathname);
-    this._liveReloadJSPath = path.join(__dirname, '../../packages/browser-injectables/vendor/livereload.js');
+    this._liveReloadJSPath = require.resolve('livereload-js/dist/livereload.js');
     this._forwardBrowserLogs = false;
   }
 
