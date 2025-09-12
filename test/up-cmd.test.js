@@ -560,6 +560,9 @@ describe('Integration test for up command with git worktrees', function suite() 
   });
 
   it('should reject git submodules', async () => {
+    // Ensure testDir exists and has some content for git to add
+    await fse.ensureDir(testDir);
+    await fse.writeFile(path.join(testDir, 'README.md'), '# Test\n');
     initGit(testDir, 'https://github.com/adobe/dummy-foo.git');
 
     // Simulate a submodule by creating a .git file with relative path
@@ -585,6 +588,9 @@ describe('Integration test for up command with git worktrees', function suite() 
   });
 
   it('should watch git directory correctly in worktree', async () => {
+    // Ensure testDir exists and has some content for git to add
+    await fse.ensureDir(testDir);
+    await fse.writeFile(path.join(testDir, 'README.md'), '# Test\n');
     initGit(testDir, 'https://github.com/adobe/dummy-foo.git');
 
     // Create an actual worktree using git CLI with unique name
