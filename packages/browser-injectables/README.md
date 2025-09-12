@@ -1,6 +1,6 @@
 # AEM CLI Browser Injectables
 
-This sub-project contains browser scripts injected by the Helix CLI development server.
+This sub-project contains browser scripts injected by the AEM CLI development server.
 
 ## Purpose
 
