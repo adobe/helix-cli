@@ -11,9 +11,12 @@
  */
 // eslint-disable-next-line max-classes-per-file
 import fs from 'fs';
+import { createRequire } from 'module';
 import chokidar from 'chokidar';
 import WebSocket from 'faye-websocket';
 import { EventEmitter } from 'events';
+
+const require = createRequire(import.meta.url);
 
 /**
  * Client connection for the live reload server.
