@@ -563,7 +563,17 @@ describe('Integration test for up command with git worktrees', function suite() 
     // Ensure testDir exists and has some content for git to add
     await fse.ensureDir(testDir);
     await fse.writeFile(path.join(testDir, 'README.md'), '# Test\n');
-    initGit(testDir, 'https://github.com/adobe/dummy-foo.git');
+    await fse.writeFile(path.join(testDir, '.gitignore'), 'node_modules\n');
+
+    // Init git directly without using the helper to avoid cd issues
+    const pwd = shell.pwd();
+    shell.cd(testDir);
+    shell.exec('git init');
+    shell.exec('git checkout -b master');
+    shell.exec('git add -A');
+    shell.exec('git commit -m"initial commit."');
+    shell.exec('git remote add origin https://github.com/adobe/dummy-foo.git');
+    shell.cd(pwd);
 
     // Simulate a submodule by creating a .git file with relative path
     await fse.remove(path.join(testDir, '.git'));
@@ -591,7 +601,17 @@ describe('Integration test for up command with git worktrees', function suite() 
     // Ensure testDir exists and has some content for git to add
     await fse.ensureDir(testDir);
     await fse.writeFile(path.join(testDir, 'README.md'), '# Test\n');
-    initGit(testDir, 'https://github.com/adobe/dummy-foo.git');
+    await fse.writeFile(path.join(testDir, '.gitignore'), 'node_modules\n');
+
+    // Init git directly without using the helper to avoid cd issues
+    const pwd = shell.pwd();
+    shell.cd(testDir);
+    shell.exec('git init');
+    shell.exec('git checkout -b master');
+    shell.exec('git add -A');
+    shell.exec('git commit -m"initial commit."');
+    shell.exec('git remote add origin https://github.com/adobe/dummy-foo.git');
+    shell.cd(pwd);
 
     // Create an actual worktree using git CLI with unique name
     const worktreeName = `worktree-test-${Date.now()}`;
