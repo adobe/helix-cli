@@ -24,11 +24,14 @@ import { getFetch } from '../src/fetch-utils.js';
  */
 export function initGit(dir, remote, branch) {
   // Ensure the directory exists before trying to cd into it
-  if (!fse.existsSync(dir)) {
-    fse.ensureDirSync(dir);
-  }
+  fse.ensureDirSync(dir);
+
   const pwd = shell.pwd();
-  shell.cd(dir);
+  const result = shell.cd(dir);
+  if (result.code !== 0) {
+    throw new Error(`Failed to cd to ${dir}: ${result.stderr}`);
+  }
+
   shell.exec('git init');
   shell.exec('git checkout -b master');
   shell.exec('git add -A');
@@ -39,7 +42,13 @@ export function initGit(dir, remote, branch) {
   if (branch) {
     shell.exec(`git checkout -b ${branch}`);
   }
-  shell.cd(pwd);
+
+  const backResult = shell.cd(pwd);
+  if (backResult.code !== 0) {
+    // If we can't cd back, at least don't throw - we've done the git init
+    // eslint-disable-next-line no-console
+    console.error(`Warning: Could not cd back to ${pwd}`);
+  }
 }
 
 export function switchBranch(dir, branch) {
