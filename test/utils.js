@@ -27,9 +27,15 @@ export function initGit(dir, remote, branch) {
   fse.ensureDirSync(dir);
 
   const pwd = shell.pwd();
-  const result = shell.cd(dir);
-  if (result.code !== 0) {
-    throw new Error(`Failed to cd to ${dir}: ${result.stderr}`);
+  const absoluteDir = path.resolve(dir);
+  const absolutePwd = path.resolve(pwd.toString());
+
+  // Only cd if we're not already there
+  if (absolutePwd !== absoluteDir) {
+    const result = shell.cd(dir);
+    if (result.code !== 0) {
+      throw new Error(`Failed to cd to ${dir}: ${result.stderr}`);
+    }
   }
 
   shell.exec('git init');
@@ -43,11 +49,14 @@ export function initGit(dir, remote, branch) {
     shell.exec(`git checkout -b ${branch}`);
   }
 
-  const backResult = shell.cd(pwd);
-  if (backResult.code !== 0) {
-    // If we can't cd back, at least don't throw - we've done the git init
-    // eslint-disable-next-line no-console
-    console.error(`Warning: Could not cd back to ${pwd}`);
+  // Only cd back if we changed directories
+  if (absolutePwd !== absoluteDir) {
+    const backResult = shell.cd(pwd);
+    if (backResult.code !== 0) {
+      // If we can't cd back, at least don't throw - we've done the git init
+      // eslint-disable-next-line no-console
+      console.error(`Warning: Could not cd back to ${pwd}`);
+    }
   }
 }
 
