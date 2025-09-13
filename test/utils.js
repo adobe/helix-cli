@@ -33,9 +33,19 @@ export async function initGit(dir, remote, branch) {
     throw new Error(`Directory ${absoluteDir} does not exist. Please ensure it's created before calling initGit.`);
   }
 
-  const pwd = shell.pwd();
+  let pwd;
   try {
-    // Change to directory
+    pwd = shell.pwd();
+  } catch (e) {
+    // If we can't get current directory, use the target directory
+    pwd = absoluteDir;
+  }
+
+  try {
+    // Change to directory - double-check it still exists
+    if (!fse.existsSync(absoluteDir)) {
+      throw new Error(`Directory ${absoluteDir} was removed before git init could run`);
+    }
     shell.cd(absoluteDir);
     if (shell.error()) {
       throw new Error(`Failed to change to directory ${absoluteDir}: ${shell.error()}`);
@@ -59,30 +69,79 @@ export async function initGit(dir, remote, branch) {
     }
   } finally {
     // Only try to restore pwd if it exists
-    if (pwd && fse.existsSync(pwd)) {
-      shell.cd(pwd);
+    try {
+      if (pwd && fse.existsSync(pwd)) {
+        shell.cd(pwd);
+      } else {
+        // If original pwd doesn't exist, try to change to a safe directory
+        shell.cd(process.cwd());
+      }
+    } catch (e) {
+      // Ignore errors when restoring directory
     }
   }
 }
 
 export function switchBranch(dir, branch) {
-  const pwd = shell.pwd();
-  shell.cd(dir);
-  shell.exec(`git checkout -b ${branch}`);
-  shell.cd(pwd);
+  let pwd;
+  try {
+    pwd = shell.pwd();
+  } catch (e) {
+    // If we can't get current directory, use the target directory
+    pwd = dir;
+  }
+
+  try {
+    shell.cd(dir);
+    shell.exec(`git checkout -b ${branch}`);
+  } finally {
+    // Only try to restore pwd if it exists
+    try {
+      if (pwd && fse.existsSync(pwd)) {
+        shell.cd(pwd);
+      } else {
+        // If original pwd doesn't exist, try to change to a safe directory
+        shell.cd(process.cwd());
+      }
+    } catch (e) {
+      // Ignore errors when restoring directory
+    }
+  }
   // eslint-disable-next-line no-console
   console.log(`switched to branch ${branch} in ${dir}`);
 }
 
 export function getBranch(dir) {
-  const pwd = shell.pwd();
-  shell.cd(dir);
-  const { stdout } = shell.exec('git rev-parse --abbrev-ref HEAD');
-  shell.cd(pwd);
-  // eslint-disable-next-line no-console
-  console.log(`The current branch is ${stdout.trim()} in ${dir}`);
+  let pwd;
+  try {
+    pwd = shell.pwd();
+  } catch (e) {
+    // If we can't get current directory, use the target directory
+    pwd = dir;
+  }
 
-  return stdout.trim();
+  let result;
+  try {
+    shell.cd(dir);
+    const { stdout } = shell.exec('git rev-parse --abbrev-ref HEAD');
+    result = stdout.trim();
+  } finally {
+    // Only try to restore pwd if it exists
+    try {
+      if (pwd && fse.existsSync(pwd)) {
+        shell.cd(pwd);
+      } else {
+        // If original pwd doesn't exist, try to change to a safe directory
+        shell.cd(process.cwd());
+      }
+    } catch (e) {
+      // Ignore errors when restoring directory
+    }
+  }
+  // eslint-disable-next-line no-console
+  console.log(`The current branch is ${result} in ${dir}`);
+
+  return result;
 }
 
 export function clearHelixEnv() {
@@ -256,7 +315,14 @@ export function initGitRepo(dir, options = {}) {
     throw new Error(`Directory ${dir} does not exist`);
   }
 
-  const pwd = shell.pwd();
+  let pwd;
+  try {
+    pwd = shell.pwd();
+  } catch (e) {
+    // If we can't get current directory, use the target directory
+    pwd = dir;
+  }
+
   try {
     shell.cd(dir);
     shell.exec('git init', { silent: false });
@@ -279,7 +345,17 @@ export function initGitRepo(dir, options = {}) {
       shell.exec(`git checkout -b ${branch}`, { silent: false });
     }
   } finally {
-    shell.cd(pwd);
+    // Only try to restore pwd if it exists
+    try {
+      if (pwd && fse.existsSync(pwd)) {
+        shell.cd(pwd);
+      } else {
+        // If original pwd doesn't exist, try to change to a safe directory
+        shell.cd(process.cwd());
+      }
+    } catch (e) {
+      // Ignore errors when restoring directory
+    }
   }
 }
 
@@ -295,7 +371,13 @@ export function createGitWorktree(parentDir, worktreeDir, branchName) {
     throw new Error(`Parent directory ${parentDir} does not exist`);
   }
 
-  const pwd = shell.pwd();
+  let pwd;
+  try {
+    pwd = shell.pwd();
+  } catch (e) {
+    // If we can't get current directory, use the parent directory
+    pwd = parentDir;
+  }
 
   try {
     shell.cd(parentDir);
@@ -318,20 +400,45 @@ export function createGitWorktree(parentDir, worktreeDir, branchName) {
       worktreeDir,
       branchName: uniqueBranch,
       cleanup: async () => {
-        const currentPwd = shell.pwd();
+        let currentPwd;
+        try {
+          currentPwd = shell.pwd();
+        } catch (e) {
+          // If we can't get current directory, use parent directory
+          currentPwd = parentDir;
+        }
+
         try {
           shell.cd(parentDir);
           shell.exec(`git worktree remove "${worktreeDir}" --force`, { silent: true });
         } catch (e) {
           // Ignore cleanup errors
         } finally {
-          shell.cd(currentPwd);
+          try {
+            if (currentPwd && fse.existsSync(currentPwd)) {
+              shell.cd(currentPwd);
+            } else {
+              shell.cd(process.cwd());
+            }
+          } catch (e) {
+            // Ignore errors when restoring directory
+          }
           await fse.remove(worktreeDir).catch(() => {});
         }
       },
     };
   } finally {
-    shell.cd(pwd);
+    // Only try to restore pwd if it exists
+    try {
+      if (pwd && fse.existsSync(pwd)) {
+        shell.cd(pwd);
+      } else {
+        // If original pwd doesn't exist, try to change to a safe directory
+        shell.cd(process.cwd());
+      }
+    } catch (e) {
+      // Ignore errors when restoring directory
+    }
   }
 }
 
@@ -347,7 +454,14 @@ export function createGitSubmodule(parentDir, submodulePath, submoduleRepo) {
     throw new Error(`Parent directory ${parentDir} does not exist`);
   }
 
-  const pwd = shell.pwd();
+  let pwd;
+  try {
+    pwd = shell.pwd();
+  } catch (e) {
+    // If we can't get current directory, use the parent directory
+    pwd = parentDir;
+  }
+
   const absoluteSubmodulePath = path.join(parentDir, submodulePath);
 
   try {
@@ -369,7 +483,14 @@ export function createGitSubmodule(parentDir, submodulePath, submoduleRepo) {
     return {
       submodulePath: absoluteSubmodulePath,
       cleanup: async () => {
-        const currentPwd = shell.pwd();
+        let currentPwd;
+        try {
+          currentPwd = shell.pwd();
+        } catch (e) {
+          // If we can't get current directory, use parent directory
+          currentPwd = parentDir;
+        }
+
         try {
           shell.cd(parentDir);
           // Remove submodule properly
@@ -379,12 +500,30 @@ export function createGitSubmodule(parentDir, submodulePath, submoduleRepo) {
         } catch (e) {
           // Ignore cleanup errors
         } finally {
-          shell.cd(currentPwd);
+          try {
+            if (currentPwd && fse.existsSync(currentPwd)) {
+              shell.cd(currentPwd);
+            } else {
+              shell.cd(process.cwd());
+            }
+          } catch (e) {
+            // Ignore errors when restoring directory
+          }
         }
       },
     };
   } finally {
-    shell.cd(pwd);
+    // Only try to restore pwd if it exists
+    try {
+      if (pwd && fse.existsSync(pwd)) {
+        shell.cd(pwd);
+      } else {
+        // If original pwd doesn't exist, try to change to a safe directory
+        shell.cd(process.cwd());
+      }
+    } catch (e) {
+      // Ignore errors when restoring directory
+    }
   }
 }
 
