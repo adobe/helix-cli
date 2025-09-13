@@ -26,16 +26,14 @@ export function initGit(dir, remote, branch) {
   // Ensure the directory exists before trying to cd into it
   fse.ensureDirSync(dir);
 
-  const pwd = shell.pwd();
+  const originalCwd = process.cwd();
   const absoluteDir = path.resolve(dir);
-  const absolutePwd = path.resolve(pwd.toString());
 
-  // Only cd if we're not already there
-  if (absolutePwd !== absoluteDir) {
-    const result = shell.cd(dir);
-    if (result.code !== 0) {
-      throw new Error(`Failed to cd to ${dir}: ${result.stderr}`);
-    }
+  // Change to the target directory
+  try {
+    process.chdir(absoluteDir);
+  } catch (e) {
+    throw new Error(`Failed to change to directory ${absoluteDir}: ${e.message}`);
   }
 
   shell.exec('git init');
@@ -49,14 +47,13 @@ export function initGit(dir, remote, branch) {
     shell.exec(`git checkout -b ${branch}`);
   }
 
-  // Only cd back if we changed directories
-  if (absolutePwd !== absoluteDir) {
-    const backResult = shell.cd(pwd);
-    if (backResult.code !== 0) {
-      // If we can't cd back, at least don't throw - we've done the git init
-      // eslint-disable-next-line no-console
-      console.error(`Warning: Could not cd back to ${pwd}`);
-    }
+  // Always try to restore the original directory
+  try {
+    process.chdir(originalCwd);
+  } catch (e) {
+    // If we can't change back, at least don't throw - we've done the git init
+    // eslint-disable-next-line no-console
+    console.error(`Warning: Could not restore directory to ${originalCwd}: ${e.message}`);
   }
 }
 
