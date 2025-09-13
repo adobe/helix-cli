@@ -23,6 +23,10 @@ import { getFetch } from '../src/fetch-utils.js';
  * init git in integration so that helix-simulator can run
  */
 export function initGit(dir, remote, branch) {
+  // Ensure the directory exists before trying to cd into it
+  if (!fse.existsSync(dir)) {
+    fse.ensureDirSync(dir);
+  }
   const pwd = shell.pwd();
   shell.cd(dir);
   shell.exec('git init');
@@ -204,6 +208,128 @@ export function signal(timeout) {
     res();
   };
   return p;
+}
+
+/**
+ * Initialize a git repository with a submodule for testing
+ * @param {string} mainDir - Main repository directory
+ * @param {string} submoduleName - Name for the submodule
+ * @param {string} remote - Optional remote URL for main repo
+ * @returns {Object} Object with mainDir and submoduleDir paths
+ */
+export async function initGitWithSubmodule(mainDir, submoduleName = 'test-submodule', remote = null) {
+  // Ensure main directory exists
+  await fse.ensureDir(mainDir);
+
+  // Create a separate repo to use as submodule with unique name
+  const timestamp = Date.now();
+  const submoduleRepoName = `${submoduleName}-repo-${timestamp}`;
+  const submoduleRepoDir = path.join(path.dirname(mainDir), submoduleRepoName);
+
+  // Initialize submodule repository
+  await fse.ensureDir(submoduleRepoDir);
+  await fse.writeFile(path.join(submoduleRepoDir, 'README.md'), `# ${submoduleName}\n`);
+
+  const pwd = shell.pwd();
+
+  // Setup submodule repo
+  shell.cd(submoduleRepoDir);
+  shell.exec('git init');
+  shell.exec('git add README.md');
+  shell.exec('git commit -m "Initial submodule commit"');
+
+  // Setup main repo and add submodule
+  shell.cd(mainDir);
+  shell.exec('git init');
+  shell.exec('git checkout -b master');
+
+  // Add some initial content before adding submodule
+  await fse.writeFile(path.join(mainDir, 'README.md'), '# Main Repository\n');
+  shell.exec('git add README.md');
+  shell.exec('git commit -m "Initial main commit"');
+
+  // Add submodule
+  shell.exec(`git submodule add "${submoduleRepoDir}" ${submoduleName}`);
+  shell.exec('git commit -m "Add submodule"');
+
+  if (remote) {
+    shell.exec(`git remote add origin ${remote}`);
+  }
+
+  shell.cd(pwd);
+
+  return {
+    mainDir,
+    submoduleDir: path.join(mainDir, submoduleName),
+    submoduleRepoDir, // for cleanup
+  };
+}
+
+/**
+ * Initialize a git repository with a worktree for testing
+ * @param {string} mainDir - Main repository directory
+ * @param {string} worktreeName - Name for the worktree
+ * @param {string} remote - Optional remote URL
+ * @returns {Object} Object with mainDir and worktreeDir paths
+ */
+export async function initGitWithWorktree(mainDir, worktreeName = 'test-worktree', remote = null) {
+  // Ensure main directory exists
+  await fse.ensureDir(mainDir);
+
+  // Add initial content
+  await fse.writeFile(path.join(mainDir, 'README.md'), '# Test Repository\n');
+  await fse.writeFile(path.join(mainDir, '.gitignore'), 'node_modules\n');
+
+  const pwd = shell.pwd();
+
+  // Initialize main repository
+  shell.cd(mainDir);
+  shell.exec('git init');
+  shell.exec('git checkout -b master');
+  shell.exec('git add -A');
+  shell.exec('git commit -m "Initial commit"');
+
+  if (remote) {
+    shell.exec(`git remote add origin ${remote}`);
+  }
+
+  // Create worktree with unique name to avoid collisions
+  const timestamp = Date.now();
+  const uniqueWorktreeName = `${worktreeName}-${timestamp}`;
+  const worktreeDir = path.join(path.dirname(mainDir), uniqueWorktreeName);
+  const branchName = `${uniqueWorktreeName}-branch`;
+
+  shell.exec(`git worktree add "${worktreeDir}" -b ${branchName}`);
+
+  shell.cd(pwd);
+
+  return {
+    mainDir,
+    worktreeDir,
+    worktreeName: uniqueWorktreeName,
+    branchName,
+  };
+}
+
+/**
+ * Clean up a git worktree
+ * @param {string} mainDir - Main repository directory
+ * @param {string} worktreeDir - Worktree directory to remove
+ */
+export async function cleanupWorktree(mainDir, worktreeDir) {
+  const pwd = shell.pwd();
+  shell.cd(mainDir);
+  shell.exec(`git worktree remove "${worktreeDir}" --force || true`);
+  shell.cd(pwd);
+  await fse.remove(worktreeDir).catch(() => {});
+}
+
+/**
+ * Clean up a submodule and its repository
+ * @param {string} submoduleRepoDir - The submodule repository directory to remove
+ */
+export async function cleanupSubmodule(submoduleRepoDir) {
+  await fse.remove(submoduleRepoDir).catch(() => {});
 }
 
 export function condit(name, condition, mochafn) {
