@@ -25,15 +25,22 @@ import { getFetch } from '../src/fetch-utils.js';
  * @param {string} remote - Optional remote URL
  * @param {string} branch - Optional branch to create
  */
-export function initGit(dir, remote, branch) {
+export async function initGit(dir, remote, branch) {
   // Ensure directory exists before trying to cd into it
-  if (!fse.existsSync(dir)) {
-    throw new Error(`Directory ${dir} does not exist. Please ensure it's created before calling initGit.`);
+  const absoluteDir = path.resolve(dir);
+  const dirExists = await fse.pathExists(absoluteDir);
+  if (!dirExists) {
+    throw new Error(`Directory ${absoluteDir} does not exist. Please ensure it's created before calling initGit.`);
   }
 
   const pwd = shell.pwd();
   try {
-    shell.cd(dir);
+    // Change to directory
+    shell.cd(absoluteDir);
+    if (shell.error()) {
+      throw new Error(`Failed to change to directory ${absoluteDir}: ${shell.error()}`);
+    }
+
     shell.exec('git init');
     shell.exec('git checkout -b master');
 
@@ -51,7 +58,10 @@ export function initGit(dir, remote, branch) {
       shell.exec(`git checkout -b ${branch}`);
     }
   } finally {
-    shell.cd(pwd);
+    // Only try to restore pwd if it exists
+    if (pwd && fse.existsSync(pwd)) {
+      shell.cd(pwd);
+    }
   }
 }
 

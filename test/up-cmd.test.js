@@ -55,7 +55,7 @@ describe('Integration test for up command with helix pages', function suite() {
         },
       }),
     });
-    initGit(testDir, 'https://github.com/adobe/dummy-foo.git');
+    await initGit(testDir, 'https://github.com/adobe/dummy-foo.git');
     const cmd = new MockedCommand()
       .withLiveReload(false)
       .withDirectory(testDir)
@@ -106,7 +106,7 @@ describe('Integration test for up command with helix pages', function suite() {
         },
       }),
     });
-    initGit(testDir, 'https://github.com/adobe/dummy-foo.git');
+    await initGit(testDir, 'https://github.com/adobe/dummy-foo.git');
     const cmd = new MockedCommand()
       .withLiveReload(false)
       .withDirectory(testDir)
@@ -160,7 +160,7 @@ describe('Integration test for up command with helix pages', function suite() {
         },
       ),
     });
-    initGit(testDir, 'https://github.com/adobe/dummy-foo.git');
+    await initGit(testDir, 'https://github.com/adobe/dummy-foo.git');
     const cmd = new MockedCommand()
       .withLiveReload(false)
       .withDirectory(testDir)
@@ -219,7 +219,7 @@ describe('Integration test for up command with helix pages', function suite() {
         },
       ),
     });
-    initGit(testDir, 'https://github.com/adobe/dummy-foo.git');
+    await initGit(testDir, 'https://github.com/adobe/dummy-foo.git');
     const cmd = new MockedCommand()
       .withLiveReload(false)
       .withDirectory(testDir)
@@ -290,7 +290,7 @@ describe('Integration test for up command with helix pages', function suite() {
         },
       }),
     });
-    initGit(testDir, 'https://github.com/adobe/dummy-foo.git');
+    await initGit(testDir, 'https://github.com/adobe/dummy-foo.git');
     const cmd = new MockedCommand()
       .withLiveReload(false)
       .withDirectory(testDir)
@@ -341,7 +341,7 @@ describe('Integration test for up command with helix pages', function suite() {
     const MockedCommand = await esmock('../src/up.cmd.js', {
       '../src/abstract-server.cmd.js': await esmock('../src/abstract-server.cmd.js'),
     });
-    initGit(testDir, 'https://github.com/adobe/dummy-foo.git', 'test');
+    await initGit(testDir, 'https://github.com/adobe/dummy-foo.git', 'test');
     const cmd = new MockedCommand()
       .withLiveReload(false)
       .withDirectory(testDir)
@@ -380,19 +380,13 @@ describe('Integration test for up command with helix pages', function suite() {
     });
   });
 
-  it('up command delivers correct response (branch with slash).', (done) => {
-    initGit(testDir, 'https://github.com/adobe/dummy-foo.git', 'tripod/test');
-    let error = null;
+  it('up command delivers correct response (branch with slash).', async () => {
+    await initGit(testDir, 'https://github.com/adobe/dummy-foo.git', 'tripod/test');
     const cmd = new UpCommand()
       .withLiveReload(false)
       .withDirectory(testDir)
       .withOpen(false)
       .withHttpPort(0);
-
-    const myDone = (err) => {
-      error = err;
-      return cmd.stop();
-    };
 
     nock('https://main--dummy-foo--adobe.aem.page')
       .get('/index.html')
@@ -400,79 +394,29 @@ describe('Integration test for up command with helix pages', function suite() {
       .get('/not-found.txt')
       .reply(404);
 
-    cmd
-      .on('started', async () => {
-        try {
-          let ret = await assertHttp(`http://127.0.0.1:${cmd.project.server.port}/index.html`, 200);
-          assert.strictEqual(ret.trim(), '## Welcome');
-          ret = await assertHttp(`http://127.0.0.1:${cmd.project.server.port}/local.txt`, 200);
-          assert.strictEqual(ret.trim(), 'Hello, world.');
-          await assertHttp(`http://127.0.0.1:${cmd.project.server.port}/not-found.txt`, 404);
-          await myDone();
-        } catch (e) {
-          await myDone(e);
-        }
-      })
-      .on('stopped', () => {
-        done(error);
-      })
-      .run()
-      .catch(done);
+    await new Promise((resolve, reject) => {
+      cmd
+        .on('started', async () => {
+          try {
+            let ret = await assertHttp(`http://127.0.0.1:${cmd.project.server.port}/index.html`, 200);
+            assert.strictEqual(ret.trim(), '## Welcome');
+            ret = await assertHttp(`http://127.0.0.1:${cmd.project.server.port}/local.txt`, 200);
+            assert.strictEqual(ret.trim(), 'Hello, world.');
+            await assertHttp(`http://127.0.0.1:${cmd.project.server.port}/not-found.txt`, 404);
+            await cmd.stop();
+          } catch (e) {
+            await cmd.stop();
+            reject(e);
+          }
+        })
+        .on('stopped', resolve)
+        .run()
+        .catch(reject);
+    });
   });
 
-  it('up command reloads when git branch changes.', (done) => {
-    initGit(testDir, 'https://github.com/adobe/dummy-foo.git');
-    let error = null;
-    const cmd = new UpCommand()
-      .withLiveReload(false)
-      .withDirectory(testDir)
-      .withOpen(false)
-      .withHttpPort(0);
-
-    const myDone = (err) => {
-      error = err;
-      return cmd.stop();
-    };
-
-    nock('https://main--dummy-foo--adobe.aem.page')
-      .get('/index.html')
-      .reply(200, '## Welcome')
-      .get('/not-found.txt')
-      .reply(404);
-
-    let timer;
-    cmd
-      .on('started', async () => {
-        try {
-          let ret = await assertHttp(`http://127.0.0.1:${cmd.project.server.port}/index.html`, 200);
-          assert.strictEqual(ret.trim(), '## Welcome');
-          ret = await assertHttp(`http://127.0.0.1:${cmd.project.server.port}/local.txt`, 200);
-          assert.strictEqual(ret.trim(), 'Hello, world.');
-          await assertHttp(`http://127.0.0.1:${cmd.project.server.port}/not-found.txt`, 404);
-          // now switch to a new branch
-          switchBranch(testDir, 'new-branch');
-          // wait 5 seconds for the git branch to be detected
-          timer = signal(5000);
-          await timer;
-          // eslint-disable-next-line no-underscore-dangle
-          assert.strictEqual(cmd._url, 'https://main--dummy-foo--adobe.aem.page');
-          await myDone();
-        } catch (e) {
-          await myDone(e);
-        }
-      })
-      .on('stopped', () => {
-        done(error);
-      })
-      .on('changed', () => {
-        timer?.cancel();
-      })
-      .run()
-      .catch(done);
-  });
-
-  it('up command stops when git branch changes to something too long', (done) => {
-    initGit(testDir, 'https://github.com/adobe/dummy-foo.git');
+  it('up command reloads when git branch changes.', async () => {
+    await initGit(testDir, 'https://github.com/adobe/dummy-foo.git');
     const cmd = new UpCommand()
       .withLiveReload(false)
       .withDirectory(testDir)
@@ -486,26 +430,78 @@ describe('Integration test for up command with helix pages', function suite() {
       .reply(404);
 
     let timer;
-    cmd
-      .on('started', async () => {
-        let ret = await assertHttp(`http://127.0.0.1:${cmd.project.server.port}/index.html`, 200);
-        assert.strictEqual(ret.trim(), '## Welcome');
-        ret = await assertHttp(`http://127.0.0.1:${cmd.project.server.port}/local.txt`, 200);
-        assert.strictEqual(ret.trim(), 'Hello, world.');
-        await assertHttp(`http://127.0.0.1:${cmd.project.server.port}/not-found.txt`, 404);
-        // now switch to a new branch
-        switchBranch(testDir, 'new-and-totally-unreasonably-long-in-fact-too-long-branch');
-        // wait 5 seconds for the git branch to be detected
-        timer = signal(5000);
-        await timer;
-        assert.ok(!cmd.project.started, 'project should have stopped');
-      })
-      .on('stopped', () => {
-        timer?.cancel();
-        done();
-      })
-      .run()
-      .catch(done);
+    await new Promise((resolve, reject) => {
+      cmd
+        .on('started', async () => {
+          try {
+            let ret = await assertHttp(`http://127.0.0.1:${cmd.project.server.port}/index.html`, 200);
+            assert.strictEqual(ret.trim(), '## Welcome');
+            ret = await assertHttp(`http://127.0.0.1:${cmd.project.server.port}/local.txt`, 200);
+            assert.strictEqual(ret.trim(), 'Hello, world.');
+            await assertHttp(`http://127.0.0.1:${cmd.project.server.port}/not-found.txt`, 404);
+            // now switch to a new branch
+            switchBranch(testDir, 'new-branch');
+            // wait 5 seconds for the git branch to be detected
+            timer = signal(5000);
+            await timer;
+            // eslint-disable-next-line no-underscore-dangle
+            assert.strictEqual(cmd._url, 'https://main--dummy-foo--adobe.aem.page');
+            await cmd.stop();
+          } catch (e) {
+            await cmd.stop();
+            reject(e);
+          }
+        })
+        .on('stopped', resolve)
+        .on('changed', () => {
+          timer?.cancel();
+        })
+        .run()
+        .catch(reject);
+    });
+  });
+
+  it('up command stops when git branch changes to something too long', async () => {
+    await initGit(testDir, 'https://github.com/adobe/dummy-foo.git');
+    const cmd = new UpCommand()
+      .withLiveReload(false)
+      .withDirectory(testDir)
+      .withOpen(false)
+      .withHttpPort(0);
+
+    nock('https://main--dummy-foo--adobe.aem.page')
+      .get('/index.html')
+      .reply(200, '## Welcome')
+      .get('/not-found.txt')
+      .reply(404);
+
+    let timer;
+    await new Promise((resolve, reject) => {
+      cmd
+        .on('started', async () => {
+          try {
+            let ret = await assertHttp(`http://127.0.0.1:${cmd.project.server.port}/index.html`, 200);
+            assert.strictEqual(ret.trim(), '## Welcome');
+            ret = await assertHttp(`http://127.0.0.1:${cmd.project.server.port}/local.txt`, 200);
+            assert.strictEqual(ret.trim(), 'Hello, world.');
+            await assertHttp(`http://127.0.0.1:${cmd.project.server.port}/not-found.txt`, 404);
+            // now switch to a new branch
+            switchBranch(testDir, 'new-and-totally-unreasonably-long-in-fact-too-long-branch');
+            // wait 5 seconds for the git branch to be detected
+            timer = signal(5000);
+            await timer;
+            assert.ok(!cmd.project.started, 'project should have stopped');
+          } catch (e) {
+            reject(e);
+          }
+        })
+        .on('stopped', () => {
+          timer?.cancel();
+          resolve();
+        })
+        .run()
+        .catch(reject);
+    });
   });
 });
 
@@ -530,7 +526,7 @@ describe('Integration test for up command with git worktrees', function suite() 
 
   it('should detect worktree and calculate branch-based port', async () => {
     // Setup a regular git repo first
-    initGit(testDir, 'https://github.com/adobe/dummy-foo.git');
+    await initGit(testDir, 'https://github.com/adobe/dummy-foo.git');
 
     // Create an actual worktree using git CLI with unique name
     const worktreeName = `worktree-feature-${Date.now()}`;
@@ -562,7 +558,7 @@ describe('Integration test for up command with git worktrees', function suite() 
 
   it('should reject git submodules', async () => {
     // Initialize git repository (testDir already exists and has files from beforeEach)
-    initGit(testDir, 'https://github.com/adobe/dummy-foo.git');
+    await initGit(testDir, 'https://github.com/adobe/dummy-foo.git');
 
     // Simulate a submodule by creating a .git file with relative path
     simulateGitSubmodule(testDir, '../.git/modules/my-submodule');
@@ -584,7 +580,7 @@ describe('Integration test for up command with git worktrees', function suite() 
 
   it('should watch git directory correctly in worktree', async () => {
     // Initialize git repository (testDir already exists and has files from beforeEach)
-    initGit(testDir, 'https://github.com/adobe/dummy-foo.git');
+    await initGit(testDir, 'https://github.com/adobe/dummy-foo.git');
 
     // Create an actual worktree using the new utility
     const worktreeName = `worktree-test-${Date.now()}`;
@@ -644,20 +640,15 @@ describe('Integration test for up command with cache', function suite() {
     await fse.remove(testRoot);
   });
 
-  it('up command delivers correct cached response.', (done) => {
-    initGit(testDir, 'https://github.com/adobe/dummy-foo.git');
-    let error = null;
+  it('up command delivers correct cached response.', async () => {
+    await initGit(testDir, 'https://github.com/adobe/dummy-foo.git');
+
     const cmd = new UpCommand()
       .withLiveReload(false)
       .withDirectory(testDir)
       .withOpen(false)
       .withHttpPort(0)
       .withCache(path.resolve(testRoot, '.cache'));
-
-    const myDone = (err) => {
-      error = err;
-      return cmd.stop();
-    };
 
     const content = {
       index: '## Welcome',
@@ -681,42 +672,43 @@ describe('Integration test for up command with cache', function suite() {
 
     nock.enableNetConnect(/127.0.0.1/);
 
-    cmd
-      .on('started', async () => {
-        try {
-          const assertRequests = async () => {
-            let ret = await assertHttp(`http://127.0.0.1:${cmd.project.server.port}/index.html`, 200);
-            assert.strictEqual(ret.trim(), content.index);
-            ret = await assertHttp(`http://127.0.0.1:${cmd.project.server.port}/`, 200);
-            assert.strictEqual(ret.trim(), content.index);
-            ret = await assertHttp(`http://127.0.0.1:${cmd.project.server.port}/folder/page.html?foo=bar&baz=qux`, 200);
-            assert.strictEqual(ret.trim(), content.page1);
-            ret = await assertHttp(`http://127.0.0.1:${cmd.project.server.port}/folder/page.html?foo=bar&baz=othervalue`, 200);
-            assert.strictEqual(ret.trim(), content.page2);
-            await assertHttp(`http://127.0.0.1:${cmd.project.server.port}/not-found.txt`, 404);
-            ret = await assertHttp(`http://127.0.0.1:${cmd.project.server.port}/page.plain.html`, 200);
-            assert.strictEqual(ret.trim(), content.plain);
+    await new Promise((resolve, reject) => {
+      cmd
+        .on('started', async () => {
+          try {
+            const assertRequests = async () => {
+              let ret = await assertHttp(`http://127.0.0.1:${cmd.project.server.port}/index.html`, 200);
+              assert.strictEqual(ret.trim(), content.index);
+              ret = await assertHttp(`http://127.0.0.1:${cmd.project.server.port}/`, 200);
+              assert.strictEqual(ret.trim(), content.index);
+              ret = await assertHttp(`http://127.0.0.1:${cmd.project.server.port}/folder/page.html?foo=bar&baz=qux`, 200);
+              assert.strictEqual(ret.trim(), content.page1);
+              ret = await assertHttp(`http://127.0.0.1:${cmd.project.server.port}/folder/page.html?foo=bar&baz=othervalue`, 200);
+              assert.strictEqual(ret.trim(), content.page2);
+              await assertHttp(`http://127.0.0.1:${cmd.project.server.port}/not-found.txt`, 404);
+              ret = await assertHttp(`http://127.0.0.1:${cmd.project.server.port}/page.plain.html`, 200);
+              assert.strictEqual(ret.trim(), content.plain);
 
-            ret = await assertHttp(`http://127.0.0.1:${cmd.project.server.port}/local.txt`, 200);
-            assert.strictEqual(ret.trim(), 'Hello, world.');
-          };
+              ret = await assertHttp(`http://127.0.0.1:${cmd.project.server.port}/local.txt`, 200);
+              assert.strictEqual(ret.trim(), 'Hello, world.');
+            };
 
-          await assertRequests();
+            await assertRequests();
 
-          // re-running the same requests with nock scopes "done" should still work
-          // because content will be served from the cache or from local file
-          await assertRequests();
+            // re-running the same requests with nock scopes "done" should still work
+            // because content will be served from the cache or from local file
+            await assertRequests();
 
-          await myDone();
-        } catch (e) {
-          await myDone(e);
-        }
-      })
-      .on('stopped', () => {
-        done(error);
-      })
-      .run()
-      .catch(done);
+            await cmd.stop();
+          } catch (e) {
+            await cmd.stop();
+            reject(e);
+          }
+        })
+        .on('stopped', resolve)
+        .run()
+        .catch(reject);
+    });
   });
 
   it('preserves --pagesUrl during git reconfiguration', async () => {
