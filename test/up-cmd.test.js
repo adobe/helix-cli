@@ -18,7 +18,7 @@ import esmock from 'esmock';
 import shell from 'shelljs';
 import { GitUrl } from '@adobe/helix-shared-git';
 import {
-  Nock, assertHttp, createTestRoot, initGit, initGitRepo,
+  Nock, assertHttp, createTestRoot, initGit,
   createGitWorktree, simulateGitSubmodule, switchBranch, signal,
 } from './utils.js';
 import UpCommand from '../src/up.cmd.js';
@@ -561,16 +561,8 @@ describe('Integration test for up command with git worktrees', function suite() 
   });
 
   it('should reject git submodules', async () => {
-    // Ensure testDir exists and has some content for git to add
-    await fse.ensureDir(testDir);
-    await fse.writeFile(path.join(testDir, 'README.md'), '# Test\n');
-    await fse.writeFile(path.join(testDir, '.gitignore'), 'node_modules\n');
-
-    // Initialize git repository using improved utility
-    initGitRepo(testDir, {
-      remote: 'https://github.com/adobe/dummy-foo.git',
-      addFiles: true,
-    });
+    // Initialize git repository (testDir already exists and has files from beforeEach)
+    initGit(testDir, 'https://github.com/adobe/dummy-foo.git');
 
     // Simulate a submodule by creating a .git file with relative path
     simulateGitSubmodule(testDir, '../.git/modules/my-submodule');
@@ -591,16 +583,8 @@ describe('Integration test for up command with git worktrees', function suite() 
   });
 
   it('should watch git directory correctly in worktree', async () => {
-    // Ensure testDir exists and has some content for git to add
-    await fse.ensureDir(testDir);
-    await fse.writeFile(path.join(testDir, 'README.md'), '# Test\n');
-    await fse.writeFile(path.join(testDir, '.gitignore'), 'node_modules\n');
-
-    // Initialize git repository using improved utility
-    initGitRepo(testDir, {
-      remote: 'https://github.com/adobe/dummy-foo.git',
-      addFiles: true,
-    });
+    // Initialize git repository (testDir already exists and has files from beforeEach)
+    initGit(testDir, 'https://github.com/adobe/dummy-foo.git');
 
     // Create an actual worktree using the new utility
     const worktreeName = `worktree-test-${Date.now()}`;
