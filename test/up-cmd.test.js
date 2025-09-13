@@ -44,13 +44,17 @@ describe('Integration test for up command with helix pages', function suite() {
     // On Windows, git worktrees can leave file handles open
     // Add a small delay and retry logic for cleanup
     if (process.platform === 'win32') {
-      await new Promise((resolve) => { setTimeout(resolve, 100); });
+      await new Promise((resolve) => {
+        setTimeout(resolve, 100);
+      });
       try {
         await fse.remove(testRoot);
       } catch (err) {
         if (err.code === 'EBUSY' || err.code === 'ENOTEMPTY') {
           // Wait a bit more and force remove
-          await new Promise((resolve) => { setTimeout(resolve, 500); });
+          await new Promise((resolve) => {
+            setTimeout(resolve, 500);
+          });
           await fse.remove(testRoot).catch(() => {
             // If still failing, try to at least clean up in next test run
             // Warning: Could not remove directory, will be cleaned up later
@@ -546,13 +550,17 @@ describe('Integration test for up command with git worktrees', function suite() 
     // On Windows, git worktrees can leave file handles open
     // Add a small delay and retry logic for cleanup
     if (process.platform === 'win32') {
-      await new Promise((resolve) => { setTimeout(resolve, 100); });
+      await new Promise((resolve) => {
+        setTimeout(resolve, 100);
+      });
       try {
         await fse.remove(testRoot);
       } catch (err) {
         if (err.code === 'EBUSY' || err.code === 'ENOTEMPTY') {
           // Wait a bit more and force remove
-          await new Promise((resolve) => { setTimeout(resolve, 500); });
+          await new Promise((resolve) => {
+            setTimeout(resolve, 500);
+          });
           await fse.remove(testRoot).catch(() => {
             // If still failing, try to at least clean up in next test run
             // Warning: Could not remove directory, will be cleaned up later
@@ -597,7 +605,9 @@ describe('Integration test for up command with git worktrees', function suite() 
 
         // On Windows, add a delay to ensure git releases file handles
         if (process.platform === 'win32') {
-          await new Promise((resolve) => { setTimeout(resolve, 200); });
+          await new Promise((resolve) => {
+            setTimeout(resolve, 200);
+          });
         }
       }
       await fse.remove(worktreeDir).catch(() => {});
@@ -675,7 +685,9 @@ describe('Integration test for up command with git worktrees', function suite() 
 
         // On Windows, add a delay to ensure git releases file handles
         if (process.platform === 'win32') {
-          await new Promise((resolve) => { setTimeout(resolve, 200); });
+          await new Promise((resolve) => {
+            setTimeout(resolve, 200);
+          });
         }
       }
       await fse.remove(worktreeDir).catch(() => {});
@@ -701,13 +713,17 @@ describe('Integration test for up command with cache', function suite() {
     // On Windows, files can remain locked after tests
     // Add a small delay and retry logic for cleanup
     if (process.platform === 'win32') {
-      await new Promise((resolve) => { setTimeout(resolve, 100); });
+      await new Promise((resolve) => {
+        setTimeout(resolve, 100);
+      });
       try {
         await fse.remove(testRoot);
       } catch (err) {
         if (err.code === 'EBUSY' || err.code === 'ENOTEMPTY') {
           // Wait a bit more and force remove
-          await new Promise((resolve) => { setTimeout(resolve, 500); });
+          await new Promise((resolve) => {
+            setTimeout(resolve, 500);
+          });
           await fse.remove(testRoot).catch(() => {
             // If still failing, try to at least clean up in next test run
             // Warning: Could not remove directory, will be cleaned up later
