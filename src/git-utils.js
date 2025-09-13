@@ -144,6 +144,24 @@ export default class GitUtils {
    * @returns {Promise<string>} current branch or tag
    */
   static async getBranch(dir, fallback = this.DEFAULT_BRANCH) {
+    // For worktrees, we need to get the actual git directory
+    const gitDir = await this.getGitDirectory(dir);
+
+    // If it's a worktree, try to get the branch from the worktree HEAD file
+    if (await this.isGitWorktree(dir)) {
+      try {
+        // Read the HEAD file in the worktree's git directory
+        const headPath = path.join(gitDir, 'HEAD');
+        const headContent = await fse.readFile(headPath, 'utf-8');
+        const match = headContent.match(/^ref: refs\/heads\/(.+)$/m);
+        if (match) {
+          return match[1].trim();
+        }
+      } catch (e) {
+        // Fall through to regular processing
+      }
+    }
+
     // current commit sha
     const rev = await git.resolveRef({ fs, dir, ref: 'HEAD' });
     // reverse-lookup tag from commit sha
@@ -194,7 +212,20 @@ export default class GitUtils {
    */
   static async getOrigin(dir) {
     try {
-      const rmt = (await git.listRemotes({ fs, dir })).find((entry) => entry.remote === 'origin');
+      // For worktrees, we need to use the main repository's config
+      let gitDir = dir;
+      if (await this.isGitWorktree(dir)) {
+        // Get the worktree's git directory
+        const worktreeGitDir = await this.getGitDirectory(dir);
+        // Extract the main repository path from the worktree git dir
+        // Worktree git dirs are like: /path/to/repo/.git/worktrees/worktree-name
+        const match = worktreeGitDir.match(/^(.+?)\/\.git\/worktrees\//);
+        if (match) {
+          [, gitDir] = match;
+        }
+      }
+
+      const rmt = (await git.listRemotes({ fs, dir: gitDir })).find((entry) => entry.remote === 'origin');
       return typeof rmt === 'object' ? rmt.url : '';
     } catch (e) {
       // don't fail if directory is not a git repository

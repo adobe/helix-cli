@@ -560,20 +560,8 @@ describe('Integration test for up command with git worktrees', function suite() 
   });
 
   it('should reject git submodules', async () => {
-    // Ensure testDir exists and has some content for git to add
-    await fse.ensureDir(testDir);
-    await fse.writeFile(path.join(testDir, 'README.md'), '# Test\n');
-    await fse.writeFile(path.join(testDir, '.gitignore'), 'node_modules\n');
-
-    // Init git directly without using the helper to avoid cd issues
-    const pwd = shell.pwd();
-    shell.cd(testDir);
-    shell.exec('git init');
-    shell.exec('git checkout -b master');
-    shell.exec('git add -A');
-    shell.exec('git commit -m"initial commit."');
-    shell.exec('git remote add origin https://github.com/adobe/dummy-foo.git');
-    shell.cd(pwd);
+    // Initialize git repository
+    initGit(testDir, 'https://github.com/adobe/dummy-foo.git');
 
     // Simulate a submodule by creating a .git file with relative path
     await fse.remove(path.join(testDir, '.git'));
@@ -598,20 +586,8 @@ describe('Integration test for up command with git worktrees', function suite() 
   });
 
   it('should watch git directory correctly in worktree', async () => {
-    // Ensure testDir exists and has some content for git to add
-    await fse.ensureDir(testDir);
-    await fse.writeFile(path.join(testDir, 'README.md'), '# Test\n');
-    await fse.writeFile(path.join(testDir, '.gitignore'), 'node_modules\n');
-
-    // Init git directly without using the helper to avoid cd issues
-    const pwd = shell.pwd();
-    shell.cd(testDir);
-    shell.exec('git init');
-    shell.exec('git checkout -b master');
-    shell.exec('git add -A');
-    shell.exec('git commit -m"initial commit."');
-    shell.exec('git remote add origin https://github.com/adobe/dummy-foo.git');
-    shell.cd(pwd);
+    // Initialize git repository
+    initGit(testDir, 'https://github.com/adobe/dummy-foo.git');
 
     // Create an actual worktree using git CLI with unique name
     const worktreeName = `worktree-test-${Date.now()}`;
@@ -627,10 +603,6 @@ describe('Integration test for up command with git worktrees', function suite() 
         .withLiveReload(false)
         .withDirectory(worktreeDir)
         .withHttpPort(0);
-
-      nock('https://main--dummy-foo--adobe.aem.page')
-        .get('/index.html')
-        .reply(200, 'test');
 
       await new Promise((resolve, reject) => {
         cmd
