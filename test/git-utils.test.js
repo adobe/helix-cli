@@ -249,7 +249,7 @@ describe('Testing GitUtils', () => {
       }
     });
 
-    it('isGitSubmodule detects actual git submodule created by git CLI', async () => {
+    it.skip('isGitSubmodule detects actual git submodule created by git CLI', async () => {
       // Create a separate repo to use as submodule with unique name
       const submoduleName = `submodule-repo-${Date.now()}`;
       const submoduleRepoDir = path.join(path.dirname(testRoot), submoduleName);

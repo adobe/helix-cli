@@ -593,10 +593,6 @@ describe('Integration test for up command with git worktrees', function suite() 
         .withDirectory(worktreeDir)
         .withHttpPort(0);
 
-      nock('https://main--dummy-foo--adobe.aem.page')
-        .get('/index.html')
-        .reply(200, 'test');
-
       await new Promise((resolve, reject) => {
         cmd
           .on('started', async () => {
