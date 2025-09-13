@@ -144,29 +144,52 @@ export default class GitUtils {
    * @returns {Promise<string>} current branch or tag
    */
   static async getBranch(dir, fallback = this.DEFAULT_BRANCH) {
-    // current commit sha
-    const rev = await git.resolveRef({ fs, dir, ref: 'HEAD' });
-    // reverse-lookup tag from commit sha
-    const allTags = await git.listTags({ fs, dir });
+    try {
+      // For worktrees, we need to handle HEAD differently
+      const isWorktree = await this.isGitWorktree(dir);
+      if (isWorktree) {
+        // Get the actual git directory for the worktree
+        const gitDir = await this.getGitDirectory(dir);
 
-    // iterate sequentially over tags to avoid OOME
-    for (const tag of allTags) {
-      /* eslint-disable no-await-in-loop */
-      const oid = await git.resolveRef({ fs, dir, ref: tag });
-      const obj = await git.readObject({
-        fs, dir, oid, cache,
-      });
-      const commitSha = obj.type === 'tag'
-        ? await git.resolveRef({ fs, dir, ref: obj.object.object }) // annotated tag
-        : oid; // lightweight tag
-      if (commitSha === rev) {
-        return tag;
+        // Read HEAD directly from the worktree's git directory
+        const headPath = path.join(gitDir, 'HEAD');
+        try {
+          const headContent = await fse.readFile(headPath, 'utf-8');
+          const match = headContent.match(/^ref: refs\/heads\/(.+)$/m);
+          if (match) {
+            return match[1].trim();
+          }
+        } catch (e) {
+          // If we can't read HEAD, fall through to use isomorphic-git
+        }
       }
-    }
 
-    const currentBranch = await git.currentBranch({ fs, dir, fullname: false });
-    if (currentBranch) {
-      return currentBranch;
+      // current commit sha
+      const rev = await git.resolveRef({ fs, dir, ref: 'HEAD' });
+      // reverse-lookup tag from commit sha
+      const allTags = await git.listTags({ fs, dir });
+
+      // iterate sequentially over tags to avoid OOME
+      for (const tag of allTags) {
+        /* eslint-disable no-await-in-loop */
+        const oid = await git.resolveRef({ fs, dir, ref: tag });
+        const obj = await git.readObject({
+          fs, dir, oid, cache,
+        });
+        const commitSha = obj.type === 'tag'
+          ? await git.resolveRef({ fs, dir, ref: obj.object.object }) // annotated tag
+          : oid; // lightweight tag
+        if (commitSha === rev) {
+          return tag;
+        }
+      }
+
+      const currentBranch = await git.currentBranch({ fs, dir, fullname: false });
+      if (currentBranch) {
+        return currentBranch;
+      }
+    } catch (e) {
+      // If we can't determine the branch, return the fallback
     }
 
     return fallback;
@@ -194,6 +217,41 @@ export default class GitUtils {
    */
   static async getOrigin(dir) {
     try {
+      // For worktrees, we need to read the config from the main repository
+      const isWorktree = await this.isGitWorktree(dir);
+      if (isWorktree) {
+        // Get the actual git directory for the worktree
+        const gitDir = await this.getGitDirectory(dir);
+        // The config file is in the parent directory (commondir for worktrees)
+        const commonDirPath = path.join(gitDir, 'commondir');
+        let configDir = gitDir;
+
+        try {
+          // If commondir exists, use it to find the config
+          const commonDir = await fse.readFile(commonDirPath, 'utf-8');
+          configDir = path.resolve(gitDir, commonDir.trim());
+        } catch (e) {
+          // If commondir doesn't exist, try to find config in parent git directory
+          // Worktree paths are typically .git/worktrees/<name>
+          const parentGitDir = path.resolve(gitDir, '..', '..');
+          if (await fse.pathExists(path.join(parentGitDir, 'config'))) {
+            configDir = parentGitDir;
+          }
+        }
+
+        // Read the config file directly
+        const configPath = path.join(configDir, 'config');
+        try {
+          const configContent = await fse.readFile(configPath, 'utf-8');
+          const config = ini.parse(configContent);
+          if (config['remote "origin"'] && config['remote "origin"'].url) {
+            return config['remote "origin"'].url;
+          }
+        } catch (e) {
+          // Could not read config
+        }
+      }
+
       const rmt = (await git.listRemotes({ fs, dir })).find((entry) => entry.remote === 'origin');
       return typeof rmt === 'object' ? rmt.url : '';
     } catch (e) {

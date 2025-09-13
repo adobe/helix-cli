@@ -18,7 +18,8 @@ import esmock from 'esmock';
 import shell from 'shelljs';
 import { GitUrl } from '@adobe/helix-shared-git';
 import {
-  Nock, assertHttp, createTestRoot, initGit, switchBranch, signal,
+  Nock, assertHttp, createTestRoot, initGit, initGitRepo,
+  createGitWorktree, simulateGitSubmodule, switchBranch, signal,
 } from './utils.js';
 import UpCommand from '../src/up.cmd.js';
 import GitUtils from '../src/git-utils.js';
@@ -565,22 +566,14 @@ describe('Integration test for up command with git worktrees', function suite() 
     await fse.writeFile(path.join(testDir, 'README.md'), '# Test\n');
     await fse.writeFile(path.join(testDir, '.gitignore'), 'node_modules\n');
 
-    // Init git directly without using the helper to avoid cd issues
-    const pwd = shell.pwd();
-    shell.cd(testDir);
-    shell.exec('git init');
-    shell.exec('git checkout -b master');
-    shell.exec('git add -A');
-    shell.exec('git commit -m"initial commit."');
-    shell.exec('git remote add origin https://github.com/adobe/dummy-foo.git');
-    shell.cd(pwd);
+    // Initialize git repository using improved utility
+    initGitRepo(testDir, {
+      remote: 'https://github.com/adobe/dummy-foo.git',
+      addFiles: true,
+    });
 
     // Simulate a submodule by creating a .git file with relative path
-    await fse.remove(path.join(testDir, '.git'));
-    await fse.writeFile(
-      path.join(testDir, '.git'),
-      'gitdir: ../.git/modules/my-submodule',
-    );
+    simulateGitSubmodule(testDir, '../.git/modules/my-submodule');
 
     const cmd = new UpCommand()
       .withLiveReload(false)
@@ -603,26 +596,18 @@ describe('Integration test for up command with git worktrees', function suite() 
     await fse.writeFile(path.join(testDir, 'README.md'), '# Test\n');
     await fse.writeFile(path.join(testDir, '.gitignore'), 'node_modules\n');
 
-    // Init git directly without using the helper to avoid cd issues
-    const pwd = shell.pwd();
-    shell.cd(testDir);
-    shell.exec('git init');
-    shell.exec('git checkout -b master');
-    shell.exec('git add -A');
-    shell.exec('git commit -m"initial commit."');
-    shell.exec('git remote add origin https://github.com/adobe/dummy-foo.git');
-    shell.cd(pwd);
+    // Initialize git repository using improved utility
+    initGitRepo(testDir, {
+      remote: 'https://github.com/adobe/dummy-foo.git',
+      addFiles: true,
+    });
 
-    // Create an actual worktree using git CLI with unique name
+    // Create an actual worktree using the new utility
     const worktreeName = `worktree-test-${Date.now()}`;
     const worktreeDir = path.resolve(testRoot, worktreeName);
-    let worktreeCreated = false;
+    const worktreeInfo = createGitWorktree(testDir, worktreeDir, 'test-branch');
 
     try {
-      shell.cd(testDir);
-      shell.exec(`git worktree add "${worktreeDir}" -b test-branch`);
-      worktreeCreated = true;
-
       const cmd = new UpCommand()
         .withLiveReload(false)
         .withDirectory(worktreeDir)
@@ -651,12 +636,8 @@ describe('Integration test for up command with git worktrees', function suite() 
           .catch(reject);
       });
     } finally {
-      // Clean up worktree if it was created
-      if (worktreeCreated) {
-        shell.cd(testDir);
-        shell.exec(`git worktree remove "${worktreeDir}" --force || true`);
-      }
-      await fse.remove(worktreeDir).catch(() => {});
+      // Clean up worktree using the cleanup function
+      await worktreeInfo.cleanup();
     }
   });
 });

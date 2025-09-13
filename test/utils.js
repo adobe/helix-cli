@@ -21,21 +21,38 @@ import { getFetch } from '../src/fetch-utils.js';
 
 /**
  * init git in integration so that helix-simulator can run
+ * @param {string} dir - Directory to initialize git in
+ * @param {string} remote - Optional remote URL
+ * @param {string} branch - Optional branch to create
  */
 export function initGit(dir, remote, branch) {
+  // Ensure directory exists before trying to cd into it
+  if (!fse.existsSync(dir)) {
+    throw new Error(`Directory ${dir} does not exist. Please ensure it's created before calling initGit.`);
+  }
+
   const pwd = shell.pwd();
-  shell.cd(dir);
-  shell.exec('git init');
-  shell.exec('git checkout -b master');
-  shell.exec('git add -A');
-  shell.exec('git commit -m"initial commit."');
-  if (remote) {
-    shell.exec(`git remote add origin ${remote}`);
+  try {
+    shell.cd(dir);
+    shell.exec('git init');
+    shell.exec('git checkout -b master');
+
+    // Check if there are files to add before committing
+    const statusResult = shell.exec('git status --porcelain', { silent: true });
+    if (statusResult.stdout.trim()) {
+      shell.exec('git add -A');
+      shell.exec('git commit -m"initial commit."');
+    }
+
+    if (remote) {
+      shell.exec(`git remote add origin ${remote}`);
+    }
+    if (branch) {
+      shell.exec(`git checkout -b ${branch}`);
+    }
+  } finally {
+    shell.cd(pwd);
   }
-  if (branch) {
-    shell.exec(`git checkout -b ${branch}`);
-  }
-  shell.cd(pwd);
 }
 
 export function switchBranch(dir, branch) {
@@ -204,6 +221,181 @@ export function signal(timeout) {
     res();
   };
   return p;
+}
+
+/**
+ * Initialize a git repository with proper error handling and directory validation
+ * @param {string} dir - Directory to initialize git in (must exist)
+ * @param {Object} options - Configuration options
+ * @param {string} options.remote - Optional remote URL
+ * @param {string} options.branch - Optional branch to create after master
+ * @param {boolean} options.addFiles - Whether to add and commit existing files (default: true)
+ * @param {string} options.commitMessage - Custom commit message (default: "initial commit.")
+ * @returns {void}
+ */
+export function initGitRepo(dir, options = {}) {
+  const {
+    remote,
+    branch,
+    addFiles = true,
+    commitMessage = 'initial commit.',
+  } = options;
+
+  // Ensure directory exists
+  if (!fse.existsSync(dir)) {
+    throw new Error(`Directory ${dir} does not exist`);
+  }
+
+  const pwd = shell.pwd();
+  try {
+    shell.cd(dir);
+    shell.exec('git init', { silent: false });
+    shell.exec('git checkout -b master', { silent: false });
+
+    if (addFiles) {
+      // Check if there are files to add
+      const result = shell.exec('git status --porcelain', { silent: true });
+      if (result.stdout.trim()) {
+        shell.exec('git add -A', { silent: false });
+        shell.exec(`git commit -m "${commitMessage}"`, { silent: false });
+      }
+    }
+
+    if (remote) {
+      shell.exec(`git remote add origin ${remote}`, { silent: false });
+    }
+
+    if (branch) {
+      shell.exec(`git checkout -b ${branch}`, { silent: false });
+    }
+  } finally {
+    shell.cd(pwd);
+  }
+}
+
+/**
+ * Create a git worktree with proper setup and cleanup handling
+ * @param {string} parentDir - Parent repository directory
+ * @param {string} worktreeDir - Directory for the worktree
+ * @param {string} branchName - Branch name for the worktree
+ * @returns {Object} Worktree info with cleanup function
+ */
+export function createGitWorktree(parentDir, worktreeDir, branchName) {
+  if (!fse.existsSync(parentDir)) {
+    throw new Error(`Parent directory ${parentDir} does not exist`);
+  }
+
+  const pwd = shell.pwd();
+
+  try {
+    shell.cd(parentDir);
+
+    // Ensure parent is a git repository
+    const gitCheck = shell.exec('git rev-parse --git-dir', { silent: true });
+    if (gitCheck.code !== 0) {
+      throw new Error(`${parentDir} is not a git repository`);
+    }
+
+    // Create worktree with unique branch name to avoid conflicts
+    const uniqueBranch = `${branchName}-${Date.now()}`;
+    const result = shell.exec(`git worktree add "${worktreeDir}" -b ${uniqueBranch}`, { silent: false });
+
+    if (result.code !== 0) {
+      throw new Error(`Failed to create worktree: ${result.stderr}`);
+    }
+
+    return {
+      worktreeDir,
+      branchName: uniqueBranch,
+      cleanup: async () => {
+        const currentPwd = shell.pwd();
+        try {
+          shell.cd(parentDir);
+          shell.exec(`git worktree remove "${worktreeDir}" --force`, { silent: true });
+        } catch (e) {
+          // Ignore cleanup errors
+        } finally {
+          shell.cd(currentPwd);
+          await fse.remove(worktreeDir).catch(() => {});
+        }
+      },
+    };
+  } finally {
+    shell.cd(pwd);
+  }
+}
+
+/**
+ * Create a git submodule setup for testing
+ * @param {string} parentDir - Parent repository directory
+ * @param {string} submodulePath - Relative path for the submodule
+ * @param {string} submoduleRepo - Repository URL for the submodule
+ * @returns {Object} Submodule info with cleanup function
+ */
+export function createGitSubmodule(parentDir, submodulePath, submoduleRepo) {
+  if (!fse.existsSync(parentDir)) {
+    throw new Error(`Parent directory ${parentDir} does not exist`);
+  }
+
+  const pwd = shell.pwd();
+  const absoluteSubmodulePath = path.join(parentDir, submodulePath);
+
+  try {
+    shell.cd(parentDir);
+
+    // Ensure parent is a git repository
+    const gitCheck = shell.exec('git rev-parse --git-dir', { silent: true });
+    if (gitCheck.code !== 0) {
+      throw new Error(`${parentDir} is not a git repository`);
+    }
+
+    // Add submodule
+    const result = shell.exec(`git submodule add ${submoduleRepo} ${submodulePath}`, { silent: false });
+
+    if (result.code !== 0) {
+      throw new Error(`Failed to create submodule: ${result.stderr}`);
+    }
+
+    return {
+      submodulePath: absoluteSubmodulePath,
+      cleanup: async () => {
+        const currentPwd = shell.pwd();
+        try {
+          shell.cd(parentDir);
+          // Remove submodule properly
+          shell.exec(`git submodule deinit -f ${submodulePath}`, { silent: true });
+          shell.exec(`git rm -f ${submodulePath}`, { silent: true });
+          await fse.remove(path.join(parentDir, '.git', 'modules', submodulePath)).catch(() => {});
+        } catch (e) {
+          // Ignore cleanup errors
+        } finally {
+          shell.cd(currentPwd);
+        }
+      },
+    };
+  } finally {
+    shell.cd(pwd);
+  }
+}
+
+/**
+ * Simulate a git submodule by creating a .git file (for testing submodule detection)
+ * @param {string} dir - Directory to simulate as a submodule
+ * @param {string} gitPath - Relative path to put in .git file
+ */
+export function simulateGitSubmodule(dir, gitPath = '../.git/modules/my-submodule') {
+  if (!fse.existsSync(dir)) {
+    throw new Error(`Directory ${dir} does not exist`);
+  }
+
+  // Remove existing .git directory if it exists
+  const gitDir = path.join(dir, '.git');
+  if (fse.existsSync(gitDir)) {
+    fse.removeSync(gitDir);
+  }
+
+  // Create .git file pointing to parent's git directory
+  fse.writeFileSync(gitDir, `gitdir: ${gitPath}\n`);
 }
 
 export function condit(name, condition, mochafn) {
