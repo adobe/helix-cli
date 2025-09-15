@@ -68,6 +68,10 @@ export default class UpCommand extends AbstractServerCommand {
         if (await GitUtils.isGitSubmodule(this.directory)) {
           throw Error('git submodules are not supported.');
         }
+        // Verify it's actually a worktree
+        if (!await GitUtils.isGitWorktree(this.directory)) {
+          throw Error('Unsupported git configuration: .git is a file but not a valid worktree or submodule.');
+        }
         // It's a worktree - this is allowed
       }
     } catch (e) {

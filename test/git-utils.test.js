@@ -265,7 +265,8 @@ describe('Testing GitUtils', () => {
 
         // Add submodule to main repo
         shell.cd(testRoot);
-        shell.exec(`git submodule add "${submoduleRepoDir}" test-submodule`);
+        // Use -c flag to allow file protocol just for this command
+        shell.exec(`git -c protocol.file.allow=always submodule add "file://${submoduleRepoDir}" test-submodule`);
 
         const submoduleDir = path.join(testRoot, 'test-submodule');
 
