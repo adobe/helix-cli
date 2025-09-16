@@ -848,6 +848,7 @@ describe('Helix Server', () => {
         .withHtmlFolder('drafts');
 
       // Mock the proxy request to return 404
+      // The proxy handler will append .html to the path
       nock('https://main--foo--bar.aem.page')
         .get('/drafts/nonexistent.html')
         .reply(404, 'Not Found');
