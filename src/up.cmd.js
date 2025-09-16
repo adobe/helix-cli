@@ -64,13 +64,30 @@ export default class UpCommand extends AbstractServerCommand {
     try {
       const stat = await fse.lstat(path.resolve(this.directory, '.git'));
       if (stat.isFile()) {
-        throw Error('git submodules are not supported.');
+        // Check if it's a submodule or a worktree
+        if (await GitUtils.isGitSubmodule(this.directory)) {
+          throw Error('git submodules are not supported.');
+        }
+        // Verify it's actually a worktree
+        if (!await GitUtils.isGitWorktree(this.directory)) {
+          throw Error('Unsupported git configuration: .git is a file but not a valid worktree or submodule.');
+        }
+        // It's a worktree - this is allowed
       }
     } catch (e) {
       if (e.code === 'ENOENT') {
         throw Error('aem up needs local git repository.');
       }
       throw e;
+    }
+
+    // Check if we're in a worktree and need to adjust the port
+    const isWorktree = await GitUtils.isGitWorktree(this.directory);
+    if (isWorktree && this._httpPort === 3000) {
+      // Only adjust port if using default port
+      const branch = await GitUtils.getBranch(this.directory);
+      this._httpPort = GitUtils.hashBranchToPort(branch);
+      this.log.info(chalk`Git worktree detected. Using port {cyan ${this._httpPort}} for branch {cyan ${branch}}`);
     }
 
     // init dev default file params
@@ -113,7 +130,7 @@ export default class UpCommand extends AbstractServerCommand {
 
     try {
       await this._project.init();
-      this.watchGit();
+      await this.watchGit();
     } catch (e) {
       throw Error(`Unable to start AEM: ${e.message}`);
     }
@@ -155,10 +172,13 @@ export default class UpCommand extends AbstractServerCommand {
   /**
    * Watches the git repository for changes and restarts the server if necessary.
    */
-  watchGit() {
+  async watchGit() {
     let timer = null;
 
-    this._watcher = chokidar.watch(path.resolve(this._project.directory, '.git'), {
+    // Resolve the actual git directory for worktrees
+    const gitDir = await GitUtils.getGitDirectory(this._project.directory);
+
+    this._watcher = chokidar.watch(gitDir, {
       persistent: true,
       ignoreInitial: true,
     });

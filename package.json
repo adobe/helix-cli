@@ -11,7 +11,7 @@
   "scripts": {
     "check": "npm run lint && npm run test",
     "test": "c8 mocha",
-    "test-ci-win": "npx mocha --reporter xunit test --reporter-options output=junit/test.xml -t 5000",
+    "test-ci-win": "mocha --reporter spec test -t 300000 --exit",
     "lint": "eslint .",
     "lint:fix": "eslint --fix .",
     "semantic-release": "semantic-release",

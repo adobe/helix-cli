@@ -177,6 +177,133 @@ describe('Testing GitUtils', () => {
     await fse.writeFile(path.resolve(anotherTestRoot, '.env'), 'Hello, world.\n', 'utf-8');
     assert.ok(await GitUtils.isIgnored(anotherTestRoot, '.env', GIT_USER_HOME));
   });
+
+  describe('Git Worktree Support', () => {
+    it('isGitWorktree returns false for regular repo', async () => {
+      assert.equal(await GitUtils.isGitWorktree(testRoot), false);
+    });
+
+    it('isGitWorktree returns true for worktree', async () => {
+      // Create a .git file that simulates a worktree
+      await fse.remove(path.join(testRoot, '.git'));
+      await fse.writeFile(path.join(testRoot, '.git'), 'gitdir: /path/to/.git/worktrees/feature-branch');
+      assert.equal(await GitUtils.isGitWorktree(testRoot), true);
+    });
+
+    it('isGitSubmodule returns false for regular repo', async () => {
+      assert.equal(await GitUtils.isGitSubmodule(testRoot), false);
+    });
+
+    it('isGitSubmodule returns true for submodule', async () => {
+      // Create a .git file that simulates a submodule
+      await fse.remove(path.join(testRoot, '.git'));
+      await fse.writeFile(path.join(testRoot, '.git'), 'gitdir: ../.git/modules/my-module');
+      assert.equal(await GitUtils.isGitSubmodule(testRoot), true);
+    });
+
+    it('isGitSubmodule returns true for Windows-style submodule path', async () => {
+      // Create a .git file that simulates a submodule with Windows path
+      await fse.remove(path.join(testRoot, '.git'));
+      await fse.writeFile(path.join(testRoot, '.git'), 'gitdir: ..\\.git\\modules\\my-module');
+      assert.equal(await GitUtils.isGitSubmodule(testRoot), true);
+    });
+
+    it('getGitDirectory returns .git for regular repo', async () => {
+      const gitDir = await GitUtils.getGitDirectory(testRoot);
+      assert.equal(gitDir, path.resolve(testRoot, '.git'));
+    });
+
+    it('getGitDirectory resolves worktree path', async () => {
+      // Create a .git file that simulates a worktree
+      await fse.remove(path.join(testRoot, '.git'));
+      await fse.writeFile(path.join(testRoot, '.git'), 'gitdir: /absolute/path/.git/worktrees/feature');
+      const gitDir = await GitUtils.getGitDirectory(testRoot);
+      assert.equal(gitDir, '/absolute/path/.git/worktrees/feature');
+    });
+
+    it('getGitDirectory resolves relative submodule path', async () => {
+      // Create a .git file that simulates a submodule
+      await fse.remove(path.join(testRoot, '.git'));
+      await fse.writeFile(path.join(testRoot, '.git'), 'gitdir: ../.git/modules/my-module');
+      const gitDir = await GitUtils.getGitDirectory(testRoot);
+      assert.equal(gitDir, path.resolve(testRoot, '../.git/modules/my-module'));
+    });
+
+    it('isGitWorktree detects actual git worktree created by git CLI', async () => {
+      // Create actual worktree using git worktree command with unique name
+      const worktreeName = `test-worktree-${Date.now()}`;
+      const worktreeDir = path.join(path.dirname(testRoot), worktreeName);
+      shell.cd(testRoot);
+
+      try {
+        shell.exec(`git worktree add "${worktreeDir}" -b ${worktreeName}-branch`);
+
+        // Test detection
+        assert.equal(await GitUtils.isGitWorktree(worktreeDir), true);
+        assert.equal(await GitUtils.isGitSubmodule(worktreeDir), false);
+      } finally {
+        // Cleanup - ensure it runs even if test fails
+        shell.cd(testRoot);
+        shell.exec(`git worktree remove "${worktreeDir}" --force || true`);
+        await fse.remove(worktreeDir).catch(() => {});
+      }
+    });
+
+    it('isGitSubmodule detects actual git submodule created by git CLI', async () => {
+      // Create a separate repo to use as submodule with unique name
+      const submoduleName = `submodule-repo-${Date.now()}`;
+      const submoduleRepoDir = path.join(path.dirname(testRoot), submoduleName);
+
+      try {
+        await fse.ensureDir(submoduleRepoDir);
+        await fse.writeFile(path.join(submoduleRepoDir, 'README.md'), '# Submodule\n');
+
+        shell.cd(submoduleRepoDir);
+        shell.exec('git init');
+        shell.exec('git add README.md');
+        shell.exec('git commit -m "Initial commit"');
+
+        // Add submodule to main repo
+        shell.cd(testRoot);
+        // Use -c flag to allow file protocol just for this command
+        shell.exec(`git -c protocol.file.allow=always submodule add "file://${submoduleRepoDir}" test-submodule`);
+
+        const submoduleDir = path.join(testRoot, 'test-submodule');
+
+        // Test detection
+        assert.equal(await GitUtils.isGitSubmodule(submoduleDir), true);
+        assert.equal(await GitUtils.isGitWorktree(submoduleDir), false);
+      } finally {
+        // Cleanup - ensure it runs even if test fails
+        await fse.remove(submoduleRepoDir).catch(() => {});
+      }
+    });
+
+    it('hashBranchToPort generates consistent ports', () => {
+      const port1 = GitUtils.hashBranchToPort('feature-branch');
+      const port2 = GitUtils.hashBranchToPort('feature-branch');
+      assert.equal(port1, port2);
+    });
+
+    it('hashBranchToPort stays within range', () => {
+      const branches = ['main', 'develop', 'feature/long-name-with-many-chars', 'fix/issue-123'];
+      branches.forEach((branch) => {
+        const port = GitUtils.hashBranchToPort(branch);
+        assert(port >= 3000 && port < 4000, `Port ${port} for branch ${branch} is out of range`);
+      });
+    });
+
+    it('hashBranchToPort generates different ports for different branches', () => {
+      const port1 = GitUtils.hashBranchToPort('feature-a');
+      const port2 = GitUtils.hashBranchToPort('feature-b');
+      assert.notEqual(port1, port2);
+    });
+
+    it('hashBranchToPort respects custom base and range', () => {
+      const port = GitUtils.hashBranchToPort('test-branch', 5000, 500);
+      assert(port >= 5000 && port < 5500, `Port ${port} is out of custom range`);
+    });
+  });
 });
 
 describe('Tests against the helix-cli repo', () => {

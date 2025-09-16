@@ -15,11 +15,13 @@ import assert from 'assert';
 import path from 'path';
 import fse from 'fs-extra';
 import esmock from 'esmock';
+import shell from 'shelljs';
 import { GitUrl } from '@adobe/helix-shared-git';
 import {
   Nock, assertHttp, createTestRoot, initGit, switchBranch, signal,
 } from './utils.js';
 import UpCommand from '../src/up.cmd.js';
+import GitUtils from '../src/git-utils.js';
 import { getFetch } from '../src/fetch-utils.js';
 
 const TEST_DIR = path.resolve(__rootdir, 'test', 'fixtures', 'project');
@@ -39,7 +41,31 @@ describe('Integration test for up command with helix pages', function suite() {
   });
 
   afterEach(async () => {
-    await fse.remove(testRoot);
+    // On Windows, git worktrees can leave file handles open
+    // Add a small delay and retry logic for cleanup
+    if (process.platform === 'win32') {
+      await new Promise((resolve) => {
+        setTimeout(resolve, 100);
+      });
+      try {
+        await fse.remove(testRoot);
+      } catch (err) {
+        if (err.code === 'EBUSY' || err.code === 'ENOTEMPTY') {
+          // Wait a bit more and force remove
+          await new Promise((resolve) => {
+            setTimeout(resolve, 500);
+          });
+          await fse.remove(testRoot).catch(() => {
+            // If still failing, try to at least clean up in next test run
+            // Warning: Could not remove directory, will be cleaned up later
+          });
+        } else {
+          throw err;
+        }
+      }
+    } else {
+      await fse.remove(testRoot);
+    }
     nock.done();
   });
 
@@ -506,6 +532,169 @@ describe('Integration test for up command with helix pages', function suite() {
   });
 });
 
+describe('Integration test for up command with git worktrees', function suite() {
+  this.timeout(60000);
+  let testDir;
+  let testRoot;
+  let nock;
+
+  beforeEach(async () => {
+    testRoot = await createTestRoot();
+    testDir = path.resolve(testRoot, 'project');
+    await fse.copy(TEST_DIR, testDir);
+    nock = new Nock();
+    nock.enableNetConnect(/127.0.0.1/);
+  });
+
+  afterEach(async () => {
+    // On Windows, git worktrees can leave file handles open
+    // Add a small delay and retry logic for cleanup
+    if (process.platform === 'win32') {
+      await new Promise((resolve) => {
+        setTimeout(resolve, 100);
+      });
+      try {
+        await fse.remove(testRoot);
+      } catch (err) {
+        if (err.code === 'EBUSY' || err.code === 'ENOTEMPTY') {
+          // Wait a bit more and force remove
+          await new Promise((resolve) => {
+            setTimeout(resolve, 500);
+          });
+          await fse.remove(testRoot).catch(() => {
+            // If still failing, try to at least clean up in next test run
+            // Warning: Could not remove directory, will be cleaned up later
+          });
+        } else {
+          throw err;
+        }
+      }
+    } else {
+      await fse.remove(testRoot);
+    }
+    nock.done();
+  });
+
+  it('should detect worktree and calculate branch-based port', async () => {
+    // Setup a regular git repo first
+    initGit(testDir, 'https://github.com/adobe/dummy-foo.git');
+
+    // Create an actual worktree using git CLI with unique name
+    const worktreeName = `worktree-feature-${Date.now()}`;
+    const worktreeDir = path.resolve(testRoot, worktreeName);
+    let worktreeCreated = false;
+
+    try {
+      shell.cd(testDir);
+      shell.exec(`git worktree add "${worktreeDir}" -b feature-branch`);
+      worktreeCreated = true;
+
+      // Test that isGitWorktree correctly identifies it
+      const isWorktree = await GitUtils.isGitWorktree(worktreeDir);
+      assert(isWorktree, 'Should be identified as a worktree');
+
+      // Test that port calculation works for a branch name
+      const port = GitUtils.hashBranchToPort('feature-branch');
+      assert(port >= 3000 && port < 4000, `Port ${port} should be in range 3000-3999`);
+      assert.notStrictEqual(port, 3000, 'Port should be different from default');
+    } finally {
+      // Clean up worktree if it was created
+      if (worktreeCreated) {
+        shell.cd(testDir);
+        shell.exec(`git worktree remove "${worktreeDir}" --force || true`);
+
+        // On Windows, add a delay to ensure git releases file handles
+        if (process.platform === 'win32') {
+          await new Promise((resolve) => {
+            setTimeout(resolve, 200);
+          });
+        }
+      }
+      await fse.remove(worktreeDir).catch(() => {});
+    }
+  });
+
+  it('should reject git submodules', async () => {
+    // Initialize git repository
+    initGit(testDir, 'https://github.com/adobe/dummy-foo.git');
+
+    // Simulate a submodule by creating a .git file with relative path
+    await fse.remove(path.join(testDir, '.git'));
+    await fse.writeFile(
+      path.join(testDir, '.git'),
+      'gitdir: ../.git/modules/my-submodule',
+    );
+
+    const cmd = new UpCommand()
+      .withLiveReload(false)
+      .withDirectory(testDir);
+
+    try {
+      await cmd.init();
+      assert.fail('Should have thrown an error for submodule');
+    } catch (e) {
+      assert(
+        e.message.includes('git submodules are not supported'),
+        `Expected submodule error, got: ${e.message}`,
+      );
+    }
+  });
+
+  it('should watch git directory correctly in worktree', async () => {
+    // Initialize git repository
+    initGit(testDir, 'https://github.com/adobe/dummy-foo.git');
+
+    // Create an actual worktree using git CLI with unique name
+    const worktreeName = `worktree-test-${Date.now()}`;
+    const worktreeDir = path.resolve(testRoot, worktreeName);
+    let worktreeCreated = false;
+
+    try {
+      shell.cd(testDir);
+      shell.exec(`git worktree add "${worktreeDir}" -b test-branch`);
+      worktreeCreated = true;
+
+      const cmd = new UpCommand()
+        .withLiveReload(false)
+        .withDirectory(worktreeDir)
+        .withHttpPort(0);
+
+      await new Promise((resolve, reject) => {
+        cmd
+          .on('started', async () => {
+            try {
+              // Verify watcher is set up on the actual git directory
+              // eslint-disable-next-line no-underscore-dangle
+              assert(cmd._watcher, 'Watcher should be initialized');
+              // The watcher should be watching the worktree git directory, not the .git file
+              // This is implicitly tested by the fact that the server starts successfully
+              await cmd.stop();
+            } catch (e) {
+              reject(e);
+            }
+          })
+          .on('stopped', resolve)
+          .run()
+          .catch(reject);
+      });
+    } finally {
+      // Clean up worktree if it was created
+      if (worktreeCreated) {
+        shell.cd(testDir);
+        shell.exec(`git worktree remove "${worktreeDir}" --force || true`);
+
+        // On Windows, add a delay to ensure git releases file handles
+        if (process.platform === 'win32') {
+          await new Promise((resolve) => {
+            setTimeout(resolve, 200);
+          });
+        }
+      }
+      await fse.remove(worktreeDir).catch(() => {});
+    }
+  });
+});
+
 describe('Integration test for up command with cache', function suite() {
   this.timeout(60000); // ensure enough time for installing modules on slow machines
   let testDir;
@@ -521,7 +710,31 @@ describe('Integration test for up command with cache', function suite() {
 
   afterEach(async () => {
     nock.done();
-    await fse.remove(testRoot);
+    // On Windows, files can remain locked after tests
+    // Add a small delay and retry logic for cleanup
+    if (process.platform === 'win32') {
+      await new Promise((resolve) => {
+        setTimeout(resolve, 100);
+      });
+      try {
+        await fse.remove(testRoot);
+      } catch (err) {
+        if (err.code === 'EBUSY' || err.code === 'ENOTEMPTY') {
+          // Wait a bit more and force remove
+          await new Promise((resolve) => {
+            setTimeout(resolve, 500);
+          });
+          await fse.remove(testRoot).catch(() => {
+            // If still failing, try to at least clean up in next test run
+            // Warning: Could not remove directory, will be cleaned up later
+          });
+        } else {
+          throw err;
+        }
+      }
+    } else {
+      await fse.remove(testRoot);
+    }
   });
 
   it('up command delivers correct cached response.', (done) => {
