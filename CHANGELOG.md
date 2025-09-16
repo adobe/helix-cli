@@ -1,3 +1,34 @@
+# [16.13.0](https://github.com/adobe/helix-cli/compare/v16.12.0...v16.13.0) (2025-09-16)
+
+
+### Bug Fixes
+
+* add package-lock.json for browser-injectables ([cc55ce9](https://github.com/adobe/helix-cli/commit/cc55ce93d009d897008c28d34d8f249bada9c942))
+* address PR review comments ([dd3ad77](https://github.com/adobe/helix-cli/commit/dd3ad77a612e2a152967e3c433a12426ec6cd3b2))
+* **browser-injectables:** Potential fix for code scanning alert no. 37: Log injection ([5bf707a](https://github.com/adobe/helix-cli/commit/5bf707a9ae35112ef12aa14eb996d23c0b5fafae))
+* install Playwright dependencies in CI instead of skipping WebKit ([0d32a82](https://github.com/adobe/helix-cli/commit/0d32a8276c06d1d5b05549856682ae519f75b6fb))
+* Potential fix for code scanning alert no. 40: Unused variable, import, function or class ([3dcd827](https://github.com/adobe/helix-cli/commit/3dcd827fbe606976a20a26eaf2a61df2bdfa00e3))
+* remove ai workaround ([ec01627](https://github.com/adobe/helix-cli/commit/ec01627ff30582ebfed1f3622f23bf01aaa154df))
+* remove duplicate console-log-forwarding.test.html file ([e2c95cf](https://github.com/adobe/helix-cli/commit/e2c95cff3e38d22da636f5d88bf808e5245b9aab))
+* resolve all ESLint issues in browser log forwarding implementation ([e5dc3cc](https://github.com/adobe/helix-cli/commit/e5dc3cce5c3b1c5a1fff0bcbdc55fee40b901c08))
+* skip WebKit browser tests on Linux CI ([d6dbd2e](https://github.com/adobe/helix-cli/commit/d6dbd2eb5b2883c8d22ab69c525a5a398465ff83))
+* upload browser coverage reports to codecov ([9c5267c](https://github.com/adobe/helix-cli/commit/9c5267c2428465dbe206e1843ad58aea0d65b226))
+* use @esm-bundle/chai for browser-compatible assertions ([4857fe8](https://github.com/adobe/helix-cli/commit/4857fe854be067fd5a82f4779ab47a574224dd3a))
+* use correct @eslint/config-helpers version (0.3.0) ([7d0cb82](https://github.com/adobe/helix-cli/commit/7d0cb822c658e961d076bbdfb31d2a94d004f352))
+* use createRequire for ESM compatibility in LiveReload.js ([319cd98](https://github.com/adobe/helix-cli/commit/319cd988c147fd7634e8d675d126a659eb6d0ac1))
+
+
+### Features
+
+* add remaining browser log forwarding implementation files ([55033a7](https://github.com/adobe/helix-cli/commit/55033a79a47cddefbc784e738944d87dae0ae33e))
+* **test:** add web-test-runner for browser testing ([2a19ec1](https://github.com/adobe/helix-cli/commit/2a19ec1012e12696aaf9f07784cc22338095128f))
+* **up:** add browser console log forwarding to terminal ([c8c6402](https://github.com/adobe/helix-cli/commit/c8c6402249c82f74a06451229bafdeb3ccb1f7a3))
+
+
+### Reverts
+
+* use node modules to serve livereload ([5957400](https://github.com/adobe/helix-cli/commit/5957400e32d238f415a57a646181f39bd97517f4))
+
 # [16.12.0](https://github.com/adobe/helix-cli/compare/v16.11.3...v16.12.0) (2025-09-16)
 
 

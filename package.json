@@ -1,6 +1,6 @@
 {
   "name": "@adobe/aem-cli",
-  "version": "16.12.0",
+  "version": "16.13.0",
   "description": "AEM CLI",
   "main": "index.js",
   "type": "module",
@@ -24,7 +24,9 @@
     "reporter": "mocha-multi-reporters",
     "reporter-options": "configFile=.mocha-multi.json",
     "loader": "esmock",
-    "exclude": ["test/browser/**"]
+    "exclude": [
+      "test/browser/**"
+    ]
   },
   "repository": {
     "type": "git",
