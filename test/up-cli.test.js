@@ -178,13 +178,13 @@ describe('hlx up', () => {
     sinon.assert.calledOnce(mockUp.run);
   });
 
-  it('hlx up can set HTML folder', async () => {
+  it('aem up can set HTML folder', async () => {
     await cli.run(['up', '--html-folder', 'drafts']);
     sinon.assert.calledWith(mockUp.withHtmlFolder, 'drafts');
     sinon.assert.calledOnce(mockUp.run);
   });
 
-  it('hlx up can use htmlFolder camelCase option', async () => {
+  it('aem up can use htmlFolder camelCase option', async () => {
     await cli.run(['up', '--htmlFolder', 'drafts']);
     sinon.assert.calledWith(mockUp.withHtmlFolder, 'drafts');
     sinon.assert.calledOnce(mockUp.run);

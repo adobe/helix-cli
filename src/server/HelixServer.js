@@ -164,16 +164,18 @@ export class HelixServer extends BaseServer {
       return next();
     }
 
-    const { url } = req;
+    // Use URL object for proper path parsing
+    const parsedUrl = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
+    const { pathname } = parsedUrl;
     const folderPrefix = `/${this._htmlFolder}/`;
 
     // Check if the request is for the HTML folder
-    if (!url.startsWith(folderPrefix)) {
+    if (!pathname.startsWith(folderPrefix)) {
       return next();
     }
 
     // Extract the path within the HTML folder
-    const relativePath = url.slice(folderPrefix.length).split('?')[0];
+    const relativePath = pathname.slice(folderPrefix.length);
 
     // Don't process if it already has an extension
     if (relativePath.includes('.')) {
@@ -204,12 +206,12 @@ export class HelixServer extends BaseServer {
 
         // Register for live reload if enabled
         if (liveReload) {
-          liveReload.startRequest(req.id, url);
+          liveReload.startRequest(req.id, req.url);
         }
 
         // Serve the file
         await sendFile(htmlFile, {
-          dotfiles: 'allow',
+          dotfiles: 'deny',
           headers: {
             'access-control-allow-origin': '*',
             'content-type': 'text/html; charset=utf-8',
@@ -221,7 +223,7 @@ export class HelixServer extends BaseServer {
           liveReload.endRequest(req.id);
         }
 
-        log.debug(`served HTML file ${htmlFile} for ${url}`);
+        log.debug(`served HTML file ${htmlFile} for ${req.url}`);
         return true; // Indicate we handled the request
       } catch (e) {
         // File doesn't exist with this extension
@@ -229,13 +231,17 @@ export class HelixServer extends BaseServer {
       }
     };
 
-    // Try each extension
-    for (const ext of extensions) {
-      // eslint-disable-next-line no-await-in-loop
-      const handled = await tryExtension(ext);
-      if (handled) {
-        return undefined; // Request was handled
+    // Try each extension sequentially using reduce
+    const handled = await extensions.reduce(async (prevPromise, ext) => {
+      const prevResult = await prevPromise;
+      if (prevResult) {
+        return prevResult; // Already handled
       }
+      return tryExtension(ext);
+    }, Promise.resolve(false));
+
+    if (handled) {
+      return undefined;
     }
 
     // No matching HTML file found, continue to next handler

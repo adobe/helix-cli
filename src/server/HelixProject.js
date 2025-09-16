@@ -181,7 +181,8 @@ export class HelixProject extends BaseProject {
         // Watch all HTML and HTM files in the folder
         this.liveReload.registerFiles([`${htmlFolderPath}/**/*.html`, `${htmlFolderPath}/**/*.htm`], `/${this._htmlFolder}/`);
       } catch (e) {
-        this.log.warn(`HTML folder '${this._htmlFolder}' does not exist`);
+        this.log.error(`HTML folder '${this._htmlFolder}' does not exist`);
+        throw new Error(`HTML folder '${this._htmlFolder}' does not exist`);
       }
     }
   }

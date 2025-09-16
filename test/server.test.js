@@ -918,6 +918,28 @@ describe('Helix Server', () => {
       }
     });
 
+    it('throws error if HTML folder does not exist', async () => {
+      const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
+
+      const project = new HelixProject()
+        .withCwd(cwd)
+        .withHttpPort(0)
+        .withProxyUrl('https://main--foo--bar.aem.page/')
+        .withHtmlFolder('nonexistent-folder')
+        .withLiveReload(true); // Required for HTML folder to be checked
+
+      await project.init();
+
+      try {
+        await project.start();
+        assert.fail('Expected start to throw error for non-existent HTML folder');
+      } catch (e) {
+        assert.ok(e.message.includes('HTML folder \'nonexistent-folder\' does not exist'), `Unexpected error message: ${e.message}`);
+      } finally {
+        await project.stop();
+      }
+    });
+
     it('serves nested HTML files correctly', async () => {
       const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
 
