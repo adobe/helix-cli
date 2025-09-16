@@ -11,10 +11,10 @@
  */
 // eslint-disable-next-line max-classes-per-file
 import fs from 'fs';
+import { createRequire } from 'module';
 import chokidar from 'chokidar';
 import WebSocket from 'faye-websocket';
 import { EventEmitter } from 'events';
-import { createRequire } from 'module';
 
 const require = createRequire(import.meta.url);
 
@@ -27,9 +27,10 @@ class ClientConnection extends EventEmitter {
     return `ws${ClientConnection.counter}`;
   }
 
-  constructor(req, socket, head) {
+  constructor(req, socket, head, logger) {
     super();
     this.id = ClientConnection.nextId();
+    this.log = logger;
     this.ws = new WebSocket(req, socket, head);
     this.ws.onmessage = this._onMessage.bind(this);
     this.ws.onclose = this._onClose.bind(this);
@@ -47,6 +48,8 @@ class ClientConnection extends EventEmitter {
         return this._cmdHello(data);
       case 'info':
         return this._cmdInfo(data);
+      case 'log':
+        return this._cmdLog(data);
       default:
         return {};
     }
@@ -76,6 +79,30 @@ class ClientConnection extends EventEmitter {
       this.url = data.url;
     }
     return { ...data || {}, id: this.id, url: this.url };
+  }
+
+  _cmdLog(data) {
+    const {
+      level = 'log', args = [], url = 'unknown', line,
+    } = data;
+    const timestamp = new Date().toISOString();
+    const location = line ? `${url}:${line}` : url;
+
+    // Format browser logs distinctively
+    const prefix = `[Browser:${level}] ${timestamp} ${location}`;
+
+    // Serialize args safely
+    const message = args.map((arg) => {
+      try {
+        return typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg);
+      } catch (e) {
+        return '[Circular or Complex Object]';
+      }
+    }).join(' ');
+
+    // Use appropriate log level
+    const logMethod = this.log[level] || this.log.info;
+    logMethod(`${prefix} ${message}`);
   }
 
   _send(data) {
@@ -123,10 +150,20 @@ export default class LiveReload extends EventEmitter {
     // client connections
     this._connections = {};
     this._liveReloadJSPath = require.resolve('livereload-js/dist/livereload.js');
+    this._forwardBrowserLogs = false;
   }
 
   get log() {
     return this._logger;
+  }
+
+  withForwardBrowserLogs(value) {
+    this._forwardBrowserLogs = value;
+    return this;
+  }
+
+  get forwardBrowserLogs() {
+    return this._forwardBrowserLogs;
   }
 
   startRequest(requestId, pathname) {
@@ -211,7 +248,7 @@ export default class LiveReload extends EventEmitter {
   }
 
   _onSvrUpgrade(req, socket, head) {
-    const cx = new ClientConnection(req, socket, head);
+    const cx = new ClientConnection(req, socket, head, this.log);
     this._connections[cx.id] = cx;
 
     socket.on('error', (e) => {

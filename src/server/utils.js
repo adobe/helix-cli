@@ -14,8 +14,18 @@ import crypto from 'crypto';
 import path from 'path';
 import { Socket } from 'net';
 import { PassThrough } from 'stream';
+import { readFileSync } from 'fs';
+import { fileURLToPath } from 'url';
 import cookie from 'cookie';
 import { getFetch } from '../fetch-utils.js';
+
+// Load console interceptor script at startup
+// eslint-disable-next-line no-underscore-dangle
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const CONSOLE_INTERCEPTOR = readFileSync(
+  path.join(__dirname, '../../packages/browser-injectables/src/console-interceptor.js'),
+  'utf-8',
+);
 
 const utils = {
   status2level(status, debug3xx) {
@@ -104,6 +114,12 @@ window.LiveReloadOptions = {
         newbody += `<script${nonce}>window.LiveReloadOptions={port:${server.port},host:location.hostname,https:${server.scheme === 'https'}};</script>`;
       }
       newbody += `<script${nonce} src="/__internal__/livereload.js"></script>`;
+
+      // Inject console interceptor if browser log forwarding is enabled
+      if (server.forwardBrowserLogs) {
+        newbody += `<script${nonce}>${CONSOLE_INTERCEPTOR}</script>`;
+      }
+
       newbody += body.substring(index);
       return newbody;
     }

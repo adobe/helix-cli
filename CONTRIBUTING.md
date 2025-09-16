@@ -28,6 +28,20 @@ For other contributors, a maintainer of the project has to approve the pull requ
 3. Use `npm run check` to make sure your code can run the tests and adheres to the style guide
 4. Create a pull request from your branch
 
+## Testing Browser Features
+
+Browser-specific features are tested separately in `packages/browser-injectables/`. These tests:
+- Run in real browsers via Playwright
+- Are isolated from main CLI tests  
+- Only run in CI when browser code changes
+
+To run browser tests locally:
+```bash
+cd packages/browser-injectables
+npm install
+npm test
+```
+
 In your pull request, outline:
 
 * What the changes intend

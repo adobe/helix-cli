@@ -12,8 +12,8 @@
     "check": "npm run lint && npm run test",
     "test": "c8 mocha",
     "test-ci-win": "mocha --reporter spec test -t 300000 --exit",
-    "lint": "eslint .",
-    "lint:fix": "eslint --fix .",
+    "lint": "eslint . && (cd packages/browser-injectables 2>/dev/null && npm run lint || true)",
+    "lint:fix": "eslint --fix . && (cd packages/browser-injectables 2>/dev/null && npx eslint --fix . || true)",
     "semantic-release": "semantic-release",
     "semantic-release-dry": "semantic-release --dry-run --branches $CI_BRANCH",
     "prepare": "husky"
@@ -23,7 +23,8 @@
     "recursive": "true",
     "reporter": "mocha-multi-reporters",
     "reporter-options": "configFile=.mocha-multi.json",
-    "loader": "esmock"
+    "loader": "esmock",
+    "exclude": ["test/browser/**"]
   },
   "repository": {
     "type": "git",
