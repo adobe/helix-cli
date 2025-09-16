@@ -52,6 +52,7 @@ describe('hlx up', () => {
     mockUp.withCache.returnsThis();
     mockUp.withCookies.returnsThis();
     mockUp.withSiteToken.returnsThis();
+    mockUp.withHtmlFolder.returnsThis();
     mockUp.run.returnsThis();
     cli = (await new CLI().initCommands()).withCommandExecutor('up', mockUp);
   });
@@ -174,6 +175,18 @@ describe('hlx up', () => {
   it('hlx up can use forwardBrowserLogs camelCase option', async () => {
     await cli.run(['up', '--forwardBrowserLogs']);
     sinon.assert.calledWith(mockUp.withForwardBrowserLogs, true);
+    sinon.assert.calledOnce(mockUp.run);
+  });
+
+  it('hlx up can set HTML folder', async () => {
+    await cli.run(['up', '--html-folder', 'drafts']);
+    sinon.assert.calledWith(mockUp.withHtmlFolder, 'drafts');
+    sinon.assert.calledOnce(mockUp.run);
+  });
+
+  it('hlx up can use htmlFolder camelCase option', async () => {
+    await cli.run(['up', '--htmlFolder', 'drafts']);
+    sinon.assert.calledWith(mockUp.withHtmlFolder, 'drafts');
     sinon.assert.calledOnce(mockUp.run);
   });
 });

@@ -54,6 +54,11 @@ export default class UpCommand extends AbstractServerCommand {
     return this;
   }
 
+  withHtmlFolder(value) {
+    this._htmlFolder = value;
+    return this;
+  }
+
   async doStop() {
     await super.doStop();
     if (this._watcher) {
@@ -105,7 +110,8 @@ export default class UpCommand extends AbstractServerCommand {
       .withPrintIndex(this._printIndex)
       .withAllowInsecure(this._allowInsecure)
       .withSiteToken(this._siteToken)
-      .withCookies(this._cookies);
+      .withCookies(this._cookies)
+      .withHtmlFolder(this._htmlFolder);
 
     this.log.info(chalk`{yellow     ___    ________  ___                          __      __ v${pkgJson.version}}`);
     this.log.info(chalk`{yellow    /   |  / ____/  |/  /  _____(_)___ ___  __  __/ /___ _/ /_____  _____}`);

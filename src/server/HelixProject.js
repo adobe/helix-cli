@@ -78,6 +78,12 @@ export class HelixProject extends BaseProject {
     return this;
   }
 
+  withHtmlFolder(value) {
+    this._htmlFolder = value;
+    this._server.withHtmlFolder(value);
+    return this;
+  }
+
   get proxyUrl() {
     return this._proxyUrl;
   }
@@ -113,6 +119,10 @@ export class HelixProject extends BaseProject {
 
   get headHtml() {
     return this._headHtml;
+  }
+
+  get htmlFolder() {
+    return this._htmlFolder;
   }
 
   async init() {
@@ -161,11 +171,27 @@ export class HelixProject extends BaseProject {
     }
   }
 
+  async initHtmlFolder() {
+    if (this._htmlFolder && this.liveReload) {
+      // Register HTML folder for live-reload watching
+      const htmlFolderPath = resolve(this.directory, this._htmlFolder);
+      try {
+        await lstat(htmlFolderPath);
+        this.log.debug(`Registered HTML folder for live-reload: ${this._htmlFolder}`);
+        // Watch all HTML and HTM files in the folder
+        this.liveReload.registerFiles([`${htmlFolderPath}/**/*.html`, `${htmlFolderPath}/**/*.htm`], `/${this._htmlFolder}/`);
+      } catch (e) {
+        this.log.warn(`HTML folder '${this._htmlFolder}' does not exist`);
+      }
+    }
+  }
+
   async start() {
     this.log.debug('Launching AEM dev server...');
     await super.start();
     await this.initHeadHtml();
     await this.init404Html();
+    await this.initHtmlFolder();
     if (this._indexer) {
       await this._indexer.init();
     }
