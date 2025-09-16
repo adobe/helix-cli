@@ -164,9 +164,8 @@ export class HelixServer extends BaseServer {
       return next();
     }
 
-    // Use URL object for proper path parsing
-    const parsedUrl = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
-    const { pathname } = parsedUrl;
+    // Use Express's req.path for pathname extraction
+    const pathname = req.path || req.url.split('?')[0];
     const folderPrefix = `/${this._htmlFolder}/`;
 
     // Check if the request is for the HTML folder
@@ -189,63 +188,71 @@ export class HelixServer extends BaseServer {
     // Try .html first, then .htm
     const extensions = ['.html', '.htm'];
 
-    // Check each extension sequentially
-    const tryExtension = async (ext) => {
-      const htmlFile = path.join(this._project.directory, this._htmlFolder, relativePath + ext);
-
-      // Security check: ensure the file is within the project directory
-      if (path.relative(this._project.directory, htmlFile).startsWith('..')) {
-        log.info(`refuse to serve file outside the project directory: ${htmlFile}`);
-        res.status(403).send('');
-        return true; // Indicate we handled the request
-      }
-
-      try {
-        // Check if file exists
-        await access(htmlFile);
-
-        // Register for live reload if enabled
-        if (liveReload) {
-          liveReload.startRequest(req.id, req.url);
+    // Build potential file paths and filter out path traversal attempts
+    const filePaths = extensions
+      .map((ext) => ({
+        ext,
+        path: path.join(this._project.directory, this._htmlFolder, relativePath + ext),
+      }))
+      .filter((file) => {
+        // Security check: ensure the file is within the project directory
+        if (path.relative(this._project.directory, file.path).startsWith('..')) {
+          log.info(`refuse to serve file outside the project directory: ${file.path}`);
+          res.status(403).send('');
+          return false;
         }
+        return true;
+      });
 
-        // Serve the file
-        await sendFile(htmlFile, {
-          dotfiles: 'deny',
-          headers: {
-            'access-control-allow-origin': '*',
-            'content-type': 'text/html; charset=utf-8',
-          },
-        });
-
-        if (liveReload) {
-          liveReload.registerFile(req.id, htmlFile);
-          liveReload.endRequest(req.id);
-        }
-
-        log.debug(`served HTML file ${htmlFile} for ${req.url}`);
-        return true; // Indicate we handled the request
-      } catch (e) {
-        // File doesn't exist with this extension
-        return false;
-      }
-    };
-
-    // Try each extension sequentially using reduce
-    const handled = await extensions.reduce(async (prevPromise, ext) => {
-      const prevResult = await prevPromise;
-      if (prevResult) {
-        return prevResult; // Already handled
-      }
-      return tryExtension(ext);
-    }, Promise.resolve(false));
-
-    if (handled) {
+    // If security check failed, we already sent a 403
+    if (filePaths.length === 0) {
       return undefined;
     }
 
-    // No matching HTML file found, continue to next handler
-    return next();
+    // Check which files exist
+    const fileChecks = await Promise.all(
+      filePaths.map(async (file) => {
+        try {
+          await access(file.path);
+          return file;
+        } catch (e) {
+          return null;
+        }
+      }),
+    );
+
+    // Find the first existing file (maintains .html preference over .htm)
+    const existingFile = fileChecks.find((file) => file !== null);
+
+    if (!existingFile) {
+      // No matching HTML file found, continue to next handler
+      return next();
+    }
+
+    // Serve the found file
+    const htmlFile = existingFile.path;
+
+    // Register for live reload if enabled
+    if (liveReload) {
+      liveReload.startRequest(req.id, req.url);
+    }
+
+    // Serve the file
+    await sendFile(htmlFile, {
+      dotfiles: 'deny',
+      headers: {
+        'access-control-allow-origin': '*',
+        'content-type': 'text/html; charset=utf-8',
+      },
+    });
+
+    if (liveReload) {
+      liveReload.registerFile(req.id, htmlFile);
+      liveReload.endRequest(req.id);
+    }
+
+    log.debug(`served HTML file ${htmlFile} for ${req.url}`);
+    return undefined;
   }
 
   /**
