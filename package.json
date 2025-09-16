@@ -1,6 +1,6 @@
 {
   "name": "@adobe/aem-cli",
-  "version": "16.11.1",
+  "version": "16.11.3",
   "description": "AEM CLI",
   "main": "index.js",
   "type": "module",
@@ -11,7 +11,7 @@
   "scripts": {
     "check": "npm run lint && npm run test",
     "test": "c8 mocha",
-    "test-ci-win": "npx mocha --reporter xunit test --reporter-options output=junit/test.xml -t 5000",
+    "test-ci-win": "mocha --reporter spec test -t 300000 --exit",
     "lint": "eslint . && (cd packages/browser-injectables 2>/dev/null && npm run lint || true)",
     "lint:fix": "eslint --fix . && (cd packages/browser-injectables 2>/dev/null && npx eslint --fix . || true)",
     "semantic-release": "semantic-release",
@@ -42,7 +42,7 @@
   "dependencies": {
     "@adobe/fetch": "4.2.2",
     "@adobe/helix-log": "7.0.0",
-    "@adobe/helix-shared-config": "11.1.9",
+    "@adobe/helix-shared-config": "11.1.10",
     "@adobe/helix-shared-git": "3.0.20",
     "@adobe/helix-shared-indexer": "2.2.5",
     "camelcase": "8.0.0",
@@ -51,7 +51,7 @@
     "compression": "1.8.1",
     "cookie": "1.0.2",
     "cookie-parser": "1.4.7",
-    "dotenv": "17.2.0",
+    "dotenv": "17.2.1",
     "express": "5.1.0",
     "faye-websocket": "0.11.4",
     "fs-extra": "11.3.0",
@@ -62,7 +62,7 @@
     "https-proxy-agent": "7.0.6",
     "ignore": "7.0.5",
     "ini": "5.0.0",
-    "isomorphic-git": "1.32.1",
+    "isomorphic-git": "1.32.2",
     "jose": "6.0.12",
     "livereload-js": "4.0.2",
     "node-fetch": "3.3.2",

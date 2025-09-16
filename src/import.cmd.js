@@ -13,7 +13,7 @@ import fse from 'fs-extra';
 import path from 'path';
 import chalk from 'chalk-template';
 import git from 'isomorphic-git';
-import http from 'isomorphic-git/http/node/index.js';
+import http from 'isomorphic-git/http/node';
 import GitUtils from './git-utils.js';
 import { HelixImportProject } from './server/HelixImportProject.js';
 import pkgJson from './package.cjs';

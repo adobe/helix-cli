@@ -1,3 +1,19 @@
+## [16.11.3](https://github.com/adobe/helix-cli/compare/v16.11.2...v16.11.3) (2025-09-13)
+
+
+### Bug Fixes
+
+* **deps:** update external fixes ([f2cf6e0](https://github.com/adobe/helix-cli/commit/f2cf6e0f507fdaf1cecd3f35ec7af5d336246257))
+* update isomorphic-git import path for v1.32.2 compatibility ([d79fc88](https://github.com/adobe/helix-cli/commit/d79fc883a48a3475f04db78a48eda2473ec85e8c)), closes [#2569](https://github.com/adobe/helix-cli/issues/2569)
+
+## [16.11.2](https://github.com/adobe/helix-cli/compare/v16.11.1...v16.11.2) (2025-09-13)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @adobe/helix-shared-config to v11.1.10 ([b301df3](https://github.com/adobe/helix-cli/commit/b301df34f4c49f6d70831cac797c768c993fa308))
+* update package-lock.json for helix-shared-config v11.1.10 ([3e66ca6](https://github.com/adobe/helix-cli/commit/3e66ca627cc7052bb50b7fa0152ab9a04fc0a36c)), closes [#2581](https://github.com/adobe/helix-cli/issues/2581)
+
 ## [16.11.1](https://github.com/adobe/helix-cli/compare/v16.11.0...v16.11.1) (2025-09-12)
 
 
