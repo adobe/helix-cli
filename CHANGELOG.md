@@ -1,3 +1,30 @@
+# [16.12.0](https://github.com/adobe/helix-cli/compare/v16.11.3...v16.12.0) (2025-09-16)
+
+
+### Bug Fixes
+
+* address PR review comments ([a14cabc](https://github.com/adobe/helix-cli/commit/a14cabc8aaa21525ded5bd9b4c021baf87da07f3))
+* address PR review comments for git worktree support ([4532cac](https://github.com/adobe/helix-cli/commit/4532cac0327e32b3aca045aa99e4279ba7b15d26)), closes [#2583](https://github.com/adobe/helix-cli/issues/2583)
+* comprehensive test setup improvements for git submodules and worktrees ([2715b95](https://github.com/adobe/helix-cli/commit/2715b9578831544ed0b42e93fdd87b2922f6d953))
+* ensure test directories exist before running git init ([c29542c](https://github.com/adobe/helix-cli/commit/c29542c5cd6c17e7a5e2691d7d4189c07a9d6914))
+* handle case where initGit is called from within target directory ([ad4ccde](https://github.com/adobe/helix-cli/commit/ad4ccde34e97afafdeac0c51b3c8e3ddefee7e3f))
+* handle Windows file locking in git worktree tests ([b271662](https://github.com/adobe/helix-cli/commit/b2716624e3fd28031d01b45cf86556d22e4e0f9f))
+* improve initGit error handling and ensure directory creation ([76514d0](https://github.com/adobe/helix-cli/commit/76514d088bc21bc51a379d292ca42bdde280d184))
+* increase Windows CI test timeout to 60 seconds ([149176a](https://github.com/adobe/helix-cli/commit/149176a2b642aee4efcb6e2d1de0a188cc789e12))
+* inline git init to avoid directory change issues ([72fe216](https://github.com/adobe/helix-cli/commit/72fe216f1355369eb2d82bc4356aa4a3aef07cb4))
+* prevent worktree name collisions in tests ([73b3cbf](https://github.com/adobe/helix-cli/commit/73b3cbfffcd6693163193f2031a344a2d2361d67))
+* properly configure Windows CI tests with increased timeout ([59f3a61](https://github.com/adobe/helix-cli/commit/59f3a6175af1c236c34ad1a54639cf7700fbd230))
+* resolve linting errors in test file ([ed31cca](https://github.com/adobe/helix-cli/commit/ed31cca0f82df047dca5e17b6ad6cba38f32f4c2))
+* revert to using initGit helper for consistent test setup ([b517cb3](https://github.com/adobe/helix-cli/commit/b517cb3e2487b180b4b3cdaf2e3949c3984e461f))
+* split statements to separate lines for linting ([068d91c](https://github.com/adobe/helix-cli/commit/068d91cfc36ef1cc6353ae9ad17b05de6e119734))
+* split test runs to identify hanging test ([8a7dd86](https://github.com/adobe/helix-cli/commit/8a7dd862ca4024a25daac0b37105d9f468a113c3))
+* use process.chdir instead of shell.cd for more reliable directory handling ([a31c327](https://github.com/adobe/helix-cli/commit/a31c327cb96add05d665ee9b00117d2be50150e4))
+
+
+### Features
+
+* add git worktree support with dynamic port selection ([cb763bd](https://github.com/adobe/helix-cli/commit/cb763bd004344d2a5361d675c8028efa2279ae1a))
+
 ## [16.11.3](https://github.com/adobe/helix-cli/compare/v16.11.2...v16.11.3) (2025-09-13)
 
 
