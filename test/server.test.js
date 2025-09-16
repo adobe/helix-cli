@@ -847,9 +847,13 @@ describe('Helix Server', () => {
         .withProxyUrl('https://main--foo--bar.aem.page/')
         .withHtmlFolder('drafts');
 
-      // Mock the proxy request to return 404
-      // The proxy handler will append .html to the path
+      // Mock the proxy requests
+      // The proxy handler will try both with and without .html
       // Mark as optional since in CI the request might fail before reaching the mock
+      nock('https://main--foo--bar.aem.page')
+        .get('/drafts/nonexistent')
+        .optionally()
+        .reply(404, 'Not Found');
       nock('https://main--foo--bar.aem.page')
         .get('/drafts/nonexistent.html')
         .optionally()
