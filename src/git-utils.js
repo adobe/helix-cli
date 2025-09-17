@@ -19,8 +19,8 @@ import { GitUrl } from '@adobe/helix-shared-git';
 
 import git from 'isomorphic-git';
 // cache for isomorphic-git API
-// see https://isomorphic-git.org/docs/en/cache
-const cache = {};
+// Note: cache disabled for compatibility with isomorphic-git 1.33.x
+// const cache = {};
 
 export default class GitUtils {
   static DEFAULT_BRANCH = 'main';
@@ -37,7 +37,7 @@ export default class GitUtils {
     const HEAD = 1;
     const WORKDIR = 2;
     const STAGE = 3;
-    const matrix = await git.statusMatrix({ fs, dir, cache });
+    const matrix = await git.statusMatrix({ fs, dir });
     let modified = matrix
       .filter((row) => !(row[HEAD] === row[WORKDIR] && row[WORKDIR] === row[STAGE]));
     if (modified.length === 0) {
@@ -116,7 +116,7 @@ export default class GitUtils {
     }
 
     const status = await git.status({
-      fs, dir, filepath, cache,
+      fs, dir, filepath,
     });
     if (status === 'ignored') {
       return true;
@@ -172,7 +172,7 @@ export default class GitUtils {
       /* eslint-disable no-await-in-loop */
       const oid = await git.resolveRef({ fs, dir, ref: tag });
       const obj = await git.readObject({
-        fs, dir, oid, cache,
+        fs, dir, oid,
       });
       const commitSha = obj.type === 'tag'
         ? await git.resolveRef({ fs, dir, ref: obj.object.object }) // annotated tag
@@ -269,7 +269,7 @@ export default class GitUtils {
         if (err instanceof git.Errors.NotFoundError) {
           // fallback: is ref a shortened oid prefix?
           const oid = await git.expandOid({
-            fs, dir, oid: ref, cache,
+            fs, dir, oid: ref,
           })
             .catch(() => { throw err; });
           return git.resolveRef({ fs, dir, ref: oid });
@@ -291,7 +291,7 @@ export default class GitUtils {
   static async getRawContent(dir, ref, pathName) {
     return GitUtils.resolveCommit(dir, ref)
       .then((oid) => git.readObject({
-        fs, dir, oid, filepath: pathName, format: 'content', cache,
+        fs, dir, oid, filepath: pathName, format: 'content',
       }))
       .then((obj) => obj.object);
   }
