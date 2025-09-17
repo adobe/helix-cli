@@ -25,7 +25,8 @@
     "reporter-options": "configFile=.mocha-multi.json",
     "loader": "esmock",
     "exclude": [
-      "test/browser/**"
+      "test/browser/**",
+      "test/tmp/**"
     ]
   },
   "repository": {
@@ -64,7 +65,7 @@
     "https-proxy-agent": "7.0.6",
     "ignore": "7.0.5",
     "ini": "5.0.0",
-    "isomorphic-git": "1.33.1",
+    "isomorphic-git": "1.32.2",
     "jose": "6.1.0",
     "livereload-js": "4.0.2",
     "node-fetch": "3.3.2",
