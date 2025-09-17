@@ -1,3 +1,10 @@
+## [16.13.2](https://github.com/adobe/helix-cli/compare/v16.13.1...v16.13.2) (2025-09-17)
+
+
+### Bug Fixes
+
+* **deps:** update external dependencies except isomorphic-git ([9174c36](https://github.com/adobe/helix-cli/commit/9174c3603d33807f86586cd70cd823f4fde60e3b)), closes [#2593](https://github.com/adobe/helix-cli/issues/2593)
+
 ## [16.13.1](https://github.com/adobe/helix-cli/compare/v16.13.0...v16.13.1) (2025-09-16)
 
 
