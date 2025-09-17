@@ -25,7 +25,8 @@
     "reporter-options": "configFile=.mocha-multi.json",
     "loader": "esmock",
     "exclude": [
-      "test/browser/**"
+      "test/browser/**",
+      "test/tmp/**"
     ]
   },
   "repository": {
@@ -53,10 +54,10 @@
     "compression": "1.8.1",
     "cookie": "1.0.2",
     "cookie-parser": "1.4.7",
-    "dotenv": "17.2.1",
+    "dotenv": "17.2.2",
     "express": "5.1.0",
     "faye-websocket": "0.11.4",
-    "fs-extra": "11.3.0",
+    "fs-extra": "11.3.1",
     "glob": "11.0.3",
     "glob-to-regexp": "0.4.1",
     "hast-util-select": "6.0.4",
@@ -65,7 +66,7 @@
     "ignore": "7.0.5",
     "ini": "5.0.0",
     "isomorphic-git": "1.32.2",
-    "jose": "6.0.12",
+    "jose": "6.1.0",
     "livereload-js": "4.0.2",
     "node-fetch": "3.3.2",
     "open": "10.2.0",
@@ -81,16 +82,16 @@
   },
   "devDependencies": {
     "@adobe/eslint-config-helix": "3.0.10",
-    "@eslint/config-helpers": "0.3.0",
+    "@eslint/config-helpers": "0.3.1",
     "@semantic-release/changelog": "6.0.3",
     "@semantic-release/git": "10.0.1",
     "c8": "10.1.3",
     "eslint": "9.4.0",
-    "esmock": "2.7.1",
+    "esmock": "2.7.2",
     "husky": "9.1.7",
     "junit-report-builder": "5.1.1",
-    "lint-staged": "16.1.2",
-    "mocha": "11.7.1",
+    "lint-staged": "16.1.6",
+    "mocha": "11.7.2",
     "mocha-multi-reporters": "1.5.1",
     "nock": "13.5.6",
     "semantic-release": "24.2.7",
