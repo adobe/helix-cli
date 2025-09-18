@@ -335,7 +335,9 @@ export class HelixServer extends BaseServer {
 
     // Add HTML folder handler before the general proxy handler
     if (this._htmlFolder) {
-      this.app.use(asyncHandler(this.handleHtmlFolderRequest.bind(this)));
+      // Only handle GET requests for the HTML folder path
+      const htmlFolderPattern = new RegExp(`^/${this._htmlFolder}/.*`);
+      this.app.get(htmlFolderPattern, asyncHandler(this.handleHtmlFolderRequest.bind(this)));
       this.log.info(`Serving HTML files from folder: ${this._htmlFolder}`);
     }
 
