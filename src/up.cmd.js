@@ -55,6 +55,7 @@ export default class UpCommand extends AbstractServerCommand {
   }
 
   withHtmlFolder(value) {
+    // Basic validation - detailed validation done in HelixProject
     this._htmlFolder = value;
     return this;
   }

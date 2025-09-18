@@ -13,7 +13,7 @@ import crypto from 'crypto';
 import express from 'express';
 import { promisify } from 'util';
 import path from 'path';
-import { access } from 'fs/promises';
+import { lstat } from 'fs/promises';
 import compression from 'compression';
 import utils from './utils.js';
 import RequestContext from './RequestContext.js';
@@ -64,6 +64,10 @@ export class HelixServer extends BaseServer {
   }
 
   withHtmlFolder(value) {
+    // Sanitize the folder name to prevent path traversal
+    if (value && (value.includes('/../') || value.includes('..') || value.startsWith('/') || path.isAbsolute(value))) {
+      throw new Error(`Invalid HTML folder name: ${value}`);
+    }
     this._htmlFolder = value;
     return this;
   }
@@ -165,7 +169,7 @@ export class HelixServer extends BaseServer {
     }
 
     // Use Express's req.path for pathname extraction
-    const pathname = req.path || req.url.split('?')[0];
+    const pathname = req.path;
     const folderPrefix = `/${this._htmlFolder}/`;
 
     // Check if the request is for the HTML folder
@@ -176,6 +180,12 @@ export class HelixServer extends BaseServer {
     // Extract the path within the HTML folder
     const relativePath = pathname.slice(folderPrefix.length);
 
+    // Security check: prevent path traversal
+    if (relativePath.includes('/../') || relativePath.startsWith('../')) {
+      // Return 404 for security instead of 403 to not reveal file structure
+      return next();
+    }
+
     // Don't process if it already has an extension
     if (relativePath.includes('.')) {
       return next();
@@ -185,8 +195,8 @@ export class HelixServer extends BaseServer {
     const { log } = this;
     const liveReload = this._liveReload;
 
-    // Try .html first, then .htm
-    const extensions = ['.html', '.htm'];
+    // Only support .html extension
+    const extensions = ['.html'];
 
     // Build potential file paths and filter out path traversal attempts
     const filePaths = extensions
@@ -196,25 +206,29 @@ export class HelixServer extends BaseServer {
       }))
       .filter((file) => {
         // Security check: ensure the file is within the project directory
-        if (path.relative(this._project.directory, file.path).startsWith('..')) {
-          log.info(`refuse to serve file outside the project directory: ${file.path}`);
-          res.status(403).send('');
+        const relPath = path.relative(this._project.directory, file.path);
+        if (relPath.startsWith('..') || path.isAbsolute(relPath)) {
+          // Silently filter out path traversal attempts
           return false;
         }
         return true;
       });
 
-    // If security check failed, we already sent a 403
+    // If all paths were filtered out due to security, continue to next handler
     if (filePaths.length === 0) {
-      return undefined;
+      return next();
     }
 
     // Check which files exist
     const fileChecks = await Promise.all(
       filePaths.map(async (file) => {
         try {
-          await access(file.path);
-          return file;
+          // Check if it's a file (not a directory)
+          const stats = await lstat(file.path);
+          if (stats.isFile()) {
+            return file;
+          }
+          return null;
         } catch (e) {
           return null;
         }

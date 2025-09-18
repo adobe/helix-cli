@@ -9,7 +9,7 @@
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-import { resolve } from 'path';
+import path, { resolve } from 'path';
 import { lstat } from 'fs/promises';
 import { HelixServer } from './HelixServer.js';
 import { BaseProject } from './BaseProject.js';
@@ -79,6 +79,10 @@ export class HelixProject extends BaseProject {
   }
 
   withHtmlFolder(value) {
+    // Validate HTML folder name
+    if (value && (value.includes('/../') || value.includes('..') || value.startsWith('/') || path.isAbsolute(value))) {
+      throw new Error(`Invalid HTML folder name: ${value}`);
+    }
     this._htmlFolder = value;
     this._server.withHtmlFolder(value);
     return this;
@@ -178,8 +182,8 @@ export class HelixProject extends BaseProject {
       try {
         await lstat(htmlFolderPath);
         this.log.debug(`Registered HTML folder for live-reload: ${this._htmlFolder}`);
-        // Watch all HTML and HTM files in the folder
-        this.liveReload.registerFiles([`${htmlFolderPath}/**/*.html`, `${htmlFolderPath}/**/*.htm`], `/${this._htmlFolder}/`);
+        // Watch all HTML files in the folder
+        this.liveReload.registerFiles([`${htmlFolderPath}/**/*.html`], `/${this._htmlFolder}/`);
       } catch (e) {
         this.log.error(`HTML folder '${this._htmlFolder}' does not exist`);
         throw new Error(`HTML folder '${this._htmlFolder}' does not exist`);
