@@ -64,10 +64,7 @@ export class HelixServer extends BaseServer {
   }
 
   withHtmlFolder(value) {
-    // Sanitize the folder name to prevent path traversal
-    if (value && (value.includes('/../') || value.includes('..') || value.startsWith('/') || path.isAbsolute(value))) {
-      throw new Error(`Invalid HTML folder name: ${value}`);
-    }
+    // It's now sanitized in HelixProject.withHtmlFolder
     this._htmlFolder = value;
     return this;
   }
@@ -195,56 +192,26 @@ export class HelixServer extends BaseServer {
     const { log } = this;
     const liveReload = this._liveReload;
 
-    // Only support .html extension
-    const extensions = ['.html'];
+    // Build the HTML file path
+    const htmlFile = path.join(this._project.directory, this._htmlFolder, `${relativePath}.html`);
 
-    // Build potential file paths and filter out path traversal attempts
-    const filePaths = extensions
-      .map((ext) => ({
-        ext,
-        path: path.join(this._project.directory, this._htmlFolder, relativePath + ext),
-      }))
-      .filter((file) => {
-        // Security check: ensure the file is within the project directory
-        const relPath = path.relative(this._project.directory, file.path);
-        if (relPath.startsWith('..') || path.isAbsolute(relPath)) {
-          // Silently filter out path traversal attempts
-          return false;
-        }
-        return true;
-      });
-
-    // If all paths were filtered out due to security, continue to next handler
-    if (filePaths.length === 0) {
+    // Security check: ensure the file is within the project directory
+    const relPath = path.relative(this._project.directory, htmlFile);
+    if (relPath.startsWith('..') || path.isAbsolute(relPath)) {
+      // Silently pass to next handler for path traversal attempts
       return next();
     }
 
-    // Check which files exist
-    const fileChecks = await Promise.all(
-      filePaths.map(async (file) => {
-        try {
-          // Check if it's a file (not a directory)
-          const stats = await lstat(file.path);
-          if (stats.isFile()) {
-            return file;
-          }
-          return null;
-        } catch (e) {
-          return null;
-        }
-      }),
-    );
-
-    // Find the first existing file (maintains .html preference over .htm)
-    const existingFile = fileChecks.find((file) => file !== null);
-
-    if (!existingFile) {
-      // No matching HTML file found, continue to next handler
+    // Check if the HTML file exists and is a file (not a directory)
+    try {
+      const stats = await lstat(htmlFile);
+      if (!stats.isFile()) {
+        return next();
+      }
+    } catch (e) {
+      // File doesn't exist, continue to next handler
       return next();
     }
-
-    // Serve the found file
-    const htmlFile = existingFile.path;
 
     // Register for live reload if enabled
     if (liveReload) {

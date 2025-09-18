@@ -910,7 +910,7 @@ describe('Helix Server', () => {
             .withHttpPort(0)
             .withProxyUrl('https://main--foo--bar.aem.page/')
             .withHtmlFolder(invalidName);
-        }, /Invalid HTML folder name/, `Should reject folder name: ${invalidName}`);
+        }, /Invalid HTML folder name.*only folders within the current workspace are allowed/, `Should reject folder name: ${invalidName}`);
       }
     });
 

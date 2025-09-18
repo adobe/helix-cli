@@ -81,7 +81,7 @@ export class HelixProject extends BaseProject {
   withHtmlFolder(value) {
     // Validate HTML folder name
     if (value && (value.includes('/../') || value.includes('..') || value.startsWith('/') || path.isAbsolute(value))) {
-      throw new Error(`Invalid HTML folder name: ${value}`);
+      throw new Error(`Invalid HTML folder name: ${value} only folders within the current workspace are allowed`);
     }
     this._htmlFolder = value;
     this._server.withHtmlFolder(value);
