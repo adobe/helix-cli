@@ -177,9 +177,8 @@ export class HelixServer extends BaseServer {
     // Extract the path within the HTML folder
     const relativePath = pathname.slice(folderPrefix.length);
 
-    // Security check: prevent path traversal
-    if (relativePath.includes('/../') || relativePath.startsWith('../')) {
-      // Return 404 for security instead of 403 to not reveal file structure
+    // Security check: prevent path traversal with /../ anywhere in the path
+    if (relativePath.includes('/../')) {
       return next();
     }
 
@@ -188,21 +187,16 @@ export class HelixServer extends BaseServer {
       return next();
     }
 
-    const sendFile = promisify(res.sendFile).bind(res);
-    const { log } = this;
-    const liveReload = this._liveReload;
-
-    // Build the HTML file path
+    // Build the HTML file path - only support .html extension
     const htmlFile = path.join(this._project.directory, this._htmlFolder, `${relativePath}.html`);
 
     // Security check: ensure the file is within the project directory
     const relPath = path.relative(this._project.directory, htmlFile);
     if (relPath.startsWith('..') || path.isAbsolute(relPath)) {
-      // Silently pass to next handler for path traversal attempts
       return next();
     }
 
-    // Check if the HTML file exists and is a file (not a directory)
+    // Check if the HTML file exists and is a file
     try {
       const stats = await lstat(htmlFile);
       if (!stats.isFile()) {
@@ -212,6 +206,10 @@ export class HelixServer extends BaseServer {
       // File doesn't exist, continue to next handler
       return next();
     }
+
+    const sendFile = promisify(res.sendFile).bind(res);
+    const { log } = this;
+    const liveReload = this._liveReload;
 
     // Register for live reload if enabled
     if (liveReload) {

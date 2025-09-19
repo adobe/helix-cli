@@ -79,12 +79,18 @@ export class HelixProject extends BaseProject {
   }
 
   withHtmlFolder(value) {
-    // Validate HTML folder name
-    if (value && (value.includes('/../') || value.includes('..') || value.startsWith('/') || path.isAbsolute(value))) {
-      throw new Error(`Invalid HTML folder name: ${value} only folders within the current workspace are allowed`);
+    if (value) {
+      // Security: reject any paths with traversal patterns or absolute paths
+      if (path.isAbsolute(value) || value.includes('..') || value.startsWith('/')) {
+        throw new Error(`Invalid HTML folder name: ${value} only folders within the current workspace are allowed`);
+      }
+
+      this._htmlFolder = value;
+      this._server.withHtmlFolder(value);
+    } else {
+      this._htmlFolder = value;
+      this._server.withHtmlFolder(value);
     }
-    this._htmlFolder = value;
-    this._server.withHtmlFolder(value);
     return this;
   }
 
@@ -177,12 +183,11 @@ export class HelixProject extends BaseProject {
 
   async initHtmlFolder() {
     if (this._htmlFolder && this.liveReload) {
-      // Register HTML folder for live-reload watching
       const htmlFolderPath = resolve(this.directory, this._htmlFolder);
       try {
         await lstat(htmlFolderPath);
         this.log.debug(`Registered HTML folder for live-reload: ${this._htmlFolder}`);
-        // Watch all HTML files in the folder
+        // Watch all HTML files in the folder - only .html extension
         this.liveReload.registerFiles([`${htmlFolderPath}/**/*.html`], `/${this._htmlFolder}/`);
       } catch (e) {
         this.log.error(`HTML folder '${this._htmlFolder}' does not exist`);
