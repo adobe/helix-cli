@@ -503,6 +503,64 @@ describe('Helix Server', () => {
     }
   });
 
+  it('injects hlx:proxyUrl meta tag in 401 HTML responses', async () => {
+    const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
+    const project = new HelixProject()
+      .withCwd(cwd)
+      .withHttpPort(0)
+      .withProxyUrl('http://main--foo--bar.aem.page');
+
+    await project.init();
+    project.log.level = 'silly';
+
+    nock('http://main--foo--bar.aem.page')
+      .get('/protected.html')
+      .reply(401, '<html><head><title>Unauthorized</title></head><body>Access denied</body></html>', {
+        'content-type': 'text/html',
+      });
+
+    try {
+      await project.start();
+      const resp = await getFetch()(`http://127.0.0.1:${project.server.port}/protected.html`);
+      assert.strictEqual(resp.status, 401);
+      const body = await resp.text();
+      assert.ok(body.includes('<meta property="hlx:proxyUrl" content="http://main--foo--bar.aem.page/protected.html">'));
+      assert.ok(body.includes('<title>Unauthorized</title>'));
+      assert.ok(body.includes('Access denied'));
+    } finally {
+      await project.stop();
+    }
+  });
+
+  it('injects hlx:proxyUrl meta tag in 403 HTML responses', async () => {
+    const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
+    const project = new HelixProject()
+      .withCwd(cwd)
+      .withHttpPort(0)
+      .withProxyUrl('http://main--foo--bar.aem.page');
+
+    await project.init();
+    project.log.level = 'silly';
+
+    nock('http://main--foo--bar.aem.page')
+      .get('/forbidden.html')
+      .reply(403, '<html><head><title>Forbidden</title></head><body>You do not have permission</body></html>', {
+        'content-type': 'text/html',
+      });
+
+    try {
+      await project.start();
+      const resp = await getFetch()(`http://127.0.0.1:${project.server.port}/forbidden.html`);
+      assert.strictEqual(resp.status, 403);
+      const body = await resp.text();
+      assert.ok(body.includes('<meta property="hlx:proxyUrl" content="http://main--foo--bar.aem.page/forbidden.html">'));
+      assert.ok(body.includes('<title>Forbidden</title>'));
+      assert.ok(body.includes('You do not have permission'));
+    } finally {
+      await project.stop();
+    }
+  });
+
   it('receives site token, saves it and uses it', async () => {
     const siteToken = `hlxtst_${new UnsecuredJWT({ email: 'test@example.com' }).encode()}`;
 

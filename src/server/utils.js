@@ -325,6 +325,7 @@ window.LiveReloadOptions = {
     }
 
     const isHTML = ret.status === 200 && contentType.indexOf('text/html') === 0;
+    const isHTMLWithAuthError = (ret.status === 401 || ret.status === 403) && contentType.indexOf('text/html') === 0;
     const livereload = isHTML && opts.injectLiveReload;
     const replaceHead = isHTML && opts.headHtml;
     const doIndex = isHTML && opts.indexer && url.indexOf('.plain.html') < 0;
@@ -380,6 +381,24 @@ window.LiveReloadOptions = {
         .send(textBody);
       return;
     }
+    if (isHTMLWithAuthError) {
+      // Handle HTML responses with 401/403 status - inject meta tag
+      let textBody = await ret.text();
+      if (ctx.log.level === 'silly') {
+        ctx.log.trace(textBody);
+        ctx.log.trace(`[${id}] <<<--------------------------`);
+      }
+      textBody = utils.injectMeta(textBody, {
+        'hlx:proxyUrl': url,
+      });
+
+      res
+        .set(respHeaders)
+        .status(ret.status)
+        .send(textBody);
+      return;
+    }
+
     if (ret.status === 401 || ret.status === 403) {
       const reqHeaders = req.headers;
       if (opts.autoLogin && opts.loginPath
