@@ -136,6 +136,18 @@ export default class GitUtils {
   }
 
   /**
+   * Checks if a name is valid for use in a DNS subdomain.
+   * DNS labels must not contain dots or other special characters.
+   * @param {string} name the name to validate
+   * @returns {boolean} true if valid for DNS
+   */
+  static isValidDNSName(name) {
+    // DNS labels can only contain alphanumeric characters and hyphens
+    // They cannot contain dots or other special characters
+    return /^[a-zA-Z0-9-]+$/.test(name);
+  }
+
+  /**
    * Returns the name of the current branch. If `HEAD` is at a tag, the name of the tag
    * will be returned instead, if head is at a commit, fallback will be returned.
    *
@@ -178,7 +190,11 @@ export default class GitUtils {
         ? await git.resolveRef({ fs, dir, ref: obj.object.object }) // annotated tag
         : oid; // lightweight tag
       if (commitSha === rev) {
-        return tag;
+        // Only return tags that are valid for DNS names
+        // Skip tags containing dots or other invalid characters
+        if (GitUtils.isValidDNSName(tag)) {
+          return tag;
+        }
       }
     }
 

@@ -69,8 +69,12 @@ describe('Testing GitUtils', () => {
   it('getBranch #unit', async () => {
     shell.exec('git checkout -b newbranch');
     assert.equal(await GitUtils.getBranch(testRoot), 'newbranch');
+    // Tags with dots are invalid for DNS, so they should not be returned
     shell.exec('git tag v0.0.0');
-    assert.equal(await GitUtils.getBranch(testRoot), 'v0.0.0');
+    assert.equal(await GitUtils.getBranch(testRoot), 'newbranch');
+    // Tags without dots are valid for DNS and should be returned
+    shell.exec('git tag v1-0-0');
+    assert.equal(await GitUtils.getBranch(testRoot), 'v1-0-0');
   });
 
   it('getBranch #unit (detached)', async () => {
@@ -277,6 +281,21 @@ describe('Testing GitUtils', () => {
         // Cleanup - ensure it runs even if test fails
         await fse.remove(submoduleRepoDir).catch(() => {});
       }
+    });
+
+    it('isValidDNSName validates DNS-compatible names', () => {
+      // Valid DNS names (alphanumeric and hyphens only)
+      assert.equal(GitUtils.isValidDNSName('main'), true);
+      assert.equal(GitUtils.isValidDNSName('feature-branch'), true);
+      assert.equal(GitUtils.isValidDNSName('v1-0-0'), true);
+      assert.equal(GitUtils.isValidDNSName('release-2024'), true);
+
+      // Invalid DNS names (containing dots or other special chars)
+      assert.equal(GitUtils.isValidDNSName('v1.0.0'), false);
+      assert.equal(GitUtils.isValidDNSName('feature/branch'), false);
+      assert.equal(GitUtils.isValidDNSName('branch_name'), false);
+      assert.equal(GitUtils.isValidDNSName('branch@name'), false);
+      assert.equal(GitUtils.isValidDNSName('1.2.3'), false);
     });
 
     it('hashBranchToPort generates consistent ports', () => {
