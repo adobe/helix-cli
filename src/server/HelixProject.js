@@ -9,7 +9,7 @@
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-import { resolve } from 'path';
+import path, { resolve } from 'path';
 import { lstat } from 'fs/promises';
 import { HelixServer } from './HelixServer.js';
 import { BaseProject } from './BaseProject.js';
@@ -78,6 +78,22 @@ export class HelixProject extends BaseProject {
     return this;
   }
 
+  withHtmlFolder(value) {
+    if (value) {
+      // Security: reject any paths with traversal patterns or absolute paths
+      if (path.isAbsolute(value) || value.includes('..') || value.startsWith('/')) {
+        throw new Error(`Invalid HTML folder name: ${value} only folders within the current workspace are allowed`);
+      }
+
+      this._htmlFolder = value;
+      this._server.withHtmlFolder(value);
+    } else {
+      this._htmlFolder = value;
+      this._server.withHtmlFolder(value);
+    }
+    return this;
+  }
+
   get proxyUrl() {
     return this._proxyUrl;
   }
@@ -113,6 +129,10 @@ export class HelixProject extends BaseProject {
 
   get headHtml() {
     return this._headHtml;
+  }
+
+  get htmlFolder() {
+    return this._htmlFolder;
   }
 
   async init() {
@@ -161,11 +181,27 @@ export class HelixProject extends BaseProject {
     }
   }
 
+  async initHtmlFolder() {
+    if (this._htmlFolder && this.liveReload) {
+      const htmlFolderPath = resolve(this.directory, this._htmlFolder);
+      try {
+        await lstat(htmlFolderPath);
+        this.log.debug(`Registered HTML folder for live-reload: ${this._htmlFolder}`);
+        // Watch all HTML files in the folder - only .html extension
+        this.liveReload.registerFiles([`${htmlFolderPath}/**/*.html`], `/${this._htmlFolder}/`);
+      } catch (e) {
+        this.log.error(`HTML folder '${this._htmlFolder}' does not exist`);
+        throw new Error(`HTML folder '${this._htmlFolder}' does not exist`);
+      }
+    }
+  }
+
   async start() {
     this.log.debug('Launching AEM dev server...');
     await super.start();
     await this.initHeadHtml();
     await this.init404Html();
+    await this.initHtmlFolder();
     if (this._indexer) {
       await this._indexer.init();
     }

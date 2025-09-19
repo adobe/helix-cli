@@ -115,6 +115,11 @@ export default function up() {
           type: 'boolean',
           default: false,
         })
+        .option('html-folder', {
+          alias: 'htmlFolder',
+          describe: 'Serve HTML files from this folder without extensions (e.g., /folder/file serves folder/file.html) use this to preview content changes if you do not have access to the authoring system',
+          type: 'string',
+        })
 
         .help();
     },
@@ -141,6 +146,7 @@ export default function up() {
         .withKill(argv.stopOther)
         .withCache(argv.alphaCache)
         .withCookies(argv.cookies)
+        .withHtmlFolder(argv.htmlFolder)
         .run();
     },
   };

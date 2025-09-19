@@ -13,6 +13,7 @@ import crypto from 'crypto';
 import express from 'express';
 import { promisify } from 'util';
 import path from 'path';
+import { lstat } from 'fs/promises';
 import compression from 'compression';
 import utils from './utils.js';
 import RequestContext from './RequestContext.js';
@@ -59,6 +60,12 @@ export class HelixServer extends BaseServer {
 
   withCookies(value) {
     this._cookies = value;
+    return this;
+  }
+
+  withHtmlFolder(value) {
+    // It's now sanitized in HelixProject.withHtmlFolder
+    this._htmlFolder = value;
     return this;
   }
 
@@ -145,6 +152,86 @@ export class HelixServer extends BaseServer {
       .set('cache-control', CACHE_CONTROL)
       .set('location', '/')
       .send('');
+  }
+
+  /**
+   * HTML Folder handler - serves HTML files without extensions
+   * @param {Express.Request} req request
+   * @param {Express.Response} res response
+   * @param {Function} next next middleware
+   */
+  async handleHtmlFolderRequest(req, res, next) {
+    if (!this._htmlFolder) {
+      return next();
+    }
+
+    // Use Express's req.path for pathname extraction
+    const pathname = req.path;
+    const folderPrefix = `/${this._htmlFolder}/`;
+
+    // Check if the request is for the HTML folder
+    if (!pathname.startsWith(folderPrefix)) {
+      return next();
+    }
+
+    // Extract the path within the HTML folder
+    const relativePath = pathname.slice(folderPrefix.length);
+
+    // Security check: prevent path traversal with /../ anywhere in the path
+    if (relativePath.includes('/../')) {
+      return next();
+    }
+
+    // Don't process if it already has an extension
+    if (relativePath.includes('.')) {
+      return next();
+    }
+
+    // Build the HTML file path - only support .html extension
+    const htmlFile = path.join(this._project.directory, this._htmlFolder, `${relativePath}.html`);
+
+    // Security check: ensure the file is within the project directory
+    const relPath = path.relative(this._project.directory, htmlFile);
+    if (relPath.startsWith('..') || path.isAbsolute(relPath)) {
+      return next();
+    }
+
+    // Check if the HTML file exists and is a file
+    try {
+      const stats = await lstat(htmlFile);
+      if (!stats.isFile()) {
+        return next();
+      }
+    } catch (e) {
+      // File doesn't exist, continue to next handler
+      return next();
+    }
+
+    const sendFile = promisify(res.sendFile).bind(res);
+    const { log } = this;
+    const liveReload = this._liveReload;
+
+    // Register for live reload if enabled
+    if (liveReload) {
+      liveReload.startRequest(req.id, req.url);
+    }
+
+    // Serve the file
+    await sendFile(htmlFile, {
+      dotfiles: 'deny',
+      headers: {
+        'access-control-allow-origin': '*',
+        'content-type': 'text/html; charset=utf-8',
+      },
+    });
+
+    if (liveReload) {
+      liveReload.registerFile(req.id, htmlFile);
+      liveReload.endRequest(req.id);
+    }
+
+    log.debug(`served HTML file ${htmlFile} for ${req.url}`);
+    return undefined;
   }
 
   /**
@@ -243,6 +330,14 @@ export class HelixServer extends BaseServer {
     this.app.get(LOGIN_ACK_ROUTE, asyncHandler(this.handleLoginAck.bind(this)));
     this.app.post(LOGIN_ACK_ROUTE, express.json(), asyncHandler(this.handleLoginAck.bind(this)));
     this.app.options(LOGIN_ACK_ROUTE, asyncHandler(this.handleLoginAck.bind(this)));
+
+    // Add HTML folder handler before the general proxy handler
+    if (this._htmlFolder) {
+      // Only handle GET requests for the HTML folder path
+      const htmlFolderPattern = new RegExp(`^/${this._htmlFolder}/.*`);
+      this.app.get(htmlFolderPattern, asyncHandler(this.handleHtmlFolderRequest.bind(this)));
+      this.log.info(`Serving HTML files from folder: ${this._htmlFolder}`);
+    }
 
     const handler = asyncHandler(this.handleProxyModeRequest.bind(this));
     this.app.get(/.*/, handler);

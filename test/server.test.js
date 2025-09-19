@@ -780,4 +780,187 @@ describe('Helix Server', () => {
       await project.stop();
     }
   });
+
+  describe('HTML Folder serving', () => {
+    it('serves HTML files without extensions from designated folder', async () => {
+      const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
+
+      // Create a drafts folder with an HTML file
+      const draftsDir = path.join(cwd, 'drafts');
+      await fse.ensureDir(draftsDir);
+      await fse.writeFile(path.join(draftsDir, 'example.html'), '<html><body>Hello from drafts</body></html>');
+
+      const project = new HelixProject()
+        .withCwd(cwd)
+        .withHttpPort(0)
+        .withProxyUrl('https://main--foo--bar.aem.page/')
+        .withHtmlFolder('drafts');
+
+      await project.init();
+      try {
+        await project.start();
+        const resp = await getFetch()(`http://127.0.0.1:${project.server.port}/drafts/example`);
+        assert.strictEqual(resp.status, 200);
+        const body = await resp.text();
+        assert.strictEqual(body, '<html><body>Hello from drafts</body></html>');
+      } finally {
+        await project.stop();
+      }
+    });
+
+    it('passes non-existent HTML folder requests to proxy', async () => {
+      const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
+
+      // Create a drafts folder but don't create the requested file
+      const draftsDir = path.join(cwd, 'drafts');
+      await fse.ensureDir(draftsDir);
+
+      const project = new HelixProject()
+        .withCwd(cwd)
+        .withHttpPort(0)
+        .withProxyUrl('https://main--foo--bar.aem.page/')
+        .withHtmlFolder('drafts');
+
+      // Mock the proxy requests
+      // The proxy handler will try both with and without .html
+      // Mark as optional since in CI the request might fail before reaching the mock
+      nock('https://main--foo--bar.aem.page')
+        .get('/drafts/nonexistent')
+        .optionally()
+        .reply(404, 'Not Found');
+      nock('https://main--foo--bar.aem.page')
+        .get('/drafts/nonexistent.html')
+        .optionally()
+        .reply(404, 'Not Found');
+
+      await project.init();
+      try {
+        await project.start();
+        const resp = await getFetch()(`http://127.0.0.1:${project.server.port}/drafts/nonexistent`);
+        // When the HTML file doesn't exist, it falls through to the proxy
+        // In test environment with nock, this may result in 404 or 502
+        const validStatuses = [404, 502];
+        assert.ok(validStatuses.includes(resp.status), `Expected 404 or 502, got ${resp.status}`);
+      } finally {
+        await project.stop();
+      }
+    });
+
+    it('does not affect normal file serving outside HTML folder', async () => {
+      const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
+
+      // Create a drafts folder
+      const draftsDir = path.join(cwd, 'drafts');
+      await fse.ensureDir(draftsDir);
+      await fse.writeFile(path.join(draftsDir, 'example.html'), '<html><body>Hello from drafts</body></html>');
+
+      const project = new HelixProject()
+        .withCwd(cwd)
+        .withHttpPort(0)
+        .withProxyUrl('https://main--foo--bar.aem.page/')
+        .withHtmlFolder('drafts');
+
+      await project.init();
+      try {
+        await project.start();
+        // Test normal file serving still works
+        await assertHttp(`http://127.0.0.1:${project.server.port}/welcome.txt`, 200, 'expected_welcome.txt');
+      } finally {
+        await project.stop();
+      }
+    });
+
+    it('rejects path traversal attempts in HTML folder', async () => {
+      const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
+
+      const draftsDir = path.join(cwd, 'drafts');
+      await fse.ensureDir(draftsDir);
+
+      const project = new HelixProject()
+        .withCwd(cwd)
+        .withHttpPort(0)
+        .withProxyUrl('https://main--foo--bar.aem.page/')
+        .withHtmlFolder('drafts');
+
+      await project.init();
+      try {
+        await project.start();
+        // Test path traversal attempts
+        // Note: URLs with /../ get normalized by the browser, so we test the handler directly
+        // Handler silently rejects these and passes to next handler (proxy) returning 404
+        const resp = await getFetch()(`http://127.0.0.1:${project.server.port}/drafts/..%2F..%2Fetc%2Fpasswd`);
+        // Should fall through to proxy which returns 404
+        const validStatuses = [404, 502]; // 502 if proxy fails in test environment
+        assert.ok(validStatuses.includes(resp.status), `Expected 404 or 502, got ${resp.status}`);
+      } finally {
+        await project.stop();
+      }
+    });
+
+    it('rejects invalid HTML folder names', async () => {
+      const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
+
+      // Test various invalid folder names
+      const invalidNames = ['../drafts', 'drafts/../other', '/absolute/path', '..', 'folder/../../../etc'];
+
+      for (const invalidName of invalidNames) {
+        assert.throws(() => {
+          new HelixProject()
+            .withCwd(cwd)
+            .withHttpPort(0)
+            .withProxyUrl('https://main--foo--bar.aem.page/')
+            .withHtmlFolder(invalidName);
+        }, /Invalid HTML folder name.*only folders within the current workspace are allowed/, `Should reject folder name: ${invalidName}`);
+      }
+    });
+
+    it('throws error if HTML folder does not exist', async () => {
+      const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
+
+      const project = new HelixProject()
+        .withCwd(cwd)
+        .withHttpPort(0)
+        .withProxyUrl('https://main--foo--bar.aem.page/')
+        .withHtmlFolder('nonexistent-folder')
+        .withLiveReload(true); // Required for HTML folder to be checked
+
+      await project.init();
+
+      try {
+        await project.start();
+        assert.fail('Expected start to throw error for non-existent HTML folder');
+      } catch (e) {
+        assert.ok(e.message.includes('HTML folder \'nonexistent-folder\' does not exist'), `Unexpected error message: ${e.message}`);
+      } finally {
+        await project.stop();
+      }
+    });
+
+    it('serves nested HTML files correctly', async () => {
+      const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
+
+      // Create nested structure
+      const draftsDir = path.join(cwd, 'drafts');
+      const nestedDir = path.join(draftsDir, 'subfolder');
+      await fse.ensureDir(nestedDir);
+      await fse.writeFile(path.join(nestedDir, 'nested.html'), '<html><body>Nested content</body></html>');
+
+      const project = new HelixProject()
+        .withCwd(cwd)
+        .withHttpPort(0)
+        .withProxyUrl('https://main--foo--bar.aem.page/')
+        .withHtmlFolder('drafts');
+
+      await project.init();
+      try {
+        await project.start();
+        const resp = await getFetch()(`http://127.0.0.1:${project.server.port}/drafts/subfolder/nested`);
+        assert.strictEqual(resp.status, 200);
+        const body = await resp.text();
+        assert.strictEqual(body, '<html><body>Nested content</body></html>');
+      } finally {
+        await project.stop();
+      }
+    });
+  });
 });

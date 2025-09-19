@@ -399,4 +399,140 @@ describe('Helix Server with Livereload', () => {
       await project.stop();
     }
   });
+
+  it('livereload works for HTML files in designated HTML folder', async () => {
+    const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
+
+    // Create a drafts folder with an HTML file
+    const draftsDir = path.join(cwd, 'drafts');
+    await fse.ensureDir(draftsDir);
+    const htmlFile = path.join(draftsDir, 'test.html');
+    await fse.writeFile(htmlFile, '<html><body>Initial content</body></html>');
+
+    const project = new HelixProject()
+      .withCwd(cwd)
+      .withHttpPort(0)
+      .withLiveReload(true)
+      .withHtmlFolder('drafts')
+      .withProxyUrl('http://main--foo--bar.aem.page');
+
+    await project.init();
+
+    try {
+      await project.start();
+
+      // Connect WebSocket client for live reload
+      const wsUrl = `ws://127.0.0.1:${project.server.port}/__internal__/livereload`;
+      const ws = new WebSocket.Client(wsUrl);
+
+      const wsOpenPromise = new Promise((resolve) => {
+        ws.on('open', resolve);
+      });
+
+      const wsReloadPromise = new Promise((resolve) => {
+        ws.on('message', (event) => {
+          const data = JSON.parse(event.data);
+          if (data.command === 'reload') {
+            resolve(data);
+          }
+        });
+      });
+
+      await wsOpenPromise;
+
+      // Send hello command to establish connection
+      ws.send(JSON.stringify({ command: 'hello' }));
+      await wait(100);
+
+      // Request the HTML file to register it with live reload
+      const resp = await fetch(`http://127.0.0.1:${project.server.port}/drafts/test`);
+      assert.strictEqual(resp.status, 200);
+
+      // Modify the HTML file
+      await fse.writeFile(htmlFile, '<html><body>Updated content</body></html>');
+
+      // Wait for reload event
+      const reloadData = await Promise.race([
+        wsReloadPromise,
+        wait(2000).then(() => null),
+      ]);
+
+      ws.close();
+
+      // Verify reload event was triggered
+      assert.ok(reloadData, 'Live reload event should have been triggered');
+      assert.strictEqual(reloadData.command, 'reload');
+      assert.ok(reloadData.path.includes('/drafts/test'));
+    } finally {
+      await project.stop();
+    }
+  });
+
+  it('livereload monitors nested HTML files in designated folder', async () => {
+    const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
+
+    // Create nested folder structure
+    const draftsDir = path.join(cwd, 'drafts');
+    const subDir = path.join(draftsDir, 'subfolder');
+    await fse.ensureDir(subDir);
+    const htmlFile = path.join(subDir, 'nested.html');
+    await fse.writeFile(htmlFile, '<html><body>Nested content</body></html>');
+
+    const project = new HelixProject()
+      .withCwd(cwd)
+      .withHttpPort(0)
+      .withLiveReload(true)
+      .withHtmlFolder('drafts')
+      .withProxyUrl('http://main--foo--bar.aem.page');
+
+    await project.init();
+
+    try {
+      await project.start();
+
+      // Connect WebSocket client
+      const wsUrl = `ws://127.0.0.1:${project.server.port}/__internal__/livereload`;
+      const ws = new WebSocket.Client(wsUrl);
+
+      const wsOpenPromise = new Promise((resolve) => {
+        ws.on('open', resolve);
+      });
+
+      const wsReloadPromise = new Promise((resolve) => {
+        ws.on('message', (event) => {
+          const data = JSON.parse(event.data);
+          if (data.command === 'reload') {
+            resolve(data);
+          }
+        });
+      });
+
+      await wsOpenPromise;
+
+      // Send hello command
+      ws.send(JSON.stringify({ command: 'hello' }));
+      await wait(100);
+
+      // Request the nested HTML file
+      const resp = await fetch(`http://127.0.0.1:${project.server.port}/drafts/subfolder/nested`);
+      assert.strictEqual(resp.status, 200);
+
+      // Modify the nested HTML file
+      await fse.writeFile(htmlFile, '<html><body>Updated nested content</body></html>');
+
+      // Wait for reload event
+      const reloadData = await Promise.race([
+        wsReloadPromise,
+        wait(2000).then(() => null),
+      ]);
+
+      ws.close();
+
+      // Verify reload event
+      assert.ok(reloadData, 'Live reload should trigger for nested HTML files');
+      assert.strictEqual(reloadData.command, 'reload');
+    } finally {
+      await project.stop();
+    }
+  });
 });
