@@ -212,6 +212,8 @@ These proxies use a private certificate authority (CA) to sign the certificates 
 servers they intercept. To make Node.js trust the server certificate, you need to add
 the CA certificate to the list of trusted CAs.
 
+### Option 1: Using IT-provided CA certificate
+
 The CA certificate is typically provided by your IT department. You can ask them for
 the CA certificate and save it to a file, e.g. `my-ca.crt`.
 
@@ -223,7 +225,29 @@ export NODE_EXTRA_CA_CERTS=my-ca.crt
 aem up
 ```
 
-This will make Node.js trust the server certificate and `aem up` should work.
+### Option 2: Extracting certificate from browser
+
+If you don't have access to the CA certificate from your IT department, you can extract it directly
+from your browser:
+
+1. Access the AEM admin URL in your browser (e.g., `https://admin.hlx.page/sidekick/owner-name/repo-name/github-branch-name/config.json`)
+2. Click on the padlock icon in the address bar and view the certificate details
+3. Export the certificate chain as a Base64 encoded `.pem` file
+4. Save it to a directory (e.g., `certs/hlx.page.pem`)
+5. Set the environment variable and run aem:
+
+```bash
+export NODE_EXTRA_CA_CERTS=./certs/hlx.page.pem
+aem up
+```
+
+On Windows, use `set` instead of `export`:
+```cmd
+set NODE_EXTRA_CA_CERTS=./certs/hlx.page.pem
+aem up
+```
+
+Either approach will make Node.js trust the server certificate and `aem up` should work.
 
 ## `npm install` fails with `File exists: /opt/homebrew/bin/hlx`
 
