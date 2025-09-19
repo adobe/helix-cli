@@ -253,6 +253,14 @@ export class HelixServer extends BaseServer {
       return;
     }
 
+    // Check if the file is ignored by .hlxignore
+    if (this._project.hlxIgnore) {
+      const isIgnored = await this._project.hlxIgnore.isIgnored(filePath);
+      if (isIgnored) {
+        log.warn(`Warning: Proxying ignored file: ${ctx.path} (matched by .hlxignore)`);
+      }
+    }
+
     const liveReload = this._liveReload;
     if (liveReload) {
       liveReload.startRequest(ctx.requestId, ctx.path);

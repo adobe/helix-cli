@@ -1,0 +1,5 @@
+# Test .hlxignore file for integration testing
+*.secret
+node_modules/
+build/
+temp.txt
