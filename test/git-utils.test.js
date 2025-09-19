@@ -284,11 +284,13 @@ describe('Testing GitUtils', () => {
     });
 
     it('isValidDNSName validates DNS-compatible names', () => {
-      // Valid DNS names (alphanumeric and hyphens only)
+      // Valid DNS names (alphanumeric and hyphens, proper format)
       assert.equal(GitUtils.isValidDNSName('main'), true);
       assert.equal(GitUtils.isValidDNSName('feature-branch'), true);
       assert.equal(GitUtils.isValidDNSName('v1-0-0'), true);
       assert.equal(GitUtils.isValidDNSName('release-2024'), true);
+      assert.equal(GitUtils.isValidDNSName('a'), true); // single character is valid
+      assert.equal(GitUtils.isValidDNSName('1'), true); // single digit is valid
 
       // Invalid DNS names (containing dots or other special chars)
       assert.equal(GitUtils.isValidDNSName('v1.0.0'), false);
@@ -296,6 +298,20 @@ describe('Testing GitUtils', () => {
       assert.equal(GitUtils.isValidDNSName('branch_name'), false);
       assert.equal(GitUtils.isValidDNSName('branch@name'), false);
       assert.equal(GitUtils.isValidDNSName('1.2.3'), false);
+
+      // Invalid DNS names (hyphens at start or end)
+      assert.equal(GitUtils.isValidDNSName('-branch'), false);
+      assert.equal(GitUtils.isValidDNSName('branch-'), false);
+      assert.equal(GitUtils.isValidDNSName('-'), false);
+
+      // Invalid DNS names (length issues)
+      assert.equal(GitUtils.isValidDNSName(''), false); // empty string
+      assert.equal(GitUtils.isValidDNSName(null), false); // null
+      assert.equal(GitUtils.isValidDNSName(undefined), false); // undefined
+      // 64 characters (too long)
+      assert.equal(GitUtils.isValidDNSName('a'.repeat(64)), false);
+      // 63 characters (max valid length)
+      assert.equal(GitUtils.isValidDNSName('a'.repeat(63)), true);
     });
 
     it('hashBranchToPort generates consistent ports', () => {

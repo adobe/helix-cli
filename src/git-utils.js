@@ -137,14 +137,24 @@ export default class GitUtils {
 
   /**
    * Checks if a name is valid for use in a DNS subdomain.
-   * DNS labels must not contain dots or other special characters.
+   * DNS labels must:
+   * - Be between 1 and 63 characters long
+   * - Contain only alphanumeric characters and hyphens
+   * - Not start or end with a hyphen
+   * - Not contain dots or other special characters
    * @param {string} name the name to validate
    * @returns {boolean} true if valid for DNS
    */
   static isValidDNSName(name) {
+    // Check length (DNS labels must be 1-63 characters)
+    if (!name || name.length > 63) {
+      return false;
+    }
+
     // DNS labels can only contain alphanumeric characters and hyphens
+    // They cannot start or end with hyphens
     // They cannot contain dots or other special characters
-    return /^[a-zA-Z0-9-]+$/.test(name);
+    return /^[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?$/.test(name);
   }
 
   /**
