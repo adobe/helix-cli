@@ -1,3 +1,20 @@
+# [16.14.0](https://github.com/adobe/helix-cli/compare/v16.13.2...v16.14.0) (2025-09-19)
+
+
+### Bug Fixes
+
+* address CodeQL security alert for HTML folder handler ([76450f2](https://github.com/adobe/helix-cli/commit/76450f25c33d0300adc53fe3b6e7696974e0e384))
+* address PR review comments for HTML folder feature ([c8ff512](https://github.com/adobe/helix-cli/commit/c8ff512d97227e94eb8890e083c533db92c4c663))
+* address PR review comments for HTML folder security ([842650e](https://github.com/adobe/helix-cli/commit/842650e96d421a32a276573b40dfa6b7a1b3b52c))
+* make HTML folder 404 test more robust for CI environment ([9f5c605](https://github.com/adobe/helix-cli/commit/9f5c60546ca22faf611eedbb3735557ebaa83c0f))
+* mock both URL patterns for HTML folder proxy test ([7be689a](https://github.com/adobe/helix-cli/commit/7be689a90c7d85b451ca6c1d00a1a67b53483d68))
+* update test to handle proxy behavior correctly in CI ([52f8afa](https://github.com/adobe/helix-cli/commit/52f8afa6823f4bbc2e45ade57790c2cce722cf59))
+
+
+### Features
+
+* add --html-folder flag to serve HTML files without extensions ([682e8a2](https://github.com/adobe/helix-cli/commit/682e8a2dea8d835281a8d41eb0ef05e6c07d04b1))
+
 ## [16.13.2](https://github.com/adobe/helix-cli/compare/v16.13.1...v16.13.2) (2025-09-17)
 
 
