@@ -1,3 +1,12 @@
+# [16.15.0](https://github.com/adobe/helix-cli/compare/v16.14.0...v16.15.0) (2025-09-22)
+
+
+### Features
+
+* enable auto-reload for static HTML resources (fixes [#2400](https://github.com/adobe/helix-cli/issues/2400)) ([0866ede](https://github.com/adobe/helix-cli/commit/0866edea1579d6e1c207d756e5ee9dbe266a5e6c))
+* **git-utils:** add DNS-valid tag filtering in getBranch ([fd367c4](https://github.com/adobe/helix-cli/commit/fd367c421187cf75263b32bdc5e83a886f29ef9a))
+* **git-utils:** enhance DNS name validation with stricter rules and length checks ([9702a63](https://github.com/adobe/helix-cli/commit/9702a63a26949d8dce135a17192b6801508d848c))
+
 # [16.14.0](https://github.com/adobe/helix-cli/compare/v16.13.2...v16.14.0) (2025-09-19)
 
 
