@@ -11,11 +11,11 @@
  */
 import path, { resolve } from 'path';
 import { lstat } from 'fs/promises';
+import { IgnoreConfig } from '@adobe/helix-shared-config';
 import { HelixServer } from './HelixServer.js';
 import { BaseProject } from './BaseProject.js';
 import HeadHtmlSupport from './HeadHtmlSupport.js';
 import Indexer from './Indexer.js';
-import HlxIgnore from '../hlxignore-utils.js';
 
 export class HelixProject extends BaseProject {
   constructor() {
@@ -147,8 +147,18 @@ export class HelixProject extends BaseProject {
       .withLogger(this._logger)
       .withCwd(this._cwd)
       .withPrintIndex(this._printIndex);
-    this._hlxIgnore = new HlxIgnore(this._cwd);
-    await this._hlxIgnore.load();
+
+    // Initialize IgnoreConfig for .hlxignore support
+    this._hlxIgnore = new IgnoreConfig()
+      .withDirectory(this._cwd);
+
+    try {
+      await this._hlxIgnore.init();
+    } catch (e) {
+      // .hlxignore file doesn't exist or couldn't be loaded, which is fine
+      this._hlxIgnore = null;
+    }
+
     return this;
   }
 
@@ -215,7 +225,13 @@ export class HelixProject extends BaseProject {
           this.liveReload.on('modified', async (modified) => {
             if (modified.includes('.hlxignore')) {
               this.log.debug('Reloading .hlxignore file');
-              await this._hlxIgnore.reload();
+              // Re-initialize the IgnoreConfig to reload the file
+              try {
+                await this._hlxIgnore.init();
+              } catch (e) {
+                // If reload fails, just continue without ignore support
+                this._hlxIgnore = null;
+              }
             }
           });
         }

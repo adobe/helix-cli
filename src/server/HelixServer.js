@@ -255,7 +255,9 @@ export class HelixServer extends BaseServer {
 
     // Check if the file is ignored by .hlxignore
     if (this._project.hlxIgnore) {
-      const isIgnored = await this._project.hlxIgnore.isIgnored(filePath);
+      // IgnoreConfig expects relative paths from project root
+      const relativePath = path.relative(this._project.directory, filePath);
+      const isIgnored = this._project.hlxIgnore.ignores(relativePath);
       if (isIgnored) {
         log.warn(`Warning: Proxying ignored file: ${ctx.path} (matched by .hlxignore)`);
       }
