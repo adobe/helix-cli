@@ -1,3 +1,10 @@
+## [16.15.1](https://github.com/adobe/helix-cli/compare/v16.15.0...v16.15.1) (2025-09-22)
+
+
+### Bug Fixes
+
+* inject hlx:proxyUrl meta tag for 401 and 403 HTML responses ([ff4f2e8](https://github.com/adobe/helix-cli/commit/ff4f2e84e897676141601fccb165d678715b3ac8)), closes [#2414](https://github.com/adobe/helix-cli/issues/2414)
+
 # [16.15.0](https://github.com/adobe/helix-cli/compare/v16.14.0...v16.15.0) (2025-09-22)
 
 
