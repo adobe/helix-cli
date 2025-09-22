@@ -13,7 +13,7 @@ import crypto from 'crypto';
 import express from 'express';
 import { promisify } from 'util';
 import path from 'path';
-import { lstat } from 'fs/promises';
+import { lstat, readFile } from 'fs/promises';
 import compression from 'compression';
 import utils from './utils.js';
 import RequestContext from './RequestContext.js';
@@ -270,16 +270,32 @@ export class HelixServer extends BaseServer {
 
     // try to serve static
     try {
-      await sendFile(filePath, {
-        dotfiles: 'allow',
-        headers: {
+      // Check if it's an HTML file and live reload is enabled
+      if (liveReload && filePath.endsWith('.html')) {
+        // Read the HTML file and inject the livereload script
+        let htmlContent = await readFile(filePath, 'utf-8');
+        htmlContent = utils.injectLiveReloadScript(htmlContent, this);
+
+        res.set({
+          'content-type': 'text/html; charset=utf-8',
           'access-control-allow-origin': '*',
-        },
-      });
-      if (liveReload) {
+        });
+        res.send(htmlContent);
         liveReload.registerFile(ctx.requestId, filePath);
+        log.debug(`${pfx}served local HTML file with livereload: ${filePath}`);
+      } else {
+        // Serve other files normally
+        await sendFile(filePath, {
+          dotfiles: 'allow',
+          headers: {
+            'access-control-allow-origin': '*',
+          },
+        });
+        if (liveReload) {
+          liveReload.registerFile(ctx.requestId, filePath);
+        }
+        log.debug(`${pfx}served local file ${filePath}`);
       }
-      log.debug(`${pfx}served local file ${filePath}`);
       return;
     } catch (e) {
       log.debug(`${pfx}unable to deliver local file ${ctx.path} - ${e.stack || e}`);
