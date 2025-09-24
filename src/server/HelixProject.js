@@ -11,6 +11,7 @@
  */
 import path, { resolve } from 'path';
 import { lstat } from 'fs/promises';
+import { IgnoreConfig } from '@adobe/helix-shared-config';
 import { HelixServer } from './HelixServer.js';
 import { BaseProject } from './BaseProject.js';
 import HeadHtmlSupport from './HeadHtmlSupport.js';
@@ -25,6 +26,7 @@ export class HelixProject extends BaseProject {
     this._printIndex = false;
     this._allowInsecure = false;
     this._file404html = null;
+    this._hlxIgnore = null;
   }
 
   withLiveReload(value) {
@@ -135,12 +137,28 @@ export class HelixProject extends BaseProject {
     return this._htmlFolder;
   }
 
+  get hlxIgnore() {
+    return this._hlxIgnore;
+  }
+
   async init() {
     await super.init();
     this._indexer = new Indexer()
       .withLogger(this._logger)
       .withCwd(this._cwd)
       .withPrintIndex(this._printIndex);
+
+    // Initialize IgnoreConfig for .hlxignore support
+    this._hlxIgnore = new IgnoreConfig()
+      .withDirectory(this._cwd);
+
+    try {
+      await this._hlxIgnore.init();
+    } catch (e) {
+      // .hlxignore file doesn't exist or couldn't be loaded, which is fine
+      this._hlxIgnore = null;
+    }
+
     return this;
   }
 
@@ -196,12 +214,40 @@ export class HelixProject extends BaseProject {
     }
   }
 
+  async initHlxIgnore() {
+    if (this._hlxIgnore && this.liveReload) {
+      const hlxIgnorePath = resolve(this.directory, '.hlxignore');
+      try {
+        await lstat(hlxIgnorePath);
+        this.log.debug('detected .hlxignore file');
+        if (this.liveReload) {
+          this.liveReload.registerFiles([hlxIgnorePath], '/');
+          this.liveReload.on('modified', async (modified) => {
+            if (modified.includes('.hlxignore')) {
+              this.log.debug('Reloading .hlxignore file');
+              // Re-initialize the IgnoreConfig to reload the file
+              try {
+                await this._hlxIgnore.init();
+              } catch (e) {
+                // If reload fails, just continue without ignore support
+                this._hlxIgnore = null;
+              }
+            }
+          });
+        }
+      } catch (e) {
+        // .hlxignore doesn't exist, which is fine
+      }
+    }
+  }
+
   async start() {
     this.log.debug('Launching AEM dev server...');
     await super.start();
     await this.initHeadHtml();
     await this.init404Html();
     await this.initHtmlFolder();
+    await this.initHlxIgnore();
     if (this._indexer) {
       await this._indexer.init();
     }
