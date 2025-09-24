@@ -1,3 +1,10 @@
+## [16.15.2](https://github.com/adobe/helix-cli/compare/v16.15.1...v16.15.2) (2025-09-24)
+
+
+### Bug Fixes
+
+* hlx proxy now respects .hlxignore and warns for ignored files ([#2086](https://github.com/adobe/helix-cli/issues/2086)) ([a413938](https://github.com/adobe/helix-cli/commit/a413938bdcbdc8987306c82f90242d110979ea51))
+
 ## [16.15.1](https://github.com/adobe/helix-cli/compare/v16.15.0...v16.15.1) (2025-09-22)
 
 
