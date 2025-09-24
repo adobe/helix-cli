@@ -1,3 +1,11 @@
+## [16.15.3](https://github.com/adobe/helix-cli/compare/v16.15.2...v16.15.3) (2025-09-24)
+
+
+### Bug Fixes
+
+* **deps:** update external fixes ([f850d11](https://github.com/adobe/helix-cli/commit/f850d11fe8b2c4f3b35f515a2f7ce1abbc79f951))
+* update package-lock.json to sync with package.json dependencies ([e8b5276](https://github.com/adobe/helix-cli/commit/e8b52767954d016fe9527222b3ca9a36724a6af1))
+
 ## [16.15.2](https://github.com/adobe/helix-cli/compare/v16.15.1...v16.15.2) (2025-09-24)
 
 
