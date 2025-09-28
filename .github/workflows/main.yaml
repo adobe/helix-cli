@@ -49,6 +49,7 @@ jobs:
           files: ./coverage/lcov.info,./packages/browser-injectables/coverage/lcov.info
           flags: unittests,browsertests
       - name: Semantic Release (Dry Run)
+        if: github.actor != 'dependabot[bot]'
         run: npm run semantic-release-dry
         env:
           GITHUB_TOKEN: ${{ secrets.ADOBE_BOT_GITHUB_TOKEN }}
