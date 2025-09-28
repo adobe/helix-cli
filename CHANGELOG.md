@@ -1,3 +1,10 @@
+## [16.15.4](https://github.com/adobe/helix-cli/compare/v16.15.3...v16.15.4) (2025-09-28)
+
+
+### Bug Fixes
+
+* skip semantic-release dry run for dependabot PRs ([6d221e6](https://github.com/adobe/helix-cli/commit/6d221e696f3ebf41f54cb7e7bf9c3e7951fdbcd3))
+
 ## [16.15.3](https://github.com/adobe/helix-cli/compare/v16.15.2...v16.15.3) (2025-09-24)
 
 
