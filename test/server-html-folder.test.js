@@ -121,6 +121,41 @@ describe('Helix Server - HTML Folder', () => {
     }
   });
 
+  it('handles symlinked project directory correctly - git worktree case', async () => {
+    // This test simulates the git worktree scenario where paths might involve symlinks
+    const actualCwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
+
+    // Create drafts folder and test HTML file
+    const draftsFolder = path.join(actualCwd, 'drafts');
+    await fs.mkdir(draftsFolder, { recursive: true });
+    await fs.writeFile(path.join(draftsFolder, 'worktree-test.html'), '<html><body>Worktree Test</body></html>');
+
+    // Create a symlink to simulate worktree-like behavior
+    const symlinkPath = path.join(testRoot, 'symlinked-project');
+    await fs.symlink(actualCwd, symlinkPath);
+
+    const project = new HelixProject()
+      .withCwd(symlinkPath) // Use symlinked path
+      .withLogger(console)
+      .withHttpPort(0)
+      .withHtmlFolder('drafts');
+
+    await project.init();
+    try {
+      await project.start();
+
+      // This should work even with symlinked directories
+      const response = await fetch(`http://127.0.0.1:${project.server.port}/drafts/worktree-test`);
+      assert.equal(response.status, 200, 'Should return 200 even with symlinked project directory');
+      assert.equal(response.headers.get('content-type'), 'text/html; charset=utf-8');
+
+      const content = await response.text();
+      assert.ok(content.includes('Worktree Test'), 'Response should contain test page content');
+    } finally {
+      await project.stop();
+    }
+  });
+
   it('handles paths with nested directories correctly', async () => {
     // This test ensures nested paths work
     const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
