@@ -188,7 +188,7 @@ export class HelixServer extends BaseServer {
     }
 
     // Build the HTML file path - only support .html extension
-    const htmlFile = path.join(this._project.directory, this._htmlFolder, `${relativePath}.html`);
+    const htmlFile = path.resolve(this._project.directory, this._htmlFolder, `${relativePath}.html`);
 
     // Security check: ensure the file is within the project directory
     const relPath = path.relative(this._project.directory, htmlFile);
