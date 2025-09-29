@@ -156,6 +156,41 @@ describe('Helix Server - HTML Folder', () => {
     }
   });
 
+  it('handles subdirectory worktree correctly - worktree in .conductor', async () => {
+    // This test simulates a worktree in a subdirectory of the main repo (e.g., .conductor/)
+    const mainRepoPath = path.join(testRoot, 'main-repo');
+    const worktreePath = path.join(mainRepoPath, '.conductor', 'worktree');
+
+    // Setup the directory structure
+    await fs.mkdir(worktreePath, { recursive: true });
+
+    // Create drafts folder and HTML file in the worktree
+    const draftsFolder = path.join(worktreePath, 'drafts');
+    await fs.mkdir(draftsFolder, { recursive: true });
+    await fs.writeFile(path.join(draftsFolder, 'subdirectory-test.html'), '<html><body>Subdirectory Worktree Test</body></html>');
+
+    const project = new HelixProject()
+      .withCwd(worktreePath)
+      .withLogger(console)
+      .withHttpPort(0)
+      .withHtmlFolder('drafts');
+
+    await project.init();
+    try {
+      await project.start();
+
+      // This should work even when the worktree is in a subdirectory
+      const response = await fetch(`http://127.0.0.1:${project.server.port}/drafts/subdirectory-test`);
+      assert.equal(response.status, 200, 'Should return 200 for worktree in subdirectory');
+      assert.equal(response.headers.get('content-type'), 'text/html; charset=utf-8');
+
+      const content = await response.text();
+      assert.ok(content.includes('Subdirectory Worktree Test'), 'Response should contain test page content');
+    } finally {
+      await project.stop();
+    }
+  });
+
   it('handles paths with nested directories correctly', async () => {
     // This test ensures nested paths work
     const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);

@@ -222,7 +222,10 @@ export class HelixServer extends BaseServer {
     }
 
     // Serve the file
-    await sendFile(htmlFile, {
+    // Use the root option to specify the base directory for sendFile
+    // This prevents issues with worktrees in subdirectories
+    await sendFile(path.basename(htmlFile), {
+      root: path.dirname(htmlFile),
       dotfiles: 'deny',
       headers: {
         'access-control-allow-origin': '*',
