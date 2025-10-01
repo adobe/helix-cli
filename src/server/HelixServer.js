@@ -193,8 +193,7 @@ export class HelixServer extends BaseServer {
     // Security check: ensure the file is within the project directory
     // Use resolve to normalize both paths before comparing
     const resolvedProjectDir = path.resolve(this._project.directory);
-    const resolvedHtmlFile = path.resolve(htmlFile);
-    const relPath = path.relative(resolvedProjectDir, resolvedHtmlFile);
+    const relPath = path.relative(resolvedProjectDir, htmlFile);
 
     // Only check for path traversal - remove the incorrect isAbsolute check
     if (relPath.startsWith('..')) {
