@@ -188,11 +188,15 @@ export class HelixServer extends BaseServer {
     }
 
     // Build the HTML file path - only support .html extension
-    const htmlFile = path.join(this._project.directory, this._htmlFolder, `${relativePath}.html`);
+    const htmlFile = path.resolve(this._project.directory, this._htmlFolder, `${relativePath}.html`);
 
     // Security check: ensure the file is within the project directory
-    const relPath = path.relative(this._project.directory, htmlFile);
-    if (relPath.startsWith('..') || path.isAbsolute(relPath)) {
+    // Use resolve to normalize both paths before comparing
+    const resolvedProjectDir = path.resolve(this._project.directory);
+    const relPath = path.relative(resolvedProjectDir, htmlFile);
+
+    // Only check for path traversal - remove the incorrect isAbsolute check
+    if (relPath.startsWith('..')) {
       return next();
     }
 
@@ -217,7 +221,10 @@ export class HelixServer extends BaseServer {
     }
 
     // Serve the file
-    await sendFile(htmlFile, {
+    // Use the root option to specify the base directory for sendFile
+    // This prevents issues with worktrees in subdirectories
+    await sendFile(path.basename(htmlFile), {
+      root: path.dirname(htmlFile),
       dotfiles: 'deny',
       headers: {
         'access-control-allow-origin': '*',
