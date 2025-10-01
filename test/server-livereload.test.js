@@ -577,10 +577,12 @@ describe('Helix Server with Livereload', () => {
 
     nock('http://main--foo--bar.aem.page')
       .get('/live/index.html')
+      .optionally()
       .reply(200, '<html><head>Test</head><body>Hello, world.</body></html>', {
         'content-type': 'text/html',
       })
       .get('/head.html')
+      .optionally()
       .reply(200, '<link rel="stylesheet" href="/styles.css"/>');
 
     try {
