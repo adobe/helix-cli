@@ -100,9 +100,12 @@ class ClientConnection extends EventEmitter {
       }
     }).join(' ');
 
-    // Use appropriate log level
-    const logMethod = this.log[level] || this.log.info;
-    logMethod(`${prefix} ${message}`);
+    // Use appropriate log level, preserving this context
+    if (this.log[level]) {
+      this.log[level](`${prefix} ${message}`);
+    } else {
+      this.log.info(`${prefix} ${message}`);
+    }
   }
 
   _send(data) {
