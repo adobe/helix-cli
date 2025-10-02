@@ -535,4 +535,93 @@ describe('Helix Server with Livereload', () => {
       await project.stop();
     }
   });
+
+  it('browser log forwarding preserves logger this context (issue #2608)', async () => {
+    const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
+    const project = new HelixProject()
+      .withCwd(cwd)
+      .withHttpPort(0)
+      .withLiveReload(true)
+      .withProxyUrl('http://main--foo--bar.aem.page');
+
+    // Create a logger that requires proper `this` context
+    let logCalled = false;
+    let logThisContext = null;
+    const loggerWithContext = {
+      _internal: 'test-logger',
+      info() {
+        logCalled = true;
+        logThisContext = this;
+        // Simulate a logger that requires `this` context
+        // (e.g., accessing this._internal or other properties)
+        if (!this || this._internal !== 'test-logger') {
+          throw new Error('Logger called without proper this context');
+        }
+      },
+      warn() {
+        this.info();
+      },
+      error() {
+        this.info();
+      },
+      log() {
+        this.info();
+      },
+      debug() {},
+    };
+
+    // Override the logger on the project
+    project._logger = loggerWithContext;
+
+    await project.init();
+
+    nock('http://main--foo--bar.aem.page')
+      .get('/live/index.html')
+      .optionally()
+      .reply(200, '<html><head>Test</head><body>Hello, world.</body></html>', {
+        'content-type': 'text/html',
+      })
+      .get('/head.html')
+      .optionally()
+      .reply(200, '<link rel="stylesheet" href="/styles.css"/>');
+
+    try {
+      await project.start();
+
+      const ws = new WebSocket.Client(`ws://127.0.0.1:${project.server.port}/`);
+      const wsOpenPromise = new Promise((resolve, reject) => {
+        ws.on('open', () => {
+          ws.send(JSON.stringify({
+            command: 'hello',
+          }));
+          ws.send(JSON.stringify({
+            command: 'info',
+            plugins: [],
+            url: `http://127.0.0.1:${project.server.port}/index.html`,
+          }));
+          // Send a log command to trigger the browser log forwarding
+          ws.send(JSON.stringify({
+            command: 'log',
+            level: 'info',
+            args: ['Test browser log message'],
+            url: 'http://example.com/test.js',
+            line: 42,
+          }));
+          resolve();
+        });
+        ws.on('error', reject);
+      });
+
+      await wsOpenPromise;
+      await wait(500);
+      ws.close();
+
+      // Verify that the logger was called with proper this context
+      assert.ok(logCalled, 'Logger should have been called');
+      assert.ok(logThisContext, 'Logger should have been called with a this context');
+      assert.strictEqual(logThisContext._internal, 'test-logger', 'Logger this context should be preserved');
+    } finally {
+      await project.stop();
+    }
+  });
 });
