@@ -1,3 +1,10 @@
+## [16.15.7](https://github.com/adobe/helix-cli/compare/v16.15.6...v16.15.7) (2025-10-02)
+
+
+### Bug Fixes
+
+* preserve logger this context in browser log forwarding ([#2608](https://github.com/adobe/helix-cli/issues/2608)) ([7e8f6bc](https://github.com/adobe/helix-cli/commit/7e8f6bcbd101af92cba3cacd6080013386ab09bf))
+
 ## [16.15.6](https://github.com/adobe/helix-cli/compare/v16.15.5...v16.15.6) (2025-09-30)
 
 
