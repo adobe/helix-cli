@@ -561,6 +561,126 @@ describe('Helix Server', () => {
     }
   });
 
+  it('transforms plain text 401 responses into Chrome-compatible HTML with meta tag', async () => {
+    const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
+    const project = new HelixProject()
+      .withCwd(cwd)
+      .withHttpPort(0)
+      .withProxyUrl('http://main--foo--bar.aem.page');
+
+    await project.init();
+    project.log.level = 'silly';
+
+    // Simulate real-world scenario: pipeline returns plain text for 401
+    nock('http://main--foo--bar.aem.page')
+      .get('/protected')
+      .reply(401, 'Unauthorized', {
+        'content-type': 'text/plain',
+      });
+
+    try {
+      await project.start();
+      const resp = await getFetch()(`http://127.0.0.1:${project.server.port}/protected`, {
+        cache: 'no-store',
+        redirect: 'manual',
+      });
+      assert.strictEqual(resp.status, 401);
+      assert.ok(resp.headers.get('content-type').startsWith('text/html'));
+
+      const body = await resp.text();
+      // Verify Chrome-compatible structure
+      assert.ok(body.includes('<html><head>'));
+      assert.ok(body.includes('<meta name="color-scheme" content="light dark">'));
+      assert.ok(body.includes('<meta property="hlx:proxyUrl" content="http://main--foo--bar.aem.page/protected">'));
+      assert.ok(body.includes('</head><body>'));
+      assert.ok(body.includes('<pre style="word-wrap: break-word; white-space: pre-wrap;">401 Unauthorized</pre>'));
+      assert.ok(body.includes('</body></html>'));
+
+      // Verify exact structure that sidekick expects
+      assert.ok(body.match(/<body><pre[^>]*>401 Unauthorized<\/pre><\/body>/));
+    } finally {
+      await project.stop();
+    }
+  });
+
+  it('transforms plain text 403 responses into Chrome-compatible HTML with meta tag', async () => {
+    const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
+    const project = new HelixProject()
+      .withCwd(cwd)
+      .withHttpPort(0)
+      .withProxyUrl('http://main--foo--bar.aem.page');
+
+    await project.init();
+    project.log.level = 'silly';
+
+    // Simulate real-world scenario: pipeline returns plain text for 403
+    nock('http://main--foo--bar.aem.page')
+      .get('/forbidden')
+      .reply(403, 'Forbidden', {
+        'content-type': 'text/plain',
+      });
+
+    try {
+      await project.start();
+      const resp = await getFetch()(`http://127.0.0.1:${project.server.port}/forbidden`, {
+        cache: 'no-store',
+        redirect: 'manual',
+      });
+      assert.strictEqual(resp.status, 403);
+      assert.ok(resp.headers.get('content-type').startsWith('text/html'));
+
+      const body = await resp.text();
+      // Verify Chrome-compatible structure
+      assert.ok(body.includes('<html><head>'));
+      assert.ok(body.includes('<meta name="color-scheme" content="light dark">'));
+      assert.ok(body.includes('<meta property="hlx:proxyUrl" content="http://main--foo--bar.aem.page/forbidden">'));
+      assert.ok(body.includes('</head><body>'));
+      assert.ok(body.includes('<pre style="word-wrap: break-word; white-space: pre-wrap;">403 Forbidden</pre>'));
+      assert.ok(body.includes('</body></html>'));
+
+      // Verify exact structure that sidekick expects
+      assert.ok(body.match(/<body><pre[^>]*>403 Forbidden<\/pre><\/body>/));
+    } finally {
+      await project.stop();
+    }
+  });
+
+  it('escapes special characters in URL when transforming 401 responses', async () => {
+    const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
+    const project = new HelixProject()
+      .withCwd(cwd)
+      .withHttpPort(0)
+      .withProxyUrl('http://main--foo--bar.aem.page');
+
+    await project.init();
+    project.log.level = 'silly';
+
+    // URL with special characters that need escaping
+    nock('http://main--foo--bar.aem.page')
+      .get('/path?param=value&other="quoted"')
+      .reply(401, 'Unauthorized', {
+        'content-type': 'text/plain',
+      });
+
+    try {
+      await project.start();
+      const resp = await getFetch()(`http://127.0.0.1:${project.server.port}/path?param=value&other="quoted"`, {
+        cache: 'no-store',
+        redirect: 'manual',
+      });
+      assert.strictEqual(resp.status, 401);
+
+      const body = await resp.text();
+      // URL is already percent-encoded by the time it reaches the server
+      // Just verify the meta tag is present and ampersands are escaped
+      assert.ok(body.includes('<meta property="hlx:proxyUrl" content="http://main--foo--bar.aem.page/path?param=value&amp;other=%22quoted%22">'));
+      // Verify structure is Chrome-compatible
+      assert.ok(body.includes('<pre style="word-wrap: break-word; white-space: pre-wrap;">401 Unauthorized</pre>'));
+    } finally {
+      await project.stop();
+    }
+  });
+
   it('receives site token, saves it and uses it', async () => {
     const siteToken = `hlxtst_${new UnsecuredJWT({ email: 'test@example.com' }).encode()}`;
 
