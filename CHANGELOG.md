@@ -1,3 +1,14 @@
+## [16.15.10](https://github.com/adobe/helix-cli/compare/v16.15.9...v16.15.10) (2025-10-16)
+
+
+### Bug Fixes
+
+* regenerate package-lock.json to fix npm ci failures ([1a9c885](https://github.com/adobe/helix-cli/commit/1a9c885f4567be03d1a5b7e561eb6350f4007d83))
+* remove NPM_TOKEN to enable OIDC trusted publishing ([2ef8251](https://github.com/adobe/helix-cli/commit/2ef8251755ef423bb35987781a6824e8baa23bdf))
+* upgrade @semantic-release/npm to 13.0.0 for OIDC support ([efcef3d](https://github.com/adobe/helix-cli/commit/efcef3ddc87db5a2da2b665151a007cdd5f68dbf))
+* upgrade to @semantic-release/npm@13.1.0-beta.1 for OIDC ([5331bd5](https://github.com/adobe/helix-cli/commit/5331bd5c2ef87c4a41343996a322bbb58c5768f3))
+* use npm overrides to force @semantic-release/npm@13.1.0-beta.1 ([f33209a](https://github.com/adobe/helix-cli/commit/f33209adac25b40af0e4c541e012318cc99e19cc))
+
 ## [16.15.9](https://github.com/adobe/helix-cli/compare/v16.15.8...v16.15.9) (2025-10-16)
 
 
