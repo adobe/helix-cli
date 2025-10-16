@@ -91,8 +91,9 @@ jobs:
         with:
           node-version: '24.x'
       - run: npm ci
+      - name: Check npm version
+        run: npm --version
       - run: npm run semantic-release
         env:
           GITHUB_TOKEN: ${{ secrets.ADOBE_BOT_GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.ADOBE_BOT_NPM_TOKEN }}
           DISCORD_WEBHOOK: ${{ secrets.HELIX_RELEASE_DISCORD_WEBHOOK }}
