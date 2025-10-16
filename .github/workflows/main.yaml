@@ -22,28 +22,28 @@ jobs:
         with:
           node-version: '22.x'
       - run: npm ci
-      
+
       # Sub-project setup and testing (conditional)
       - name: Install browser injectable dependencies
         if: hashFiles('packages/browser-injectables/**') != ''
         run: cd packages/browser-injectables && npm ci
-      
+
       - name: Install Playwright dependencies for browser injectables
         if: hashFiles('packages/browser-injectables/**') != ''
         run: cd packages/browser-injectables && npx playwright install-deps
-      
+
       - run: git config --global user.email "test@project-helix.io" && git config --global user.name "Test Build"
       - run: git config --global protocol.file.allow always
       - run: npm run lint
       - run: npm test
         env:
           CIRCLE_REPOSITORY_URL: dummy-url
-      
+
       # Browser injectable tests (conditional)
       - name: Test browser injectables
         if: hashFiles('packages/browser-injectables/**') != ''
         run: cd packages/browser-injectables && npm test
-      
+
       - uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
@@ -96,4 +96,5 @@ jobs:
       - run: npm run semantic-release
         env:
           GITHUB_TOKEN: ${{ secrets.ADOBE_BOT_GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.ADOBE_BOT_NPM_TOKEN }}
           DISCORD_WEBHOOK: ${{ secrets.HELIX_RELEASE_DISCORD_WEBHOOK }}
