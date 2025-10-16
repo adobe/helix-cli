@@ -1,3 +1,13 @@
+## [16.15.8](https://github.com/adobe/helix-cli/compare/v16.15.7...v16.15.8) (2025-10-16)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @adobe/helix-shared-config to v11.1.12 ([86729d3](https://github.com/adobe/helix-cli/commit/86729d35c43d5572639a5227ce5c4c077cf6c9f3))
+* **deps:** update external fixes ([d5078f8](https://github.com/adobe/helix-cli/commit/d5078f8fe2ad8b9050af4bfdaf41fc6e5cfefb86))
+* regenerate package-lock.json to fix CI ([7f9daa4](https://github.com/adobe/helix-cli/commit/7f9daa4fa63fffb16c7b9b05b858a9aa20e71da1))
+* regenerate package-lock.json with updated dependencies ([23421da](https://github.com/adobe/helix-cli/commit/23421da7286ddde7e6cef391b2054f161a8a174e))
+
 ## [16.15.7](https://github.com/adobe/helix-cli/compare/v16.15.6...v16.15.7) (2025-10-02)
 
 
