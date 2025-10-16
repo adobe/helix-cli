@@ -4,6 +4,9 @@
   "description": "AEM CLI",
   "main": "index.js",
   "type": "module",
+  "overrides": {
+    "@semantic-release/npm": "13.1.0-beta.1"
+  },
   "bin": {
     "aem": "./index.js",
     "hlx": "./index.js"
