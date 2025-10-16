@@ -1,3 +1,10 @@
+## [16.15.9](https://github.com/adobe/helix-cli/compare/v16.15.8...v16.15.9) (2025-10-16)
+
+
+### Bug Fixes
+
+* enable npm trusted publishers with OIDC ([b5dd177](https://github.com/adobe/helix-cli/commit/b5dd177c4d42c50023bf8681ad96810f18e2bd4b))
+
 ## [16.15.8](https://github.com/adobe/helix-cli/compare/v16.15.7...v16.15.8) (2025-10-16)
 
 
