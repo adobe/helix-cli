@@ -410,15 +410,15 @@ window.LiveReloadOptions = {
         return;
       }
 
-      let textBody = await ret.text();
-      textBody = `<html>
-  <head><meta property="hlx:proxyUrl" content="${url}"></head>
-  <body>
-    <pre>${textBody}</pre>
-    <p>Click <b><a href="${opts.loginPath}">here</a></b> to login.</p>
-  </body>
-</html>
-`;
+      // Transform plain text 401/403 responses into Chrome-compatible HTML
+      // This allows the sidekick to recognize the error page and enable login
+      const statusText = ret.status === 401 ? '401 Unauthorized' : '403 Forbidden';
+      const escapedUrl = url
+        .replace(/&/g, '&amp;')
+        .replace(/"/g, '&quot;');
+
+      const textBody = `<html><head><meta name="color-scheme" content="light dark"><meta property="hlx:proxyUrl" content="${escapedUrl}"></head><body><pre style="word-wrap: break-word; white-space: pre-wrap;">${statusText}</pre></body></html>`;
+
       respHeaders['content-type'] = 'text/html';
       res
         .set(respHeaders)
