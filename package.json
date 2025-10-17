@@ -100,5 +100,10 @@
   },
   "lint-staged": {
     "*.js": "eslint"
+  },
+  "overrides": {
+    "nunjucks": {
+      "chokidar": "^4.0.3"
+    }
   }
 }
