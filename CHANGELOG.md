@@ -1,3 +1,13 @@
+## [16.15.12](https://github.com/adobe/helix-cli/compare/v16.15.11...v16.15.12) (2025-10-30)
+
+
+### Bug Fixes
+
+* **deps:** update external fixes ([365d90e](https://github.com/adobe/helix-cli/commit/365d90ec1f5bc85bb2bf68a141c7ae0970b449b8))
+* regenerate package-lock.json with all chokidar v3 dependencies ([7681dad](https://github.com/adobe/helix-cli/commit/7681dad542355edd58de5090e13c8e2a783e79f0))
+* regenerate package-lock.json with all missing dependencies ([d0955fe](https://github.com/adobe/helix-cli/commit/d0955feed8591d8599dff61f65231b1d9af6fbe4))
+* update package-lock.json to sync with package.json dependencies ([6a6f392](https://github.com/adobe/helix-cli/commit/6a6f3922175d8e43833ee9283cb8d7559e4cf495))
+
 ## [16.15.11](https://github.com/adobe/helix-cli/compare/v16.15.10...v16.15.11) (2025-10-20)
 
 
