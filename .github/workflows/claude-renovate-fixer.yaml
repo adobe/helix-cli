@@ -9,6 +9,7 @@ permissions:
   pull-requests: write
   issues: write
   id-token: write
+  actions: read  # Allow reading CI results
 
 jobs:
   claude-fix:
@@ -23,6 +24,9 @@ jobs:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           github_token: ${{ secrets.ADOBE_BOT_GITHUB_TOKEN }}
           allowed_bots: "renovate"
+          additional_permissions: |
+            actions: read
+          claude_args: '--allowed-tools "Bash(npm:*),Bash(git:*),Bash(gh pr:*),Read,Edit,Write,Grep,Glob"'
           prompt: |
             You are helping to automatically fix issues in Renovate dependency update PRs for the helix-cli project.
 
