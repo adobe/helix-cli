@@ -1,0 +1,63 @@
+name: Claude Code - Renovate PR Fixer
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+  id-token: write
+
+jobs:
+  claude-fix:
+    # Only run on Renovate PRs
+    if: github.event.pull_request.user.login == 'renovate[bot]'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Run Claude Code to fix issues
+        uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          github_token: ${{ secrets.ADOBE_BOT_GITHUB_TOKEN }}
+          allowed_bots: "renovate"
+          prompt: |
+            You are helping to automatically fix issues in Renovate dependency update PRs for the helix-cli project.
+
+            ## Your Task
+
+            Analyze and fix the following issues that commonly occur in Renovate PRs:
+
+            1. **Package Lock Issues**: Renovate often fails to correctly regenerate package-lock.json files
+               - Run `npm install` in the root directory to regenerate package-lock.json
+               - If there's a packages/browser-injectables directory, also run `npm install` there
+               - Verify the lock files are properly updated
+
+            2. **Small API Changes**: Check if tests are passing
+               - Run `npm test` to identify any failures
+               - If there are API changes requiring small code fixes (5 lines or less), fix them
+               - DO NOT attempt to fix large breaking changes (>5 lines of code changes)
+               - If changes are too large, leave a comment explaining what needs manual review
+
+            3. **Security Review**:
+               - Check the dependency changes for known security issues
+               - Review the changelog/release notes for security fixes
+               - Flag any concerning changes in a comment
+
+            ## Important Guidelines
+
+            - Make commits for each type of fix separately (one for package-lock, one for code fixes)
+            - Use clear commit messages: "fix: regenerate package-lock.json" or "fix: update API usage for <package>"
+            - If you can't fix something automatically, leave a clear comment explaining why
+            - Only fix issues - do not refactor or improve code beyond what's needed
+            - Verify tests pass after your changes
+
+            ## Current PR Context
+
+            PR: #${{ github.event.pull_request.number }}
+            Title: ${{ github.event.pull_request.title }}
+            Branch: ${{ github.event.pull_request.head.ref }}
+
+            Start by checking the current state of the repository and running tests.
