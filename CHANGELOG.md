@@ -1,3 +1,11 @@
+## [16.15.13](https://github.com/adobe/helix-cli/compare/v16.15.12...v16.15.13) (2025-11-11)
+
+
+### Bug Fixes
+
+* **deps:** update dependency ini to v6 ([7c37973](https://github.com/adobe/helix-cli/commit/7c37973c45d7d6956bbc3200d46c2015d7e483fe))
+* **deps:** update external fixes ([#2630](https://github.com/adobe/helix-cli/issues/2630)) ([8671a13](https://github.com/adobe/helix-cli/commit/8671a131f4cb1e3d29e318cfb7c3b3326d2cea77))
+
 ## [16.15.12](https://github.com/adobe/helix-cli/compare/v16.15.11...v16.15.12) (2025-10-30)
 
 
