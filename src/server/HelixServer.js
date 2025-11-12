@@ -233,8 +233,8 @@ export class HelixServer extends BaseServer {
     // Use localHtml if available, otherwise empty string
     const headHtml = this._project.headHtml.localHtml || '';
 
-    // Wrap in complete HTML structure
-    return `<html><head>${headHtml}</head><body>${plainContent}</body></html>`;
+    // Wrap in complete HTML structure with header/main/footer
+    return `<html><head>${headHtml}</head><body><header></header><main>${plainContent}</main><footer></footer></body></html>`;
   }
 
   /**

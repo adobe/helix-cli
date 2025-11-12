@@ -259,7 +259,11 @@ describe('Helix Server - HTML Folder', () => {
       const content = await response.text();
       assert.ok(content.includes('<html><head>'), 'Should include <html><head> wrapper');
       assert.ok(content.includes('</head><body>'), 'Should include </head><body> structure');
-      assert.ok(content.includes('<p>Plain content here</p>'), 'Should contain plain content in body');
+      assert.ok(content.includes('<header></header>'), 'Should include empty header');
+      assert.ok(content.includes('<main>'), 'Should include main tag');
+      assert.ok(content.includes('<p>Plain content here</p>'), 'Should contain plain content in main');
+      assert.ok(content.includes('</main>'), 'Should close main tag');
+      assert.ok(content.includes('<footer></footer>'), 'Should include empty footer');
       assert.ok(content.includes('</body></html>'), 'Should close body and html tags');
       assert.ok(content.includes('<meta name="test" content="local-head">'), 'Should include head.html content');
     } finally {
@@ -367,7 +371,9 @@ describe('Helix Server - HTML Folder', () => {
 
       const content = await response.text();
       assert.ok(content.includes('<html><head>'), 'Should include HTML structure');
+      assert.ok(content.includes('<main>'), 'Should include main tag');
       assert.ok(content.includes('<p>Nested plain content</p>'), 'Should contain nested plain content');
+      assert.ok(content.includes('</main>'), 'Should close main tag');
       assert.ok(content.includes('<meta name="nested" content="test">'), 'Should include head.html');
     } finally {
       await project.stop();
@@ -436,7 +442,9 @@ describe('Helix Server - HTML Folder', () => {
       const content = await response.text();
       assert.ok(content.includes('<html><head>'), 'Should include HTML structure');
       assert.ok(content.includes('</head><body>'), 'Should include body tag');
+      assert.ok(content.includes('<main>'), 'Should include main tag');
       assert.ok(content.includes('<p>Content without head</p>'), 'Should contain plain content');
+      assert.ok(content.includes('</main>'), 'Should close main tag');
     } finally {
       await project.stop();
     }
