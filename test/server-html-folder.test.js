@@ -224,4 +224,221 @@ describe('Helix Server - HTML Folder', () => {
       await project.stop();
     }
   });
+
+  it('serves .plain.html files wrapped with head.html', async () => {
+    const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
+
+    // Create drafts folder and .plain.html file
+    const draftsFolder = path.join(cwd, 'drafts');
+    await fs.mkdir(draftsFolder, { recursive: true });
+    await fs.writeFile(path.join(draftsFolder, 'plain-page.plain.html'), '<p>Plain content here</p>');
+
+    // Create a local head.html for testing
+    await fs.writeFile(path.join(cwd, 'head.html'), '<meta name="test" content="local-head">');
+
+    // Mock the remote head.html request
+    nock('https://main--foo--bar.aem.page')
+      .get('/head.html')
+      .reply(404);
+
+    const project = new HelixProject()
+      .withCwd(cwd)
+      .withLogger(console)
+      .withHttpPort(0)
+      .withProxyUrl('https://main--foo--bar.aem.page/')
+      .withHtmlFolder('drafts');
+
+    await project.init();
+    try {
+      await project.start();
+
+      const response = await fetch(`http://127.0.0.1:${project.server.port}/drafts/plain-page`);
+      assert.equal(response.status, 200, 'Should return 200 for .plain.html file');
+      assert.equal(response.headers.get('content-type'), 'text/html; charset=utf-8');
+
+      const content = await response.text();
+      assert.ok(content.includes('<html><head>'), 'Should include <html><head> wrapper');
+      assert.ok(content.includes('</head><body>'), 'Should include </head><body> structure');
+      assert.ok(content.includes('<p>Plain content here</p>'), 'Should contain plain content in body');
+      assert.ok(content.includes('</body></html>'), 'Should close body and html tags');
+      assert.ok(content.includes('<meta name="test" content="local-head">'), 'Should include head.html content');
+    } finally {
+      await project.stop();
+    }
+  });
+
+  it('.html files take precedence over .plain.html', async () => {
+    const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
+
+    // Create drafts folder with both .html and .plain.html
+    const draftsFolder = path.join(cwd, 'drafts');
+    await fs.mkdir(draftsFolder, { recursive: true });
+    await fs.writeFile(path.join(draftsFolder, 'priority.html'), '<html><body>Regular HTML</body></html>');
+    await fs.writeFile(path.join(draftsFolder, 'priority.plain.html'), '<p>Plain HTML</p>');
+
+    const project = new HelixProject()
+      .withCwd(cwd)
+      .withLogger(console)
+      .withHttpPort(0)
+      .withProxyUrl('https://main--foo--bar.aem.page/')
+      .withHtmlFolder('drafts');
+
+    await project.init();
+    try {
+      await project.start();
+
+      const response = await fetch(`http://127.0.0.1:${project.server.port}/drafts/priority`);
+      assert.equal(response.status, 200);
+
+      const content = await response.text();
+      assert.ok(content.includes('Regular HTML'), 'Should serve .html file');
+      assert.ok(!content.includes('Plain HTML'), 'Should not serve .plain.html file');
+    } finally {
+      await project.stop();
+    }
+  });
+
+  it('.plain.html files support live reload injection', async () => {
+    const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
+
+    // Create drafts folder and .plain.html file
+    const draftsFolder = path.join(cwd, 'drafts');
+    await fs.mkdir(draftsFolder, { recursive: true });
+    await fs.writeFile(path.join(draftsFolder, 'livereload-test.plain.html'), '<p>Content with livereload</p>');
+    await fs.writeFile(path.join(cwd, 'head.html'), '<meta name="test" content="head">');
+
+    // Mock the remote head.html request
+    nock('https://main--foo--bar.aem.page')
+      .get('/head.html')
+      .reply(404);
+
+    const project = new HelixProject()
+      .withCwd(cwd)
+      .withLogger(console)
+      .withHttpPort(0)
+      .withProxyUrl('https://main--foo--bar.aem.page/')
+      .withHtmlFolder('drafts')
+      .withLiveReload(true); // Enable live reload
+
+    await project.init();
+    try {
+      await project.start();
+
+      const response = await fetch(`http://127.0.0.1:${project.server.port}/drafts/livereload-test`);
+      assert.equal(response.status, 200);
+
+      const content = await response.text();
+      assert.ok(content.includes('<p>Content with livereload</p>'), 'Should contain plain content');
+      assert.ok(content.includes('livereload'), 'Should include livereload script');
+      assert.ok(content.includes('LiveReload'), 'Should include LiveReload functionality');
+    } finally {
+      await project.stop();
+    }
+  });
+
+  it('.plain.html files work with nested directories', async () => {
+    const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
+
+    // Create nested structure in drafts
+    const draftsFolder = path.join(cwd, 'drafts');
+    const nestedFolder = path.join(draftsFolder, 'section', 'subsection');
+    await fs.mkdir(nestedFolder, { recursive: true });
+    await fs.writeFile(path.join(nestedFolder, 'nested.plain.html'), '<p>Nested plain content</p>');
+    await fs.writeFile(path.join(cwd, 'head.html'), '<meta name="nested" content="test">');
+
+    // Mock the remote head.html request
+    nock('https://main--foo--bar.aem.page')
+      .get('/head.html')
+      .reply(404);
+
+    const project = new HelixProject()
+      .withCwd(cwd)
+      .withLogger(console)
+      .withHttpPort(0)
+      .withProxyUrl('https://main--foo--bar.aem.page/')
+      .withHtmlFolder('drafts');
+
+    await project.init();
+    try {
+      await project.start();
+
+      const response = await fetch(`http://127.0.0.1:${project.server.port}/drafts/section/subsection/nested`);
+      assert.equal(response.status, 200);
+
+      const content = await response.text();
+      assert.ok(content.includes('<html><head>'), 'Should include HTML structure');
+      assert.ok(content.includes('<p>Nested plain content</p>'), 'Should contain nested plain content');
+      assert.ok(content.includes('<meta name="nested" content="test">'), 'Should include head.html');
+    } finally {
+      await project.stop();
+    }
+  });
+
+  it('.plain.html files respect path traversal protection', async () => {
+    const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
+
+    // Create drafts folder
+    const draftsFolder = path.join(cwd, 'drafts');
+    await fs.mkdir(draftsFolder, { recursive: true });
+    await fs.writeFile(path.join(draftsFolder, 'safe.plain.html'), '<p>Safe content</p>');
+
+    // Create a file outside drafts folder
+    await fs.writeFile(path.join(cwd, 'outside.plain.html'), '<p>Outside content</p>');
+
+    const project = new HelixProject()
+      .withCwd(cwd)
+      .withLogger(console)
+      .withHttpPort(0)
+      .withProxyUrl('https://main--foo--bar.aem.page/')
+      .withHtmlFolder('drafts');
+
+    await project.init();
+    try {
+      await project.start();
+
+      // Try to access file outside drafts using path traversal
+      const response = await fetch(`http://127.0.0.1:${project.server.port}/drafts/../outside`);
+      assert.notEqual(response.status, 200, 'Should not serve file outside drafts folder');
+    } finally {
+      await project.stop();
+    }
+  });
+
+  it('.plain.html files work without local head.html', async () => {
+    const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
+
+    // Create drafts folder and .plain.html file
+    const draftsFolder = path.join(cwd, 'drafts');
+    await fs.mkdir(draftsFolder, { recursive: true });
+    await fs.writeFile(path.join(draftsFolder, 'no-head.plain.html'), '<p>Content without head</p>');
+
+    // Do NOT create head.html - test with empty head
+
+    // Mock the remote head.html request
+    nock('https://main--foo--bar.aem.page')
+      .get('/head.html')
+      .reply(404);
+
+    const project = new HelixProject()
+      .withCwd(cwd)
+      .withLogger(console)
+      .withHttpPort(0)
+      .withProxyUrl('https://main--foo--bar.aem.page/')
+      .withHtmlFolder('drafts');
+
+    await project.init();
+    try {
+      await project.start();
+
+      const response = await fetch(`http://127.0.0.1:${project.server.port}/drafts/no-head`);
+      assert.equal(response.status, 200);
+
+      const content = await response.text();
+      assert.ok(content.includes('<html><head>'), 'Should include HTML structure');
+      assert.ok(content.includes('</head><body>'), 'Should include body tag');
+      assert.ok(content.includes('<p>Content without head</p>'), 'Should contain plain content');
+    } finally {
+      await project.stop();
+    }
+  });
 });
