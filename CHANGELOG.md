@@ -1,3 +1,10 @@
+# [16.16.0](https://github.com/adobe/helix-cli/compare/v16.15.13...v16.16.0) (2025-11-13)
+
+
+### Features
+
+* add .plain.html support for HTML folder serving ([#2631](https://github.com/adobe/helix-cli/issues/2631)) ([2186d4c](https://github.com/adobe/helix-cli/commit/2186d4c330f97db86849b9388e119b7d599c9fc1))
+
 ## [16.15.13](https://github.com/adobe/helix-cli/compare/v16.15.12...v16.15.13) (2025-11-11)
 
 
