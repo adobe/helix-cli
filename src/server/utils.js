@@ -608,7 +608,12 @@ window.LiveReloadOptions = {
         [, value] = imgMatch;
       } else {
         // Strip HTML tags but keep text content
-        value = value.replace(/<[^>]+>/g, '').trim();
+        let prevValue;
+        do {
+          prevValue = value;
+          value = value.replace(/<[^>]+>/g, '');
+        } while (value !== prevValue);
+        value = value.trim();
       }
 
       metadata[key] = value;
