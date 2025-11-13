@@ -449,4 +449,277 @@ describe('Helix Server - HTML Folder', () => {
       await project.stop();
     }
   });
+
+  it('extracts metadata and generates meta tags', async () => {
+    const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
+
+    // Create drafts folder and .plain.html file with metadata
+    const draftsFolder = path.join(cwd, 'drafts');
+    await fs.mkdir(draftsFolder, { recursive: true });
+    const htmlWithMetadata = `<div>
+  <div class="metadata">
+    <div>
+      <div>title</div>
+      <div>Test Page Title</div>
+    </div>
+    <div>
+      <div>description</div>
+      <div>This is a test description</div>
+    </div>
+  </div>
+</div>
+<p>Main content here</p>`;
+    await fs.writeFile(path.join(draftsFolder, 'with-metadata.plain.html'), htmlWithMetadata);
+
+    // Mock the remote head.html request
+    nock('https://main--foo--bar.aem.page')
+      .get('/head.html')
+      .reply(404);
+
+    const project = new HelixProject()
+      .withCwd(cwd)
+      .withLogger(console)
+      .withHttpPort(0)
+      .withProxyUrl('https://main--foo--bar.aem.page/')
+      .withHtmlFolder('drafts');
+
+    await project.init();
+    try {
+      await project.start();
+
+      const response = await fetch(`http://127.0.0.1:${project.server.port}/drafts/with-metadata`);
+      assert.equal(response.status, 200);
+
+      const content = await response.text();
+      // Verify meta tags are present
+      assert.ok(content.includes('<meta name="title" content="Test Page Title">'), 'Should have standard title meta tag');
+      assert.ok(content.includes('<meta property="og:title" content="Test Page Title">'), 'Should have og:title meta tag');
+      assert.ok(content.includes('<meta name="description" content="This is a test description">'), 'Should have standard description meta tag');
+      assert.ok(content.includes('<meta property="og:description" content="This is a test description">'), 'Should have og:description meta tag');
+
+      // Verify metadata block is removed from content
+      assert.ok(!content.includes('class="metadata"'), 'Should not contain metadata class in body');
+      assert.ok(content.includes('<p>Main content here</p>'), 'Should contain main content');
+    } finally {
+      await project.stop();
+    }
+  });
+
+  it('extracts image src from img tags in metadata', async () => {
+    const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
+
+    const draftsFolder = path.join(cwd, 'drafts');
+    await fs.mkdir(draftsFolder, { recursive: true });
+    const htmlWithImage = `<div>
+  <div class="metadata">
+    <div>
+      <div>image</div>
+      <div><img src="https://example.com/test.png" alt="Test Image"></div>
+    </div>
+  </div>
+</div>
+<p>Content</p>`;
+    await fs.writeFile(path.join(draftsFolder, 'with-image.plain.html'), htmlWithImage);
+
+    nock('https://main--foo--bar.aem.page')
+      .get('/head.html')
+      .reply(404);
+
+    const project = new HelixProject()
+      .withCwd(cwd)
+      .withLogger(console)
+      .withHttpPort(0)
+      .withProxyUrl('https://main--foo--bar.aem.page/')
+      .withHtmlFolder('drafts');
+
+    await project.init();
+    try {
+      await project.start();
+
+      const response = await fetch(`http://127.0.0.1:${project.server.port}/drafts/with-image`);
+      const content = await response.text();
+
+      // Verify image src is extracted
+      assert.ok(content.includes('<meta name="image" content="https://example.com/test.png">'), 'Should extract img src to meta tag');
+      assert.ok(content.includes('<meta property="og:image" content="https://example.com/test.png">'), 'Should have og:image meta tag');
+      assert.ok(!content.includes('<img'), 'Should not contain img tag in body');
+    } finally {
+      await project.stop();
+    }
+  });
+
+  it('strips HTML tags from metadata values', async () => {
+    const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
+
+    const draftsFolder = path.join(cwd, 'drafts');
+    await fs.mkdir(draftsFolder, { recursive: true });
+    const htmlWithTags = `<div>
+  <div class="metadata">
+    <div>
+      <div>author</div>
+      <div><strong>John</strong> <em>Doe</em></div>
+    </div>
+  </div>
+</div>
+<p>Content</p>`;
+    await fs.writeFile(path.join(draftsFolder, 'with-html.plain.html'), htmlWithTags);
+
+    nock('https://main--foo--bar.aem.page')
+      .get('/head.html')
+      .reply(404);
+
+    const project = new HelixProject()
+      .withCwd(cwd)
+      .withLogger(console)
+      .withHttpPort(0)
+      .withProxyUrl('https://main--foo--bar.aem.page/')
+      .withHtmlFolder('drafts');
+
+    await project.init();
+    try {
+      await project.start();
+
+      const response = await fetch(`http://127.0.0.1:${project.server.port}/drafts/with-html`);
+      const content = await response.text();
+
+      // Verify HTML is stripped, text is kept
+      assert.ok(content.includes('<meta name="author" content="John Doe">'), 'Should strip HTML and keep text');
+      assert.ok(!content.includes('<strong>'), 'Should not contain HTML tags in meta value');
+    } finally {
+      await project.stop();
+    }
+  });
+
+  it('works without metadata block', async () => {
+    const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
+
+    const draftsFolder = path.join(cwd, 'drafts');
+    await fs.mkdir(draftsFolder, { recursive: true });
+    await fs.writeFile(path.join(draftsFolder, 'no-metadata.plain.html'), '<p>Just content</p>');
+
+    nock('https://main--foo--bar.aem.page')
+      .get('/head.html')
+      .reply(404);
+
+    const project = new HelixProject()
+      .withCwd(cwd)
+      .withLogger(console)
+      .withHttpPort(0)
+      .withProxyUrl('https://main--foo--bar.aem.page/')
+      .withHtmlFolder('drafts');
+
+    await project.init();
+    try {
+      await project.start();
+
+      const response = await fetch(`http://127.0.0.1:${project.server.port}/drafts/no-metadata`);
+      assert.equal(response.status, 200);
+
+      const content = await response.text();
+      assert.ok(content.includes('<p>Just content</p>'), 'Should contain content');
+      assert.ok(content.includes('<main>'), 'Should have HTML structure');
+    } finally {
+      await project.stop();
+    }
+  });
+
+  it('escapes special characters in metadata values', async () => {
+    const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
+
+    const draftsFolder = path.join(cwd, 'drafts');
+    await fs.mkdir(draftsFolder, { recursive: true });
+    const htmlWithSpecialChars = `<div>
+  <div class="metadata">
+    <div>
+      <div>title</div>
+      <div>Title with "quotes" & ampersand</div>
+    </div>
+  </div>
+</div>
+<p>Content</p>`;
+    await fs.writeFile(path.join(draftsFolder, 'special-chars.plain.html'), htmlWithSpecialChars);
+
+    nock('https://main--foo--bar.aem.page')
+      .get('/head.html')
+      .reply(404);
+
+    const project = new HelixProject()
+      .withCwd(cwd)
+      .withLogger(console)
+      .withHttpPort(0)
+      .withProxyUrl('https://main--foo--bar.aem.page/')
+      .withHtmlFolder('drafts');
+
+    await project.init();
+    try {
+      await project.start();
+
+      const response = await fetch(`http://127.0.0.1:${project.server.port}/drafts/special-chars`);
+      const content = await response.text();
+
+      // Verify special characters are escaped
+      assert.ok(content.includes('&quot;quotes&quot;'), 'Should escape quotes');
+      assert.ok(content.includes('&amp;'), 'Should escape ampersand');
+    } finally {
+      await project.stop();
+    }
+  });
+
+  it('only generates og: tags for common fields', async () => {
+    const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
+
+    const draftsFolder = path.join(cwd, 'drafts');
+    await fs.mkdir(draftsFolder, { recursive: true });
+    const htmlWithFields = `<div>
+  <div class="metadata">
+    <div>
+      <div>title</div>
+      <div>Page Title</div>
+    </div>
+    <div>
+      <div>author</div>
+      <div>John Doe</div>
+    </div>
+    <div>
+      <div>keywords</div>
+      <div>test, keywords</div>
+    </div>
+  </div>
+</div>
+<p>Content</p>`;
+    await fs.writeFile(path.join(draftsFolder, 'og-fields.plain.html'), htmlWithFields);
+
+    nock('https://main--foo--bar.aem.page')
+      .get('/head.html')
+      .reply(404);
+
+    const project = new HelixProject()
+      .withCwd(cwd)
+      .withLogger(console)
+      .withHttpPort(0)
+      .withProxyUrl('https://main--foo--bar.aem.page/')
+      .withHtmlFolder('drafts');
+
+    await project.init();
+    try {
+      await project.start();
+
+      const response = await fetch(`http://127.0.0.1:${project.server.port}/drafts/og-fields`);
+      const content = await response.text();
+
+      // title should have both
+      assert.ok(content.includes('<meta name="title"'), 'Should have name=title');
+      assert.ok(content.includes('<meta property="og:title"'), 'Should have og:title');
+
+      // author should only have name=
+      assert.ok(content.includes('<meta name="author"'), 'Should have name=author');
+      assert.ok(!content.includes('og:author'), 'Should NOT have og:author');
+
+      // keywords should only have name=
+      assert.ok(content.includes('<meta name="keywords"'), 'Should have name=keywords');
+      assert.ok(!content.includes('og:keywords'), 'Should NOT have og:keywords');
+    } finally {
+      await project.stop();
+    }
+  });
 });

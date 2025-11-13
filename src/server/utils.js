@@ -525,6 +525,133 @@ window.LiveReloadOptions = {
     text = text.replaceAll(re, (match, arg, q1, value, q2) => (`${arg}=${q1}${value || '/'}${q2}`));
     return Buffer.from(text, 'utf-8');
   },
+
+  /**
+   * Escapes HTML entities for use in attributes
+   * @param {string} text text to escape
+   * @returns {string} escaped text
+   */
+  escapeHtml(text) {
+    return text
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  },
+
+  /**
+   * Extracts metadata block from plain HTML content
+   * @param {string} html HTML content with potential metadata block
+   * @returns {{content: string, metadata: object}} cleaned content and metadata object
+   */
+  extractMetadataBlock(html) {
+    // The metadata block structure is:
+    // <div>
+    //   <div class="metadata">
+    //     <div><div>key</div><div>value</div></div>
+    //   </div>
+    // </div>
+
+    // Find the outer div containing the metadata div
+    const outerDivRegex = /<div>\s*<div class="metadata">/;
+    const outerMatch = html.match(outerDivRegex);
+
+    if (!outerMatch) {
+      return { content: html, metadata: {} };
+    }
+
+    // Find the matching closing </div></div> by counting nested divs
+    // Start after <div><div class="metadata">
+    const startIndex = outerMatch.index + outerMatch[0].length;
+    let depth = 2; // Already inside two divs
+    let endIndex = startIndex;
+    let closingDivCount = 0;
+
+    for (let i = startIndex; i < html.length && closingDivCount < 2; i += 1) {
+      if (html.substr(i, 5) === '<div>') {
+        depth += 1;
+      } else if (html.substr(i, 6) === '</div>') {
+        depth -= 1;
+        if (depth < 2) {
+          closingDivCount += 1;
+          if (closingDivCount === 2) {
+            endIndex = i + 6; // Include the last </div>
+          }
+        }
+      }
+    }
+
+    if (closingDivCount !== 2) {
+      // Malformed HTML, return as-is
+      return { content: html, metadata: {} };
+    }
+
+    // Extract the metadata block content and remove entire outer div from HTML
+    const fullMetadataBlock = html.substring(outerMatch.index, endIndex);
+    const metadataBlock = html.substring(startIndex, endIndex - 12); // -12 for </div></div>
+    const cleanedContent = html.replace(fullMetadataBlock, '').trim();
+
+    // Parse metadata block to extract key-value pairs
+    const pairRegex = /<div>\s*<div>([^<]+)<\/div>\s*<div>([\s\S]*?)<\/div>\s*<\/div>/g;
+    const metadata = {};
+    let pairMatch;
+
+    // eslint-disable-next-line no-cond-assign
+    while ((pairMatch = pairRegex.exec(metadataBlock)) !== null) {
+      const key = pairMatch[1].trim();
+      let value = pairMatch[2].trim();
+
+      // Handle <img> tags - extract src
+      const imgMatch = value.match(/<img[^>]+src="([^"]+)"/);
+      if (imgMatch) {
+        [, value] = imgMatch;
+      } else {
+        // Strip HTML tags but keep text content
+        value = value.replace(/<[^>]+>/g, '').trim();
+      }
+
+      metadata[key] = value;
+    }
+
+    return { content: cleanedContent, metadata };
+  },
+
+  /**
+   * Generates meta tags from metadata object
+   * @param {object} metadata key-value pairs of metadata
+   * @returns {string} HTML string of meta tags
+   */
+  generateMetaTags(metadata) {
+    // Generate meta tags (both standard and OG format)
+    const ogFields = ['title', 'description', 'image', 'url'];
+    let metaTags = '';
+
+    // eslint-disable-next-line no-restricted-syntax
+    for (const [key, value] of Object.entries(metadata)) {
+      // Standard meta tag
+      metaTags += `<meta name="${key}" content="${utils.escapeHtml(value)}">`;
+
+      // Open Graph meta tag for common fields
+      if (ogFields.includes(key.toLowerCase())) {
+        metaTags += `<meta property="og:${key}" content="${utils.escapeHtml(value)}">`;
+      }
+    }
+
+    return metaTags;
+  },
+
+  /**
+   * Wraps plain HTML content in complete HTML structure
+   * @param {string} content plain HTML content
+   * @param {string} headHtml head.html content
+   * @param {string} metaTags generated meta tags
+   * @returns {string} complete HTML document
+   */
+  wrapPlainHtml(content, headHtml, metaTags) {
+    const fullHead = headHtml + metaTags;
+    return `<html><head>${fullHead}</head><body><header></header><main>${content}</main><footer></footer></body></html>`;
+  },
 };
 
 export default Object.freeze(utils);

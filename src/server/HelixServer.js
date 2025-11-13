@@ -228,13 +228,18 @@ export class HelixServer extends BaseServer {
   async transformPlainHtml(plainHtmlFile) {
     const plainContent = await readFile(plainHtmlFile, 'utf-8');
 
+    // Extract metadata and clean content
+    const { content, metadata } = utils.extractMetadataBlock(plainContent);
+
     // Get head HTML using existing HeadHtmlSupport
     await this._project.headHtml.update();
-    // Use localHtml if available, otherwise empty string
     const headHtml = this._project.headHtml.localHtml || '';
 
-    // Wrap in complete HTML structure with header/main/footer
-    return `<html><head>${headHtml}</head><body><header></header><main>${plainContent}</main><footer></footer></body></html>`;
+    // Generate meta tags from metadata
+    const metaTags = utils.generateMetaTags(metadata);
+
+    // Wrap in complete HTML structure
+    return utils.wrapPlainHtml(content, headHtml, metaTags);
   }
 
   /**
