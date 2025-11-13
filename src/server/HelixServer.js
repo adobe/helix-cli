@@ -231,12 +231,15 @@ export class HelixServer extends BaseServer {
     // Extract metadata and clean content
     const { content, metadata } = utils.extractMetadataBlock(plainContent);
 
+    // Extract default metadata values from content
+    const defaults = utils.extractDefaultMetadata(content);
+
     // Get head HTML using existing HeadHtmlSupport
     await this._project.headHtml.update();
     const headHtml = this._project.headHtml.localHtml || '';
 
-    // Generate meta tags from metadata
-    const metaTags = utils.generateMetaTags(metadata);
+    // Generate meta tags from metadata with defaults
+    const metaTags = utils.generateMetaTags(metadata, defaults);
 
     // Wrap in complete HTML structure
     return utils.wrapPlainHtml(content, headHtml, metaTags);

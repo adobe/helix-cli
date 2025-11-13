@@ -722,4 +722,280 @@ describe('Helix Server - HTML Folder', () => {
       await project.stop();
     }
   });
+
+  it('uses default title from first H1 when not specified', async () => {
+    const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
+
+    const draftsFolder = path.join(cwd, 'drafts');
+    await fs.mkdir(draftsFolder, { recursive: true });
+    const htmlWithH1 = `<h1>Page Heading</h1>
+<p>This is a very long paragraph with more than ten words to test description extraction.</p>
+<p>More content</p>`;
+    await fs.writeFile(path.join(draftsFolder, 'default-title.plain.html'), htmlWithH1);
+
+    nock('https://main--foo--bar.aem.page')
+      .get('/head.html')
+      .reply(404);
+
+    const project = new HelixProject()
+      .withCwd(cwd)
+      .withLogger(console)
+      .withHttpPort(0)
+      .withProxyUrl('https://main--foo--bar.aem.page/')
+      .withHtmlFolder('drafts');
+
+    await project.init();
+    try {
+      await project.start();
+
+      const response = await fetch(`http://127.0.0.1:${project.server.port}/drafts/default-title`);
+      const content = await response.text();
+
+      // Should use H1 as default title
+      assert.ok(content.includes('<meta name="title" content="Page Heading">'), 'Should use H1 as default title');
+      assert.ok(content.includes('<meta property="og:title" content="Page Heading">'), 'Should have og:title from H1');
+    } finally {
+      await project.stop();
+    }
+  });
+
+  it('uses default description from first paragraph with 10+ words', async () => {
+    const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
+
+    const draftsFolder = path.join(cwd, 'drafts');
+    await fs.mkdir(draftsFolder, { recursive: true });
+    const htmlWithP = `<p>This is a very long paragraph with more than ten words for description.</p>
+<p>More content</p>`;
+    await fs.writeFile(path.join(draftsFolder, 'default-desc.plain.html'), htmlWithP);
+
+    nock('https://main--foo--bar.aem.page')
+      .get('/head.html')
+      .reply(404);
+
+    const project = new HelixProject()
+      .withCwd(cwd)
+      .withLogger(console)
+      .withHttpPort(0)
+      .withProxyUrl('https://main--foo--bar.aem.page/')
+      .withHtmlFolder('drafts');
+
+    await project.init();
+    try {
+      await project.start();
+
+      const response = await fetch(`http://127.0.0.1:${project.server.port}/drafts/default-desc`);
+      const content = await response.text();
+
+      // Should use first paragraph as default description
+      assert.ok(content.includes('This is a very long paragraph with more than ten words for description.'), 'Should use paragraph as default description');
+    } finally {
+      await project.stop();
+    }
+  });
+
+  it('uses default image from first img tag', async () => {
+    const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
+
+    const draftsFolder = path.join(cwd, 'drafts');
+    await fs.mkdir(draftsFolder, { recursive: true });
+    const htmlWithImg = `<p>Content here</p>
+<img src="https://example.com/first-image.png" alt="First">
+<img src="https://example.com/second-image.png" alt="Second">`;
+    await fs.writeFile(path.join(draftsFolder, 'default-image.plain.html'), htmlWithImg);
+
+    nock('https://main--foo--bar.aem.page')
+      .get('/head.html')
+      .reply(404);
+
+    const project = new HelixProject()
+      .withCwd(cwd)
+      .withLogger(console)
+      .withHttpPort(0)
+      .withProxyUrl('https://main--foo--bar.aem.page/')
+      .withHtmlFolder('drafts');
+
+    await project.init();
+    try {
+      await project.start();
+
+      const response = await fetch(`http://127.0.0.1:${project.server.port}/drafts/default-image`);
+      const content = await response.text();
+
+      // Should use first image as default
+      assert.ok(content.includes('<meta name="image" content="https://example.com/first-image.png">'), 'Should use first image as default');
+      // Note: second image will still be in the content body, just not in meta tags
+      assert.ok(!content.includes('<meta name="image" content="https://example.com/second-image.png">'), 'Should not use second image in meta tags');
+    } finally {
+      await project.stop();
+    }
+  });
+
+  it('handles title:suffix by appending to title', async () => {
+    const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
+
+    const draftsFolder = path.join(cwd, 'drafts');
+    await fs.mkdir(draftsFolder, { recursive: true });
+    const htmlWithSuffix = `<div>
+  <div class="metadata">
+    <div>
+      <div>title</div>
+      <div>My Page</div>
+    </div>
+    <div>
+      <div>title:suffix</div>
+      <div>| My Site</div>
+    </div>
+  </div>
+</div>
+<p>Content</p>`;
+    await fs.writeFile(path.join(draftsFolder, 'title-suffix.plain.html'), htmlWithSuffix);
+
+    nock('https://main--foo--bar.aem.page')
+      .get('/head.html')
+      .reply(404);
+
+    const project = new HelixProject()
+      .withCwd(cwd)
+      .withLogger(console)
+      .withHttpPort(0)
+      .withProxyUrl('https://main--foo--bar.aem.page/')
+      .withHtmlFolder('drafts');
+
+    await project.init();
+    try {
+      await project.start();
+
+      const response = await fetch(`http://127.0.0.1:${project.server.port}/drafts/title-suffix`);
+      const content = await response.text();
+
+      // Title should include suffix
+      assert.ok(content.includes('<meta name="title" content="My Page | My Site">'), 'Should append suffix to title');
+      assert.ok(content.includes('<meta property="og:title" content="My Page | My Site">'), 'Should have og:title with suffix');
+      assert.ok(!content.includes('title:suffix'), 'Should not include title:suffix as separate meta tag');
+    } finally {
+      await project.stop();
+    }
+  });
+
+  it('handles canonical URL with og:url and twitter:url', async () => {
+    const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
+
+    const draftsFolder = path.join(cwd, 'drafts');
+    await fs.mkdir(draftsFolder, { recursive: true });
+    const htmlWithCanonical = `<div>
+  <div class="metadata">
+    <div>
+      <div>canonical</div>
+      <div>https://example.com/canonical-page</div>
+    </div>
+  </div>
+</div>
+<p>Content</p>`;
+    await fs.writeFile(path.join(draftsFolder, 'canonical.plain.html'), htmlWithCanonical);
+
+    nock('https://main--foo--bar.aem.page')
+      .get('/head.html')
+      .reply(404);
+
+    const project = new HelixProject()
+      .withCwd(cwd)
+      .withLogger(console)
+      .withHttpPort(0)
+      .withProxyUrl('https://main--foo--bar.aem.page/')
+      .withHtmlFolder('drafts');
+
+    await project.init();
+    try {
+      await project.start();
+
+      const response = await fetch(`http://127.0.0.1:${project.server.port}/drafts/canonical`);
+      const content = await response.text();
+
+      // Should have link rel=canonical
+      assert.ok(content.includes('<link rel="canonical" href="https://example.com/canonical-page">'), 'Should have canonical link');
+      assert.ok(content.includes('<meta property="og:url" content="https://example.com/canonical-page">'), 'Should have og:url');
+      assert.ok(content.includes('<meta name="twitter:url" content="https://example.com/canonical-page">'), 'Should have twitter:url');
+      assert.ok(!content.includes('<meta name="canonical"'), 'Should not have name=canonical meta tag');
+    } finally {
+      await project.stop();
+    }
+  });
+
+  it('handles tags property as article:tag meta tags', async () => {
+    const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
+
+    const draftsFolder = path.join(cwd, 'drafts');
+    await fs.mkdir(draftsFolder, { recursive: true });
+    const htmlWithTags = `<div>
+  <div class="metadata">
+    <div>
+      <div>tags</div>
+      <div>javascript, nodejs, web development</div>
+    </div>
+  </div>
+</div>
+<p>Content</p>`;
+    await fs.writeFile(path.join(draftsFolder, 'with-tags.plain.html'), htmlWithTags);
+
+    nock('https://main--foo--bar.aem.page')
+      .get('/head.html')
+      .reply(404);
+
+    const project = new HelixProject()
+      .withCwd(cwd)
+      .withLogger(console)
+      .withHttpPort(0)
+      .withProxyUrl('https://main--foo--bar.aem.page/')
+      .withHtmlFolder('drafts');
+
+    await project.init();
+    try {
+      await project.start();
+
+      const response = await fetch(`http://127.0.0.1:${project.server.port}/drafts/with-tags`);
+      const content = await response.text();
+
+      // Should have article:tag for each tag
+      assert.ok(content.includes('<meta property="article:tag" content="javascript">'), 'Should have article:tag for javascript');
+      assert.ok(content.includes('<meta property="article:tag" content="nodejs">'), 'Should have article:tag for nodejs');
+      assert.ok(content.includes('<meta property="article:tag" content="web development">'), 'Should have article:tag for web development');
+      assert.ok(!content.includes('<meta name="tags"'), 'Should not have name=tags meta tag');
+    } finally {
+      await project.stop();
+    }
+  });
+
+  it('uses /default-meta-image.png when no image in content or metadata', async () => {
+    const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
+
+    const draftsFolder = path.join(cwd, 'drafts');
+    await fs.mkdir(draftsFolder, { recursive: true });
+    const htmlNoImage = '<p>Content without images</p>';
+    await fs.writeFile(path.join(draftsFolder, 'no-image.plain.html'), htmlNoImage);
+
+    nock('https://main--foo--bar.aem.page')
+      .get('/head.html')
+      .reply(404);
+
+    const project = new HelixProject()
+      .withCwd(cwd)
+      .withLogger(console)
+      .withHttpPort(0)
+      .withProxyUrl('https://main--foo--bar.aem.page/')
+      .withHtmlFolder('drafts');
+
+    await project.init();
+    try {
+      await project.start();
+
+      const response = await fetch(`http://127.0.0.1:${project.server.port}/drafts/no-image`);
+      const content = await response.text();
+
+      // Should use default image
+      assert.ok(content.includes('<meta name="image" content="/default-meta-image.png">'), 'Should use default image');
+      assert.ok(content.includes('<meta property="og:image" content="/default-meta-image.png">'), 'Should have og:image with default');
+    } finally {
+      await project.stop();
+    }
+  });
 });

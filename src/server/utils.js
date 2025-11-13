@@ -623,23 +623,103 @@ window.LiveReloadOptions = {
   },
 
   /**
-   * Generates meta tags from metadata object
+   * Extracts default metadata values from HTML content
+   * @param {string} content HTML content to extract defaults from
+   * @returns {object} default metadata values
+   */
+  extractDefaultMetadata(content) {
+    const defaults = {};
+
+    // Extract title from first H1
+    const h1Match = content.match(/<h1[^>]*>(.*?)<\/h1>/i);
+    if (h1Match) {
+      // Strip HTML tags from h1 content
+      defaults.title = h1Match[1].replace(/<[^>]+>/g, '').trim();
+    }
+
+    // Extract description from first paragraph with 10+ words
+    const pMatch = content.match(/<p[^>]*>(.*?)<\/p>/i);
+    if (pMatch) {
+      const text = pMatch[1].replace(/<[^>]+>/g, '').trim();
+      const wordCount = text.split(/\s+/).length;
+      if (wordCount >= 10) {
+        defaults.description = text;
+      }
+    }
+
+    // Extract image from first img tag
+    const imgMatch = content.match(/<img[^>]+src="([^"]+)"/i);
+    if (imgMatch) {
+      [, defaults.image] = imgMatch;
+    }
+
+    return defaults;
+  },
+
+  /**
+   * Generates meta tags from metadata object with AEM.live special property support
    * @param {object} metadata key-value pairs of metadata
+   * @param {object} defaults default values extracted from content
    * @returns {string} HTML string of meta tags
    */
-  generateMetaTags(metadata) {
+  generateMetaTags(metadata, defaults = {}) {
+    // Handle title:suffix special property
+    let title = metadata.title || defaults.title || '';
+    const titleSuffix = metadata['title:suffix'];
+    if (titleSuffix && title) {
+      title = `${title} ${titleSuffix}`;
+    }
+
+    // Apply defaults for missing values
+    const description = metadata.description || defaults.description || '';
+    const image = metadata.image || defaults.image || '/default-meta-image.png';
+
+    // Build final metadata object with computed values
+    const finalMetadata = { ...metadata };
+    if (title) finalMetadata.title = title;
+    if (description) finalMetadata.description = description;
+    if (image) finalMetadata.image = image;
+
+    // Remove special properties that shouldn't become meta tags
+    delete finalMetadata['title:suffix'];
+
     // Generate meta tags (both standard and OG format)
     const ogFields = ['title', 'description', 'image', 'url'];
     let metaTags = '';
 
     // eslint-disable-next-line no-restricted-syntax
-    for (const [key, value] of Object.entries(metadata)) {
-      // Standard meta tag
-      metaTags += `<meta name="${key}" content="${utils.escapeHtml(value)}">`;
+    for (const [key, value] of Object.entries(finalMetadata)) {
+      // Skip empty values
+      if (!value) {
+        // eslint-disable-next-line no-continue
+        continue;
+      }
 
-      // Open Graph meta tag for common fields
-      if (ogFields.includes(key.toLowerCase())) {
-        metaTags += `<meta property="og:${key}" content="${utils.escapeHtml(value)}">`;
+      // Handle 'tags' property specially - create article:tag for each
+      if (key === 'tags') {
+        // Split by comma or newline
+        const tagList = value.split(/[,\n]/).map((t) => t.trim()).filter((t) => t);
+        // eslint-disable-next-line no-restricted-syntax
+        for (const tag of tagList) {
+          metaTags += `<meta property="article:tag" content="${utils.escapeHtml(tag)}">`;
+        }
+        // Don't create standard name= tag for 'tags'
+      } else if (key === 'canonical') {
+        // Handle canonical specially
+        metaTags += `<link rel="canonical" href="${utils.escapeHtml(value)}">`;
+        metaTags += `<meta property="og:url" content="${utils.escapeHtml(value)}">`;
+        metaTags += `<meta name="twitter:url" content="${utils.escapeHtml(value)}">`;
+        // Don't create standard name= tag
+      } else {
+        // Standard meta tag
+        metaTags += `<meta name="${key}" content="${utils.escapeHtml(value)}">`;
+
+        // Open Graph meta tag for common fields
+        if (ogFields.includes(key.toLowerCase())) {
+          metaTags += `<meta property="og:${key}" content="${utils.escapeHtml(value)}">`;
+          // Add twitter card tags for common fields
+          metaTags += `<meta name="twitter:${key}" content="${utils.escapeHtml(value)}">`;
+        }
       }
     }
 
