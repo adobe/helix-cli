@@ -17,6 +17,8 @@ import { PassThrough } from 'stream';
 import { readFileSync } from 'fs';
 import { fileURLToPath } from 'url';
 import cookie from 'cookie';
+import { unified } from 'unified';
+import rehypeParse from 'rehype-parse';
 import { getFetch } from '../fetch-utils.js';
 
 // Load console interceptor script at startup
@@ -541,6 +543,34 @@ window.LiveReloadOptions = {
   },
 
   /**
+   * Extracts text content from HTML using proper HTML parsing
+   * @param {string} html HTML content to extract text from
+   * @returns {string} plain text content
+   */
+  extractTextFromHtml(html) {
+    // Helper to recursively extract text from AST nodes
+    function extractText(node) {
+      if (node.type === 'text') {
+        return node.value;
+      }
+      if (node.children) {
+        return node.children.map(extractText).join('');
+      }
+      return '';
+    }
+
+    try {
+      const ast = unified()
+        .use(rehypeParse, { fragment: true })
+        .parse(html);
+      return extractText(ast).trim();
+    } catch (e) {
+      // Fallback to regex if parsing fails
+      return html.replace(/<[^>]+>/g, '').trim();
+    }
+  },
+
+  /**
    * Extracts metadata block from plain HTML content
    * @param {string} html HTML content with potential metadata block
    * @returns {{content: string, metadata: object}} cleaned content and metadata object
@@ -607,13 +637,8 @@ window.LiveReloadOptions = {
       if (imgMatch) {
         [, value] = imgMatch;
       } else {
-        // Strip HTML tags but keep text content
-        let prevValue;
-        do {
-          prevValue = value;
-          value = value.replace(/<[^>]+>/g, '');
-        } while (value !== prevValue);
-        value = value.trim();
+        // Use proper HTML parsing to extract text content
+        value = utils.extractTextFromHtml(value);
       }
 
       metadata[key] = value;
@@ -633,14 +658,15 @@ window.LiveReloadOptions = {
     // Extract title from first H1
     const h1Match = content.match(/<h1[^>]*>(.*?)<\/h1>/i);
     if (h1Match) {
-      // Strip HTML tags from h1 content
-      defaults.title = h1Match[1].replace(/<[^>]+>/g, '').trim();
+      // Use proper HTML parsing to extract text
+      defaults.title = utils.extractTextFromHtml(h1Match[1]);
     }
 
     // Extract description from first paragraph with 10+ words
     const pMatch = content.match(/<p[^>]*>(.*?)<\/p>/i);
     if (pMatch) {
-      const text = pMatch[1].replace(/<[^>]+>/g, '').trim();
+      // Use proper HTML parsing to extract text
+      const text = utils.extractTextFromHtml(pMatch[1]);
       const wordCount = text.split(/\s+/).length;
       if (wordCount >= 10) {
         defaults.description = text;
