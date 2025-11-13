@@ -17,6 +17,8 @@ import { PassThrough } from 'stream';
 import { readFileSync } from 'fs';
 import { fileURLToPath } from 'url';
 import cookie from 'cookie';
+import { unified } from 'unified';
+import rehypeParse from 'rehype-parse';
 import { getFetch } from '../fetch-utils.js';
 
 // Load console interceptor script at startup
@@ -524,6 +526,254 @@ window.LiveReloadOptions = {
     const re = new RegExp(`(src|href)\\s*=\\s*(["'])${hostPattern}(/.*?)?(['"])`, 'gm');
     text = text.replaceAll(re, (match, arg, q1, value, q2) => (`${arg}=${q1}${value || '/'}${q2}`));
     return Buffer.from(text, 'utf-8');
+  },
+
+  /**
+   * Escapes HTML entities for use in attributes
+   * @param {string} text text to escape
+   * @returns {string} escaped text
+   */
+  escapeHtml(text) {
+    return text
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  },
+
+  /**
+   * Extracts text content from HTML using proper HTML parsing
+   * @param {string} html HTML content to extract text from
+   * @returns {string} plain text content
+   */
+  extractTextFromHtml(html) {
+    // Helper to recursively extract text from AST nodes
+    function extractText(node) {
+      if (node.type === 'text') {
+        return node.value;
+      }
+      if (node.children) {
+        return node.children.map(extractText).join('');
+      }
+      return '';
+    }
+
+    try {
+      const ast = unified()
+        .use(rehypeParse, { fragment: true })
+        .parse(html);
+      return extractText(ast).trim();
+    } catch (e) {
+      // If parsing fails, return empty string to avoid XSS vulnerabilities
+      return '';
+    }
+  },
+
+  /**
+   * Validates that a file path is within a base directory (security check)
+   * @param {string} filePath absolute file path to validate
+   * @param {string} baseDirectory base directory path
+   * @returns {boolean} true if path is safe, false if it tries to escape base directory
+   */
+  validatePathSecurity(filePath, baseDirectory) {
+    const resolvedBaseDir = path.resolve(baseDirectory);
+    const relPath = path.relative(resolvedBaseDir, filePath);
+    return !relPath.startsWith('..');
+  },
+
+  /**
+   * Extracts metadata block from plain HTML content
+   * @param {string} html HTML content with potential metadata block
+   * @returns {{content: string, metadata: object}} cleaned content and metadata object
+   */
+  extractMetadataBlock(html) {
+    // The metadata block structure is:
+    // <div>
+    //   <div class="metadata">
+    //     <div><div>key</div><div>value</div></div>
+    //   </div>
+    // </div>
+
+    // Find the outer div containing the metadata div
+    const outerDivRegex = /<div>\s*<div class="metadata">/;
+    const outerMatch = html.match(outerDivRegex);
+
+    if (!outerMatch) {
+      return { content: html, metadata: {} };
+    }
+
+    // Find the matching closing </div></div> by counting nested divs
+    // Start after <div><div class="metadata">
+    const startIndex = outerMatch.index + outerMatch[0].length;
+    let depth = 2; // Already inside two divs
+    let endIndex = startIndex;
+    let closingDivCount = 0;
+
+    for (let i = startIndex; i < html.length && closingDivCount < 2; i += 1) {
+      if (html.substr(i, 5) === '<div>') {
+        depth += 1;
+      } else if (html.substr(i, 6) === '</div>') {
+        depth -= 1;
+        if (depth < 2) {
+          closingDivCount += 1;
+          if (closingDivCount === 2) {
+            endIndex = i + 6; // Include the last </div>
+          }
+        }
+      }
+    }
+
+    if (closingDivCount !== 2) {
+      // Malformed HTML, return as-is
+      return { content: html, metadata: {} };
+    }
+
+    // Extract the metadata block content and remove entire outer div from HTML
+    const fullMetadataBlock = html.substring(outerMatch.index, endIndex);
+    const metadataBlock = html.substring(startIndex, endIndex - 12); // -12 for </div></div>
+    const cleanedContent = html.replace(fullMetadataBlock, '').trim();
+
+    // Parse metadata block to extract key-value pairs
+    const pairRegex = /<div>\s*<div>([^<]+)<\/div>\s*<div>([\s\S]*?)<\/div>\s*<\/div>/g;
+    const metadata = {};
+    let pairMatch;
+
+    // eslint-disable-next-line no-cond-assign
+    while ((pairMatch = pairRegex.exec(metadataBlock)) !== null) {
+      const key = pairMatch[1].trim();
+      let value = pairMatch[2].trim();
+
+      // Handle <img> tags - extract src
+      const imgMatch = value.match(/<img[^>]+src="([^"]+)"/);
+      if (imgMatch) {
+        [, value] = imgMatch;
+      } else {
+        // Use proper HTML parsing to extract text content
+        value = utils.extractTextFromHtml(value);
+      }
+
+      metadata[key] = value;
+    }
+
+    return { content: cleanedContent, metadata };
+  },
+
+  /**
+   * Extracts default metadata values from HTML content
+   * @param {string} content HTML content to extract defaults from
+   * @returns {object} default metadata values
+   */
+  extractDefaultMetadata(content) {
+    const defaults = {};
+
+    // Extract title from first H1
+    const h1Match = content.match(/<h1[^>]*>(.*?)<\/h1>/i);
+    if (h1Match) {
+      // Use proper HTML parsing to extract text
+      defaults.title = utils.extractTextFromHtml(h1Match[1]);
+    }
+
+    // Extract description from first paragraph with 10+ words
+    const pMatch = content.match(/<p[^>]*>(.*?)<\/p>/i);
+    if (pMatch) {
+      // Use proper HTML parsing to extract text
+      const text = utils.extractTextFromHtml(pMatch[1]);
+      const wordCount = text.split(/\s+/).length;
+      if (wordCount >= 10) {
+        defaults.description = text;
+      }
+    }
+
+    // Extract image from first img tag
+    const imgMatch = content.match(/<img[^>]+src="([^"]+)"/i);
+    if (imgMatch) {
+      [, defaults.image] = imgMatch;
+    }
+
+    return defaults;
+  },
+
+  /**
+   * Generates meta tags from metadata object with AEM.live special property support
+   * @param {object} metadata key-value pairs of metadata
+   * @param {object} defaults default values extracted from content
+   * @returns {string} HTML string of meta tags
+   */
+  generateMetaTags(metadata, defaults = {}) {
+    // Handle title:suffix special property
+    let title = metadata.title || defaults.title || '';
+    const titleSuffix = metadata['title:suffix'];
+    if (titleSuffix && title) {
+      title = `${title} ${titleSuffix}`;
+    }
+
+    // Apply defaults for missing values
+    const description = metadata.description || defaults.description || '';
+    const image = metadata.image || defaults.image || '/default-meta-image.png';
+
+    // Build final metadata object with computed values
+    const finalMetadata = { ...metadata };
+    if (title) finalMetadata.title = title;
+    if (description) finalMetadata.description = description;
+    if (image) finalMetadata.image = image;
+
+    // Remove special properties that shouldn't become meta tags
+    delete finalMetadata['title:suffix'];
+
+    // Generate meta tags (both standard and OG format)
+    const ogFields = ['title', 'description', 'image', 'url'];
+    let metaTags = '';
+
+    // eslint-disable-next-line no-restricted-syntax
+    for (const [key, value] of Object.entries(finalMetadata)) {
+      // Skip empty values
+      if (!value) {
+        // eslint-disable-next-line no-continue
+        continue;
+      }
+
+      // Handle 'tags' property specially - create article:tag for each
+      if (key === 'tags') {
+        // Split by comma or newline
+        const tagList = value.split(/[,\n]/).map((t) => t.trim()).filter((t) => t);
+        // eslint-disable-next-line no-restricted-syntax
+        for (const tag of tagList) {
+          metaTags += `<meta property="article:tag" content="${utils.escapeHtml(tag)}">`;
+        }
+        // Don't create standard name= tag for 'tags'
+      } else if (key === 'canonical') {
+        // Handle canonical specially
+        metaTags += `<link rel="canonical" href="${utils.escapeHtml(value)}">`;
+        metaTags += `<meta property="og:url" content="${utils.escapeHtml(value)}">`;
+        metaTags += `<meta name="twitter:url" content="${utils.escapeHtml(value)}">`;
+        // Don't create standard name= tag
+      } else {
+        // Standard meta tag
+        metaTags += `<meta name="${key}" content="${utils.escapeHtml(value)}">`;
+
+        // Open Graph meta tag for common fields
+        if (ogFields.includes(key.toLowerCase())) {
+          metaTags += `<meta property="og:${key}" content="${utils.escapeHtml(value)}">`;
+          // Add twitter card tags for common fields
+          metaTags += `<meta name="twitter:${key}" content="${utils.escapeHtml(value)}">`;
+        }
+      }
+    }
+
+    return metaTags;
+  },
+
+  /**
+   * Wraps plain HTML content in complete HTML structure
+   * @param {string} content plain HTML content
+   * @param {string} headHtml head.html content
+   * @param {string} metaTags generated meta tags
+   * @returns {string} complete HTML document
+   */
+  wrapPlainHtml(content, headHtml, metaTags) {
+    const fullHead = headHtml + metaTags;
+    return `<html><head>${fullHead}</head><body><header></header><main>${content}</main><footer></footer></body></html>`;
   },
 };
 

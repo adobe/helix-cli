@@ -74,6 +74,26 @@ This feature is especially helpful when:
 - Monitoring client-side behavior during development
 - Working with AI coding assistants that need visibility into both server and client logs
 
+### html folder for content preview
+
+The `--html-folder` option enables serving HTML files without extensions, useful for previewing content changes when you don't have access to the authoring system.
+
+```
+$ aem up --html-folder content
+```
+
+This enables two features:
+
+1. **Extension-less URLs**: Access `/content/page` to serve `content/page.html`
+2. **Plain HTML with metadata**: Create `content/page.plain.html` files that are automatically wrapped with proper HTML structure and metadata processing
+
+#### Plain HTML files (.plain.html)
+
+Plain HTML files contain only the main content and an optional metadata block. The CLI automatically:
+- Wraps content in `<html><head><body><header><main><footer>` structure
+- Merges in `head.html` content
+- The metadata block is removed from the rendered content and converted to meta tags in the `<head>`.
+
 ### setting up a self-signed cert for using https
 
 1. create the certificate
@@ -161,6 +181,7 @@ If present, `ALL_PROXY` is used as fallback if there is no other match.
 | `--livereload`    | `AEM_LIVERELOAD`    | `true`      | Enable automatic reloading of modified sources in browser.  |
 | `--no-livereload` | `AEM_NO_LIVERELOAD` | `false`     | Disable live-reload.                                        |
 | `--forward-browser-logs` | `AEM_FORWARD_BROWSER_LOGS` | `false` | Forward browser console logs to terminal.            |
+| `--html-folder`   | `AEM_HTML_FOLDER`   | undefined   | Serve HTML files from folder without extensions. Supports .html and .plain.html files. |
 | `--open`          | `AEM_OPEN`          | `/`         | Open a browser window at specified path after server start. |
 | `--no-open`       | `AEM_NO_OPEN`       | `false`     | Disable automatic opening of browser window.                |
 | `--tls-key`       | `AEM_TLS_KEY`       | undefined   | Path to .key file (for enabling TLS)                        |
