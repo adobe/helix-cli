@@ -998,4 +998,52 @@ describe('Helix Server - HTML Folder', () => {
       await project.stop();
     }
   });
+
+  it('merges remote and local head.html for .plain.html files', async () => {
+    const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
+
+    const draftsFolder = path.join(cwd, 'drafts');
+    await fs.mkdir(draftsFolder, { recursive: true });
+    const htmlWithMetadata = `<div>
+  <div class="metadata">
+    <div>
+      <div>title</div>
+      <div>Test Page</div>
+    </div>
+  </div>
+</div>
+<p>Content</p>`;
+    await fs.writeFile(path.join(draftsFolder, 'remote-head.plain.html'), htmlWithMetadata);
+
+    // Create local head.html
+    await fs.writeFile(path.join(cwd, 'head.html'), '<meta name="local" content="local-value">');
+
+    // Mock remote head.html with different content
+    nock('https://main--foo--bar.aem.page')
+      .get('/head.html')
+      .reply(200, '<meta name="remote" content="remote-value">');
+
+    const project = new HelixProject()
+      .withCwd(cwd)
+      .withLogger(console)
+      .withHttpPort(0)
+      .withProxyUrl('https://main--foo--bar.aem.page/')
+      .withHtmlFolder('drafts');
+
+    await project.init();
+    try {
+      await project.start();
+
+      const response = await fetch(`http://127.0.0.1:${project.server.port}/drafts/remote-head`);
+      assert.equal(response.status, 200);
+
+      const content = await response.text();
+      // Should have local head.html content (HeadHtmlSupport uses local when both exist)
+      assert.ok(content.includes('<meta name="local" content="local-value">'), 'Should include local head.html');
+      // Should have extracted metadata
+      assert.ok(content.includes('<meta name="title" content="Test Page">'), 'Should have metadata');
+    } finally {
+      await project.stop();
+    }
+  });
 });

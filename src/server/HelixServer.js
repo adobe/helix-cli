@@ -177,12 +177,7 @@ export class HelixServer extends BaseServer {
       `${relativePath}.html`,
     );
 
-    // Security check: ensure the file is within the project directory
-    const resolvedProjectDir = path.resolve(this._project.directory);
-    const relPath = path.relative(resolvedProjectDir, htmlFile);
-
-    // Only check for path traversal
-    if (relPath.startsWith('..')) {
+    if (!utils.validatePathSecurity(htmlFile, this._project.directory)) {
       return null;
     }
 
@@ -202,9 +197,7 @@ export class HelixServer extends BaseServer {
       `${relativePath}.plain.html`,
     );
 
-    // Same security check for .plain.html
-    const plainRelPath = path.relative(resolvedProjectDir, plainHtmlFile);
-    if (plainRelPath.startsWith('..')) {
+    if (!utils.validatePathSecurity(plainHtmlFile, this._project.directory)) {
       return null;
     }
 

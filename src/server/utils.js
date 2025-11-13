@@ -565,9 +565,21 @@ window.LiveReloadOptions = {
         .parse(html);
       return extractText(ast).trim();
     } catch (e) {
-      // Fallback to regex if parsing fails
-      return html.replace(/<[^>]+>/g, '').trim();
+      // If parsing fails, return empty string to avoid XSS vulnerabilities
+      return '';
     }
+  },
+
+  /**
+   * Validates that a file path is within a base directory (security check)
+   * @param {string} filePath absolute file path to validate
+   * @param {string} baseDirectory base directory path
+   * @returns {boolean} true if path is safe, false if it tries to escape base directory
+   */
+  validatePathSecurity(filePath, baseDirectory) {
+    const resolvedBaseDir = path.resolve(baseDirectory);
+    const relPath = path.relative(resolvedBaseDir, filePath);
+    return !relPath.startsWith('..');
   },
 
   /**
