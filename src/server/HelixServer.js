@@ -259,7 +259,12 @@ export class HelixServer extends BaseServer {
     }
 
     // Extract the path within the HTML folder
-    const relativePath = pathname.slice(folderPrefix.length);
+    let relativePath = pathname.slice(folderPrefix.length);
+
+    // Handle directory requests (trailing slash) by appending 'index'
+    if (relativePath === '' || relativePath.endsWith('/')) {
+      relativePath = `${relativePath}index`.replace(/\/+/g, '/');
+    }
 
     // Resolve which file to serve (.html or .plain.html)
     const resolvedFile = await this.resolveHtmlFolderFile(relativePath);

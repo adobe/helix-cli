@@ -1046,4 +1046,102 @@ describe('Helix Server - HTML Folder', () => {
       await project.stop();
     }
   });
+
+  it('serves index.html for directory requests with trailing slash', async () => {
+    const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
+
+    const draftsFolder = path.join(cwd, 'drafts');
+    const subFolder = path.join(draftsFolder, 'subfolder');
+    await fs.mkdir(subFolder, { recursive: true });
+    await fs.writeFile(path.join(subFolder, 'index.html'), '<html><body>Subfolder Index</body></html>');
+
+    const project = new HelixProject()
+      .withCwd(cwd)
+      .withLogger(console)
+      .withHttpPort(0)
+      .withProxyUrl('https://main--foo--bar.aem.page/')
+      .withHtmlFolder('drafts');
+
+    await project.init();
+    try {
+      await project.start();
+
+      // Request with trailing slash should serve index.html
+      const response = await fetch(`http://127.0.0.1:${project.server.port}/drafts/subfolder/`);
+      assert.equal(response.status, 200);
+
+      const content = await response.text();
+      assert.ok(content.includes('Subfolder Index'), 'Should serve index.html for directory request');
+    } finally {
+      await project.stop();
+    }
+  });
+
+  it('serves index.plain.html for directory requests with trailing slash', async () => {
+    const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
+
+    const draftsFolder = path.join(cwd, 'drafts');
+    const subFolder = path.join(draftsFolder, 'section');
+    await fs.mkdir(subFolder, { recursive: true });
+    await fs.writeFile(path.join(subFolder, 'index.plain.html'), '<p>Section index content</p>');
+
+    nock('https://main--foo--bar.aem.page')
+      .get('/head.html')
+      .reply(404);
+
+    const project = new HelixProject()
+      .withCwd(cwd)
+      .withLogger(console)
+      .withHttpPort(0)
+      .withProxyUrl('https://main--foo--bar.aem.page/')
+      .withHtmlFolder('drafts');
+
+    await project.init();
+    try {
+      await project.start();
+
+      // Request with trailing slash should serve index.plain.html
+      const response = await fetch(`http://127.0.0.1:${project.server.port}/drafts/section/`);
+      assert.equal(response.status, 200);
+
+      const content = await response.text();
+      assert.ok(content.includes('<main>'), 'Should have HTML structure');
+      assert.ok(content.includes('<p>Section index content</p>'), 'Should serve index.plain.html for directory request');
+    } finally {
+      await project.stop();
+    }
+  });
+
+  it('serves index.html when requesting the html-folder root', async () => {
+    const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
+
+    const draftsFolder = path.join(cwd, 'drafts');
+    await fs.mkdir(draftsFolder, { recursive: true });
+    await fs.writeFile(path.join(draftsFolder, 'index.plain.html'), '<p>Drafts root index</p>');
+
+    nock('https://main--foo--bar.aem.page')
+      .get('/head.html')
+      .reply(404);
+
+    const project = new HelixProject()
+      .withCwd(cwd)
+      .withLogger(console)
+      .withHttpPort(0)
+      .withProxyUrl('https://main--foo--bar.aem.page/')
+      .withHtmlFolder('drafts');
+
+    await project.init();
+    try {
+      await project.start();
+
+      // Request for /drafts/ should serve drafts/index.plain.html
+      const response = await fetch(`http://127.0.0.1:${project.server.port}/drafts/`);
+      assert.equal(response.status, 200);
+
+      const content = await response.text();
+      assert.ok(content.includes('<p>Drafts root index</p>'), 'Should serve index.plain.html for html-folder root');
+    } finally {
+      await project.stop();
+    }
+  });
 });
