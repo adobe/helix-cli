@@ -17,6 +17,7 @@ import { HelixProject } from './server/HelixProject.js';
 import GitUtils from './git-utils.js';
 import pkgJson from './package.cjs';
 import { AbstractServerCommand } from './abstract-server.cmd.js';
+import { checkForUpdates } from './update-check.js';
 
 export default class UpCommand extends AbstractServerCommand {
   withLiveReload(value) {
@@ -120,6 +121,11 @@ export default class UpCommand extends AbstractServerCommand {
     this.log.info(chalk`{yellow  / ___ |/ /___/ /  / /  (__  ) / / / / / / /_/ / / /_/ / /_/ /_/ / /}`);
     this.log.info(chalk`{yellow /_/  |_/_____/_/  /_/  /____/_/_/ /_/ /_/\\__,_/_/\\__,_/\\__/\\____/_/}`);
     this.log.info('');
+
+    // Check for updates asynchronously (non-blocking)
+    checkForUpdates('@adobe/aem-cli', pkgJson.version, this.log).catch(() => {
+      // Silently ignore errors
+    });
 
     const ref = await GitUtils.getBranch(this.directory);
     this._gitUrl = await GitUtils.getOriginURL(this.directory, { ref });
