@@ -1,3 +1,10 @@
+## [16.16.2](https://github.com/adobe/helix-cli/compare/v16.16.1...v16.16.2) (2025-11-14)
+
+
+### Bug Fixes
+
+* **html-folder:** add missing <title> tag for .plain.html files ([c7fe861](https://github.com/adobe/helix-cli/commit/c7fe8619a89acea24c86076cfa17af506a4d257d))
+
 ## [16.16.1](https://github.com/adobe/helix-cli/compare/v16.16.0...v16.16.1) (2025-11-14)
 
 
