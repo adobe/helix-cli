@@ -725,6 +725,11 @@ window.LiveReloadOptions = {
     const ogFields = ['title', 'description', 'image', 'url'];
     let metaTags = '';
 
+    // Add <title> tag if title exists
+    if (title) {
+      metaTags += `<title>${utils.escapeHtml(title)}</title>`;
+    }
+
     // eslint-disable-next-line no-restricted-syntax
     for (const [key, value] of Object.entries(finalMetadata)) {
       // Skip empty values

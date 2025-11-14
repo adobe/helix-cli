@@ -492,6 +492,7 @@ describe('Helix Server - HTML Folder', () => {
 
       const content = await response.text();
       // Verify meta tags are present
+      assert.ok(content.includes('<title>Test Page Title</title>'), 'Should have title tag');
       assert.ok(content.includes('<meta name="title" content="Test Page Title">'), 'Should have standard title meta tag');
       assert.ok(content.includes('<meta property="og:title" content="Test Page Title">'), 'Should have og:title meta tag');
       assert.ok(content.includes('<meta name="description" content="This is a test description">'), 'Should have standard description meta tag');
@@ -869,6 +870,7 @@ describe('Helix Server - HTML Folder', () => {
       const content = await response.text();
 
       // Title should include suffix
+      assert.ok(content.includes('<title>My Page | My Site</title>'), 'Should have title tag with suffix');
       assert.ok(content.includes('<meta name="title" content="My Page | My Site">'), 'Should append suffix to title');
       assert.ok(content.includes('<meta property="og:title" content="My Page | My Site">'), 'Should have og:title with suffix');
       assert.ok(!content.includes('title:suffix'), 'Should not include title:suffix as separate meta tag');
