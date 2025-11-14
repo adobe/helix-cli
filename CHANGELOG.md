@@ -1,3 +1,10 @@
+## [16.16.1](https://github.com/adobe/helix-cli/compare/v16.16.0...v16.16.1) (2025-11-14)
+
+
+### Bug Fixes
+
+* **html-folder:** support index files for directory requests with trailing slash ([#2632](https://github.com/adobe/helix-cli/issues/2632)) ([55d782d](https://github.com/adobe/helix-cli/commit/55d782db744a43841fb9da08354a8d22d8d14dd7))
+
 # [16.16.0](https://github.com/adobe/helix-cli/compare/v16.15.13...v16.16.0) (2025-11-13)
 
 
