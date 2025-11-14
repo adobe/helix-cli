@@ -40,13 +40,16 @@ export async function checkForUpdates(packageName, currentVersion, logger) {
     const latestVersion = data.version;
 
     if (latestVersion && semver.gt(latestVersion, currentVersion)) {
+      const updateMsg = `Update available! ${currentVersion} → ${latestVersion}`;
+      const installMsg = `npm install -g ${packageName}`;
+
       logger.warn('');
-      logger.warn(chalk`{yellow ┌─────────────────────────────────────────────────────────────┐}`);
+      logger.warn(chalk`{yellow ╭─────────────────────────────────────────────────────────────╮}`);
       logger.warn(chalk`{yellow │                                                             │}`);
-      logger.warn(chalk`{yellow │   Update available! ${currentVersion} → ${latestVersion}                      │}`);
-      logger.warn(chalk`{yellow │   Run {cyan npm install -g ${packageName}} to update   │}`);
+      logger.warn(chalk`{yellow │   ${updateMsg.padEnd(57)} │}`);
+      logger.warn(chalk`{yellow │   Run {cyan ${installMsg}} to update${' '.repeat(61 - installMsg.length - 17)} │}`);
       logger.warn(chalk`{yellow │                                                             │}`);
-      logger.warn(chalk`{yellow └─────────────────────────────────────────────────────────────┘}`);
+      logger.warn(chalk`{yellow ╰─────────────────────────────────────────────────────────────╯}`);
       logger.warn('');
     }
   } catch (error) {
