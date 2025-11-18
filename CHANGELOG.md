@@ -1,3 +1,10 @@
+## [16.16.3](https://github.com/adobe/helix-cli/compare/v16.16.2...v16.16.3) (2025-11-18)
+
+
+### Bug Fixes
+
+* **deps:** update dependency glob to v11.1.0 [security] ([#2639](https://github.com/adobe/helix-cli/issues/2639)) ([7021b7b](https://github.com/adobe/helix-cli/commit/7021b7b049b6e8ff38a45f840cf632e6552be948))
+
 ## [16.16.2](https://github.com/adobe/helix-cli/compare/v16.16.1...v16.16.2) (2025-11-14)
 
 
