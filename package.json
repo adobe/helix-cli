@@ -47,7 +47,7 @@
     "@adobe/helix-log": "7.0.0",
     "@adobe/helix-shared-config": "11.1.12",
     "@adobe/helix-shared-git": "3.0.20",
-    "@adobe/helix-shared-indexer": "2.2.5",
+    "@adobe/helix-shared-indexer": "2.2.6",
     "camelcase": "8.0.0",
     "chalk-template": "1.1.2",
     "chokidar": "4.0.3",
@@ -81,7 +81,7 @@
     "yargs": "18.0.0"
   },
   "devDependencies": {
-    "@adobe/eslint-config-helix": "3.0.13",
+    "@adobe/eslint-config-helix": "3.0.14",
     "@eslint/config-helpers": "0.4.1",
     "@semantic-release/changelog": "6.0.3",
     "@semantic-release/git": "10.0.1",
