@@ -26,7 +26,7 @@ export async function checkForUpdates(packageName, currentVersion, logger) {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
 
-    const response = await fetch(`https://registry.npmjs.org/${packageName}/latest`, {
+    const response = await fetch(`https://registry.npmjs.org/${packageName}`, {
       signal: controller.signal,
     });
     clearTimeout(timeoutId);
@@ -37,17 +37,21 @@ export async function checkForUpdates(packageName, currentVersion, logger) {
     }
 
     const data = await response.json();
-    const latestVersion = data.version;
+    const latestVersion = data['dist-tags']?.latest;
 
     if (latestVersion && semver.gt(latestVersion, currentVersion)) {
+      const boxWidth = 61;
       const updateMsg = `Update available! ${currentVersion} → ${latestVersion}`;
-      const installMsg = `npm install -g ${packageName}`;
+      const installMsg = `Run npm install -g ${packageName} to update`;
+
+      const updatePadding = ' '.repeat(Math.max(0, boxWidth - updateMsg.length - 4));
+      const installPadding = ' '.repeat(Math.max(0, boxWidth - installMsg.length - 4));
 
       logger.warn('');
       logger.warn(chalk`{yellow ╭─────────────────────────────────────────────────────────────╮}`);
       logger.warn(chalk`{yellow │                                                             │}`);
-      logger.warn(chalk`{yellow │   ${updateMsg.padEnd(57)} │}`);
-      logger.warn(chalk`{yellow │   Run {cyan ${installMsg}} to update${' '.repeat(61 - installMsg.length - 17)} │}`);
+      logger.warn(chalk`{yellow │   ${updateMsg}${updatePadding} │}`);
+      logger.warn(chalk`{yellow │   ${installMsg}${installPadding} │}`);
       logger.warn(chalk`{yellow │                                                             │}`);
       logger.warn(chalk`{yellow ╰─────────────────────────────────────────────────────────────╯}`);
       logger.warn('');

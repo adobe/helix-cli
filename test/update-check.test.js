@@ -39,9 +39,11 @@ describe('Update Check Tests', () => {
 
   it('should notify when newer version is available', async () => {
     nock('https://registry.npmjs.org')
-      .get('/@adobe/aem-cli/latest')
+      .get('/@adobe/aem-cli')
       .reply(200, {
-        version: '99.99.99',
+        'dist-tags': {
+          latest: '99.99.99',
+        },
       });
 
     await checkForUpdates('@adobe/aem-cli', '1.0.0', mockLogger);
@@ -60,9 +62,11 @@ describe('Update Check Tests', () => {
 
   it('should not notify when current version is latest', async () => {
     nock('https://registry.npmjs.org')
-      .get('/@adobe/aem-cli/latest')
+      .get('/@adobe/aem-cli')
       .reply(200, {
-        version: '1.0.0',
+        'dist-tags': {
+          latest: '1.0.0',
+        },
       });
 
     await checkForUpdates('@adobe/aem-cli', '1.0.0', mockLogger);
@@ -73,9 +77,11 @@ describe('Update Check Tests', () => {
 
   it('should not notify when current version is newer (pre-release)', async () => {
     nock('https://registry.npmjs.org')
-      .get('/@adobe/aem-cli/latest')
+      .get('/@adobe/aem-cli')
       .reply(200, {
-        version: '1.0.0',
+        'dist-tags': {
+          latest: '1.0.0',
+        },
       });
 
     await checkForUpdates('@adobe/aem-cli', '2.0.0', mockLogger);
@@ -86,7 +92,7 @@ describe('Update Check Tests', () => {
 
   it('should handle network errors gracefully', async () => {
     nock('https://registry.npmjs.org')
-      .get('/@adobe/aem-cli/latest')
+      .get('/@adobe/aem-cli')
       .replyWithError('Network error');
 
     // Should not throw
@@ -101,9 +107,13 @@ describe('Update Check Tests', () => {
     this.timeout(10000);
 
     nock('https://registry.npmjs.org')
-      .get('/@adobe/aem-cli/latest')
+      .get('/@adobe/aem-cli')
       .delayConnection(6000) // 6 second delay, longer than 5 second timeout in checkForUpdates
-      .reply(200, { version: '99.99.99' });
+      .reply(200, {
+        'dist-tags': {
+          latest: '99.99.99',
+        },
+      });
 
     // Should not throw
     await checkForUpdates('@adobe/aem-cli', '1.0.0', mockLogger);
@@ -114,7 +124,7 @@ describe('Update Check Tests', () => {
 
   it('should handle 404 responses gracefully', async () => {
     nock('https://registry.npmjs.org')
-      .get('/@adobe/aem-cli/latest')
+      .get('/@adobe/aem-cli')
       .reply(404);
 
     // Should not throw
@@ -126,7 +136,7 @@ describe('Update Check Tests', () => {
 
   it('should handle malformed response gracefully', async () => {
     nock('https://registry.npmjs.org')
-      .get('/@adobe/aem-cli/latest')
+      .get('/@adobe/aem-cli')
       .reply(200, 'not json');
 
     // Should not throw
@@ -138,7 +148,7 @@ describe('Update Check Tests', () => {
 
   it('should handle missing version in response gracefully', async () => {
     nock('https://registry.npmjs.org')
-      .get('/@adobe/aem-cli/latest')
+      .get('/@adobe/aem-cli')
       .reply(200, {});
 
     // Should not throw
