@@ -1,3 +1,91 @@
+## [16.16.4](https://github.com/adobe/helix-cli/compare/v16.16.3...v16.16.4) (2025-11-19)
+
+
+### Bug Fixes
+
+* **deps:** update adobe fixes ([#2640](https://github.com/adobe/helix-cli/issues/2640)) ([f9933d2](https://github.com/adobe/helix-cli/commit/f9933d2d35f3b125af208877f4db989149650675))
+
+## [16.16.3](https://github.com/adobe/helix-cli/compare/v16.16.2...v16.16.3) (2025-11-18)
+
+
+### Bug Fixes
+
+* **deps:** update dependency glob to v11.1.0 [security] ([#2639](https://github.com/adobe/helix-cli/issues/2639)) ([7021b7b](https://github.com/adobe/helix-cli/commit/7021b7b049b6e8ff38a45f840cf632e6552be948))
+
+## [16.16.2](https://github.com/adobe/helix-cli/compare/v16.16.1...v16.16.2) (2025-11-14)
+
+
+### Bug Fixes
+
+* **html-folder:** add missing <title> tag for .plain.html files ([c7fe861](https://github.com/adobe/helix-cli/commit/c7fe8619a89acea24c86076cfa17af506a4d257d))
+
+## [16.16.1](https://github.com/adobe/helix-cli/compare/v16.16.0...v16.16.1) (2025-11-14)
+
+
+### Bug Fixes
+
+* **html-folder:** support index files for directory requests with trailing slash ([#2632](https://github.com/adobe/helix-cli/issues/2632)) ([55d782d](https://github.com/adobe/helix-cli/commit/55d782db744a43841fb9da08354a8d22d8d14dd7))
+
+# [16.16.0](https://github.com/adobe/helix-cli/compare/v16.15.13...v16.16.0) (2025-11-13)
+
+
+### Features
+
+* add .plain.html support for HTML folder serving ([#2631](https://github.com/adobe/helix-cli/issues/2631)) ([2186d4c](https://github.com/adobe/helix-cli/commit/2186d4c330f97db86849b9388e119b7d599c9fc1))
+
+## [16.15.13](https://github.com/adobe/helix-cli/compare/v16.15.12...v16.15.13) (2025-11-11)
+
+
+### Bug Fixes
+
+* **deps:** update dependency ini to v6 ([7c37973](https://github.com/adobe/helix-cli/commit/7c37973c45d7d6956bbc3200d46c2015d7e483fe))
+* **deps:** update external fixes ([#2630](https://github.com/adobe/helix-cli/issues/2630)) ([8671a13](https://github.com/adobe/helix-cli/commit/8671a131f4cb1e3d29e318cfb7c3b3326d2cea77))
+
+## [16.15.12](https://github.com/adobe/helix-cli/compare/v16.15.11...v16.15.12) (2025-10-30)
+
+
+### Bug Fixes
+
+* **deps:** update external fixes ([365d90e](https://github.com/adobe/helix-cli/commit/365d90ec1f5bc85bb2bf68a141c7ae0970b449b8))
+* regenerate package-lock.json with all chokidar v3 dependencies ([7681dad](https://github.com/adobe/helix-cli/commit/7681dad542355edd58de5090e13c8e2a783e79f0))
+* regenerate package-lock.json with all missing dependencies ([d0955fe](https://github.com/adobe/helix-cli/commit/d0955feed8591d8599dff61f65231b1d9af6fbe4))
+* update package-lock.json to sync with package.json dependencies ([6a6f392](https://github.com/adobe/helix-cli/commit/6a6f3922175d8e43833ee9283cb8d7559e4cf495))
+
+## [16.15.11](https://github.com/adobe/helix-cli/compare/v16.15.10...v16.15.11) (2025-10-20)
+
+
+### Bug Fixes
+
+* **deps:** update dependency isomorphic-git to v1.34.0 ([#2621](https://github.com/adobe/helix-cli/issues/2621)) ([f2f4784](https://github.com/adobe/helix-cli/commit/f2f47846f7f3f140d0b1e14b6ddb0825c96fda0d))
+
+## [16.15.10](https://github.com/adobe/helix-cli/compare/v16.15.9...v16.15.10) (2025-10-16)
+
+
+### Bug Fixes
+
+* regenerate package-lock.json to fix npm ci failures ([1a9c885](https://github.com/adobe/helix-cli/commit/1a9c885f4567be03d1a5b7e561eb6350f4007d83))
+* remove NPM_TOKEN to enable OIDC trusted publishing ([2ef8251](https://github.com/adobe/helix-cli/commit/2ef8251755ef423bb35987781a6824e8baa23bdf))
+* upgrade @semantic-release/npm to 13.0.0 for OIDC support ([efcef3d](https://github.com/adobe/helix-cli/commit/efcef3ddc87db5a2da2b665151a007cdd5f68dbf))
+* upgrade to @semantic-release/npm@13.1.0-beta.1 for OIDC ([5331bd5](https://github.com/adobe/helix-cli/commit/5331bd5c2ef87c4a41343996a322bbb58c5768f3))
+* use npm overrides to force @semantic-release/npm@13.1.0-beta.1 ([f33209a](https://github.com/adobe/helix-cli/commit/f33209adac25b40af0e4c541e012318cc99e19cc))
+
+## [16.15.9](https://github.com/adobe/helix-cli/compare/v16.15.8...v16.15.9) (2025-10-16)
+
+
+### Bug Fixes
+
+* enable npm trusted publishers with OIDC ([b5dd177](https://github.com/adobe/helix-cli/commit/b5dd177c4d42c50023bf8681ad96810f18e2bd4b))
+
+## [16.15.8](https://github.com/adobe/helix-cli/compare/v16.15.7...v16.15.8) (2025-10-16)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @adobe/helix-shared-config to v11.1.12 ([86729d3](https://github.com/adobe/helix-cli/commit/86729d35c43d5572639a5227ce5c4c077cf6c9f3))
+* **deps:** update external fixes ([d5078f8](https://github.com/adobe/helix-cli/commit/d5078f8fe2ad8b9050af4bfdaf41fc6e5cfefb86))
+* regenerate package-lock.json to fix CI ([7f9daa4](https://github.com/adobe/helix-cli/commit/7f9daa4fa63fffb16c7b9b05b858a9aa20e71da1))
+* regenerate package-lock.json with updated dependencies ([23421da](https://github.com/adobe/helix-cli/commit/23421da7286ddde7e6cef391b2054f161a8a174e))
+
 ## [16.15.7](https://github.com/adobe/helix-cli/compare/v16.15.6...v16.15.7) (2025-10-02)
 
 

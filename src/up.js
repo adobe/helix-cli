@@ -117,7 +117,7 @@ export default function up() {
         })
         .option('html-folder', {
           alias: 'htmlFolder',
-          describe: 'Serve HTML files from this folder without extensions (e.g., /folder/file serves folder/file.html) use this to preview content changes if you do not have access to the authoring system',
+          describe: 'Serve HTML files from this folder without extensions (e.g., /folder/file serves folder/file.html or folder/file.plain.html) use this to preview content changes if you do not have access to the authoring system',
           type: 'string',
         })
 

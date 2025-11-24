@@ -155,6 +155,90 @@ export class HelixServer extends BaseServer {
   }
 
   /**
+   * Resolves which HTML file to serve from the HTML folder
+   * @param {string} relativePath path relative to HTML folder
+   * @returns {Promise<{file: string, isPlain: boolean}|null>} resolved file info or null
+   */
+  async resolveHtmlFolderFile(relativePath) {
+    // Security check: prevent path traversal with /../ anywhere in the path
+    if (relativePath.includes('/../')) {
+      return null;
+    }
+
+    // Don't process if it already has an extension
+    if (relativePath.includes('.')) {
+      return null;
+    }
+
+    // Try .html first
+    const htmlFile = path.resolve(
+      this._project.directory,
+      this._htmlFolder,
+      `${relativePath}.html`,
+    );
+
+    if (!utils.validatePathSecurity(htmlFile, this._project.directory)) {
+      return null;
+    }
+
+    try {
+      const stats = await lstat(htmlFile);
+      if (stats.isFile()) {
+        return { file: htmlFile, isPlain: false };
+      }
+    } catch (e) {
+      // .html not found, try .plain.html
+    }
+
+    // Try .plain.html
+    const plainHtmlFile = path.resolve(
+      this._project.directory,
+      this._htmlFolder,
+      `${relativePath}.plain.html`,
+    );
+
+    if (!utils.validatePathSecurity(plainHtmlFile, this._project.directory)) {
+      return null;
+    }
+
+    try {
+      const stats = await lstat(plainHtmlFile);
+      if (stats.isFile()) {
+        return { file: plainHtmlFile, isPlain: true };
+      }
+    } catch (e) {
+      // Neither exists
+    }
+
+    return null;
+  }
+
+  /**
+   * Transforms .plain.html content into complete HTML with head.html
+   * @param {string} plainHtmlFile path to .plain.html file
+   * @returns {Promise<string>} complete HTML document
+   */
+  async transformPlainHtml(plainHtmlFile) {
+    const plainContent = await readFile(plainHtmlFile, 'utf-8');
+
+    // Extract metadata and clean content
+    const { content, metadata } = utils.extractMetadataBlock(plainContent);
+
+    // Extract default metadata values from content
+    const defaults = utils.extractDefaultMetadata(content);
+
+    // Get head HTML using existing HeadHtmlSupport
+    await this._project.headHtml.update();
+    const headHtml = this._project.headHtml.localHtml || '';
+
+    // Generate meta tags from metadata with defaults
+    const metaTags = utils.generateMetaTags(metadata, defaults);
+
+    // Wrap in complete HTML structure
+    return utils.wrapPlainHtml(content, headHtml, metaTags);
+  }
+
+  /**
    * HTML Folder handler - serves HTML files without extensions
    * @param {Express.Request} req request
    * @param {Express.Response} res response
@@ -175,43 +259,19 @@ export class HelixServer extends BaseServer {
     }
 
     // Extract the path within the HTML folder
-    const relativePath = pathname.slice(folderPrefix.length);
+    let relativePath = pathname.slice(folderPrefix.length);
 
-    // Security check: prevent path traversal with /../ anywhere in the path
-    if (relativePath.includes('/../')) {
+    // Handle directory requests (trailing slash) by appending 'index'
+    if (relativePath === '' || relativePath.endsWith('/')) {
+      relativePath = `${relativePath}index`.replace(/\/+/g, '/');
+    }
+
+    // Resolve which file to serve (.html or .plain.html)
+    const resolvedFile = await this.resolveHtmlFolderFile(relativePath);
+    if (!resolvedFile) {
       return next();
     }
 
-    // Don't process if it already has an extension
-    if (relativePath.includes('.')) {
-      return next();
-    }
-
-    // Build the HTML file path - only support .html extension
-    const htmlFile = path.resolve(this._project.directory, this._htmlFolder, `${relativePath}.html`);
-
-    // Security check: ensure the file is within the project directory
-    // Use resolve to normalize both paths before comparing
-    const resolvedProjectDir = path.resolve(this._project.directory);
-    const relPath = path.relative(resolvedProjectDir, htmlFile);
-
-    // Only check for path traversal - remove the incorrect isAbsolute check
-    if (relPath.startsWith('..')) {
-      return next();
-    }
-
-    // Check if the HTML file exists and is a file
-    try {
-      const stats = await lstat(htmlFile);
-      if (!stats.isFile()) {
-        return next();
-      }
-    } catch (e) {
-      // File doesn't exist, continue to next handler
-      return next();
-    }
-
-    const sendFile = promisify(res.sendFile).bind(res);
     const { log } = this;
     const liveReload = this._liveReload;
 
@@ -220,24 +280,33 @@ export class HelixServer extends BaseServer {
       liveReload.startRequest(req.id, req.url);
     }
 
-    // Serve the file
-    // Use the root option to specify the base directory for sendFile
-    // This prevents issues with worktrees in subdirectories
-    await sendFile(path.basename(htmlFile), {
-      root: path.dirname(htmlFile),
-      dotfiles: 'deny',
-      headers: {
-        'access-control-allow-origin': '*',
-        'content-type': 'text/html; charset=utf-8',
-      },
-    });
+    // Load content (handle .plain.html transformation)
+    let htmlContent;
+    if (resolvedFile.isPlain) {
+      htmlContent = await this.transformPlainHtml(resolvedFile.file);
+    } else {
+      htmlContent = await readFile(resolvedFile.file, 'utf-8');
+    }
 
+    // Inject live reload script
     if (liveReload) {
-      liveReload.registerFile(req.id, htmlFile);
+      htmlContent = utils.injectLiveReloadScript(htmlContent, this);
+    }
+
+    // Send response
+    res.set({
+      'content-type': 'text/html; charset=utf-8',
+      'access-control-allow-origin': '*',
+    });
+    res.send(htmlContent);
+
+    // Register with live reload
+    if (liveReload) {
+      liveReload.registerFile(req.id, resolvedFile.file);
       liveReload.endRequest(req.id);
     }
 
-    log.debug(`served HTML file ${htmlFile} for ${req.url}`);
+    log.debug(`served HTML file ${resolvedFile.file} for ${req.url}`);
     return undefined;
   }
 
