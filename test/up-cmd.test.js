@@ -23,6 +23,7 @@ import {
 import UpCommand from '../src/up.cmd.js';
 import GitUtils from '../src/git-utils.js';
 import { getFetch } from '../src/fetch-utils.js';
+import pkgJson from '../src/package.cjs';
 
 const TEST_DIR = path.resolve(__rootdir, 'test', 'fixtures', 'project');
 
@@ -42,7 +43,7 @@ describe('Integration test for up command with helix pages', function suite() {
       .get('/@adobe/aem-cli')
       .reply(200, {
         'dist-tags': {
-          latest: '16.16.1', // Same as current version to avoid update notification
+          latest: pkgJson.version, // Same as current version to avoid update notification
         },
       });
     await fse.copy(TEST_DIR, testDir);
@@ -557,7 +558,7 @@ describe('Integration test for up command with git worktrees', function suite() 
       .get('/@adobe/aem-cli')
       .reply(200, {
         'dist-tags': {
-          latest: '16.16.1', // Same as current version to avoid update notification
+          latest: pkgJson.version, // Same as current version to avoid update notification
         },
       });
   });
@@ -727,7 +728,7 @@ describe('Integration test for up command with cache', function suite() {
       .get('/@adobe/aem-cli')
       .reply(200, {
         'dist-tags': {
-          latest: '16.16.1', // Same as current version to avoid update notification
+          latest: pkgJson.version, // Same as current version to avoid update notification
         },
       });
   });
