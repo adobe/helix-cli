@@ -37,6 +37,14 @@ describe('Integration test for up command with helix pages', function suite() {
     testDir = path.resolve(testRoot, 'project');
     nock = new Nock();
     nock.enableNetConnect(/127.0.0.1/);
+    // Mock npm registry for update check
+    nock('https://registry.npmjs.org')
+      .get('/@adobe/aem-cli')
+      .reply(200, {
+        'dist-tags': {
+          latest: '16.16.1', // Same as current version to avoid update notification
+        },
+      });
     await fse.copy(TEST_DIR, testDir);
   });
 
@@ -544,6 +552,14 @@ describe('Integration test for up command with git worktrees', function suite() 
     await fse.copy(TEST_DIR, testDir);
     nock = new Nock();
     nock.enableNetConnect(/127.0.0.1/);
+    // Mock npm registry for update check
+    nock('https://registry.npmjs.org')
+      .get('/@adobe/aem-cli')
+      .reply(200, {
+        'dist-tags': {
+          latest: '16.16.1', // Same as current version to avoid update notification
+        },
+      });
   });
 
   afterEach(async () => {
@@ -706,6 +722,14 @@ describe('Integration test for up command with cache', function suite() {
     testDir = path.resolve(testRoot, 'project');
     await fse.copy(TEST_DIR, testDir);
     nock = new Nock();
+    // Mock npm registry for update check
+    nock('https://registry.npmjs.org')
+      .get('/@adobe/aem-cli')
+      .reply(200, {
+        'dist-tags': {
+          latest: '16.16.1', // Same as current version to avoid update notification
+        },
+      });
   });
 
   afterEach(async () => {
