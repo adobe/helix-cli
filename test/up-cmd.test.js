@@ -38,9 +38,10 @@ describe('Integration test for up command with helix pages', function suite() {
     testDir = path.resolve(testRoot, 'project');
     nock = new Nock();
     nock.enableNetConnect(/127.0.0.1/);
-    // Mock npm registry for update check
+    // Mock npm registry for update check (optional - not all tests trigger it)
     nock('https://registry.npmjs.org')
       .get('/@adobe/aem-cli')
+      .optionally()
       .reply(200, {
         'dist-tags': {
           latest: pkgJson.version, // Same as current version to avoid update notification
@@ -553,9 +554,10 @@ describe('Integration test for up command with git worktrees', function suite() 
     await fse.copy(TEST_DIR, testDir);
     nock = new Nock();
     nock.enableNetConnect(/127.0.0.1/);
-    // Mock npm registry for update check
+    // Mock npm registry for update check (optional - not all tests trigger it)
     nock('https://registry.npmjs.org')
       .get('/@adobe/aem-cli')
+      .optionally()
       .reply(200, {
         'dist-tags': {
           latest: pkgJson.version, // Same as current version to avoid update notification
@@ -723,9 +725,10 @@ describe('Integration test for up command with cache', function suite() {
     testDir = path.resolve(testRoot, 'project');
     await fse.copy(TEST_DIR, testDir);
     nock = new Nock();
-    // Mock npm registry for update check
+    // Mock npm registry for update check (optional - not all tests trigger it)
     nock('https://registry.npmjs.org')
       .get('/@adobe/aem-cli')
+      .optionally()
       .reply(200, {
         'dist-tags': {
           latest: pkgJson.version, // Same as current version to avoid update notification
