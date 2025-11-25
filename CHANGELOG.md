@@ -1,3 +1,10 @@
+## [16.16.5](https://github.com/adobe/helix-cli/compare/v16.16.4...v16.16.5) (2025-11-25)
+
+
+### Bug Fixes
+
+* **deps:** update dependency camelcase to v9 ([3f41df8](https://github.com/adobe/helix-cli/commit/3f41df82738d2644999b7b59ea2878adb18bd127))
+
 ## [16.16.4](https://github.com/adobe/helix-cli/compare/v16.16.3...v16.16.4) (2025-11-19)
 
 
