@@ -15,7 +15,6 @@ import assert from 'assert';
 import fs from 'fs/promises';
 import path from 'path';
 import sinon from 'sinon';
-import * as xdgBasedir from 'xdg-basedir';
 import { Nock } from './utils.js';
 import { checkForUpdates } from '../src/update-check.js';
 
