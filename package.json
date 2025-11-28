@@ -78,6 +78,7 @@
     "shelljs": "0.10.0",
     "unified": "11.0.5",
     "uuid": "13.0.0",
+    "xdg-basedir": "5.1.0",
     "yargs": "18.0.0"
   },
   "devDependencies": {
