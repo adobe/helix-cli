@@ -1,3 +1,10 @@
+## [16.16.7](https://github.com/adobe/helix-cli/compare/v16.16.6...v16.16.7) (2025-11-28)
+
+
+### Bug Fixes
+
+* **server:** transform plain text 401/403 to Chrome-compatible HTML for sidekick ([#2414](https://github.com/adobe/helix-cli/issues/2414)) ([a261c6d](https://github.com/adobe/helix-cli/commit/a261c6dfa7a44ae44cd68bcf65f1a3473e1607cb)), closes [#2601](https://github.com/adobe/helix-cli/issues/2601)
+
 ## [16.16.6](https://github.com/adobe/helix-cli/compare/v16.16.5...v16.16.6) (2025-11-26)
 
 
