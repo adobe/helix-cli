@@ -66,7 +66,7 @@
     "ignore": "7.0.5",
     "ini": "6.0.0",
     "isomorphic-git": "1.35.0",
-    "jose": "6.1.1",
+    "jose": "6.1.2",
     "livereload-js": "4.0.2",
     "node-fetch": "3.3.2",
     "open": "10.2.0",
@@ -83,7 +83,7 @@
   },
   "devDependencies": {
     "@adobe/eslint-config-helix": "3.0.14",
-    "@eslint/config-helpers": "0.4.2",
+    "@eslint/config-helpers": "0.5.0",
     "@semantic-release/changelog": "6.0.3",
     "@semantic-release/git": "10.0.1",
     "c8": "10.1.3",
