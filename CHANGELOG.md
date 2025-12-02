@@ -1,3 +1,10 @@
+## [16.16.9](https://github.com/adobe/helix-cli/compare/v16.16.8...v16.16.9) (2025-12-02)
+
+
+### Bug Fixes
+
+* **deps:** update dependency express to v5.2.0 [security] ([#2646](https://github.com/adobe/helix-cli/issues/2646)) ([fc4ec53](https://github.com/adobe/helix-cli/commit/fc4ec5330ac4f920a21408d6854261f1c72f2d48))
+
 ## [16.16.8](https://github.com/adobe/helix-cli/compare/v16.16.7...v16.16.8) (2025-12-01)
 
 
