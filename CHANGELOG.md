@@ -1,3 +1,10 @@
+## [16.16.12](https://github.com/adobe/helix-cli/compare/v16.16.11...v16.16.12) (2025-12-15)
+
+
+### Bug Fixes
+
+* **deps:** update dependency cookie to v1.1.1 ([fadf59f](https://github.com/adobe/helix-cli/commit/fadf59f892c0e207a16b68ce32a479befe7c3799))
+
 ## [16.16.11](https://github.com/adobe/helix-cli/compare/v16.16.10...v16.16.11) (2025-12-08)
 
 
