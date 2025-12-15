@@ -52,7 +52,7 @@
     "chalk-template": "1.1.2",
     "chokidar": "4.0.3",
     "compression": "1.8.1",
-    "cookie": "1.0.2",
+    "cookie": "1.1.1",
     "cookie-parser": "1.4.7",
     "dotenv": "17.2.3",
     "express": "5.2.0",
