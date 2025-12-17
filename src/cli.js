@@ -14,6 +14,7 @@ import camelcase from 'camelcase';
 import path from 'path';
 import chalk from 'chalk-template';
 import { resetContext } from './fetch-utils.js';
+import pkgJson from './package.cjs';
 
 const MIN_MSG = 'You need at least one command.';
 
@@ -124,6 +125,7 @@ export default class CLI {
     await logArgs(argv)
       .strictCommands(true)
       .scriptName('aem')
+      .version(pkgJson.version)
       .usage('Usage: $0 <command> [options]')
       .parserConfiguration({ 'camel-case-expansion': false })
       .env('AEM_')
