@@ -1,3 +1,10 @@
+## [16.16.15](https://github.com/adobe/helix-cli/compare/v16.16.14...v16.16.15) (2025-12-17)
+
+
+### Bug Fixes
+
+* use correct package version ([#2655](https://github.com/adobe/helix-cli/issues/2655)) ([a5eac55](https://github.com/adobe/helix-cli/commit/a5eac559b4d3722c577883c272647c2c811b75c3)), closes [#2654](https://github.com/adobe/helix-cli/issues/2654)
+
 ## [16.16.14](https://github.com/adobe/helix-cli/compare/v16.16.13...v16.16.14) (2025-12-17)
 
 
