@@ -65,7 +65,7 @@
     "https-proxy-agent": "7.0.6",
     "ignore": "7.0.5",
     "ini": "6.0.0",
-    "isomorphic-git": "1.35.1",
+    "isomorphic-git": "1.36.1",
     "jose": "6.1.3",
     "livereload-js": "4.0.2",
     "node-fetch": "3.3.2",
