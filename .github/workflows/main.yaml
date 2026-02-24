@@ -89,7 +89,7 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version: '24.13.0'
-      - run: npm ci
+      - run: npm i
       - name: Check npm version
         run: npm --version
       - run: npm run semantic-release
