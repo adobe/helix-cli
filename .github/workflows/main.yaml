@@ -21,7 +21,7 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version: '24.x'
-      - run: npm ci
+      - run: npm i
 
       # Sub-project setup and testing (conditional)
       - name: Install browser injectable dependencies
@@ -67,7 +67,7 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version: '24.x'
-      - run: npm ci
+      - run: npm i
       - run: git config --global user.email "test@project-helix.io" && git config --global user.name "Test Build"
       - run: git config --global protocol.file.allow always
       - name: Run Windows Tests
