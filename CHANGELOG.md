@@ -1,3 +1,12 @@
+## [16.16.22](https://github.com/adobe/helix-cli/compare/v16.16.21...v16.16.22) (2026-02-24)
+
+
+### Bug Fixes
+
+* **deps:** update adobe fixes ([#2675](https://github.com/adobe/helix-cli/issues/2675)) ([abe3bad](https://github.com/adobe/helix-cli/commit/abe3bada3e5108c5af472f8d30cbfdc0ffd25625))
+* **deps:** update dependency proxy-from-env to v2 ([#2676](https://github.com/adobe/helix-cli/issues/2676)) ([506e7fe](https://github.com/adobe/helix-cli/commit/506e7fe4bb7c3b03749ebc6cf3a9c89ea4ebd28f))
+* **deps:** update external fixes ([#2674](https://github.com/adobe/helix-cli/issues/2674)) ([8c813ba](https://github.com/adobe/helix-cli/commit/8c813baa125d803256f8675b98f2b463139a4257))
+
 ## [16.16.21](https://github.com/adobe/helix-cli/compare/v16.16.20...v16.16.21) (2026-02-10)
 
 
