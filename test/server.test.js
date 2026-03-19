@@ -1141,4 +1141,140 @@ describe('Helix Server', () => {
       }
     });
   });
+
+  describe('aem-content/ serving', () => {
+    it('serves a plain file from aem-content/ without hitting the proxy', async () => {
+      const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
+      await fse.ensureDir(path.join(cwd, 'aem-content', 'blog'));
+      await fse.writeFile(path.join(cwd, 'aem-content', 'blog', 'post.json'), '{"title":"local"}');
+
+      const project = new HelixProject()
+        .withCwd(cwd)
+        .withProxyUrl('http://main--foo--bar.aem.page')
+        .withHttpPort(0);
+      await project.init();
+      try {
+        await project.start();
+        const resp = await getFetch()(`http://127.0.0.1:${project.server.port}/blog/post.json`);
+        assert.strictEqual(resp.status, 200);
+        const body = await resp.text();
+        assert.strictEqual(body, '{"title":"local"}');
+      } finally {
+        await project.stop();
+      }
+    });
+
+    it('serves a body-only HTML file from aem-content/ and injects head.html', async () => {
+      const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
+      await fse.ensureDir(path.join(cwd, 'aem-content'));
+      // aem-content files are plain HTML (body only, no <head>) as stored by da.live
+      await fse.writeFile(
+        path.join(cwd, 'aem-content', 'index.html'),
+        '<body><header></header><main><p>local content</p></main><footer></footer></body>',
+      );
+      await fse.writeFile(
+        path.join(cwd, 'head.html'),
+        '<link rel="stylesheet" href="/styles.css"/>',
+      );
+
+      nock('http://main--foo--bar.aem.page')
+        .get('/head.html')
+        .reply(200, '', { 'content-type': 'text/html' });
+
+      const project = new HelixProject()
+        .withCwd(cwd)
+        .withProxyUrl('http://main--foo--bar.aem.page')
+        .withHttpPort(0);
+      await project.init();
+      try {
+        await project.start();
+        const resp = await getFetch()(`http://127.0.0.1:${project.server.port}/index.html`);
+        assert.strictEqual(resp.status, 200);
+        const body = await resp.text();
+        assert.ok(body.includes('local content'));
+        assert.ok(body.includes('<head>'));
+        assert.ok(body.includes('/styles.css'));
+      } finally {
+        await project.stop();
+      }
+    });
+
+    it('falls through to proxy when file is not in aem-content/', async () => {
+      const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
+      await fse.ensureDir(path.join(cwd, 'aem-content'));
+      // aem-content/ exists but does NOT contain /page.html
+
+      nock('http://main--foo--bar.aem.page')
+        .get('/page.html')
+        .reply(200, '<html><body>from proxy</body></html>', { 'content-type': 'text/html' })
+        .get('/head.html')
+        .reply(200, '', { 'content-type': 'text/html' });
+
+      const project = new HelixProject()
+        .withCwd(cwd)
+        .withProxyUrl('http://main--foo--bar.aem.page')
+        .withHttpPort(0);
+      await project.init();
+      try {
+        await project.start();
+        const resp = await getFetch()(`http://127.0.0.1:${project.server.port}/page.html`);
+        assert.strictEqual(resp.status, 200);
+        const body = await resp.text();
+        assert.ok(body.includes('from proxy'));
+      } finally {
+        await project.stop();
+      }
+    });
+
+    it('does not serve directories from aem-content/', async () => {
+      const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
+      await fse.ensureDir(path.join(cwd, 'aem-content', 'blog'));
+
+      nock('http://main--foo--bar.aem.page')
+        .get('/blog')
+        .reply(200, '<html><body>proxy blog index</body></html>', { 'content-type': 'text/html' })
+        .get('/head.html')
+        .reply(200, '', { 'content-type': 'text/html' });
+
+      const project = new HelixProject()
+        .withCwd(cwd)
+        .withProxyUrl('http://main--foo--bar.aem.page')
+        .withHttpPort(0);
+      await project.init();
+      try {
+        await project.start();
+        const resp = await getFetch()(`http://127.0.0.1:${project.server.port}/blog`);
+        // Should not serve the directory — fall through to proxy
+        const body = await resp.text();
+        assert.ok(body.includes('proxy blog index'));
+      } finally {
+        await project.stop();
+      }
+    });
+
+    it('prefers aem-content/ over proxy even when project dir has no such file', async () => {
+      const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
+      await fse.ensureDir(path.join(cwd, 'aem-content'));
+      await fse.writeFile(
+        path.join(cwd, 'aem-content', 'data.json'),
+        '{"source":"aem-content"}',
+      );
+
+      // Proxy should NOT be called for this path
+      const project = new HelixProject()
+        .withCwd(cwd)
+        .withProxyUrl('http://main--foo--bar.aem.page')
+        .withHttpPort(0);
+      await project.init();
+      try {
+        await project.start();
+        const resp = await getFetch()(`http://127.0.0.1:${project.server.port}/data.json`);
+        assert.strictEqual(resp.status, 200);
+        const body = await resp.text();
+        assert.strictEqual(body, '{"source":"aem-content"}');
+      } finally {
+        await project.stop();
+      }
+    });
+  });
 });

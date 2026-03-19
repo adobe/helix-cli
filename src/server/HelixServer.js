@@ -356,6 +356,51 @@ export class HelixServer extends BaseServer {
 
     // try to serve static
     try {
+      // Check aem-content/ first — prefer local content checkout over proxy
+      const contentDir = path.join(this._project.directory, 'aem-content');
+      const contentFilePath = path.join(contentDir, ctx.path);
+      if (!path.relative(contentDir, contentFilePath).startsWith('..')) {
+        try {
+          const contentStat = await lstat(contentFilePath);
+          if (contentStat.isFile()) {
+            if (contentFilePath.endsWith('.html')) {
+              let htmlContent = await readFile(contentFilePath, 'utf-8');
+              // aem-content files are plain HTML (body only, no <head>)
+              // wrap with a full document and inject local head.html
+              if (!htmlContent.includes('<head>')) {
+                await this._project.headHtml.update();
+                const headHtml = this._project.headHtml.localHtml || '';
+                htmlContent = `<html><head>${headHtml}</head>${htmlContent}</html>`;
+              } else {
+                await this._project.headHtml.setCookie(req.headers.cookie);
+                htmlContent = await this._project.headHtml.replace(htmlContent);
+              }
+              if (liveReload) {
+                htmlContent = utils.injectLiveReloadScript(htmlContent, this);
+                liveReload.registerFile(ctx.requestId, contentFilePath);
+              }
+              res.set({
+                'content-type': 'text/html; charset=utf-8',
+                'access-control-allow-origin': '*',
+              });
+              res.send(htmlContent);
+            } else {
+              await sendFile(contentFilePath, {
+                dotfiles: 'allow',
+                headers: { 'access-control-allow-origin': '*' },
+              });
+              if (liveReload) {
+                liveReload.registerFile(ctx.requestId, contentFilePath);
+              }
+            }
+            log.debug(`${pfx}served from aem-content/: ${ctx.path}`);
+            return;
+          }
+        } catch (e) {
+          log.debug(`${pfx}aem-content/ miss for ${ctx.path}: ${e.code}`);
+        }
+      }
+
       // Check if it's an HTML file and live reload is enabled
       if (liveReload && filePath.endsWith('.html')) {
         // Read the HTML file and inject the livereload script
