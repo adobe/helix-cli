@@ -28,6 +28,7 @@ import {
 import { getFetch } from '../src/fetch-utils.js';
 import { getSiteTokenFromFile } from '../src/config/config-utils.js';
 import packageJson from '../src/package.cjs';
+import { CONTENT_DIR } from '../src/content/clone.cmd.js';
 
 describe('Helix Server', () => {
   let nock;
@@ -1142,11 +1143,11 @@ describe('Helix Server', () => {
     });
   });
 
-  describe('aem-content/ serving', () => {
-    it('serves a plain file from aem-content/ without hitting the proxy', async () => {
+  describe('content/ serving', () => {
+    it('serves a plain file from content/ without hitting the proxy', async () => {
       const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
-      await fse.ensureDir(path.join(cwd, 'aem-content', 'blog'));
-      await fse.writeFile(path.join(cwd, 'aem-content', 'blog', 'post.json'), '{"title":"local"}');
+      await fse.ensureDir(path.join(cwd, CONTENT_DIR, 'blog'));
+      await fse.writeFile(path.join(cwd, CONTENT_DIR, 'blog', 'post.json'), '{"title":"local"}');
 
       const project = new HelixProject()
         .withCwd(cwd)
@@ -1164,12 +1165,12 @@ describe('Helix Server', () => {
       }
     });
 
-    it('serves a body-only HTML file from aem-content/ and injects head.html', async () => {
+    it('serves a body-only HTML file from content/ and injects head.html', async () => {
       const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
-      await fse.ensureDir(path.join(cwd, 'aem-content'));
-      // aem-content files are plain HTML (body only, no <head>) as stored by da.live
+      await fse.ensureDir(path.join(cwd, CONTENT_DIR));
+      // content/ files are plain HTML (body only, no <head>) as stored by da.live
       await fse.writeFile(
-        path.join(cwd, 'aem-content', 'index.html'),
+        path.join(cwd, CONTENT_DIR, 'index.html'),
         '<body><header></header><main><p>local content</p></main><footer></footer></body>',
       );
       await fse.writeFile(
@@ -1199,10 +1200,10 @@ describe('Helix Server', () => {
       }
     });
 
-    it('falls through to proxy when file is not in aem-content/', async () => {
+    it('falls through to proxy when file is not in content/', async () => {
       const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
-      await fse.ensureDir(path.join(cwd, 'aem-content'));
-      // aem-content/ exists but does NOT contain /page.html
+      await fse.ensureDir(path.join(cwd, CONTENT_DIR));
+      // content/ exists but does NOT contain /page.html
 
       nock('http://main--foo--bar.aem.page')
         .get('/page.html')
@@ -1226,9 +1227,9 @@ describe('Helix Server', () => {
       }
     });
 
-    it('does not serve directories from aem-content/', async () => {
+    it('does not serve directories from content/', async () => {
       const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
-      await fse.ensureDir(path.join(cwd, 'aem-content', 'blog'));
+      await fse.ensureDir(path.join(cwd, CONTENT_DIR, 'blog'));
 
       nock('http://main--foo--bar.aem.page')
         .get('/blog')
@@ -1252,12 +1253,12 @@ describe('Helix Server', () => {
       }
     });
 
-    it('prefers aem-content/ over proxy even when project dir has no such file', async () => {
+    it('prefers content/ over proxy even when project dir has no such file', async () => {
       const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
-      await fse.ensureDir(path.join(cwd, 'aem-content'));
+      await fse.ensureDir(path.join(cwd, CONTENT_DIR));
       await fse.writeFile(
-        path.join(cwd, 'aem-content', 'data.json'),
-        '{"source":"aem-content"}',
+        path.join(cwd, CONTENT_DIR, 'data.json'),
+        '{"source":"content"}',
       );
 
       // Proxy should NOT be called for this path
@@ -1271,7 +1272,7 @@ describe('Helix Server', () => {
         const resp = await getFetch()(`http://127.0.0.1:${project.server.port}/data.json`);
         assert.strictEqual(resp.status, 200);
         const body = await resp.text();
-        assert.strictEqual(body, '{"source":"aem-content"}');
+        assert.strictEqual(body, '{"source":"content"}');
       } finally {
         await project.stop();
       }

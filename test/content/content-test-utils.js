@@ -13,6 +13,7 @@ import fs from 'fs';
 import path from 'path';
 import fse from 'fs-extra';
 import git from 'isomorphic-git';
+import { CONTENT_DIR } from '../../src/content/clone.cmd.js';
 
 export const GIT_AUTHOR = { name: 'aem-cli', email: 'aem-cli@adobe.com' };
 
@@ -31,7 +32,7 @@ export function makeLogger() {
  * Writes .da-config.json (not tracked).
  */
 export async function setupContentDir(baseDir, org = 'myorg', repo = 'myrepo') {
-  const contentDir = path.join(baseDir, 'aem-content');
+  const contentDir = path.join(baseDir, CONTENT_DIR);
   await fse.ensureDir(path.join(contentDir, 'blog'));
 
   await fse.writeFile(path.join(contentDir, 'blog', 'post.html'), '<html><p>original</p></html>');

@@ -16,6 +16,7 @@ import EventEmitter from 'events';
 import express from 'express';
 import cookieParser from 'cookie-parser';
 import { getFetch } from '../fetch-utils.js';
+import { CONTENT_DIR } from '../content/clone.cmd.js';
 import utils from './utils.js';
 import packageJson from '../package.cjs';
 
@@ -157,9 +158,9 @@ export class BaseServer extends EventEmitter {
         this._addr = this._server.address().address;
         log.info(`Local AEM dev server up and running: ${this.scheme}://${this.hostname}:${this.port}/`);
         if (this._project.proxyUrl) {
-          const contentDir = path.join(this._project.directory, 'aem-content');
+          const contentDir = path.join(this._project.directory, CONTENT_DIR);
           if (existsSync(contentDir)) {
-            log.info(`Serving content from local aem-content/, proxying missing files from ${this._project.proxyUrl}`);
+            log.info(`Serving content from local ${CONTENT_DIR}/, proxying missing files from ${this._project.proxyUrl}`);
           } else {
             log.info(`Enabled reverse proxy to ${this._project.proxyUrl}`);
           }

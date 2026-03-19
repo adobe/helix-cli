@@ -20,6 +20,7 @@ import RequestContext from './RequestContext.js';
 import { asyncHandler, BaseServer } from './BaseServer.js';
 import LiveReload from './LiveReload.js';
 import { saveSiteTokenToFile } from '../config/config-utils.js';
+import { CONTENT_DIR } from '../content/clone.cmd.js';
 
 const LOGIN_ROUTE = '/.aem/cli/login';
 const LOGIN_ACK_ROUTE = '/.aem/cli/login/ack';
@@ -356,15 +357,15 @@ export class HelixServer extends BaseServer {
 
     // try to serve static
     try {
-      // Check aem-content/ first — prefer local content checkout over proxy
-      const contentDir = path.join(this._project.directory, 'aem-content');
+      // Check content/ first — prefer local content checkout over proxy
+      const contentDir = path.join(this._project.directory, CONTENT_DIR);
       const contentFilePath = path.join(contentDir, ctx.path);
       if (!path.relative(contentDir, contentFilePath).startsWith('..')) {
         try {
           if (contentFilePath.endsWith('.html')) {
             // readFile throws EISDIR for directories and ENOENT for missing files
             let htmlContent = await readFile(contentFilePath, 'utf-8');
-            // aem-content files are plain HTML (body only, no <head>)
+            // content/ files are plain HTML (body only, no <head>)
             // wrap with a full document and inject local head.html
             if (!htmlContent.includes('<head>')) {
               await this._project.headHtml.update();
@@ -383,7 +384,7 @@ export class HelixServer extends BaseServer {
               'access-control-allow-origin': '*',
             });
             res.send(htmlContent);
-            log.debug(`${pfx}served from aem-content/: ${ctx.path}`);
+            log.debug(`${pfx}served from ${CONTENT_DIR}/: ${ctx.path}`);
             return;
           }
           // sendFile throws EISDIR for directories and ENOENT for missing files
@@ -394,10 +395,10 @@ export class HelixServer extends BaseServer {
           if (liveReload) {
             liveReload.registerFile(ctx.requestId, contentFilePath);
           }
-          log.debug(`${pfx}served from aem-content/: ${ctx.path}`);
+          log.debug(`${pfx}served from ${CONTENT_DIR}/: ${ctx.path}`);
           return;
         } catch (e) {
-          log.debug(`${pfx}aem-content/ miss for ${ctx.path}: ${e.code}`);
+          log.debug(`${pfx}${CONTENT_DIR}/ miss for ${ctx.path}: ${e.code}`);
         }
       }
 

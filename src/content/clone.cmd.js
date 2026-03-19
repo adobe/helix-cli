@@ -17,7 +17,7 @@ import GitUtils from '../git-utils.js';
 import { DaClient } from './da-api.js';
 import { getValidToken } from './da-auth.js';
 
-export const CONTENT_DIR = 'aem-content';
+export const CONTENT_DIR = 'content';
 export const CONFIG_FILE = '.da-config.json';
 export const GIT_AUTHOR = { name: 'aem-cli', email: 'aem-cli@adobe.com' };
 
@@ -155,7 +155,7 @@ export default class CloneCommand {
       rootPath: this._rootPath,
     }, { spaces: 2 });
 
-    // 8. Add aem-content/ to project .gitignore
+    // 8. Add content/ to project .gitignore
     await this.ensureGitIgnored(CONTENT_DIR);
 
     log.info(`\nDone. ${downloaded.length} file(s) downloaded${errors > 0 ? `, ${errors} error(s)` : ''}.`);

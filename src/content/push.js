@@ -18,7 +18,7 @@ export default function push() {
       executor = value;
     },
     command: 'push',
-    description: 'Push local aem-content/ changes back to da.live',
+    description: 'Push local content/ changes back to da.live',
     builder: (yargs) => {
       yargs
         .option('token', {

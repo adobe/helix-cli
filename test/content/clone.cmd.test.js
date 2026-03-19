@@ -17,7 +17,7 @@ import fse from 'fs-extra';
 import esmock from 'esmock';
 import { createTestRoot } from '../utils.js';
 import { makeLogger, createDaClientClass } from './content-test-utils.js';
-import { normalizeDaPath } from '../../src/content/clone.cmd.js';
+import { normalizeDaPath, CONTENT_DIR } from '../../src/content/clone.cmd.js';
 
 async function makeCloneCommand(testRoot, DaClientClass) {
   const mod = await esmock('../../src/content/clone.cmd.js', {
@@ -126,7 +126,7 @@ describe('CloneCommand', () => {
     });
 
     it('throws when content dir exists and --force not set', async () => {
-      const contentDir = path.join(testRoot, 'aem-content');
+      const contentDir = path.join(testRoot, CONTENT_DIR);
       await fse.ensureDir(contentDir);
 
       const cmd = await makeCloneCommand(testRoot, createDaClientClass());
@@ -135,7 +135,7 @@ describe('CloneCommand', () => {
     });
 
     it('removes existing content dir when --force is set', async () => {
-      const contentDir = path.join(testRoot, 'aem-content');
+      const contentDir = path.join(testRoot, CONTENT_DIR);
       await fse.ensureDir(contentDir);
       await fse.writeFile(path.join(contentDir, 'old-file.txt'), 'old');
 
@@ -151,7 +151,7 @@ describe('CloneCommand', () => {
       assert.ok(await fse.pathExists(contentDir));
     });
 
-    it('downloads files into aem-content/', async () => {
+    it('downloads files into content/', async () => {
       const DaClientClass = createDaClientClass({
         files: [{ path: '/myorg/myrepo/page.html', name: 'page.html', ext: 'html' }],
         sourceContent: '<html>page</html>',
@@ -160,7 +160,7 @@ describe('CloneCommand', () => {
       cmd.withRootPath('/');
       await cmd.run();
 
-      const localPath = path.join(testRoot, 'aem-content', 'page.html');
+      const localPath = path.join(testRoot, CONTENT_DIR, 'page.html');
       assert.ok(await fse.pathExists(localPath));
       const content = await fse.readFile(localPath, 'utf-8');
       assert.strictEqual(content, '<html>page</html>');
@@ -171,7 +171,7 @@ describe('CloneCommand', () => {
       cmd.withRootPath('/blog');
       await cmd.run();
 
-      const configPath = path.join(testRoot, 'aem-content', '.da-config.json');
+      const configPath = path.join(testRoot, CONTENT_DIR, '.da-config.json');
       assert.ok(await fse.pathExists(configPath));
       const config = await fse.readJson(configPath);
       assert.strictEqual(config.org, 'myorg');
@@ -179,21 +179,21 @@ describe('CloneCommand', () => {
       assert.strictEqual(config.rootPath, '/blog');
     });
 
-    it('initializes a git repo in aem-content/', async () => {
+    it('initializes a git repo in content/', async () => {
       const cmd = await makeCloneCommand(testRoot, createDaClientClass());
       cmd.withRootPath('/');
       await cmd.run();
 
-      const gitDir = path.join(testRoot, 'aem-content', '.git');
+      const gitDir = path.join(testRoot, CONTENT_DIR, '.git');
       assert.ok(await fse.pathExists(gitDir));
     });
 
-    it('writes .gitignore in aem-content/ excluding .da-config.json', async () => {
+    it('writes .gitignore in content/ excluding .da-config.json', async () => {
       const cmd = await makeCloneCommand(testRoot, createDaClientClass());
       cmd.withRootPath('/');
       await cmd.run();
 
-      const gitIgnorePath = path.join(testRoot, 'aem-content', '.gitignore');
+      const gitIgnorePath = path.join(testRoot, CONTENT_DIR, '.gitignore');
       assert.ok(await fse.pathExists(gitIgnorePath));
       const content = await fse.readFile(gitIgnorePath, 'utf-8');
       assert.ok(content.includes('.da-config.json'));
@@ -208,18 +208,18 @@ describe('CloneCommand', () => {
       cmd.withRootPath('/');
       await cmd.run();
 
-      const localPath = path.join(testRoot, 'aem-content', 'missing.html');
+      const localPath = path.join(testRoot, CONTENT_DIR, 'missing.html');
       assert.ok(!await fse.pathExists(localPath));
     });
 
-    it('adds aem-content to project .gitignore', async () => {
+    it('adds content to project .gitignore', async () => {
       const cmd = await makeCloneCommand(testRoot, createDaClientClass());
       cmd.withRootPath('/');
       await cmd.run();
 
       const gitIgnorePath = path.join(testRoot, '.gitignore');
       const content = await fse.readFile(gitIgnorePath, 'utf-8');
-      assert.ok(content.includes('aem-content'));
+      assert.ok(content.includes(CONTENT_DIR));
     });
 
     it('passes root path to listAll', async () => {
@@ -235,7 +235,7 @@ describe('CloneCommand', () => {
       cmd.withRootPath('/ca/fr_ca');
       await cmd.run();
       assert.strictEqual(listedAt, '/ca/fr_ca');
-      assert.ok(await fse.pathExists(path.join(testRoot, 'aem-content', 'ca', 'fr_ca', 'page.html')));
+      assert.ok(await fse.pathExists(path.join(testRoot, CONTENT_DIR, 'ca', 'fr_ca', 'page.html')));
     });
   });
 
@@ -248,14 +248,14 @@ describe('CloneCommand', () => {
       });
       const Cmd = mod.default;
       const cmd = new Cmd(makeLogger()).withDirectory(testRoot);
-      await cmd.ensureGitIgnored('aem-content');
+      await cmd.ensureGitIgnored(CONTENT_DIR);
 
       const content = await fse.readFile(path.join(testRoot, '.gitignore'), 'utf-8');
-      assert.ok(content.includes('aem-content'));
+      assert.ok(content.includes(CONTENT_DIR));
     });
 
     it('does not duplicate entry when already present', async () => {
-      await fse.writeFile(path.join(testRoot, '.gitignore'), 'node_modules\naem-content\n');
+      await fse.writeFile(path.join(testRoot, '.gitignore'), `node_modules\n${CONTENT_DIR}\n`);
       const mod = await esmock('../../src/content/clone.cmd.js', {
         '../../src/git-utils.js': { default: { getOriginURL: async () => null } },
         '../../src/content/da-auth.js': { getValidToken: async () => 'token' },
@@ -263,10 +263,10 @@ describe('CloneCommand', () => {
       });
       const Cmd = mod.default;
       const cmd = new Cmd(makeLogger()).withDirectory(testRoot);
-      await cmd.ensureGitIgnored('aem-content');
+      await cmd.ensureGitIgnored(CONTENT_DIR);
 
       const content = await fse.readFile(path.join(testRoot, '.gitignore'), 'utf-8');
-      const count = content.split('\n').filter((l) => l.trim() === 'aem-content').length;
+      const count = content.split('\n').filter((l) => l.trim() === CONTENT_DIR).length;
       assert.strictEqual(count, 1);
     });
 
@@ -279,10 +279,10 @@ describe('CloneCommand', () => {
       });
       const Cmd = mod.default;
       const cmd = new Cmd(makeLogger()).withDirectory(testRoot);
-      await cmd.ensureGitIgnored('aem-content');
+      await cmd.ensureGitIgnored(CONTENT_DIR);
 
       const content = await fse.readFile(path.join(testRoot, '.gitignore'), 'utf-8');
-      assert.ok(content.includes('aem-content'));
+      assert.ok(content.includes(CONTENT_DIR));
     });
   });
 });

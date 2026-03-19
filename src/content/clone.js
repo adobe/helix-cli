@@ -19,7 +19,7 @@ export default function clone() {
       executor = value;
     },
     command: 'clone',
-    description: 'Clone da.live content locally into aem-content/',
+    description: 'Clone da.live content locally into content/',
     builder: (yargs) => {
       yargs
         .option('path', {
@@ -36,7 +36,7 @@ export default function clone() {
           type: 'string',
         })
         .option('force', {
-          describe: 'Overwrite existing aem-content/ without prompting',
+          describe: 'Overwrite existing content/ without prompting',
           type: 'boolean',
           default: false,
         })
