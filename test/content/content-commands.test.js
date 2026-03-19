@@ -67,7 +67,7 @@ describe('clone()', () => {
     assert.ok(cmd.description && cmd.description.length > 0);
   });
 
-  it('has a builder that registers --token and --force options', () => {
+  it('has a builder that registers path, all, token, and force options', () => {
     const cmd = clone();
     const registered = {};
     const chainable = {
@@ -75,9 +75,12 @@ describe('clone()', () => {
         registered[name] = opts;
         return chainable;
       },
+      check: () => chainable,
       help: () => chainable,
     };
     cmd.builder(chainable);
+    assert.ok('path' in registered);
+    assert.ok('all' in registered);
     assert.ok('token' in registered);
     assert.ok('force' in registered);
   });
@@ -87,6 +90,7 @@ describe('clone()', () => {
     const mockExecutor = {
       withToken: () => mockExecutor,
       withForce: () => mockExecutor,
+      withRootPath: () => mockExecutor,
       run: async () => {},
     };
     cmd.executor = mockExecutor;
@@ -100,14 +104,25 @@ describe('clone()', () => {
   it('handler calls executor when executor is set', async () => {
     const cmd = clone();
     let ranWith;
+    let rootPathArg;
     cmd.executor = {
       withToken: (t) => {
         ranWith = t;
-        return { withForce: () => ({ run: async () => {} }) };
+        return {
+          withForce: () => ({
+            withRootPath: (rp) => {
+              rootPathArg = rp;
+              return { run: async () => {} };
+            },
+          }),
+        };
       },
     };
-    await cmd.handler({ token: 'abc', force: false });
+    await cmd.handler({
+      token: 'abc', force: false, all: false, path: '/ca/fr_ca',
+    });
     assert.strictEqual(ranWith, 'abc');
+    assert.strictEqual(rootPathArg, '/ca/fr_ca');
   });
 });
 

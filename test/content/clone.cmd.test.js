@@ -17,6 +17,7 @@ import fse from 'fs-extra';
 import esmock from 'esmock';
 import { createTestRoot } from '../utils.js';
 import { makeLogger, createDaClientClass } from './content-test-utils.js';
+import { normalizeDaPath } from '../../src/content/clone.cmd.js';
 
 async function makeCloneCommand(testRoot, DaClientClass) {
   const mod = await esmock('../../src/content/clone.cmd.js', {
@@ -67,6 +68,12 @@ describe('CloneCommand', () => {
       assert.strictEqual(cmd._force, true); // eslint-disable-line no-underscore-dangle
     });
 
+    it('withRootPath sets _rootPath', async () => {
+      const cmd = await makeCloneCommand(testRoot, createDaClientClass());
+      cmd.withRootPath('/ca/fr_ca');
+      assert.strictEqual(cmd._rootPath, '/ca/fr_ca'); // eslint-disable-line no-underscore-dangle
+    });
+
     it('builder methods return this for chaining', async () => {
       const mod = await esmock('../../src/content/clone.cmd.js', {
         '../../src/git-utils.js': { default: { getOriginURL: async () => null } },
@@ -78,6 +85,24 @@ describe('CloneCommand', () => {
       assert.strictEqual(cmd.withDirectory('/tmp'), cmd);
       assert.strictEqual(cmd.withToken('t'), cmd);
       assert.strictEqual(cmd.withForce(false), cmd);
+      assert.strictEqual(cmd.withRootPath('/'), cmd);
+    });
+  });
+
+  describe('normalizeDaPath()', () => {
+    it('adds leading slash and strips trailing slashes', () => {
+      assert.strictEqual(normalizeDaPath('ca/fr_ca/'), '/ca/fr_ca');
+      assert.strictEqual(normalizeDaPath('/a/b/'), '/a/b');
+    });
+
+    it('preserves root', () => {
+      assert.strictEqual(normalizeDaPath('/'), '/');
+      assert.strictEqual(normalizeDaPath('///'), '/');
+    });
+
+    it('rejects empty input', () => {
+      assert.throws(() => normalizeDaPath(''), /empty/);
+      assert.throws(() => normalizeDaPath('   '), /empty/);
     });
   });
 
@@ -91,8 +116,13 @@ describe('CloneCommand', () => {
         '../../src/content/da-api.js': { DaClient: createDaClientClass() },
       });
       const Cmd = mod.default;
-      const cmd = new Cmd(makeLogger()).withDirectory(testRoot);
+      const cmd = new Cmd(makeLogger()).withDirectory(testRoot).withRootPath('/');
       await assert.rejects(() => cmd.run(), /No git remote/);
+    });
+
+    it('throws when run without withRootPath', async () => {
+      const cmd = await makeCloneCommand(testRoot, createDaClientClass());
+      await assert.rejects(() => cmd.run(), /root path was not set/);
     });
 
     it('throws when content dir exists and --force not set', async () => {
@@ -100,6 +130,7 @@ describe('CloneCommand', () => {
       await fse.ensureDir(contentDir);
 
       const cmd = await makeCloneCommand(testRoot, createDaClientClass());
+      cmd.withRootPath('/');
       await assert.rejects(() => cmd.run(), /already exists/);
     });
 
@@ -113,7 +144,7 @@ describe('CloneCommand', () => {
         sourceContent: '<html>hi</html>',
       });
       const cmd = await makeCloneCommand(testRoot, DaClientClass);
-      cmd.withForce(true);
+      cmd.withForce(true).withRootPath('/');
       await cmd.run();
 
       assert.ok(!await fse.pathExists(path.join(contentDir, 'old-file.txt')));
@@ -126,6 +157,7 @@ describe('CloneCommand', () => {
         sourceContent: '<html>page</html>',
       });
       const cmd = await makeCloneCommand(testRoot, DaClientClass);
+      cmd.withRootPath('/');
       await cmd.run();
 
       const localPath = path.join(testRoot, 'aem-content', 'page.html');
@@ -134,8 +166,9 @@ describe('CloneCommand', () => {
       assert.strictEqual(content, '<html>page</html>');
     });
 
-    it('writes .da-config.json with org and repo', async () => {
+    it('writes .da-config.json with org, repo, and rootPath', async () => {
       const cmd = await makeCloneCommand(testRoot, createDaClientClass());
+      cmd.withRootPath('/blog');
       await cmd.run();
 
       const configPath = path.join(testRoot, 'aem-content', '.da-config.json');
@@ -143,10 +176,12 @@ describe('CloneCommand', () => {
       const config = await fse.readJson(configPath);
       assert.strictEqual(config.org, 'myorg');
       assert.strictEqual(config.repo, 'myrepo');
+      assert.strictEqual(config.rootPath, '/blog');
     });
 
     it('initializes a git repo in aem-content/', async () => {
       const cmd = await makeCloneCommand(testRoot, createDaClientClass());
+      cmd.withRootPath('/');
       await cmd.run();
 
       const gitDir = path.join(testRoot, 'aem-content', '.git');
@@ -155,6 +190,7 @@ describe('CloneCommand', () => {
 
     it('writes .gitignore in aem-content/ excluding .da-config.json', async () => {
       const cmd = await makeCloneCommand(testRoot, createDaClientClass());
+      cmd.withRootPath('/');
       await cmd.run();
 
       const gitIgnorePath = path.join(testRoot, 'aem-content', '.gitignore');
@@ -169,6 +205,7 @@ describe('CloneCommand', () => {
         sourceContent: null,
       });
       const cmd = await makeCloneCommand(testRoot, DaClientClass);
+      cmd.withRootPath('/');
       await cmd.run();
 
       const localPath = path.join(testRoot, 'aem-content', 'missing.html');
@@ -177,11 +214,28 @@ describe('CloneCommand', () => {
 
     it('adds aem-content to project .gitignore', async () => {
       const cmd = await makeCloneCommand(testRoot, createDaClientClass());
+      cmd.withRootPath('/');
       await cmd.run();
 
       const gitIgnorePath = path.join(testRoot, '.gitignore');
       const content = await fse.readFile(gitIgnorePath, 'utf-8');
       assert.ok(content.includes('aem-content'));
+    });
+
+    it('passes root path to listAll', async () => {
+      let listedAt;
+      const DaClientClass = createDaClientClass({
+        files: [{ path: '/myorg/myrepo/ca/fr_ca/page.html', name: 'page.html', ext: 'html' }],
+        sourceContent: '<html>x</html>',
+        onListAll: (org, repo, daPath) => {
+          listedAt = daPath;
+        },
+      });
+      const cmd = await makeCloneCommand(testRoot, DaClientClass);
+      cmd.withRootPath('/ca/fr_ca');
+      await cmd.run();
+      assert.strictEqual(listedAt, '/ca/fr_ca');
+      assert.ok(await fse.pathExists(path.join(testRoot, 'aem-content', 'ca', 'fr_ca', 'page.html')));
     });
   });
 

@@ -70,7 +70,8 @@ export function createDaClientClass(opts = {}) {
     this.token = token;
   }
 
-  DaClientMock.prototype.listAll = async function listAll() {
+  DaClientMock.prototype.listAll = async function listAll(org, repo, daPath) {
+    if (opts.onListAll) opts.onListAll(org, repo, daPath);
     return opts.files || [];
   };
 

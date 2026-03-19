@@ -10,6 +10,7 @@
  * governing permissions and limitations under the License.
  */
 import { getOrCreateLogger } from '../log-common.js';
+import { normalizeDaPath } from './clone.cmd.js';
 
 export default function clone() {
   let executor;
@@ -21,6 +22,15 @@ export default function clone() {
     description: 'Clone da.live content locally into aem-content/',
     builder: (yargs) => {
       yargs
+        .option('path', {
+          describe: 'da.live folder to clone (e.g. /ca/fr_ca). Omit only when using --all.',
+          type: 'string',
+        })
+        .option('all', {
+          describe: 'Clone the entire repository (large). Use instead of --path.',
+          type: 'boolean',
+          default: false,
+        })
         .option('token', {
           describe: 'IMS Bearer token for da.live authentication',
           type: 'string',
@@ -30,6 +40,15 @@ export default function clone() {
           type: 'boolean',
           default: false,
         })
+        .check((argv) => {
+          if (argv.all && argv.path !== undefined && argv.path !== '') {
+            return 'Do not use --path together with --all.';
+          }
+          if (!argv.all && (argv.path === undefined || argv.path === '')) {
+            return 'Missing --path. Example: aem content clone --path /ca/fr_ca. Use --all to clone all the content.';
+          }
+          return true;
+        })
         .help();
     },
     handler: async (argv) => {
@@ -37,9 +56,11 @@ export default function clone() {
         const CloneCommand = (await import('./clone.cmd.js')).default;
         executor = new CloneCommand(getOrCreateLogger(argv));
       }
+      const rootPath = argv.all ? '/' : normalizeDaPath(argv.path);
       await executor
         .withToken(argv.token)
         .withForce(argv.force)
+        .withRootPath(rootPath)
         .run();
     },
   };

@@ -21,11 +21,32 @@ export const CONTENT_DIR = 'aem-content';
 export const CONFIG_FILE = '.da-config.json';
 export const GIT_AUTHOR = { name: 'aem-cli', email: 'aem-cli@adobe.com' };
 
+/**
+ * Normalizes a da.live path: leading slash, no trailing slash except root.
+ * @param {string} input
+ * @returns {string}
+ */
+export function normalizeDaPath(input) {
+  if (input === undefined || input === null) {
+    throw new Error('Content path is required.');
+  }
+  let s = String(input).trim();
+  if (s === '') {
+    throw new Error('Content path cannot be empty.');
+  }
+  if (!s.startsWith('/')) {
+    s = `/${s}`;
+  }
+  s = s.replace(/\/+$/, '') || '/';
+  return s;
+}
+
 export default class CloneCommand {
   constructor(logger) {
     this.log = logger;
     this._dir = process.cwd();
     this._force = false;
+    this._rootPath = null;
   }
 
   withDirectory(dir) {
@@ -43,8 +64,17 @@ export default class CloneCommand {
     return this;
   }
 
+  withRootPath(daPath) {
+    this._rootPath = daPath;
+    return this;
+  }
+
   async run() {
     const { log } = this;
+
+    if (this._rootPath == null) {
+      throw new Error('Clone root path was not set (internal error).');
+    }
 
     // 1. Resolve org/repo from git remote
     const originUrl = await GitUtils.getOriginURL(this._dir);
@@ -53,7 +83,7 @@ export default class CloneCommand {
     }
     const org = originUrl.owner;
     const { repo } = originUrl;
-    log.info(`Cloning content from da.live: ${org}/${repo}`);
+    log.info(`Cloning content from da.live: ${org}/${repo}${this._rootPath === '/' ? '' : ` @ ${this._rootPath}`}`);
 
     // 2. Resolve token
     const token = await getValidToken(log, this._token);
@@ -71,7 +101,7 @@ export default class CloneCommand {
     // 4. Fetch file list
     const client = new DaClient(token);
     log.info('Fetching file list...');
-    const files = await client.listAll(org, repo, '/');
+    const files = await client.listAll(org, repo, this._rootPath);
     log.info(`Found ${files.length} file(s). Downloading...`);
 
     // 5. Download files
@@ -114,12 +144,16 @@ export default class CloneCommand {
     await git.commit({
       fs,
       dir: contentDir,
-      message: `clone: ${org}/${repo}`,
+      message: `clone: ${org}/${repo}${this._rootPath === '/' ? '' : ` (${this._rootPath})`}`,
       author: GIT_AUTHOR,
     });
 
     // 7. Write config (not tracked by git)
-    await fse.writeJson(path.join(contentDir, CONFIG_FILE), { org, repo }, { spaces: 2 });
+    await fse.writeJson(path.join(contentDir, CONFIG_FILE), {
+      org,
+      repo,
+      rootPath: this._rootPath,
+    }, { spaces: 2 });
 
     // 8. Add aem-content/ to project .gitignore
     await this.ensureGitIgnored(CONTENT_DIR);
