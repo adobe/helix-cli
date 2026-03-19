@@ -10,7 +10,7 @@
  * governing permissions and limitations under the License.
  */
 import { getOrCreateLogger } from '../log-common.js';
-import { normalizeDaPath } from './clone.cmd.js';
+import { normalizeDaPath, LARGE_CLONE_FILE_THRESHOLD } from './clone.cmd.js';
 
 export default function clone() {
   let executor;
@@ -40,6 +40,12 @@ export default function clone() {
           type: 'boolean',
           default: false,
         })
+        .option('yes', {
+          alias: 'y',
+          describe: `Proceed without prompting when the clone has more than ${LARGE_CLONE_FILE_THRESHOLD.toLocaleString()} files`,
+          type: 'boolean',
+          default: false,
+        })
         .check((argv) => {
           if (argv.all && argv.path !== undefined && argv.path !== '') {
             return 'Do not use --path together with --all.';
@@ -60,6 +66,7 @@ export default function clone() {
       await executor
         .withToken(argv.token)
         .withForce(argv.force)
+        .withAssumeYes(argv.yes)
         .withRootPath(rootPath)
         .run();
     },

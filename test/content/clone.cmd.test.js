@@ -17,7 +17,7 @@ import fse from 'fs-extra';
 import esmock from 'esmock';
 import { createTestRoot } from '../utils.js';
 import { makeLogger, createDaClientClass } from './content-test-utils.js';
-import { normalizeDaPath, CONTENT_DIR } from '../../src/content/clone.cmd.js';
+import { normalizeDaPath, CONTENT_DIR, LARGE_CLONE_FILE_THRESHOLD } from '../../src/content/clone.cmd.js';
 
 async function makeCloneCommand(testRoot, DaClientClass) {
   const mod = await esmock('../../src/content/clone.cmd.js', {
@@ -74,6 +74,12 @@ describe('CloneCommand', () => {
       assert.strictEqual(cmd._rootPath, '/ca/fr_ca'); // eslint-disable-line no-underscore-dangle
     });
 
+    it('withAssumeYes sets _assumeYes', async () => {
+      const cmd = await makeCloneCommand(testRoot, createDaClientClass());
+      cmd.withAssumeYes(true);
+      assert.strictEqual(cmd._assumeYes, true); // eslint-disable-line no-underscore-dangle
+    });
+
     it('builder methods return this for chaining', async () => {
       const mod = await esmock('../../src/content/clone.cmd.js', {
         '../../src/git-utils.js': { default: { getOriginURL: async () => null } },
@@ -86,6 +92,7 @@ describe('CloneCommand', () => {
       assert.strictEqual(cmd.withToken('t'), cmd);
       assert.strictEqual(cmd.withForce(false), cmd);
       assert.strictEqual(cmd.withRootPath('/'), cmd);
+      assert.strictEqual(cmd.withAssumeYes(false), cmd);
     });
   });
 
@@ -236,6 +243,32 @@ describe('CloneCommand', () => {
       await cmd.run();
       assert.strictEqual(listedAt, '/ca/fr_ca');
       assert.ok(await fse.pathExists(path.join(testRoot, CONTENT_DIR, 'ca', 'fr_ca', 'page.html')));
+    });
+
+    it('refuses large clone without --yes when not interactive', async () => {
+      const prevIn = process.stdin.isTTY;
+      const prevOut = process.stdout.isTTY;
+      process.stdin.isTTY = false;
+      process.stdout.isTTY = false;
+      try {
+        const n = LARGE_CLONE_FILE_THRESHOLD + 1;
+        const files = Array.from({ length: n }, (_, i) => ({
+          path: `/myorg/myrepo/f${i}.html`,
+          name: `f${i}.html`,
+          ext: 'html',
+        }));
+        const DaClientClass = createDaClientClass({
+          files,
+          sourceContent: '<html/>',
+        });
+        const cmd = await makeCloneCommand(testRoot, DaClientClass);
+        cmd.withRootPath('/');
+        await assert.rejects(() => cmd.run(), /needs confirmation/);
+        assert.ok(!await fse.pathExists(path.join(testRoot, CONTENT_DIR)));
+      } finally {
+        process.stdin.isTTY = prevIn;
+        process.stdout.isTTY = prevOut;
+      }
     });
   });
 

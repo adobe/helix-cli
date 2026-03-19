@@ -10,16 +10,53 @@
  * governing permissions and limitations under the License.
  */
 import fs from 'fs';
+import readline from 'readline';
 import path from 'path';
 import fse from 'fs-extra';
 import git from 'isomorphic-git';
 import GitUtils from '../git-utils.js';
+import { prompt } from '../cli-util.js';
 import { DaClient } from './da-api.js';
 import { getValidToken } from './da-auth.js';
 
 export const CONTENT_DIR = 'content';
+/** Above this count, the user is warned and must confirm (or pass --yes). */
+export const LARGE_CLONE_FILE_THRESHOLD = 10000;
 export const CONFIG_FILE = '.da-config.json';
 export const GIT_AUTHOR = { name: 'aem-cli', email: 'aem-cli@adobe.com' };
+
+const DOWNLOAD_CONCURRENCY = 10;
+
+/**
+ * Runs async mapper over items with at most `limit` in flight. Preserves result order.
+ * @template T, R
+ * @param {T[]} array
+ * @param {number} limit
+ * @param {(item: T, index: number) => Promise<R>} mapper
+ * @returns {Promise<R[]>}
+ */
+async function mapWithConcurrency(array, limit, mapper) {
+  if (array.length === 0) {
+    return [];
+  }
+  const results = new Array(array.length);
+  let next = 0;
+  async function worker() {
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      const i = next;
+      next += 1;
+      if (i >= array.length) {
+        return;
+      }
+      // eslint-disable-next-line no-await-in-loop
+      results[i] = await mapper(array[i], i);
+    }
+  }
+  const pool = Math.min(limit, array.length);
+  await Promise.all(Array.from({ length: pool }, () => worker()));
+  return results;
+}
 
 /**
  * Normalizes a da.live path: leading slash, no trailing slash except root.
@@ -41,11 +78,44 @@ export function normalizeDaPath(input) {
   return s;
 }
 
+/**
+ * @param {*} log logger with .warn
+ * @param {number} fileCount
+ * @param {boolean} assumeYes
+ */
+async function confirmLargeCloneIfNeeded(log, fileCount, assumeYes) {
+  if (fileCount <= LARGE_CLONE_FILE_THRESHOLD) {
+    return;
+  }
+  log.warn(
+    `This clone lists ${fileCount} files (more than ${LARGE_CLONE_FILE_THRESHOLD.toLocaleString()}). `
+    + 'Downloading may take a long time and use substantial disk space.',
+  );
+  if (assumeYes) {
+    return;
+  }
+  if (!process.stdin.isTTY || !process.stdout.isTTY) {
+    throw new Error(
+      `Large clone (${fileCount} files) needs confirmation. Re-run with --yes, or clone a smaller path with --path.`,
+    );
+  }
+  const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+  try {
+    const answer = await prompt(rl, 'Do you really want to proceed? [y/N] ');
+    if (!/^y(es)?$/i.test(String(answer).trim())) {
+      throw new Error('Clone cancelled.');
+    }
+  } finally {
+    rl.close();
+  }
+}
+
 export default class CloneCommand {
   constructor(logger) {
     this.log = logger;
     this._dir = process.cwd();
     this._force = false;
+    this._assumeYes = false;
     this._rootPath = null;
   }
 
@@ -61,6 +131,11 @@ export default class CloneCommand {
 
   withForce(force) {
     this._force = force;
+    return this;
+  }
+
+  withAssumeYes(yes) {
+    this._assumeYes = !!yes;
     return this;
   }
 
@@ -88,7 +163,7 @@ export default class CloneCommand {
     // 2. Resolve token
     const token = await getValidToken(log, this._token);
 
-    // 3. Prepare content directory
+    // 3. Ensure target path is available (do not create content/ until after file count is known)
     const contentDir = path.resolve(this._dir, CONTENT_DIR);
     if (await fse.pathExists(contentDir)) {
       if (!this._force) {
@@ -96,44 +171,61 @@ export default class CloneCommand {
       }
       await fse.remove(contentDir);
     }
-    await fse.ensureDir(contentDir);
 
-    // 4. Fetch file list
+    // 4. Fetch file list (no local content dir required yet)
     const client = new DaClient(token);
     log.info('Fetching file list...');
-    const files = await client.listAll(org, repo, this._rootPath);
-    log.info(`Found ${files.length} file(s). Downloading...`);
+    const showDiscoveryProgress = process.stdout.isTTY;
+    const files = await client.listAll(org, repo, this._rootPath, showDiscoveryProgress
+      ? (n) => {
+        process.stdout.write(`\r  ${n} file(s) discovered so far...`);
+      }
+      : undefined);
+    if (showDiscoveryProgress) {
+      process.stdout.write('\n');
+    }
+    log.info(`Found ${files.length} file(s).`);
 
-    // 5. Download files
-    const downloaded = [];
-    let errors = 0;
+    await confirmLargeCloneIfNeeded(log, files.length, this._assumeYes);
 
-    for (const file of files) {
+    // 5. Prepare content directory and project .gitignore
+    await fse.ensureDir(contentDir);
+    await this.ensureGitIgnored(CONTENT_DIR);
+
+    log.info('Downloading...');
+
+    // 6. Download files (bounded concurrency)
+    const downloadResults = await mapWithConcurrency(files, DOWNLOAD_CONCURRENCY, async (file) => {
       const daPath = file.path.replace(`/${org}/${repo}`, '');
       const localPath = path.join(contentDir, ...daPath.split('/').filter(Boolean));
       try {
-        // eslint-disable-next-line no-await-in-loop
         const res = await client.getSource(org, repo, daPath);
         if (!res) {
           log.warn(`  skip (not found): ${daPath}`);
-          // eslint-disable-next-line no-continue
-          continue;
+          return { status: 'skip' };
         }
-        // eslint-disable-next-line no-await-in-loop
         const buffer = Buffer.from(await res.arrayBuffer());
-        // eslint-disable-next-line no-await-in-loop
         await fse.ensureDir(path.dirname(localPath));
-        // eslint-disable-next-line no-await-in-loop
         await fse.writeFile(localPath, buffer);
-        downloaded.push(daPath);
         log.info(`  ✓ ${daPath}`);
+        return { status: 'ok', daPath };
       } catch (err) {
         log.warn(`  ✗ ${daPath}: ${err.message}`);
+        return { status: 'error' };
+      }
+    });
+
+    const downloaded = [];
+    let errors = 0;
+    for (const r of downloadResults) {
+      if (r.status === 'ok') {
+        downloaded.push(r.daPath);
+      } else if (r.status === 'error') {
         errors += 1;
       }
     }
 
-    // 6. Init git repo and commit as baseline
+    // 7. Init git repo and commit as baseline
     await git.init({ fs, dir: contentDir, defaultBranch: 'main' });
     await fse.writeFile(path.join(contentDir, '.gitignore'), `${CONFIG_FILE}\n`);
     for (const daPath of downloaded) {
@@ -148,15 +240,12 @@ export default class CloneCommand {
       author: GIT_AUTHOR,
     });
 
-    // 7. Write config (not tracked by git)
+    // 8. Write config (not tracked by git)
     await fse.writeJson(path.join(contentDir, CONFIG_FILE), {
       org,
       repo,
       rootPath: this._rootPath,
     }, { spaces: 2 });
-
-    // 8. Add content/ to project .gitignore
-    await this.ensureGitIgnored(CONTENT_DIR);
 
     log.info(`\nDone. ${downloaded.length} file(s) downloaded${errors > 0 ? `, ${errors} error(s)` : ''}.`);
     log.info(`Content saved to ./${CONTENT_DIR}/`);

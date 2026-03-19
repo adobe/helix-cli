@@ -67,7 +67,7 @@ describe('clone()', () => {
     assert.ok(cmd.description && cmd.description.length > 0);
   });
 
-  it('has a builder that registers path, all, token, and force options', () => {
+  it('has a builder that registers path, all, token, force, and yes options', () => {
     const cmd = clone();
     const registered = {};
     const chainable = {
@@ -83,6 +83,7 @@ describe('clone()', () => {
     assert.ok('all' in registered);
     assert.ok('token' in registered);
     assert.ok('force' in registered);
+    assert.ok('yes' in registered);
   });
 
   it('executor setter replaces internal executor', () => {
@@ -90,6 +91,7 @@ describe('clone()', () => {
     const mockExecutor = {
       withToken: () => mockExecutor,
       withForce: () => mockExecutor,
+      withAssumeYes: () => mockExecutor,
       withRootPath: () => mockExecutor,
       run: async () => {},
     };
@@ -104,24 +106,31 @@ describe('clone()', () => {
   it('handler calls executor when executor is set', async () => {
     const cmd = clone();
     let ranWith;
+    let assumeYesArg;
     let rootPathArg;
     cmd.executor = {
       withToken: (t) => {
         ranWith = t;
         return {
           withForce: () => ({
-            withRootPath: (rp) => {
-              rootPathArg = rp;
-              return { run: async () => {} };
+            withAssumeYes: (y) => {
+              assumeYesArg = y;
+              return {
+                withRootPath: (rp) => {
+                  rootPathArg = rp;
+                  return { run: async () => {} };
+                },
+              };
             },
           }),
         };
       },
     };
     await cmd.handler({
-      token: 'abc', force: false, all: false, path: '/ca/fr_ca',
+      token: 'abc', force: false, yes: true, all: false, path: '/ca/fr_ca',
     });
     assert.strictEqual(ranWith, 'abc');
+    assert.strictEqual(assumeYesArg, true);
     assert.strictEqual(rootPathArg, '/ca/fr_ca');
   });
 });

@@ -71,9 +71,19 @@ export function createDaClientClass(opts = {}) {
     this.token = token;
   }
 
-  DaClientMock.prototype.listAll = async function listAll(org, repo, daPath) {
+  DaClientMock.prototype.listAll = async function listAll(org, repo, daPath, onDiscovered) {
     if (opts.onListAll) opts.onListAll(org, repo, daPath);
-    return opts.files || [];
+    const files = opts.files || [];
+    if (onDiscovered) {
+      let n = 0;
+      for (const item of files) {
+        if (item.ext !== undefined) {
+          n += 1;
+          onDiscovered(n);
+        }
+      }
+    }
+    return files;
   };
 
   DaClientMock.prototype.getSource = async function getSource() {

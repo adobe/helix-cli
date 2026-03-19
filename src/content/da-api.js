@@ -13,6 +13,34 @@ import { getFetch } from '../fetch-utils.js';
 
 const DA_ADMIN = 'https://admin.da.live';
 
+/** Max concurrent directory listings during {@link DaClient#listAll}. */
+const LIST_ALL_CONCURRENCY = 10;
+
+/**
+ * @param {number} maxConcurrent
+ * @returns {<T>(fn: () => Promise<T>) => Promise<T>}
+ */
+function createLimiter(maxConcurrent) {
+  let running = 0;
+  const waiters = [];
+  return async function limit(fn) {
+    while (running >= maxConcurrent) {
+      // eslint-disable-next-line no-await-in-loop
+      await new Promise((r) => {
+        waiters.push(r);
+      });
+    }
+    running += 1;
+    try {
+      return await fn();
+    } finally {
+      running -= 1;
+      const w = waiters.shift();
+      if (w) w();
+    }
+  };
+}
+
 const CONTENT_TYPES = {
   html: 'text/html',
   json: 'application/json',
@@ -55,23 +83,42 @@ export class DaClient {
   }
 
   /**
-   * Recursively lists all files under a path.
+   * Recursively lists all files under a path. Sibling folders are listed in parallel (bounded).
+   * @param {string} org
+   * @param {string} repo
+   * @param {string} [daPath='/']
+   * @param {(discoveredCount: number) => void} [onDiscovered] - cumulative file count per discovery
    * @returns {Promise<Array<{path, name, ext, lastModified}>>}
    */
-  async listAll(org, repo, daPath = '/') {
-    const items = await this.list(org, repo, daPath);
-    const files = [];
-    for (const item of items) {
-      if (item.ext !== undefined) {
-        files.push(item);
-      } else {
-        // folder — recurse
-        const subPath = item.path.replace(`/${org}/${repo}`, '') || '/';
-        // eslint-disable-next-line no-await-in-loop
-        files.push(...await this.listAll(org, repo, subPath));
+  async listAll(org, repo, daPath = '/', onDiscovered = undefined) {
+    const state = { count: 0, onDiscovered };
+    const ctx = this;
+    const limit = createLimiter(LIST_ALL_CONCURRENCY);
+
+    async function recurse(currentPath) {
+      const items = await limit(() => ctx.list(org, repo, currentPath));
+      const acc = [];
+      const subdirs = [];
+      for (const item of items) {
+        if (item.ext !== undefined) {
+          acc.push(item);
+          state.count += 1;
+          if (state.onDiscovered) {
+            state.onDiscovered(state.count);
+          }
+        } else {
+          subdirs.push(item.path.replace(`/${org}/${repo}`, '') || '/');
+        }
       }
+      if (subdirs.length > 0) {
+        const nested = await Promise.all(subdirs.map((sub) => recurse(sub)));
+        for (const part of nested) {
+          acc.push(...part);
+        }
+      }
+      return acc;
     }
-    return files;
+    return recurse(daPath);
   }
 
   /**

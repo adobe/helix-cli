@@ -178,6 +178,27 @@ describe('DaClient', () => {
       await client.listAll('org', 'repo', '/');
       assert.ok(listedPaths.includes('/nested'));
     });
+
+    it('invokes onDiscovered with cumulative count for each file', async () => {
+      const counts = [];
+      client.list = async (org, repo, daPath) => {
+        if (daPath === '/') {
+          return [
+            { path: '/org/repo/a.html', name: 'a.html', ext: 'html' },
+            { path: '/org/repo/sub', name: 'sub' },
+          ];
+        }
+        if (daPath === '/sub') {
+          return [
+            { path: '/org/repo/sub/b.html', name: 'b.html', ext: 'html' },
+            { path: '/org/repo/sub/c.html', name: 'c.html', ext: 'html' },
+          ];
+        }
+        return [];
+      };
+      await client.listAll('org', 'repo', '/', (n) => counts.push(n));
+      assert.deepStrictEqual(counts, [1, 2, 3]);
+    });
   });
 
   describe('getSource', () => {
