@@ -28,7 +28,7 @@ import {
 import { getFetch } from '../src/fetch-utils.js';
 import { getSiteTokenFromFile } from '../src/config/config-utils.js';
 import packageJson from '../src/package.cjs';
-import { CONTENT_DIR } from '../src/content/clone.cmd.js';
+import { CONTENT_DIR } from '../src/content/content-shared.js';
 
 describe('Helix Server', () => {
   let nock;

@@ -17,7 +17,7 @@ import { createTwoFilesPatch } from 'diff';
 import chalk from 'chalk-template';
 import { DaClient } from './da-api.js';
 import { getValidToken } from './da-auth.js';
-import { CONTENT_DIR, CONFIG_FILE } from './clone.cmd.js';
+import { CONTENT_DIR, CONFIG_FILE } from './content-shared.js';
 
 function printPatch(patch) {
   for (const line of patch.split('\n')) {

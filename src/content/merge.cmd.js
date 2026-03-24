@@ -16,7 +16,7 @@ import git from 'isomorphic-git';
 import { diff3Merge } from 'node-diff3'; // eslint-disable-line import/no-unresolved
 import { DaClient } from './da-api.js';
 import { getValidToken } from './da-auth.js';
-import { CONTENT_DIR, CONFIG_FILE } from './clone.cmd.js';
+import { CONTENT_DIR, CONFIG_FILE } from './content-shared.js';
 
 /**
  * 3-way merge using diff3 algorithm.

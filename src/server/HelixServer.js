@@ -20,7 +20,7 @@ import RequestContext from './RequestContext.js';
 import { asyncHandler, BaseServer } from './BaseServer.js';
 import LiveReload from './LiveReload.js';
 import { saveSiteTokenToFile } from '../config/config-utils.js';
-import { CONTENT_DIR } from '../content/clone.cmd.js';
+import { CONTENT_DIR } from '../content/content-shared.js';
 
 const LOGIN_ROUTE = '/.aem/cli/login';
 const LOGIN_ACK_ROUTE = '/.aem/cli/login/ack';

@@ -17,7 +17,7 @@ import fse from 'fs-extra';
 import esmock from 'esmock';
 import { createTestRoot } from '../utils.js';
 import { makeLogger, createDaClientClass } from './content-test-utils.js';
-import { normalizeDaPath, CONTENT_DIR, LARGE_CLONE_FILE_THRESHOLD } from '../../src/content/clone.cmd.js';
+import { normalizeDaPath, CONTENT_DIR, LARGE_CLONE_FILE_THRESHOLD } from '../../src/content/content-shared.js';
 
 async function makeCloneCommand(testRoot, DaClientClass) {
   const mod = await esmock('../../src/content/clone.cmd.js', {

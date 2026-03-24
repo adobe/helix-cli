@@ -13,7 +13,7 @@ import fs from 'fs';
 import path from 'path';
 import fse from 'fs-extra';
 import git from 'isomorphic-git';
-import { CONTENT_DIR, CONFIG_FILE } from './clone.cmd.js';
+import { CONTENT_DIR, CONFIG_FILE } from './content-shared.js';
 
 export default class StatusCommand {
   constructor(logger) {

@@ -10,7 +10,7 @@
  * governing permissions and limitations under the License.
  */
 import { getOrCreateLogger } from '../log-common.js';
-import { normalizeDaPath, LARGE_CLONE_FILE_THRESHOLD } from './clone.cmd.js';
+import { normalizeDaPath, LARGE_CLONE_FILE_THRESHOLD } from './content-shared.js';
 
 export default function clone() {
   let executor;

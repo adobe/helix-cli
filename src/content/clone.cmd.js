@@ -18,66 +18,14 @@ import GitUtils from '../git-utils.js';
 import { prompt } from '../cli-util.js';
 import { DaClient } from './da-api.js';
 import { getValidToken } from './da-auth.js';
-
-export const CONTENT_DIR = 'content';
-/** Above this count, the user is warned and must confirm (or pass --yes). */
-export const LARGE_CLONE_FILE_THRESHOLD = 10000;
-export const CONFIG_FILE = '.da-config.json';
-export const GIT_AUTHOR = { name: 'aem-cli', email: 'aem-cli@adobe.com' };
-
-/** Max parallel da.live file operations for clone (download) and push (upload/delete). */
-export const CONTENT_TRANSFER_CONCURRENCY = 10;
-
-/**
- * Runs async mapper over items with at most `limit` in flight. Preserves result order.
- * @template T, R
- * @param {T[]} array
- * @param {number} limit
- * @param {(item: T, index: number) => Promise<R>} mapper
- * @returns {Promise<R[]>}
- */
-export async function mapWithConcurrency(array, limit, mapper) {
-  if (array.length === 0) {
-    return [];
-  }
-  const results = new Array(array.length);
-  let next = 0;
-  async function worker() {
-    // eslint-disable-next-line no-constant-condition
-    while (true) {
-      const i = next;
-      next += 1;
-      if (i >= array.length) {
-        return;
-      }
-      // eslint-disable-next-line no-await-in-loop
-      results[i] = await mapper(array[i], i);
-    }
-  }
-  const pool = Math.min(limit, array.length);
-  await Promise.all(Array.from({ length: pool }, () => worker()));
-  return results;
-}
-
-/**
- * Normalizes a da.live path: leading slash, no trailing slash except root.
- * @param {string} input
- * @returns {string}
- */
-export function normalizeDaPath(input) {
-  if (input === undefined || input === null) {
-    throw new Error('Content path is required.');
-  }
-  let s = String(input).trim();
-  if (s === '') {
-    throw new Error('Content path cannot be empty.');
-  }
-  if (!s.startsWith('/')) {
-    s = `/${s}`;
-  }
-  s = s.replace(/\/+$/, '') || '/';
-  return s;
-}
+import {
+  CONTENT_DIR,
+  CONFIG_FILE,
+  GIT_AUTHOR,
+  LARGE_CLONE_FILE_THRESHOLD,
+  CONTENT_IO_CONCURRENCY,
+  mapWithConcurrency,
+} from './content-shared.js';
 
 /**
  * @param {*} log logger with .warn
@@ -198,7 +146,7 @@ export default class CloneCommand {
     // 6. Download files (bounded concurrency)
     const downloadResults = await mapWithConcurrency(
       files,
-      CONTENT_TRANSFER_CONCURRENCY,
+      CONTENT_IO_CONCURRENCY,
       async (file) => {
         const daPath = file.path.replace(`/${org}/${repo}`, '');
         const localPath = path.join(contentDir, ...daPath.split('/').filter(Boolean));

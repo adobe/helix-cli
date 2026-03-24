@@ -16,7 +16,7 @@ import EventEmitter from 'events';
 import express from 'express';
 import cookieParser from 'cookie-parser';
 import { getFetch } from '../fetch-utils.js';
-import { CONTENT_DIR } from '../content/clone.cmd.js';
+import { CONTENT_DIR } from '../content/content-shared.js';
 import utils from './utils.js';
 import packageJson from '../package.cjs';
 

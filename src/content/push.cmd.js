@@ -19,9 +19,9 @@ import {
   CONTENT_DIR,
   CONFIG_FILE,
   GIT_AUTHOR,
-  CONTENT_TRANSFER_CONCURRENCY,
+  CONTENT_IO_CONCURRENCY,
   mapWithConcurrency,
-} from './clone.cmd.js';
+} from './content-shared.js';
 
 export default class PushCommand {
   constructor(logger) {
@@ -154,7 +154,7 @@ export default class PushCommand {
     const putTargets = [...added, ...modified];
     const putResults = await mapWithConcurrency(
       putTargets,
-      CONTENT_TRANSFER_CONCURRENCY,
+      CONTENT_IO_CONCURRENCY,
       async (daPath) => {
         const localPath = path.join(contentDir, ...daPath.split('/').filter(Boolean));
         const ext = daPath.split('.').pop();
@@ -180,7 +180,7 @@ export default class PushCommand {
 
     const deleteResults = await mapWithConcurrency(
       deleted,
-      CONTENT_TRANSFER_CONCURRENCY,
+      CONTENT_IO_CONCURRENCY,
       async (daPath) => {
         try {
           await client.deleteSource(org, repo, daPath);

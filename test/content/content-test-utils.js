@@ -13,7 +13,7 @@ import fs from 'fs';
 import path from 'path';
 import fse from 'fs-extra';
 import git from 'isomorphic-git';
-import { CONTENT_DIR } from '../../src/content/clone.cmd.js';
+import { CONTENT_DIR } from '../../src/content/content-shared.js';
 
 export const GIT_AUTHOR = { name: 'aem-cli', email: 'aem-cli@adobe.com' };
 

@@ -10,6 +10,7 @@
  * governing permissions and limitations under the License.
  */
 import { getFetch } from '../fetch-utils.js';
+import { CONTENT_IO_CONCURRENCY } from './content-shared.js';
 
 const DA_ADMIN = 'https://admin.da.live';
 
@@ -18,9 +19,6 @@ const LIST_CONTINUATION_HEADER = 'da-continuation-token';
 
 /** Safety cap on list pages per directory (avoids infinite loops if the API misbehaves). */
 const LIST_MAX_PAGES = 50000;
-
-/** Max concurrent directory listings during {@link DaClient#listAll}. */
-const LIST_ALL_CONCURRENCY = 10;
 
 /**
  * @param {number} maxConcurrent
@@ -122,7 +120,7 @@ export class DaClient {
   async listAll(org, repo, daPath = '/', onDiscovered = undefined) {
     const state = { count: 0, onDiscovered };
     const ctx = this;
-    const limit = createLimiter(LIST_ALL_CONCURRENCY);
+    const limit = createLimiter(CONTENT_IO_CONCURRENCY);
 
     async function recurse(currentPath) {
       const items = await limit(() => ctx.list(org, repo, currentPath));
