@@ -14,7 +14,10 @@
 import assert from 'assert';
 import { DaClient, getContentType } from '../../src/content/da-api.js';
 
-function mockResponse(status, body, ok = status >= 200 && status < 300) {
+function mockResponse(status, body, ok = status >= 200 && status < 300, responseHeaders = {}) {
+  const lower = Object.fromEntries(
+    Object.entries(responseHeaders).map(([k, v]) => [k.toLowerCase(), v]),
+  );
   return {
     status,
     ok,
@@ -22,6 +25,11 @@ function mockResponse(status, body, ok = status >= 200 && status < 300) {
     json: async () => body,
     text: async () => (typeof body === 'string' ? body : JSON.stringify(body)),
     arrayBuffer: async () => Buffer.from(typeof body === 'string' ? body : JSON.stringify(body)),
+    headers: {
+      get(name) {
+        return lower[name.toLowerCase()] ?? null;
+      },
+    },
   };
 }
 
@@ -129,6 +137,30 @@ describe('DaClient', () => {
     it('throws on non-ok status', async () => {
       client.fetch = async () => mockResponse(500, 'Server Error', false);
       await assert.rejects(() => client.list('org', 'repo', '/'), /List failed/);
+    });
+
+    it('follows da-continuation-token until no further pages', async () => {
+      let calls = 0;
+      client.fetch = async (url, opts) => {
+        calls += 1;
+        if (calls === 1) {
+          assert.strictEqual(opts.headers.Authorization, 'Bearer test-token');
+          assert.strictEqual(opts.headers['da-continuation-token'], undefined);
+          return mockResponse(
+            200,
+            [{ path: '/org/repo/a.html', name: 'a.html', ext: 'html' }],
+            true,
+            { 'da-continuation-token': 'page2token' },
+          );
+        }
+        assert.strictEqual(opts.headers['da-continuation-token'], 'page2token');
+        return mockResponse(200, [{ path: '/org/repo/b.html', name: 'b.html', ext: 'html' }], true, {});
+      };
+      const result = await client.list('org', 'repo', '/');
+      assert.strictEqual(calls, 2);
+      assert.strictEqual(result.length, 2);
+      assert.ok(result.some((i) => i.path === '/org/repo/a.html'));
+      assert.ok(result.some((i) => i.path === '/org/repo/b.html'));
     });
   });
 

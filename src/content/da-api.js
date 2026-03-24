@@ -13,6 +13,12 @@ import { getFetch } from '../fetch-utils.js';
 
 const DA_ADMIN = 'https://admin.da.live';
 
+/** Response header used to page past the per-request list limit (e.g. 1000 items). */
+const LIST_CONTINUATION_HEADER = 'da-continuation-token';
+
+/** Safety cap on list pages per directory (avoids infinite loops if the API misbehaves). */
+const LIST_MAX_PAGES = 50000;
+
 /** Max concurrent directory listings during {@link DaClient#listAll}. */
 const LIST_ALL_CONCURRENCY = 10;
 
@@ -68,7 +74,7 @@ export class DaClient {
   }
 
   /**
-   * Lists the contents of a directory.
+   * Lists the contents of a directory, following {@link LIST_CONTINUATION_HEADER} until complete.
    * @param {string} org
    * @param {string} repo
    * @param {string} daPath - path starting with /
@@ -76,10 +82,33 @@ export class DaClient {
    */
   async list(org, repo, daPath) {
     const url = `${DA_ADMIN}/list/${org}/${repo}${daPath}`;
-    const res = await this.fetch(url, { headers: this.authHeader });
-    if (res.status === 401) throw new Error('Unauthorized: invalid or missing token');
-    if (!res.ok) throw new Error(`List failed for ${daPath}: ${res.status} ${res.statusText}`);
-    return res.json();
+    const aggregated = [];
+    let continuation = null;
+
+    for (let page = 0; page < LIST_MAX_PAGES; page += 1) {
+      const headers = { ...this.authHeader };
+      if (continuation) {
+        headers[LIST_CONTINUATION_HEADER] = continuation;
+      }
+      // eslint-disable-next-line no-await-in-loop
+      const res = await this.fetch(url, { headers });
+      if (res.status === 401) throw new Error('Unauthorized: invalid or missing token');
+      if (!res.ok) throw new Error(`List failed for ${daPath}: ${res.status} ${res.statusText}`);
+      // eslint-disable-next-line no-await-in-loop
+      const body = await res.json();
+      if (!Array.isArray(body)) {
+        throw new Error(`List response for ${daPath} must be a JSON array`);
+      }
+      aggregated.push(...body);
+
+      const next = res.headers.get(LIST_CONTINUATION_HEADER);
+      if (!next || next === continuation) {
+        return aggregated;
+      }
+      continuation = next;
+    }
+
+    throw new Error(`List pagination for ${daPath} exceeded ${LIST_MAX_PAGES} pages.`);
   }
 
   /**
