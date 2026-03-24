@@ -15,7 +15,13 @@ import fse from 'fs-extra';
 import git from 'isomorphic-git';
 import { DaClient, getContentType } from './da-api.js';
 import { getValidToken } from './da-auth.js';
-import { CONTENT_DIR, CONFIG_FILE, GIT_AUTHOR } from './clone.cmd.js';
+import {
+  CONTENT_DIR,
+  CONFIG_FILE,
+  GIT_AUTHOR,
+  CONTENT_TRANSFER_CONCURRENCY,
+  mapWithConcurrency,
+} from './clone.cmd.js';
 
 export default class PushCommand {
   constructor(logger) {
@@ -139,38 +145,58 @@ export default class PushCommand {
       return;
     }
 
-    // 6. Push changes, tracking which succeeded
+    // 6. Push changes (bounded concurrency), tracking which succeeded
     let pushed = 0;
     let pushErrors = 0;
     const successfullyPushed = new Set();
     const successfullyDeleted = new Set();
 
-    for (const daPath of [...added, ...modified]) {
-      const localPath = path.join(contentDir, ...daPath.split('/').filter(Boolean));
-      const ext = daPath.split('.').pop();
-      try {
-        // eslint-disable-next-line no-await-in-loop
-        const buffer = await fse.readFile(localPath);
-        // eslint-disable-next-line no-await-in-loop
-        await client.putSource(org, repo, daPath, buffer, getContentType(ext));
-        log.info(`  ✓ ${daPath}`);
+    const putTargets = [...added, ...modified];
+    const putResults = await mapWithConcurrency(
+      putTargets,
+      CONTENT_TRANSFER_CONCURRENCY,
+      async (daPath) => {
+        const localPath = path.join(contentDir, ...daPath.split('/').filter(Boolean));
+        const ext = daPath.split('.').pop();
+        try {
+          const buffer = await fse.readFile(localPath);
+          await client.putSource(org, repo, daPath, buffer, getContentType(ext));
+          log.info(`  ✓ ${daPath}`);
+          return { ok: true, daPath };
+        } catch (err) {
+          log.warn(`  ✗ ${daPath}: ${err.message}`);
+          return { ok: false };
+        }
+      },
+    );
+    for (const r of putResults) {
+      if (r.ok) {
         pushed += 1;
-        successfullyPushed.add(daPath);
-      } catch (err) {
-        log.warn(`  ✗ ${daPath}: ${err.message}`);
+        successfullyPushed.add(r.daPath);
+      } else {
         pushErrors += 1;
       }
     }
 
-    for (const daPath of deleted) {
-      try {
-        // eslint-disable-next-line no-await-in-loop
-        await client.deleteSource(org, repo, daPath);
-        log.info(`  ✓ deleted ${daPath}`);
+    const deleteResults = await mapWithConcurrency(
+      deleted,
+      CONTENT_TRANSFER_CONCURRENCY,
+      async (daPath) => {
+        try {
+          await client.deleteSource(org, repo, daPath);
+          log.info(`  ✓ deleted ${daPath}`);
+          return { ok: true, daPath };
+        } catch (err) {
+          log.warn(`  ✗ ${daPath}: ${err.message}`);
+          return { ok: false };
+        }
+      },
+    );
+    for (const r of deleteResults) {
+      if (r.ok) {
         pushed += 1;
-        successfullyDeleted.add(daPath);
-      } catch (err) {
-        log.warn(`  ✗ ${daPath}: ${err.message}`);
+        successfullyDeleted.add(r.daPath);
+      } else {
         pushErrors += 1;
       }
     }

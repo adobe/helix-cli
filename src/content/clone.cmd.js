@@ -25,7 +25,8 @@ export const LARGE_CLONE_FILE_THRESHOLD = 10000;
 export const CONFIG_FILE = '.da-config.json';
 export const GIT_AUTHOR = { name: 'aem-cli', email: 'aem-cli@adobe.com' };
 
-const DOWNLOAD_CONCURRENCY = 10;
+/** Max parallel da.live file operations for clone (download) and push (upload/delete). */
+export const CONTENT_TRANSFER_CONCURRENCY = 10;
 
 /**
  * Runs async mapper over items with at most `limit` in flight. Preserves result order.
@@ -35,7 +36,7 @@ const DOWNLOAD_CONCURRENCY = 10;
  * @param {(item: T, index: number) => Promise<R>} mapper
  * @returns {Promise<R[]>}
  */
-async function mapWithConcurrency(array, limit, mapper) {
+export async function mapWithConcurrency(array, limit, mapper) {
   if (array.length === 0) {
     return [];
   }
@@ -195,25 +196,29 @@ export default class CloneCommand {
     log.info('Downloading...');
 
     // 6. Download files (bounded concurrency)
-    const downloadResults = await mapWithConcurrency(files, DOWNLOAD_CONCURRENCY, async (file) => {
-      const daPath = file.path.replace(`/${org}/${repo}`, '');
-      const localPath = path.join(contentDir, ...daPath.split('/').filter(Boolean));
-      try {
-        const res = await client.getSource(org, repo, daPath);
-        if (!res) {
-          log.warn(`  skip (not found): ${daPath}`);
-          return { status: 'skip' };
+    const downloadResults = await mapWithConcurrency(
+      files,
+      CONTENT_TRANSFER_CONCURRENCY,
+      async (file) => {
+        const daPath = file.path.replace(`/${org}/${repo}`, '');
+        const localPath = path.join(contentDir, ...daPath.split('/').filter(Boolean));
+        try {
+          const res = await client.getSource(org, repo, daPath);
+          if (!res) {
+            log.warn(`  skip (not found): ${daPath}`);
+            return { status: 'skip' };
+          }
+          const buffer = Buffer.from(await res.arrayBuffer());
+          await fse.ensureDir(path.dirname(localPath));
+          await fse.writeFile(localPath, buffer);
+          log.info(`  ✓ ${daPath}`);
+          return { status: 'ok', daPath };
+        } catch (err) {
+          log.warn(`  ✗ ${daPath}: ${err.message}`);
+          return { status: 'error' };
         }
-        const buffer = Buffer.from(await res.arrayBuffer());
-        await fse.ensureDir(path.dirname(localPath));
-        await fse.writeFile(localPath, buffer);
-        log.info(`  ✓ ${daPath}`);
-        return { status: 'ok', daPath };
-      } catch (err) {
-        log.warn(`  ✗ ${daPath}: ${err.message}`);
-        return { status: 'error' };
-      }
-    });
+      },
+    );
 
     const downloaded = [];
     let errors = 0;
