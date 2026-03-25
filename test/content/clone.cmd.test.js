@@ -12,12 +12,15 @@
 
 /* eslint-env mocha */
 import assert from 'assert';
+import fs from 'fs';
 import path from 'path';
 import fse from 'fs-extra';
+import git from 'isomorphic-git';
 import esmock from 'esmock';
 import { createTestRoot } from '../utils.js';
 import { makeLogger, createDaClientClass } from './content-test-utils.js';
 import { normalizeDaPath, CONTENT_DIR, LARGE_CLONE_FILE_THRESHOLD } from '../../src/content/content-shared.js';
+import { DA_SYNCED_REF } from '../../src/content/content-git.js';
 
 async function makeCloneCommand(testRoot, DaClientClass) {
   const mod = await esmock('../../src/content/clone.cmd.js', {
@@ -193,6 +196,17 @@ describe('CloneCommand', () => {
 
       const gitDir = path.join(testRoot, CONTENT_DIR, '.git');
       assert.ok(await fse.pathExists(gitDir));
+    });
+
+    it('sets refs/da/synced to HEAD after clone', async () => {
+      const cmd = await makeCloneCommand(testRoot, createDaClientClass());
+      cmd.withRootPath('/');
+      await cmd.run();
+
+      const contentDir = path.join(testRoot, CONTENT_DIR);
+      const synced = await git.resolveRef({ fs, dir: contentDir, ref: DA_SYNCED_REF });
+      const head = await git.resolveRef({ fs, dir: contentDir, ref: 'HEAD' });
+      assert.strictEqual(synced, head);
     });
 
     it('writes .gitignore in content/ excluding .da-config.json', async () => {

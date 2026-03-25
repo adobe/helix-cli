@@ -141,10 +141,10 @@ export default class MergeCommand {
     log.info('');
     if (conflictCount > 0) {
       log.info(`Merge complete: ${cleanCount} clean, ${conflictCount} with conflicts.`);
-      log.info('Resolve conflicts manually, then run: aem content push');
+      log.info('Resolve conflicts manually, then: aem content add, aem content commit -m "...", aem content push');
     } else {
       log.info(`Merge complete: ${cleanCount} file(s) merged cleanly.`);
-      log.info('Review changes, then run: aem content push');
+      log.info('Review changes, then: aem content add, aem content commit -m "...", aem content push');
     }
   }
 }

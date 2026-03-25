@@ -67,10 +67,11 @@ export default class DiffCommand {
     }
     const { org, repo } = await fse.readJson(configPath);
 
-    // Find locally changed files via git
     const matrix = await git.statusMatrix({ fs, dir: contentDir });
     let changedPaths = matrix
-      .filter(([, head, workdir]) => head === 1 && workdir === 2)
+      .filter(([, head, workdir]) => (head === 0 && workdir === 2)
+        || (head === 1 && workdir === 2)
+        || (head === 1 && workdir === 0))
       .map(([filepath]) => `/${filepath}`);
 
     if (this._filePath) {
@@ -83,24 +84,23 @@ export default class DiffCommand {
     }
 
     if (changedPaths.length === 0) {
-      log.info('Nothing to diff. No locally modified files.');
+      log.info('Nothing to diff. No local changes vs last commit.');
       return;
     }
 
     const token = await getValidToken(log, this._token);
     const client = new DaClient(token);
 
-    for (const daPath of changedPaths) {
+    await Promise.all(changedPaths.map(async (daPath) => {
       const localPath = path.join(contentDir, ...daPath.split('/').filter(Boolean));
 
-      // eslint-disable-next-line no-await-in-loop
-      const [localBuffer, remoteRes] = await Promise.all([
-        fse.readFile(localPath),
-        client.getSource(org, repo, daPath),
-      ]);
+      const localBuffer = await fse.pathExists(localPath)
+        ? await fse.readFile(localPath)
+        : Buffer.from('');
+
+      const remoteRes = await client.getSource(org, repo, daPath);
 
       const localText = localBuffer.toString('utf-8');
-      // eslint-disable-next-line no-await-in-loop
       const remoteText = remoteRes ? await remoteRes.text() : '';
 
       const patch = createTwoFilesPatch(
@@ -113,10 +113,11 @@ export default class DiffCommand {
         { context: 3 },
       );
 
-      // skip if no actual diff (only header lines)
-      if (!patch.includes('\n@@')) continue; // eslint-disable-line no-continue
+      if (!patch.includes('\n@@')) {
+        return;
+      }
 
       printPatch(patch);
-    }
+    }));
   }
 }

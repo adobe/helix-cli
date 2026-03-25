@@ -12,11 +12,18 @@
 
 /* eslint-env mocha */
 import assert from 'assert';
+import fs from 'fs';
 import path from 'path';
 import fse from 'fs-extra';
+import git from 'isomorphic-git';
 import esmock from 'esmock';
 import { createTestRoot } from '../utils.js';
-import { makeLogger, setupContentDir, createDaClientClass } from './content-test-utils.js';
+import {
+  makeLogger,
+  setupContentDir,
+  createDaClientClass,
+  stageAllAndCommit,
+} from './content-test-utils.js';
 
 async function makePushCommand(testRoot, DaClientClass) {
   const mod = await esmock('../../src/content/push.cmd.js', {
@@ -90,11 +97,21 @@ describe('PushCommand', () => {
       await cmd.run();
 
       assert.ok(log.logs.some((l) => l.msg.includes('Nothing to push')));
+      assert.ok(log.logs.some((l) => l.msg.includes('last da.live sync')));
+    });
+
+    it('rejects push when there are uncommitted changes', async () => {
+      const contentDir = await setupContentDir(testRoot);
+      await fse.writeFile(path.join(contentDir, 'index.html'), 'changed');
+
+      const cmd = await makePushCommand(testRoot, createDaClientClass());
+      await assert.rejects(() => cmd.run(), /uncommitted changes/);
     });
 
     it('dry-run shows what would be pushed without pushing', async () => {
       const contentDir = await setupContentDir(testRoot);
       await fse.writeFile(path.join(contentDir, 'index.html'), 'changed');
+      await stageAllAndCommit(contentDir, 'edit index');
 
       let putCalled = false;
       const DaClientClass = createDaClientClass({
@@ -122,6 +139,7 @@ describe('PushCommand', () => {
     it('aborts on conflict without --force', async () => {
       const contentDir = await setupContentDir(testRoot);
       await fse.writeFile(path.join(contentDir, 'index.html'), 'changed');
+      await stageAllAndCommit(contentDir, 'edit index');
 
       // Remote modified time is in the future (more recent than our last sync)
       const DaClientClass = createDaClientClass({ remoteLastModified: Date.now() + 60_000 });
@@ -143,6 +161,7 @@ describe('PushCommand', () => {
     it('pushes despite conflict when --force is set', async () => {
       const contentDir = await setupContentDir(testRoot);
       await fse.writeFile(path.join(contentDir, 'index.html'), 'changed');
+      await stageAllAndCommit(contentDir, 'edit index');
 
       let putCalled = false;
       const DaClientClass = createDaClientClass({
@@ -167,6 +186,7 @@ describe('PushCommand', () => {
     it('pushes modified files to da.live', async () => {
       const contentDir = await setupContentDir(testRoot);
       await fse.writeFile(path.join(contentDir, 'index.html'), 'changed content');
+      await stageAllAndCommit(contentDir, 'edit index');
 
       const pushed = [];
       const DaClientClass = createDaClientClass({ onPut: (p) => pushed.push(p) });
@@ -188,6 +208,8 @@ describe('PushCommand', () => {
     it('deletes removed files from da.live', async () => {
       const contentDir = await setupContentDir(testRoot);
       await fse.remove(path.join(contentDir, 'index.html'));
+      await git.remove({ fs, dir: contentDir, filepath: 'index.html' });
+      await stageAllAndCommit(contentDir, 'drop index');
 
       const deleted = [];
       const DaClientClass = createDaClientClass({ onDelete: (p) => deleted.push(p) });
@@ -210,6 +232,7 @@ describe('PushCommand', () => {
       const contentDir = await setupContentDir(testRoot);
       await fse.writeFile(path.join(contentDir, 'index.html'), 'changed');
       await fse.writeFile(path.join(contentDir, 'blog', 'post.html'), 'changed blog');
+      await stageAllAndCommit(contentDir, 'edit pages');
 
       const pushed = [];
       const DaClientClass = createDaClientClass({ onPut: (p) => pushed.push(p) });
@@ -234,6 +257,8 @@ describe('PushCommand', () => {
       await fse.writeFile(path.join(contentDir, 'index.html'), 'changed');
       await fse.writeFile(path.join(contentDir, 'new.html'), 'new');
       await fse.remove(path.join(contentDir, 'blog', 'post.html'));
+      await git.remove({ fs, dir: contentDir, filepath: 'blog/post.html' });
+      await stageAllAndCommit(contentDir, 'mixed changes');
 
       const log = makeLogger();
       const mod = await esmock('../../src/content/push.cmd.js', {

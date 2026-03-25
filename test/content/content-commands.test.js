@@ -14,6 +14,8 @@
 import assert from 'assert';
 import content from '../../src/content/content.js';
 import clone from '../../src/content/clone.js';
+import add from '../../src/content/add.js';
+import commit from '../../src/content/commit.js';
 import push from '../../src/content/push.js';
 import status from '../../src/content/status.js';
 import diff from '../../src/content/diff.js';
@@ -132,6 +134,77 @@ describe('clone()', () => {
     assert.strictEqual(ranWith, 'abc');
     assert.strictEqual(assumeYesArg, true);
     assert.strictEqual(rootPathArg, '/ca/fr_ca');
+  });
+});
+
+describe('add()', () => {
+  it('returns command named add [files..]', () => {
+    const cmd = add();
+    assert.strictEqual(cmd.command, 'add [files..]');
+  });
+
+  it('has a description', () => {
+    const cmd = add();
+    assert.ok(cmd.description && cmd.description.length > 0);
+  });
+
+  it('executor setter works', () => {
+    const cmd = add();
+    cmd.executor = { withPaths: () => ({ run: async () => {} }) };
+  });
+
+  it('handler calls executor when set', async () => {
+    const cmd = add();
+    let called = false;
+    cmd.executor = {
+      withPaths: () => ({
+        run: async () => {
+          called = true;
+        },
+      }),
+    };
+    await cmd.handler({});
+    assert.strictEqual(called, true);
+  });
+});
+
+describe('commit()', () => {
+  it('returns command named commit', () => {
+    const cmd = commit();
+    assert.strictEqual(cmd.command, 'commit');
+  });
+
+  it('has a description', () => {
+    const cmd = commit();
+    assert.ok(cmd.description && cmd.description.length > 0);
+  });
+
+  it('has a builder that registers -m', () => {
+    const cmd = commit();
+    const registered = {};
+    const chainable = {
+      option: (name, opts) => {
+        registered[name] = opts;
+        return chainable;
+      },
+      help: () => chainable,
+    };
+    cmd.builder(chainable);
+    assert.ok('m' in registered);
+  });
+
+  it('handler calls executor when set', async () => {
+    const cmd = commit();
+    let called = false;
+    cmd.executor = {
+      withMessage: () => ({
+        run: async () => {
+          called = true;
+        },
+      }),
+    };
+    await cmd.handler({ m: 'msg' });
+    assert.strictEqual(called, true);
   });
 });
 

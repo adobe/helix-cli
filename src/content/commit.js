@@ -9,30 +9,32 @@
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-import clone from './clone.js';
-import add from './add.js';
-import commit from './commit.js';
-import push from './push.js';
-import status from './status.js';
-import diff from './diff.js';
-import mergeCmd from './merge.js';
+import { getOrCreateLogger } from '../log-common.js';
 
-export default function content() {
+export default function commit() {
+  let executor;
   return {
-    command: 'content',
-    description: 'Manage AEM content from da.live',
+    set executor(value) {
+      executor = value;
+    },
+    command: 'commit',
+    description: 'Commit staged changes in content/ (like git commit)',
     builder: (yargs) => {
       yargs
-        .command(clone())
-        .command(add())
-        .command(commit())
-        .command(push())
-        .command(status())
-        .command(diff())
-        .command(mergeCmd())
-        .demandCommand(1, 'You need at least one content subcommand.')
+        .option('m', {
+          alias: 'message',
+          describe: 'Commit message',
+          type: 'string',
+          demandOption: true,
+        })
         .help();
     },
-    handler: () => {},
+    handler: async (argv) => {
+      if (!executor) {
+        const CommitCommand = (await import('./commit.cmd.js')).default;
+        executor = new CommitCommand(getOrCreateLogger(argv));
+      }
+      await executor.withMessage(argv.m).run();
+    },
   };
 }

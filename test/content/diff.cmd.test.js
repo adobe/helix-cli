@@ -79,6 +79,7 @@ describe('DiffCommand', () => {
       await cmd.run();
 
       assert.ok(log.logs.some((l) => l.msg.includes('Nothing to diff')));
+      assert.ok(log.logs.some((l) => l.msg.includes('last commit')));
     });
 
     it('reports no changes for specific file when unmodified', async () => {

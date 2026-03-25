@@ -48,7 +48,7 @@ describe('StatusCommand', () => {
       const cmd = new StatusCommand(log).withDirectory(testRoot);
       await cmd.run();
 
-      assert.ok(log.logs.some((l) => l.msg.includes('Nothing to push')));
+      assert.ok(log.logs.some((l) => l.msg.includes('Nothing to push to da.live')));
     });
 
     it('reports modified files', async () => {
@@ -60,6 +60,7 @@ describe('StatusCommand', () => {
       await cmd.run();
 
       assert.ok(log.logs.some((l) => l.msg.includes('Modified')));
+      assert.ok(log.logs.some((l) => l.msg.includes('not committed')));
       assert.ok(log.logs.some((l) => l.msg.includes('/index.html')));
     });
 

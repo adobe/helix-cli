@@ -14,6 +14,7 @@ import path from 'path';
 import fse from 'fs-extra';
 import git from 'isomorphic-git';
 import { CONTENT_DIR, CONFIG_FILE } from './content-shared.js';
+import { resolveSyncedOid, countCommitsAhead } from './content-git.js';
 
 export default class StatusCommand {
   constructor(logger) {
@@ -51,21 +52,30 @@ export default class StatusCommand {
       else if (head === 1 && workdir === 0) deleted.push(filepath);
     }
 
+    const headOid = await git.resolveRef({ fs, dir: contentDir, ref: 'HEAD' });
+    const syncedOid = await resolveSyncedOid(fs, contentDir);
+    const ahead = await countCommitsAhead(fs, contentDir, headOid, syncedOid);
+
     if (added.length === 0 && modified.length === 0 && deleted.length === 0) {
-      log.info('Nothing to push. Local content matches the clone baseline.');
+      log.info('No uncommitted changes in content/.');
+      if (ahead === 0) {
+        log.info('Nothing to push to da.live.');
+      } else {
+        log.info(`${ahead} commit(s) not yet pushed to da.live. Run 'aem content push'.`);
+      }
       return;
     }
 
     if (added.length) {
-      log.info('Added:');
+      log.info('Added (unstaged or not committed):');
       for (const f of added) log.info(`  A  /${f}`);
     }
     if (modified.length) {
-      log.info('Modified:');
+      log.info('Modified (unstaged or not committed):');
       for (const f of modified) log.info(`  M  /${f}`);
     }
     if (deleted.length) {
-      log.info('Deleted:');
+      log.info('Deleted (unstaged or not committed):');
       for (const f of deleted) log.info(`  D  /${f}`);
     }
 

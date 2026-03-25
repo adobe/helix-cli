@@ -26,6 +26,7 @@ import {
   CONTENT_IO_CONCURRENCY,
   mapWithConcurrency,
 } from './content-shared.js';
+import { writeSyncedRef } from './content-git.js';
 
 /**
  * @param {*} log logger with .warn
@@ -192,6 +193,8 @@ export default class CloneCommand {
       message: `clone: ${org}/${repo}${this._rootPath === '/' ? '' : ` (${this._rootPath})`}`,
       author: GIT_AUTHOR,
     });
+    const headOid = await git.resolveRef({ fs, dir: contentDir, ref: 'HEAD' });
+    await writeSyncedRef(fs, contentDir, headOid);
 
     // 8. Write config (not tracked by git)
     await fse.writeJson(path.join(contentDir, CONFIG_FILE), {

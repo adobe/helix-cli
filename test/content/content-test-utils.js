@@ -56,6 +56,21 @@ export async function setupContentDir(baseDir, org = 'myorg', repo = 'myrepo') {
 }
 
 /**
+ * Stage all paths and create a commit (for tests that exercise push after edits).
+ * @param {string} contentDir
+ * @param {string} message
+ */
+export async function stageAllAndCommit(contentDir, message) {
+  await git.add({ fs, dir: contentDir, filepath: '.' });
+  await git.commit({
+    fs,
+    dir: contentDir,
+    message,
+    author: GIT_AUTHOR,
+  });
+}
+
+/**
  * Returns a constructor function (not a class) for a configurable DaClient mock.
  * @param {object} opts
  * @param {Array}   opts.files           files returned by listAll

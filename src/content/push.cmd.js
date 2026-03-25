@@ -18,10 +18,16 @@ import { getValidToken } from './da-auth.js';
 import {
   CONTENT_DIR,
   CONFIG_FILE,
-  GIT_AUTHOR,
   CONTENT_IO_CONCURRENCY,
   mapWithConcurrency,
 } from './content-shared.js';
+import {
+  resolveSyncedOid,
+  writeSyncedRef,
+  statusMatrixHasUncommitted,
+  diffCommitTrees,
+  getCommitCommitterTimeMs,
+} from './content-git.js';
 
 export default class PushCommand {
   constructor(logger) {
@@ -62,47 +68,40 @@ export default class PushCommand {
     const contentDir = path.resolve(this._dir, CONTENT_DIR);
     const configPath = path.join(contentDir, CONFIG_FILE);
 
-    // 1. Load config
     if (!await fse.pathExists(configPath)) {
       throw new Error(`No config found at ${configPath}. Run 'aem content clone' first.`);
     }
     const { org, repo } = await fse.readJson(configPath);
 
-    // 2. Get baseline from last git commit (seconds → ms for comparison with da.live)
-    const [lastCommit] = await git.log({ fs, dir: contentDir, depth: 1 });
-    const lastSyncTime = lastCommit.commit.committer.timestamp * 1000;
-
-    // 3. Resolve token
-    const token = await getValidToken(log, this._token);
-
-    log.info(`Pushing content to da.live: ${org}/${repo}`);
-
-    // 4. Detect local changes via git status matrix
-    // statusMatrix columns: [filepath, HEAD, WORKDIR, STAGE]
-    // HEAD=0: absent in last commit, WORKDIR=2: differs from HEAD, WORKDIR=0: deleted
     const matrix = await git.statusMatrix({ fs, dir: contentDir });
-    const inScope = (daPath) => !this._pushPath || daPath.startsWith(this._pushPath);
-
-    const added = [];
-    const modified = [];
-    const deleted = [];
-
-    for (const [filepath, head, workdir] of matrix) {
-      const daPath = `/${filepath}`;
-      if (!inScope(daPath)) continue; // eslint-disable-line no-continue
-      if (head === 0 && workdir === 2) added.push(daPath);
-      else if (head === 1 && workdir === 2) modified.push(daPath);
-      else if (head === 1 && workdir === 0) deleted.push(daPath);
+    if (statusMatrixHasUncommitted(matrix)) {
+      throw new Error(
+        'Cannot push: you have uncommitted changes in content/. '
+        + 'Stage with \'aem content add\' and commit with \'aem content commit -m "..."\'.',
+      );
     }
 
+    const headOid = await git.resolveRef({ fs, dir: contentDir, ref: 'HEAD' });
+    const syncedOid = await resolveSyncedOid(fs, contentDir);
+    const lastSyncTime = await getCommitCommitterTimeMs(fs, contentDir, syncedOid);
+
+    let { added, modified, deleted } = await diffCommitTrees(fs, contentDir, syncedOid, headOid);
+
+    const inScope = (daPath) => !this._pushPath || daPath.startsWith(this._pushPath);
+    added = added.filter(inScope);
+    modified = modified.filter(inScope);
+    deleted = deleted.filter(inScope);
+
     if (added.length === 0 && modified.length === 0 && deleted.length === 0) {
-      log.info('Nothing to push. Local content matches the clone baseline.');
+      log.info('Nothing to push. No commits ahead of the last da.live sync.');
       return;
     }
 
+    const token = await getValidToken(log, this._token);
+
+    log.info(`Pushing content to da.live: ${org}/${repo}`);
     log.info(`${added.length} added, ${modified.length} modified, ${deleted.length} deleted`);
 
-    // 5. Conflict detection: remote changed since our last sync?
     const client = new DaClient(token);
     const dirCache = new Map();
     const conflicts = [];
@@ -145,7 +144,6 @@ export default class PushCommand {
       return;
     }
 
-    // 6. Push changes (bounded concurrency), tracking which succeeded
     let pushed = 0;
     let pushErrors = 0;
     const successfullyPushed = new Set();
@@ -201,22 +199,15 @@ export default class PushCommand {
       }
     }
 
-    // 7. Stage and commit only successfully pushed files
-    if (successfullyPushed.size + successfullyDeleted.size > 0) {
-      for (const daPath of successfullyPushed) {
-        // eslint-disable-next-line no-await-in-loop
-        await git.add({ fs, dir: contentDir, filepath: daPath.replace(/^\//, '') });
-      }
-      for (const daPath of successfullyDeleted) {
-        // eslint-disable-next-line no-await-in-loop
-        await git.remove({ fs, dir: contentDir, filepath: daPath.replace(/^\//, '') });
-      }
-      await git.commit({
-        fs,
-        dir: contentDir,
-        message: `push: ${org}/${repo}`,
-        author: GIT_AUTHOR,
-      });
+    const expectedPuts = new Set(putTargets);
+    const expectedDeletes = new Set(deleted);
+    const allPutsOk = [...expectedPuts].every((p) => successfullyPushed.has(p));
+    const allDeletesOk = [...expectedDeletes].every((p) => successfullyDeleted.has(p));
+
+    if (allPutsOk && allDeletesOk) {
+      await writeSyncedRef(fs, contentDir, headOid);
+    } else {
+      log.warn('\nSync ref not updated: fix errors and push again to finish syncing this commit.');
     }
 
     log.info(`\nDone. ${pushed} file(s) pushed${pushErrors > 0 ? `, ${pushErrors} error(s)` : ''}.`);

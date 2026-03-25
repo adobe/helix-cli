@@ -18,7 +18,7 @@ export default function push() {
       executor = value;
     },
     command: 'push',
-    description: 'Push local content/ changes back to da.live',
+    description: 'Push committed content/ changes to da.live (use content add & content commit first)',
     builder: (yargs) => {
       yargs
         .option('token', {
