@@ -12,7 +12,9 @@
 import { keepAlive } from '@adobe/fetch';
 import { getProxyForUrl } from 'proxy-from-env';
 import nodeFetch from 'node-fetch';
+// eslint-disable-next-line import/no-unresolved
 import { HttpProxyAgent } from 'http-proxy-agent';
+// eslint-disable-next-line import/no-unresolved
 import { HttpsProxyAgent } from 'https-proxy-agent';
 
 const CONTEXT_CACHE = {

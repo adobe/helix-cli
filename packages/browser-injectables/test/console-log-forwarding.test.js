@@ -12,6 +12,7 @@
 
 /* eslint-env mocha, browser */
 
+// eslint-disable-next-line import/no-unresolved
 import { assert } from '@esm-bundle/chai';
 
 /* eslint-disable no-console */
