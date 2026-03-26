@@ -1180,7 +1180,9 @@ describe('Helix Server', () => {
 
       nock('http://main--foo--bar.aem.page')
         .get('/head.html')
-        .reply(200, '', { 'content-type': 'text/html' });
+        .reply(200, '', { 'content-type': 'text/html' })
+        .get('/metadata.json')
+        .reply(200, { data: [] });
 
       const project = new HelixProject()
         .withCwd(cwd)
@@ -1195,6 +1197,75 @@ describe('Helix Server', () => {
         assert.ok(body.includes('local content'));
         assert.ok(body.includes('<head>'));
         assert.ok(body.includes('/styles.css'));
+      } finally {
+        await project.stop();
+      }
+    });
+
+    it('strips content/ metadata block and injects meta tags in head', async () => {
+      const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
+      const recipeDir = path.join(cwd, CONTENT_DIR, 'ca', 'fr_ca', 'recipes');
+      await fse.ensureDir(recipeDir);
+      await fse.writeFile(
+        path.join(recipeDir, 'chicken.html'),
+        '<body><main><h1>Ramen</h1></main>'
+        + '<div class="metadata">'
+        + '<div><div><p>Total Time</p></div><div><p>00:17:30</p></div></div>'
+        + '<div><div><p>Yield</p></div><div><p>4 portions</p></div></div>'
+        + '</div></body>',
+      );
+      await fse.writeFile(
+        path.join(cwd, 'head.html'),
+        '<link rel="stylesheet" href="/styles.css"/>',
+      );
+
+      nock('http://main--foo--bar.aem.page')
+        .get('/head.html')
+        .reply(200, '', { 'content-type': 'text/html' })
+        .get('/metadata.json')
+        .reply(200, {
+          data: [
+            {
+              URL: '/ca/fr_ca/**',
+              nav: '/ca/fr_ca/nav/nav',
+              footer: '/ca/fr_ca/footer/footer',
+              template: 'section',
+            },
+            {
+              URL: '/ca/fr_ca/recipes/**',
+              nav: '',
+              footer: '',
+              'nav-banners': '',
+              template: 'recipe',
+            },
+          ],
+          ':type': 'sheet',
+        });
+
+      const project = new HelixProject()
+        .withCwd(cwd)
+        .withProxyUrl('http://main--foo--bar.aem.page')
+        .withHttpPort(0);
+      await project.init();
+      try {
+        await project.start();
+        const { port } = project.server;
+        const resp = await getFetch()(`http://127.0.0.1:${port}/ca/fr_ca/recipes/chicken`);
+        assert.strictEqual(resp.status, 200);
+        const body = await resp.text();
+        assert.ok(!body.includes('<div class="metadata">'));
+        assert.ok(body.includes('name="total-time"'));
+        assert.ok(body.includes('content="00:17:30"'));
+        assert.ok(body.includes('property="og:title"'));
+        assert.ok(body.includes('content="Ramen"'));
+        assert.ok(body.includes(`http://127.0.0.1:${port}/ca/fr_ca/recipes/chicken`));
+        assert.ok(body.includes('name="template"'));
+        assert.ok(body.includes('content="recipe"'));
+        assert.ok(!body.includes('content="section"'));
+        assert.ok(body.includes('name="nav"'));
+        assert.ok(body.includes('content="/ca/fr_ca/nav/nav"'));
+        assert.ok(body.includes('name="footer"'));
+        assert.ok(body.includes('content="/ca/fr_ca/footer/footer"'));
       } finally {
         await project.stop();
       }

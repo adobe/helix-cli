@@ -21,9 +21,30 @@ import { asyncHandler, BaseServer } from './BaseServer.js';
 import LiveReload from './LiveReload.js';
 import { saveSiteTokenToFile } from '../config/config-utils.js';
 import { CONTENT_DIR } from '../content/content-shared.js';
+import { transformContentMetadataHtml } from './content-metadata-html.js';
 
 const LOGIN_ROUTE = '/.aem/cli/login';
 const LOGIN_ACK_ROUTE = '/.aem/cli/login/ack';
+
+/**
+ * @param {import('express').Request} req
+ * @param {import('./RequestContext.js').default} ctx
+ * @returns {string}
+ */
+function absolutePageUrlFromRequest(req, ctx) {
+  const raw = req.headers['x-forwarded-proto'];
+  const proto = (Array.isArray(raw) ? raw[0] : raw) || req.protocol || 'http';
+  const host = req.get('host');
+  if (!host) {
+    return '';
+  }
+  try {
+    const pathWithQuery = req.originalUrl || ctx.url;
+    return new URL(pathWithQuery, `${proto}://${host}`).href;
+  } catch {
+    return '';
+  }
+}
 
 export class HelixServer extends BaseServer {
   /**
@@ -128,6 +149,7 @@ export class HelixServer extends BaseServer {
 
         this.withSiteToken(siteToken);
         this._project.headHtml.setSiteToken(siteToken);
+        this._project.metadataSheet?.setSiteToken(siteToken);
         await saveSiteTokenToFile(siteToken);
         this.log.info('Site token received and saved to file.');
 
@@ -365,15 +387,29 @@ export class HelixServer extends BaseServer {
           if (contentFilePath.endsWith('.html')) {
             // readFile throws EISDIR for directories and ENOENT for missing files
             let htmlContent = await readFile(contentFilePath, 'utf-8');
+            const absolutePageUrl = absolutePageUrlFromRequest(req, ctx);
+            if (this._project.metadataSheet) {
+              this._project.metadataSheet.setCookie(req.headers.cookie || '');
+              await this._project.metadataSheet.ensureLoaded();
+            }
+            const sheetRow = this._project.metadataSheet?.matchPath(ctx.path) ?? null;
+            const { htmlFragment, metaTagsHtml } = transformContentMetadataHtml(htmlContent, {
+              absolutePageUrl,
+              sheetRow,
+            });
+            htmlContent = htmlFragment;
             // content/ files are plain HTML (body only, no <head>)
             // wrap with a full document and inject local head.html
             if (!htmlContent.includes('<head>')) {
               await this._project.headHtml.update();
               const headHtml = this._project.headHtml.localHtml || '';
-              htmlContent = `<html><head>${headHtml}</head>${htmlContent}</html>`;
+              htmlContent = `<html><head>${headHtml}${metaTagsHtml}</head>${htmlContent}</html>`;
             } else {
               await this._project.headHtml.setCookie(req.headers.cookie);
               htmlContent = await this._project.headHtml.replace(htmlContent);
+              if (metaTagsHtml) {
+                htmlContent = htmlContent.replace(/<\/head>/i, `${metaTagsHtml}</head>`);
+              }
             }
             if (liveReload) {
               htmlContent = utils.injectLiveReloadScript(htmlContent, this);
