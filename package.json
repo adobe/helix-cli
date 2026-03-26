@@ -94,7 +94,7 @@
     "lint-staged": "16.3.2",
     "mocha": "11.7.5",
     "mocha-multi-reporters": "1.5.1",
-    "nock": "14.0.11",
+    "nock": "13.5.6",
     "semantic-release": "25.0.3",
     "semantic-release-discord-bot": "^1.1.0",
     "sinon": "21.0.2"
