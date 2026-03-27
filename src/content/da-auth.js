@@ -58,7 +58,8 @@ function isTokenExpired(stored) {
  *
  * IMS redirects to http://localhost:{port}/callback#access_token=TOKEN
  * The fragment never reaches the server, so /callback serves a tiny HTML page
- * that reads the fragment via JS and forwards the token to /token.
+ * that reads the fragment via JS and forwards the token to /token, then
+ * redirects the browser to https://tools.aem.live/cli/logged-in on success.
  *
  * @returns {Promise<string>} access token
  */
@@ -81,11 +82,18 @@ function waitForToken() {
   const dest = token
     ? '/token?access_token=' + encodeURIComponent(token) + (expiresIn ? '&expires_in=' + encodeURIComponent(expiresIn) : '')
     : '/token?error=' + encodeURIComponent(error || 'unknown');
-  fetch(dest).finally(() => {
-    document.body.innerHTML = token
-      ? '<h2>Login successful!</h2><p>You may close this tab and return to your terminal.</p>'
-      : '<h2>Login failed.</h2><p>' + (error || 'Unknown error') + '</p>';
-  });
+  const loggedInUrl = 'https://tools.aem.live/cli/logged-in';
+  fetch(dest)
+    .then(() => {
+      if (token) {
+        window.location.href = loggedInUrl;
+      } else {
+        document.body.innerHTML = '<h2>Login failed.</h2><p>' + (error || 'Unknown error') + '</p>';
+      }
+    })
+    .catch(() => {
+      document.body.innerHTML = '<h2>Login failed.</h2><p>Could not complete login.</p>';
+    });
 </script></body></html>`);
         return;
       }
