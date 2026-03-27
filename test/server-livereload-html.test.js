@@ -100,7 +100,7 @@ describe('Server Live Reload for HTML Resources (Issue #2400)', () => {
         wait(2000).then(() => null),
       ]);
 
-      ws.close();
+      await ws.close();
 
       // Verify reload event was triggered
       assert.ok(reloadData, 'Live reload event should have been triggered for HTML file');
@@ -158,6 +158,7 @@ describe('Server Live Reload for HTML Resources (Issue #2400)', () => {
       // Request the CSS file to register it with live reload
       const resp = await fetch(`http://127.0.0.1:${project.server.port}/styles.css`);
       assert.strictEqual(resp.status, 200);
+      assert.strictEqual(await resp.text(), 'body { color: red; }');
 
       // Modify the CSS file
       await fse.writeFile(cssFile, 'body { color: blue; }');
@@ -168,7 +169,7 @@ describe('Server Live Reload for HTML Resources (Issue #2400)', () => {
         wait(2000).then(() => null),
       ]);
 
-      ws.close();
+      await ws.close();
 
       // Verify reload event was triggered
       assert.ok(reloadData, 'Live reload event should have been triggered for CSS file');
@@ -227,6 +228,7 @@ describe('Server Live Reload for HTML Resources (Issue #2400)', () => {
       // Request the JS file to register it with live reload
       const resp = await fetch(`http://127.0.0.1:${project.server.port}/script.js`);
       assert.strictEqual(resp.status, 200);
+      assert.strictEqual(await resp.text(), 'console.log("initial");');
 
       // Modify the JS file
       await fse.writeFile(jsFile, 'console.log("updated");');
@@ -237,7 +239,7 @@ describe('Server Live Reload for HTML Resources (Issue #2400)', () => {
         wait(2000).then(() => null),
       ]);
 
-      ws.close();
+      await ws.close();
 
       // Verify reload event was triggered
       assert.ok(reloadData, 'Live reload event should have been triggered for JS file');

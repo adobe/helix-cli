@@ -1,3 +1,24 @@
+## [16.16.28](https://github.com/adobe/helix-cli/compare/v16.16.27...v16.16.28) (2026-03-26)
+
+
+### Bug Fixes
+
+* **deps:** update external major (major) ([#2683](https://github.com/adobe/helix-cli/issues/2683)) ([3c85c17](https://github.com/adobe/helix-cli/commit/3c85c172f7114f742a3d13e5ab00ddce344d4a53))
+
+## [16.16.27](https://github.com/adobe/helix-cli/compare/v16.16.26...v16.16.27) (2026-03-23)
+
+
+### Bug Fixes
+
+* **deps:** update adobe fixes ([#2692](https://github.com/adobe/helix-cli/issues/2692)) ([2b3b95f](https://github.com/adobe/helix-cli/commit/2b3b95f549afc41654dd1ca7c028b368d9f4d325))
+
+## [16.16.26](https://github.com/adobe/helix-cli/compare/v16.16.25...v16.16.26) (2026-03-23)
+
+
+### Bug Fixes
+
+* **deps:** update external fixes ([#2691](https://github.com/adobe/helix-cli/issues/2691)) ([99d542f](https://github.com/adobe/helix-cli/commit/99d542ffdbc559acb63d5c4cd8ee3188b663f935))
+
 ## [16.16.25](https://github.com/adobe/helix-cli/compare/v16.16.24...v16.16.25) (2026-03-09)
 
 
