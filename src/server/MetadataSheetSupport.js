@@ -34,7 +34,7 @@ export function normalizePathForMetadataMatch(pathname) {
  * @returns {object[]}
  */
 function extractDataRows(body) {
-  if (!body || typeof body !== 'object' || body === null) {
+  if (!body || typeof body !== 'object') {
     return [];
   }
   const { data } = /** @type {{ data?: unknown }} */ (body);

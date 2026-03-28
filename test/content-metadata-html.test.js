@@ -64,7 +64,12 @@ describe('content-metadata-html', () => {
     assert.ok(metaTagsHtml.includes('property="og:title"'));
     assert.ok(metaTagsHtml.includes('content="Ramen"'));
     assert.ok(metaTagsHtml.includes('property="og:url"'));
-    assert.ok(metaTagsHtml.includes('https://example.com/recipe'));
+    const ogUrlMatch = metaTagsHtml.match(/property="og:url"\s+content="([^"]*)"/);
+    assert.ok(ogUrlMatch, 'expected og:url meta tag');
+    assert.strictEqual(
+      new URL(ogUrlMatch[1]).href,
+      new URL('https://example.com/recipe').href,
+    );
   });
 
   it('uses Description row for description metas', () => {
