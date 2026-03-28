@@ -142,51 +142,15 @@ function removeNode(tree, target) {
 
 /**
  * @param {HastRoot} tree
- * @param {string} tag
- * @returns {HastElement | null}
- */
-function findFirstElement(tree, tag) {
-  /** @type {HastElement | null} */
-  let found = null;
-  function walk(n) {
-    if (found || !n) {
-      return;
-    }
-    if (n.type === 'element' && n.tagName === tag) {
-      found = n;
-      return;
-    }
-    if ('children' in n && n.children) {
-      n.children.forEach(walk);
-    }
-  }
-  walk(tree);
-  return found;
-}
-
-/**
- * @param {HastRoot} tree
  * @returns {string}
  */
 function firstImgSrc(tree) {
-  /** @type {string | null} */
-  let src = null;
-  function walk(n) {
-    if (src || !n) {
-      return;
-    }
-    if (n.type === 'element' && n.tagName === 'img') {
-      const s = n.properties?.src;
-      if (typeof s === 'string' && s.length > 0) {
-        src = s;
-      }
-    }
-    if ('children' in n && n.children) {
-      n.children.forEach(walk);
-    }
+  const img = select('img[src]', tree);
+  if (!img || img.type !== 'element') {
+    return '';
   }
-  walk(tree);
-  return src || '';
+  const s = img.properties?.src;
+  return typeof s === 'string' ? s : '';
 }
 
 /**
@@ -194,17 +158,17 @@ function firstImgSrc(tree) {
  * @returns {string}
  */
 function firstParagraphText(tree) {
-  const p = findFirstElement(tree, 'p');
-  const t = p ? textContent(p).trim() : '';
-  return t;
+  const p = select('p', tree);
+  return p && p.type === 'element' ? textContent(p).trim() : '';
 }
 
 /**
+ * Truncates a string to `max` characters, trimming and appending an ellipsis when needed.
  * @param {string} s
  * @param {number} max
  * @returns {string}
  */
-function truncateMetaText(s, max) {
+function truncateWithEllipsis(s, max) {
   if (s.length <= max) {
     return s;
   }
@@ -295,9 +259,9 @@ export function transformContentMetadataHtml(htmlFragment, options = {}) {
 
   removeNode(tree, metadataEl);
 
-  const title = (lowerMap.get('title') || textContent(findFirstElement(tree, 'h1')).trim() || '').trim();
+  const title = (lowerMap.get('title') || textContent(select('h1', tree)).trim() || '').trim();
   let description = (lowerMap.get('description') || firstParagraphText(tree) || '').trim();
-  description = truncateMetaText(description, 200);
+  description = truncateWithEllipsis(description, 200);
   const image = (lowerMap.get('image') || lowerMap.get('og image') || firstImgSrc(tree) || '').trim();
 
   /** @type {string[]} */

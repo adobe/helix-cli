@@ -24,7 +24,7 @@ import {
   GIT_AUTHOR,
   LARGE_CLONE_FILE_THRESHOLD,
   CONTENT_IO_CONCURRENCY,
-  mapWithConcurrency,
+  processQueue,
 } from './content-shared.js';
 import { writeSyncedRef } from './content-git.js';
 
@@ -145,7 +145,7 @@ export default class CloneCommand {
     log.info('Downloading...');
 
     // 6. Download files (bounded concurrency)
-    const downloadResults = await mapWithConcurrency(
+    const downloadResults = await processQueue(
       files,
       CONTENT_IO_CONCURRENCY,
       async (file) => {

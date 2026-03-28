@@ -19,7 +19,7 @@ import {
   CONTENT_DIR,
   CONFIG_FILE,
   CONTENT_IO_CONCURRENCY,
-  mapWithConcurrency,
+  processQueue,
 } from './content-shared.js';
 import {
   resolveSyncedOid,
@@ -150,7 +150,7 @@ export default class PushCommand {
     const successfullyDeleted = new Set();
 
     const putTargets = [...added, ...modified];
-    const putResults = await mapWithConcurrency(
+    const putResults = await processQueue(
       putTargets,
       CONTENT_IO_CONCURRENCY,
       async (daPath) => {
@@ -176,7 +176,7 @@ export default class PushCommand {
       }
     }
 
-    const deleteResults = await mapWithConcurrency(
+    const deleteResults = await processQueue(
       deleted,
       CONTENT_IO_CONCURRENCY,
       async (daPath) => {
