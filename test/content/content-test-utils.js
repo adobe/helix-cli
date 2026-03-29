@@ -13,6 +13,7 @@ import fs from 'fs';
 import path from 'path';
 import fse from 'fs-extra';
 import git from 'isomorphic-git';
+import { stageDeletionsForContentAddScopes } from '../../src/content/add.cmd.js';
 import { CONTENT_DIR } from '../../src/content/content-shared.js';
 
 export const GIT_AUTHOR = { name: 'aem-cli', email: 'aem-cli@adobe.com' };
@@ -62,6 +63,7 @@ export async function setupContentDir(baseDir, org = 'myorg', repo = 'myrepo') {
  */
 export async function stageAllAndCommit(contentDir, message) {
   await git.add({ fs, dir: contentDir, filepath: '.' });
+  await stageDeletionsForContentAddScopes(fs, contentDir, ['.']);
   await git.commit({
     fs,
     dir: contentDir,

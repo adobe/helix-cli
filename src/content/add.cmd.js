@@ -37,6 +37,47 @@ export function normalizePathForContentAdd(raw) {
   return s.length > 0 ? s : '.';
 }
 
+/**
+ * Whether a repo-relative path is covered by an `aem content add` path (`.` = whole tree).
+ * @param {string} filepath
+ * @param {string} scope normalized path from {@link normalizePathForContentAdd}
+ */
+export function filepathInContentAddScope(filepath, scope) {
+  if (scope === '.' || scope === '') {
+    return true;
+  }
+  const s = scope.replace(/\/$/, '');
+  return filepath === s || filepath.startsWith(`${s}/`);
+}
+
+/**
+ * isomorphic-git `add` only walks paths that exist on disk, so deletions are never staged.
+ * Stage removals for tracked files missing from the workdir (same idea as `git add -u` for
+ * those scopes).
+ * @param {import('isomorphic-git').FsClient} fsClient
+ * @param {string} dir content repo root
+ * @param {string[]} scopes normalized add paths
+ * @returns {Promise<number>} number of index entries removed
+ */
+export async function stageDeletionsForContentAddScopes(fsClient, dir, scopes) {
+  const matrix = await git.statusMatrix({ fs: fsClient, dir });
+  let n = 0;
+  for (const [filepath, head, workdir, stage] of matrix) {
+    const unstagedDelete = head === 1 && workdir === 0 && stage !== 0;
+    const inScope = scopes.some((sc) => filepathInContentAddScope(filepath, sc));
+    if (unstagedDelete && inScope) {
+      // eslint-disable-next-line no-await-in-loop
+      await git.remove({ fs: fsClient, dir, filepath });
+      n += 1;
+    }
+  }
+  return n;
+}
+
+function isNotFoundError(err) {
+  return Boolean(err && (err.code === 'NotFoundError' || err.name === 'NotFoundError'));
+}
+
 export default class AddCommand {
   constructor(logger) {
     this.log = logger;
@@ -70,9 +111,23 @@ export default class AddCommand {
     const normalized = this._paths.map((p) => normalizePathForContentAdd(p));
 
     for (const fp of normalized) {
-      // eslint-disable-next-line no-await-in-loop
-      await git.add({ fs, dir: contentDir, filepath: fp });
+      try {
+        // eslint-disable-next-line no-await-in-loop
+        await git.add({ fs, dir: contentDir, filepath: fp });
+      } catch (err) {
+        if (!isNotFoundError(err)) {
+          throw err;
+        }
+        // Deleted directory/file: `add` cannot lstat the path; stage removal if it was tracked.
+        // eslint-disable-next-line no-await-in-loop
+        const staged = await stageDeletionsForContentAddScopes(fs, contentDir, [fp]);
+        if (staged === 0) {
+          throw err;
+        }
+      }
     }
+    // `git add .` never visits missing files — stage tracked deletions under the requested paths.
+    await stageDeletionsForContentAddScopes(fs, contentDir, normalized);
     log.info(`Staged: ${normalized.join(', ')}`);
   }
 }

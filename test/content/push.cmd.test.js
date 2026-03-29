@@ -12,10 +12,8 @@
 
 /* eslint-env mocha */
 import assert from 'assert';
-import fs from 'fs';
 import path from 'path';
 import fse from 'fs-extra';
-import git from 'isomorphic-git';
 import esmock from 'esmock';
 import { createTestRoot } from '../utils.js';
 import {
@@ -208,7 +206,6 @@ describe('PushCommand', () => {
     it('deletes removed files from da.live', async () => {
       const contentDir = await setupContentDir(testRoot);
       await fse.remove(path.join(contentDir, 'index.html'));
-      await git.remove({ fs, dir: contentDir, filepath: 'index.html' });
       await stageAllAndCommit(contentDir, 'drop index');
 
       const deleted = [];
@@ -257,7 +254,6 @@ describe('PushCommand', () => {
       await fse.writeFile(path.join(contentDir, 'index.html'), 'changed');
       await fse.writeFile(path.join(contentDir, 'new.html'), 'new');
       await fse.remove(path.join(contentDir, 'blog', 'post.html'));
-      await git.remove({ fs, dir: contentDir, filepath: 'blog/post.html' });
       await stageAllAndCommit(contentDir, 'mixed changes');
 
       const log = makeLogger();
