@@ -15,6 +15,7 @@ import { IgnoreConfig } from '@adobe/helix-shared-config';
 import { HelixServer } from './HelixServer.js';
 import { BaseProject } from './BaseProject.js';
 import HeadHtmlSupport from './HeadHtmlSupport.js';
+import MetadataSheetSupport from './MetadataSheetSupport.js';
 import Indexer from './Indexer.js';
 
 export class HelixProject extends BaseProject {
@@ -22,6 +23,7 @@ export class HelixProject extends BaseProject {
     super(HelixServer);
     this._proxyUrl = null;
     this._headHtml = null;
+    this._metadataSheet = null;
     this._indexer = null;
     this._printIndex = false;
     this._allowInsecure = false;
@@ -42,6 +44,7 @@ export class HelixProject extends BaseProject {
   withSiteToken(value) {
     this.siteToken = value;
     this._server.withSiteToken(value);
+    this._metadataSheet?.setSiteToken(value);
     return this;
   }
 
@@ -133,6 +136,10 @@ export class HelixProject extends BaseProject {
     return this._headHtml;
   }
 
+  get metadataSheet() {
+    return this._metadataSheet;
+  }
+
   get htmlFolder() {
     return this._htmlFolder;
   }
@@ -181,6 +188,17 @@ export class HelixProject extends BaseProject {
           }
         });
       }
+    }
+  }
+
+  async initMetadataSheet() {
+    if (this.proxyUrl) {
+      this._metadataSheet = new MetadataSheetSupport({
+        proxyUrl: this.proxyUrl,
+        log: this.log,
+        allowInsecure: this.allowInsecure,
+        siteToken: this.siteToken,
+      });
     }
   }
 
@@ -245,6 +263,7 @@ export class HelixProject extends BaseProject {
     this.log.debug('Launching AEM dev server...');
     await super.start();
     await this.initHeadHtml();
+    await this.initMetadataSheet();
     await this.init404Html();
     await this.initHtmlFolder();
     await this.initHlxIgnore();
