@@ -48,6 +48,7 @@
     "@adobe/helix-shared-config": "11.1.18",
     "@adobe/helix-shared-git": "3.0.21",
     "@adobe/helix-shared-indexer": "2.2.6",
+    "@adobe/helix-shared-process-queue": "3.1.6",
     "camelcase": "9.0.0",
     "chalk-template": "1.1.2",
     "chokidar": "5.0.0",

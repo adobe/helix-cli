@@ -13,13 +13,13 @@ import fs from 'fs';
 import path from 'path';
 import fse from 'fs-extra';
 import git from 'isomorphic-git';
+import processQueue from '@adobe/helix-shared-process-queue';
 import { DaClient, getContentType } from './da-api.js';
 import { getValidToken } from './da-auth.js';
 import {
   CONTENT_DIR,
   CONFIG_FILE,
   CONTENT_IO_CONCURRENCY,
-  processQueue,
 } from './content-shared.js';
 import {
   resolveSyncedOid,
@@ -152,7 +152,6 @@ export default class PushCommand {
     const putTargets = [...added, ...modified];
     const putResults = await processQueue(
       putTargets,
-      CONTENT_IO_CONCURRENCY,
       async (daPath) => {
         const localPath = path.join(contentDir, ...daPath.split('/').filter(Boolean));
         const ext = daPath.split('.').pop();
@@ -166,6 +165,7 @@ export default class PushCommand {
           return { ok: false };
         }
       },
+      CONTENT_IO_CONCURRENCY,
     );
     for (const r of putResults) {
       if (r.ok) {
@@ -178,7 +178,6 @@ export default class PushCommand {
 
     const deleteResults = await processQueue(
       deleted,
-      CONTENT_IO_CONCURRENCY,
       async (daPath) => {
         try {
           await client.deleteSource(org, repo, daPath);
@@ -189,6 +188,7 @@ export default class PushCommand {
           return { ok: false };
         }
       },
+      CONTENT_IO_CONCURRENCY,
     );
     for (const r of deleteResults) {
       if (r.ok) {

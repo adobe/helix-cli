@@ -14,6 +14,7 @@ import readline from 'readline';
 import path from 'path';
 import fse from 'fs-extra';
 import git from 'isomorphic-git';
+import processQueue from '@adobe/helix-shared-process-queue';
 import GitUtils from '../git-utils.js';
 import { prompt } from '../cli-util.js';
 import { DaClient } from './da-api.js';
@@ -24,7 +25,6 @@ import {
   GIT_AUTHOR,
   LARGE_CLONE_FILE_THRESHOLD,
   CONTENT_IO_CONCURRENCY,
-  processQueue,
 } from './content-shared.js';
 import { writeSyncedRef } from './content-git.js';
 
@@ -147,7 +147,6 @@ export default class CloneCommand {
     // 6. Download files (bounded concurrency)
     const downloadResults = await processQueue(
       files,
-      CONTENT_IO_CONCURRENCY,
       async (file) => {
         const daPath = file.path.replace(`/${org}/${repo}`, '');
         const localPath = path.join(contentDir, ...daPath.split('/').filter(Boolean));
@@ -167,6 +166,7 @@ export default class CloneCommand {
           return { status: 'error' };
         }
       },
+      CONTENT_IO_CONCURRENCY,
     );
 
     const downloaded = [];

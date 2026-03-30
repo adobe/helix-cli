@@ -41,34 +41,3 @@ export function normalizeDaPath(input) {
   s = s.replace(/\/+$/, '') || '/';
   return s;
 }
-
-/**
- * Runs async `processor` over `items` with at most `limit` in flight. Preserves result order.
- * @template T, R
- * @param {T[]} items
- * @param {number} limit
- * @param {(item: T, index: number) => Promise<R>} processor
- * @returns {Promise<R[]>}
- */
-export async function processQueue(items, limit, processor) {
-  if (items.length === 0) {
-    return [];
-  }
-  const results = new Array(items.length);
-  let next = 0;
-  async function worker() {
-    // eslint-disable-next-line no-constant-condition
-    while (true) {
-      const i = next;
-      next += 1;
-      if (i >= items.length) {
-        return;
-      }
-      // eslint-disable-next-line no-await-in-loop
-      results[i] = await processor(items[i], i);
-    }
-  }
-  const pool = Math.min(limit, items.length);
-  await Promise.all(Array.from({ length: pool }, () => worker()));
-  return results;
-}
