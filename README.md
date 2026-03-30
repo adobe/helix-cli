@@ -79,12 +79,12 @@ This feature is especially helpful when:
 The `--html-folder` option enables serving HTML files without extensions, useful for previewing content changes when you don't have access to the authoring system.
 
 ```
-$ aem up --html-folder drafts          # serves at /drafts/*
-$ aem up --html-folder content:/       # serves at /* (root)
-$ aem up --html-folder drafts:/preview # serves at /preview/*
+$ aem up --html-folder drafts                      # serves at /drafts/*
+$ aem up --html-folder content --html-mount /       # serves at /* (root)
+$ aem up --html-folder drafts --html-mount /preview # serves at /preview/*
 ```
 
-Use the `FOLDER:MOUNT` syntax to control the URL path where files are served. Without a mount point, files are served at `/FOLDER/*`.
+Use `--html-mount` to control the URL path where files are served. Without it, files are served at `/FOLDER/*`.
 
 This enables two features:
 
@@ -185,7 +185,8 @@ If present, `ALL_PROXY` is used as fallback if there is no other match.
 | `--livereload`    | `AEM_LIVERELOAD`    | `true`      | Enable automatic reloading of modified sources in browser.  |
 | `--no-livereload` | `AEM_NO_LIVERELOAD` | `false`     | Disable live-reload.                                        |
 | `--forward-browser-logs` | `AEM_FORWARD_BROWSER_LOGS` | `false` | Forward browser console logs to terminal.            |
-| `--html-folder`   | `AEM_HTML_FOLDER`   | undefined   | Serve HTML files from folder without extensions. Use `FOLDER:MOUNT` to control URL path (e.g., `content:/`). |
+| `--html-folder`   | `AEM_HTML_FOLDER`   | undefined   | Serve HTML files from folder without extensions. |
+| `--html-mount`    | `AEM_HTML_MOUNT`    | `/FOLDER`   | URL path where html-folder files are served. |
 | `--open`          | `AEM_OPEN`          | `/`         | Open a browser window at specified path after server start. |
 | `--no-open`       | `AEM_NO_OPEN`       | `false`     | Disable automatic opening of browser window.                |
 | `--tls-key`       | `AEM_TLS_KEY`       | undefined   | Path to .key file (for enabling TLS)                        |

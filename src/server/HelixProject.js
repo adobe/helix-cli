@@ -82,19 +82,17 @@ export class HelixProject extends BaseProject {
 
   withHtmlFolder(value) {
     if (value) {
-      const [folder, mount] = value.includes(':')
-        ? value.split(':', 2)
-        : [value, `/${value}`];
-
       // Security: reject any paths with traversal patterns or absolute paths
-      if (path.isAbsolute(folder) || folder.includes('..') || folder.startsWith('/')) {
-        throw new Error(`Invalid HTML folder name: ${folder} only folders within the current workspace are allowed`);
+      if (path.isAbsolute(value) || value.includes('..') || value.startsWith('/')) {
+        throw new Error(`Invalid HTML folder name: ${value} only folders within the current workspace are allowed`);
       }
-
-      this._htmlFolder = folder;
-      this._htmlMount = mount;
-      this._server.withHtmlFolder(folder, mount);
+      this._htmlFolder = value;
     }
+    return this;
+  }
+
+  withHtmlMount(value) {
+    this._htmlMount = value;
     return this;
   }
 
@@ -144,6 +142,10 @@ export class HelixProject extends BaseProject {
   }
 
   async init() {
+    if (this._htmlFolder) {
+      const mount = this._htmlMount || `/${this._htmlFolder}`;
+      this._server.withHtmlFolder(this._htmlFolder, mount);
+    }
     await super.init();
     this._indexer = new Indexer()
       .withLogger(this._logger)

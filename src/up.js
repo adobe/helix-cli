@@ -117,7 +117,12 @@ export default function up() {
         })
         .option('html-folder', {
           alias: 'htmlFolder',
-          describe: 'Serve HTML files from this folder without extensions. Use FOLDER:MOUNT syntax to control URL path (e.g., content:/ serves at root, drafts:/preview serves at /preview). Defaults to serving at /FOLDER.',
+          describe: 'Serve HTML files from this folder without extensions. Defaults to serving at /FOLDER.',
+          type: 'string',
+        })
+        .option('html-mount', {
+          alias: 'htmlMount',
+          describe: 'URL path where html-folder files are served (e.g., / for root). Defaults to /FOLDER.',
           type: 'string',
         })
 
@@ -147,6 +152,7 @@ export default function up() {
         .withCache(argv.alphaCache)
         .withCookies(argv.cookies)
         .withHtmlFolder(argv.htmlFolder)
+        .withHtmlMount(argv.htmlMount)
         .run();
     },
   };

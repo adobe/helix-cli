@@ -1147,7 +1147,7 @@ describe('Helix Server - HTML Folder', () => {
     }
   });
 
-  describe('Root mount with folder:mount syntax (content:/)', () => {
+  describe('Root mount with --html-mount /', () => {
     it('serves local .html file at root', async () => {
       const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
       const contentFolder = path.join(cwd, 'content');
@@ -1159,7 +1159,8 @@ describe('Helix Server - HTML Folder', () => {
         .withLogger(console)
         .withHttpPort(0)
         .withProxyUrl('https://main--foo--bar.aem.page/')
-        .withHtmlFolder('content:/');
+        .withHtmlFolder('content')
+        .withHtmlMount('/');
 
       await project.init();
       try {
@@ -1191,7 +1192,8 @@ describe('Helix Server - HTML Folder', () => {
         .withLogger(console)
         .withHttpPort(0)
         .withProxyUrl('https://main--foo--bar.aem.page/')
-        .withHtmlFolder('content:/');
+        .withHtmlFolder('content')
+        .withHtmlMount('/');
 
       await project.init();
       try {
@@ -1219,7 +1221,8 @@ describe('Helix Server - HTML Folder', () => {
         .withLogger(console)
         .withHttpPort(0)
         .withProxyUrl('https://main--foo--bar.aem.page/')
-        .withHtmlFolder('content:/');
+        .withHtmlFolder('content')
+        .withHtmlMount('/');
 
       await project.init();
       try {
@@ -1249,7 +1252,8 @@ describe('Helix Server - HTML Folder', () => {
         .withLogger(console)
         .withHttpPort(0)
         .withProxyUrl('https://main--foo--bar.aem.page/')
-        .withHtmlFolder('content:/');
+        .withHtmlFolder('content')
+        .withHtmlMount('/');
 
       await project.init();
       try {
@@ -1273,7 +1277,8 @@ describe('Helix Server - HTML Folder', () => {
         .withLogger(console)
         .withHttpPort(0)
         .withProxyUrl('https://main--foo--bar.aem.page/')
-        .withHtmlFolder('content:/');
+        .withHtmlFolder('content')
+        .withHtmlMount('/');
 
       await project.init();
       try {
@@ -1300,7 +1305,8 @@ describe('Helix Server - HTML Folder', () => {
         .withLogger(console)
         .withHttpPort(0)
         .withProxyUrl('https://main--foo--bar.aem.page/')
-        .withHtmlFolder('content:/');
+        .withHtmlFolder('content')
+        .withHtmlMount('/');
 
       await project.init();
       try {
@@ -1329,7 +1335,8 @@ describe('Helix Server - HTML Folder', () => {
         .withLogger(console)
         .withHttpPort(0)
         .withProxyUrl('https://main--foo--bar.aem.page/')
-        .withHtmlFolder('drafts:/preview');
+        .withHtmlFolder('drafts')
+        .withHtmlMount('/preview');
 
       await project.init();
       try {
@@ -1362,7 +1369,8 @@ describe('Helix Server - HTML Folder', () => {
         .withLogger(console)
         .withHttpPort(0)
         .withProxyUrl('https://main--foo--bar.aem.page/')
-        .withHtmlFolder('drafts:/preview');
+        .withHtmlFolder('drafts')
+        .withHtmlMount('/preview');
 
       await project.init();
       try {
