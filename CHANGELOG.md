@@ -1,3 +1,10 @@
+## [16.16.32](https://github.com/adobe/helix-cli/compare/v16.16.31...v16.16.32) (2026-04-02)
+
+
+### Bug Fixes
+
+* Give a warning when using Safari for CLI login ([#2500](https://github.com/adobe/helix-cli/issues/2500)) ([6b8b86e](https://github.com/adobe/helix-cli/commit/6b8b86eff7aa21d462aa808b9572d639aa2c2754))
+
 ## [16.16.31](https://github.com/adobe/helix-cli/compare/v16.16.30...v16.16.31) (2026-04-01)
 
 
