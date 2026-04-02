@@ -714,9 +714,15 @@ window.LiveReloadOptions = {
 
     // Build final metadata object with computed values
     const finalMetadata = { ...metadata };
-    if (title) finalMetadata.title = title;
-    if (description) finalMetadata.description = description;
-    if (image) finalMetadata.image = image;
+    if (title) {
+      finalMetadata.title = title;
+    }
+    if (description) {
+      finalMetadata.description = description;
+    }
+    if (image) {
+      finalMetadata.image = image;
+    }
 
     // Remove special properties that shouldn't become meta tags
     delete finalMetadata['title:suffix'];
