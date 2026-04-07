@@ -255,9 +255,6 @@ export class HelixServer extends BaseServer {
     let relativePath;
     if (pathname.startsWith(this._mountPrefix)) {
       relativePath = pathname.slice(this._mountPrefix.length);
-    } else if (pathname === this._htmlMount) {
-      // e.g., /drafts without trailing slash
-      relativePath = '';
     } else {
       return next();
     }
@@ -436,8 +433,8 @@ export class HelixServer extends BaseServer {
 
     // Add HTML folder handler before the general proxy handler
     if (this._htmlFolder) {
-      // Handle GET requests for both clean URLs and folder-prefixed URLs
-      this.app.get(/.*/, asyncHandler(this.handleHtmlFolderRequest.bind(this)));
+      const mountPattern = new RegExp(`^${this._mountPrefix}.*`);
+      this.app.get(mountPattern, asyncHandler(this.handleHtmlFolderRequest.bind(this)));
       this.log.info(`Serving HTML files from folder: ${this._htmlFolder} at ${this._htmlMount}`);
     }
 
