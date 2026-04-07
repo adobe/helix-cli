@@ -1,3 +1,10 @@
+# [16.17.0](https://github.com/adobe/helix-cli/compare/v16.16.33...v16.17.0) (2026-04-07)
+
+
+### Features
+
+* **html-folder:** Add --html-mount flag to control URL path for html-folder serving ([#2697](https://github.com/adobe/helix-cli/issues/2697)) ([4ed1f4b](https://github.com/adobe/helix-cli/commit/4ed1f4bea996e2afcf79dd1fc94f2809689ed772))
+
 ## [16.16.33](https://github.com/adobe/helix-cli/compare/v16.16.32...v16.16.33) (2026-04-06)
 
 
