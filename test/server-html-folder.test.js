@@ -1323,7 +1323,7 @@ describe('Helix Server - HTML Folder', () => {
     });
   });
 
-  describe('Custom mount with folder:mount syntax', () => {
+  describe('Custom mount with --html-mount', () => {
     it('serves files at custom mount point', async () => {
       const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
       const draftsFolder = path.join(cwd, 'drafts');
@@ -1387,7 +1387,7 @@ describe('Helix Server - HTML Folder', () => {
   });
 
   describe('Default mount (backward compatibility)', () => {
-    it('without mount syntax, serves at /folder/* as before', async () => {
+    it('without --html-mount, serves at /folder/* as before', async () => {
       const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
       const contentFolder = path.join(cwd, 'content');
       await fs.mkdir(contentFolder, { recursive: true });
