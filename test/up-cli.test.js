@@ -53,6 +53,7 @@ describe('hlx up', () => {
     mockUp.withCookies.returnsThis();
     mockUp.withSiteToken.returnsThis();
     mockUp.withHtmlFolder.returnsThis();
+    mockUp.withHtmlMount.returnsThis();
     mockUp.run.returnsThis();
     cli = (await new CLI().initCommands()).withCommandExecutor('up', mockUp);
   });

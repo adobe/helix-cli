@@ -1146,4 +1146,281 @@ describe('Helix Server - HTML Folder', () => {
       await project.stop();
     }
   });
+
+  describe('Root mount with --html-mount /', () => {
+    it('serves local .html file at root', async () => {
+      const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
+      const contentFolder = path.join(cwd, 'content');
+      await fs.mkdir(contentFolder, { recursive: true });
+      await fs.writeFile(path.join(contentFolder, 'test-page.html'), '<html><body>Root Mount Test Page</body></html>');
+
+      const project = new HelixProject()
+        .withCwd(cwd)
+        .withLogger(console)
+        .withHttpPort(0)
+        .withProxyUrl('https://main--foo--bar.aem.page/')
+        .withHtmlFolder('content')
+        .withHtmlMount('/');
+
+      await project.init();
+      try {
+        await project.start();
+
+        const response = await fetch(`http://127.0.0.1:${project.server.port}/test-page`);
+        assert.equal(response.status, 200, 'Root mount should serve at /test-page');
+        assert.equal(response.headers.get('content-type'), 'text/html; charset=utf-8');
+
+        const content = await response.text();
+        assert.ok(content.includes('Root Mount Test Page'), 'Should serve local content at root');
+      } finally {
+        await project.stop();
+      }
+    });
+
+    it('serves local .plain.html file at root', async () => {
+      const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
+      const contentFolder = path.join(cwd, 'content');
+      await fs.mkdir(contentFolder, { recursive: true });
+      await fs.writeFile(path.join(contentFolder, 'plain-test.plain.html'), '<h1>Plain Root Mount</h1>\n<p>This is plain HTML content served at root mount.</p>');
+
+      nock('https://main--foo--bar.aem.page')
+        .get('/head.html')
+        .reply(404);
+
+      const project = new HelixProject()
+        .withCwd(cwd)
+        .withLogger(console)
+        .withHttpPort(0)
+        .withProxyUrl('https://main--foo--bar.aem.page/')
+        .withHtmlFolder('content')
+        .withHtmlMount('/');
+
+      await project.init();
+      try {
+        await project.start();
+
+        const response = await fetch(`http://127.0.0.1:${project.server.port}/plain-test`);
+        assert.equal(response.status, 200, 'Root mount should serve .plain.html');
+
+        const content = await response.text();
+        assert.ok(content.includes('Plain Root Mount'), 'Should serve transformed .plain.html at root');
+        assert.ok(content.includes('<html>'), 'Should wrap in full HTML structure');
+      } finally {
+        await project.stop();
+      }
+    });
+
+    it('serves nested path at root', async () => {
+      const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
+      const nestedFolder = path.join(cwd, 'content', 'section');
+      await fs.mkdir(nestedFolder, { recursive: true });
+      await fs.writeFile(path.join(nestedFolder, 'deep-page.html'), '<html><body>Nested Root Mount</body></html>');
+
+      const project = new HelixProject()
+        .withCwd(cwd)
+        .withLogger(console)
+        .withHttpPort(0)
+        .withProxyUrl('https://main--foo--bar.aem.page/')
+        .withHtmlFolder('content')
+        .withHtmlMount('/');
+
+      await project.init();
+      try {
+        await project.start();
+
+        const response = await fetch(`http://127.0.0.1:${project.server.port}/section/deep-page`);
+        assert.equal(response.status, 200, 'Nested path should work at root mount');
+
+        const content = await response.text();
+        assert.ok(content.includes('Nested Root Mount'));
+      } finally {
+        await project.stop();
+      }
+    });
+
+    it('falls through to proxy when no local file', async () => {
+      const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
+      const contentFolder = path.join(cwd, 'content');
+      await fs.mkdir(contentFolder, { recursive: true });
+
+      nock('https://main--foo--bar.aem.page')
+        .get('/nonexistent')
+        .reply(404, 'Not Found');
+
+      const project = new HelixProject()
+        .withCwd(cwd)
+        .withLogger(console)
+        .withHttpPort(0)
+        .withProxyUrl('https://main--foo--bar.aem.page/')
+        .withHtmlFolder('content')
+        .withHtmlMount('/');
+
+      await project.init();
+      try {
+        await project.start();
+
+        const response = await fetch(`http://127.0.0.1:${project.server.port}/nonexistent`);
+        assert.equal(response.status, 404, 'Should fall through to proxy when no local file');
+      } finally {
+        await project.stop();
+      }
+    });
+
+    it('serves nested directory index at root', async () => {
+      const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
+      const subFolder = path.join(cwd, 'content', 'subfolder');
+      await fs.mkdir(subFolder, { recursive: true });
+      await fs.writeFile(path.join(subFolder, 'index.html'), '<html><body>Nested Directory Index</body></html>');
+
+      const project = new HelixProject()
+        .withCwd(cwd)
+        .withLogger(console)
+        .withHttpPort(0)
+        .withProxyUrl('https://main--foo--bar.aem.page/')
+        .withHtmlFolder('content')
+        .withHtmlMount('/');
+
+      await project.init();
+      try {
+        await project.start();
+
+        const response = await fetch(`http://127.0.0.1:${project.server.port}/subfolder/`);
+        assert.equal(response.status, 200, 'Nested directory index should work at root mount');
+
+        const content = await response.text();
+        assert.ok(content.includes('Nested Directory Index'));
+      } finally {
+        await project.stop();
+      }
+    });
+
+    it('serves root index', async () => {
+      const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
+      const contentFolder = path.join(cwd, 'content');
+      await fs.mkdir(contentFolder, { recursive: true });
+      await fs.writeFile(path.join(contentFolder, 'index.html'), '<html><body>Root Index</body></html>');
+
+      const project = new HelixProject()
+        .withCwd(cwd)
+        .withLogger(console)
+        .withHttpPort(0)
+        .withProxyUrl('https://main--foo--bar.aem.page/')
+        .withHtmlFolder('content')
+        .withHtmlMount('/');
+
+      await project.init();
+      try {
+        await project.start();
+
+        const response = await fetch(`http://127.0.0.1:${project.server.port}/`);
+        assert.equal(response.status, 200, 'Root / should serve content/index.html');
+
+        const content = await response.text();
+        assert.ok(content.includes('Root Index'));
+      } finally {
+        await project.stop();
+      }
+    });
+  });
+
+  describe('Custom mount with --html-mount', () => {
+    it('serves files at custom mount point', async () => {
+      const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
+      const draftsFolder = path.join(cwd, 'drafts');
+      await fs.mkdir(draftsFolder, { recursive: true });
+      await fs.writeFile(path.join(draftsFolder, 'my-page.html'), '<html><body>Custom Mount Page</body></html>');
+
+      const project = new HelixProject()
+        .withCwd(cwd)
+        .withLogger(console)
+        .withHttpPort(0)
+        .withProxyUrl('https://main--foo--bar.aem.page/')
+        .withHtmlFolder('drafts')
+        .withHtmlMount('/preview');
+
+      await project.init();
+      try {
+        await project.start();
+
+        // /preview/my-page should serve drafts/my-page.html
+        const response = await fetch(`http://127.0.0.1:${project.server.port}/preview/my-page`);
+        assert.equal(response.status, 200, 'Custom mount should serve at /preview/*');
+
+        const content = await response.text();
+        assert.ok(content.includes('Custom Mount Page'));
+      } finally {
+        await project.stop();
+      }
+    });
+
+    it('does not serve extension-less URLs at folder name when custom mount is set', async () => {
+      const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
+      const draftsFolder = path.join(cwd, 'drafts');
+      await fs.mkdir(draftsFolder, { recursive: true });
+      // Only create a .plain.html file (not .html) so the proxy handler won't find it
+      await fs.writeFile(path.join(draftsFolder, 'only-plain.plain.html'), '<h1>Only Plain</h1>');
+
+      nock('https://main--foo--bar.aem.page')
+        .get('/drafts/only-plain')
+        .reply(404, 'Not Found');
+
+      const project = new HelixProject()
+        .withCwd(cwd)
+        .withLogger(console)
+        .withHttpPort(0)
+        .withProxyUrl('https://main--foo--bar.aem.page/')
+        .withHtmlFolder('drafts')
+        .withHtmlMount('/preview');
+
+      await project.init();
+      try {
+        await project.start();
+
+        // /drafts/only-plain should NOT get html-folder treatment (mount is /preview)
+        // The proxy handler won't find drafts/only-plain.html either, so it proxies → 404
+        const response = await fetch(`http://127.0.0.1:${project.server.port}/drafts/only-plain`);
+        assert.equal(response.status, 404, 'Should not serve extension-less at original folder when custom mount is set');
+      } finally {
+        await project.stop();
+      }
+    });
+  });
+
+  describe('Default mount (backward compatibility)', () => {
+    it('without --html-mount, serves at /folder/* as before', async () => {
+      const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
+      const contentFolder = path.join(cwd, 'content');
+      await fs.mkdir(contentFolder, { recursive: true });
+      await fs.writeFile(path.join(contentFolder, 'my-page.html'), '<html><body>Default Mount Page</body></html>');
+
+      nock('https://main--foo--bar.aem.page')
+        .get('/my-page')
+        .reply(404, 'Not Found');
+
+      const project = new HelixProject()
+        .withCwd(cwd)
+        .withLogger(console)
+        .withHttpPort(0)
+        .withProxyUrl('https://main--foo--bar.aem.page/')
+        .withHtmlFolder('content');
+
+      await project.init();
+      try {
+        await project.start();
+
+        // /content/my-page should work (default mount is /content)
+        const prefixedResponse = await fetch(`http://127.0.0.1:${project.server.port}/content/my-page`);
+        assert.equal(prefixedResponse.status, 200, 'Default mount should serve at /content/*');
+
+        const content = await prefixedResponse.text();
+        assert.ok(content.includes('Default Mount Page'));
+
+        // /my-page should NOT be served (mount is /content, not /)
+        const cleanResponse = await fetch(`http://127.0.0.1:${project.server.port}/my-page`);
+        assert.equal(cleanResponse.status, 404, 'Should not serve at root when default mount is /content');
+      } finally {
+        await project.stop();
+      }
+    });
+  });
 });

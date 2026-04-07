@@ -63,10 +63,15 @@ export class HelixServer extends BaseServer {
     return this;
   }
 
-  withHtmlFolder(value) {
-    // It's now sanitized in HelixProject.withHtmlFolder
-    this._htmlFolder = value;
+  withHtmlFolder(folder, mount) {
+    this._htmlFolder = folder;
+    this._htmlMount = mount;
+    this._mountPrefix = mount.endsWith('/') ? mount : `${mount}/`;
     return this;
+  }
+
+  get mountPrefix() {
+    return this._mountPrefix;
   }
 
   async handleLogin(req, res) {
@@ -262,21 +267,14 @@ export class HelixServer extends BaseServer {
    * @param {Function} next next middleware
    */
   async handleHtmlFolderRequest(req, res, next) {
-    if (!this._htmlFolder) {
-      return next();
-    }
-
-    // Use Express's req.path for pathname extraction
     const pathname = req.path;
-    const folderPrefix = `/${this._htmlFolder}/`;
 
-    // Check if the request is for the HTML folder
-    if (!pathname.startsWith(folderPrefix)) {
+    let relativePath;
+    if (pathname.startsWith(this._mountPrefix)) {
+      relativePath = pathname.slice(this._mountPrefix.length);
+    } else {
       return next();
     }
-
-    // Extract the path within the HTML folder
-    let relativePath = pathname.slice(folderPrefix.length);
 
     // Handle directory requests (trailing slash) by appending 'index'
     if (relativePath === '' || relativePath.endsWith('/')) {
@@ -452,10 +450,9 @@ export class HelixServer extends BaseServer {
 
     // Add HTML folder handler before the general proxy handler
     if (this._htmlFolder) {
-      // Only handle GET requests for the HTML folder path
-      const htmlFolderPattern = new RegExp(`^/${this._htmlFolder}/.*`);
-      this.app.get(htmlFolderPattern, asyncHandler(this.handleHtmlFolderRequest.bind(this)));
-      this.log.info(`Serving HTML files from folder: ${this._htmlFolder}`);
+      const mountPattern = new RegExp(`^${this._mountPrefix}.*`);
+      this.app.get(mountPattern, asyncHandler(this.handleHtmlFolderRequest.bind(this)));
+      this.log.info(`Serving HTML files from folder: ${this._htmlFolder} at ${this._htmlMount}`);
     }
 
     const handler = asyncHandler(this.handleProxyModeRequest.bind(this));
