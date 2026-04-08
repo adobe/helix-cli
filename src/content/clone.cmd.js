@@ -151,7 +151,7 @@ export default class CloneCommand {
         const prefix = `/${org}/${repo}`;
         if (!file.path.startsWith(prefix)) {
           log.warn(`  skip (unexpected path, missing org/repo prefix): ${file.path}`);
-          return { status: 'skip' };
+          return { status: 404 };
         }
         const daPath = file.path.slice(prefix.length) || '/';
         const localPath = path.join(contentDir, ...daPath.split('/').filter(Boolean));
@@ -159,16 +159,16 @@ export default class CloneCommand {
           const res = await client.getSource(org, repo, daPath);
           if (!res) {
             log.warn(`  skip (not found): ${daPath}`);
-            return { status: 'skip' };
+            return { status: 404 };
           }
-          const buffer = Buffer.from(await res.arrayBuffer());
+          const buffer = await res.buffer();
           await fse.ensureDir(path.dirname(localPath));
           await fse.writeFile(localPath, buffer);
           log.info(`  ✓ ${daPath}`);
-          return { status: 'ok', daPath };
+          return { status: 200, daPath };
         } catch (err) {
           log.warn(`  ✗ ${daPath}: ${err.message}`);
-          return { status: 'error' };
+          return { status: err.status || 500 };
         }
       },
       CONTENT_IO_CONCURRENCY,
@@ -177,9 +177,9 @@ export default class CloneCommand {
     const downloaded = [];
     let errors = 0;
     for (const r of downloadResults) {
-      if (r.status === 'ok') {
+      if (r.status === 200) {
         downloaded.push(r.daPath);
-      } else if (r.status === 'error') {
+      } else if (r.status !== 404) {
         errors += 1;
       }
     }

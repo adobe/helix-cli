@@ -111,6 +111,7 @@ export function createDaClientClass(opts = {}) {
       return null;
     }
     return {
+      buffer: async () => Buffer.from(content),
       arrayBuffer: async () => Buffer.from(content),
       text: async () => content,
     };
