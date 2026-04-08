@@ -80,7 +80,7 @@ The `--html-folder` option enables serving HTML files without extensions, useful
 
 ```
 $ aem up --html-folder drafts                      # serves at /drafts/*
-$ aem up --html-folder content --html-mount /       # serves at /* (root)
+$ aem up --html-folder html --html-mount /       # serves at /* (root)
 $ aem up --html-folder drafts --html-mount /preview # serves at /preview/*
 ```
 
