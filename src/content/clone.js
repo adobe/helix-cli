@@ -27,7 +27,7 @@ export default function clone() {
           type: 'string',
         })
         .option('all', {
-          describe: 'Clone the entire repository (large). Use instead of --path.',
+          describe: 'Clone the entire site content (large). Use instead of --path.',
           type: 'boolean',
           default: false,
         })
