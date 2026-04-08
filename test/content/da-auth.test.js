@@ -13,10 +13,11 @@
 /* eslint-env mocha */
 import assert from 'assert';
 import path from 'path';
-import os from 'os';
 import esmock from 'esmock';
 import fse from 'fs-extra';
 import { makeLogger } from './content-test-utils.js';
+
+const TEST_PROJECT_DIR = '/tmp/test-da-project';
 
 function waitForTimeout(ms) {
   return new Promise((resolve) => {
@@ -37,7 +38,7 @@ describe('getValidToken', () => {
       },
     });
     const log = makeLogger();
-    const result = await getValidToken(log, 'my-explicit-token');
+    const result = await getValidToken(log, 'my-explicit-token', TEST_PROJECT_DIR);
     assert.strictEqual(result, 'my-explicit-token');
     assert.strictEqual(fseCalled, false);
   });
@@ -55,7 +56,7 @@ describe('getValidToken', () => {
       },
     });
     const log = makeLogger();
-    const result = await getValidToken(log, undefined);
+    const result = await getValidToken(log, undefined, TEST_PROJECT_DIR);
     assert.strictEqual(result, 'stored-token');
   });
 
@@ -77,7 +78,7 @@ describe('getValidToken', () => {
     const log = makeLogger();
     try {
       await Promise.race([
-        getValidToken(log, undefined),
+        getValidToken(log, undefined, TEST_PROJECT_DIR),
         waitForTimeout(100).then(() => { throw new Error('timeout'); }),
       ]);
     } catch (err) {
@@ -104,7 +105,7 @@ describe('getValidToken', () => {
     const log = makeLogger();
     try {
       await Promise.race([
-        getValidToken(log, undefined),
+        getValidToken(log, undefined, TEST_PROJECT_DIR),
         waitForTimeout(100).then(() => { throw new Error('timeout'); }),
       ]);
     } catch (err) {
@@ -132,7 +133,7 @@ describe('getValidToken', () => {
     const log = makeLogger();
     try {
       await Promise.race([
-        getValidToken(log, undefined),
+        getValidToken(log, undefined, TEST_PROJECT_DIR),
         waitForTimeout(100).then(() => { throw new Error('timeout'); }),
       ]);
     } catch (err) {
@@ -145,7 +146,7 @@ describe('getValidToken', () => {
     }
   });
 
-  it('reads token file from ~/.aem/da-token.json', async () => {
+  it('reads token file from the content directory', async () => {
     const tokenData = {
       access_token: 'valid-token',
       expires_at: Date.now() + 3_600_000,
@@ -162,7 +163,7 @@ describe('getValidToken', () => {
       },
     });
     const log = makeLogger();
-    await getValidToken(log, undefined);
-    assert.ok(readPath.includes(path.join(os.homedir(), '.aem', 'da-token.json')));
+    await getValidToken(log, undefined, TEST_PROJECT_DIR);
+    assert.strictEqual(readPath, path.join(TEST_PROJECT_DIR, '.hlx', '.da-token.json'));
   });
 });

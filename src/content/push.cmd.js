@@ -97,7 +97,7 @@ export default class PushCommand {
       return;
     }
 
-    const token = await getValidToken(log, this._token);
+    const token = await getValidToken(log, this._token, this._dir);
 
     log.info(`Pushing content to da.live: ${org}/${repo}`);
     log.info(`${added.length} added, ${modified.length} modified, ${deleted.length} deleted`);
@@ -131,15 +131,21 @@ export default class PushCommand {
       log.info('\nDry run — no files were pushed.');
       if (added.length) {
         log.info('\nWould add:');
-        for (const p of added) log.info(`  + ${p}`);
+        for (const p of added) {
+          log.info(`  + ${p}`);
+        }
       }
       if (modified.length) {
         log.info('\nWould update:');
-        for (const p of modified) log.info(`  ~ ${p}`);
+        for (const p of modified) {
+          log.info(`  ~ ${p}`);
+        }
       }
       if (deleted.length) {
         log.info('\nWould delete:');
-        for (const p of deleted) log.info(`  - ${p}`);
+        for (const p of deleted) {
+          log.info(`  - ${p}`);
+        }
       }
       return;
     }

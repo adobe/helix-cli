@@ -9,11 +9,13 @@
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
+import fs from 'fs/promises';
 import http from 'http';
 import os from 'os';
 import path from 'path';
 import fse from 'fs-extra';
 import open from 'open';
+import GitUtils from '../git-utils.js';
 
 const IMS_ORIGIN = 'https://ims-na1.adobelogin.com';
 const CLIENT_ID = 'darkalley';
@@ -21,23 +23,41 @@ const SCOPE = 'ab.manage,AdobeID,gnav,openid,org.read,read_organizations,session
 const CALLBACK_PORT = 9898;
 const REDIRECT_URI = `http://localhost:${CALLBACK_PORT}/callback`;
 
-// Token stored globally per user, not per project
-const TOKEN_FILE = path.join(os.homedir(), '.aem', 'da-token.json');
+/** Token file stored in the project's .hlx folder, alongside the site token. */
+export const DA_TOKEN_FILE = path.join('.hlx', '.da-token.json');
 
 // ─── Token storage ───────────────────────────────────────────────────────────
 
-async function loadStoredToken() {
-  if (!await fse.pathExists(TOKEN_FILE)) return null;
+async function loadStoredToken(tokenFile) {
+  if (!await fse.pathExists(tokenFile)) {
+    return null;
+  }
   try {
-    return await fse.readJson(TOKEN_FILE);
+    return await fse.readJson(tokenFile);
   } catch {
     return null;
   }
 }
 
-async function storeToken(tokenData) {
-  await fse.ensureDir(path.dirname(TOKEN_FILE));
-  await fse.writeJson(TOKEN_FILE, tokenData, { spaces: 2 });
+/**
+ * Saves the DA token to the project's .hlx folder and ensures the file is git-ignored,
+ * following the same pattern as saveSiteTokenToFile in config-utils.js.
+ * @param {string} projectDir
+ * @param {object} tokenData
+ */
+async function saveDaTokenToFile(projectDir, tokenData) {
+  const tokenFile = path.join(projectDir, DA_TOKEN_FILE);
+  await fse.ensureDir(path.dirname(tokenFile));
+  await fse.writeJson(tokenFile, tokenData, { spaces: 2 });
+
+  const tokenFileName = path.basename(DA_TOKEN_FILE);
+  if (!await GitUtils.isIgnored(projectDir, tokenFile)) {
+    await fs.appendFile(
+      path.join(projectDir, '.gitignore'),
+      `${os.EOL}${path.join('.hlx', tokenFileName)}${os.EOL}`,
+      'utf8',
+    );
+  }
 }
 
 // ─── Token validity ──────────────────────────────────────────────────────────
@@ -61,7 +81,7 @@ function isTokenExpired(stored) {
  * that reads the fragment via JS and forwards the token to /token, then
  * redirects the browser to https://tools.aem.live/cli/logged-in on success.
  *
- * @returns {Promise<string>} access token
+ * @returns {Promise<{token: string, expiresIn: number|null}>}
  */
 function waitForToken() {
   return new Promise((resolve, reject) => {
@@ -132,9 +152,10 @@ function waitForToken() {
 /**
  * Runs the implicit OAuth login flow.
  * @param {object} log
+ * @param {string} projectDir
  * @returns {Promise<string>} access token
  */
-async function login(log) {
+async function login(log, projectDir) {
   const params = new URLSearchParams({
     response_type: 'token',
     client_id: CLIENT_ID,
@@ -151,12 +172,12 @@ async function login(log) {
 
   const { token, expiresIn } = await waitForToken();
 
-  await storeToken({
+  await saveDaTokenToFile(projectDir, {
     access_token: token,
     expires_at: expiresIn ? Date.now() + (expiresIn * 1000) : null,
   });
 
-  log.info('Login successful. Token saved to ~/.aem/da-token.json');
+  log.info(`Login successful. Token saved to ${path.join(projectDir, DA_TOKEN_FILE)}`);
   return token;
 }
 
@@ -167,20 +188,22 @@ async function login(log) {
  *
  * Priority:
  *  1. Caller-supplied token (--token flag) — used as-is, not persisted
- *  2. Stored token that is still valid
+ *  2. Stored token in .hlx/.da-token.json that is still valid
  *  3. Full browser implicit login flow
  *
  * @param {object} log
  * @param {string} [override] token supplied via CLI --token flag
+ * @param {string} projectDir project root directory (token stored in .hlx/ here)
  * @returns {Promise<string>} valid access token
  */
-export async function getValidToken(log, override) {
-  // 1. Explicit override (CI / automation)
-  if (override) return override;
+export async function getValidToken(log, override, projectDir) {
+  if (override) {
+    return override;
+  }
 
-  const stored = await loadStoredToken();
+  const tokenFile = path.join(projectDir, DA_TOKEN_FILE);
+  const stored = await loadStoredToken(tokenFile);
 
-  // 2. Stored access token still valid
   if (stored?.access_token && !isTokenExpired(stored)) {
     return stored.access_token;
   }
@@ -189,6 +212,5 @@ export async function getValidToken(log, override) {
     log.info('Stored token has expired. Re-authenticating...');
   }
 
-  // 3. Full login flow
-  return login(log);
+  return login(log, projectDir);
 }

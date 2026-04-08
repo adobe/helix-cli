@@ -88,7 +88,7 @@ export default class DiffCommand {
       return;
     }
 
-    const token = await getValidToken(log, this._token);
+    const token = await getValidToken(log, this._token, this._dir);
     const client = new DaClient(token);
 
     await Promise.all(changedPaths.map(async (daPath) => {

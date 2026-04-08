@@ -96,7 +96,7 @@ export default class MergeCommand {
       return;
     }
 
-    const token = await getValidToken(log, this._token);
+    const token = await getValidToken(log, this._token, contentDir);
     const client = new DaClient(token);
 
     // Get the HEAD commit to read base blobs
