@@ -71,7 +71,7 @@ describe('getContentType', () => {
   });
 
   it('returns application/octet-stream for unknown extension', () => {
-    assert.strictEqual(getContentType('xyz'), 'application/octet-stream');
+    assert.strictEqual(getContentType('zzzunknown'), 'application/octet-stream');
   });
 
   it('is case-insensitive', () => {
@@ -204,7 +204,9 @@ describe('DaClient', () => {
       const listedPaths = [];
       client.list = async (org, repo, daPath) => {
         listedPaths.push(daPath);
-        if (daPath === '/') return [{ path: '/org/repo/nested', name: 'nested' }];
+        if (daPath === '/') {
+          return [{ path: '/org/repo/nested', name: 'nested' }];
+        }
         return [];
       };
       await client.listAll('org', 'repo', '/');
@@ -276,14 +278,14 @@ describe('DaClient', () => {
       assert.deepStrictEqual(result, responseBody);
     });
 
-    it('sends POST request', async () => {
+    it('sends PUT request', async () => {
       let method;
       client.fetch = async (url, opts) => {
         method = opts.method;
         return mockResponse(200, {});
       };
       await client.putSource('org', 'repo', '/file.html', Buffer.from(''), 'text/html');
-      assert.strictEqual(method, 'POST');
+      assert.strictEqual(method, 'PUT');
     });
 
     it('calls correct source URL', async () => {

@@ -9,6 +9,8 @@
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
+import mime from 'mime';
+import processQueue from '@adobe/helix-shared-process-queue';
 import { getFetch } from '../fetch-utils.js';
 import { CONTENT_IO_CONCURRENCY } from './content-shared.js';
 
@@ -20,45 +22,8 @@ const LIST_CONTINUATION_HEADER = 'da-continuation-token';
 /** Safety cap on list pages per directory (avoids infinite loops if the API misbehaves). */
 const LIST_MAX_PAGES = 50000;
 
-/**
- * @param {number} maxConcurrent
- * @returns {<T>(fn: () => Promise<T>) => Promise<T>}
- */
-function createLimiter(maxConcurrent) {
-  let running = 0;
-  const waiters = [];
-  return async function limit(fn) {
-    while (running >= maxConcurrent) {
-      // eslint-disable-next-line no-await-in-loop
-      await new Promise((r) => {
-        waiters.push(r);
-      });
-    }
-    running += 1;
-    try {
-      return await fn();
-    } finally {
-      running -= 1;
-      const w = waiters.shift();
-      if (w) w();
-    }
-  };
-}
-
-const CONTENT_TYPES = {
-  html: 'text/html',
-  json: 'application/json',
-  svg: 'image/svg+xml',
-  png: 'image/png',
-  jpg: 'image/jpeg',
-  jpeg: 'image/jpeg',
-  gif: 'image/gif',
-  webp: 'image/webp',
-  pdf: 'application/pdf',
-};
-
 export function getContentType(ext) {
-  return CONTENT_TYPES[ext?.toLowerCase()] || 'application/octet-stream';
+  return mime.getType(ext) || 'application/octet-stream';
 }
 
 export class DaClient {
@@ -90,8 +55,12 @@ export class DaClient {
       }
       // eslint-disable-next-line no-await-in-loop
       const res = await this.fetch(url, { headers });
-      if (res.status === 401) throw new Error('Unauthorized: invalid or missing token');
-      if (!res.ok) throw new Error(`List failed for ${daPath}: ${res.status} ${res.statusText}`);
+      if (res.status === 401) {
+        throw new Error('Unauthorized: invalid or missing token');
+      }
+      if (!res.ok) {
+        throw new Error(`List failed for ${daPath}: ${res.status} ${res.statusText}`);
+      }
       // eslint-disable-next-line no-await-in-loop
       const body = await res.json();
       if (!Array.isArray(body)) {
@@ -110,7 +79,7 @@ export class DaClient {
   }
 
   /**
-   * Recursively lists all files under a path. Sibling folders are listed in parallel (bounded).
+   * Recursively lists all files under a path using a non-recursive queue-based approach.
    * @param {string} org
    * @param {string} repo
    * @param {string} [daPath='/']
@@ -118,51 +87,57 @@ export class DaClient {
    * @returns {Promise<Array<{path, name, ext, lastModified}>>}
    */
   async listAll(org, repo, daPath = '/', onDiscovered = undefined) {
-    const state = { count: 0, onDiscovered };
-    const ctx = this;
-    const limit = createLimiter(CONTENT_IO_CONCURRENCY);
+    const prefix = `/${org}/${repo}`;
+    const files = [];
+    let dirsToProcess = [daPath];
 
-    async function recurse(currentPath) {
-      const items = await limit(() => ctx.list(org, repo, currentPath));
-      const acc = [];
-      const subdirs = [];
-      for (const item of items) {
-        if (item.ext !== undefined) {
-          acc.push(item);
-          state.count += 1;
-          if (state.onDiscovered) {
-            state.onDiscovered(state.count);
+    while (dirsToProcess.length > 0) {
+      const nextDirs = [];
+      // eslint-disable-next-line no-await-in-loop
+      await processQueue(
+        dirsToProcess,
+        async (currentPath) => {
+          const items = await this.list(org, repo, currentPath);
+          for (const item of items) {
+            if (item.ext !== undefined) {
+              files.push(item);
+              if (onDiscovered) {
+                onDiscovered(files.length);
+              }
+            } else {
+              nextDirs.push(item.path.replace(prefix, '') || '/');
+            }
           }
-        } else {
-          subdirs.push(item.path.replace(`/${org}/${repo}`, '') || '/');
-        }
-      }
-      if (subdirs.length > 0) {
-        const nested = await Promise.all(subdirs.map((sub) => recurse(sub)));
-        for (const part of nested) {
-          acc.push(...part);
-        }
-      }
-      return acc;
+        },
+        CONTENT_IO_CONCURRENCY,
+      );
+      dirsToProcess = nextDirs;
     }
-    return recurse(daPath);
+
+    return files;
   }
 
   /**
    * Fetches the raw content of a file.
-   * @returns {Promise<Response>}
+   * @returns {Promise<Response|null>}
    */
   async getSource(org, repo, daPath) {
     const url = `${DA_ADMIN}/source/${org}/${repo}${daPath}`;
     const res = await this.fetch(url, { headers: this.authHeader });
-    if (res.status === 401) throw new Error('Unauthorized: invalid or missing token');
-    if (res.status === 404) return null;
-    if (!res.ok) throw new Error(`GET failed for ${daPath}: ${res.status} ${res.statusText}`);
+    if (res.status === 401) {
+      throw new Error('Unauthorized: invalid or missing token');
+    }
+    if (res.status === 404) {
+      return null;
+    }
+    if (!res.ok) {
+      throw new Error(`GET failed for ${daPath}: ${res.status} ${res.statusText}`);
+    }
     return res;
   }
 
   /**
-   * Uploads a file via multipart/form-data.
+   * Uploads a file via PUT.
    * @param {string} org
    * @param {string} repo
    * @param {string} daPath
@@ -172,15 +147,17 @@ export class DaClient {
    */
   async putSource(org, repo, daPath, buffer, contentType) {
     const url = `${DA_ADMIN}/source/${org}/${repo}${daPath}`;
-    const formData = new FormData();
-    formData.append('data', new Blob([buffer], { type: contentType }), daPath.split('/').pop());
     const res = await this.fetch(url, {
-      method: 'POST',
-      headers: this.authHeader,
-      body: formData,
+      method: 'PUT',
+      headers: { ...this.authHeader, 'Content-Type': contentType },
+      body: buffer,
     });
-    if (res.status === 401) throw new Error('Unauthorized: invalid or missing token');
-    if (!res.ok) throw new Error(`PUT failed for ${daPath}: ${res.status} ${res.statusText}`);
+    if (res.status === 401) {
+      throw new Error('Unauthorized: invalid or missing token');
+    }
+    if (!res.ok) {
+      throw new Error(`PUT failed for ${daPath}: ${res.status} ${res.statusText}`);
+    }
     return res.json();
   }
 
@@ -193,7 +170,9 @@ export class DaClient {
       method: 'DELETE',
       headers: this.authHeader,
     });
-    if (res.status === 401) throw new Error('Unauthorized: invalid or missing token');
+    if (res.status === 401) {
+      throw new Error('Unauthorized: invalid or missing token');
+    }
     return res.ok || res.status === 204;
   }
 

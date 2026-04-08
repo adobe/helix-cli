@@ -70,6 +70,7 @@
     "ini": "6.0.0",
     "isomorphic-git": "1.37.4",
     "jose": "6.2.2",
+    "mime": "4.1.0",
     "livereload-js": "4.0.2",
     "node-diff3": "3.2.0",
     "node-fetch": "3.3.2",
