@@ -75,7 +75,7 @@ export async function stageDeletionsForContentAddScopes(fsClient, dir, scopes) {
 }
 
 function isNotFoundError(err) {
-  return Boolean(err && (err.code === 'NotFoundError' || err.name === 'NotFoundError'));
+  return err?.code === 'NotFoundError' || err?.name === 'NotFoundError';
 }
 
 export default class AddCommand {
