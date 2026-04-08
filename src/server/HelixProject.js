@@ -89,13 +89,13 @@ export class HelixProject extends BaseProject {
       if (path.isAbsolute(value) || value.includes('..') || value.startsWith('/')) {
         throw new Error(`Invalid HTML folder name: ${value} only folders within the current workspace are allowed`);
       }
-
       this._htmlFolder = value;
-      this._server.withHtmlFolder(value);
-    } else {
-      this._htmlFolder = value;
-      this._server.withHtmlFolder(value);
     }
+    return this;
+  }
+
+  withHtmlMount(value) {
+    this._htmlMount = value;
     return this;
   }
 
@@ -149,6 +149,10 @@ export class HelixProject extends BaseProject {
   }
 
   async init() {
+    if (this._htmlFolder) {
+      const mount = this._htmlMount || `/${this._htmlFolder}`;
+      this._server.withHtmlFolder(this._htmlFolder, mount);
+    }
     await super.init();
     this._indexer = new Indexer()
       .withLogger(this._logger)
@@ -224,7 +228,7 @@ export class HelixProject extends BaseProject {
         await lstat(htmlFolderPath);
         this.log.debug(`Registered HTML folder for live-reload: ${this._htmlFolder}`);
         // Watch all HTML files in the folder - only .html extension
-        this.liveReload.registerFiles([`${htmlFolderPath}/**/*.html`], `/${this._htmlFolder}/`);
+        this.liveReload.registerFiles([`${htmlFolderPath}/**/*.html`], this._server.mountPrefix);
       } catch (e) {
         this.log.error(`HTML folder '${this._htmlFolder}' does not exist`);
         throw new Error(`HTML folder '${this._htmlFolder}' does not exist`);

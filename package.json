@@ -1,6 +1,6 @@
 {
   "name": "@adobe/aem-cli",
-  "version": "16.16.28",
+  "version": "16.17.0",
   "description": "AEM CLI",
   "main": "index.js",
   "type": "module",
@@ -45,9 +45,9 @@
   "dependencies": {
     "@adobe/fetch": "4.2.3",
     "@adobe/helix-log": "7.0.0",
-    "@adobe/helix-shared-config": "11.1.18",
-    "@adobe/helix-shared-git": "3.0.21",
-    "@adobe/helix-shared-indexer": "2.2.6",
+    "@adobe/helix-shared-config": "11.1.20",
+    "@adobe/helix-shared-git": "3.0.23",
+    "@adobe/helix-shared-indexer": "2.2.7",
     "@adobe/helix-shared-process-queue": "3.1.6",
     "camelcase": "9.0.0",
     "chalk-template": "1.1.2",
@@ -68,15 +68,15 @@
     "https-proxy-agent": "8.0.0",
     "ignore": "7.0.5",
     "ini": "6.0.0",
-    "isomorphic-git": "1.37.2",
-    "jose": "6.2.1",
+    "isomorphic-git": "1.37.4",
+    "jose": "6.2.2",
     "livereload-js": "4.0.2",
     "node-diff3": "3.2.0",
     "node-fetch": "3.3.2",
     "open": "11.0.0",
     "progress": "2.0.3",
     "proxy-agent": "7.0.0",
-    "proxy-from-env": "2.0.0",
+    "proxy-from-env": "2.1.0",
     "rehype-parse": "9.0.1",
     "semver": "7.7.4",
     "shelljs": "0.10.0",
@@ -86,7 +86,7 @@
     "yargs": "18.0.0"
   },
   "devDependencies": {
-    "@adobe/eslint-config-helix": "3.0.23",
+    "@adobe/eslint-config-helix": "3.0.24",
     "@eslint/config-helpers": "0.5.3",
     "@semantic-release/changelog": "6.0.3",
     "@semantic-release/git": "10.0.1",
@@ -95,13 +95,13 @@
     "esmock": "2.7.3",
     "husky": "9.1.7",
     "junit-report-builder": "5.1.1",
-    "lint-staged": "16.3.2",
+    "lint-staged": "16.4.0",
     "mocha": "11.7.5",
     "mocha-multi-reporters": "1.5.1",
     "nock": "13.5.6",
     "semantic-release": "25.0.3",
     "semantic-release-discord-bot": "^1.1.0",
-    "sinon": "21.0.2"
+    "sinon": "21.0.3"
   },
   "lint-staged": {
     "*.js": "eslint"

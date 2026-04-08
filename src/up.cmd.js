@@ -56,8 +56,12 @@ export default class UpCommand extends AbstractServerCommand {
   }
 
   withHtmlFolder(value) {
-    // Basic validation - detailed validation done in HelixProject
     this._htmlFolder = value;
+    return this;
+  }
+
+  withHtmlMount(value) {
+    this._htmlMount = value;
     return this;
   }
 
@@ -113,7 +117,8 @@ export default class UpCommand extends AbstractServerCommand {
       .withAllowInsecure(this._allowInsecure)
       .withSiteToken(this._siteToken)
       .withCookies(this._cookies)
-      .withHtmlFolder(this._htmlFolder);
+      .withHtmlFolder(this._htmlFolder)
+      .withHtmlMount(this._htmlMount);
 
     this.log.info(chalk`{yellow     ___    ________  ___                          __      __ v${pkgJson.version}}`);
     this.log.info(chalk`{yellow    /   |  / ____/  |/  /  _____(_)___ ___  __  __/ /___ _/ /_____  _____}`);

@@ -1,3 +1,45 @@
+# [16.17.0](https://github.com/adobe/helix-cli/compare/v16.16.33...v16.17.0) (2026-04-07)
+
+
+### Features
+
+* **html-folder:** Add --html-mount flag to control URL path for html-folder serving ([#2697](https://github.com/adobe/helix-cli/issues/2697)) ([4ed1f4b](https://github.com/adobe/helix-cli/commit/4ed1f4bea996e2afcf79dd1fc94f2809689ed772))
+
+## [16.16.33](https://github.com/adobe/helix-cli/compare/v16.16.32...v16.16.33) (2026-04-06)
+
+
+### Bug Fixes
+
+* **deps:** update dependency jose to v6.2.2 ([#2701](https://github.com/adobe/helix-cli/issues/2701)) ([8c1ffd0](https://github.com/adobe/helix-cli/commit/8c1ffd093b29aa38a60fae7e43d9984bf3a6539f))
+
+## [16.16.32](https://github.com/adobe/helix-cli/compare/v16.16.31...v16.16.32) (2026-04-02)
+
+
+### Bug Fixes
+
+* Give a warning when using Safari for CLI login ([#2500](https://github.com/adobe/helix-cli/issues/2500)) ([6b8b86e](https://github.com/adobe/helix-cli/commit/6b8b86eff7aa21d462aa808b9572d639aa2c2754))
+
+## [16.16.31](https://github.com/adobe/helix-cli/compare/v16.16.30...v16.16.31) (2026-04-01)
+
+
+### Bug Fixes
+
+* **deps:** update adobe fixes ([#2699](https://github.com/adobe/helix-cli/issues/2699)) ([ef8f22b](https://github.com/adobe/helix-cli/commit/ef8f22b465f8ba09587e9dba624e5f475ce051e2))
+
+## [16.16.30](https://github.com/adobe/helix-cli/compare/v16.16.29...v16.16.30) (2026-03-31)
+
+
+### Bug Fixes
+
+* **deps:** update adobe fixes ([#2698](https://github.com/adobe/helix-cli/issues/2698)) ([bf35c46](https://github.com/adobe/helix-cli/commit/bf35c46789185286f69b2912a998fecdafccab3f))
+
+## [16.16.29](https://github.com/adobe/helix-cli/compare/v16.16.28...v16.16.29) (2026-03-30)
+
+
+### Bug Fixes
+
+* **deps:** update external fixes ([#2696](https://github.com/adobe/helix-cli/issues/2696)) ([70ce164](https://github.com/adobe/helix-cli/commit/70ce1645876de1db79c37d8eb26210e80adde5ef))
+
 ## [16.16.28](https://github.com/adobe/helix-cli/compare/v16.16.27...v16.16.28) (2026-03-26)
 
 

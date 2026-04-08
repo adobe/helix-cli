@@ -79,13 +79,17 @@ This feature is especially helpful when:
 The `--html-folder` option enables serving HTML files without extensions, useful for previewing content changes when you don't have access to the authoring system.
 
 ```
-$ aem up --html-folder content
+$ aem up --html-folder drafts                      # serves at /drafts/*
+$ aem up --html-folder content --html-mount /       # serves at /* (root)
+$ aem up --html-folder drafts --html-mount /preview # serves at /preview/*
 ```
+
+Use `--html-mount` to control the URL path where files are served. Without it, files are served at `/FOLDER/*`.
 
 This enables two features:
 
-1. **Extension-less URLs**: Access `/content/page` to serve `content/page.html`
-2. **Plain HTML with metadata**: Create `content/page.plain.html` files that are automatically wrapped with proper HTML structure and metadata processing
+1. **Extension-less URLs**: Access `/drafts/page` (or `/page` with root mount) to serve the corresponding `.html` file
+2. **Plain HTML with metadata**: Create `.plain.html` files that are automatically wrapped with proper HTML structure and metadata processing
 
 #### Plain HTML files (.plain.html)
 
@@ -181,7 +185,8 @@ If present, `ALL_PROXY` is used as fallback if there is no other match.
 | `--livereload`    | `AEM_LIVERELOAD`    | `true`      | Enable automatic reloading of modified sources in browser.  |
 | `--no-livereload` | `AEM_NO_LIVERELOAD` | `false`     | Disable live-reload.                                        |
 | `--forward-browser-logs` | `AEM_FORWARD_BROWSER_LOGS` | `false` | Forward browser console logs to terminal.            |
-| `--html-folder`   | `AEM_HTML_FOLDER`   | undefined   | Serve HTML files from folder without extensions. Supports .html and .plain.html files. |
+| `--html-folder`   | `AEM_HTML_FOLDER`   | undefined   | Serve HTML files from folder without extensions. |
+| `--html-mount`    | `AEM_HTML_MOUNT`    | `/FOLDER`   | URL path where html-folder files are served. |
 | `--open`          | `AEM_OPEN`          | `/`         | Open a browser window at specified path after server start. |
 | `--no-open`       | `AEM_NO_OPEN`       | `false`     | Disable automatic opening of browser window.                |
 | `--tls-key`       | `AEM_TLS_KEY`       | undefined   | Path to .key file (for enabling TLS)                        |
