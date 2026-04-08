@@ -177,23 +177,22 @@ export class DaClient {
   }
 
   /**
-   * Returns the current lastModified for a file by listing its parent directory.
-   * Results for the same parent are cached within a single call.
+   * Returns the current lastModified for a file via a HEAD request.
    * @param {string} org
    * @param {string} repo
    * @param {string} daPath - e.g. /blog/post.html
-   * @param {Map} [cache] - optional Map for caching directory listings
    * @returns {Promise<number|null>}
    */
-  async getRemoteLastModified(org, repo, daPath, cache = new Map()) {
-    const parentPath = daPath.substring(0, daPath.lastIndexOf('/')) || '/';
-    if (!cache.has(parentPath)) {
-      const items = await this.list(org, repo, parentPath);
-      cache.set(parentPath, items);
+  async getRemoteLastModified(org, repo, daPath) {
+    const url = `${DA_ADMIN}/source/${org}/${repo}${daPath}`;
+    const res = await this.fetch(url, { method: 'HEAD', headers: this.authHeader });
+    if (res.status === 401) {
+      throw new Error('Unauthorized: invalid or missing token');
     }
-    const items = cache.get(parentPath);
-    const fullPath = `/${org}/${repo}${daPath}`;
-    const item = items.find((i) => i.path === fullPath);
-    return item ? item.lastModified : null;
+    if (!res.ok) {
+      return null;
+    }
+    const lastModified = res.headers.get('last-modified');
+    return lastModified ? new Date(lastModified).getTime() : null;
   }
 }

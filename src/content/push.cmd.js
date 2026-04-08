@@ -103,12 +103,11 @@ export default class PushCommand {
     log.info(`${added.length} added, ${modified.length} modified, ${deleted.length} deleted`);
 
     const client = new DaClient(token);
-    const dirCache = new Map();
     const conflicts = [];
 
     for (const daPath of [...modified, ...deleted]) {
       // eslint-disable-next-line no-await-in-loop
-      const remoteLastModified = await client.getRemoteLastModified(org, repo, daPath, dirCache);
+      const remoteLastModified = await client.getRemoteLastModified(org, repo, daPath);
       if (remoteLastModified != null && remoteLastModified > lastSyncTime) {
         conflicts.push({ daPath, remoteDate: new Date(remoteLastModified).toLocaleString() });
       }

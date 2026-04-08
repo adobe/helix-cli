@@ -355,64 +355,51 @@ describe('DaClient', () => {
   });
 
   describe('getRemoteLastModified', () => {
-    it('returns lastModified for matching file', async () => {
-      client.list = async () => [
-        {
-          path: '/org/repo/file.html',
-          name: 'file.html',
-          ext: 'html',
-          lastModified: 1700000000000,
-        },
-      ];
+    it('returns parsed lastModified from last-modified header', async () => {
+      const date = 'Tue, 01 Jan 2025 00:00:00 GMT';
+      client.fetch = async () => mockResponse(200, '', true, { 'last-modified': date });
       const result = await client.getRemoteLastModified('org', 'repo', '/file.html');
-      assert.strictEqual(result, 1700000000000);
+      assert.strictEqual(result, new Date(date).getTime());
     });
 
-    it('returns null when file not found in listing', async () => {
-      client.list = async () => [];
+    it('returns null when last-modified header is absent', async () => {
+      client.fetch = async () => mockResponse(200, '', true, {});
+      const result = await client.getRemoteLastModified('org', 'repo', '/file.html');
+      assert.strictEqual(result, null);
+    });
+
+    it('returns null on 404', async () => {
+      client.fetch = async () => mockResponse(404, '', false);
       const result = await client.getRemoteLastModified('org', 'repo', '/missing.html');
       assert.strictEqual(result, null);
     });
 
-    it('caches directory listing', async () => {
-      let listCount = 0;
-      client.list = async () => {
-        listCount += 1;
-        return [{ path: '/org/repo/file.html', lastModified: 123 }];
-      };
-      const cache = new Map();
-      await client.getRemoteLastModified('org', 'repo', '/file.html', cache);
-      await client.getRemoteLastModified('org', 'repo', '/file.html', cache);
-      assert.strictEqual(listCount, 1);
+    it('throws Unauthorized on 401', async () => {
+      client.fetch = async () => mockResponse(401, '', false);
+      await assert.rejects(() => client.getRemoteLastModified('org', 'repo', '/file.html'), /Unauthorized/);
     });
 
-    it('uses root / as parent for root-level files', async () => {
-      let listedPath;
-      client.list = async (org, repo, p) => {
-        listedPath = p;
-        return [];
+    it('sends HEAD request to correct source URL', async () => {
+      let method;
+      let calledUrl;
+      client.fetch = async (url, opts) => {
+        method = opts.method;
+        calledUrl = url;
+        return mockResponse(200, '', true, {});
+      };
+      await client.getRemoteLastModified('org', 'repo', '/path/to/file.html');
+      assert.strictEqual(method, 'HEAD');
+      assert.strictEqual(calledUrl, 'https://admin.da.live/source/org/repo/path/to/file.html');
+    });
+
+    it('passes auth header', async () => {
+      let calledHeaders;
+      client.fetch = async (_url, opts) => {
+        calledHeaders = opts.headers;
+        return mockResponse(200, '', true, {});
       };
       await client.getRemoteLastModified('org', 'repo', '/file.html');
-      assert.strictEqual(listedPath, '/');
-    });
-
-    it('uses subdirectory as parent for nested files', async () => {
-      let listedPath;
-      client.list = async (org, repo, p) => {
-        listedPath = p;
-        return [];
-      };
-      await client.getRemoteLastModified('org', 'repo', '/blog/post.html');
-      assert.strictEqual(listedPath, '/blog');
-    });
-
-    it('matches by full path including org/repo prefix', async () => {
-      client.list = async () => [
-        { path: '/org/repo/file.html', lastModified: 999 },
-        { path: '/other/repo/file.html', lastModified: 111 },
-      ];
-      const result = await client.getRemoteLastModified('org', 'repo', '/file.html');
-      assert.strictEqual(result, 999);
+      assert.deepStrictEqual(calledHeaders, { Authorization: 'Bearer test-token' });
     });
   });
 });
