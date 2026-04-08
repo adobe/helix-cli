@@ -89,7 +89,9 @@ export function createDaClientClass(opts = {}) {
   }
 
   DaClientMock.prototype.listAll = async function listAll(org, repo, daPath, onDiscovered) {
-    if (opts.onListAll) opts.onListAll(org, repo, daPath);
+    if (opts.onListAll) {
+      opts.onListAll(org, repo, daPath);
+    }
     const files = opts.files || [];
     if (onDiscovered) {
       let n = 0;
@@ -105,7 +107,9 @@ export function createDaClientClass(opts = {}) {
 
   DaClientMock.prototype.getSource = async function getSource() {
     const content = opts.sourceContent !== undefined ? opts.sourceContent : '<html>remote</html>';
-    if (content === null) return null;
+    if (content === null) {
+      return null;
+    }
     return {
       arrayBuffer: async () => Buffer.from(content),
       text: async () => content,
@@ -117,14 +121,22 @@ export function createDaClientClass(opts = {}) {
   };
 
   DaClientMock.prototype.putSource = async function putSource(org, repo, daPath) {
-    if (opts.putFails) throw new Error(`PUT failed for ${daPath}`);
-    if (opts.onPut) opts.onPut(daPath);
+    if (opts.putFails) {
+      throw new Error(`PUT failed for ${daPath}`);
+    }
+    if (opts.onPut) {
+      opts.onPut(daPath);
+    }
     return {};
   };
 
   DaClientMock.prototype.deleteSource = async function deleteSource(org, repo, daPath) {
-    if (opts.deleteFails) throw new Error(`DELETE failed for ${daPath}`);
-    if (opts.onDelete) opts.onDelete(daPath);
+    if (opts.deleteFails) {
+      throw new Error(`DELETE failed for ${daPath}`);
+    }
+    if (opts.onDelete) {
+      opts.onDelete(daPath);
+    }
     return true;
   };
 

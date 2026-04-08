@@ -47,9 +47,13 @@ export default class StatusCommand {
     const deleted = [];
 
     for (const [filepath, head, workdir] of matrix) {
-      if (head === 0 && workdir === 2) added.push(filepath);
-      else if (head === 1 && workdir === 2) modified.push(filepath);
-      else if (head === 1 && workdir === 0) deleted.push(filepath);
+      if (head === 0 && workdir === 2) {
+        added.push(filepath);
+      } else if (head === 1 && workdir === 2) {
+        modified.push(filepath);
+      } else if (head === 1 && workdir === 0) {
+        deleted.push(filepath);
+      }
     }
 
     const headOid = await git.resolveRef({ fs, dir: contentDir, ref: 'HEAD' });
@@ -68,15 +72,21 @@ export default class StatusCommand {
 
     if (added.length) {
       log.info('Added (unstaged or not committed):');
-      for (const f of added) log.info(`  A  /${f}`);
+      for (const f of added) {
+        log.info(`  A  /${f}`);
+      }
     }
     if (modified.length) {
       log.info('Modified (unstaged or not committed):');
-      for (const f of modified) log.info(`  M  /${f}`);
+      for (const f of modified) {
+        log.info(`  M  /${f}`);
+      }
     }
     if (deleted.length) {
       log.info('Deleted (unstaged or not committed):');
-      for (const f of deleted) log.info(`  D  /${f}`);
+      for (const f of deleted) {
+        log.info(`  D  /${f}`);
+      }
     }
 
     log.info(`\n${added.length} added, ${modified.length} modified, ${deleted.length} deleted`);
