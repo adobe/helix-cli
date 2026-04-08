@@ -110,10 +110,7 @@ export default class CloneCommand {
     const { repo } = originUrl;
     log.info(`Cloning content from da.live: ${org}/${repo}${this._rootPath === '/' ? '' : ` @ ${this._rootPath}`}`);
 
-    // 2. Resolve token
-    const token = await getValidToken(log, this._token);
-
-    // 3. Ensure target path is available (do not create content/ until after file count is known)
+    // 2. Ensure target path is available (do not create content/ until after file count is known)
     const contentDir = path.resolve(this._dir, CONTENT_DIR);
     if (await fse.pathExists(contentDir)) {
       if (!this._force) {
@@ -121,6 +118,9 @@ export default class CloneCommand {
       }
       await fse.remove(contentDir);
     }
+
+    // 3. Resolve token
+    const token = await getValidToken(log, this._token, this._dir);
 
     // 4. Fetch file list (no local content dir required yet)
     const client = new DaClient(token);
@@ -148,7 +148,12 @@ export default class CloneCommand {
     const downloadResults = await processQueue(
       files,
       async (file) => {
-        const daPath = file.path.replace(`/${org}/${repo}`, '');
+        const prefix = `/${org}/${repo}`;
+        if (!file.path.startsWith(prefix)) {
+          log.warn(`  skip (unexpected path, missing org/repo prefix): ${file.path}`);
+          return { status: 'skip' };
+        }
+        const daPath = file.path.slice(prefix.length) || '/';
         const localPath = path.join(contentDir, ...daPath.split('/').filter(Boolean));
         try {
           const res = await client.getSource(org, repo, daPath);
