@@ -216,7 +216,7 @@ export function buildSheetMetaLines(sheetRow, excludeMetaNames) {
  * @param {string[]} lines
  * @returns {string}
  */
-function joinMetaLines(lines) {
+function joinLines(lines) {
   return lines.length > 0 ? `\n${lines.join('\n')}\n` : '';
 }
 
@@ -232,12 +232,12 @@ export function transformContentMetadataHtml(htmlFragment, options = {}) {
   try {
     tree = unified().use(rehypeParse, REHYPE_PARSE).parse(htmlFragment);
   } catch {
-    return { htmlFragment, metaTagsHtml: joinMetaLines(buildSheetMetaLines(sheetRow)) };
+    return { htmlFragment, metaTagsHtml: joinLines(buildSheetMetaLines(sheetRow)) };
   }
 
   const metadataEl = select('div.metadata', tree);
   if (!metadataEl || metadataEl.type !== 'element' || !hasClass(metadataEl, 'metadata')) {
-    return { htmlFragment, metaTagsHtml: joinMetaLines(buildSheetMetaLines(sheetRow)) };
+    return { htmlFragment, metaTagsHtml: joinLines(buildSheetMetaLines(sheetRow)) };
   }
 
   const pairs = extractMetadataPairs(metadataEl);
@@ -317,5 +317,5 @@ export function transformContentMetadataHtml(htmlFragment, options = {}) {
   // SEO first, then sheet (fields not overridden by local pairs), then local page metadata
   const allLines = [...seoLines, ...sheetLines, ...pairLines];
   const htmlOut = toHtml(tree);
-  return { htmlFragment: htmlOut, metaTagsHtml: joinMetaLines(allLines) };
+  return { htmlFragment: htmlOut, metaTagsHtml: joinLines(allLines) };
 }
