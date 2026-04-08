@@ -50,11 +50,10 @@ async function saveDaTokenToFile(projectDir, tokenData) {
   await fse.ensureDir(path.dirname(tokenFile));
   await fse.writeJson(tokenFile, tokenData, { spaces: 2 });
 
-  const tokenFileName = path.basename(DA_TOKEN_FILE);
-  if (!await GitUtils.isIgnored(projectDir, tokenFile)) {
+  if (!await GitUtils.isIgnored(projectDir, DA_TOKEN_FILE)) {
     await fs.appendFile(
       path.join(projectDir, '.gitignore'),
-      `${os.EOL}${path.join('.hlx', tokenFileName)}${os.EOL}`,
+      `${os.EOL}${DA_TOKEN_FILE}${os.EOL}`,
       'utf8',
     );
   }
