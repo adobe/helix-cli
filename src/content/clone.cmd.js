@@ -26,7 +26,7 @@ import {
   LARGE_CLONE_FILE_THRESHOLD,
   CONTENT_IO_CONCURRENCY,
 } from './content-shared.js';
-import { writeSyncedRef } from './content-git.js';
+import { writeSyncedRef, ensureGitIgnored } from './content-git.js';
 
 /**
  * @param {*} log logger with .warn
@@ -140,7 +140,7 @@ export default class CloneCommand {
 
     // 5. Prepare content directory and project .gitignore
     await fse.ensureDir(contentDir);
-    await this.ensureGitIgnored(CONTENT_DIR);
+    await ensureGitIgnored(this._dir, CONTENT_DIR);
 
     log.info('Downloading...');
 
@@ -210,17 +210,5 @@ export default class CloneCommand {
 
     log.info(`\nDone. ${downloaded.length} file(s) downloaded${errors > 0 ? `, ${errors} error(s)` : ''}.`);
     log.info(`Content saved to ./${CONTENT_DIR}/`);
-  }
-
-  async ensureGitIgnored(entry) {
-    const gitIgnorePath = path.resolve(this._dir, '.gitignore');
-    let content = '';
-    if (await fse.pathExists(gitIgnorePath)) {
-      content = await fse.readFile(gitIgnorePath, 'utf-8');
-    }
-    if (!content.split('\n').map((l) => l.trim()).includes(entry)) {
-      await fse.appendFile(gitIgnorePath, `\n${entry}\n`);
-      this.log.info(`Added '${entry}' to .gitignore`);
-    }
   }
 }

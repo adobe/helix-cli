@@ -9,6 +9,8 @@
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
+import path from 'path';
+import fse from 'fs-extra';
 import git from 'isomorphic-git';
 
 /** Ref pointing at the last commit whose tree was fully synced to da.live. */
@@ -160,4 +162,20 @@ export async function countCommitsAhead(fs, dir, tipOid, ancestorOid) {
 export async function getCommitCommitterTimeMs(fs, dir, commitOid) {
   const { commit } = await git.readCommit({ fs, dir, oid: commitOid });
   return commit.committer.timestamp * 1000;
+}
+
+/**
+ * Ensures an entry is present in the project .gitignore, creating the file if needed.
+ * @param {string} projectDir
+ * @param {string} entry
+ */
+export async function ensureGitIgnored(projectDir, entry) {
+  const gitIgnorePath = path.resolve(projectDir, '.gitignore');
+  let content = '';
+  if (await fse.pathExists(gitIgnorePath)) {
+    content = await fse.readFile(gitIgnorePath, 'utf-8');
+  }
+  if (!content.split('\n').map((l) => l.trim()).includes(entry)) {
+    await fse.appendFile(gitIgnorePath, `\n${entry}\n`);
+  }
 }
