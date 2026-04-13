@@ -44,7 +44,7 @@ jobs:
         if: hashFiles('packages/browser-injectables/**') != ''
         run: cd packages/browser-injectables && npm test
 
-      - uses: codecov/codecov-action@v5
+      - uses: codecov/codecov-action@v6
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: ./coverage/lcov.info,./packages/browser-injectables/coverage/lcov.info
