@@ -74,6 +74,12 @@ export class HelixServer extends BaseServer {
     return this._mountPrefix;
   }
 
+  withLocalForms(folder, mount) {
+    this._localForms = folder;
+    this._localFormsMount = mount.endsWith('/') ? mount : `${mount}/`;
+    return this;
+  }
+
   async handleLogin(req, res) {
     const userAgent = req.headers['user-agent']?.toLowerCase();
     if (userAgent?.includes('safari') && !userAgent?.includes('chrome')) {
@@ -326,6 +332,73 @@ export class HelixServer extends BaseServer {
   }
 
   /**
+   * Local Forms handler - serves form pages from local JSON files
+   * @param {Express.Request} req request
+   * @param {Express.Response} res response
+   * @param {Function} next next middleware
+   */
+  async handleLocalFormsRequest(req, res, next) {
+    const pathname = req.path;
+    const formsPrefix = this._localFormsMount;
+
+    if (!pathname.startsWith(formsPrefix)) {
+      return next();
+    }
+
+    const relativePath = pathname.slice(formsPrefix.length);
+
+    // Security: prevent path traversal
+    if (relativePath.includes('/../') || relativePath.includes('..')) {
+      return next();
+    }
+
+    const jsonFile = path.resolve(
+      this._project.directory,
+      this._localForms,
+      `${relativePath}.json`,
+    );
+
+    if (!utils.validatePathSecurity(jsonFile, this._project.directory)) {
+      return next();
+    }
+
+    let formJson;
+    try {
+      formJson = await readFile(jsonFile, 'utf-8');
+    } catch (e) {
+      return next();
+    }
+
+    const { log } = this;
+    const liveReload = this._liveReload;
+
+    if (liveReload) {
+      liveReload.startRequest(req.id, req.url);
+    }
+
+    // Construct the form page HTML
+    let htmlContent = utils.generateFormPageHtml(formJson, relativePath);
+
+    if (liveReload) {
+      htmlContent = utils.injectLiveReloadScript(htmlContent, this);
+    }
+
+    res.set({
+      'content-type': 'text/html; charset=utf-8',
+      'access-control-allow-origin': '*',
+    });
+    res.send(htmlContent);
+
+    if (liveReload) {
+      liveReload.registerFile(req.id, jsonFile);
+      liveReload.endRequest(req.id);
+    }
+
+    log.debug(`served local form from ${jsonFile} for ${req.url}`);
+    return undefined;
+  }
+
+  /**
    * Proxy Mode route handler
    * @param {Express.Request} req request
    * @param {Express.Response} res response
@@ -447,6 +520,13 @@ export class HelixServer extends BaseServer {
     this.app.get(LOGIN_ACK_ROUTE, asyncHandler(this.handleLoginAck.bind(this)));
     this.app.post(LOGIN_ACK_ROUTE, express.json(), asyncHandler(this.handleLoginAck.bind(this)));
     this.app.options(LOGIN_ACK_ROUTE, asyncHandler(this.handleLoginAck.bind(this)));
+
+    // Add local forms handler before the general proxy handler
+    if (this._localForms) {
+      const escapedMount = this._localFormsMount.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      this.app.get(new RegExp(`^${escapedMount}.*`), asyncHandler(this.handleLocalFormsRequest.bind(this)));
+      this.log.info(`Serving local forms from folder: ${this._localForms} at ${this._localFormsMount}`);
+    }
 
     // Add HTML folder handler before the general proxy handler
     if (this._htmlFolder) {
