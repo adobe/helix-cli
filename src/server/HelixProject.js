@@ -96,6 +96,25 @@ export class HelixProject extends BaseProject {
     return this;
   }
 
+  withLocalForms(value) {
+    if (value) {
+      if (path.isAbsolute(value) || value.includes('..') || value.startsWith('/')) {
+        throw new Error(`Invalid local forms folder: ${value} only folders within the current workspace are allowed`);
+      }
+      this._localForms = value;
+    }
+    return this;
+  }
+
+  withLocalFormsMount(value) {
+    this._localFormsMount = value;
+    return this;
+  }
+
+  get localForms() {
+    return this._localForms;
+  }
+
   get proxyUrl() {
     return this._proxyUrl;
   }
@@ -145,6 +164,10 @@ export class HelixProject extends BaseProject {
     if (this._htmlFolder) {
       const mount = this._htmlMount || `/${this._htmlFolder}`;
       this._server.withHtmlFolder(this._htmlFolder, mount);
+    }
+    if (this._localForms) {
+      const formsMount = this._localFormsMount || '/content/forms/af/';
+      this._server.withLocalForms(this._localForms, formsMount);
     }
     await super.init();
     this._indexer = new Indexer()
@@ -218,6 +241,20 @@ export class HelixProject extends BaseProject {
     }
   }
 
+  async initLocalForms() {
+    if (this._localForms && this.liveReload) {
+      const localFormsPath = resolve(this.directory, this._localForms);
+      try {
+        await lstat(localFormsPath);
+        this.log.debug(`Registered local forms folder for live-reload: ${this._localForms}`);
+        this.liveReload.registerFiles([`${localFormsPath}/**/*.json`], '/content/forms/af/');
+      } catch (e) {
+        this.log.error(`Local forms folder '${this._localForms}' does not exist`);
+        throw new Error(`Local forms folder '${this._localForms}' does not exist`);
+      }
+    }
+  }
+
   async initHlxIgnore() {
     if (this._hlxIgnore && this.liveReload) {
       const hlxIgnorePath = resolve(this.directory, '.hlxignore');
@@ -251,6 +288,7 @@ export class HelixProject extends BaseProject {
     await this.initHeadHtml();
     await this.init404Html();
     await this.initHtmlFolder();
+    await this.initLocalForms();
     await this.initHlxIgnore();
     if (this._indexer) {
       await this._indexer.init();

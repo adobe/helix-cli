@@ -125,6 +125,16 @@ export default function up() {
           describe: 'URL path where html-folder files are served (e.g., / for root). Defaults to /FOLDER.',
           type: 'string',
         })
+        .option('local-forms', {
+          alias: 'localForms',
+          describe: 'Serve forms from local JSON files in this folder, without requiring publish.',
+          type: 'string',
+        })
+        .option('local-forms-mount', {
+          alias: 'localFormsMount',
+          describe: 'URL path where local forms are served. Defaults to /content/forms/af/.',
+          type: 'string',
+        })
 
         .help();
     },
@@ -153,6 +163,8 @@ export default function up() {
         .withCookies(argv.cookies)
         .withHtmlFolder(argv.htmlFolder)
         .withHtmlMount(argv.htmlMount)
+        .withLocalForms(argv.localForms)
+        .withLocalFormsMount(argv.localFormsMount)
         .run();
     },
   };

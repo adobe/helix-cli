@@ -786,6 +786,46 @@ window.LiveReloadOptions = {
     const fullHead = headHtml + metaTags;
     return `<html><head>${fullHead}</head><body><header></header><main>${content}</main><footer></footer></body></html>`;
   },
+
+  /**
+   * Generates a complete form page HTML from a form JSON string.
+   * This produces the same HTML structure that AEM would serve for a published form.
+   * @param {string} formJson the form JSON content
+   * @param {string} formName the form name (used for title)
+   * @returns {string} complete HTML document
+   */
+  generateFormPageHtml(formJson, formName) {
+    const title = formName.split('/').pop() || 'form';
+    // formJson is the raw file content (a JSON object as string).
+    // The form block expects a JSON-stringified string inside <pre><code>,
+    // e.g. "{\"id\":...}" — so we stringify once to wrap in quotes and escape.
+    const encodedJson = JSON.stringify(formJson.trim());
+    return `<!DOCTYPE html>
+<html>
+  <head>
+    <title>${utils.escapeHtml(title)}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="/scripts/aem.js" type="module"></script>
+    <script src="/scripts/scripts.js" type="module"></script>
+    <link rel="stylesheet" href="/styles/styles.css">
+  </head>
+  <body>
+    <header></header>
+    <main>
+      <div>
+        <div class="form">
+          <div>
+            <div>
+              <pre><code>${encodedJson}</code></pre>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+    <footer></footer>
+  </body>
+</html>`;
+  },
 };
 
 export default Object.freeze(utils);
