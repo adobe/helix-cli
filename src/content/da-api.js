@@ -75,7 +75,7 @@ export class DaClient {
       continuation = next;
     }
 
-    throw new Error(`List pagination for ${daPath} exceeded ${LIST_MAX_PAGES} pages.`);
+    return aggregated;
   }
 
   /**
