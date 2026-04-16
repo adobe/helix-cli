@@ -63,6 +63,128 @@ export default class PushCommand {
     return this;
   }
 
+  /**
+   * Checks for conflicts between local changes and remote modifications.
+   * @param {DaClient} client
+   * @param {string} org
+   * @param {string} repo
+   * @param {string[]} modified
+   * @param {string[]} deleted
+   * @param {number} lastSyncTime
+   * @returns {Promise<boolean>} true if the push should be aborted
+   */
+  async _checkConflicts(client, org, repo, modified, deleted, lastSyncTime) {
+    const { log } = this;
+    const conflicts = [];
+
+    for (const daPath of [...modified, ...deleted]) {
+      // eslint-disable-next-line no-await-in-loop
+      const remoteLastModified = await client.getRemoteLastModified(org, repo, daPath);
+      if (remoteLastModified != null && remoteLastModified > lastSyncTime) {
+        conflicts.push({ daPath, remoteDate: new Date(remoteLastModified).toLocaleString() });
+      }
+    }
+
+    if (conflicts.length > 0) {
+      log.warn('\nConflicts detected — remote files were modified after your last sync:\n');
+      for (const { daPath, remoteDate } of conflicts) {
+        log.warn(`  ✗ ${daPath}  (remote modified ${remoteDate})`);
+      }
+      if (!this._force) {
+        log.warn('\nPush aborted. Use --force to overwrite remote changes.');
+        process.exitCode = 1;
+        return true;
+      }
+      log.warn('\n--force specified: overwriting remote changes.');
+    }
+
+    return false;
+  }
+
+  /**
+   * Uploads added and modified files to da.live.
+   * @param {DaClient} client
+   * @param {string} org
+   * @param {string} repo
+   * @param {string} contentDir
+   * @param {string[]} targets
+   * @returns {Promise<{ pushed: number, errors: number, successfullyPushed: Set<string> }>}
+   */
+  async _uploadFiles(client, org, repo, contentDir, targets) {
+    const { log } = this;
+    let pushed = 0;
+    let errors = 0;
+    const successfullyPushed = new Set();
+
+    const results = await processQueue(
+      targets,
+      async (daPath) => {
+        const localPath = path.join(contentDir, ...daPath.split('/').filter(Boolean));
+        const ext = daPath.split('.').pop();
+        try {
+          const buffer = await fse.readFile(localPath);
+          await client.putSource(org, repo, daPath, buffer, getContentType(ext));
+          log.info(`  ✓ ${daPath}`);
+          return { ok: true, daPath };
+        } catch (err) {
+          log.warn(`  ✗ ${daPath}: ${err.message}`);
+          return { ok: false };
+        }
+      },
+      CONTENT_IO_CONCURRENCY,
+    );
+    for (const r of results) {
+      if (r.ok) {
+        pushed += 1;
+        successfullyPushed.add(r.daPath);
+      } else {
+        errors += 1;
+      }
+    }
+
+    return { pushed, errors, successfullyPushed };
+  }
+
+  /**
+   * Deletes files from da.live.
+   * @param {DaClient} client
+   * @param {string} org
+   * @param {string} repo
+   * @param {string[]} deleted
+   * @returns {Promise<{ pushed: number, errors: number, successfullyDeleted: Set<string> }>}
+   */
+  async _deleteFiles(client, org, repo, deleted) {
+    const { log } = this;
+    let pushed = 0;
+    let errors = 0;
+    const successfullyDeleted = new Set();
+
+    const results = await processQueue(
+      deleted,
+      async (daPath) => {
+        try {
+          await client.deleteSource(org, repo, daPath);
+          log.info(`  ✓ deleted ${daPath}`);
+          return { ok: true, daPath };
+        } catch (err) {
+          log.warn(`  ✗ ${daPath}: ${err.message}`);
+          return { ok: false };
+        }
+      },
+      CONTENT_IO_CONCURRENCY,
+    );
+    for (const r of results) {
+      if (r.ok) {
+        pushed += 1;
+        successfullyDeleted.add(r.daPath);
+      } else {
+        errors += 1;
+      }
+    }
+
+    return { pushed, errors, successfullyDeleted };
+  }
+
   async run() {
     const { log } = this;
     const contentDir = path.resolve(this._dir, CONTENT_DIR);
@@ -103,27 +225,17 @@ export default class PushCommand {
     log.info(`${added.length} added, ${modified.length} modified, ${deleted.length} deleted`);
 
     const client = new DaClient(token);
-    const conflicts = [];
 
-    for (const daPath of [...modified, ...deleted]) {
-      // eslint-disable-next-line no-await-in-loop
-      const remoteLastModified = await client.getRemoteLastModified(org, repo, daPath);
-      if (remoteLastModified != null && remoteLastModified > lastSyncTime) {
-        conflicts.push({ daPath, remoteDate: new Date(remoteLastModified).toLocaleString() });
-      }
-    }
-
-    if (conflicts.length > 0) {
-      log.warn('\nConflicts detected — remote files were modified after your last sync:\n');
-      for (const { daPath, remoteDate } of conflicts) {
-        log.warn(`  ✗ ${daPath}  (remote modified ${remoteDate})`);
-      }
-      if (!this._force) {
-        log.warn('\nPush aborted. Use --force to overwrite remote changes.');
-        process.exitCode = 1;
-        return;
-      }
-      log.warn('\n--force specified: overwriting remote changes.');
+    const shouldAbort = await this._checkConflicts(
+      client,
+      org,
+      repo,
+      modified,
+      deleted,
+      lastSyncTime,
+    );
+    if (shouldAbort) {
+      return;
     }
 
     if (this._dryRun) {
@@ -149,65 +261,24 @@ export default class PushCommand {
       return;
     }
 
-    let pushed = 0;
-    let pushErrors = 0;
-    const successfullyPushed = new Set();
-    const successfullyDeleted = new Set();
-
     const putTargets = [...added, ...modified];
-    const putResults = await processQueue(
-      putTargets,
-      async (daPath) => {
-        const localPath = path.join(contentDir, ...daPath.split('/').filter(Boolean));
-        const ext = daPath.split('.').pop();
-        try {
-          const buffer = await fse.readFile(localPath);
-          await client.putSource(org, repo, daPath, buffer, getContentType(ext));
-          log.info(`  ✓ ${daPath}`);
-          return { ok: true, daPath };
-        } catch (err) {
-          log.warn(`  ✗ ${daPath}: ${err.message}`);
-          return { ok: false };
-        }
-      },
-      CONTENT_IO_CONCURRENCY,
-    );
-    for (const r of putResults) {
-      if (r.ok) {
-        pushed += 1;
-        successfullyPushed.add(r.daPath);
-      } else {
-        pushErrors += 1;
-      }
-    }
+    const {
+      pushed: putPushed,
+      errors: putErrors,
+      successfullyPushed,
+    } = await this._uploadFiles(client, org, repo, contentDir, putTargets);
 
-    const deleteResults = await processQueue(
-      deleted,
-      async (daPath) => {
-        try {
-          await client.deleteSource(org, repo, daPath);
-          log.info(`  ✓ deleted ${daPath}`);
-          return { ok: true, daPath };
-        } catch (err) {
-          log.warn(`  ✗ ${daPath}: ${err.message}`);
-          return { ok: false };
-        }
-      },
-      CONTENT_IO_CONCURRENCY,
-    );
-    for (const r of deleteResults) {
-      if (r.ok) {
-        pushed += 1;
-        successfullyDeleted.add(r.daPath);
-      } else {
-        pushErrors += 1;
-      }
-    }
+    const {
+      pushed: deletePushed,
+      errors: deleteErrors,
+      successfullyDeleted,
+    } = await this._deleteFiles(client, org, repo, deleted);
 
-    const expectedPuts = new Set(putTargets);
-    const expectedDeletes = new Set(deleted);
-    const allPutsOk = [...expectedPuts].every((p) => successfullyPushed.has(p));
-    const allDeletesOk = [...expectedDeletes].every((p) => successfullyDeleted.has(p));
+    const pushed = putPushed + deletePushed;
+    const pushErrors = putErrors + deleteErrors;
+
+    const allPutsOk = putTargets.every((p) => successfullyPushed.has(p));
+    const allDeletesOk = deleted.every((p) => successfullyDeleted.has(p));
 
     if (allPutsOk && allDeletesOk) {
       await writeSyncedRef(fs, contentDir, headOid);
