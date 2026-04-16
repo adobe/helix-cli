@@ -26,6 +26,7 @@ export const CONTENT_IO_CONCURRENCY = 10;
  * Normalizes a da.live path: leading slash, no trailing slash except root.
  * @param {string} input
  * @returns {string}
+ * @throws {Error} if input is null, undefined, or empty
  */
 export function normalizeDaPath(input) {
   if (input === undefined || input === null) {
