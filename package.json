@@ -1,6 +1,6 @@
 {
   "name": "@adobe/aem-cli",
-  "version": "16.17.0",
+  "version": "16.17.1",
   "description": "AEM CLI",
   "main": "index.js",
   "type": "module",
@@ -43,7 +43,7 @@
     "node": ">=18"
   },
   "dependencies": {
-    "@adobe/fetch": "4.2.3",
+    "@adobe/fetch": "4.3.0",
     "@adobe/helix-log": "7.0.0",
     "@adobe/helix-shared-config": "11.1.20",
     "@adobe/helix-shared-git": "3.0.23",
