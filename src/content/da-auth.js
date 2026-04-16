@@ -94,17 +94,19 @@ function waitForToken() {
     ? '/token?access_token=' + encodeURIComponent(token) + (expiresIn ? '&expires_in=' + encodeURIComponent(expiresIn) : '')
     : '/token?error=' + encodeURIComponent(error || 'unknown');
   const loggedInUrl = 'https://tools.aem.live/cli/logged-in';
-  fetch(dest)
-    .then(() => {
-      if (token) {
-        window.location.href = loggedInUrl;
-      } else {
-        document.body.innerHTML = '<h2>Login failed.</h2><p>' + (error || 'Unknown error') + '</p>';
-      }
-    })
-    .catch(() => {
-      document.body.innerHTML = '<h2>Login failed.</h2><p>Could not complete login.</p>';
-    });
+  if (!token) {
+    fetch(dest);
+    document.body.innerHTML = '<h2>Login failed.</h2>';
+    const errP = document.createElement('p');
+    errP.textContent = error || 'Unknown error';
+    document.body.appendChild(errP);
+  } else {
+    fetch(dest)
+      .then(() => { window.location.href = loggedInUrl; })
+      .catch(() => {
+        document.body.innerHTML = '<h2>Login failed.</h2><p>Could not complete login.</p>';
+      });
+  }
 </script></body></html>`);
         return;
       }
