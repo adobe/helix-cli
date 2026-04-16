@@ -1,3 +1,10 @@
+## [16.18.1](https://github.com/adobe/helix-cli/compare/v16.18.0...v16.18.1) (2026-04-16)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @adobe/helix-shared-process-queue to v3.1.8 ([#2708](https://github.com/adobe/helix-cli/issues/2708)) ([17d3962](https://github.com/adobe/helix-cli/commit/17d3962b355749eaff69b0a5b5da62058c9fa513))
+
 # [16.18.0](https://github.com/adobe/helix-cli/compare/v16.17.1...v16.18.0) (2026-04-16)
 
 
