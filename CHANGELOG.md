@@ -1,3 +1,10 @@
+# [16.18.0](https://github.com/adobe/helix-cli/compare/v16.17.1...v16.18.0) (2026-04-16)
+
+
+### Features
+
+* aem content ([#2689](https://github.com/adobe/helix-cli/issues/2689)) ([5524b6d](https://github.com/adobe/helix-cli/commit/5524b6d63949a1d45efe35479a31ab55e62f78ef))
+
 ## [16.17.1](https://github.com/adobe/helix-cli/compare/v16.17.0...v16.17.1) (2026-04-08)
 
 
