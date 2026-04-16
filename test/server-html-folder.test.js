@@ -1389,7 +1389,7 @@ describe('Helix Server - HTML Folder', () => {
   describe('Default mount (backward compatibility)', () => {
     it('without --html-mount, serves at /folder/* as before', async () => {
       const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
-      const contentFolder = path.join(cwd, 'content');
+      const contentFolder = path.join(cwd, 'html');
       await fs.mkdir(contentFolder, { recursive: true });
       await fs.writeFile(path.join(contentFolder, 'my-page.html'), '<html><body>Default Mount Page</body></html>');
 
@@ -1402,22 +1402,22 @@ describe('Helix Server - HTML Folder', () => {
         .withLogger(console)
         .withHttpPort(0)
         .withProxyUrl('https://main--foo--bar.aem.page/')
-        .withHtmlFolder('content');
+        .withHtmlFolder('html');
 
       await project.init();
       try {
         await project.start();
 
-        // /content/my-page should work (default mount is /content)
-        const prefixedResponse = await fetch(`http://127.0.0.1:${project.server.port}/content/my-page`);
-        assert.equal(prefixedResponse.status, 200, 'Default mount should serve at /content/*');
+        // /html/my-page should work (default mount is /html, matching the folder name)
+        const prefixedResponse = await fetch(`http://127.0.0.1:${project.server.port}/html/my-page`);
+        assert.equal(prefixedResponse.status, 200, 'Default mount should serve at /html/*');
 
         const content = await prefixedResponse.text();
         assert.ok(content.includes('Default Mount Page'));
 
-        // /my-page should NOT be served (mount is /content, not /)
+        // /my-page should NOT be served (mount is /html, not /)
         const cleanResponse = await fetch(`http://127.0.0.1:${project.server.port}/my-page`);
-        assert.equal(cleanResponse.status, 404, 'Should not serve at root when default mount is /content');
+        assert.equal(cleanResponse.status, 404, 'Should not serve at root when default mount is /html');
       } finally {
         await project.stop();
       }

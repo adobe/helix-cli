@@ -20,9 +20,31 @@ import RequestContext from './RequestContext.js';
 import { asyncHandler, BaseServer } from './BaseServer.js';
 import LiveReload from './LiveReload.js';
 import { saveSiteTokenToFile } from '../config/config-utils.js';
+import { CONTENT_DIR } from '../content/content-shared.js';
+import { transformContentMetadataHtml } from '../content/content-metadata-html.js';
 
 const LOGIN_ROUTE = '/.aem/cli/login';
 const LOGIN_ACK_ROUTE = '/.aem/cli/login/ack';
+
+/**
+ * @param {import('express').Request} req
+ * @param {import('./RequestContext.js').default} ctx
+ * @returns {string}
+ */
+function absolutePageUrlFromRequest(req, ctx) {
+  const raw = req.headers['x-forwarded-proto'];
+  const proto = (Array.isArray(raw) ? raw[0] : raw) || req.protocol || 'http';
+  const host = req.get('host');
+  if (!host) {
+    return '';
+  }
+  try {
+    const pathWithQuery = req.originalUrl || ctx.url;
+    return new URL(pathWithQuery, `${proto}://${host}`).href;
+  } catch {
+    return '';
+  }
+}
 
 export class HelixServer extends BaseServer {
   /**
@@ -149,6 +171,7 @@ export class HelixServer extends BaseServer {
 
         this.withSiteToken(siteToken);
         this._project.headHtml.setSiteToken(siteToken);
+        this._project.metadataSheet?.setSiteToken(siteToken);
         await saveSiteTokenToFile(siteToken);
         this.log.info('Site token received and saved to file.');
 
@@ -424,6 +447,65 @@ export class HelixServer extends BaseServer {
 
     // try to serve static
     try {
+      // Check content/ first — prefer local content checkout over proxy
+      const contentDir = path.join(this._project.directory, CONTENT_DIR);
+      const contentFilePath = path.join(contentDir, ctx.path);
+      if (!path.relative(contentDir, contentFilePath).startsWith('..')) {
+        try {
+          if (contentFilePath.endsWith('.html')) {
+            // readFile throws EISDIR for directories and ENOENT for missing files
+            let htmlContent = await readFile(contentFilePath, 'utf-8');
+            const absolutePageUrl = absolutePageUrlFromRequest(req, ctx);
+            if (this._project.metadataSheet) {
+              this._project.metadataSheet.setCookie(req.headers.cookie || '');
+              await this._project.metadataSheet.ensureLoaded();
+            }
+            const sheetRow = this._project.metadataSheet?.matchPath(ctx.path) ?? null;
+            const { htmlFragment, metaTagsHtml } = transformContentMetadataHtml(htmlContent, {
+              absolutePageUrl,
+              sheetRow,
+            });
+            htmlContent = htmlFragment;
+            // content/ files are plain HTML (body only, no <head>)
+            // wrap with a full document and inject local head.html
+            if (!htmlContent.includes('<head>')) {
+              await this._project.headHtml.update();
+              const headHtml = this._project.headHtml.localHtml || '';
+              htmlContent = `<html><head>${headHtml}${metaTagsHtml}</head>${htmlContent}</html>`;
+            } else {
+              await this._project.headHtml.setCookie(req.headers.cookie);
+              htmlContent = await this._project.headHtml.replace(htmlContent);
+              if (metaTagsHtml) {
+                htmlContent = htmlContent.replace(/<\/head>/i, `${metaTagsHtml}</head>`);
+              }
+            }
+            if (liveReload) {
+              htmlContent = utils.injectLiveReloadScript(htmlContent, this);
+              liveReload.registerFile(ctx.requestId, contentFilePath);
+            }
+            res.set({
+              'content-type': 'text/html; charset=utf-8',
+              'access-control-allow-origin': '*',
+            });
+            res.send(htmlContent);
+            log.debug(`${pfx}served from ${CONTENT_DIR}/: ${ctx.path}`);
+            return;
+          }
+          // sendFile throws EISDIR for directories and ENOENT for missing files
+          await sendFile(contentFilePath, {
+            dotfiles: 'allow',
+            headers: { 'access-control-allow-origin': '*' },
+          });
+          if (liveReload) {
+            liveReload.registerFile(ctx.requestId, contentFilePath);
+          }
+          log.debug(`${pfx}served from ${CONTENT_DIR}/: ${ctx.path}`);
+          return;
+        } catch (e) {
+          log.debug(`${pfx}${CONTENT_DIR}/ miss for ${ctx.path}: ${e.code}`);
+        }
+      }
+
       // Check if it's an HTML file and live reload is enabled
       if (liveReload && filePath.endsWith('.html')) {
         // Read the HTML file and inject the livereload script

@@ -112,6 +112,9 @@ export default class CLI {
           this._commands[cmd] = (await import(`./${cmd}.js`)).default();
         }
       }
+      if (!this._commands.content) {
+        this._commands.content = (await import('./content/content.js')).default();
+      }
     }
     return this;
   }
