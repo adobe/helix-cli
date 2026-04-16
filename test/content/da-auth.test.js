@@ -146,8 +146,8 @@ describe('getValidToken', () => {
     }
   });
 
-  it('passes relative token path to GitUtils.isIgnored when saving token after login', async () => {
-    let isIgnoredPath;
+  it('calls ensureGitIgnored with the token file path after login', async () => {
+    let gitIgnoredEntry;
     // Mock http so no real socket is bound (avoids EADDRINUSE from other tests)
     // When listen() is called, simulate the /token request firing immediately.
     const { getValidToken } = await esmock('../../src/content/da-auth.js', {
@@ -175,22 +175,16 @@ describe('getValidToken', () => {
         ensureDir: async () => {},
         writeJson: async () => {},
       },
-      'fs/promises': {
-        appendFile: async () => {},
-      },
-      '../../src/git-utils.js': {
-        default: {
-          isIgnored: async (_dir, filePath) => {
-            isIgnoredPath = filePath;
-            return true; // already ignored — skip .gitignore append
-          },
+      '../../src/content/content-git.js': {
+        ensureGitIgnored: async (_dir, entry) => {
+          gitIgnoredEntry = entry;
         },
       },
       open: async () => {},
     });
     const log = makeLogger();
     await getValidToken(log, undefined, TEST_PROJECT_DIR);
-    assert.strictEqual(isIgnoredPath, path.join('.hlx', '.da-token.json'));
+    assert.strictEqual(gitIgnoredEntry, path.join('.hlx', '.da-token.json'));
   });
 
   it('reads token file from the content directory', async () => {
