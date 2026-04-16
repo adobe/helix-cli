@@ -9,13 +9,11 @@
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-import fs from 'fs/promises';
 import http from 'http';
-import os from 'os';
 import path from 'path';
 import fse from 'fs-extra';
 import open from 'open';
-import GitUtils from '../git-utils.js';
+import { ensureGitIgnored } from './content-git.js';
 
 const IMS_ORIGIN = 'https://ims-na1.adobelogin.com';
 const CLIENT_ID = 'darkalley';
@@ -50,13 +48,7 @@ async function saveDaTokenToFile(projectDir, tokenData) {
   await fse.ensureDir(path.dirname(tokenFile));
   await fse.writeJson(tokenFile, tokenData, { spaces: 2 });
 
-  if (!await GitUtils.isIgnored(projectDir, DA_TOKEN_FILE)) {
-    await fs.appendFile(
-      path.join(projectDir, '.gitignore'),
-      `${os.EOL}${DA_TOKEN_FILE}${os.EOL}`,
-      'utf8',
-    );
-  }
+  await ensureGitIgnored(projectDir, DA_TOKEN_FILE);
 }
 
 // ─── Token validity ──────────────────────────────────────────────────────────
