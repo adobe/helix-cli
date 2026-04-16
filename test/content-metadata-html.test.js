@@ -21,7 +21,7 @@ import {
   extractMetadataPairs,
   escapeHtmlAttr,
   buildSheetMetaLines,
-} from '../src/server/content-metadata-html.js';
+} from '../src/content/content-metadata-html.js';
 
 describe('content-metadata-html', () => {
   it('slugifyMetadataLabel', () => {
