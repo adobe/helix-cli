@@ -62,7 +62,7 @@ function textContent(node) {
   if (node.type === 'text') {
     return node.value;
   }
-  if ('children' in node && Array.isArray(node.children)) {
+  if (Array.isArray(node.children)) {
     return node.children.map((c) => textContent(c)).join('');
   }
   return '';
