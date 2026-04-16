@@ -21,7 +21,7 @@ import { asyncHandler, BaseServer } from './BaseServer.js';
 import LiveReload from './LiveReload.js';
 import { saveSiteTokenToFile } from '../config/config-utils.js';
 import { CONTENT_DIR } from '../content/content-shared.js';
-import { transformContentMetadataHtml } from './content-metadata-html.js';
+import { transformContentMetadataHtml } from '../content/content-metadata-html.js';
 
 const LOGIN_ROUTE = '/.aem/cli/login';
 const LOGIN_ACK_ROUTE = '/.aem/cli/login/ack';
