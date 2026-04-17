@@ -26,8 +26,9 @@ $ aem --help
 Usage: aem <command> [options]
 
 Commands:
-  aem up  Run a AEM development server
-  aem import  Run the AEM import server
+  aem up       Run a AEM development server
+  aem import   Run the AEM import server
+  aem content  Manage local da.live content
 
 Options:
   --version                Show version number                         [boolean]
@@ -202,6 +203,24 @@ $ aem import
 ```
 
 Read the full AEM Importer [documentation](https://github.com/adobe/helix-importer-ui).
+
+## Managing content
+
+The `aem content` commands let you check out content from da.live locally, make bulk edits, and push changes back. The local content lives in a `content/` folder in your project.
+
+| Command | Description |
+|---------|-------------|
+| `aem content clone` | Clone da.live content locally into `content/` |
+| `aem content status` | Show locally added, modified, and deleted content files |
+| `aem content diff` | Show diff between local and remote content |
+| `aem content merge` | Merge remote content into local files |
+| `aem content add` | Stage changes in `content/` (like `git add`) |
+| `aem content commit` | Commit staged changes in `content/` (like `git commit`) |
+| `aem content push` | Push committed `content/` changes to da.live (use `content add` & `content commit` first) |
+
+### Local content serving
+
+When a `content/` folder is present, `aem up` automatically serves content from it first, falling back to the proxy for any files not found locally. HTML files in `content/` are wrapped with `head.html` and have their metadata blocks processed, so pages render the same way they would when served from da.live.
 
 # Developing AEM CLI
 
