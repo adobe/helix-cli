@@ -35,6 +35,11 @@ export default function clone() {
           describe: 'IMS Bearer token for da.live authentication',
           type: 'string',
         })
+        .option('media', {
+          describe: 'Include non-HTML/JSON assets (images, video, SVG, PDF, etc.)',
+          type: 'boolean',
+          default: false,
+        })
         .option('force', {
           describe: 'Overwrite existing content/ without prompting',
           type: 'boolean',
@@ -67,6 +72,7 @@ export default function clone() {
         .withToken(argv.token)
         .withForce(argv.force)
         .withAssumeYes(argv.yes)
+        .withIncludeMedia(argv.media)
         .withRootPath(rootPath)
         .run();
     },
