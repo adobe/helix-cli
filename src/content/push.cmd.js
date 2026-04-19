@@ -14,8 +14,10 @@ import path from 'path';
 import fse from 'fs-extra';
 import git from 'isomorphic-git';
 import processQueue from '@adobe/helix-shared-process-queue';
+import GitUtils from '../git-utils.js';
 import { DaClient, getContentType } from './da-api.js';
 import { getValidToken } from './da-auth.js';
+import { runBulkPreviewAndPublish, toAdminBulkPath } from './hlx-admin.js';
 import {
   CONTENT_DIR,
   CONFIG_FILE,
@@ -36,6 +38,8 @@ export default class PushCommand {
     this._force = false;
     this._dryRun = false;
     this._pushPath = null;
+    this._preview = false;
+    this._publish = false;
   }
 
   withDirectory(dir) {
@@ -61,6 +65,28 @@ export default class PushCommand {
   withPath(pushPath) {
     this._pushPath = pushPath || null;
     return this;
+  }
+
+  withPreview(preview) {
+    this._preview = !!preview;
+    return this;
+  }
+
+  withPublish(publish) {
+    this._publish = !!publish;
+    return this;
+  }
+
+  /**
+   * Resolves the git branch / site ref for admin.hlx.page bulk jobs (parent repo).
+   * @returns {Promise<string>}
+   */
+  async _resolveSiteRef() {
+    try {
+      return await GitUtils.getBranch(this._dir, GitUtils.DEFAULT_BRANCH);
+    } catch {
+      return GitUtils.DEFAULT_BRANCH;
+    }
   }
 
   /**
@@ -258,6 +284,21 @@ export default class PushCommand {
           log.info(`  - ${p}`);
         }
       }
+      const upsertDry = [...added, ...modified].map(toAdminBulkPath);
+      const deleteDry = [...deleted].map(toAdminBulkPath);
+      if (this._preview || this._publish) {
+        const ref = await this._resolveSiteRef();
+        log.info(
+          `\nDry run — would run admin.hlx.page bulk jobs (ref: ${ref})`
+          + `${this._publish ? ' [preview then publish]' : ' [preview only]'}.`,
+        );
+        if (upsertDry.length) {
+          log.info(`  Preview/publish upsert paths (${upsertDry.length}): ${upsertDry.join(', ')}`);
+        }
+        if (deleteDry.length) {
+          log.info(`  Preview/publish delete paths (${deleteDry.length}): ${deleteDry.join(', ')}`);
+        }
+      }
       return;
     }
 
@@ -287,5 +328,42 @@ export default class PushCommand {
     }
 
     log.info(`\nDone. ${pushed} file(s) pushed${pushErrors > 0 ? `, ${pushErrors} error(s)` : ''}.`);
+
+    const wantAdmin = this._preview || this._publish;
+    if (!wantAdmin) {
+      return;
+    }
+
+    if (!allPutsOk || !allDeletesOk) {
+      log.warn('Skipping admin preview/publish: not all da.live operations succeeded.');
+      return;
+    }
+
+    const upsertPaths = [...successfullyPushed].map(toAdminBulkPath);
+    const deletePaths = [...successfullyDeleted].map(toAdminBulkPath);
+    if (upsertPaths.length === 0 && deletePaths.length === 0) {
+      return;
+    }
+
+    const ref = await this._resolveSiteRef();
+    const runPreview = this._preview || this._publish;
+    const runPublish = this._publish;
+
+    try {
+      await runBulkPreviewAndPublish({
+        log,
+        token,
+        org,
+        site: repo,
+        ref,
+        preview: runPreview,
+        publish: runPublish,
+        upsertPaths,
+        deletePaths,
+      });
+    } catch (err) {
+      log.warn(`admin.hlx.page: ${err.message}`);
+      process.exitCode = 1;
+    }
   }
 }
