@@ -72,6 +72,18 @@ describe('PushCommand', () => {
       cmd.withPath(undefined);
       assert.strictEqual(cmd._pushPath, null); // eslint-disable-line no-underscore-dangle
     });
+
+    it('withPreview sets _preview', async () => {
+      const cmd = await makePushCommand(testRoot, createDaClientClass());
+      cmd.withPreview(true);
+      assert.strictEqual(cmd._preview, true); // eslint-disable-line no-underscore-dangle
+    });
+
+    it('withPublish sets _publish', async () => {
+      const cmd = await makePushCommand(testRoot, createDaClientClass());
+      cmd.withPublish(true);
+      assert.strictEqual(cmd._publish, true); // eslint-disable-line no-underscore-dangle
+    });
   });
 
   describe('run()', () => {
@@ -274,6 +286,61 @@ describe('PushCommand', () => {
         || allMsgs.includes('Would add')
         || allMsgs.includes('Would delete'),
       );
+    });
+
+    it('dry-run with --preview logs bulk job intent', async () => {
+      const contentDir = await setupContentDir(testRoot);
+      await fse.writeFile(path.join(contentDir, 'index.html'), 'changed');
+      await stageAllAndCommit(contentDir, 'edit index');
+
+      const log = makeLogger();
+      const mod = await esmock('../../src/content/push.cmd.js', {
+        '../../src/content/da-auth.js': { getValidToken: async () => 'token' },
+        '../../src/content/da-api.js': {
+          DaClient: createDaClientClass(),
+          getContentType: () => 'text/html',
+        },
+        '../../src/content/hlx-admin.js': { runBulkPreviewAndPublish: async () => assert.fail('should not call') },
+      });
+      const Cmd = mod.default;
+      const cmd = new Cmd(log).withDirectory(testRoot).withDryRun(true).withPreview(true);
+      await cmd.run();
+
+      const allMsgs = log.logs.map((l) => l.msg).join('\n');
+      assert.ok(allMsgs.includes('admin.hlx.page bulk jobs'));
+    });
+
+    it('invokes runBulkPreviewAndPublish after successful push when --preview', async () => {
+      const contentDir = await setupContentDir(testRoot);
+      await fse.writeFile(path.join(contentDir, 'index.html'), 'changed');
+      await stageAllAndCommit(contentDir, 'edit index');
+
+      let bulkOpts;
+      const log = makeLogger();
+      const mod = await esmock('../../src/content/push.cmd.js', {
+        '../../src/content/da-auth.js': { getValidToken: async () => 'token' },
+        '../../src/content/da-api.js': {
+          DaClient: createDaClientClass({
+            onPut: () => {},
+          }),
+          getContentType: () => 'text/html',
+        },
+        '../../src/content/hlx-admin.js': {
+          runBulkPreviewAndPublish: async (opts) => {
+            bulkOpts = opts;
+          },
+        },
+      });
+      const Cmd = mod.default;
+      const cmd = new Cmd(log).withDirectory(testRoot).withPreview(true);
+      await cmd.run();
+
+      assert.ok(bulkOpts);
+      assert.strictEqual(bulkOpts.org, 'myorg');
+      assert.strictEqual(bulkOpts.site, 'myrepo');
+      assert.strictEqual(bulkOpts.preview, true);
+      assert.strictEqual(bulkOpts.publish, false);
+      assert.ok(bulkOpts.upsertPaths.includes('/index'));
     });
   });
 });
