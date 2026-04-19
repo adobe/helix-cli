@@ -19,7 +19,12 @@ import git from 'isomorphic-git';
 import esmock from 'esmock';
 import { createTestRoot } from '../utils.js';
 import { makeLogger, createDaClientClass } from './content-test-utils.js';
-import { normalizeDaPath, CONTENT_DIR, LARGE_CLONE_FILE_THRESHOLD } from '../../src/content/content-shared.js';
+import {
+  normalizeDaPath,
+  CONTENT_DIR,
+  LARGE_CLONE_FILE_THRESHOLD,
+  filterFilesForContentClone,
+} from '../../src/content/content-shared.js';
 import { DA_SYNCED_REF } from '../../src/content/content-git.js';
 
 async function makeCloneCommand(testRoot, DaClientClass) {
@@ -83,6 +88,12 @@ describe('CloneCommand', () => {
       assert.strictEqual(cmd._assumeYes, true); // eslint-disable-line no-underscore-dangle
     });
 
+    it('withIncludeMedia sets _includeMedia', async () => {
+      const cmd = await makeCloneCommand(testRoot, createDaClientClass());
+      cmd.withIncludeMedia(true);
+      assert.strictEqual(cmd._includeMedia, true); // eslint-disable-line no-underscore-dangle
+    });
+
     it('builder methods return this for chaining', async () => {
       const mod = await esmock('../../src/content/clone.cmd.js', {
         '../../src/git-utils.js': { default: { getOriginURL: async () => null } },
@@ -96,6 +107,34 @@ describe('CloneCommand', () => {
       assert.strictEqual(cmd.withForce(false), cmd);
       assert.strictEqual(cmd.withRootPath('/'), cmd);
       assert.strictEqual(cmd.withAssumeYes(false), cmd);
+      assert.strictEqual(cmd.withIncludeMedia(false), cmd);
+    });
+  });
+
+  describe('filterFilesForContentClone()', () => {
+    it('keeps only html and json when includeMedia is false', () => {
+      const files = [
+        { path: '/o/r/a.html', name: 'a.html', ext: 'html' },
+        { path: '/o/r/b.json', name: 'b.json', ext: 'json' },
+        { path: '/o/r/c.jpg', name: 'c.jpg', ext: 'jpg' },
+      ];
+      const out = filterFilesForContentClone(files, false);
+      assert.strictEqual(out.length, 2);
+      assert.ok(out.every((f) => f.ext === 'html' || f.ext === 'json'));
+    });
+
+    it('is case-insensitive on extension', () => {
+      const files = [{ path: '/o/r/x.HTML', name: 'x.HTML', ext: 'HTML' }];
+      const out = filterFilesForContentClone(files, false);
+      assert.strictEqual(out.length, 1);
+    });
+
+    it('returns all files when includeMedia is true', () => {
+      const files = [
+        { path: '/o/r/a.html', name: 'a.html', ext: 'html' },
+        { path: '/o/r/v.mp4', name: 'v.mp4', ext: 'mp4' },
+      ];
+      assert.strictEqual(filterFilesForContentClone(files, true).length, 2);
     });
   });
 
@@ -174,6 +213,38 @@ describe('CloneCommand', () => {
       assert.ok(await fse.pathExists(localPath));
       const content = await fse.readFile(localPath, 'utf-8');
       assert.strictEqual(content, '<html>page</html>');
+    });
+
+    it('by default skips non-HTML/JSON files', async () => {
+      const DaClientClass = createDaClientClass({
+        files: [
+          { path: '/myorg/myrepo/page.html', name: 'page.html', ext: 'html' },
+          { path: '/myorg/myrepo/hero.jpg', name: 'hero.jpg', ext: 'jpg' },
+        ],
+        sourceContent: 'x',
+      });
+      const cmd = await makeCloneCommand(testRoot, DaClientClass);
+      cmd.withRootPath('/');
+      await cmd.run();
+
+      assert.ok(await fse.pathExists(path.join(testRoot, CONTENT_DIR, 'page.html')));
+      assert.ok(!await fse.pathExists(path.join(testRoot, CONTENT_DIR, 'hero.jpg')));
+    });
+
+    it('withIncludeMedia downloads non-HTML/JSON files', async () => {
+      const DaClientClass = createDaClientClass({
+        files: [
+          { path: '/myorg/myrepo/page.html', name: 'page.html', ext: 'html' },
+          { path: '/myorg/myrepo/hero.jpg', name: 'hero.jpg', ext: 'jpg' },
+        ],
+        sourceContent: 'payload',
+      });
+      const cmd = await makeCloneCommand(testRoot, DaClientClass);
+      cmd.withIncludeMedia(true).withRootPath('/');
+      await cmd.run();
+
+      assert.ok(await fse.pathExists(path.join(testRoot, CONTENT_DIR, 'page.html')));
+      assert.ok(await fse.pathExists(path.join(testRoot, CONTENT_DIR, 'hero.jpg')));
     });
 
     it('writes .da-config.json with org, repo, and rootPath', async () => {
