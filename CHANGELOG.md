@@ -1,3 +1,10 @@
+## [16.18.2](https://github.com/adobe/helix-cli/compare/v16.18.1...v16.18.2) (2026-04-20)
+
+
+### Bug Fixes
+
+* remove if-modified-since from proxy request to ensure that content-type is included ([#2711](https://github.com/adobe/helix-cli/issues/2711)) ([482a618](https://github.com/adobe/helix-cli/commit/482a618deeacfffb4d14d41ce828bd2650c9dc3e))
+
 ## [16.18.1](https://github.com/adobe/helix-cli/compare/v16.18.0...v16.18.1) (2026-04-16)
 
 
