@@ -45,7 +45,7 @@
   "dependencies": {
     "@adobe/fetch": "4.3.0",
     "@adobe/helix-log": "7.0.0",
-    "@adobe/helix-shared-config": "11.1.20",
+    "@adobe/helix-shared-config": "11.1.21",
     "@adobe/helix-shared-git": "3.0.23",
     "@adobe/helix-shared-indexer": "2.2.7",
     "@adobe/helix-shared-process-queue": "3.1.8",
@@ -87,7 +87,7 @@
     "yargs": "18.0.0"
   },
   "devDependencies": {
-    "@adobe/eslint-config-helix": "3.0.24",
+    "@adobe/eslint-config-helix": "3.0.25",
     "@eslint/config-helpers": "0.5.4",
     "@semantic-release/changelog": "6.0.3",
     "@semantic-release/git": "10.0.1",
