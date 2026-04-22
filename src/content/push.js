@@ -40,6 +40,17 @@ export default function push() {
           type: 'boolean',
           default: false,
         })
+        .option('preview', {
+          describe: 'After a successful push, start a bulk preview job on admin.hlx.page for changed paths',
+          type: 'boolean',
+          default: false,
+        })
+        .option('publish', {
+          describe:
+            'After a successful push, bulk preview then bulk publish on admin.hlx.page (publish waits for preview)',
+          type: 'boolean',
+          default: false,
+        })
         .help();
     },
     handler: async (argv) => {
@@ -52,6 +63,8 @@ export default function push() {
         .withPath(argv.path)
         .withForce(argv.force)
         .withDryRun(argv.dryRun)
+        .withPreview(argv.preview)
+        .withPublish(argv.publish)
         .run();
     },
   };
