@@ -96,25 +96,6 @@ export class HelixProject extends BaseProject {
     return this;
   }
 
-  withLocalForms(value) {
-    if (value) {
-      if (path.isAbsolute(value) || value.includes('..') || value.startsWith('/')) {
-        throw new Error(`Invalid local forms folder: ${value} only folders within the current workspace are allowed`);
-      }
-      this._localForms = value;
-    }
-    return this;
-  }
-
-  withLocalFormsMount(value) {
-    this._localFormsMount = value;
-    return this;
-  }
-
-  get localForms() {
-    return this._localForms;
-  }
-
   get proxyUrl() {
     return this._proxyUrl;
   }
@@ -164,10 +145,6 @@ export class HelixProject extends BaseProject {
     if (this._htmlFolder) {
       const mount = this._htmlMount || `/${this._htmlFolder}`;
       this._server.withHtmlFolder(this._htmlFolder, mount);
-    }
-    if (this._localForms) {
-      const formsMount = this._localFormsMount || '/content/forms/af/';
-      this._server.withLocalForms(this._localForms, formsMount);
     }
     await super.init();
     this._indexer = new Indexer()
@@ -233,24 +210,13 @@ export class HelixProject extends BaseProject {
         await lstat(htmlFolderPath);
         this.log.debug(`Registered HTML folder for live-reload: ${this._htmlFolder}`);
         // Watch all HTML files in the folder - only .html extension
-        this.liveReload.registerFiles([`${htmlFolderPath}/**/*.html`], this._server.mountPrefix);
+        this.liveReload.registerFiles([
+          `${htmlFolderPath}/**/*.html`,
+          `${htmlFolderPath}/**/*.json`,
+        ], this._server.mountPrefix);
       } catch (e) {
         this.log.error(`HTML folder '${this._htmlFolder}' does not exist`);
         throw new Error(`HTML folder '${this._htmlFolder}' does not exist`);
-      }
-    }
-  }
-
-  async initLocalForms() {
-    if (this._localForms && this.liveReload) {
-      const localFormsPath = resolve(this.directory, this._localForms);
-      try {
-        await lstat(localFormsPath);
-        this.log.debug(`Registered local forms folder for live-reload: ${this._localForms}`);
-        this.liveReload.registerFiles([`${localFormsPath}/**/*.json`], '/content/forms/af/');
-      } catch (e) {
-        this.log.error(`Local forms folder '${this._localForms}' does not exist`);
-        throw new Error(`Local forms folder '${this._localForms}' does not exist`);
       }
     }
   }
@@ -288,7 +254,6 @@ export class HelixProject extends BaseProject {
     await this.initHeadHtml();
     await this.init404Html();
     await this.initHtmlFolder();
-    await this.initLocalForms();
     await this.initHlxIgnore();
     if (this._indexer) {
       await this._indexer.init();

@@ -1423,4 +1423,156 @@ describe('Helix Server - HTML Folder', () => {
       }
     });
   });
+
+  describe('JSON form rendering via --html-folder', () => {
+    it('serves form page from .json file in html-folder', async () => {
+      const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
+      const formsFolder = path.join(cwd, 'forms');
+      await fs.mkdir(formsFolder, { recursive: true });
+      const formJson = JSON.stringify({ id: 'my-form', items: [] });
+      await fs.writeFile(path.join(formsFolder, 'my-form.json'), formJson);
+
+      const project = new HelixProject()
+        .withCwd(cwd)
+        .withLogger(console)
+        .withHttpPort(0)
+        .withHtmlFolder('forms')
+        .withHtmlMount('/content/forms/af/');
+
+      await project.init();
+      try {
+        await project.start();
+
+        const response = await fetch(`http://127.0.0.1:${project.server.port}/content/forms/af/my-form`);
+        assert.equal(response.status, 200, 'Should return 200 for JSON-backed form');
+        assert.equal(response.headers.get('content-type'), 'text/html; charset=utf-8');
+
+        const body = await response.text();
+        assert.ok(body.includes('class="form"'), 'Response should contain form block markup');
+        assert.ok(body.includes('<pre><code>'), 'Response should contain pre/code with JSON');
+        assert.ok(body.includes('/scripts/aem.js'), 'Response should include aem.js');
+        assert.ok(body.includes('/styles/styles.css'), 'Response should include styles.css');
+        // Verify the JSON content is embedded in the response
+        assert.ok(body.includes('my-form'), 'Response should contain the form id from the JSON');
+      } finally {
+        await project.stop();
+      }
+    });
+
+    it('injects live reload script into .json form response', async () => {
+      const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
+      const formsFolder = path.join(cwd, 'forms');
+      await fs.mkdir(formsFolder, { recursive: true });
+      await fs.writeFile(path.join(formsFolder, 'my-form.json'), JSON.stringify({ id: 'my-form' }));
+
+      const project = new HelixProject()
+        .withCwd(cwd)
+        .withLogger(console)
+        .withHttpPort(0)
+        .withHtmlFolder('forms')
+        .withHtmlMount('/content/forms/af/')
+        .withLiveReload(true);
+
+      await project.init();
+      try {
+        await project.start();
+
+        const response = await fetch(`http://127.0.0.1:${project.server.port}/content/forms/af/my-form`);
+        assert.equal(response.status, 200);
+
+        const body = await response.text();
+        assert.ok(body.includes('class="form"'), 'Response should contain form block markup');
+        assert.ok(body.includes('livereload'), 'Response should include live reload script');
+        assert.ok(body.includes('LiveReload'), 'Response should include LiveReload functionality');
+      } finally {
+        await project.stop();
+      }
+    });
+
+    it('.html takes precedence over .json', async () => {
+      const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
+      const formsFolder = path.join(cwd, 'forms');
+      await fs.mkdir(formsFolder, { recursive: true });
+      await fs.writeFile(path.join(formsFolder, 'my-page.html'), '<html><body>HTML wins</body></html>');
+      await fs.writeFile(path.join(formsFolder, 'my-page.json'), JSON.stringify({ id: 'should-not-be-used' }));
+
+      const project = new HelixProject()
+        .withCwd(cwd)
+        .withLogger(console)
+        .withHttpPort(0)
+        .withHtmlFolder('forms');
+
+      await project.init();
+      try {
+        await project.start();
+
+        const response = await fetch(`http://127.0.0.1:${project.server.port}/forms/my-page`);
+        assert.equal(response.status, 200);
+        const body = await response.text();
+        assert.ok(body.includes('HTML wins'), '.html file should be served, not .json');
+        assert.ok(!body.includes('class="form"'), 'Should not render as form block');
+      } finally {
+        await project.stop();
+      }
+    });
+
+    it('.plain.html takes precedence over .json', async () => {
+      const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
+      const formsFolder = path.join(cwd, 'forms');
+      await fs.mkdir(formsFolder, { recursive: true });
+      await fs.writeFile(path.join(formsFolder, 'my-page.plain.html'), '<div>Plain HTML wins</div>');
+      await fs.writeFile(path.join(formsFolder, 'my-page.json'), JSON.stringify({ id: 'should-not-be-used' }));
+
+      nock('https://main--foo--bar.aem.page')
+        .get('/head.html')
+        .reply(404);
+
+      const project = new HelixProject()
+        .withCwd(cwd)
+        .withLogger(console)
+        .withHttpPort(0)
+        .withProxyUrl('https://main--foo--bar.aem.page/')
+        .withHtmlFolder('forms');
+
+      await project.init();
+      try {
+        await project.start();
+
+        const response = await fetch(`http://127.0.0.1:${project.server.port}/forms/my-page`);
+        assert.equal(response.status, 200);
+        const body = await response.text();
+        assert.ok(body.includes('Plain HTML wins'), '.plain.html should be served, not .json');
+        assert.ok(!body.includes('class="form"'), 'Should not render as form block');
+      } finally {
+        await project.stop();
+      }
+    });
+
+    it('serves .json from nested directory', async () => {
+      const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
+      const nestedFolder = path.join(cwd, 'forms', 'nested');
+      await fs.mkdir(nestedFolder, { recursive: true });
+      const formJson = JSON.stringify({ id: 'nested-form' });
+      await fs.writeFile(path.join(nestedFolder, 'sub-form.json'), formJson);
+
+      const project = new HelixProject()
+        .withCwd(cwd)
+        .withLogger(console)
+        .withHttpPort(0)
+        .withHtmlFolder('forms')
+        .withHtmlMount('/content/forms/af/');
+
+      await project.init();
+      try {
+        await project.start();
+
+        const response = await fetch(`http://127.0.0.1:${project.server.port}/content/forms/af/nested/sub-form`);
+        assert.equal(response.status, 200, 'Should serve nested JSON form');
+        const body = await response.text();
+        assert.ok(body.includes('class="form"'), 'Response should contain form block markup');
+      } finally {
+        await project.stop();
+      }
+    });
+  });
 });

@@ -65,16 +65,6 @@ export default class UpCommand extends AbstractServerCommand {
     return this;
   }
 
-  withLocalForms(value) {
-    this._localForms = value;
-    return this;
-  }
-
-  withLocalFormsMount(value) {
-    this._localFormsMount = value;
-    return this;
-  }
-
   async doStop() {
     await super.doStop();
     if (this._watcher) {
@@ -128,9 +118,7 @@ export default class UpCommand extends AbstractServerCommand {
       .withSiteToken(this._siteToken)
       .withCookies(this._cookies)
       .withHtmlFolder(this._htmlFolder)
-      .withHtmlMount(this._htmlMount)
-      .withLocalForms(this._localForms)
-      .withLocalFormsMount(this._localFormsMount);
+      .withHtmlMount(this._htmlMount);
 
     this.log.info(chalk`{yellow     ___    ________  ___                          __      __ v${pkgJson.version}}`);
     this.log.info(chalk`{yellow    /   |  / ____/  |/  /  _____(_)___ ___  __  __/ /___ _/ /_____  _____}`);
