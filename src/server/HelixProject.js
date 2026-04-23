@@ -228,7 +228,10 @@ export class HelixProject extends BaseProject {
         await lstat(htmlFolderPath);
         this.log.debug(`Registered HTML folder for live-reload: ${this._htmlFolder}`);
         // Watch all HTML files in the folder - only .html extension
-        this.liveReload.registerFiles([`${htmlFolderPath}/**/*.html`], this._server.mountPrefix);
+        this.liveReload.registerFiles([
+          `${htmlFolderPath}/**/*.html`,
+          `${htmlFolderPath}/**/*.json`,
+        ], this._server.mountPrefix);
       } catch (e) {
         this.log.error(`HTML folder '${this._htmlFolder}' does not exist`);
         throw new Error(`HTML folder '${this._htmlFolder}' does not exist`);

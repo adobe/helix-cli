@@ -125,7 +125,6 @@ export default function up() {
           describe: 'URL path where html-folder files are served (e.g., / for root). Defaults to /FOLDER.',
           type: 'string',
         })
-
         .help();
     },
     handler: async (argv) => {

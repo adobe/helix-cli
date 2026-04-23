@@ -1423,4 +1423,151 @@ describe('Helix Server - HTML Folder', () => {
       }
     });
   });
+
+  describe('Static file serving via --html-folder', () => {
+    it('serves .json files as-is from html-folder', async () => {
+      const cwd = await setupProject(
+        path.join(__rootdir, 'test', 'fixtures', 'project'),
+        testRoot,
+      );
+      const formsFolder = path.join(cwd, 'forms');
+      await fs.mkdir(formsFolder, { recursive: true });
+      const formJson = JSON.stringify({ id: 'my-form', items: [] });
+      await fs.writeFile(
+        path.join(formsFolder, 'my-form.json'),
+        formJson,
+      );
+
+      const project = new HelixProject()
+        .withCwd(cwd)
+        .withLogger(console)
+        .withHttpPort(0)
+        .withHtmlFolder('forms');
+
+      await project.init();
+      try {
+        await project.start();
+
+        const response = await fetch(
+          `http://127.0.0.1:${project.server.port}/forms/my-form.json`,
+        );
+        assert.equal(response.status, 200);
+        assert.ok(
+          response.headers.get('content-type').includes('application/json'),
+          'Should serve with JSON content-type',
+        );
+
+        const body = await response.json();
+        assert.equal(body.id, 'my-form');
+      } finally {
+        await project.stop();
+      }
+    });
+
+    it('serves static files from nested directories', async () => {
+      const cwd = await setupProject(
+        path.join(__rootdir, 'test', 'fixtures', 'project'),
+        testRoot,
+      );
+      const nested = path.join(cwd, 'forms', 'nested');
+      await fs.mkdir(nested, { recursive: true });
+      await fs.writeFile(
+        path.join(nested, 'data.json'),
+        JSON.stringify({ id: 'nested' }),
+      );
+
+      const project = new HelixProject()
+        .withCwd(cwd)
+        .withLogger(console)
+        .withHttpPort(0)
+        .withHtmlFolder('forms');
+
+      await project.init();
+      try {
+        await project.start();
+
+        const response = await fetch(
+          `http://127.0.0.1:${project.server.port}/forms/nested/data.json`,
+        );
+        assert.equal(response.status, 200);
+        const body = await response.json();
+        assert.equal(body.id, 'nested');
+      } finally {
+        await project.stop();
+      }
+    });
+
+    it('blocks path traversal for static files', async () => {
+      const cwd = await setupProject(
+        path.join(__rootdir, 'test', 'fixtures', 'project'),
+        testRoot,
+      );
+      const formsFolder = path.join(cwd, 'forms');
+      await fs.mkdir(formsFolder, { recursive: true });
+      await fs.writeFile(
+        path.join(formsFolder, 'safe.json'),
+        '{}',
+      );
+      await fs.writeFile(
+        path.join(cwd, 'secret.json'),
+        '{"secret":true}',
+      );
+
+      const project = new HelixProject()
+        .withCwd(cwd)
+        .withLogger(console)
+        .withHttpPort(0)
+        .withHtmlFolder('forms');
+
+      await project.init();
+      try {
+        await project.start();
+
+        const response = await fetch(
+          `http://127.0.0.1:${project.server.port}/forms/../secret.json`,
+        );
+        assert.notEqual(
+          response.status,
+          200,
+          'Should not serve files outside html-folder',
+        );
+      } finally {
+        await project.stop();
+      }
+    });
+
+    it('serves static files with custom mount', async () => {
+      const cwd = await setupProject(
+        path.join(__rootdir, 'test', 'fixtures', 'project'),
+        testRoot,
+      );
+      const formsFolder = path.join(cwd, 'forms');
+      await fs.mkdir(formsFolder, { recursive: true });
+      await fs.writeFile(
+        path.join(formsFolder, 'xpl.json'),
+        JSON.stringify({ id: 'xpl-form' }),
+      );
+
+      const project = new HelixProject()
+        .withCwd(cwd)
+        .withLogger(console)
+        .withHttpPort(0)
+        .withHtmlFolder('forms')
+        .withHtmlMount('/content/forms/af/');
+
+      await project.init();
+      try {
+        await project.start();
+
+        const response = await fetch(
+          `http://127.0.0.1:${project.server.port}/content/forms/af/xpl.json`,
+        );
+        assert.equal(response.status, 200);
+        const body = await response.json();
+        assert.equal(body.id, 'xpl-form');
+      } finally {
+        await project.stop();
+      }
+    });
+  });
 });

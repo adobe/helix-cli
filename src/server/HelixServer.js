@@ -307,6 +307,10 @@ export class HelixServer extends BaseServer {
     // Resolve which file to serve (.html or .plain.html)
     const resolvedFile = await this.resolveHtmlFolderFile(relativePath);
     if (!resolvedFile) {
+      // Serve static assets (e.g. .json) from the html-folder as-is
+      if (relativePath.includes('.')) {
+        return this.serveHtmlFolderStaticFile(req, res, next, relativePath);
+      }
       return next();
     }
 
@@ -345,6 +349,55 @@ export class HelixServer extends BaseServer {
     }
 
     log.debug(`served HTML file ${resolvedFile.file} for ${req.url}`);
+    return undefined;
+  }
+
+  /**
+   * Serves static files from the HTML folder as-is
+   * @param {Express.Request} req request
+   * @param {Express.Response} res response
+   * @param {Function} next next middleware
+   * @param {string} relativePath path relative to HTML folder
+   */
+  async serveHtmlFolderStaticFile(req, res, next, relativePath) {
+    if (relativePath.includes('/../') || relativePath.includes('..')) {
+      return next();
+    }
+
+    const filePath = path.resolve(
+      this._project.directory,
+      this._htmlFolder,
+      relativePath,
+    );
+
+    if (!utils.validatePathSecurity(
+      filePath,
+      this._project.directory,
+    )) {
+      return next();
+    }
+
+    try {
+      const stats = await lstat(filePath);
+      if (!stats.isFile()) {
+        return next();
+      }
+    } catch (e) {
+      return next();
+    }
+
+    const sendFile = promisify(res.sendFile).bind(res);
+    try {
+      await sendFile(filePath, {
+        dotfiles: 'allow',
+        headers: { 'access-control-allow-origin': '*' },
+      });
+      this.log.debug(
+        `served static file ${filePath} for ${req.url}`,
+      );
+    } catch (e) {
+      return next();
+    }
     return undefined;
   }
 
