@@ -232,26 +232,6 @@ export class HelixServer extends BaseServer {
       // Neither exists
     }
 
-    // Try .json (form definition files — rendered as form block HTML on-the-fly)
-    const jsonFile = path.resolve(
-      this._project.directory,
-      this._htmlFolder,
-      `${relativePath}.json`,
-    );
-
-    if (!utils.validatePathSecurity(jsonFile, this._project.directory)) {
-      return null;
-    }
-
-    try {
-      const stats = await lstat(jsonFile);
-      if (stats.isFile()) {
-        return { file: jsonFile, isJson: true };
-      }
-    } catch (e) {
-      // .json not found either
-    }
-
     return null;
   }
 
@@ -304,6 +284,10 @@ export class HelixServer extends BaseServer {
     // Resolve which file to serve (.html or .plain.html)
     const resolvedFile = await this.resolveHtmlFolderFile(relativePath);
     if (!resolvedFile) {
+      // Serve static assets (e.g. .json) from the html-folder as-is
+      if (relativePath.includes('.')) {
+        return this.serveHtmlFolderStaticFile(req, res, next, relativePath);
+      }
       return next();
     }
 
@@ -315,12 +299,9 @@ export class HelixServer extends BaseServer {
       liveReload.startRequest(req.id, req.url);
     }
 
-    // Load content (handle .plain.html transformation and .json form rendering)
+    // Load content (handle .plain.html transformation)
     let htmlContent;
-    if (resolvedFile.isJson) {
-      const formJson = await readFile(resolvedFile.file, 'utf-8');
-      htmlContent = utils.generateFormPageHtml(formJson, relativePath);
-    } else if (resolvedFile.isPlain) {
+    if (resolvedFile.isPlain) {
       htmlContent = await this.transformPlainHtml(resolvedFile.file);
     } else {
       htmlContent = await readFile(resolvedFile.file, 'utf-8');
@@ -345,6 +326,55 @@ export class HelixServer extends BaseServer {
     }
 
     log.debug(`served HTML file ${resolvedFile.file} for ${req.url}`);
+    return undefined;
+  }
+
+  /**
+   * Serves static files from the HTML folder as-is
+   * @param {Express.Request} req request
+   * @param {Express.Response} res response
+   * @param {Function} next next middleware
+   * @param {string} relativePath path relative to HTML folder
+   */
+  async serveHtmlFolderStaticFile(req, res, next, relativePath) {
+    if (relativePath.includes('/../') || relativePath.includes('..')) {
+      return next();
+    }
+
+    const filePath = path.resolve(
+      this._project.directory,
+      this._htmlFolder,
+      relativePath,
+    );
+
+    if (!utils.validatePathSecurity(
+      filePath,
+      this._project.directory,
+    )) {
+      return next();
+    }
+
+    try {
+      const stats = await lstat(filePath);
+      if (!stats.isFile()) {
+        return next();
+      }
+    } catch (e) {
+      return next();
+    }
+
+    const sendFile = promisify(res.sendFile).bind(res);
+    try {
+      await sendFile(filePath, {
+        dotfiles: 'allow',
+        headers: { 'access-control-allow-origin': '*' },
+      });
+      this.log.debug(
+        `served static file ${filePath} for ${req.url}`,
+      );
+    } catch (e) {
+      return next();
+    }
     return undefined;
   }
 
