@@ -25,18 +25,15 @@ export const LARGE_CLONE_FILE_THRESHOLD = 10000;
 export const CONTENT_IO_CONCURRENCY = 10;
 
 /** File extensions cloned by default (without `--media`). Case-insensitive. */
-const CONTENT_CLONE_DEFAULT_EXTS = new Set(['html', 'json']);
+const CONTENT_CLONE_DEFAULT_EXTS = new Set(['.html', '.json']);
 
 /**
  * @param {{ ext?: string, name?: string, path?: string }} file
- * @returns {string} lower-case extension without leading dot, or '' if unknown
+ * @returns {string} lower-case extension with leading dot, or '' if unknown
  */
 function contentFileExtension(file) {
-  if (file.ext != null && String(file.ext) !== '') {
-    return String(file.ext).replace(/^\./, '').toLowerCase();
-  }
-  const base = file.name || file.path || '';
-  return path.extname(base).replace(/^\./, '').toLowerCase();
+  const lowerExt = (file.ext != null && file.ext !== '' ? String(file.ext) : path.extname(file.name || file.path || '')).toLowerCase();
+  return !lowerExt || lowerExt.startsWith('.') ? lowerExt : `.${lowerExt}`;
 }
 
 /**
