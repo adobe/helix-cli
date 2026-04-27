@@ -1,3 +1,10 @@
+## [16.18.6](https://github.com/adobe/helix-cli/compare/v16.18.5...v16.18.6) (2026-04-27)
+
+
+### Bug Fixes
+
+* **deps:** update dependency diff to v9 ([0da5b57](https://github.com/adobe/helix-cli/commit/0da5b573584a495350b18c2f05b6496cae9b5f42))
+
 ## [16.18.5](https://github.com/adobe/helix-cli/compare/v16.18.4...v16.18.5) (2026-04-21)
 
 
