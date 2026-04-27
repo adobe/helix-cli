@@ -1,3 +1,10 @@
+# [16.19.0](https://github.com/adobe/helix-cli/compare/v16.18.7...v16.19.0) (2026-04-27)
+
+
+### Features
+
+* extend --html-folder to serve local JSON form definitions on-the-fly ([3f0623a](https://github.com/adobe/helix-cli/commit/3f0623aa497c0f7aab4618808d8110ac460a14fb))
+
 ## [16.18.7](https://github.com/adobe/helix-cli/compare/v16.18.6...v16.18.7) (2026-04-27)
 
 
