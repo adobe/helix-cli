@@ -45,10 +45,10 @@
   "dependencies": {
     "@adobe/fetch": "4.3.0",
     "@adobe/helix-log": "7.0.0",
-    "@adobe/helix-shared-config": "11.1.21",
+    "@adobe/helix-shared-config": "11.1.22",
     "@adobe/helix-shared-git": "3.0.23",
     "@adobe/helix-shared-indexer": "2.2.7",
-    "@adobe/helix-shared-process-queue": "3.1.8",
+    "@adobe/helix-shared-process-queue": "3.1.9",
     "camelcase": "9.0.0",
     "chalk-template": "1.1.2",
     "chokidar": "5.0.0",
@@ -87,7 +87,7 @@
     "yargs": "18.0.0"
   },
   "devDependencies": {
-    "@adobe/eslint-config-helix": "3.0.25",
+    "@adobe/eslint-config-helix": "3.0.26",
     "@eslint/config-helpers": "0.5.5",
     "@semantic-release/changelog": "6.0.3",
     "@semantic-release/git": "10.0.1",
