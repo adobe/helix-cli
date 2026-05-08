@@ -162,7 +162,8 @@ export class DaClient {
   }
 
   /**
-   * Deletes a file or folder. Idempotent.
+   * Deletes a file or folder. Idempotent: 404 is treated as success.
+   * Throws on transport or server errors so callers don't silently treat them as success.
    */
   async deleteSource(org, repo, daPath) {
     const url = `${DA_ADMIN}/source/${org}/${repo}${daPath}`;
@@ -173,7 +174,10 @@ export class DaClient {
     if (res.status === 401) {
       throw new Error('Unauthorized: invalid or missing token');
     }
-    return res.ok || res.status === 204;
+    if (res.ok || res.status === 204 || res.status === 404) {
+      return true;
+    }
+    throw new Error(`DELETE failed for ${daPath}: ${res.status} ${res.statusText}`);
   }
 
   /**

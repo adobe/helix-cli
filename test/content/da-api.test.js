@@ -343,6 +343,20 @@ describe('DaClient', () => {
       await assert.rejects(() => client.deleteSource('org', 'repo', '/file.html'), /Unauthorized/);
     });
 
+    it('throws on 5xx so callers cannot treat server failure as success', async () => {
+      client.fetch = async () => mockResponse(500, 'Server Error', false);
+      await assert.rejects(
+        () => client.deleteSource('org', 'repo', '/file.html'),
+        /DELETE failed/,
+      );
+    });
+
+    it('treats 404 as success (idempotent)', async () => {
+      client.fetch = async () => mockResponse(404, 'Not Found', false);
+      const result = await client.deleteSource('org', 'repo', '/missing.html');
+      assert.strictEqual(result, true);
+    });
+
     it('calls correct source URL', async () => {
       let calledUrl;
       client.fetch = async (url) => {

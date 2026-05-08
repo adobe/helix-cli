@@ -12,10 +12,13 @@
 
 /* eslint-env mocha */
 import assert from 'assert';
+import fs from 'fs';
 import path from 'path';
 import fse from 'fs-extra';
+import git from 'isomorphic-git';
 import esmock from 'esmock';
 import { createTestRoot } from '../utils.js';
+import { DA_SYNCED_REF } from '../../src/content/content-git.js';
 import {
   makeLogger,
   setupContentDir,
@@ -247,6 +250,118 @@ describe('PushCommand', () => {
 
       assert.ok(pushed.includes('/blog/post.html'));
       assert.ok(!pushed.includes('/index.html'));
+    });
+
+    it('--path /blog does not match /blog2/* (no prefix bleed)', async () => {
+      const contentDir = await setupContentDir(testRoot);
+      await fse.ensureDir(path.join(contentDir, 'blog2'));
+      await fse.writeFile(path.join(contentDir, 'blog', 'post.html'), 'changed blog');
+      await fse.writeFile(path.join(contentDir, 'blog2', 'post.html'), 'new blog2');
+      await stageAllAndCommit(contentDir, 'edit blog and add blog2');
+
+      const pushed = [];
+      const DaClientClass = createDaClientClass({ onPut: (p) => pushed.push(p) });
+      const log = makeLogger();
+      const mod = await esmock('../../src/content/push.cmd.js', {
+        '../../src/content/da-auth.js': { getValidToken: async () => 'token' },
+        '../../src/content/da-api.js': {
+          DaClient: DaClientClass,
+          getContentType: () => 'text/html',
+        },
+      });
+      const Cmd = mod.default;
+      const cmd = new Cmd(log).withDirectory(testRoot).withPath('/blog');
+      await cmd.run();
+
+      assert.ok(pushed.includes('/blog/post.html'));
+      assert.ok(!pushed.includes('/blog2/post.html'));
+    });
+
+    it('does not advance synced ref when --path filter excludes other ahead changes', async () => {
+      const contentDir = await setupContentDir(testRoot);
+      await fse.writeFile(path.join(contentDir, 'index.html'), 'changed');
+      await fse.writeFile(path.join(contentDir, 'blog', 'post.html'), 'changed blog');
+      await stageAllAndCommit(contentDir, 'edit pages');
+
+      const pushed = [];
+      const DaClientClass = createDaClientClass({ onPut: (p) => pushed.push(p) });
+      const log = makeLogger();
+      const mod = await esmock('../../src/content/push.cmd.js', {
+        '../../src/content/da-auth.js': { getValidToken: async () => 'token' },
+        '../../src/content/da-api.js': {
+          DaClient: DaClientClass,
+          getContentType: () => 'text/html',
+        },
+      });
+      const Cmd = mod.default;
+      const cmd = new Cmd(log).withDirectory(testRoot).withPath('/blog');
+      await cmd.run();
+
+      // The in-scope file must still be uploaded successfully…
+      assert.ok(pushed.includes('/blog/post.html'));
+      assert.ok(!pushed.includes('/index.html'));
+      // …but the synced ref must not advance to HEAD, otherwise the unfiltered
+      // /index.html change would be silently considered already-synced next time.
+      const headOid = await git.resolveRef({ fs, dir: contentDir, ref: 'HEAD' });
+      let syncedOid;
+      try {
+        syncedOid = await git.resolveRef({ fs, dir: contentDir, ref: DA_SYNCED_REF });
+      } catch {
+        syncedOid = null;
+      }
+      assert.notStrictEqual(syncedOid, headOid);
+      assert.ok(log.logs.some((l) => l.msg.includes('held back') || l.msg.includes('without --path')));
+    });
+
+    it('advances synced ref to HEAD when --path covers all ahead changes', async () => {
+      const contentDir = await setupContentDir(testRoot);
+      await fse.writeFile(path.join(contentDir, 'blog', 'post.html'), 'changed blog only');
+      await stageAllAndCommit(contentDir, 'edit blog');
+
+      const mod = await esmock('../../src/content/push.cmd.js', {
+        '../../src/content/da-auth.js': { getValidToken: async () => 'token' },
+        '../../src/content/da-api.js': {
+          DaClient: createDaClientClass(),
+          getContentType: () => 'text/html',
+        },
+      });
+      const Cmd = mod.default;
+      const cmd = new Cmd(makeLogger()).withDirectory(testRoot).withPath('/blog');
+      await cmd.run();
+
+      const headOid = await git.resolveRef({ fs, dir: contentDir, ref: 'HEAD' });
+      const syncedOid = await git.resolveRef({ fs, dir: contentDir, ref: DA_SYNCED_REF });
+      assert.strictEqual(syncedOid, headOid);
+    });
+
+    it('does not advance synced ref when a delete fails on the server', async () => {
+      const contentDir = await setupContentDir(testRoot);
+      await fse.remove(path.join(contentDir, 'index.html'));
+      await stageAllAndCommit(contentDir, 'drop index');
+
+      const DaClientClass = createDaClientClass({ deleteFails: true });
+      const log = makeLogger();
+      const mod = await esmock('../../src/content/push.cmd.js', {
+        '../../src/content/da-auth.js': { getValidToken: async () => 'token' },
+        '../../src/content/da-api.js': {
+          DaClient: DaClientClass,
+          getContentType: () => 'text/html',
+        },
+      });
+      const Cmd = mod.default;
+      const cmd = new Cmd(log).withDirectory(testRoot);
+      await cmd.run();
+
+      const headOid = await git.resolveRef({ fs, dir: contentDir, ref: 'HEAD' });
+      let syncedOid;
+      try {
+        syncedOid = await git.resolveRef({ fs, dir: contentDir, ref: DA_SYNCED_REF });
+      } catch {
+        syncedOid = null;
+      }
+      assert.notStrictEqual(syncedOid, headOid);
+      assert.ok(log.logs.some((l) => l.msg.includes('Sync ref not updated')));
+      assert.ok(log.logs.some((l) => l.msg.includes('error') || l.msg.includes('✗')));
     });
 
     it('shows dry-run added/modified/deleted sections', async () => {
