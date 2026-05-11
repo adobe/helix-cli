@@ -1,3 +1,10 @@
+## [16.19.2](https://github.com/adobe/helix-cli/compare/v16.19.1...v16.19.2) (2026-05-11)
+
+
+### Bug Fixes
+
+* **content:** correctness fixes for push, merge, and delete ([#2721](https://github.com/adobe/helix-cli/issues/2721)) ([efc6f11](https://github.com/adobe/helix-cli/commit/efc6f1138d55493dd546da300114df83ad006c5e))
+
 ## [16.19.1](https://github.com/adobe/helix-cli/compare/v16.19.0...v16.19.1) (2026-04-28)
 
 
