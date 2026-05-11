@@ -201,5 +201,31 @@ describe('MergeCommand', () => {
       const cmd = new Cmd(makeLogger()).withDirectory(testRoot).withFilePath('index.html');
       await cmd.run();
     });
+
+    it('passes the project root (not content/) to getValidToken so the cached login is reused', async () => {
+      const contentDir = await setupContentDir(testRoot);
+      await fse.writeFile(
+        path.join(contentDir, 'index.html'),
+        '<html><p>index</p><p>local extra</p></html>',
+      );
+
+      let capturedProjectDir;
+      const mod = await esmock('../../src/content/merge.cmd.js', {
+        '../../src/content/da-auth.js': {
+          getValidToken: async (_log, _override, projectDir) => {
+            capturedProjectDir = projectDir;
+            return 'token';
+          },
+        },
+        '../../src/content/da-api.js': {
+          DaClient: createDaClientClass({ sourceContent: '<html><p>remote</p></html>' }),
+        },
+      });
+      const Cmd = mod.default;
+      const cmd = new Cmd(makeLogger()).withDirectory(testRoot);
+      await cmd.run();
+
+      assert.strictEqual(capturedProjectDir, testRoot);
+    });
   });
 });

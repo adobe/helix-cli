@@ -108,16 +108,16 @@ export default class PushCommand {
    * @param {string} repo
    * @param {string} contentDir
    * @param {string[]} targets
-   * @returns {Promise<{ pushed: number, errors: number, successfullyPushed: Set<string> }>}
+   * @returns {Promise<{ pushed: number, errors: number }>}
    */
   async _uploadFiles(client, org, repo, contentDir, targets) {
     const { log } = this;
     let pushed = 0;
     let errors = 0;
-    const successfullyPushed = new Set();
 
+    // processQueue consumes its input array via shift(); copy so the caller's list survives.
     const results = await processQueue(
-      targets,
+      [...targets],
       async (daPath) => {
         const localPath = path.join(contentDir, ...daPath.split('/').filter(Boolean));
         const ext = daPath.split('.').pop();
@@ -125,7 +125,7 @@ export default class PushCommand {
           const buffer = await fse.readFile(localPath);
           await client.putSource(org, repo, daPath, buffer, getContentType(ext));
           log.info(`  ✓ ${daPath}`);
-          return { ok: true, daPath };
+          return { ok: true };
         } catch (err) {
           log.warn(`  ✗ ${daPath}: ${err.message}`);
           return { ok: false };
@@ -136,13 +136,12 @@ export default class PushCommand {
     for (const r of results) {
       if (r.ok) {
         pushed += 1;
-        successfullyPushed.add(r.daPath);
       } else {
         errors += 1;
       }
     }
 
-    return { pushed, errors, successfullyPushed };
+    return { pushed, errors };
   }
 
   /**
@@ -151,21 +150,21 @@ export default class PushCommand {
    * @param {string} org
    * @param {string} repo
    * @param {string[]} deleted
-   * @returns {Promise<{ pushed: number, errors: number, successfullyDeleted: Set<string> }>}
+   * @returns {Promise<{ pushed: number, errors: number }>}
    */
   async _deleteFiles(client, org, repo, deleted) {
     const { log } = this;
     let pushed = 0;
     let errors = 0;
-    const successfullyDeleted = new Set();
 
+    // processQueue consumes its input array via shift(); copy so the caller's list survives.
     const results = await processQueue(
-      deleted,
+      [...deleted],
       async (daPath) => {
         try {
           await client.deleteSource(org, repo, daPath);
           log.info(`  ✓ deleted ${daPath}`);
-          return { ok: true, daPath };
+          return { ok: true };
         } catch (err) {
           log.warn(`  ✗ ${daPath}: ${err.message}`);
           return { ok: false };
@@ -176,13 +175,12 @@ export default class PushCommand {
     for (const r of results) {
       if (r.ok) {
         pushed += 1;
-        successfullyDeleted.add(r.daPath);
       } else {
         errors += 1;
       }
     }
 
-    return { pushed, errors, successfullyDeleted };
+    return { pushed, errors };
   }
 
   async run() {
@@ -207,12 +205,21 @@ export default class PushCommand {
     const syncedOid = await resolveSyncedOid(fs, contentDir);
     const lastSyncTime = await getCommitCommitterTimeMs(fs, contentDir, syncedOid);
 
-    let { added, modified, deleted } = await diffCommitTrees(fs, contentDir, syncedOid, headOid);
+    const fullChanges = await diffCommitTrees(fs, contentDir, syncedOid, headOid);
 
-    const inScope = (daPath) => !this._pushPath || daPath.startsWith(this._pushPath);
-    added = added.filter(inScope);
-    modified = modified.filter(inScope);
-    deleted = deleted.filter(inScope);
+    const scope = this._pushPath ? this._pushPath.replace(/\/+$/, '') : null;
+    const inScope = (daPath) => scope === null
+      || daPath === scope
+      || daPath.startsWith(`${scope}/`);
+    const added = fullChanges.added.filter(inScope);
+    const modified = fullChanges.modified.filter(inScope);
+    const deleted = fullChanges.deleted.filter(inScope);
+
+    const fullCount = fullChanges.added.length
+      + fullChanges.modified.length
+      + fullChanges.deleted.length;
+    const scopeCount = added.length + modified.length + deleted.length;
+    const scopeIsComplete = fullCount === scopeCount;
 
     if (added.length === 0 && modified.length === 0 && deleted.length === 0) {
       log.info('Nothing to push. No commits ahead of the last da.live sync.');
@@ -261,27 +268,27 @@ export default class PushCommand {
       return;
     }
 
-    const putTargets = [...added, ...modified];
     const {
       pushed: putPushed,
       errors: putErrors,
-      successfullyPushed,
-    } = await this._uploadFiles(client, org, repo, contentDir, putTargets);
+    } = await this._uploadFiles(client, org, repo, contentDir, [...added, ...modified]);
 
     const {
       pushed: deletePushed,
       errors: deleteErrors,
-      successfullyDeleted,
     } = await this._deleteFiles(client, org, repo, deleted);
 
     const pushed = putPushed + deletePushed;
     const pushErrors = putErrors + deleteErrors;
+    const allOk = pushErrors === 0;
 
-    const allPutsOk = putTargets.every((p) => successfullyPushed.has(p));
-    const allDeletesOk = deleted.every((p) => successfullyDeleted.has(p));
-
-    if (allPutsOk && allDeletesOk) {
+    if (allOk && scopeIsComplete) {
       await writeSyncedRef(fs, contentDir, headOid);
+    } else if (allOk) {
+      log.info(
+        '\n--path filter held back other changes; sync ref not advanced. '
+        + 'Run \'aem content push\' (without --path) to fully sync.',
+      );
     } else {
       log.warn('\nSync ref not updated: fix errors and push again to finish syncing this commit.');
     }
