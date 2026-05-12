@@ -69,7 +69,7 @@ describe('clone()', () => {
     assert.ok(cmd.description && cmd.description.length > 0);
   });
 
-  it('has a builder that registers path, all, token, force, and yes options', () => {
+  it('has a builder that registers path, all, token, media, force, and yes options', () => {
     const cmd = clone();
     const registered = {};
     const chainable = {
@@ -84,6 +84,7 @@ describe('clone()', () => {
     assert.ok('path' in registered);
     assert.ok('all' in registered);
     assert.ok('token' in registered);
+    assert.ok('media' in registered);
     assert.ok('force' in registered);
     assert.ok('yes' in registered);
   });
@@ -94,6 +95,7 @@ describe('clone()', () => {
       withToken: () => mockExecutor,
       withForce: () => mockExecutor,
       withAssumeYes: () => mockExecutor,
+      withIncludeMedia: () => mockExecutor,
       withRootPath: () => mockExecutor,
       run: async () => {},
     };
@@ -109,6 +111,7 @@ describe('clone()', () => {
     const cmd = clone();
     let ranWith;
     let assumeYesArg;
+    let includeMediaArg;
     let rootPathArg;
     cmd.executor = {
       withToken: (t) => {
@@ -118,9 +121,14 @@ describe('clone()', () => {
             withAssumeYes: (y) => {
               assumeYesArg = y;
               return {
-                withRootPath: (rp) => {
-                  rootPathArg = rp;
-                  return { run: async () => {} };
+                withIncludeMedia: (m) => {
+                  includeMediaArg = m;
+                  return {
+                    withRootPath: (rp) => {
+                      rootPathArg = rp;
+                      return { run: async () => {} };
+                    },
+                  };
                 },
               };
             },
@@ -129,10 +137,11 @@ describe('clone()', () => {
       },
     };
     await cmd.handler({
-      token: 'abc', force: false, yes: true, all: false, path: '/ca/fr_ca',
+      token: 'abc', force: false, yes: true, media: true, all: false, path: '/ca/fr_ca',
     });
     assert.strictEqual(ranWith, 'abc');
     assert.strictEqual(assumeYesArg, true);
+    assert.strictEqual(includeMediaArg, true);
     assert.strictEqual(rootPathArg, '/ca/fr_ca');
   });
 });

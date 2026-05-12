@@ -25,6 +25,7 @@ import {
   GIT_AUTHOR,
   LARGE_CLONE_FILE_THRESHOLD,
   CONTENT_IO_CONCURRENCY,
+  filterFilesForContentClone,
 } from './content-shared.js';
 import { writeSyncedRef, ensureGitIgnored } from './content-git.js';
 
@@ -67,6 +68,7 @@ export default class CloneCommand {
     this._force = false;
     this._assumeYes = false;
     this._rootPath = null;
+    this._includeMedia = false;
   }
 
   withDirectory(dir) {
@@ -91,6 +93,11 @@ export default class CloneCommand {
 
   withRootPath(daPath) {
     this._rootPath = daPath;
+    return this;
+  }
+
+  withIncludeMedia(include) {
+    this._includeMedia = !!include;
     return this;
   }
 
@@ -126,7 +133,7 @@ export default class CloneCommand {
     const client = new DaClient(token);
     log.info('Fetching file list...');
     const showDiscoveryProgress = process.stdout.isTTY;
-    const files = await client.listAll(org, repo, this._rootPath, showDiscoveryProgress
+    const listedFiles = await client.listAll(org, repo, this._rootPath, showDiscoveryProgress
       ? (n) => {
         process.stdout.write(`\r  ${n} file(s) discovered so far...`);
       }
@@ -134,7 +141,16 @@ export default class CloneCommand {
     if (showDiscoveryProgress) {
       process.stdout.write('\n');
     }
-    log.info(`Found ${files.length} file(s).`);
+    const listedCount = listedFiles.length;
+    const files = filterFilesForContentClone(listedFiles, this._includeMedia);
+    if (!this._includeMedia && listedCount > files.length) {
+      log.info(
+        `Found ${listedCount} file(s); cloning ${files.length} HTML/JSON file(s). `
+        + 'Use --media to include images, video, PDFs, and other assets.',
+      );
+    } else {
+      log.info(`Found ${files.length} file(s).`);
+    }
 
     await confirmLargeCloneIfNeeded(log, files.length, this._assumeYes);
 

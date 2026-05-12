@@ -10,6 +10,8 @@
  * governing permissions and limitations under the License.
  */
 
+import path from 'path';
+
 export const CONTENT_DIR = 'content';
 export const CONFIG_FILE = '.da-config.json';
 export const GIT_AUTHOR = { name: 'aem-cli', email: 'aem-cli@adobe.com' };
@@ -21,6 +23,31 @@ export const LARGE_CLONE_FILE_THRESHOLD = 10000;
  * Parallelism for da.live I/O: recursive list fan-out, clone downloads, push uploads/deletes.
  */
 export const CONTENT_IO_CONCURRENCY = 10;
+
+/** File extensions cloned by default (without `--media`). Case-insensitive. */
+const CONTENT_CLONE_DEFAULT_EXTS = new Set(['.html', '.json']);
+
+/**
+ * @param {{ ext?: string, name?: string, path?: string }} file
+ * @returns {string} lower-case extension with leading dot, or '' if unknown
+ */
+function contentFileExtension(file) {
+  const lowerExt = (file.ext != null && file.ext !== '' ? String(file.ext) : path.extname(file.name || file.path || '')).toLowerCase();
+  return !lowerExt || lowerExt.startsWith('.') ? lowerExt : `.${lowerExt}`;
+}
+
+/**
+ * When `includeMedia` is false, keeps only `.html` and `.json` entries (da.live list items).
+ * @param {Array<{ ext?: string, name?: string, path?: string }>} files
+ * @param {boolean} includeMedia
+ * @returns {typeof files}
+ */
+export function filterFilesForContentClone(files, includeMedia) {
+  if (includeMedia) {
+    return files;
+  }
+  return files.filter((f) => CONTENT_CLONE_DEFAULT_EXTS.has(contentFileExtension(f)));
+}
 
 /**
  * Normalizes a da.live path: leading slash, no trailing slash except root.
