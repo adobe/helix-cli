@@ -125,6 +125,12 @@ export default function up() {
           describe: 'URL path where html-folder files are served (e.g., / for root). Defaults to /FOLDER.',
           type: 'string',
         })
+        .option('prefer-plain-html', {
+          alias: 'preferPlainHtml',
+          describe: 'When --html-folder is set, prefer <stem>.plain.html over <stem>.html if both exist.',
+          type: 'boolean',
+          default: false,
+        })
 
         .help();
     },
@@ -153,6 +159,7 @@ export default function up() {
         .withCookies(argv.cookies)
         .withHtmlFolder(argv.htmlFolder)
         .withHtmlMount(argv.htmlMount)
+        .withPreferPlainHtml(argv.preferPlainHtml)
         .run();
     },
   };
