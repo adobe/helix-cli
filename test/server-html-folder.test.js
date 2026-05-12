@@ -302,6 +302,73 @@ describe('Helix Server - HTML Folder', () => {
     }
   });
 
+  it('with --prefer-plain-html, .plain.html takes precedence over .html', async () => {
+    const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
+
+    // Create drafts folder with both .html and .plain.html
+    const draftsFolder = path.join(cwd, 'drafts');
+    await fs.mkdir(draftsFolder, { recursive: true });
+    await fs.writeFile(path.join(draftsFolder, 'priority.html'), '<html><body>Regular HTML</body></html>');
+    await fs.writeFile(path.join(draftsFolder, 'priority.plain.html'), '<p>Plain HTML</p>');
+
+    // Mock the remote head.html request (needed when serving .plain.html)
+    nock('https://main--foo--bar.aem.page')
+      .get('/head.html')
+      .reply(404);
+
+    const project = new HelixProject()
+      .withCwd(cwd)
+      .withLogger(console)
+      .withHttpPort(0)
+      .withProxyUrl('https://main--foo--bar.aem.page/')
+      .withHtmlFolder('drafts')
+      .withPreferPlainHtml(true);
+
+    await project.init();
+    try {
+      await project.start();
+
+      const response = await fetch(`http://127.0.0.1:${project.server.port}/drafts/priority`);
+      assert.equal(response.status, 200);
+
+      const content = await response.text();
+      assert.ok(content.includes('<p>Plain HTML</p>'), 'Should serve .plain.html content');
+      assert.ok(!content.includes('Regular HTML'), 'Should not serve .html file');
+    } finally {
+      await project.stop();
+    }
+  });
+
+  it('with --prefer-plain-html, falls back to .html when .plain.html missing', async () => {
+    const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
+
+    // Only .html exists, no .plain.html sibling
+    const draftsFolder = path.join(cwd, 'drafts');
+    await fs.mkdir(draftsFolder, { recursive: true });
+    await fs.writeFile(path.join(draftsFolder, 'fallback.html'), '<html><body>Regular HTML</body></html>');
+
+    const project = new HelixProject()
+      .withCwd(cwd)
+      .withLogger(console)
+      .withHttpPort(0)
+      .withProxyUrl('https://main--foo--bar.aem.page/')
+      .withHtmlFolder('drafts')
+      .withPreferPlainHtml(true);
+
+    await project.init();
+    try {
+      await project.start();
+
+      const response = await fetch(`http://127.0.0.1:${project.server.port}/drafts/fallback`);
+      assert.equal(response.status, 200);
+
+      const content = await response.text();
+      assert.ok(content.includes('Regular HTML'), 'Should serve .html file as fallback');
+    } finally {
+      await project.stop();
+    }
+  });
+
   it('.plain.html files support live reload injection', async () => {
     const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
 

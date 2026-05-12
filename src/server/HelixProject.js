@@ -99,6 +99,11 @@ export class HelixProject extends BaseProject {
     return this;
   }
 
+  withPreferPlainHtml(value) {
+    this._preferPlainHtml = value;
+    return this;
+  }
+
   get proxyUrl() {
     return this._proxyUrl;
   }
@@ -152,6 +157,7 @@ export class HelixProject extends BaseProject {
     if (this._htmlFolder) {
       const mount = this._htmlMount || `/${this._htmlFolder}`;
       this._server.withHtmlFolder(this._htmlFolder, mount);
+      this._server.withPreferPlainHtml(this._preferPlainHtml);
     }
     await super.init();
     this._indexer = new Indexer()

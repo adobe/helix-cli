@@ -92,6 +92,11 @@ export class HelixServer extends BaseServer {
     return this;
   }
 
+  withPreferPlainHtml(value) {
+    this._preferPlainHtml = value;
+    return this;
+  }
+
   get mountPrefix() {
     return this._mountPrefix;
   }
@@ -215,41 +220,45 @@ export class HelixServer extends BaseServer {
       return null;
     }
 
-    // Try .html first
-    const htmlFile = path.resolve(
+    const [firstExt, secondExt] = this._preferPlainHtml
+      ? ['.plain.html', '.html']
+      : ['.html', '.plain.html'];
+
+    // Try first extension
+    const firstFile = path.resolve(
       this._project.directory,
       this._htmlFolder,
-      `${relativePath}.html`,
+      `${relativePath}${firstExt}`,
     );
 
-    if (!utils.validatePathSecurity(htmlFile, this._project.directory)) {
+    if (!utils.validatePathSecurity(firstFile, this._project.directory)) {
       return null;
     }
 
     try {
-      const stats = await lstat(htmlFile);
+      const stats = await lstat(firstFile);
       if (stats.isFile()) {
-        return { file: htmlFile, isPlain: false };
+        return { file: firstFile, isPlain: firstExt === '.plain.html' };
       }
     } catch (e) {
-      // .html not found, try .plain.html
+      // first extension not found, try second
     }
 
-    // Try .plain.html
-    const plainHtmlFile = path.resolve(
+    // Try second extension
+    const secondFile = path.resolve(
       this._project.directory,
       this._htmlFolder,
-      `${relativePath}.plain.html`,
+      `${relativePath}${secondExt}`,
     );
 
-    if (!utils.validatePathSecurity(plainHtmlFile, this._project.directory)) {
+    if (!utils.validatePathSecurity(secondFile, this._project.directory)) {
       return null;
     }
 
     try {
-      const stats = await lstat(plainHtmlFile);
+      const stats = await lstat(secondFile);
       if (stats.isFile()) {
-        return { file: plainHtmlFile, isPlain: true };
+        return { file: secondFile, isPlain: secondExt === '.plain.html' };
       }
     } catch (e) {
       // Neither exists
