@@ -205,6 +205,35 @@ export class HelixServer extends BaseServer {
   }
 
   /**
+   * Resolves a candidate file inside the HTML folder, returning its absolute path
+   * if it exists and passes the security check, or null otherwise.
+   * @param {string} relativePath path relative to HTML folder (without extension)
+   * @param {string} ext extension to append (e.g. '.html', '.plain.html')
+   * @returns {Promise<string|null>} absolute path, or null if missing/invalid
+   */
+  async resolveCandidate(relativePath, ext) {
+    const file = path.resolve(
+      this._project.directory,
+      this._htmlFolder,
+      `${relativePath}${ext}`,
+    );
+
+    if (!utils.validatePathSecurity(file, this._project.directory)) {
+      return null;
+    }
+
+    try {
+      const stats = await lstat(file);
+      if (stats.isFile()) {
+        return file;
+      }
+    } catch (e) {
+      // not found
+    }
+    return null;
+  }
+
+  /**
    * Resolves which HTML file to serve from the HTML folder
    * @param {string} relativePath path relative to HTML folder
    * @returns {Promise<{file: string, isPlain: boolean}|null>} resolved file info or null
@@ -220,48 +249,16 @@ export class HelixServer extends BaseServer {
       return null;
     }
 
-    const [firstExt, secondExt] = this._preferPlainHtml
+    const candidates = this._preferPlainHtml
       ? ['.plain.html', '.html']
       : ['.html', '.plain.html'];
 
-    // Try first extension
-    const firstFile = path.resolve(
-      this._project.directory,
-      this._htmlFolder,
-      `${relativePath}${firstExt}`,
-    );
-
-    if (!utils.validatePathSecurity(firstFile, this._project.directory)) {
-      return null;
-    }
-
-    try {
-      const stats = await lstat(firstFile);
-      if (stats.isFile()) {
-        return { file: firstFile, isPlain: firstExt === '.plain.html' };
+    for (const ext of candidates) {
+      // eslint-disable-next-line no-await-in-loop
+      const file = await this.resolveCandidate(relativePath, ext);
+      if (file) {
+        return { file, isPlain: ext === '.plain.html' };
       }
-    } catch (e) {
-      // first extension not found, try second
-    }
-
-    // Try second extension
-    const secondFile = path.resolve(
-      this._project.directory,
-      this._htmlFolder,
-      `${relativePath}${secondExt}`,
-    );
-
-    if (!utils.validatePathSecurity(secondFile, this._project.directory)) {
-      return null;
-    }
-
-    try {
-      const stats = await lstat(secondFile);
-      if (stats.isFile()) {
-        return { file: secondFile, isPlain: secondExt === '.plain.html' };
-      }
-    } catch (e) {
-      // Neither exists
     }
 
     return null;
