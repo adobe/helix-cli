@@ -26,6 +26,11 @@ import { transformContentMetadataHtml } from '../content/content-metadata-html.j
 const LOGIN_ROUTE = '/.aem/cli/login';
 const LOGIN_ACK_ROUTE = '/.aem/cli/login/ack';
 
+// HTML folder candidate extensions, in lookup order.
+// First entry takes precedence when multiple candidates exist on disk.
+const HTML_FOLDER_EXTENSIONS = ['.html', '.plain.html'];
+const HTML_FOLDER_EXTENSIONS_PREFER_PLAIN = [...HTML_FOLDER_EXTENSIONS].reverse();
+
 /**
  * @param {import('express').Request} req
  * @param {import('./RequestContext.js').default} ctx
@@ -250,8 +255,8 @@ export class HelixServer extends BaseServer {
     }
 
     const candidates = this._preferPlainHtml
-      ? ['.plain.html', '.html']
-      : ['.html', '.plain.html'];
+      ? HTML_FOLDER_EXTENSIONS_PREFER_PLAIN
+      : HTML_FOLDER_EXTENSIONS;
 
     for (const ext of candidates) {
       // eslint-disable-next-line no-await-in-loop
