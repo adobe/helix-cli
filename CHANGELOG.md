@@ -1,3 +1,10 @@
+## [16.19.8](https://github.com/adobe/helix-cli/compare/v16.19.7...v16.19.8) (2026-05-20)
+
+
+### Bug Fixes
+
+* Add --preferPlainHtml flag ([#2728](https://github.com/adobe/helix-cli/issues/2728)) ([0ae790f](https://github.com/adobe/helix-cli/commit/0ae790fdc9ac5a36385ef2efa9e9f717c3321eaa))
+
 ## [16.19.7](https://github.com/adobe/helix-cli/compare/v16.19.6...v16.19.7) (2026-05-19)
 
 
