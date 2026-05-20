@@ -99,6 +99,12 @@ Plain HTML files contain only the main content and an optional metadata block. T
 - Merges in `head.html` content
 - The metadata block is removed from the rendered content and converted to meta tags in the `<head>`.
 
+When a request resolves to `<stem>`, the CLI looks up `<stem>.html` first and falls back to `<stem>.plain.html`. Pass `--preferPlainHtml` to reverse this order — useful when you keep both files side-by-side and want the plain version to win:
+
+```
+$ aem up --html-folder drafts --preferPlainHtml
+```
+
 ### setting up a self-signed cert for using https
 
 1. create the certificate
@@ -188,6 +194,7 @@ If present, `ALL_PROXY` is used as fallback if there is no other match.
 | `--forward-browser-logs` | `AEM_FORWARD_BROWSER_LOGS` | `false` | Forward browser console logs to terminal.            |
 | `--html-folder`   | `AEM_HTML_FOLDER`   | undefined   | Serve HTML files from folder without extensions. |
 | `--html-mount`    | `AEM_HTML_MOUNT`    | `/FOLDER`   | URL path where html-folder files are served. |
+| `--prefer-plain-html` | `AEM_PREFER_PLAIN_HTML` | `false` | Prefer `<stem>.plain.html` over `<stem>.html` when both exist. |
 | `--open`          | `AEM_OPEN`          | `/`         | Open a browser window at specified path after server start. |
 | `--no-open`       | `AEM_NO_OPEN`       | `false`     | Disable automatic opening of browser window.                |
 | `--tls-key`       | `AEM_TLS_KEY`       | undefined   | Path to .key file (for enabling TLS)                        |
