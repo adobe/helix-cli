@@ -1,3 +1,38 @@
+## [16.19.7](https://github.com/adobe/helix-cli/compare/v16.19.6...v16.19.7) (2026-05-19)
+
+
+### Bug Fixes
+
+* **deps:** update dependency uuid to v14 ([#2720](https://github.com/adobe/helix-cli/issues/2720)) ([659f919](https://github.com/adobe/helix-cli/commit/659f919c8b4df9c1fad46bd5e45624d09a662c89))
+
+## [16.19.6](https://github.com/adobe/helix-cli/compare/v16.19.5...v16.19.6) (2026-05-19)
+
+
+### Bug Fixes
+
+* **deps:** update adobe fixes ([#2727](https://github.com/adobe/helix-cli/issues/2727)) ([8eab1a7](https://github.com/adobe/helix-cli/commit/8eab1a74e75d835fed29ac7b6f96ba7621b6017a))
+
+## [16.19.5](https://github.com/adobe/helix-cli/compare/v16.19.4...v16.19.5) (2026-05-19)
+
+
+### Bug Fixes
+
+* **deps:** update external fixes ([#2726](https://github.com/adobe/helix-cli/issues/2726)) ([f75e2cd](https://github.com/adobe/helix-cli/commit/f75e2cdec8dbe7c91d0504f6d2efe659a3218798))
+
+## [16.19.4](https://github.com/adobe/helix-cli/compare/v16.19.3...v16.19.4) (2026-05-12)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @adobe/helix-shared-config to v11.1.23 ([#2723](https://github.com/adobe/helix-cli/issues/2723)) ([cd85f27](https://github.com/adobe/helix-cli/commit/cd85f27e1f61947148913d62fe3bf2d57be3f723))
+
+## [16.19.3](https://github.com/adobe/helix-cli/compare/v16.19.2...v16.19.3) (2026-05-11)
+
+
+### Bug Fixes
+
+* **deps:** update external fixes ([#2722](https://github.com/adobe/helix-cli/issues/2722)) ([aaf998f](https://github.com/adobe/helix-cli/commit/aaf998f1d130c4a36428a3277ea9d1a516cb6050))
+
 ## [16.19.2](https://github.com/adobe/helix-cli/compare/v16.19.1...v16.19.2) (2026-05-11)
 
 
