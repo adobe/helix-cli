@@ -26,6 +26,11 @@ import { transformContentMetadataHtml } from '../content/content-metadata-html.j
 const LOGIN_ROUTE = '/.aem/cli/login';
 const LOGIN_ACK_ROUTE = '/.aem/cli/login/ack';
 
+// HTML folder candidate extensions, in lookup order.
+// First entry takes precedence when multiple candidates exist on disk.
+const HTML_FOLDER_EXTENSIONS = ['.html', '.plain.html'];
+const HTML_FOLDER_EXTENSIONS_PREFER_PLAIN = [...HTML_FOLDER_EXTENSIONS].reverse();
+
 /**
  * @param {import('express').Request} req
  * @param {import('./RequestContext.js').default} ctx
@@ -89,6 +94,11 @@ export class HelixServer extends BaseServer {
     this._htmlFolder = folder;
     this._htmlMount = mount;
     this._mountPrefix = mount.endsWith('/') ? mount : `${mount}/`;
+    return this;
+  }
+
+  withPreferPlainHtml(value) {
+    this._preferPlainHtml = value;
     return this;
   }
 
@@ -200,59 +210,54 @@ export class HelixServer extends BaseServer {
   }
 
   /**
+   * Resolves a candidate file inside the HTML folder, returning its absolute path
+   * if it exists and passes the security check, or null otherwise.
+   * @param {string} relativePath path relative to HTML folder
+   * @returns {Promise<string|null>} absolute path, or null if missing/invalid
+   */
+  async resolveCandidate(relativePath) {
+    const file = path.resolve(
+      this._project.directory,
+      this._htmlFolder,
+      relativePath,
+    );
+
+    if (!utils.validatePathSecurity(file, this._project.directory)) {
+      return null;
+    }
+
+    try {
+      const stats = await lstat(file);
+      if (stats.isFile()) {
+        return file;
+      }
+    } catch (e) {
+      // not found
+    }
+    return null;
+  }
+
+  /**
    * Resolves which HTML file to serve from the HTML folder
    * @param {string} relativePath path relative to HTML folder
    * @returns {Promise<{file: string, isPlain: boolean}|null>} resolved file info or null
    */
   async resolveHtmlFolderFile(relativePath) {
-    // Security check: prevent path traversal with /../ anywhere in the path
-    if (relativePath.includes('/../')) {
-      return null;
-    }
-
     // Don't process if it already has an extension
     if (relativePath.includes('.')) {
       return null;
     }
 
-    // Try .html first
-    const htmlFile = path.resolve(
-      this._project.directory,
-      this._htmlFolder,
-      `${relativePath}.html`,
-    );
+    const candidates = this._preferPlainHtml
+      ? HTML_FOLDER_EXTENSIONS_PREFER_PLAIN
+      : HTML_FOLDER_EXTENSIONS;
 
-    if (!utils.validatePathSecurity(htmlFile, this._project.directory)) {
-      return null;
-    }
-
-    try {
-      const stats = await lstat(htmlFile);
-      if (stats.isFile()) {
-        return { file: htmlFile, isPlain: false };
+    for (const ext of candidates) {
+      // eslint-disable-next-line no-await-in-loop
+      const file = await this.resolveCandidate(`${relativePath}${ext}`);
+      if (file) {
+        return { file, isPlain: ext === '.plain.html' };
       }
-    } catch (e) {
-      // .html not found, try .plain.html
-    }
-
-    // Try .plain.html
-    const plainHtmlFile = path.resolve(
-      this._project.directory,
-      this._htmlFolder,
-      `${relativePath}.plain.html`,
-    );
-
-    if (!utils.validatePathSecurity(plainHtmlFile, this._project.directory)) {
-      return null;
-    }
-
-    try {
-      const stats = await lstat(plainHtmlFile);
-      if (stats.isFile()) {
-        return { file: plainHtmlFile, isPlain: true };
-      }
-    } catch (e) {
-      // Neither exists
     }
 
     return null;

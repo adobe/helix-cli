@@ -54,6 +54,7 @@ describe('hlx up', () => {
     mockUp.withSiteToken.returnsThis();
     mockUp.withHtmlFolder.returnsThis();
     mockUp.withHtmlMount.returnsThis();
+    mockUp.withPreferPlainHtml.returnsThis();
     mockUp.run.returnsThis();
     cli = (await new CLI().initCommands()).withCommandExecutor('up', mockUp);
   });
@@ -188,6 +189,24 @@ describe('hlx up', () => {
   it('aem up can use htmlFolder camelCase option', async () => {
     await cli.run(['up', '--htmlFolder', 'drafts']);
     sinon.assert.calledWith(mockUp.withHtmlFolder, 'drafts');
+    sinon.assert.calledOnce(mockUp.run);
+  });
+
+  it('aem up can set --prefer-plain-html', async () => {
+    await cli.run(['up', '--prefer-plain-html']);
+    sinon.assert.calledWith(mockUp.withPreferPlainHtml, true);
+    sinon.assert.calledOnce(mockUp.run);
+  });
+
+  it('aem up can use preferPlainHtml camelCase option', async () => {
+    await cli.run(['up', '--preferPlainHtml']);
+    sinon.assert.calledWith(mockUp.withPreferPlainHtml, true);
+    sinon.assert.calledOnce(mockUp.run);
+  });
+
+  it('aem up defaults --prefer-plain-html to false', async () => {
+    await cli.run(['up']);
+    sinon.assert.calledWith(mockUp.withPreferPlainHtml, false);
     sinon.assert.calledOnce(mockUp.run);
   });
 });

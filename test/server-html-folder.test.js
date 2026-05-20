@@ -302,6 +302,73 @@ describe('Helix Server - HTML Folder', () => {
     }
   });
 
+  it('with --prefer-plain-html, .plain.html takes precedence over .html', async () => {
+    const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
+
+    // Create drafts folder with both .html and .plain.html
+    const draftsFolder = path.join(cwd, 'drafts');
+    await fs.mkdir(draftsFolder, { recursive: true });
+    await fs.writeFile(path.join(draftsFolder, 'priority.html'), '<html><body>Regular HTML</body></html>');
+    await fs.writeFile(path.join(draftsFolder, 'priority.plain.html'), '<p>Plain HTML</p>');
+
+    // Mock the remote head.html request (needed when serving .plain.html)
+    nock('https://main--foo--bar.aem.page')
+      .get('/head.html')
+      .reply(404);
+
+    const project = new HelixProject()
+      .withCwd(cwd)
+      .withLogger(console)
+      .withHttpPort(0)
+      .withProxyUrl('https://main--foo--bar.aem.page/')
+      .withHtmlFolder('drafts')
+      .withPreferPlainHtml(true);
+
+    await project.init();
+    try {
+      await project.start();
+
+      const response = await fetch(`http://127.0.0.1:${project.server.port}/drafts/priority`);
+      assert.equal(response.status, 200);
+
+      const content = await response.text();
+      assert.ok(content.includes('<p>Plain HTML</p>'), 'Should serve .plain.html content');
+      assert.ok(!content.includes('Regular HTML'), 'Should not serve .html file');
+    } finally {
+      await project.stop();
+    }
+  });
+
+  it('with --prefer-plain-html, falls back to .html when .plain.html missing', async () => {
+    const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
+
+    // Only .html exists, no .plain.html sibling
+    const draftsFolder = path.join(cwd, 'drafts');
+    await fs.mkdir(draftsFolder, { recursive: true });
+    await fs.writeFile(path.join(draftsFolder, 'fallback.html'), '<html><body>Regular HTML</body></html>');
+
+    const project = new HelixProject()
+      .withCwd(cwd)
+      .withLogger(console)
+      .withHttpPort(0)
+      .withProxyUrl('https://main--foo--bar.aem.page/')
+      .withHtmlFolder('drafts')
+      .withPreferPlainHtml(true);
+
+    await project.init();
+    try {
+      await project.start();
+
+      const response = await fetch(`http://127.0.0.1:${project.server.port}/drafts/fallback`);
+      assert.equal(response.status, 200);
+
+      const content = await response.text();
+      assert.ok(content.includes('Regular HTML'), 'Should serve .html file as fallback');
+    } finally {
+      await project.stop();
+    }
+  });
+
   it('.plain.html files support live reload injection', async () => {
     const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
 
@@ -1568,6 +1635,69 @@ describe('Helix Server - HTML Folder', () => {
       } finally {
         await project.stop();
       }
+    });
+  });
+
+  describe('resolveCandidate helper', () => {
+    async function makeProject() {
+      const cwd = await setupProject(
+        path.join(__rootdir, 'test', 'fixtures', 'project'),
+        testRoot,
+      );
+      await fs.mkdir(path.join(cwd, 'forms'), { recursive: true });
+      const project = new HelixProject()
+        .withCwd(cwd)
+        .withLogger(console)
+        .withHttpPort(0)
+        .withHtmlFolder('forms');
+      await project.init();
+      return { project, cwd };
+    }
+
+    it('returns the absolute path when an .html candidate exists', async () => {
+      const { project, cwd } = await makeProject();
+      const filePath = path.join(cwd, 'forms', 'foo.html');
+      await fs.writeFile(filePath, '<html></html>');
+
+      const resolved = await project.server.resolveCandidate('foo.html');
+      assert.equal(resolved, filePath);
+    });
+
+    it('returns the absolute path when a .plain.html candidate exists', async () => {
+      const { project, cwd } = await makeProject();
+      const filePath = path.join(cwd, 'forms', 'foo.plain.html');
+      await fs.writeFile(filePath, '<h1>plain</h1>');
+
+      const resolved = await project.server.resolveCandidate('foo.plain.html');
+      assert.equal(resolved, filePath);
+    });
+
+    it('returns null when the candidate file does not exist', async () => {
+      const { project } = await makeProject();
+      assert.equal(await project.server.resolveCandidate('missing.html'), null);
+      assert.equal(await project.server.resolveCandidate('missing.plain.html'), null);
+    });
+
+    it('does not fall back to the .plain.html sibling', async () => {
+      const { project, cwd } = await makeProject();
+      await fs.writeFile(path.join(cwd, 'forms', 'foo.plain.html'), '<h1>plain</h1>');
+
+      const resolved = await project.server.resolveCandidate('foo.html');
+      assert.equal(resolved, null);
+    });
+
+    it('returns null when the candidate path is a directory', async () => {
+      const { project, cwd } = await makeProject();
+      await fs.mkdir(path.join(cwd, 'forms', 'foo.html'), { recursive: true });
+
+      const resolved = await project.server.resolveCandidate('foo.html');
+      assert.equal(resolved, null);
+    });
+
+    it('returns null when the resolved path escapes the project directory', async () => {
+      const { project } = await makeProject();
+      const resolved = await project.server.resolveCandidate('../../etc/passwd.html');
+      assert.equal(resolved, null);
     });
   });
 });
