@@ -212,15 +212,14 @@ export class HelixServer extends BaseServer {
   /**
    * Resolves a candidate file inside the HTML folder, returning its absolute path
    * if it exists and passes the security check, or null otherwise.
-   * @param {string} relativePath path relative to HTML folder (without extension)
-   * @param {string} ext extension to append (e.g. '.html', '.plain.html')
+   * @param {string} relativePath path relative to HTML folder
    * @returns {Promise<string|null>} absolute path, or null if missing/invalid
    */
-  async resolveCandidate(relativePath, ext) {
+  async resolveCandidate(relativePath) {
     const file = path.resolve(
       this._project.directory,
       this._htmlFolder,
-      `${relativePath}${ext}`,
+      relativePath,
     );
 
     if (!utils.validatePathSecurity(file, this._project.directory)) {
@@ -244,11 +243,6 @@ export class HelixServer extends BaseServer {
    * @returns {Promise<{file: string, isPlain: boolean}|null>} resolved file info or null
    */
   async resolveHtmlFolderFile(relativePath) {
-    // Security check: prevent path traversal with /../ anywhere in the path
-    if (relativePath.includes('/../')) {
-      return null;
-    }
-
     // Don't process if it already has an extension
     if (relativePath.includes('.')) {
       return null;
@@ -260,7 +254,7 @@ export class HelixServer extends BaseServer {
 
     for (const ext of candidates) {
       // eslint-disable-next-line no-await-in-loop
-      const file = await this.resolveCandidate(relativePath, ext);
+      const file = await this.resolveCandidate(`${relativePath}${ext}`);
       if (file) {
         return { file, isPlain: ext === '.plain.html' };
       }

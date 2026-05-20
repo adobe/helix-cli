@@ -1659,7 +1659,7 @@ describe('Helix Server - HTML Folder', () => {
       const filePath = path.join(cwd, 'forms', 'foo.html');
       await fs.writeFile(filePath, '<html></html>');
 
-      const resolved = await project.server.resolveCandidate('foo', '.html');
+      const resolved = await project.server.resolveCandidate('foo.html');
       assert.equal(resolved, filePath);
     });
 
@@ -1668,21 +1668,21 @@ describe('Helix Server - HTML Folder', () => {
       const filePath = path.join(cwd, 'forms', 'foo.plain.html');
       await fs.writeFile(filePath, '<h1>plain</h1>');
 
-      const resolved = await project.server.resolveCandidate('foo', '.plain.html');
+      const resolved = await project.server.resolveCandidate('foo.plain.html');
       assert.equal(resolved, filePath);
     });
 
     it('returns null when the candidate file does not exist', async () => {
       const { project } = await makeProject();
-      assert.equal(await project.server.resolveCandidate('missing', '.html'), null);
-      assert.equal(await project.server.resolveCandidate('missing', '.plain.html'), null);
+      assert.equal(await project.server.resolveCandidate('missing.html'), null);
+      assert.equal(await project.server.resolveCandidate('missing.plain.html'), null);
     });
 
     it('does not fall back to the .plain.html sibling', async () => {
       const { project, cwd } = await makeProject();
       await fs.writeFile(path.join(cwd, 'forms', 'foo.plain.html'), '<h1>plain</h1>');
 
-      const resolved = await project.server.resolveCandidate('foo', '.html');
+      const resolved = await project.server.resolveCandidate('foo.html');
       assert.equal(resolved, null);
     });
 
@@ -1690,13 +1690,13 @@ describe('Helix Server - HTML Folder', () => {
       const { project, cwd } = await makeProject();
       await fs.mkdir(path.join(cwd, 'forms', 'foo.html'), { recursive: true });
 
-      const resolved = await project.server.resolveCandidate('foo', '.html');
+      const resolved = await project.server.resolveCandidate('foo.html');
       assert.equal(resolved, null);
     });
 
     it('returns null when the resolved path escapes the project directory', async () => {
       const { project } = await makeProject();
-      const resolved = await project.server.resolveCandidate('../../etc/passwd', '.html');
+      const resolved = await project.server.resolveCandidate('../../etc/passwd.html');
       assert.equal(resolved, null);
     });
   });
