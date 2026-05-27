@@ -459,22 +459,13 @@ export class HelixServer extends BaseServer {
         try {
           if (contentFilePath.endsWith('.html')) {
             // readFile throws EISDIR for directories and ENOENT for missing files
-            let htmlContent;
-            let servedFilePath = contentFilePath;
-            let isPlainFallback = false;
-            try {
-              htmlContent = await readFile(contentFilePath, 'utf-8');
-            } catch (e) {
-              // .plain.html is a virtual URL convention — no such file exists on disk.
-              // Fall back to the stored .html file and serve it as a raw fragment.
-              if (e.code === 'ENOENT' && contentFilePath.endsWith('.plain.html')) {
-                servedFilePath = `${contentFilePath.slice(0, -'.plain.html'.length)}.html`;
-                htmlContent = await readFile(servedFilePath, 'utf-8');
-                isPlainFallback = true;
-              } else {
-                throw e;
-              }
-            }
+            // .plain.html is a virtual URL convention — AEM never stores .plain.html files,
+            // so always read the corresponding .html file and serve the <main> fragment.
+            const isPlainFallback = contentFilePath.endsWith('.plain.html');
+            const servedFilePath = isPlainFallback
+              ? `${contentFilePath.slice(0, -'.plain.html'.length)}.html`
+              : contentFilePath;
+            let htmlContent = await readFile(servedFilePath, 'utf-8');
             if (isPlainFallback) {
               // .plain.html callers want the raw fragment — extract <main> content
               if (liveReload) {

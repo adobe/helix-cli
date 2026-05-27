@@ -1378,13 +1378,7 @@ describe('Helix Server', () => {
         const resp = await getFetch()(`http://127.0.0.1:${project.server.port}/foo.plain.html`);
         assert.strictEqual(resp.status, 200);
         const body = await resp.text();
-        // Must return the inner fragment only — no document structure
-        assert.ok(body.includes('<a href="/">Home</a>'), 'body should contain the fragment content');
-        assert.ok(!body.includes('<head>'), '.plain.html response must not contain a <head> element');
-        assert.ok(!body.includes('<body>'), '.plain.html response must not contain a <body> element');
-        assert.ok(!body.includes('<main>'), '.plain.html response must not contain a <main> element');
-        assert.ok(!body.includes('<header>'), '.plain.html response must not contain a <header> element');
-        assert.ok(!body.includes('<footer>'), '.plain.html response must not contain a <footer> element');
+        assert.strictEqual(body, innerFragment);
       } finally {
         await project.stop();
       }
