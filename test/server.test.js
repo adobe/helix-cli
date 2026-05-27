@@ -1348,5 +1348,33 @@ describe('Helix Server', () => {
         await project.stop();
       }
     });
+
+    it('serves .plain.html from content/ by falling back to the .html file', async () => {
+      const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
+      await fse.ensureDir(path.join(cwd, CONTENT_DIR));
+      // Only content/foo.html exists on disk — no content/foo.plain.html
+      await fse.writeFile(
+        path.join(cwd, CONTENT_DIR, 'foo.html'),
+        '<body><header></header><main><p>plain fragment</p></main><footer></footer></body>',
+      );
+
+      // Proxy must not be called — if it is, the test will fail via nock
+      const project = new HelixProject()
+        .withCwd(cwd)
+        .withProxyUrl('http://main--foo--bar.aem.page')
+        .withHttpPort(0);
+      await project.init();
+      try {
+        await project.start();
+        const resp = await getFetch()(`http://127.0.0.1:${project.server.port}/foo.plain.html`);
+        assert.strictEqual(resp.status, 200);
+        const body = await resp.text();
+        // Should return the raw fragment — no <head> wrapping, no head.html injection
+        assert.ok(body.includes('plain fragment'), 'body should contain the fragment content');
+        assert.ok(!body.includes('<head>'), '.plain.html response must not contain a <head> element');
+      } finally {
+        await project.stop();
+      }
+    });
   });
 });

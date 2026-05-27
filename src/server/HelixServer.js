@@ -459,7 +459,35 @@ export class HelixServer extends BaseServer {
         try {
           if (contentFilePath.endsWith('.html')) {
             // readFile throws EISDIR for directories and ENOENT for missing files
-            let htmlContent = await readFile(contentFilePath, 'utf-8');
+            let htmlContent;
+            let servedFilePath = contentFilePath;
+            let isPlainFallback = false;
+            try {
+              htmlContent = await readFile(contentFilePath, 'utf-8');
+            } catch (e) {
+              // .plain.html is a virtual URL convention — no such file exists on disk.
+              // Fall back to the stored .html file and serve it as a raw fragment.
+              if (e.code === 'ENOENT' && contentFilePath.endsWith('.plain.html')) {
+                servedFilePath = `${contentFilePath.slice(0, -'.plain.html'.length)}.html`;
+                htmlContent = await readFile(servedFilePath, 'utf-8');
+                isPlainFallback = true;
+              } else {
+                throw e;
+              }
+            }
+            if (isPlainFallback) {
+              // .plain.html callers want the raw body fragment — skip head wrapping
+              if (liveReload) {
+                liveReload.registerFile(ctx.requestId, servedFilePath);
+              }
+              res.set({
+                'content-type': 'text/html; charset=utf-8',
+                'access-control-allow-origin': '*',
+              });
+              res.send(htmlContent);
+              log.debug(`${pfx}served from ${CONTENT_DIR}/: ${ctx.path}`);
+              return;
+            }
             const absolutePageUrl = absolutePageUrlFromRequest(req, ctx);
             if (this._project.metadataSheet) {
               this._project.metadataSheet.setCookie(req.headers.cookie || '');
