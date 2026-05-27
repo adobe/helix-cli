@@ -1353,9 +1353,18 @@ describe('Helix Server', () => {
       const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
       await fse.ensureDir(path.join(cwd, CONTENT_DIR));
       // Only content/foo.html exists on disk — no content/foo.plain.html
+      // The stored .html file is a full document; .plain.html must return only the inner fragment
+      const innerFragment = `<div>
+  <p><a href="/">Home</a></p>
+</div>
+<div>
+  <ul>
+    <li><a href="/about">About</a></li>
+  </ul>
+</div>`;
       await fse.writeFile(
         path.join(cwd, CONTENT_DIR, 'foo.html'),
-        '<body><header></header><main><p>plain fragment</p></main><footer></footer></body>',
+        `<html><head><title>Foo</title></head><body><header></header><main>${innerFragment}</main><footer></footer></body></html>`,
       );
 
       // Proxy must not be called — if it is, the test will fail via nock
@@ -1369,9 +1378,13 @@ describe('Helix Server', () => {
         const resp = await getFetch()(`http://127.0.0.1:${project.server.port}/foo.plain.html`);
         assert.strictEqual(resp.status, 200);
         const body = await resp.text();
-        // Should return the raw fragment — no <head> wrapping, no head.html injection
-        assert.ok(body.includes('plain fragment'), 'body should contain the fragment content');
+        // Must return the inner fragment only — no document structure
+        assert.ok(body.includes('<a href="/">Home</a>'), 'body should contain the fragment content');
         assert.ok(!body.includes('<head>'), '.plain.html response must not contain a <head> element');
+        assert.ok(!body.includes('<body>'), '.plain.html response must not contain a <body> element');
+        assert.ok(!body.includes('<main>'), '.plain.html response must not contain a <main> element');
+        assert.ok(!body.includes('<header>'), '.plain.html response must not contain a <header> element');
+        assert.ok(!body.includes('<footer>'), '.plain.html response must not contain a <footer> element');
       } finally {
         await project.stop();
       }

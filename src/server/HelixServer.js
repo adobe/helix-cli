@@ -476,15 +476,16 @@ export class HelixServer extends BaseServer {
               }
             }
             if (isPlainFallback) {
-              // .plain.html callers want the raw body fragment — skip head wrapping
+              // .plain.html callers want the raw fragment — extract <main> content
               if (liveReload) {
                 liveReload.registerFile(ctx.requestId, servedFilePath);
               }
+              const fragment = utils.extractMainContent(htmlContent);
               res.set({
                 'content-type': 'text/html; charset=utf-8',
                 'access-control-allow-origin': '*',
               });
-              res.send(htmlContent);
+              res.send(fragment);
               log.debug(`${pfx}served from ${CONTENT_DIR}/: ${ctx.path}`);
               return;
             }
