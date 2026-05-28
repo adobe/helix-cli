@@ -800,7 +800,9 @@ window.LiveReloadOptions = {
   extractMainContent(html) {
     const ast = htmlParser.parse(html);
     const main = select('main', ast);
-    if (!main) return html;
+    if (!main) {
+      return html;
+    }
     return main.children.map((child) => toHtml(child)).join('');
   },
 };
