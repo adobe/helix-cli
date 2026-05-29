@@ -467,7 +467,6 @@ export class HelixServer extends BaseServer {
               : contentFilePath;
             let htmlContent = await readFile(servedFilePath, 'utf-8');
             if (isPlainFallback) {
-              // .plain.html callers want the raw fragment — extract <main> content
               if (liveReload) {
                 liveReload.registerFile(ctx.requestId, servedFilePath);
               }
