@@ -321,4 +321,31 @@ describe('Utils Test', () => {
       test('<a href="https://www.example.com">https://www.example.com</a>', '<a href="/">https://www.example.com</a>');
     });
   });
+
+  describe('extractMainContent', () => {
+    it('extracts children of <main> from a full document', () => {
+      const html = '<html><head><title>Test</title></head><body><header></header><main><div>hello</div></main><footer></footer></body></html>';
+      assert.strictEqual(utils.extractMainContent(html), '<div>hello</div>');
+    });
+
+    it('returns empty string for an empty <main>', () => {
+      const html = '<html><head></head><body><main></main></body></html>';
+      assert.strictEqual(utils.extractMainContent(html), '');
+    });
+
+    it('returns the original html when no <main> is present', () => {
+      const html = '<html><head></head><body><div>no main here</div></body></html>';
+      assert.strictEqual(utils.extractMainContent(html), html);
+    });
+
+    it('preserves nested markup inside <main>', () => {
+      const html = '<html><head></head><body><main><div><p><a href="/about">About</a></p></div><ul><li>item</li></ul></main></body></html>';
+      assert.strictEqual(utils.extractMainContent(html), '<div><p><a href="/about">About</a></p></div><ul><li>item</li></ul>');
+    });
+
+    it('preserves whitespace-only text content inside <main>', () => {
+      const html = '<html><head></head><body><main>  \n  </main></body></html>';
+      assert.strictEqual(utils.extractMainContent(html), '  \n  ');
+    });
+  });
 });

@@ -1348,5 +1348,40 @@ describe('Helix Server', () => {
         await project.stop();
       }
     });
+
+    it('serves .plain.html from content/ by falling back to the .html file', async () => {
+      const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
+      await fse.ensureDir(path.join(cwd, CONTENT_DIR));
+      // Only content/foo.html exists on disk — no content/foo.plain.html
+      // The stored .html file is a full document; .plain.html must return only the inner fragment
+      const innerFragment = `<div>
+  <p><a href="/">Home</a></p>
+</div>
+<div>
+  <ul>
+    <li><a href="/about">About</a></li>
+  </ul>
+</div>`;
+      await fse.writeFile(
+        path.join(cwd, CONTENT_DIR, 'foo.html'),
+        `<html><head><title>Foo</title></head><body><header></header><main>${innerFragment}</main><footer></footer></body></html>`,
+      );
+
+      // Proxy must not be called — if it is, the test will fail via nock
+      const project = new HelixProject()
+        .withCwd(cwd)
+        .withProxyUrl('http://main--foo--bar.aem.page')
+        .withHttpPort(0);
+      await project.init();
+      try {
+        await project.start();
+        const resp = await getFetch()(`http://127.0.0.1:${project.server.port}/foo.plain.html`);
+        assert.strictEqual(resp.status, 200);
+        const body = await resp.text();
+        assert.strictEqual(body, innerFragment);
+      } finally {
+        await project.stop();
+      }
+    });
   });
 });

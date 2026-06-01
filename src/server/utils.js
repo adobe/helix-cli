@@ -19,11 +19,14 @@ import { fileURLToPath } from 'url';
 import cookie from 'cookie';
 import { unified } from 'unified';
 import rehypeParse from 'rehype-parse';
+import { select } from 'hast-util-select';
+import { toHtml } from 'hast-util-to-html';
 import { getFetch } from '../fetch-utils.js';
 
 // Load console interceptor script at startup
 // eslint-disable-next-line no-underscore-dangle
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const htmlParser = unified().use(rehypeParse);
 const CONSOLE_INTERCEPTOR = readFileSync(
   path.join(__dirname, '../../packages/browser-injectables/src/console-interceptor.js'),
   'utf-8',
@@ -786,6 +789,21 @@ window.LiveReloadOptions = {
   wrapPlainHtml(content, headHtml, metaTags) {
     const fullHead = headHtml + metaTags;
     return `<html><head>${fullHead}</head><body><header></header><main>${content}</main><footer></footer></body></html>`;
+  },
+
+  /**
+   * Extracts the innerHTML of the <main> element from a full HTML document.
+   * Returns the original content unchanged if no <main> is found.
+   * @param {string} html full HTML document
+   * @returns {string} innerHTML of <main>, or original html if no <main> present
+   */
+  extractMainContent(html) {
+    const ast = htmlParser.parse(html);
+    const main = select('main', ast);
+    if (!main) {
+      return html;
+    }
+    return main.children.map((child) => toHtml(child)).join('');
   },
 };
 

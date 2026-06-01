@@ -459,7 +459,26 @@ export class HelixServer extends BaseServer {
         try {
           if (contentFilePath.endsWith('.html')) {
             // readFile throws EISDIR for directories and ENOENT for missing files
-            let htmlContent = await readFile(contentFilePath, 'utf-8');
+            // .plain.html is a virtual URL convention — AEM never stores .plain.html files,
+            // so always read the corresponding .html file and serve the <main> fragment.
+            const isPlainFallback = contentFilePath.endsWith('.plain.html');
+            const servedFilePath = isPlainFallback
+              ? `${contentFilePath.slice(0, -'.plain.html'.length)}.html`
+              : contentFilePath;
+            let htmlContent = await readFile(servedFilePath, 'utf-8');
+            if (isPlainFallback) {
+              if (liveReload) {
+                liveReload.registerFile(ctx.requestId, servedFilePath);
+              }
+              const fragment = utils.extractMainContent(htmlContent);
+              res.set({
+                'content-type': 'text/html; charset=utf-8',
+                'access-control-allow-origin': '*',
+              });
+              res.send(fragment);
+              log.debug(`${pfx}served from ${CONTENT_DIR}/: ${ctx.path}`);
+              return;
+            }
             const absolutePageUrl = absolutePageUrlFromRequest(req, ctx);
             if (this._project.metadataSheet) {
               this._project.metadataSheet.setCookie(req.headers.cookie || '');
