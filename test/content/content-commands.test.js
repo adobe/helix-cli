@@ -219,7 +219,7 @@ describe('push()', () => {
     assert.ok(cmd.description && cmd.description.length > 0);
   });
 
-  it('has a builder that registers --token, --path, --force, --dry-run options', () => {
+  it('has a builder that registers --token, --path, --force, --dry-run, --preview, --publish options', () => {
     const cmd = push();
     const registered = {};
     const chainable = {
@@ -234,6 +234,8 @@ describe('push()', () => {
     assert.ok('force' in registered);
     assert.ok('dry-run' in registered);
     assert.ok('path' in registered);
+    assert.ok('preview' in registered);
+    assert.ok('publish' in registered);
   });
 
   it('executor setter works', () => {
@@ -249,16 +251,20 @@ describe('push()', () => {
         withPath: () => ({
           withForce: () => ({
             withDryRun: () => ({
-              run: async () => {
-                called = true;
-              },
+              withPreview: () => ({
+                withPublish: () => ({
+                  run: async () => {
+                    called = true;
+                  },
+                }),
+              }),
             }),
           }),
         }),
       }),
     };
     await cmd.handler({
-      token: 't', path: null, force: false, dryRun: false,
+      token: 't', path: null, force: false, dryRun: false, preview: false, publish: false,
     });
     assert.strictEqual(called, true);
   });
