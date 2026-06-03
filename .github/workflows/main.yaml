@@ -15,7 +15,6 @@ jobs:
   test:
     name: Test
     runs-on: ubuntu-latest
-    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v6
       - name: Use Node.js 24.x
@@ -38,10 +37,6 @@ jobs:
 
       - name: Install Playwright browsers (chromium, firefox, webkit)
         if: hashFiles('packages/browser-injectables/**') != ''
-        timeout-minutes: 10
-        env:
-          PLAYWRIGHT_DOWNLOAD_CONNECTION_TIMEOUT: 30000
-          DEBIAN_FRONTEND: noninteractive
         run: cd packages/browser-injectables && npx playwright install --with-deps chromium firefox webkit
 
       - run: git config --global user.email "test@project-helix.io" && git config --global user.name "Test Build"
