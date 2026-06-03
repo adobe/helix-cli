@@ -26,7 +26,7 @@ async function makeCloneCommand(testRoot, DaClientClass) {
   const mod = await esmock('../../src/content/clone.cmd.js', {
     '../../src/git-utils.js': {
       default: {
-        getOriginURL: async () => ({ owner: 'myorg', repo: 'myrepo' }),
+        getOriginURL: async () => ({ owner: 'myowner', repo: 'myrepo' }),
       },
     },
     '../../src/content/da-auth.js': {
@@ -150,7 +150,7 @@ describe('CloneCommand', () => {
       await fse.writeFile(path.join(contentDir, 'old-file.txt'), 'old');
 
       const DaClientClass = createDaClientClass({
-        files: [{ path: '/myorg/myrepo/index.html', name: 'index.html', ext: 'html' }],
+        files: [{ path: '/myowner/myrepo/index.html', name: 'index.html', ext: 'html' }],
         sourceContent: '<html>hi</html>',
       });
       const cmd = await makeCloneCommand(testRoot, DaClientClass);
@@ -163,7 +163,7 @@ describe('CloneCommand', () => {
 
     it('downloads files into content/', async () => {
       const DaClientClass = createDaClientClass({
-        files: [{ path: '/myorg/myrepo/page.html', name: 'page.html', ext: 'html' }],
+        files: [{ path: '/myowner/myrepo/page.html', name: 'page.html', ext: 'html' }],
         sourceContent: '<html>page</html>',
       });
       const cmd = await makeCloneCommand(testRoot, DaClientClass);
@@ -176,7 +176,7 @@ describe('CloneCommand', () => {
       assert.strictEqual(content, '<html>page</html>');
     });
 
-    it('writes .da-config.json with org, repo, and rootPath', async () => {
+    it('writes .da-config.json with owner, repo, and rootPath', async () => {
       const cmd = await makeCloneCommand(testRoot, createDaClientClass());
       cmd.withRootPath('/blog');
       await cmd.run();
@@ -184,7 +184,7 @@ describe('CloneCommand', () => {
       const configPath = path.join(testRoot, CONTENT_DIR, '.da-config.json');
       assert.ok(await fse.pathExists(configPath));
       const config = await fse.readJson(configPath);
-      assert.strictEqual(config.org, 'myorg');
+      assert.strictEqual(config.owner, 'myowner');
       assert.strictEqual(config.repo, 'myrepo');
       assert.strictEqual(config.rootPath, '/blog');
     });
@@ -222,7 +222,7 @@ describe('CloneCommand', () => {
 
     it('skips files that return null from getSource', async () => {
       const DaClientClass = createDaClientClass({
-        files: [{ path: '/myorg/myrepo/missing.html', name: 'missing.html', ext: 'html' }],
+        files: [{ path: '/myowner/myrepo/missing.html', name: 'missing.html', ext: 'html' }],
         sourceContent: null,
       });
       const cmd = await makeCloneCommand(testRoot, DaClientClass);
@@ -246,9 +246,9 @@ describe('CloneCommand', () => {
     it('passes root path to listAll', async () => {
       let listedAt;
       const DaClientClass = createDaClientClass({
-        files: [{ path: '/myorg/myrepo/ca/fr_ca/page.html', name: 'page.html', ext: 'html' }],
+        files: [{ path: '/myowner/myrepo/ca/fr_ca/page.html', name: 'page.html', ext: 'html' }],
         sourceContent: '<html>x</html>',
-        onListAll: (org, repo, daPath) => {
+        onListAll: (owner, repo, daPath) => {
           listedAt = daPath;
         },
       });
@@ -259,6 +259,36 @@ describe('CloneCommand', () => {
       assert.ok(await fse.pathExists(path.join(testRoot, CONTENT_DIR, 'ca', 'fr_ca', 'page.html')));
     });
 
+    it('downloads files when git remote has mixed-case owner/repo but DA returns lowercase paths', async () => {
+      const mod = await esmock('../../src/content/clone.cmd.js', {
+        '../../src/git-utils.js': {
+          default: {
+            getOriginURL: async () => ({ owner: 'myOwner', repo: 'MyRepo' }),
+          },
+        },
+        '../../src/content/da-auth.js': {
+          getValidToken: async () => 'mock-token',
+        },
+        '../../src/content/da-api.js': {
+          DaClient: createDaClientClass({
+            files: [{ path: '/myowner/myrepo/page.html', name: 'page.html', ext: 'html' }],
+            sourceContent: '<html>page</html>',
+          }),
+          getContentType: (ext) => `text/${ext}`,
+        },
+      });
+      const Cmd = mod.default;
+      const cmd = new Cmd(makeLogger()).withDirectory(testRoot).withRootPath('/');
+      await cmd.run();
+
+      const localPath = path.join(testRoot, CONTENT_DIR, 'page.html');
+      assert.ok(await fse.pathExists(localPath), 'file should be downloaded despite case mismatch');
+
+      const config = await fse.readJson(path.join(testRoot, CONTENT_DIR, '.da-config.json'));
+      assert.strictEqual(config.owner, 'myowner', 'owner should be stored lowercase');
+      assert.strictEqual(config.repo, 'myrepo', 'repo should be stored lowercase');
+    });
+
     it('refuses large clone without --yes when not interactive', async () => {
       const prevIn = process.stdin.isTTY;
       const prevOut = process.stdout.isTTY;
@@ -267,7 +297,7 @@ describe('CloneCommand', () => {
       try {
         const n = LARGE_CLONE_FILE_THRESHOLD + 1;
         const files = Array.from({ length: n }, (_, i) => ({
-          path: `/myorg/myrepo/f${i}.html`,
+          path: `/myowner/myrepo/f${i}.html`,
           name: `f${i}.html`,
           ext: 'html',
         }));
