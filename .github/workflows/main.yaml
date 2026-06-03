@@ -24,11 +24,22 @@ jobs:
       - run: npm i
 
       # Sub-project setup and testing (conditional)
+      - name: Cache Playwright browsers
+        if: hashFiles('packages/browser-injectables/**') != ''
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ hashFiles('packages/browser-injectables/package-lock.json') }}
+
       - name: Install browser injectable dependencies
         if: hashFiles('packages/browser-injectables/**') != ''
         run: cd packages/browser-injectables && npm ci
 
-      - name: Install Playwright dependencies for browser injectables
+      - name: Install Playwright browsers
+        if: hashFiles('packages/browser-injectables/**') != ''
+        run: cd packages/browser-injectables && npx playwright install
+
+      - name: Install Playwright system dependencies
         if: hashFiles('packages/browser-injectables/**') != ''
         run: cd packages/browser-injectables && npx playwright install-deps
 

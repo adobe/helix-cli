@@ -8,7 +8,7 @@
     "lint": "eslint .",
     "test": "web-test-runner",
     "test:watch": "web-test-runner --watch",
-    "postinstall": "npm run copy-vendor && npx playwright install",
+    "postinstall": "npm run copy-vendor",
     "copy-vendor": "node scripts/copy-vendor.js"
   },
   "devDependencies": {
