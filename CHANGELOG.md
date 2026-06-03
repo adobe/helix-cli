@@ -1,3 +1,12 @@
+## [16.19.12](https://github.com/adobe/helix-cli/compare/v16.19.11...v16.19.12) (2026-06-03)
+
+
+### Bug Fixes
+
+* extract main innerHTML for .plain.html fallback and improve test fixture ([e49ca05](https://github.com/adobe/helix-cli/commit/e49ca059f67da164ff20ad549dbd40590797f911))
+* **lint:** fix curly brace style and install missing dependencies ([e138bf0](https://github.com/adobe/helix-cli/commit/e138bf00f1da5c2c8f542fe56a3a8a86ee63a70c))
+* properly serve .plain.html requests for documents in local content directory ([89d12d5](https://github.com/adobe/helix-cli/commit/89d12d574e7e8a143f32973c4f319f814d814099))
+
 ## [16.19.11](https://github.com/adobe/helix-cli/compare/v16.19.10...v16.19.11) (2026-05-26)
 
 
