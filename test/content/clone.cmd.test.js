@@ -259,6 +259,36 @@ describe('CloneCommand', () => {
       assert.ok(await fse.pathExists(path.join(testRoot, CONTENT_DIR, 'ca', 'fr_ca', 'page.html')));
     });
 
+    it('downloads files when git remote has mixed-case org/repo but DA returns lowercase paths', async () => {
+      const mod = await esmock('../../src/content/clone.cmd.js', {
+        '../../src/git-utils.js': {
+          default: {
+            getOriginURL: async () => ({ owner: 'myOrg', repo: 'MyRepo' }),
+          },
+        },
+        '../../src/content/da-auth.js': {
+          getValidToken: async () => 'mock-token',
+        },
+        '../../src/content/da-api.js': {
+          DaClient: createDaClientClass({
+            files: [{ path: '/myorg/myrepo/page.html', name: 'page.html', ext: 'html' }],
+            sourceContent: '<html>page</html>',
+          }),
+          getContentType: (ext) => `text/${ext}`,
+        },
+      });
+      const Cmd = mod.default;
+      const cmd = new Cmd(makeLogger()).withDirectory(testRoot).withRootPath('/');
+      await cmd.run();
+
+      const localPath = path.join(testRoot, CONTENT_DIR, 'page.html');
+      assert.ok(await fse.pathExists(localPath), 'file should be downloaded despite case mismatch');
+
+      const config = await fse.readJson(path.join(testRoot, CONTENT_DIR, '.da-config.json'));
+      assert.strictEqual(config.org, 'myorg', 'org should be stored lowercase');
+      assert.strictEqual(config.repo, 'myrepo', 'repo should be stored lowercase');
+    });
+
     it('refuses large clone without --yes when not interactive', async () => {
       const prevIn = process.stdin.isTTY;
       const prevOut = process.stdout.isTTY;

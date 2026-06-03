@@ -106,8 +106,8 @@ export default class CloneCommand {
     if (!originUrl) {
       throw new Error('No git remote found. Run `aem content clone` inside an AEM project directory.');
     }
-    const org = originUrl.owner;
-    const { repo } = originUrl;
+    const org = originUrl.owner.toLowerCase();
+    const repo = originUrl.repo.toLowerCase();
     log.info(`Cloning content from da.live: ${org}/${repo}${this._rootPath === '/' ? '' : ` @ ${this._rootPath}`}`);
 
     // 2. Ensure target path is available (do not create content/ until after file count is known)
