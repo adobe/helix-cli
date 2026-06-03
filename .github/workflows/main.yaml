@@ -24,13 +24,20 @@ jobs:
       - run: npm i
 
       # Sub-project setup and testing (conditional)
+      - name: Cache Playwright browsers
+        if: hashFiles('packages/browser-injectables/**') != ''
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ hashFiles('packages/browser-injectables/package-lock.json') }}
+
       - name: Install browser injectable dependencies
         if: hashFiles('packages/browser-injectables/**') != ''
         run: cd packages/browser-injectables && npm ci
 
-      - name: Install Playwright dependencies for browser injectables
+      - name: Install Playwright browsers (chromium, firefox, webkit)
         if: hashFiles('packages/browser-injectables/**') != ''
-        run: cd packages/browser-injectables && npx playwright install-deps
+        run: cd packages/browser-injectables && npx playwright install --with-deps chromium firefox webkit
 
       - run: git config --global user.email "test@project-helix.io" && git config --global user.name "Test Build"
       - run: git config --global protocol.file.allow always
