@@ -35,13 +35,9 @@ jobs:
         if: hashFiles('packages/browser-injectables/**') != ''
         run: cd packages/browser-injectables && npm ci
 
-      - name: Install Playwright browsers
+      - name: Install Playwright browsers (chromium, firefox, webkit)
         if: hashFiles('packages/browser-injectables/**') != ''
-        run: cd packages/browser-injectables && npx playwright install
-
-      - name: Install Playwright system dependencies
-        if: hashFiles('packages/browser-injectables/**') != ''
-        run: cd packages/browser-injectables && npx playwright install-deps
+        run: cd packages/browser-injectables && npx playwright install --with-deps chromium firefox webkit
 
       - run: git config --global user.email "test@project-helix.io" && git config --global user.name "Test Build"
       - run: git config --global protocol.file.allow always
