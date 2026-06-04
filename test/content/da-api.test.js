@@ -176,7 +176,7 @@ describe('DaClient', () => {
     });
 
     it('recurses into folders', async () => {
-      client.list = async (org, repo, daPath) => {
+      client.list = async (org, site, daPath) => {
         if (daPath === '/') {
           return [
             { path: '/org/repo/file.html', name: 'file.html', ext: 'html' },
@@ -202,7 +202,7 @@ describe('DaClient', () => {
 
     it('strips org/repo prefix when computing subfolder path', async () => {
       const listedPaths = [];
-      client.list = async (org, repo, daPath) => {
+      client.list = async (org, site, daPath) => {
         listedPaths.push(daPath);
         if (daPath === '/') {
           return [{ path: '/org/repo/nested', name: 'nested' }];
@@ -215,7 +215,7 @@ describe('DaClient', () => {
 
     it('invokes onDiscovered with cumulative count for each file', async () => {
       const counts = [];
-      client.list = async (org, repo, daPath) => {
+      client.list = async (org, site, daPath) => {
         if (daPath === '/') {
           return [
             { path: '/org/repo/a.html', name: 'a.html', ext: 'html' },

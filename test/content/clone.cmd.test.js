@@ -19,7 +19,12 @@ import git from 'isomorphic-git';
 import esmock from 'esmock';
 import { createTestRoot } from '../utils.js';
 import { makeLogger, createDaClientClass } from './content-test-utils.js';
-import { normalizeDaPath, CONTENT_DIR, LARGE_CLONE_FILE_THRESHOLD } from '../../src/content/content-shared.js';
+import {
+  normalizeDaPath,
+  readContentConfig,
+  CONTENT_DIR,
+  LARGE_CLONE_FILE_THRESHOLD,
+} from '../../src/content/content-shared.js';
 import { DA_SYNCED_REF } from '../../src/content/content-git.js';
 
 async function makeCloneCommand(testRoot, DaClientClass) {
@@ -116,6 +121,50 @@ describe('CloneCommand', () => {
     });
   });
 
+  describe('readContentConfig()', () => {
+    it('reads org and site from current config format', async () => {
+      await fse.writeJson(path.join(testRoot, '.da-config.json'), { org: 'myorg', site: 'mysite', rootPath: '/' });
+      const config = await readContentConfig(testRoot);
+      assert.strictEqual(config.org, 'myorg');
+      assert.strictEqual(config.site, 'mysite');
+      assert.strictEqual(config.rootPath, '/');
+    });
+
+    it('maps legacy owner/repo fields to org/site', async () => {
+      await fse.writeJson(path.join(testRoot, '.da-config.json'), { owner: 'myowner', repo: 'myrepo' });
+      const config = await readContentConfig(testRoot);
+      assert.strictEqual(config.org, 'myowner');
+      assert.strictEqual(config.site, 'myrepo');
+    });
+
+    it('gives org/site priority over owner/repo when both present', async () => {
+      await fse.writeJson(path.join(testRoot, '.da-config.json'), {
+        org: 'daorg', site: 'dasite', owner: 'ghowner', repo: 'ghrepo',
+      });
+      const config = await readContentConfig(testRoot);
+      assert.strictEqual(config.org, 'daorg');
+      assert.strictEqual(config.site, 'dasite');
+    });
+
+    it('normalizes org and site to lowercase', async () => {
+      await fse.writeJson(path.join(testRoot, '.da-config.json'), { org: 'MyOrg', site: 'My-Site' });
+      const config = await readContentConfig(testRoot);
+      assert.strictEqual(config.org, 'myorg');
+      assert.strictEqual(config.site, 'my-site');
+    });
+
+    it('normalizes legacy owner/repo to lowercase', async () => {
+      await fse.writeJson(path.join(testRoot, '.da-config.json'), { owner: 'MyOwner', repo: 'MyRepo' });
+      const config = await readContentConfig(testRoot);
+      assert.strictEqual(config.org, 'myowner');
+      assert.strictEqual(config.site, 'myrepo');
+    });
+
+    it('throws when config file is missing', async () => {
+      await assert.rejects(() => readContentConfig(testRoot), /No config found/);
+    });
+  });
+
   describe('run()', () => {
     it('throws when no git remote found', async () => {
       const mod = await esmock('../../src/content/clone.cmd.js', {
@@ -176,7 +225,7 @@ describe('CloneCommand', () => {
       assert.strictEqual(content, '<html>page</html>');
     });
 
-    it('writes .da-config.json with owner, repo, and rootPath', async () => {
+    it('writes .da-config.json with org, site, and rootPath', async () => {
       const cmd = await makeCloneCommand(testRoot, createDaClientClass());
       cmd.withRootPath('/blog');
       await cmd.run();
@@ -184,8 +233,8 @@ describe('CloneCommand', () => {
       const configPath = path.join(testRoot, CONTENT_DIR, '.da-config.json');
       assert.ok(await fse.pathExists(configPath));
       const config = await fse.readJson(configPath);
-      assert.strictEqual(config.owner, 'myowner');
-      assert.strictEqual(config.repo, 'myrepo');
+      assert.strictEqual(config.org, 'myowner');
+      assert.strictEqual(config.site, 'myrepo');
       assert.strictEqual(config.rootPath, '/blog');
     });
 
@@ -248,7 +297,7 @@ describe('CloneCommand', () => {
       const DaClientClass = createDaClientClass({
         files: [{ path: '/myowner/myrepo/ca/fr_ca/page.html', name: 'page.html', ext: 'html' }],
         sourceContent: '<html>x</html>',
-        onListAll: (owner, repo, daPath) => {
+        onListAll: (org, site, daPath) => {
           listedAt = daPath;
         },
       });
@@ -285,8 +334,8 @@ describe('CloneCommand', () => {
       assert.ok(await fse.pathExists(localPath), 'file should be downloaded despite case mismatch');
 
       const config = await fse.readJson(path.join(testRoot, CONTENT_DIR, '.da-config.json'));
-      assert.strictEqual(config.owner, 'myowner', 'owner should be stored lowercase');
-      assert.strictEqual(config.repo, 'myrepo', 'repo should be stored lowercase');
+      assert.strictEqual(config.org, 'myowner', 'org should be stored lowercase');
+      assert.strictEqual(config.site, 'myrepo', 'site should be stored lowercase');
     });
 
     it('refuses large clone without --yes when not interactive', async () => {

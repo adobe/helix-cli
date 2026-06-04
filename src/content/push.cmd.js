@@ -18,8 +18,8 @@ import { DaClient, getContentType } from './da-api.js';
 import { getValidToken } from './da-auth.js';
 import {
   CONTENT_DIR,
-  CONFIG_FILE,
   CONTENT_IO_CONCURRENCY,
+  readContentConfig,
 } from './content-shared.js';
 import {
   resolveSyncedOid,
@@ -67,19 +67,19 @@ export default class PushCommand {
    * Checks for conflicts between local changes and remote modifications.
    * @param {DaClient} client
    * @param {string} org
-   * @param {string} repo
+   * @param {string} site
    * @param {string[]} modified
    * @param {string[]} deleted
    * @param {number} lastSyncTime
    * @returns {Promise<boolean>} true if the push should be aborted
    */
-  async _checkConflicts(client, org, repo, modified, deleted, lastSyncTime) {
+  async _checkConflicts(client, org, site, modified, deleted, lastSyncTime) {
     const { log } = this;
     const conflicts = [];
 
     for (const daPath of [...modified, ...deleted]) {
       // eslint-disable-next-line no-await-in-loop
-      const remoteLastModified = await client.getRemoteLastModified(org, repo, daPath);
+      const remoteLastModified = await client.getRemoteLastModified(org, site, daPath);
       if (remoteLastModified != null && remoteLastModified > lastSyncTime) {
         conflicts.push({ daPath, remoteDate: new Date(remoteLastModified).toLocaleString() });
       }
@@ -105,12 +105,12 @@ export default class PushCommand {
    * Uploads added and modified files to da.live.
    * @param {DaClient} client
    * @param {string} org
-   * @param {string} repo
+   * @param {string} site
    * @param {string} contentDir
    * @param {string[]} targets
    * @returns {Promise<{ pushed: number, errors: number }>}
    */
-  async _uploadFiles(client, org, repo, contentDir, targets) {
+  async _uploadFiles(client, org, site, contentDir, targets) {
     const { log } = this;
     let pushed = 0;
     let errors = 0;
@@ -123,7 +123,7 @@ export default class PushCommand {
         const ext = daPath.split('.').pop();
         try {
           const buffer = await fse.readFile(localPath);
-          await client.putSource(org, repo, daPath, buffer, getContentType(ext));
+          await client.putSource(org, site, daPath, buffer, getContentType(ext));
           log.info(`  ✓ ${daPath}`);
           return { ok: true };
         } catch (err) {
@@ -148,11 +148,11 @@ export default class PushCommand {
    * Deletes files from da.live.
    * @param {DaClient} client
    * @param {string} org
-   * @param {string} repo
+   * @param {string} site
    * @param {string[]} deleted
    * @returns {Promise<{ pushed: number, errors: number }>}
    */
-  async _deleteFiles(client, org, repo, deleted) {
+  async _deleteFiles(client, org, site, deleted) {
     const { log } = this;
     let pushed = 0;
     let errors = 0;
@@ -162,7 +162,7 @@ export default class PushCommand {
       [...deleted],
       async (daPath) => {
         try {
-          await client.deleteSource(org, repo, daPath);
+          await client.deleteSource(org, site, daPath);
           log.info(`  ✓ deleted ${daPath}`);
           return { ok: true };
         } catch (err) {
@@ -186,12 +186,7 @@ export default class PushCommand {
   async run() {
     const { log } = this;
     const contentDir = path.resolve(this._dir, CONTENT_DIR);
-    const configPath = path.join(contentDir, CONFIG_FILE);
-
-    if (!await fse.pathExists(configPath)) {
-      throw new Error(`No config found at ${configPath}. Run 'aem content clone' first.`);
-    }
-    const { org, repo } = await fse.readJson(configPath);
+    const { org, site } = await readContentConfig(contentDir);
 
     const matrix = await git.statusMatrix({ fs, dir: contentDir });
     if (statusMatrixHasUncommitted(matrix)) {
@@ -228,7 +223,7 @@ export default class PushCommand {
 
     const token = await getValidToken(log, this._token, this._dir);
 
-    log.info(`Pushing content to da.live: ${org}/${repo}`);
+    log.info(`Pushing content to da.live: ${org}/${site}`);
     log.info(`${added.length} added, ${modified.length} modified, ${deleted.length} deleted`);
 
     const client = new DaClient(token);
@@ -236,7 +231,7 @@ export default class PushCommand {
     const shouldAbort = await this._checkConflicts(
       client,
       org,
-      repo,
+      site,
       modified,
       deleted,
       lastSyncTime,
@@ -271,12 +266,12 @@ export default class PushCommand {
     const {
       pushed: putPushed,
       errors: putErrors,
-    } = await this._uploadFiles(client, org, repo, contentDir, [...added, ...modified]);
+    } = await this._uploadFiles(client, org, site, contentDir, [...added, ...modified]);
 
     const {
       pushed: deletePushed,
       errors: deleteErrors,
-    } = await this._deleteFiles(client, org, repo, deleted);
+    } = await this._deleteFiles(client, org, site, deleted);
 
     const pushed = putPushed + deletePushed;
     const pushErrors = putErrors + deleteErrors;
