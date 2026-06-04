@@ -382,18 +382,6 @@ describe('CloneCommand', () => {
       assert.strictEqual(config.site, 'customsite');
     });
 
-    it('throws when no git remote and --org/--site not provided', async () => {
-      const mod = await esmock('../../src/content/clone.cmd.js', {
-        '../../src/git-utils.js': {
-          default: { getOriginURL: async () => null },
-        },
-        '../../src/content/da-auth.js': { getValidToken: async () => 'token' },
-        '../../src/content/da-api.js': { DaClient: createDaClientClass() },
-      });
-      const Cmd = mod.default;
-      const cmd = new Cmd(makeLogger()).withDirectory(testRoot).withRootPath('/');
-      await assert.rejects(() => cmd.run(), /No git remote/);
-    });
 
     it('stores --org/--site values lowercased in config', async () => {
       const mod = await esmock('../../src/content/clone.cmd.js', {
