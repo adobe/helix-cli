@@ -55,8 +55,8 @@ export default function clone() {
           default: false,
         })
         .check((argv) => {
-          const org = argv.org != null ? String(argv.org).trim() : '';
-          const site = argv.site != null ? String(argv.site).trim() : '';
+          const org = (argv.org || '').trim();
+          const site = (argv.site || '').trim();
           if ((org && !site) || (!org && site)) {
             return '--org and --site must be used together.';
           }

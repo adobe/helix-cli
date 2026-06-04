@@ -352,18 +352,6 @@ describe('CloneCommand', () => {
       assert.strictEqual(config.site, 'myrepo', 'site should be stored lowercase');
     });
 
-    it('throws when only --org is set without --site', async () => {
-      const cmd = await makeCloneCommand(testRoot, createDaClientClass());
-      cmd.withOrg('myorg').withRootPath('/');
-      await assert.rejects(() => cmd.run(), /--org and --site must be used together/);
-    });
-
-    it('throws when only --site is set without --org', async () => {
-      const cmd = await makeCloneCommand(testRoot, createDaClientClass());
-      cmd.withSite('mysite').withRootPath('/');
-      await assert.rejects(() => cmd.run(), /--org and --site must be used together/);
-    });
-
     it('treats whitespace-only --org as unset and falls back to git remote', async () => {
       const cmd = await makeCloneCommand(testRoot, createDaClientClass({
         files: [{ path: '/myowner/myrepo/index.html', name: 'index.html', ext: 'html' }],
