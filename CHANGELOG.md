@@ -1,3 +1,10 @@
+# [16.20.0](https://github.com/adobe/helix-cli/compare/v16.19.14...v16.20.0) (2026-06-04)
+
+
+### Features
+
+* **content:** add --org/--site options to aem content clone ([#2738](https://github.com/adobe/helix-cli/issues/2738)) ([58f5b54](https://github.com/adobe/helix-cli/commit/58f5b54c729990359e11a02f569866083ac1c393)), closes [#2725](https://github.com/adobe/helix-cli/issues/2725)
+
 ## [16.19.14](https://github.com/adobe/helix-cli/compare/v16.19.13...v16.19.14) (2026-06-04)
 
 
