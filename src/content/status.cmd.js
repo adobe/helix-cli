@@ -11,9 +11,8 @@
  */
 import fs from 'fs';
 import path from 'path';
-import fse from 'fs-extra';
 import git from 'isomorphic-git';
-import { CONTENT_DIR, CONFIG_FILE } from './content-shared.js';
+import { CONTENT_DIR, readContentConfig } from './content-shared.js';
 import { resolveSyncedOid, countCommitsAhead } from './content-git.js';
 
 export default class StatusCommand {
@@ -30,14 +29,9 @@ export default class StatusCommand {
   async run() {
     const { log } = this;
     const contentDir = path.resolve(this._dir, CONTENT_DIR);
-    const configPath = path.join(contentDir, CONFIG_FILE);
+    const { org, site } = await readContentConfig(contentDir);
 
-    if (!await fse.pathExists(configPath)) {
-      throw new Error('No config found. Run \'aem content clone\' first.');
-    }
-    const { org, repo } = await fse.readJson(configPath);
-
-    log.info(`On da.live: ${org}/${repo}`);
+    log.info(`On da.live: ${org}/${site}`);
     log.info(`Local content: ./${CONTENT_DIR}/\n`);
 
     const matrix = await git.statusMatrix({ fs, dir: contentDir });

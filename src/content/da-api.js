@@ -39,12 +39,12 @@ export class DaClient {
   /**
    * Lists the contents of a directory, following {@link LIST_CONTINUATION_HEADER} until complete.
    * @param {string} org
-   * @param {string} repo
+   * @param {string} site
    * @param {string} daPath - path starting with /
    * @returns {Promise<Array<{path, name, ext?, lastModified}>>}
    */
-  async list(org, repo, daPath) {
-    const url = `${DA_ADMIN}/list/${org}/${repo}${daPath}`;
+  async list(org, site, daPath) {
+    const url = `${DA_ADMIN}/list/${org}/${site}${daPath}`;
     const aggregated = [];
     let continuation = null;
 
@@ -81,13 +81,13 @@ export class DaClient {
   /**
    * Recursively lists all files under a path using a non-recursive queue-based approach.
    * @param {string} org
-   * @param {string} repo
+   * @param {string} site
    * @param {string} [daPath='/']
    * @param {(discoveredCount: number) => void} [onDiscovered] - cumulative file count per discovery
    * @returns {Promise<Array<{path, name, ext, lastModified}>>}
    */
-  async listAll(org, repo, daPath = '/', onDiscovered = undefined) {
-    const prefix = `/${org}/${repo}`;
+  async listAll(org, site, daPath = '/', onDiscovered = undefined) {
+    const prefix = `/${org}/${site}`;
     const files = [];
     let dirsToProcess = [daPath];
 
@@ -97,7 +97,7 @@ export class DaClient {
       await processQueue(
         dirsToProcess,
         async (currentPath) => {
-          const items = await this.list(org, repo, currentPath);
+          const items = await this.list(org, site, currentPath);
           for (const item of items) {
             if (item.ext !== undefined) {
               files.push(item);
@@ -119,10 +119,13 @@ export class DaClient {
 
   /**
    * Fetches the raw content of a file.
+   * @param {string} org
+   * @param {string} site
+   * @param {string} daPath
    * @returns {Promise<Response|null>}
    */
-  async getSource(org, repo, daPath) {
-    const url = `${DA_ADMIN}/source/${org}/${repo}${daPath}`;
+  async getSource(org, site, daPath) {
+    const url = `${DA_ADMIN}/source/${org}/${site}${daPath}`;
     const res = await this.fetch(url, { headers: this.authHeader });
     if (res.status === 401) {
       throw new Error('Unauthorized: invalid or missing token');
@@ -139,14 +142,14 @@ export class DaClient {
   /**
    * Uploads a file via PUT.
    * @param {string} org
-   * @param {string} repo
+   * @param {string} site
    * @param {string} daPath
    * @param {Buffer} buffer
    * @param {string} contentType
    * @returns {Promise<object>} API response body
    */
-  async putSource(org, repo, daPath, buffer, contentType) {
-    const url = `${DA_ADMIN}/source/${org}/${repo}${daPath}`;
+  async putSource(org, site, daPath, buffer, contentType) {
+    const url = `${DA_ADMIN}/source/${org}/${site}${daPath}`;
     const res = await this.fetch(url, {
       method: 'PUT',
       headers: { ...this.authHeader, 'Content-Type': contentType },
@@ -165,8 +168,8 @@ export class DaClient {
    * Deletes a file or folder. Idempotent: 404 is treated as success.
    * Throws on transport or server errors so callers don't silently treat them as success.
    */
-  async deleteSource(org, repo, daPath) {
-    const url = `${DA_ADMIN}/source/${org}/${repo}${daPath}`;
+  async deleteSource(org, site, daPath) {
+    const url = `${DA_ADMIN}/source/${org}/${site}${daPath}`;
     const res = await this.fetch(url, {
       method: 'DELETE',
       headers: this.authHeader,
@@ -183,12 +186,12 @@ export class DaClient {
   /**
    * Returns the current lastModified for a file via a HEAD request.
    * @param {string} org
-   * @param {string} repo
+   * @param {string} site
    * @param {string} daPath - e.g. /blog/post.html
    * @returns {Promise<number|null>}
    */
-  async getRemoteLastModified(org, repo, daPath) {
-    const url = `${DA_ADMIN}/source/${org}/${repo}${daPath}`;
+  async getRemoteLastModified(org, site, daPath) {
+    const url = `${DA_ADMIN}/source/${org}/${site}${daPath}`;
     const res = await this.fetch(url, { method: 'HEAD', headers: this.authHeader });
     if (res.status === 401) {
       throw new Error('Unauthorized: invalid or missing token');

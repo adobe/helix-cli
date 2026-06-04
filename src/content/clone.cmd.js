@@ -101,14 +101,14 @@ export default class CloneCommand {
       throw new Error('Clone root path was not set (internal error).');
     }
 
-    // 1. Resolve owner/repo from git remote
+    // 1. Resolve org/site from git remote (GitHub owner/repo → da.live org/site)
     const originUrl = await GitUtils.getOriginURL(this._dir);
     if (!originUrl) {
       throw new Error('No git remote found. Run `aem content clone` inside an AEM project directory.');
     }
-    const owner = originUrl.owner.toLowerCase();
-    const repo = originUrl.repo.toLowerCase();
-    log.info(`Cloning content from da.live: ${owner}/${repo}${this._rootPath === '/' ? '' : ` @ ${this._rootPath}`}`);
+    const org = originUrl.owner.toLowerCase();
+    const site = originUrl.repo.toLowerCase();
+    log.info(`Cloning content from da.live: ${org}/${site}${this._rootPath === '/' ? '' : ` @ ${this._rootPath}`}`);
 
     // 2. Ensure target path is available (do not create content/ until after file count is known)
     const contentDir = path.resolve(this._dir, CONTENT_DIR);
@@ -126,7 +126,7 @@ export default class CloneCommand {
     const client = new DaClient(token);
     log.info('Fetching file list...');
     const showDiscoveryProgress = process.stdout.isTTY;
-    const files = await client.listAll(owner, repo, this._rootPath, showDiscoveryProgress
+    const files = await client.listAll(org, site, this._rootPath, showDiscoveryProgress
       ? (n) => {
         process.stdout.write(`\r  ${n} file(s) discovered so far...`);
       }
@@ -148,15 +148,15 @@ export default class CloneCommand {
     const downloadResults = await processQueue(
       files,
       async (file) => {
-        const prefix = `/${owner}/${repo}`;
+        const prefix = `/${org}/${site}`;
         if (!file.path.startsWith(prefix)) {
-          log.warn(`  skip (unexpected path, missing owner/repo prefix): ${file.path}`);
+          log.warn(`  skip (unexpected path, missing org/site prefix): ${file.path}`);
           return { status: 404 };
         }
         const daPath = file.path.slice(prefix.length) || '/';
         const localPath = path.join(contentDir, ...daPath.split('/').filter(Boolean));
         try {
-          const res = await client.getSource(owner, repo, daPath);
+          const res = await client.getSource(org, site, daPath);
           if (!res) {
             log.warn(`  skip (not found): ${daPath}`);
             return { status: 404 };
@@ -195,7 +195,7 @@ export default class CloneCommand {
     await git.commit({
       fs,
       dir: contentDir,
-      message: `clone: ${owner}/${repo}${this._rootPath === '/' ? '' : ` (${this._rootPath})`}`,
+      message: `clone: ${org}/${site}${this._rootPath === '/' ? '' : ` (${this._rootPath})`}`,
       author: GIT_AUTHOR,
     });
     const headOid = await git.resolveRef({ fs, dir: contentDir, ref: 'HEAD' });
@@ -203,8 +203,8 @@ export default class CloneCommand {
 
     // 8. Write config (not tracked by git)
     await fse.writeJson(path.join(contentDir, CONFIG_FILE), {
-      owner,
-      repo,
+      org,
+      site,
       rootPath: this._rootPath,
     }, { spaces: 2 });
 

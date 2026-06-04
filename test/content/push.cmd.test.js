@@ -390,5 +390,39 @@ describe('PushCommand', () => {
         || allMsgs.includes('Would delete'),
       );
     });
+
+    it('normalizes owner/repo to lowercase when config uses owner field with mixed case', async () => {
+      const contentDir = await setupContentDir(testRoot);
+      await fse.writeJson(path.join(contentDir, '.da-config.json'), { owner: 'myOwner', repo: 'MyRepo' });
+      await fse.writeFile(path.join(contentDir, 'index.html'), 'changed');
+      await stageAllAndCommit(contentDir, 'edit');
+
+      const log = makeLogger();
+      const mod = await esmock('../../src/content/push.cmd.js', {
+        '../../src/content/da-auth.js': { getValidToken: async () => 'token' },
+        '../../src/content/da-api.js': { DaClient: createDaClientClass(), getContentType: () => 'text/html' },
+      });
+      const Cmd = mod.default;
+      await new Cmd(log).withDirectory(testRoot).run();
+
+      assert.ok(log.logs.some((l) => l.msg.includes('myowner/myrepo')));
+    });
+
+    it('normalizes owner/repo to lowercase when config uses legacy org field with mixed case', async () => {
+      const contentDir = await setupContentDir(testRoot);
+      await fse.writeJson(path.join(contentDir, '.da-config.json'), { org: 'myOrg', repo: 'MyRepo' });
+      await fse.writeFile(path.join(contentDir, 'index.html'), 'changed');
+      await stageAllAndCommit(contentDir, 'edit');
+
+      const log = makeLogger();
+      const mod = await esmock('../../src/content/push.cmd.js', {
+        '../../src/content/da-auth.js': { getValidToken: async () => 'token' },
+        '../../src/content/da-api.js': { DaClient: createDaClientClass(), getContentType: () => 'text/html' },
+      });
+      const Cmd = mod.default;
+      await new Cmd(log).withDirectory(testRoot).run();
+
+      assert.ok(log.logs.some((l) => l.msg.includes('myorg/myrepo')));
+    });
   });
 });

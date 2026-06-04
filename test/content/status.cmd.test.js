@@ -88,13 +88,29 @@ describe('StatusCommand', () => {
       assert.ok(log.logs.some((l) => l.msg.includes('/index.html')));
     });
 
-    it('prints org/repo from config', async () => {
-      await setupContentDir(testRoot, 'testorg', 'testrepo');
+    it('prints org/site from config', async () => {
+      await setupContentDir(testRoot, 'testorg', 'testsite');
       const log = makeLogger();
       const cmd = new StatusCommand(log).withDirectory(testRoot);
       await cmd.run();
 
-      assert.ok(log.logs.some((l) => l.msg.includes('testorg/testrepo')));
+      assert.ok(log.logs.some((l) => l.msg.includes('testorg/testsite')));
+    });
+
+    it('normalizes owner/repo to lowercase when config uses owner field with mixed case', async () => {
+      const contentDir = await setupContentDir(testRoot);
+      await fse.writeJson(path.join(contentDir, '.da-config.json'), { owner: 'myOwner', repo: 'MyRepo' });
+      const log = makeLogger();
+      await new StatusCommand(log).withDirectory(testRoot).run();
+      assert.ok(log.logs.some((l) => l.msg.includes('myowner/myrepo')));
+    });
+
+    it('normalizes owner/repo to lowercase when config uses legacy org field with mixed case', async () => {
+      const contentDir = await setupContentDir(testRoot);
+      await fse.writeJson(path.join(contentDir, '.da-config.json'), { org: 'myOrg', repo: 'MyRepo' });
+      const log = makeLogger();
+      await new StatusCommand(log).withDirectory(testRoot).run();
+      assert.ok(log.logs.some((l) => l.msg.includes('myorg/myrepo')));
     });
 
     it('prints summary counts when changes exist', async () => {

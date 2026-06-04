@@ -32,7 +32,7 @@ export function makeLogger() {
  * Creates a content dir with a baseline git commit.
  * Writes .da-config.json (not tracked).
  */
-export async function setupContentDir(baseDir, org = 'myorg', repo = 'myrepo') {
+export async function setupContentDir(baseDir, org = 'myorg', site = 'mysite') {
   const contentDir = path.join(baseDir, CONTENT_DIR);
   await fse.ensureDir(path.join(contentDir, 'blog'));
 
@@ -47,11 +47,11 @@ export async function setupContentDir(baseDir, org = 'myorg', repo = 'myrepo') {
   await git.commit({
     fs,
     dir: contentDir,
-    message: `clone: ${org}/${repo}`,
+    message: `clone: ${org}/${site}`,
     author: GIT_AUTHOR,
   });
 
-  await fse.writeJson(path.join(contentDir, '.da-config.json'), { org, repo }, { spaces: 2 });
+  await fse.writeJson(path.join(contentDir, '.da-config.json'), { org, site }, { spaces: 2 });
 
   return contentDir;
 }
@@ -80,6 +80,7 @@ export async function stageAllAndCommit(contentDir, message) {
  * @param {number}  opts.remoteLastModified lastModified returned by getRemoteLastModified
  * @param {boolean} opts.putFails        if true, putSource throws
  * @param {boolean} opts.deleteFails     if true, deleteSource throws
+ * @param {Function} opts.onGetSource   called with (owner, repo, daPath) when getSource is called
  * @param {Function} opts.onPut         called with (daPath) when putSource is called
  * @param {Function} opts.onDelete      called with (daPath) when deleteSource is called
  */
@@ -88,9 +89,9 @@ export function createDaClientClass(opts = {}) {
     this.token = token;
   }
 
-  DaClientMock.prototype.listAll = async function listAll(org, repo, daPath, onDiscovered) {
+  DaClientMock.prototype.listAll = async function listAll(org, site, daPath, onDiscovered) {
     if (opts.onListAll) {
-      opts.onListAll(org, repo, daPath);
+      opts.onListAll(org, site, daPath);
     }
     const files = opts.files || [];
     if (onDiscovered) {
@@ -105,7 +106,10 @@ export function createDaClientClass(opts = {}) {
     return files;
   };
 
-  DaClientMock.prototype.getSource = async function getSource() {
+  DaClientMock.prototype.getSource = async function getSource(org, site, daPath) {
+    if (opts.onGetSource) {
+      opts.onGetSource(org, site, daPath);
+    }
     const content = opts.sourceContent !== undefined ? opts.sourceContent : '<html>remote</html>';
     if (content === null) {
       return null;
@@ -121,7 +125,7 @@ export function createDaClientClass(opts = {}) {
     return opts.remoteLastModified !== undefined ? opts.remoteLastModified : null;
   };
 
-  DaClientMock.prototype.putSource = async function putSource(org, repo, daPath) {
+  DaClientMock.prototype.putSource = async function putSource(org, site, daPath) {
     if (opts.putFails) {
       throw new Error(`PUT failed for ${daPath}`);
     }
@@ -131,7 +135,7 @@ export function createDaClientClass(opts = {}) {
     return {};
   };
 
-  DaClientMock.prototype.deleteSource = async function deleteSource(org, repo, daPath) {
+  DaClientMock.prototype.deleteSource = async function deleteSource(org, site, daPath) {
     if (opts.deleteFails) {
       throw new Error(`DELETE failed for ${daPath}`);
     }

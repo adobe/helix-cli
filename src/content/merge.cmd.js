@@ -16,7 +16,7 @@ import git from 'isomorphic-git';
 import { diff3Merge } from 'node-diff3'; // eslint-disable-line import/no-unresolved
 import { DaClient } from './da-api.js';
 import { getValidToken } from './da-auth.js';
-import { CONTENT_DIR, CONFIG_FILE } from './content-shared.js';
+import { CONTENT_DIR, readContentConfig } from './content-shared.js';
 
 /**
  * 3-way merge using diff3 algorithm.
@@ -69,12 +69,7 @@ export default class MergeCommand {
   async run() {
     const { log } = this;
     const contentDir = path.resolve(this._dir, CONTENT_DIR);
-    const configPath = path.join(contentDir, CONFIG_FILE);
-
-    if (!await fse.pathExists(configPath)) {
-      throw new Error('No config found. Run \'aem content clone\' first.');
-    }
-    const { org, repo } = await fse.readJson(configPath);
+    const { org, site } = await readContentConfig(contentDir);
 
     // Find locally changed files via git
     const matrix = await git.statusMatrix({ fs, dir: contentDir });
@@ -112,7 +107,7 @@ export default class MergeCommand {
       // eslint-disable-next-line no-await-in-loop
       const [localBuffer, remoteRes, blobResult] = await Promise.all([
         fse.readFile(localPath),
-        client.getSource(org, repo, daPath),
+        client.getSource(org, site, daPath),
         git.readBlob({
           fs, dir: contentDir, oid: headCommit.oid, filepath: relPath,
         })

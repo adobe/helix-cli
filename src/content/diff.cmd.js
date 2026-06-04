@@ -17,7 +17,7 @@ import { createTwoFilesPatch } from 'diff';
 import chalk from 'chalk-template';
 import { DaClient } from './da-api.js';
 import { getValidToken } from './da-auth.js';
-import { CONTENT_DIR, CONFIG_FILE } from './content-shared.js';
+import { CONTENT_DIR, readContentConfig } from './content-shared.js';
 
 function printPatch(patch) {
   for (const line of patch.split('\n')) {
@@ -60,12 +60,7 @@ export default class DiffCommand {
   async run() {
     const { log } = this;
     const contentDir = path.resolve(this._dir, CONTENT_DIR);
-    const configPath = path.join(contentDir, CONFIG_FILE);
-
-    if (!await fse.pathExists(configPath)) {
-      throw new Error('No config found. Run \'aem content clone\' first.');
-    }
-    const { org, repo } = await fse.readJson(configPath);
+    const { org, site } = await readContentConfig(contentDir);
 
     const matrix = await git.statusMatrix({ fs, dir: contentDir });
     let changedPaths = matrix
@@ -98,7 +93,7 @@ export default class DiffCommand {
         ? await fse.readFile(localPath)
         : Buffer.from('');
 
-      const remoteRes = await client.getSource(org, repo, daPath);
+      const remoteRes = await client.getSource(org, site, daPath);
 
       const localText = localBuffer.toString('utf-8');
       const remoteText = remoteRes ? await remoteRes.text() : '';

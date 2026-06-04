@@ -227,5 +227,47 @@ describe('MergeCommand', () => {
 
       assert.strictEqual(capturedProjectDir, testRoot);
     });
+
+    it('calls DA API with lowercase owner/repo when config uses owner field with mixed case', async () => {
+      const contentDir = await setupContentDir(testRoot);
+      await fse.writeJson(path.join(contentDir, '.da-config.json'), { owner: 'myOwner', repo: 'MyRepo' });
+      await fse.writeFile(path.join(contentDir, 'index.html'), 'changed');
+
+      const calls = [];
+      const mod = await esmock('../../src/content/merge.cmd.js', {
+        '../../src/content/da-auth.js': { getValidToken: async () => 'token' },
+        '../../src/content/da-api.js': {
+          DaClient: createDaClientClass({
+            onGetSource: (org, site) => calls.push({ org, site }),
+          }),
+        },
+      });
+      const Cmd = mod.default;
+      await new Cmd(makeLogger()).withDirectory(testRoot).run();
+
+      assert.ok(calls.length > 0);
+      assert.ok(calls.every((c) => c.org === 'myowner' && c.site === 'myrepo'));
+    });
+
+    it('calls DA API with lowercase owner/repo when config uses legacy org field with mixed case', async () => {
+      const contentDir = await setupContentDir(testRoot);
+      await fse.writeJson(path.join(contentDir, '.da-config.json'), { org: 'myOrg', repo: 'MyRepo' });
+      await fse.writeFile(path.join(contentDir, 'index.html'), 'changed');
+
+      const calls = [];
+      const mod = await esmock('../../src/content/merge.cmd.js', {
+        '../../src/content/da-auth.js': { getValidToken: async () => 'token' },
+        '../../src/content/da-api.js': {
+          DaClient: createDaClientClass({
+            onGetSource: (org, site) => calls.push({ org, site }),
+          }),
+        },
+      });
+      const Cmd = mod.default;
+      await new Cmd(makeLogger()).withDirectory(testRoot).run();
+
+      assert.ok(calls.length > 0);
+      assert.ok(calls.every((c) => c.org === 'myorg' && c.site === 'myrepo'));
+    });
   });
 });
