@@ -97,12 +97,12 @@ export default class CloneCommand {
   }
 
   withOrg(org) {
-    this._org = (org || '').trim() || null;
+    this._org = org ? org.trim() : null;
     return this;
   }
 
   withSite(site) {
-    this._site = (site || '').trim() || null;
+    this._site = site ? site.trim() : null;
     return this;
   }
 
