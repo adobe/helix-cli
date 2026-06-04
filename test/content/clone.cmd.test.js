@@ -364,6 +364,42 @@ describe('CloneCommand', () => {
       await assert.rejects(() => cmd.run(), /--org and --site must be used together/);
     });
 
+    it('treats whitespace-only --org as unset and falls back to git remote', async () => {
+      const cmd = await makeCloneCommand(testRoot, createDaClientClass({
+        files: [{ path: '/myowner/myrepo/index.html', name: 'index.html', ext: 'html' }],
+        sourceContent: '<html/>',
+      }));
+      cmd.withOrg('   ').withSite('   ').withRootPath('/');
+      await cmd.run();
+      const config = await fse.readJson(path.join(testRoot, CONTENT_DIR, '.da-config.json'));
+      assert.strictEqual(config.org, 'myowner');
+      assert.strictEqual(config.site, 'myrepo');
+    });
+
+    it('trims whitespace from --org and --site values', async () => {
+      const mod = await esmock('../../src/content/clone.cmd.js', {
+        '../../src/git-utils.js': { default: { getOriginURL: async () => null } },
+        '../../src/content/da-auth.js': { getValidToken: async () => 'mock-token' },
+        '../../src/content/da-api.js': {
+          DaClient: createDaClientClass({
+            files: [{ path: '/myorg/mysite/index.html', name: 'index.html', ext: 'html' }],
+            sourceContent: '<html/>',
+          }),
+          getContentType: (ext) => `text/${ext}`,
+        },
+      });
+      const Cmd = mod.default;
+      await new Cmd(makeLogger())
+        .withDirectory(testRoot)
+        .withOrg('  MyOrg  ')
+        .withSite('  MySite  ')
+        .withRootPath('/')
+        .run();
+      const config = await fse.readJson(path.join(testRoot, CONTENT_DIR, '.da-config.json'));
+      assert.strictEqual(config.org, 'myorg');
+      assert.strictEqual(config.site, 'mysite');
+    });
+
     it('uses --org/--site instead of git remote when both are provided', async () => {
       const mod = await esmock('../../src/content/clone.cmd.js', {
         '../../src/git-utils.js': {
