@@ -1,3 +1,10 @@
+## [16.19.14](https://github.com/adobe/helix-cli/compare/v16.19.13...v16.19.14) (2026-06-04)
+
+
+### Bug Fixes
+
+* **content:** use org/site terminology and centralize config reading ([#2737](https://github.com/adobe/helix-cli/issues/2737)) ([bb0d357](https://github.com/adobe/helix-cli/commit/bb0d35744b41487245c269de6000a0d9a23d5bdb))
+
 ## [16.19.13](https://github.com/adobe/helix-cli/compare/v16.19.12...v16.19.13) (2026-06-03)
 
 
