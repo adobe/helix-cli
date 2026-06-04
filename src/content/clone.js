@@ -22,6 +22,14 @@ export default function clone() {
     description: 'Clone da.live content locally into content/',
     builder: (yargs) => {
       yargs
+        .option('org', {
+          describe: 'da.live org to clone from. Overrides the org derived from the git remote.',
+          type: 'string',
+        })
+        .option('site', {
+          describe: 'da.live site to clone from. Overrides the site derived from the git remote.',
+          type: 'string',
+        })
         .option('path', {
           describe: 'da.live folder to clone (e.g. /ca/fr_ca). Omit only when using --all.',
           type: 'string',
@@ -47,6 +55,9 @@ export default function clone() {
           default: false,
         })
         .check((argv) => {
+          if ((argv.org && !argv.site) || (!argv.org && argv.site)) {
+            return '--org and --site must be used together.';
+          }
           if (argv.all && argv.path !== undefined && argv.path !== '') {
             return 'Do not use --path together with --all.';
           }
@@ -67,6 +78,8 @@ export default function clone() {
         .withToken(argv.token)
         .withForce(argv.force)
         .withAssumeYes(argv.yes)
+        .withOrg(argv.org)
+        .withSite(argv.site)
         .withRootPath(rootPath)
         .run();
     },

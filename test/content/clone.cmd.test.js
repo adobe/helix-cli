@@ -88,6 +88,18 @@ describe('CloneCommand', () => {
       assert.strictEqual(cmd._assumeYes, true); // eslint-disable-line no-underscore-dangle
     });
 
+    it('withOrg sets _org', async () => {
+      const cmd = await makeCloneCommand(testRoot, createDaClientClass());
+      cmd.withOrg('myorg');
+      assert.strictEqual(cmd._org, 'myorg'); // eslint-disable-line no-underscore-dangle
+    });
+
+    it('withSite sets _site', async () => {
+      const cmd = await makeCloneCommand(testRoot, createDaClientClass());
+      cmd.withSite('mysite');
+      assert.strictEqual(cmd._site, 'mysite'); // eslint-disable-line no-underscore-dangle
+    });
+
     it('builder methods return this for chaining', async () => {
       const mod = await esmock('../../src/content/clone.cmd.js', {
         '../../src/git-utils.js': { default: { getOriginURL: async () => null } },
@@ -101,6 +113,8 @@ describe('CloneCommand', () => {
       assert.strictEqual(cmd.withForce(false), cmd);
       assert.strictEqual(cmd.withRootPath('/'), cmd);
       assert.strictEqual(cmd.withAssumeYes(false), cmd);
+      assert.strictEqual(cmd.withOrg('o'), cmd);
+      assert.strictEqual(cmd.withSite('s'), cmd);
     });
   });
 
@@ -336,6 +350,76 @@ describe('CloneCommand', () => {
       const config = await fse.readJson(path.join(testRoot, CONTENT_DIR, '.da-config.json'));
       assert.strictEqual(config.org, 'myowner', 'org should be stored lowercase');
       assert.strictEqual(config.site, 'myrepo', 'site should be stored lowercase');
+    });
+
+    it('uses --org/--site instead of git remote when both are provided', async () => {
+      const mod = await esmock('../../src/content/clone.cmd.js', {
+        '../../src/git-utils.js': {
+          default: { getOriginURL: async () => null },
+        },
+        '../../src/content/da-auth.js': { getValidToken: async () => 'mock-token' },
+        '../../src/content/da-api.js': {
+          DaClient: createDaClientClass({
+            files: [{ path: '/customorg/customsite/page.html', name: 'page.html', ext: 'html' }],
+            sourceContent: '<html>page</html>',
+          }),
+          getContentType: (ext) => `text/${ext}`,
+        },
+      });
+      const Cmd = mod.default;
+      const cmd = new Cmd(makeLogger())
+        .withDirectory(testRoot)
+        .withOrg('CustomOrg')
+        .withSite('CustomSite')
+        .withRootPath('/');
+      await cmd.run();
+
+      const localPath = path.join(testRoot, CONTENT_DIR, 'page.html');
+      assert.ok(await fse.pathExists(localPath));
+
+      const config = await fse.readJson(path.join(testRoot, CONTENT_DIR, '.da-config.json'));
+      assert.strictEqual(config.org, 'customorg');
+      assert.strictEqual(config.site, 'customsite');
+    });
+
+    it('throws when no git remote and --org/--site not provided', async () => {
+      const mod = await esmock('../../src/content/clone.cmd.js', {
+        '../../src/git-utils.js': {
+          default: { getOriginURL: async () => null },
+        },
+        '../../src/content/da-auth.js': { getValidToken: async () => 'token' },
+        '../../src/content/da-api.js': { DaClient: createDaClientClass() },
+      });
+      const Cmd = mod.default;
+      const cmd = new Cmd(makeLogger()).withDirectory(testRoot).withRootPath('/');
+      await assert.rejects(() => cmd.run(), /No git remote/);
+    });
+
+    it('stores --org/--site values lowercased in config', async () => {
+      const mod = await esmock('../../src/content/clone.cmd.js', {
+        '../../src/git-utils.js': {
+          default: { getOriginURL: async () => null },
+        },
+        '../../src/content/da-auth.js': { getValidToken: async () => 'mock-token' },
+        '../../src/content/da-api.js': {
+          DaClient: createDaClientClass({
+            files: [{ path: '/myorg/mysite/index.html', name: 'index.html', ext: 'html' }],
+            sourceContent: '<html/>',
+          }),
+          getContentType: (ext) => `text/${ext}`,
+        },
+      });
+      const Cmd = mod.default;
+      await new Cmd(makeLogger())
+        .withDirectory(testRoot)
+        .withOrg('MyOrg')
+        .withSite('MySite')
+        .withRootPath('/')
+        .run();
+
+      const config = await fse.readJson(path.join(testRoot, CONTENT_DIR, '.da-config.json'));
+      assert.strictEqual(config.org, 'myorg');
+      assert.strictEqual(config.site, 'mysite');
     });
 
     it('refuses large clone without --yes when not interactive', async () => {

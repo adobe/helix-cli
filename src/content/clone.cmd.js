@@ -67,6 +67,8 @@ export default class CloneCommand {
     this._force = false;
     this._assumeYes = false;
     this._rootPath = null;
+    this._org = null;
+    this._site = null;
   }
 
   withDirectory(dir) {
@@ -94,6 +96,16 @@ export default class CloneCommand {
     return this;
   }
 
+  withOrg(org) {
+    this._org = org;
+    return this;
+  }
+
+  withSite(site) {
+    this._site = site;
+    return this;
+  }
+
   async run() {
     const { log } = this;
 
@@ -101,13 +113,20 @@ export default class CloneCommand {
       throw new Error('Clone root path was not set (internal error).');
     }
 
-    // 1. Resolve org/site from git remote (GitHub owner/repo → da.live org/site)
-    const originUrl = await GitUtils.getOriginURL(this._dir);
-    if (!originUrl) {
-      throw new Error('No git remote found. Run `aem content clone` inside an AEM project directory.');
+    // 1. Resolve org/site: explicit --org/--site override, otherwise derive from git remote
+    let org;
+    let site;
+    if (this._org && this._site) {
+      org = this._org.toLowerCase();
+      site = this._site.toLowerCase();
+    } else {
+      const originUrl = await GitUtils.getOriginURL(this._dir);
+      if (!originUrl) {
+        throw new Error('No git remote found. Run `aem content clone` inside an AEM project directory.');
+      }
+      org = originUrl.owner.toLowerCase();
+      site = originUrl.repo.toLowerCase();
     }
-    const org = originUrl.owner.toLowerCase();
-    const site = originUrl.repo.toLowerCase();
     log.info(`Cloning content from da.live: ${org}/${site}${this._rootPath === '/' ? '' : ` @ ${this._rootPath}`}`);
 
     // 2. Ensure target path is available (do not create content/ until after file count is known)
