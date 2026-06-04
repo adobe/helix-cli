@@ -352,6 +352,18 @@ describe('CloneCommand', () => {
       assert.strictEqual(config.site, 'myrepo', 'site should be stored lowercase');
     });
 
+    it('throws when only --org is set without --site', async () => {
+      const cmd = await makeCloneCommand(testRoot, createDaClientClass());
+      cmd.withOrg('myorg').withRootPath('/');
+      await assert.rejects(() => cmd.run(), /--org and --site must be used together/);
+    });
+
+    it('throws when only --site is set without --org', async () => {
+      const cmd = await makeCloneCommand(testRoot, createDaClientClass());
+      cmd.withSite('mysite').withRootPath('/');
+      await assert.rejects(() => cmd.run(), /--org and --site must be used together/);
+    });
+
     it('uses --org/--site instead of git remote when both are provided', async () => {
       const mod = await esmock('../../src/content/clone.cmd.js', {
         '../../src/git-utils.js': {
@@ -381,7 +393,6 @@ describe('CloneCommand', () => {
       assert.strictEqual(config.org, 'customorg');
       assert.strictEqual(config.site, 'customsite');
     });
-
 
     it('stores --org/--site values lowercased in config', async () => {
       const mod = await esmock('../../src/content/clone.cmd.js', {

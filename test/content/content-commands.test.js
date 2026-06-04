@@ -107,25 +107,33 @@ describe('clone()', () => {
 
   it('handler calls executor when executor is set', async () => {
     const cmd = clone();
-    let ranWith;
+    let tokenArg;
     let assumeYesArg;
+    let orgArg;
+    let siteArg;
     let rootPathArg;
     cmd.executor = {
       withToken: (t) => {
-        ranWith = t;
+        tokenArg = t;
         return {
           withForce: () => ({
             withAssumeYes: (y) => {
               assumeYesArg = y;
               return {
-                withOrg: () => ({
-                  withSite: () => ({
-                    withRootPath: (rp) => {
-                      rootPathArg = rp;
-                      return { run: async () => {} };
+                withOrg: (o) => {
+                  orgArg = o;
+                  return {
+                    withSite: (s) => {
+                      siteArg = s;
+                      return {
+                        withRootPath: (rp) => {
+                          rootPathArg = rp;
+                          return { run: async () => {} };
+                        },
+                      };
                     },
-                  }),
-                }),
+                  };
+                },
               };
             },
           }),
@@ -133,10 +141,12 @@ describe('clone()', () => {
       },
     };
     await cmd.handler({
-      token: 'abc', force: false, yes: true, all: false, path: '/ca/fr_ca',
+      token: 'abc', force: false, yes: true, all: false, path: '/ca/fr_ca', org: 'myorg', site: 'mysite',
     });
-    assert.strictEqual(ranWith, 'abc');
+    assert.strictEqual(tokenArg, 'abc');
     assert.strictEqual(assumeYesArg, true);
+    assert.strictEqual(orgArg, 'myorg');
+    assert.strictEqual(siteArg, 'mysite');
     assert.strictEqual(rootPathArg, '/ca/fr_ca');
   });
 });
