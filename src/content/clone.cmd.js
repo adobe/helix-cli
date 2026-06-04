@@ -114,9 +114,14 @@ export default class CloneCommand {
     }
 
     // 1. Resolve org/site: explicit --org/--site override, otherwise derive from git remote
+    const hasOrg = this._org != null && this._org !== '';
+    const hasSite = this._site != null && this._site !== '';
+    if (hasOrg !== hasSite) {
+      throw new Error('--org and --site must be used together.');
+    }
     let org;
     let site;
-    if (this._org && this._site) {
+    if (hasOrg && hasSite) {
       org = this._org.toLowerCase();
       site = this._site.toLowerCase();
     } else {
