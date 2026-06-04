@@ -118,10 +118,14 @@ describe('clone()', () => {
             withAssumeYes: (y) => {
               assumeYesArg = y;
               return {
-                withRootPath: (rp) => {
-                  rootPathArg = rp;
-                  return { run: async () => {} };
-                },
+                withOrg: () => ({
+                  withSite: () => ({
+                    withRootPath: (rp) => {
+                      rootPathArg = rp;
+                      return { run: async () => {} };
+                    },
+                  }),
+                }),
               };
             },
           }),
