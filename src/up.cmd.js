@@ -139,11 +139,32 @@ export default class UpCommand extends AbstractServerCommand {
     });
 
     const ref = await GitUtils.getBranch(this.directory);
-    this._gitUrl = await GitUtils.getOriginURL(this.directory, { ref });
-    if (!this._gitUrl) {
-      throw Error('No git remote found. Make sure you have a remote "origin" configured.');
+    let gitUrlError;
+    try {
+      this._gitUrl = await GitUtils.getOriginURL(this.directory, { ref });
+    } catch (e) {
+      gitUrlError = e;
     }
-    await this.initUrl(this._gitUrl, ref);
+
+    if (!this._gitUrl) {
+      if (gitUrlError) {
+        if (this._originalUrl && !this._originalUrl.includes('{{')) {
+          this.log.warn(chalk`Could not parse git remote origin URL: {yellow ${gitUrlError.message}}`);
+          this.log.warn(chalk`Continuing with the provided {cyan --url} value.`);
+          this._url = this._originalUrl;
+        } else {
+          this.log.error(chalk`Could not parse git remote origin URL: {yellow ${gitUrlError.message}}`);
+          this.log.error('The git remote origin uses an SSH URL format that cannot be automatically resolved.');
+          this.log.error(chalk`Please specify the content origin URL using the {cyan --url} option:`);
+          this.log.error(chalk`  {cyan aem up --url https://main--<repo>--<owner>.aem.page}`);
+          throw Error('Invalid git remote origin URL. Use --url to specify the content origin.');
+        }
+      } else {
+        throw Error('No git remote found. Make sure you have a remote "origin" configured.');
+      }
+    } else {
+      await this.initUrl(this._gitUrl, ref);
+    }
     this._project.withProxyUrl(this._url);
     const { site, org } = this.extractSiteAndOrg(this._url);
     if (site && org) {
