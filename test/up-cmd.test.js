@@ -855,4 +855,53 @@ describe('Integration test for up command with cache', function suite() {
     // eslint-disable-next-line no-underscore-dangle
     assert.strictEqual(cmd._url, 'https://custom.domain.com', 'User-provided --pagesUrl should be preserved during git reconfiguration');
   });
+
+  it('shows helpful error when git remote origin uses non-parseable SSH format', async () => {
+    initGit(testDir, 'user@example.ghe.com:ACMEGROUP/acme-eds.git');
+    const cmd = new UpCommand()
+      .withLiveReload(false)
+      .withDirectory(testDir);
+
+    try {
+      await cmd.init();
+      assert.fail('Should have thrown an error for non-parseable SSH origin');
+    } catch (e) {
+      assert(
+        e.message.includes('Invalid git remote origin URL'),
+        `Expected SSH URL error, got: ${e.message}`,
+      );
+    }
+  });
+
+  it('starts successfully when non-parseable SSH origin is paired with --url', async () => {
+    initGit(testDir, 'user@example.ghe.com:ACMEGROUP/acme-eds.git');
+    const cmd = new UpCommand()
+      .withLiveReload(false)
+      .withDirectory(testDir)
+      .withHttpPort(0)
+      .withUrl('https://main--acme-eds--acmegroup.aem.page');
+
+    await new Promise((resolve, reject) => {
+      let error = null;
+      cmd
+        .on('started', async () => {
+          try {
+            // eslint-disable-next-line no-underscore-dangle
+            assert.strictEqual(cmd._url, 'https://main--acme-eds--acmegroup.aem.page');
+          } catch (e) {
+            error = e;
+          }
+          await cmd.stop();
+        })
+        .on('stopped', () => {
+          if (error) {
+            reject(error);
+          } else {
+            resolve();
+          }
+        })
+        .run()
+        .catch(reject);
+    });
+  });
 });
