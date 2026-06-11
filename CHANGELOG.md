@@ -1,3 +1,10 @@
+## [16.20.2](https://github.com/adobe/helix-cli/compare/v16.20.1...v16.20.2) (2026-06-11)
+
+
+### Bug Fixes
+
+* **up:** handle non-parseable SSH git remote origin gracefully ([#2741](https://github.com/adobe/helix-cli/issues/2741)) ([d2d34d4](https://github.com/adobe/helix-cli/commit/d2d34d44d515e455ed39d1820311752ad1b608ad))
+
 ## [16.20.1](https://github.com/adobe/helix-cli/compare/v16.20.0...v16.20.1) (2026-06-09)
 
 
