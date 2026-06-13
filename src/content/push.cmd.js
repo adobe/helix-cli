@@ -123,7 +123,7 @@ export default class PushCommand {
         const ext = daPath.split('.').pop();
         try {
           const buffer = await fse.readFile(localPath);
-          await client.putSource(org, site, daPath, buffer, getContentType(ext));
+          await client.postSource(org, site, daPath, buffer, getContentType(ext));
           log.info(`  ✓ ${daPath}`);
           return { ok: true };
         } catch (err) {

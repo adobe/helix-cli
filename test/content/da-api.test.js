@@ -270,22 +270,60 @@ describe('DaClient', () => {
     });
   });
 
-  describe('putSource', () => {
+  describe('postSource', () => {
     it('returns parsed JSON on success', async () => {
       const responseBody = { status: 'ok' };
       client.fetch = async () => mockResponse(200, responseBody);
-      const result = await client.putSource('org', 'repo', '/file.html', Buffer.from('<html>'), 'text/html');
+      const result = await client.postSource('org', 'repo', '/file.html', Buffer.from('<html>'), 'text/html');
       assert.deepStrictEqual(result, responseBody);
     });
 
-    it('sends PUT request', async () => {
+    it('sends POST request', async () => {
       let method;
       client.fetch = async (url, opts) => {
         method = opts.method;
         return mockResponse(200, {});
       };
-      await client.putSource('org', 'repo', '/file.html', Buffer.from(''), 'text/html');
-      assert.strictEqual(method, 'PUT');
+      await client.postSource('org', 'repo', '/file.html', Buffer.from(''), 'text/html');
+      assert.strictEqual(method, 'POST');
+    });
+
+    it('sends multipart form-data body with file content in data field', async () => {
+      const content = '<html><body>hello</body></html>';
+      let body;
+      client.fetch = async (url, opts) => {
+        body = opts.body;
+        return mockResponse(200, {});
+      };
+      await client.postSource('org', 'repo', '/file.html', Buffer.from(content), 'text/html');
+      assert.ok(body instanceof FormData, 'body should be FormData');
+      const dataField = body.get('data');
+      assert.ok(dataField != null, 'FormData should have a data field');
+      assert.strictEqual(await dataField.text(), content);
+    });
+
+    it('sets correct content type on the data Blob for each file type', async () => {
+      for (const [ext, expectedType] of [['html', 'text/html'], ['json', 'application/json']]) {
+        let body;
+        client.fetch = async (url, opts) => {
+          body = opts.body;
+          return mockResponse(200, {});
+        };
+        // eslint-disable-next-line no-await-in-loop
+        await client.postSource('org', 'repo', `/file.${ext}`, Buffer.from('content'), expectedType);
+        const dataField = body.get('data');
+        assert.strictEqual(dataField.type, expectedType, `Blob type should be ${expectedType} for .${ext}`);
+      }
+    });
+
+    it('does not set Content-Type header directly (lets fetch set multipart boundary)', async () => {
+      let reqHeaders;
+      client.fetch = async (url, opts) => {
+        reqHeaders = opts.headers;
+        return mockResponse(200, {});
+      };
+      await client.postSource('org', 'repo', '/file.json', Buffer.from('{}'), 'application/json');
+      assert.ok(!('Content-Type' in reqHeaders), 'Content-Type must not be set manually on multipart requests');
     });
 
     it('calls correct source URL', async () => {
@@ -294,14 +332,14 @@ describe('DaClient', () => {
         calledUrl = url;
         return mockResponse(200, {});
       };
-      await client.putSource('org', 'repo', '/page.html', Buffer.from(''), 'text/html');
+      await client.postSource('org', 'repo', '/page.html', Buffer.from(''), 'text/html');
       assert.strictEqual(calledUrl, 'https://admin.da.live/source/org/repo/page.html');
     });
 
     it('throws Unauthorized on 401', async () => {
       client.fetch = async () => mockResponse(401, 'Unauthorized', false);
       await assert.rejects(
-        () => client.putSource('org', 'repo', '/file.html', Buffer.from(''), 'text/html'),
+        () => client.postSource('org', 'repo', '/file.html', Buffer.from(''), 'text/html'),
         /Unauthorized/,
       );
     });
@@ -309,8 +347,8 @@ describe('DaClient', () => {
     it('throws on non-ok status', async () => {
       client.fetch = async () => mockResponse(500, 'Error', false);
       await assert.rejects(
-        () => client.putSource('org', 'repo', '/file.html', Buffer.from(''), 'text/html'),
-        /PUT failed/,
+        () => client.postSource('org', 'repo', '/file.html', Buffer.from(''), 'text/html'),
+        /POST failed/,
       );
     });
   });

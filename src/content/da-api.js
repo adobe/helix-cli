@@ -140,7 +140,10 @@ export class DaClient {
   }
 
   /**
-   * Uploads a file via PUT.
+   * Uploads a file via multipart POST — the documented DA API contract.
+   * Raw body uploads are only supported by DA for text/html; all other types
+   * (including application/json) are silently ignored and must use form-data.
+   * See: https://docs.da.live/developers/api/source
    * @param {string} org
    * @param {string} site
    * @param {string} daPath
@@ -148,18 +151,20 @@ export class DaClient {
    * @param {string} contentType
    * @returns {Promise<object>} API response body
    */
-  async putSource(org, site, daPath, buffer, contentType) {
+  async postSource(org, site, daPath, buffer, contentType) {
     const url = `${DA_ADMIN}/source/${org}/${site}${daPath}`;
+    const formData = new FormData();
+    formData.append('data', new Blob([buffer], { type: contentType }));
     const res = await this.fetch(url, {
-      method: 'PUT',
-      headers: { ...this.authHeader, 'Content-Type': contentType },
-      body: buffer,
+      method: 'POST',
+      headers: { ...this.authHeader },
+      body: formData,
     });
     if (res.status === 401) {
       throw new Error('Unauthorized: invalid or missing token');
     }
     if (!res.ok) {
-      throw new Error(`PUT failed for ${daPath}: ${res.status} ${res.statusText}`);
+      throw new Error(`POST failed for ${daPath}: ${res.status} ${res.statusText}`);
     }
     return res.json();
   }
