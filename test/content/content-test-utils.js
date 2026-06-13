@@ -78,10 +78,10 @@ export async function stageAllAndCommit(contentDir, message) {
  * @param {Array}   opts.files           files returned by listAll
  * @param {string}  opts.sourceContent   content returned by getSource (null = 404)
  * @param {number}  opts.remoteLastModified lastModified returned by getRemoteLastModified
- * @param {boolean} opts.putFails        if true, putSource throws
+ * @param {boolean} opts.uploadFails        if true, postSource throws
  * @param {boolean} opts.deleteFails     if true, deleteSource throws
  * @param {Function} opts.onGetSource   called with (owner, repo, daPath) when getSource is called
- * @param {Function} opts.onPut         called with (daPath) when putSource is called
+ * @param {Function} opts.onUpload         called with (daPath) when postSource is called
  * @param {Function} opts.onDelete      called with (daPath) when deleteSource is called
  */
 export function createDaClientClass(opts = {}) {
@@ -125,12 +125,13 @@ export function createDaClientClass(opts = {}) {
     return opts.remoteLastModified !== undefined ? opts.remoteLastModified : null;
   };
 
-  DaClientMock.prototype.putSource = async function putSource(org, site, daPath) {
-    if (opts.putFails) {
-      throw new Error(`PUT failed for ${daPath}`);
+  // eslint-disable-next-line max-len
+  DaClientMock.prototype.postSource = async function postSource(org, site, daPath, buffer, contentType) {
+    if (opts.uploadFails) {
+      throw new Error(`POST failed for ${daPath}`);
     }
-    if (opts.onPut) {
-      opts.onPut(daPath);
+    if (opts.onUpload) {
+      opts.onUpload(daPath, buffer, contentType);
     }
     return {};
   };

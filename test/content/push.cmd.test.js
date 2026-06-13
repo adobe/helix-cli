@@ -116,7 +116,7 @@ describe('PushCommand', () => {
 
       let putCalled = false;
       const DaClientClass = createDaClientClass({
-        onPut: () => {
+        onUpload: () => {
           putCalled = true;
         },
       });
@@ -167,7 +167,7 @@ describe('PushCommand', () => {
       let putCalled = false;
       const DaClientClass = createDaClientClass({
         remoteLastModified: Date.now() + 60_000,
-        onPut: () => { putCalled = true; },
+        onUpload: () => { putCalled = true; },
       });
       const log = makeLogger();
       const mod = await esmock('../../src/content/push.cmd.js', {
@@ -190,7 +190,7 @@ describe('PushCommand', () => {
       await stageAllAndCommit(contentDir, 'edit index');
 
       const pushed = [];
-      const DaClientClass = createDaClientClass({ onPut: (p) => pushed.push(p) });
+      const DaClientClass = createDaClientClass({ onUpload: (p) => pushed.push(p) });
       const log = makeLogger();
       const mod = await esmock('../../src/content/push.cmd.js', {
         '../../src/content/da-auth.js': { getValidToken: async () => 'token' },
@@ -204,6 +204,48 @@ describe('PushCommand', () => {
       await cmd.run();
 
       assert.ok(pushed.includes('/index.html'));
+    });
+
+    it('pushes modified JSON file with correct content and content-type', async () => {
+      const contentDir = await setupContentDir(testRoot);
+
+      // Add a JSON file in the baseline (the synced point)
+      await fse.writeFile(path.join(contentDir, 'metadata.json'), '{"title":"original"}');
+      await stageAllAndCommit(contentDir, 'add json');
+
+      // Write synced ref to this new HEAD so the json file is the baseline
+      const baseOid = await git.resolveRef({ fs, dir: contentDir, ref: 'HEAD' });
+      await git.writeRef({
+        fs, dir: contentDir, ref: DA_SYNCED_REF, value: baseOid, force: true,
+      });
+
+      // Now modify the JSON — this is the scenario Claude edits then user commits/pushes
+      const updatedContent = '{"title":"updated"}';
+      await fse.writeFile(path.join(contentDir, 'metadata.json'), updatedContent);
+      await stageAllAndCommit(contentDir, 'edit json');
+
+      const puts = {};
+      const DaClientClass = createDaClientClass({
+        onUpload: (daPath, buffer, contentType) => {
+          puts[daPath] = { body: buffer.toString('utf-8'), contentType };
+        },
+      });
+
+      // Use real getContentType so we can verify application/json is sent
+      const { getContentType: realGetContentType } = await import('../../src/content/da-api.js');
+      const mod = await esmock('../../src/content/push.cmd.js', {
+        '../../src/content/da-auth.js': { getValidToken: async () => 'token' },
+        '../../src/content/da-api.js': {
+          DaClient: DaClientClass,
+          getContentType: realGetContentType,
+        },
+      });
+      const Cmd = mod.default;
+      await new Cmd(makeLogger()).withDirectory(testRoot).run();
+
+      assert.ok('/metadata.json' in puts, 'JSON file should be pushed');
+      assert.strictEqual(puts['/metadata.json'].body, updatedContent, 'pushed content should match modified file');
+      assert.strictEqual(puts['/metadata.json'].contentType, 'application/json', 'content-type should be application/json');
     });
 
     it('deletes removed files from da.live', async () => {
@@ -235,7 +277,7 @@ describe('PushCommand', () => {
       await stageAllAndCommit(contentDir, 'edit pages');
 
       const pushed = [];
-      const DaClientClass = createDaClientClass({ onPut: (p) => pushed.push(p) });
+      const DaClientClass = createDaClientClass({ onUpload: (p) => pushed.push(p) });
       const log = makeLogger();
       const mod = await esmock('../../src/content/push.cmd.js', {
         '../../src/content/da-auth.js': { getValidToken: async () => 'token' },
@@ -260,7 +302,7 @@ describe('PushCommand', () => {
       await stageAllAndCommit(contentDir, 'edit blog and add blog2');
 
       const pushed = [];
-      const DaClientClass = createDaClientClass({ onPut: (p) => pushed.push(p) });
+      const DaClientClass = createDaClientClass({ onUpload: (p) => pushed.push(p) });
       const log = makeLogger();
       const mod = await esmock('../../src/content/push.cmd.js', {
         '../../src/content/da-auth.js': { getValidToken: async () => 'token' },
@@ -284,7 +326,7 @@ describe('PushCommand', () => {
       await stageAllAndCommit(contentDir, 'edit pages');
 
       const pushed = [];
-      const DaClientClass = createDaClientClass({ onPut: (p) => pushed.push(p) });
+      const DaClientClass = createDaClientClass({ onUpload: (p) => pushed.push(p) });
       const log = makeLogger();
       const mod = await esmock('../../src/content/push.cmd.js', {
         '../../src/content/da-auth.js': { getValidToken: async () => 'token' },
