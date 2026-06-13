@@ -81,7 +81,7 @@ export async function stageAllAndCommit(contentDir, message) {
  * @param {boolean} opts.uploadFails        if true, postSource throws
  * @param {boolean} opts.deleteFails     if true, deleteSource throws
  * @param {Function} opts.onGetSource   called with (owner, repo, daPath) when getSource is called
- * @param {Function} opts.onUpload         called with (daPath) when postSource is called
+ * @param {Function} opts.onUpload         called with (daPath, buffer, contentType)
  * @param {Function} opts.onDelete      called with (daPath) when deleteSource is called
  */
 export function createDaClientClass(opts = {}) {

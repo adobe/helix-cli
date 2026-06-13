@@ -376,6 +376,36 @@ describe('PushCommand', () => {
       assert.strictEqual(syncedOid, headOid);
     });
 
+    it('does not advance synced ref when an upload fails on the server', async () => {
+      const contentDir = await setupContentDir(testRoot);
+      await fse.writeFile(path.join(contentDir, 'index.html'), 'changed');
+      await stageAllAndCommit(contentDir, 'edit index');
+
+      const DaClientClass = createDaClientClass({ uploadFails: true });
+      const log = makeLogger();
+      const mod = await esmock('../../src/content/push.cmd.js', {
+        '../../src/content/da-auth.js': { getValidToken: async () => 'token' },
+        '../../src/content/da-api.js': {
+          DaClient: DaClientClass,
+          getContentType: () => 'text/html',
+        },
+      });
+      const Cmd = mod.default;
+      const cmd = new Cmd(log).withDirectory(testRoot);
+      await cmd.run();
+
+      const headOid = await git.resolveRef({ fs, dir: contentDir, ref: 'HEAD' });
+      let syncedOid;
+      try {
+        syncedOid = await git.resolveRef({ fs, dir: contentDir, ref: DA_SYNCED_REF });
+      } catch {
+        syncedOid = null;
+      }
+      assert.notStrictEqual(syncedOid, headOid);
+      assert.ok(log.logs.some((l) => l.msg.includes('Sync ref not updated')));
+      assert.ok(log.logs.some((l) => l.msg.includes('error') || l.msg.includes('✗')));
+    });
+
     it('does not advance synced ref when a delete fails on the server', async () => {
       const contentDir = await setupContentDir(testRoot);
       await fse.remove(path.join(contentDir, 'index.html'));
