@@ -301,6 +301,10 @@ aem up
 
 Either approach will make Node.js trust the server certificate and `aem up` should work.
 
+If you need a temporary workaround while you obtain the CA certificate, you can run
+`aem up --allow-insecure` to skip certificate verification for server requests. Use
+this only as a last resort because it disables TLS certificate validation.
+
 ## `npm install` fails with `File exists: /opt/homebrew/bin/hlx`
 
 If you try to install `@adobe/aem-cli`: 
@@ -321,4 +325,3 @@ To solve, first uninstall the old version, then install again with the new name:
 npm uninstall -g @adobe/helix-cli
 npm install -g @adobe/aem-cli
 ```
-
