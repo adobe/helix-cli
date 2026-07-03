@@ -792,6 +792,24 @@ window.LiveReloadOptions = {
   },
 
   /**
+   * Rewrites da.live content-store image URLs (`https://content.da.live/${org}/${site}/...`)
+   * to the site's preview domain, since content.da.live is not publicly reachable
+   * for rendering images during local dev.
+   * @param {string} html html content
+   * @param {string} org da.live org
+   * @param {string} site da.live site
+   * @returns {string} rewritten html
+   */
+  rewriteDaContentImageUrls(html, org, site) {
+    if (!org || !site) {
+      return html;
+    }
+    const from = `https://content.da.live/${org}/${site}/`;
+    const to = `https://main--${site}--${org}.preview.da.live/`;
+    return html.split(from).join(to);
+  },
+
+  /**
    * Extracts the innerHTML of the <main> element from a full HTML document.
    * Returns the original content unchanged if no <main> is found.
    * @param {string} html full HTML document

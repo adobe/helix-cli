@@ -1271,6 +1271,43 @@ describe('Helix Server', () => {
       }
     });
 
+    it('rewrites content.da.live image src to the site preview domain', async () => {
+      const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
+      await fse.ensureDir(path.join(cwd, CONTENT_DIR));
+      await fse.writeFile(
+        path.join(cwd, CONTENT_DIR, 'index.html'),
+        '<body><header></header><main><img src="https://content.da.live/bar/foo/media_123.png"></main><footer></footer></body>',
+      );
+      await fse.writeFile(
+        path.join(cwd, 'head.html'),
+        '<link rel="stylesheet" href="/styles.css"/>',
+      );
+
+      nock('http://main--foo--bar.aem.page')
+        .get('/head.html')
+        .reply(200, '', { 'content-type': 'text/html' })
+        .get('/metadata.json')
+        .reply(200, { data: [] });
+
+      const project = new HelixProject()
+        .withCwd(cwd)
+        .withProxyUrl('http://main--foo--bar.aem.page')
+        .withSite('foo')
+        .withOrg('bar')
+        .withHttpPort(0);
+      await project.init();
+      try {
+        await project.start();
+        const resp = await getFetch()(`http://127.0.0.1:${project.server.port}/index.html`);
+        assert.strictEqual(resp.status, 200);
+        const body = await resp.text();
+        assert.ok(body.includes('src="https://main--foo--bar.preview.da.live/media_123.png"'));
+        assert.ok(!body.includes('content.da.live'));
+      } finally {
+        await project.stop();
+      }
+    });
+
     it('falls through to proxy when file is not in content/', async () => {
       const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
       await fse.ensureDir(path.join(cwd, CONTENT_DIR));

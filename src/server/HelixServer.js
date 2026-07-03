@@ -466,6 +466,11 @@ export class HelixServer extends BaseServer {
               ? `${contentFilePath.slice(0, -'.plain.html'.length)}.html`
               : contentFilePath;
             let htmlContent = await readFile(servedFilePath, 'utf-8');
+            htmlContent = utils.rewriteDaContentImageUrls(
+              htmlContent,
+              this._project.org,
+              this._project.site,
+            );
             if (isPlainFallback) {
               if (liveReload) {
                 liveReload.registerFile(ctx.requestId, servedFilePath);

@@ -348,4 +348,38 @@ describe('Utils Test', () => {
       assert.strictEqual(utils.extractMainContent(html), '  \n  ');
     });
   });
+
+  describe('rewriteDaContentImageUrls', () => {
+    it('rewrites content.da.live image src to the site preview domain', () => {
+      const html = '<img src="https://content.da.live/bar/foo/media_123.png">';
+      assert.strictEqual(
+        utils.rewriteDaContentImageUrls(html, 'bar', 'foo'),
+        '<img src="https://main--foo--bar.preview.da.live/media_123.png">',
+      );
+    });
+
+    it('rewrites multiple occurrences', () => {
+      const html = '<img src="https://content.da.live/bar/foo/a.png">'
+        + '<img src="https://content.da.live/bar/foo/b.png">';
+      assert.strictEqual(
+        utils.rewriteDaContentImageUrls(html, 'bar', 'foo'),
+        '<img src="https://main--foo--bar.preview.da.live/a.png">'
+        + '<img src="https://main--foo--bar.preview.da.live/b.png">',
+      );
+    });
+
+    it('does not rewrite urls for a different org/site', () => {
+      const html = '<img src="https://content.da.live/other/site/media_123.png">';
+      assert.strictEqual(
+        utils.rewriteDaContentImageUrls(html, 'bar', 'foo'),
+        html,
+      );
+    });
+
+    it('returns html unchanged when org or site is missing', () => {
+      const html = '<img src="https://content.da.live/bar/foo/media_123.png">';
+      assert.strictEqual(utils.rewriteDaContentImageUrls(html, '', 'foo'), html);
+      assert.strictEqual(utils.rewriteDaContentImageUrls(html, 'bar', ''), html);
+    });
+  });
 });
