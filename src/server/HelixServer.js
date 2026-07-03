@@ -11,6 +11,7 @@
  */
 import crypto from 'crypto';
 import express from 'express';
+import { rateLimit } from 'express-rate-limit';
 import { promisify } from 'util';
 import path from 'path';
 import { lstat, readFile } from 'fs/promises';
@@ -27,6 +28,15 @@ import { DA_IMS_CLIENT_ID, DA_IMS_SCOPE, startDaLoginRedirect } from '../content
 const LOGIN_ROUTE = '/.aem/cli/login';
 const LOGIN_ACK_ROUTE = '/.aem/cli/login/ack';
 const DA_LOGIN_ROUTE = '/.aem/cli/da-login';
+
+// Local dev-server only, but both routes trigger real side effects (a live server
+// bind on :9898, an outbound redirect to IMS) — cap abuse from a runaway page/script.
+const daContentAuthRateLimit = rateLimit({
+  windowMs: 60_000,
+  limit: 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+});
 
 // HTML folder candidate extensions, in lookup order.
 // First entry takes precedence when multiple candidates exist on disk.
@@ -655,8 +665,12 @@ export class HelixServer extends BaseServer {
     this.app.get(LOGIN_ACK_ROUTE, asyncHandler(this.handleLoginAck.bind(this)));
     this.app.post(LOGIN_ACK_ROUTE, express.json(), asyncHandler(this.handleLoginAck.bind(this)));
     this.app.options(LOGIN_ACK_ROUTE, asyncHandler(this.handleLoginAck.bind(this)));
-    this.app.get('/__internal__/da-content-auth.js', (req, res) => utils.serveDaContentAuthScript(res));
-    this.app.get(DA_LOGIN_ROUTE, this.handleDaLogin.bind(this));
+    this.app.get(
+      '/__internal__/da-content-auth.js',
+      daContentAuthRateLimit,
+      (req, res) => utils.serveDaContentAuthScript(res),
+    );
+    this.app.get(DA_LOGIN_ROUTE, daContentAuthRateLimit, this.handleDaLogin.bind(this));
 
     // Add HTML folder handler before the general proxy handler
     if (this._htmlFolder) {

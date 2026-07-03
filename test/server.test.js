@@ -554,6 +554,30 @@ describe('Helix Server', () => {
         await project.stop();
       }
     });
+
+    it('rate-limits repeated requests', async () => {
+      const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
+      const project = new HelixProject()
+        .withCwd(cwd)
+        .withHttpPort(0);
+      await project.init();
+      try {
+        await project.start();
+        const { port } = project.server;
+        let lastStatus;
+        for (let i = 0; i < 21; i += 1) {
+          // eslint-disable-next-line no-await-in-loop
+          const resp = await getFetch()(`http://127.0.0.1:${port}/.aem/cli/da-login`, {
+            cache: 'no-store',
+            redirect: 'manual',
+          });
+          lastStatus = resp.status;
+        }
+        assert.strictEqual(lastStatus, 429);
+      } finally {
+        await project.stop();
+      }
+    });
   });
 
   it('starts auto login when receiving 401 during navigation', async () => {
