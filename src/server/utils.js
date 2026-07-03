@@ -31,6 +31,10 @@ const CONSOLE_INTERCEPTOR = readFileSync(
   path.join(__dirname, '../../packages/browser-injectables/src/console-interceptor.js'),
   'utf-8',
 );
+const DA_CONTENT_AUTH_SCRIPT = readFileSync(
+  path.join(__dirname, '../../packages/browser-injectables/src/da-content-auth.js'),
+  'utf-8',
+);
 
 const utils = {
   status2level(status, debug3xx) {
@@ -807,6 +811,58 @@ window.LiveReloadOptions = {
     const from = `https://content.da.live/${org}/${site}/`;
     const to = `https://main--${site}--${org}.preview.da.live/`;
     return html.split(from).join(to);
+  },
+
+  /**
+   * Finds one concrete asset path served from `previewOrigin` in the page (e.g. an
+   * image src), so the browser can probe *that* to check for a valid auth cookie —
+   * the site's root document is often served regardless of auth, only assets are
+   * gated, so probing `/` would give a false "already authorized" reading.
+   * @param {string} html html content
+   * @param {string} previewOrigin e.g. `https://main--site--org.preview.da.live`
+   * @returns {string} an absolute path (starting with `/`), defaults to `/` if none found
+   */
+  findDaPreviewProbePath(html, previewOrigin) {
+    const escaped = previewOrigin.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const match = html.match(new RegExp(`${escaped}(/[^"'\\s)]*)`));
+    return match ? match[1] : '/';
+  },
+
+  /**
+   * Injects the IMS-auth bootstrap that forwards an access token to `/gimme_cookie`
+   * on the given preview origin, so images served from that origin (after
+   * {@link rewriteDaContentImageUrls}) are authorized. Redirects the browser to the
+   * IMS login screen if there is no existing session.
+   * @param {string} html full HTML document (must contain a `</head>`)
+   * @param {{ previewOrigin: string, probePath: string, clientId: string, scope: string }} options
+   * @returns {string} html with the auth bootstrap injected, unchanged if no `</head>` found
+   */
+  injectDaContentAuthScript(html, {
+    previewOrigin, probePath, clientId, scope,
+  }) {
+    const match = html.match(/<\/head>/i);
+    if (!match) {
+      return html;
+    }
+    const { index } = match;
+    const nonceMatch = html.match(/nonce="([a-zA-Z0-9+/=]+)"/);
+    const nonce = nonceMatch ? ` nonce="${nonceMatch[1]}"` : '';
+    const config = JSON.stringify({
+      previewOrigin, probePath, clientId, scope,
+    });
+    const script = `<script${nonce}>window.DaContentAuthConfig=${config};</script>`
+      + `<script${nonce} src="/__internal__/da-content-auth.js"></script>`;
+    return `${html.substring(0, index)}${script}${html.substring(index)}`;
+  },
+
+  /**
+   * Serves the da-content-auth bootstrap as a static JS file (referenced by
+   * {@link injectDaContentAuthScript}).
+   * @param {Express.Response} res response
+   */
+  serveDaContentAuthScript(res) {
+    res.set('content-type', 'application/javascript');
+    res.send(DA_CONTENT_AUTH_SCRIPT);
   },
 
   /**

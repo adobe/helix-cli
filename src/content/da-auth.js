@@ -16,8 +16,11 @@ import open from 'open';
 import { ensureGitIgnored } from './content-git.js';
 
 const IMS_ORIGIN = 'https://ims-na1.adobelogin.com';
-const CLIENT_ID = 'darkalley';
-const SCOPE = 'ab.manage,AdobeID,gnav,openid,org.read,read_organizations,session,aem.frontend.all,additional_info.ownerOrg,additional_info.projectedProductContext,account_cluster.read';
+/** Shared with da-live's own IMS client (see da-live/scripts/scripts.js). */
+export const DA_IMS_CLIENT_ID = 'darkalley';
+export const DA_IMS_SCOPE = 'ab.manage,AdobeID,gnav,openid,org.read,read_organizations,session,aem.frontend.all,additional_info.ownerOrg,additional_info.projectedProductContext,account_cluster.read';
+const CLIENT_ID = DA_IMS_CLIENT_ID;
+const SCOPE = DA_IMS_SCOPE;
 const CALLBACK_PORT = 9898;
 const REDIRECT_URI = `http://localhost:${CALLBACK_PORT}/callback`;
 
@@ -70,11 +73,15 @@ function isTokenExpired(stored) {
  * IMS redirects to http://localhost:{port}/callback#access_token=TOKEN
  * The fragment never reaches the server, so /callback serves a tiny HTML page
  * that reads the fragment via JS and forwards the token to /token, then
- * redirects the browser to https://tools.aem.live/cli/logged-in on success.
+ * redirects the browser on success — to `finalRedirectUrl` (with the token appended
+ * as a URL fragment) when given, otherwise to https://tools.aem.live/cli/logged-in.
  *
+ * @param {string} [finalRedirectUrl] where to send the browser after login,
+ *   used by the `aem up` dev-server login flow to return to the page that
+ *   triggered it. Omitted for the CLI's own `content clone`/`content push` login.
  * @returns {Promise<{token: string, expiresIn: number|null}>}
  */
-function waitForToken() {
+function waitForToken(finalRedirectUrl) {
   return new Promise((resolve, reject) => {
     let timeout;
     const server = http.createServer((req, res) => {
@@ -83,6 +90,9 @@ function waitForToken() {
       // Step 1: IMS lands here with the token in the fragment.
       // Serve a page that extracts it and calls /token.
       if (url.pathname === '/callback') {
+        const finalizeJs = finalRedirectUrl
+          ? "window.location.href = loggedInUrl + '#access_token=' + encodeURIComponent(token) + (expiresIn ? '&expires_in=' + encodeURIComponent(expiresIn) : '');"
+          : 'window.location.href = loggedInUrl;';
         res.writeHead(200, { 'Content-Type': 'text/html' });
         res.end(`<!DOCTYPE html><html><head><title>Logging in...</title></head><body>
 <script>
@@ -93,7 +103,7 @@ function waitForToken() {
   const dest = token
     ? '/token?access_token=' + encodeURIComponent(token) + (expiresIn ? '&expires_in=' + encodeURIComponent(expiresIn) : '')
     : '/token?error=' + encodeURIComponent(error || 'unknown');
-  const loggedInUrl = 'https://tools.aem.live/cli/logged-in';
+  const loggedInUrl = ${JSON.stringify(finalRedirectUrl || 'https://tools.aem.live/cli/logged-in')};
   if (!token) {
     fetch(dest);
     document.body.innerHTML = '<h2>Login failed.</h2>';
@@ -102,7 +112,7 @@ function waitForToken() {
     document.body.appendChild(errP);
   } else {
     fetch(dest)
-      .then(() => { window.location.href = loggedInUrl; })
+      .then(() => { ${finalizeJs} })
       .catch(() => {
         document.body.innerHTML = '<h2>Login failed.</h2><p>Could not complete login.</p>';
       });
@@ -175,6 +185,31 @@ async function login(log, projectDir) {
 }
 
 // ─── Public API ──────────────────────────────────────────────────────────────
+
+/**
+ * Starts the IMS login flow for the `aem up` dev server: unlike {@link getValidToken},
+ * this doesn't open a browser itself — the caller already has one open (the page that
+ * needs auth). Returns the IMS authorize URL to redirect that page to; the browser
+ * comes back to `finalRedirectUrl` with `#access_token=...` once login completes.
+ *
+ * The `darkalley` IMS client only allows `http://localhost:9898/callback` as a
+ * redirect_uri (arbitrary localhost ports/paths are rejected), so the round trip
+ * always passes through the fixed callback server before returning to the caller.
+ *
+ * @param {string} finalRedirectUrl page to send the browser back to after login
+ * @returns {string} the IMS authorize URL to redirect the browser to
+ */
+export function startDaLoginRedirect(finalRedirectUrl) {
+  const params = new URLSearchParams({
+    response_type: 'token',
+    client_id: CLIENT_ID,
+    scope: SCOPE,
+    redirect_uri: REDIRECT_URI,
+  });
+  // fire-and-forget: the callback server delivers the browser to finalRedirectUrl itself
+  waitForToken(finalRedirectUrl).catch(() => {});
+  return `${IMS_ORIGIN}/ims/authorize/v2?${params}`;
+}
 
 /**
  * Returns a valid da.live access token. Triggers browser login if needed.

@@ -21,6 +21,7 @@ import { UnsecuredJWT } from 'jose';
 import path from 'path';
 import { h1NoCache } from '@adobe/fetch';
 import * as http from 'node:http';
+import esmock from 'esmock';
 import { HelixProject } from '../src/server/HelixProject.js';
 import {
   Nock, assertHttp, createTestRoot, setupProject, rawGet,
@@ -471,6 +472,88 @@ describe('Helix Server', () => {
     } finally {
       await project.stop();
     }
+  });
+
+  describe('da.live login redirect', () => {
+    it('redirects to the IMS authorize url for a same-origin return url', async () => {
+      // Mock startDaLoginRedirect: the real one starts a live callback server on
+      // :9898 that stays open for up to 5 minutes waiting for a token we'll never
+      // send, which would leak an open handle past the end of this test.
+      let calledWith;
+      const { HelixServer: MockedHelixServer } = await esmock('../src/server/HelixServer.js', {
+        '../src/content/da-auth.js': {
+          DA_IMS_CLIENT_ID: 'darkalley',
+          DA_IMS_SCOPE: 'AdobeID,openid',
+          startDaLoginRedirect: (finalRedirectUrl) => {
+            calledWith = finalRedirectUrl;
+            return 'https://ims-na1.adobelogin.com/ims/authorize/v2?client_id=darkalley&redirect_uri=http%3A%2F%2Flocalhost%3A9898%2Fcallback';
+          },
+        },
+      });
+      const { HelixProject: MockedHelixProject } = await esmock('../src/server/HelixProject.js', {
+        '../src/server/HelixServer.js': { HelixServer: MockedHelixServer },
+      });
+
+      const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
+      const project = new MockedHelixProject()
+        .withCwd(cwd)
+        .withHttpPort(0);
+      await project.init();
+      try {
+        await project.start();
+        const { port } = project.server;
+        const returnUrl = `http://127.0.0.1:${port}/index.html`;
+        const resp = await getFetch()(`http://127.0.0.1:${port}/.aem/cli/da-login?return=${encodeURIComponent(returnUrl)}`, {
+          cache: 'no-store',
+          redirect: 'manual',
+        });
+        assert.strictEqual(resp.status, 302);
+        const location = resp.headers.get('location');
+        assert.ok(location.startsWith('https://ims-na1.adobelogin.com/ims/authorize/v2?'));
+        assert.ok(location.includes('client_id=darkalley'));
+        assert.strictEqual(calledWith, returnUrl);
+      } finally {
+        await project.stop();
+      }
+    });
+
+    it('rejects a cross-origin return url', async () => {
+      const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
+      const project = new HelixProject()
+        .withCwd(cwd)
+        .withHttpPort(0);
+      await project.init();
+      try {
+        await project.start();
+        const { port } = project.server;
+        const resp = await getFetch()(`http://127.0.0.1:${port}/.aem/cli/da-login?return=${encodeURIComponent('https://evil.example/steal')}`, {
+          cache: 'no-store',
+          redirect: 'manual',
+        });
+        assert.strictEqual(resp.status, 400);
+      } finally {
+        await project.stop();
+      }
+    });
+
+    it('rejects a missing return url', async () => {
+      const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
+      const project = new HelixProject()
+        .withCwd(cwd)
+        .withHttpPort(0);
+      await project.init();
+      try {
+        await project.start();
+        const { port } = project.server;
+        const resp = await getFetch()(`http://127.0.0.1:${port}/.aem/cli/da-login`, {
+          cache: 'no-store',
+          redirect: 'manual',
+        });
+        assert.strictEqual(resp.status, 400);
+      } finally {
+        await project.stop();
+      }
+    });
   });
 
   it('starts auto login when receiving 401 during navigation', async () => {
@@ -1302,7 +1385,83 @@ describe('Helix Server', () => {
         assert.strictEqual(resp.status, 200);
         const body = await resp.text();
         assert.ok(body.includes('src="https://main--foo--bar.preview.da.live/media_123.png"'));
-        assert.ok(!body.includes('content.da.live'));
+        assert.ok(!body.includes('src="https://content.da.live'));
+        assert.ok(body.includes('window.DaContentAuthConfig={"previewOrigin":"https://main--foo--bar.preview.da.live","probePath":"/media_123.png","clientId":"darkalley"'));
+        assert.ok(body.includes('src="/__internal__/da-content-auth.js"'));
+      } finally {
+        await project.stop();
+      }
+    });
+
+    it('does not inject the da.live auth bootstrap when no image src is rewritten', async () => {
+      const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
+      await fse.ensureDir(path.join(cwd, CONTENT_DIR));
+      await fse.writeFile(
+        path.join(cwd, CONTENT_DIR, 'index.html'),
+        '<body><header></header><main><p>no images here</p></main><footer></footer></body>',
+      );
+      await fse.writeFile(
+        path.join(cwd, 'head.html'),
+        '<link rel="stylesheet" href="/styles.css"/>',
+      );
+
+      nock('http://main--foo--bar.aem.page')
+        .get('/head.html')
+        .reply(200, '', { 'content-type': 'text/html' })
+        .get('/metadata.json')
+        .reply(200, { data: [] });
+
+      const project = new HelixProject()
+        .withCwd(cwd)
+        .withProxyUrl('http://main--foo--bar.aem.page')
+        .withSite('foo')
+        .withOrg('bar')
+        .withHttpPort(0);
+      await project.init();
+      try {
+        await project.start();
+        const resp = await getFetch()(`http://127.0.0.1:${project.server.port}/index.html`);
+        assert.strictEqual(resp.status, 200);
+        const body = await resp.text();
+        assert.ok(!body.includes('DaContentAuthConfig'));
+        assert.ok(!body.includes('/__internal__/da-content-auth.js'));
+      } finally {
+        await project.stop();
+      }
+    });
+
+    it('injects the da.live auth bootstrap when content already references the preview host directly', async () => {
+      const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
+      await fse.ensureDir(path.join(cwd, CONTENT_DIR));
+      await fse.writeFile(
+        path.join(cwd, CONTENT_DIR, 'index.html'),
+        '<body><header></header><main><img src="https://main--foo--bar.preview.da.live/media_123.png"></main><footer></footer></body>',
+      );
+      await fse.writeFile(
+        path.join(cwd, 'head.html'),
+        '<link rel="stylesheet" href="/styles.css"/>',
+      );
+
+      nock('http://main--foo--bar.aem.page')
+        .get('/head.html')
+        .reply(200, '', { 'content-type': 'text/html' })
+        .get('/metadata.json')
+        .reply(200, { data: [] });
+
+      const project = new HelixProject()
+        .withCwd(cwd)
+        .withProxyUrl('http://main--foo--bar.aem.page')
+        .withSite('foo')
+        .withOrg('bar')
+        .withHttpPort(0);
+      await project.init();
+      try {
+        await project.start();
+        const resp = await getFetch()(`http://127.0.0.1:${project.server.port}/index.html`);
+        assert.strictEqual(resp.status, 200);
+        const body = await resp.text();
+        assert.ok(body.includes('window.DaContentAuthConfig={"previewOrigin":"https://main--foo--bar.preview.da.live","probePath":"/media_123.png","clientId":"darkalley"'));
+        assert.ok(body.includes('src="/__internal__/da-content-auth.js"'));
       } finally {
         await project.stop();
       }

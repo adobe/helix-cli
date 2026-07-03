@@ -22,9 +22,11 @@ import LiveReload from './LiveReload.js';
 import { saveSiteTokenToFile } from '../config/config-utils.js';
 import { CONTENT_DIR } from '../content/content-shared.js';
 import { transformContentMetadataHtml } from '../content/content-metadata-html.js';
+import { DA_IMS_CLIENT_ID, DA_IMS_SCOPE, startDaLoginRedirect } from '../content/da-auth.js';
 
 const LOGIN_ROUTE = '/.aem/cli/login';
 const LOGIN_ACK_ROUTE = '/.aem/cli/login/ack';
+const DA_LOGIN_ROUTE = '/.aem/cli/da-login';
 
 // HTML folder candidate extensions, in lookup order.
 // First entry takes precedence when multiple candidates exist on disk.
@@ -138,6 +140,34 @@ export class HelixServer extends BaseServer {
     this._loginState = crypto.randomUUID();
     const loginUrl = `${this._project.siteLoginUrl}&state=${this._loginState}`;
     res.status(302).set('location', loginUrl).send('');
+  }
+
+  /**
+   * Kicks off the IMS login flow for a page that needs the da.live preview cookie
+   * (see {@link utils.injectDaContentAuthScript}). Redirects to IMS; the browser comes
+   * back to the `return` url (validated same-origin, to avoid leaking the token via an
+   * open redirect) with `#access_token=...` once the fixed :9898 callback catches it.
+   */
+  handleDaLogin(req, res) {
+    if (!req.query.return) {
+      res.status(400).send('Invalid or missing return url.');
+      return;
+    }
+    const expectedOrigin = `${req.protocol}://${req.get('host')}`;
+    let target;
+    try {
+      const parsed = new URL(req.query.return, expectedOrigin);
+      if (parsed.origin !== expectedOrigin) {
+        throw new Error('cross-origin return url');
+      }
+      target = parsed.href;
+    } catch (e) {
+      res.status(400).send('Invalid or missing return url.');
+      return;
+    }
+    this.log.debug(`Starting da.live login, returning to ${target} when done.`);
+    const authUrl = startDaLoginRedirect(target);
+    res.status(302).set('location', authUrl).send('');
   }
 
   async handleLoginAck(req, res) {
@@ -471,6 +501,12 @@ export class HelixServer extends BaseServer {
               this._project.org,
               this._project.site,
             );
+            const previewOrigin = this._project.org && this._project.site
+              ? `https://main--${this._project.site}--${this._project.org}.preview.da.live`
+              : null;
+            // Content may already reference the preview host directly (not just via
+            // the content.da.live rewrite above), so gate on presence, not on rewrite.
+            const needsDaContentAuth = !!previewOrigin && htmlContent.includes(previewOrigin);
             if (isPlainFallback) {
               if (liveReload) {
                 liveReload.registerFile(ctx.requestId, servedFilePath);
@@ -507,6 +543,14 @@ export class HelixServer extends BaseServer {
               if (metaTagsHtml) {
                 htmlContent = htmlContent.replace(/<\/head>/i, `${metaTagsHtml}</head>`);
               }
+            }
+            if (needsDaContentAuth) {
+              htmlContent = utils.injectDaContentAuthScript(htmlContent, {
+                previewOrigin,
+                probePath: utils.findDaPreviewProbePath(htmlContent, previewOrigin),
+                clientId: DA_IMS_CLIENT_ID,
+                scope: DA_IMS_SCOPE,
+              });
             }
             if (liveReload) {
               htmlContent = utils.injectLiveReloadScript(htmlContent, this);
@@ -611,6 +655,8 @@ export class HelixServer extends BaseServer {
     this.app.get(LOGIN_ACK_ROUTE, asyncHandler(this.handleLoginAck.bind(this)));
     this.app.post(LOGIN_ACK_ROUTE, express.json(), asyncHandler(this.handleLoginAck.bind(this)));
     this.app.options(LOGIN_ACK_ROUTE, asyncHandler(this.handleLoginAck.bind(this)));
+    this.app.get('/__internal__/da-content-auth.js', (req, res) => utils.serveDaContentAuthScript(res));
+    this.app.get(DA_LOGIN_ROUTE, this.handleDaLogin.bind(this));
 
     // Add HTML folder handler before the general proxy handler
     if (this._htmlFolder) {
