@@ -44,6 +44,7 @@
   },
   "dependencies": {
     "@adobe/fetch": "4.3.0",
+    "@adobe/helix-html-pipeline": "6.29.6",
     "@adobe/helix-log": "7.0.0",
     "@adobe/helix-shared-config": "11.1.27",
     "@adobe/helix-shared-git": "3.0.25",
@@ -70,8 +71,8 @@
     "ini": "7.0.0",
     "isomorphic-git": "1.38.4",
     "jose": "6.2.3",
-    "mime": "4.1.0",
     "livereload-js": "4.0.2",
+    "mime": "4.1.0",
     "node-diff3": "3.2.1",
     "node-fetch": "3.3.2",
     "open": "11.0.0",

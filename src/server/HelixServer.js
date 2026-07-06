@@ -22,6 +22,7 @@ import LiveReload from './LiveReload.js';
 import { saveSiteTokenToFile } from '../config/config-utils.js';
 import { CONTENT_DIR } from '../content/content-shared.js';
 import { transformContentMetadataHtml } from '../content/content-metadata-html.js';
+import { transformContentIconsHtml } from '../content/content-icons-html.js';
 
 const LOGIN_ROUTE = '/.aem/cli/login';
 const LOGIN_ACK_ROUTE = '/.aem/cli/login/ack';
@@ -489,7 +490,7 @@ export class HelixServer extends BaseServer {
               absolutePageUrl,
               sheetRow,
             });
-            htmlContent = htmlFragment;
+            htmlContent = transformContentIconsHtml(htmlFragment);
             // content/ files are plain HTML (body only, no <head>)
             // wrap with a full document and inject local head.html
             if (!htmlContent.includes('<head>')) {

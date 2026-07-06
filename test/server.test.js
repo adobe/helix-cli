@@ -1271,6 +1271,41 @@ describe('Helix Server', () => {
       }
     });
 
+    it('rewrites :icon-name: syntax in content/ into an icon span', async () => {
+      const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
+      await fse.ensureDir(path.join(cwd, CONTENT_DIR));
+      await fse.writeFile(
+        path.join(cwd, CONTENT_DIR, 'index.html'),
+        '<body><main><p>Hello :smile: world</p></main></body>',
+      );
+      await fse.writeFile(
+        path.join(cwd, 'head.html'),
+        '<link rel="stylesheet" href="/styles.css"/>',
+      );
+
+      nock('http://main--foo--bar.aem.page')
+        .get('/head.html')
+        .reply(200, '', { 'content-type': 'text/html' })
+        .get('/metadata.json')
+        .reply(200, { data: [] });
+
+      const project = new HelixProject()
+        .withCwd(cwd)
+        .withProxyUrl('http://main--foo--bar.aem.page')
+        .withHttpPort(0);
+      await project.init();
+      try {
+        await project.start();
+        const resp = await getFetch()(`http://127.0.0.1:${project.server.port}/index.html`);
+        assert.strictEqual(resp.status, 200);
+        const body = await resp.text();
+        assert.ok(body.includes('<span class="icon icon-smile"></span>'));
+        assert.ok(!body.includes(':smile:'));
+      } finally {
+        await project.stop();
+      }
+    });
+
     it('falls through to proxy when file is not in content/', async () => {
       const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
       await fse.ensureDir(path.join(cwd, CONTENT_DIR));
