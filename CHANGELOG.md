@@ -1,3 +1,10 @@
+## [16.20.9](https://github.com/adobe/helix-cli/compare/v16.20.8...v16.20.9) (2026-07-07)
+
+
+### Bug Fixes
+
+* inject hlx:proxyUrl meta for pages served from local content/ ([#2753](https://github.com/adobe/helix-cli/issues/2753)) ([271bfcf](https://github.com/adobe/helix-cli/commit/271bfcfa01316944ce5b4e26e767d59a189b78bc))
+
 ## [16.20.8](https://github.com/adobe/helix-cli/compare/v16.20.7...v16.20.8) (2026-07-06)
 
 
