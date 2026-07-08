@@ -208,3 +208,23 @@ describe('getValidToken', () => {
     assert.strictEqual(readPath, path.join(TEST_PROJECT_DIR, '.hlx', '.da-token.json'));
   });
 });
+
+describe('startDaLoginRedirect', () => {
+  it('returns the fixed :9898 callback as redirect_uri, regardless of the return url\'s own port', async () => {
+    // Mock http so no real socket is bound (the fire-and-forget callback server
+    // this starts is never asked for a token in this test).
+    const { startDaLoginRedirect } = await esmock('../../src/content/da-auth.js', {
+      'node:http': {
+        default: {
+          createServer: () => ({ listen: () => {}, close: () => {}, on: () => {} }),
+        },
+      },
+    });
+    const authUrl = startDaLoginRedirect('http://127.0.0.1:54321/index.html');
+    const parsed = new URL(authUrl);
+    assert.strictEqual(parsed.origin, 'https://ims-na1.adobelogin.com');
+    assert.strictEqual(parsed.searchParams.get('response_type'), 'token');
+    assert.strictEqual(parsed.searchParams.get('client_id'), 'darkalley');
+    assert.strictEqual(parsed.searchParams.get('redirect_uri'), 'http://localhost:9898/callback');
+  });
+});

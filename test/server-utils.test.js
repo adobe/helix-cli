@@ -348,4 +348,104 @@ describe('Utils Test', () => {
       assert.strictEqual(utils.extractMainContent(html), '  \n  ');
     });
   });
+
+  describe('rewriteDaContentImageUrls', () => {
+    it('rewrites content.da.live image src to the site preview domain', () => {
+      const html = '<img src="https://content.da.live/bar/foo/media_123.png">';
+      assert.strictEqual(
+        utils.rewriteDaContentImageUrls(html, 'bar', 'foo'),
+        '<img src="https://main--foo--bar.preview.da.live/media_123.png">',
+      );
+    });
+
+    it('rewrites multiple occurrences', () => {
+      const html = '<img src="https://content.da.live/bar/foo/a.png">'
+        + '<img src="https://content.da.live/bar/foo/b.png">';
+      assert.strictEqual(
+        utils.rewriteDaContentImageUrls(html, 'bar', 'foo'),
+        '<img src="https://main--foo--bar.preview.da.live/a.png">'
+        + '<img src="https://main--foo--bar.preview.da.live/b.png">',
+      );
+    });
+
+    it('does not rewrite urls for a different org/site', () => {
+      const html = '<img src="https://content.da.live/other/site/media_123.png">';
+      assert.strictEqual(
+        utils.rewriteDaContentImageUrls(html, 'bar', 'foo'),
+        html,
+      );
+    });
+
+    it('returns html unchanged when org or site is missing', () => {
+      const html = '<img src="https://content.da.live/bar/foo/media_123.png">';
+      assert.strictEqual(utils.rewriteDaContentImageUrls(html, '', 'foo'), html);
+      assert.strictEqual(utils.rewriteDaContentImageUrls(html, 'bar', ''), html);
+    });
+  });
+
+  describe('findDaPreviewProbePath', () => {
+    const previewOrigin = 'https://main--foo--bar.preview.da.live';
+
+    it('finds the path of an asset served from the preview origin', () => {
+      const html = `<img src="${previewOrigin}/.index/photo-abc123.png" alt="">`;
+      assert.strictEqual(utils.findDaPreviewProbePath(html, previewOrigin), '/.index/photo-abc123.png');
+    });
+
+    it('stops at the closing quote', () => {
+      const html = `<source srcset="${previewOrigin}/.index/photo.png" media="(min-width: 600px)">`;
+      assert.strictEqual(utils.findDaPreviewProbePath(html, previewOrigin), '/.index/photo.png');
+    });
+
+    it('defaults to / when no asset path is found', () => {
+      const html = '<p>no preview links here</p>';
+      assert.strictEqual(utils.findDaPreviewProbePath(html, previewOrigin), '/');
+    });
+  });
+
+  describe('injectDaContentAuthScript', () => {
+    const options = {
+      previewOrigin: 'https://main--foo--bar.preview.da.live',
+      probePath: '/.index/photo-abc123.png',
+      clientId: 'darkalley',
+      scope: 'AdobeID,openid',
+    };
+
+    it('injects the config and auth bootstrap script before </head>', () => {
+      const html = '<html><head><title>Test</title></head><body></body></html>';
+      const out = utils.injectDaContentAuthScript(html, options);
+      assert.ok(out.includes('<script>window.DaContentAuthConfig={'));
+      assert.ok(out.includes('"previewOrigin":"https://main--foo--bar.preview.da.live"'));
+      assert.ok(out.includes('"probePath":"/.index/photo-abc123.png"'));
+      assert.ok(out.includes('"clientId":"darkalley"'));
+      assert.ok(out.includes('<script src="/__internal__/da-content-auth.js">'));
+      assert.ok(out.indexOf('DaContentAuthConfig') < out.indexOf('</head>'));
+    });
+
+    it('returns html unchanged when there is no </head>', () => {
+      const html = '<body>no head here</body>';
+      assert.strictEqual(utils.injectDaContentAuthScript(html, options), html);
+    });
+
+    it('reuses the page CSP nonce on injected scripts', () => {
+      const html = '<html><head><script nonce="aem" src="/scripts/aem.js"></script></head><body></body></html>';
+      const out = utils.injectDaContentAuthScript(html, options);
+      assert.ok(out.includes('<script nonce="aem">window.DaContentAuthConfig='));
+      assert.ok(out.includes('<script nonce="aem" src="/__internal__/da-content-auth.js">'));
+    });
+  });
+
+  describe('serveDaContentAuthScript', () => {
+    it('serves the bootstrap script source as javascript', () => {
+      const headers = {};
+      let sent;
+      const res = {
+        set: (key, value) => { headers[key] = value; },
+        send: (body) => { sent = body; },
+      };
+      utils.serveDaContentAuthScript(res);
+      assert.strictEqual(headers['content-type'], 'application/javascript');
+      assert.ok(sent.includes('DaContentAuthConfig'));
+      assert.ok(sent.includes('imslib.min.js'));
+    });
+  });
 });
