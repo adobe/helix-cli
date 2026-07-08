@@ -1,3 +1,10 @@
+## [16.20.10](https://github.com/adobe/helix-cli/compare/v16.20.9...v16.20.10) (2026-07-08)
+
+
+### Bug Fixes
+
+* **server:** auth to da.live preview host for content.da.live images ([#2754](https://github.com/adobe/helix-cli/issues/2754)) ([c3e4b53](https://github.com/adobe/helix-cli/commit/c3e4b53c2d8a8844a7917e3aff0c856ea7d1c631)), closes [#2752](https://github.com/adobe/helix-cli/issues/2752)
+
 ## [16.20.9](https://github.com/adobe/helix-cli/compare/v16.20.8...v16.20.9) (2026-07-07)
 
 
