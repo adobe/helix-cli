@@ -1373,6 +1373,7 @@ describe('Helix Server', () => {
         assert.ok(body.includes('content="/ca/fr_ca/nav/nav"'));
         assert.ok(body.includes('name="footer"'));
         assert.ok(body.includes('content="/ca/fr_ca/footer/footer"'));
+        assert.ok(body.includes('<meta property="hlx:proxyUrl" content="http://main--foo--bar.aem.page/ca/fr_ca/recipes/chicken">'));
       } finally {
         await project.stop();
       }

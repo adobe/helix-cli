@@ -554,6 +554,13 @@ export class HelixServer extends BaseServer {
                 htmlContent = htmlContent.replace(/<\/head>/i, `${metaTagsHtml}</head>`);
               }
             }
+            const proxyPageUrl = new URL(ctx.url, proxyUrl);
+            for (const [key, value] of proxyUrl.searchParams.entries()) {
+              proxyPageUrl.searchParams.append(key, value);
+            }
+            htmlContent = utils.injectMeta(htmlContent, {
+              'hlx:proxyUrl': proxyPageUrl.href,
+            });
             if (needsDaContentAuth) {
               htmlContent = utils.injectDaContentAuthScript(htmlContent, {
                 previewOrigin,
