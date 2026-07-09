@@ -12,39 +12,36 @@
 
 /* eslint-env mocha */
 import assert from 'assert';
-import {
-  normalizePathForMetadataMatch,
-  compileMetadataSheetPatterns,
-  mergeMetadataSheetRows,
-} from '../src/server/MetadataSheetSupport.js';
+import { buildMetadataModifiers } from '../src/server/MetadataSheetSupport.js';
 
 describe('MetadataSheetSupport', () => {
-  it('normalizePathForMetadataMatch strips .html', () => {
-    assert.strictEqual(normalizePathForMetadataMatch('/a/b/c.html'), '/a/b/c');
-    assert.strictEqual(normalizePathForMetadataMatch('/x'), '/x');
-  });
+  describe('buildMetadataModifiers', () => {
+    it('uses template from specific row and nav from broader when specific leaves nav empty', () => {
+      // real metadata.json convention: broad rule first, specific override later
+      const rows = [
+        { URL: '/ca/fr_ca/**', nav: '/nav1', template: 'broad' },
+        { URL: '/ca/fr_ca/recipes/**', nav: '', template: 'recipe' },
+      ];
+      const modifiers = buildMetadataModifiers(rows);
+      const hit = modifiers.getModifiers('/ca/fr_ca/recipes/chicken');
+      assert.strictEqual(hit.template, 'recipe');
+      assert.strictEqual(hit.nav, '/nav1');
+    });
 
-  it('mergeMetadataSheetRows uses template from specific row and nav from broader when specific leaves nav empty', () => {
-    const rows = [
-      { URL: '/ca/fr_ca/**', nav: '/nav1', template: 'broad' },
-      { URL: '/ca/fr_ca/recipes/**', nav: '', template: 'recipe' },
-    ];
-    const compiled = compileMetadataSheetPatterns(rows);
-    const hit = mergeMetadataSheetRows('/ca/fr_ca/recipes/chicken', compiled);
-    assert.ok(hit);
-    assert.strictEqual(hit.template, 'recipe');
-    assert.strictEqual(hit.nav, '/nav1');
-  });
+    it('returns broader rule when specific does not match', () => {
+      const rows = [
+        { URL: '/ca/fr_ca/**', nav: '/nav1', template: 'section' },
+        { URL: '/ca/fr_ca/recipes/**', template: 'recipe' },
+      ];
+      const modifiers = buildMetadataModifiers(rows);
+      const hit = modifiers.getModifiers('/ca/fr_ca/about');
+      assert.strictEqual(hit.template, 'section');
+      assert.strictEqual(hit.nav, '/nav1');
+    });
 
-  it('mergeMetadataSheetRows returns broader rule when specific does not match', () => {
-    const rows = [
-      { URL: '/ca/fr_ca/**', nav: '/nav1', template: 'section' },
-      { URL: '/ca/fr_ca/recipes/**', template: 'recipe' },
-    ];
-    const compiled = compileMetadataSheetPatterns(rows);
-    const hit = mergeMetadataSheetRows('/ca/fr_ca/about', compiled);
-    assert.ok(hit);
-    assert.strictEqual(hit.template, 'section');
-    assert.strictEqual(hit.nav, '/nav1');
+    it('returns an empty modifier object for an unmatched path', () => {
+      const modifiers = buildMetadataModifiers([{ URL: '/x/**', nav: '/n' }]);
+      assert.strictEqual(Object.keys(modifiers.getModifiers('/y')).length, 0);
+    });
   });
 });

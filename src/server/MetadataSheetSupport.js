@@ -10,24 +10,9 @@
  * governing permissions and limitations under the License.
  */
 
-import globToRegExp from 'glob-to-regexp';
+// eslint-disable-next-line import/no-unresolved, import/extensions
+import { Modifiers } from '@adobe/helix-html-pipeline/src/utils/modifiers.js';
 import { getFetch } from '../fetch-utils.js';
-
-/**
- * Normalizes the request path for matching against metadata.json URL globs.
- * @param {string} pathname
- * @returns {string}
- */
-export function normalizePathForMetadataMatch(pathname) {
-  let p = pathname || '/';
-  if (!p.startsWith('/')) {
-    p = `/${p}`;
-  }
-  if (p.length > 5 && p.endsWith('.html')) {
-    p = p.slice(0, -5);
-  }
-  return p || '/';
-}
 
 /**
  * @param {unknown} body
@@ -45,79 +30,13 @@ function extractDataRows(body) {
 }
 
 /**
+ * Builds a `Modifiers` instance (the same class `helix-html-pipeline` uses to resolve
+ * sheet-based metadata overrides in production) from raw metadata.json sheet rows.
  * @param {object[]} rows
- * @returns {Array<{ pattern: string, regex: RegExp, row: object }>}
+ * @returns {Modifiers}
  */
-export function compileMetadataSheetPatterns(rows) {
-  /** @type {Array<{ pattern: string, regex: RegExp, row: object }>} */
-  const out = [];
-  for (const row of rows) {
-    const pattern = row.URL;
-    if (typeof pattern !== 'string' || !pattern.trim()) {
-      // eslint-disable-next-line no-continue
-      continue;
-    }
-    try {
-      const regex = globToRegExp(pattern, { globstar: true });
-      out.push({ pattern, regex, row });
-    } catch {
-      // eslint-disable-next-line no-continue
-      continue;
-    }
-  }
-  return out;
-}
-
-/**
- * Merges all matching metadata sheet rows for a path: most specific URL pattern first,
- * then each field uses the first non-empty value (empty string falls through to broader rows).
- * @param {string} normalizedPath
- * @param {Array<{ pattern: string, regex: RegExp, row: object }>} compiled
- * @returns {Record<string, string> | null}
- */
-export function mergeMetadataSheetRows(normalizedPath, compiled) {
-  /** @type {Array<{ pattern: string, row: object }>} */
-  const hits = [];
-  for (const { pattern, regex, row } of compiled) {
-    if (regex.test(normalizedPath)) {
-      hits.push({ pattern, row });
-    }
-  }
-  if (hits.length === 0) {
-    return null;
-  }
-  hits.sort((a, b) => b.pattern.length - a.pattern.length);
-
-  /** @type {Set<string>} */
-  const keys = new Set();
-  for (const { row } of hits) {
-    for (const k of Object.keys(row)) {
-      if (k !== 'URL' && !k.startsWith(':')) {
-        keys.add(k);
-      }
-    }
-  }
-
-  /** @type {Record<string, string>} */
-  const merged = {};
-  for (const key of keys) {
-    for (const { row } of hits) {
-      const v = row[key];
-      if (v === undefined || v === null) {
-        // eslint-disable-next-line no-continue
-        continue;
-      }
-      const s = String(v).trim();
-      if (s === '') {
-        // eslint-disable-next-line no-continue
-        continue;
-      }
-      merged[key] = s;
-      break;
-    }
-  }
-
-  return Object.keys(merged).length > 0 ? merged : null;
+export function buildMetadataModifiers(rows) {
+  return Modifiers.fromModifierSheet(rows);
 }
 
 export default class MetadataSheetSupport {
@@ -133,8 +52,8 @@ export default class MetadataSheetSupport {
     this.allowInsecure = allowInsecure;
     this.siteToken = siteToken || '';
     this.cookie = '';
-    /** @type {Array<{ pattern: string, regex: RegExp, row: object }> | null} */
-    this._compiled = null;
+    /** @type {Modifiers | null} */
+    this._modifiers = null;
     /** @type {Promise<void> | null} */
     this._loadPromise = null;
   }
@@ -143,7 +62,7 @@ export default class MetadataSheetSupport {
     const next = cookie || '';
     if (this.cookie !== next) {
       this.cookie = next;
-      this._compiled = null;
+      this._modifiers = null;
       this._loadPromise = null;
     }
   }
@@ -152,18 +71,18 @@ export default class MetadataSheetSupport {
     const next = siteToken || '';
     if (this.siteToken !== next) {
       this.siteToken = next;
-      this._compiled = null;
+      this._modifiers = null;
       this._loadPromise = null;
     }
   }
 
   invalidate() {
-    this._compiled = null;
+    this._modifiers = null;
     this._loadPromise = null;
   }
 
   async ensureLoaded() {
-    if (this._compiled !== null) {
+    if (this._modifiers !== null) {
       return;
     }
     if (this._loadPromise) {
@@ -193,29 +112,25 @@ export default class MetadataSheetSupport {
       });
       if (!resp.ok) {
         this.log.debug(`metadata.json not loaded (${resp.status}) from ${this.url}`);
-        this._compiled = [];
+        this._modifiers = Modifiers.EMPTY;
         return;
       }
       const text = await resp.text();
       const body = JSON.parse(text);
       const rows = extractDataRows(body);
-      this._compiled = compileMetadataSheetPatterns(rows);
-      this.log.debug(`loaded metadata.json (${this._compiled.length} URL pattern(s)) from ${this.url}`);
+      this._modifiers = buildMetadataModifiers(rows);
+      this.log.debug(`loaded metadata.json (${rows.length} row(s)) from ${this.url}`);
     } catch (e) {
       this.log.debug(`metadata.json fetch/parse failed: ${e.message || e}`);
-      this._compiled = [];
+      this._modifiers = Modifiers.EMPTY;
     }
   }
 
   /**
-   * @param {string} pathname ctx.path or resource path with .html
-   * @returns {object | null}
+   * @returns {Modifiers} the sheet-based metadata modifiers, matched by URL pattern the same
+   *   way production resolves them (`Modifiers.getModifiers(path)`)
    */
-  matchPath(pathname) {
-    if (!this._compiled || this._compiled.length === 0) {
-      return null;
-    }
-    const normalized = normalizePathForMetadataMatch(pathname);
-    return mergeMetadataSheetRows(normalized, this._compiled);
+  getModifiers() {
+    return this._modifiers ?? Modifiers.EMPTY;
   }
 }

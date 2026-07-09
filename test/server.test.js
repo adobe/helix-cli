@@ -1275,10 +1275,11 @@ describe('Helix Server', () => {
     it('serves a body-only HTML file from content/ and injects head.html', async () => {
       const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
       await fse.ensureDir(path.join(cwd, CONTENT_DIR));
-      // content/ files are plain HTML (body only, no <head>) as stored by da.live
+      // content/ files are plain HTML (body only, no <head>) as stored by da.live -- each
+      // section is its own top-level <div> under <main>, matching da.live's authoring convention
       await fse.writeFile(
         path.join(cwd, CONTENT_DIR, 'index.html'),
-        '<body><header></header><main><p>local content</p></main><footer></footer></body>',
+        '<body><header></header><main><div><p>local content</p></div></main><footer></footer></body>',
       );
       await fse.writeFile(
         path.join(cwd, 'head.html'),
@@ -1309,17 +1310,55 @@ describe('Helix Server', () => {
       }
     });
 
+    it('rewrites :icon-name: syntax in content/ into an icon span', async () => {
+      const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
+      await fse.ensureDir(path.join(cwd, CONTENT_DIR));
+      await fse.writeFile(
+        path.join(cwd, CONTENT_DIR, 'index.html'),
+        '<body><main><div><p>Hello :smile: world</p></div></main></body>',
+      );
+      await fse.writeFile(
+        path.join(cwd, 'head.html'),
+        '<link rel="stylesheet" href="/styles.css"/>',
+      );
+
+      nock('http://main--foo--bar.aem.page')
+        .get('/head.html')
+        .reply(200, '', { 'content-type': 'text/html' })
+        .get('/metadata.json')
+        .reply(200, { data: [] });
+
+      const project = new HelixProject()
+        .withCwd(cwd)
+        .withProxyUrl('http://main--foo--bar.aem.page')
+        .withHttpPort(0);
+      await project.init();
+      try {
+        await project.start();
+        const resp = await getFetch()(`http://127.0.0.1:${project.server.port}/index.html`);
+        assert.strictEqual(resp.status, 200);
+        const body = await resp.text();
+        assert.ok(body.includes('<span class="icon icon-smile"></span>'));
+      } finally {
+        await project.stop();
+      }
+    });
+
     it('strips content/ metadata block and injects meta tags in head', async () => {
       const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
       const recipeDir = path.join(cwd, CONTENT_DIR, 'ca', 'fr_ca', 'recipes');
       await fse.ensureDir(recipeDir);
       await fse.writeFile(
         path.join(recipeDir, 'chicken.html'),
-        '<body><main><h1>Ramen</h1></main>'
-        + '<div class="metadata">'
+        // metadata is authored as its own section (top-level div under <main>), same as any
+        // other block -- da.live convention.
+        '<body><main>'
+        + '<div><h1>Ramen</h1></div>'
+        + '<div><div class="metadata">'
         + '<div><div><p>Total Time</p></div><div><p>00:17:30</p></div></div>'
         + '<div><div><p>Yield</p></div><div><p>4 portions</p></div></div>'
-        + '</div></body>',
+        + '</div></div>'
+        + '</main></body>',
       );
       await fse.writeFile(
         path.join(cwd, 'head.html'),
@@ -1365,7 +1404,8 @@ describe('Helix Server', () => {
         assert.ok(body.includes('content="00:17:30"'));
         assert.ok(body.includes('property="og:title"'));
         assert.ok(body.includes('content="Ramen"'));
-        assert.ok(body.includes(`http://127.0.0.1:${port}/ca/fr_ca/recipes/chicken`));
+        // og:url is always built with a hardcoded https:// scheme (production assumption)
+        assert.ok(body.includes(`property="og:url" content="https://127.0.0.1:${port}/ca/fr_ca/recipes/chicken"`));
         assert.ok(body.includes('name="template"'));
         assert.ok(body.includes('content="recipe"'));
         assert.ok(!body.includes('content="section"'));
@@ -1379,12 +1419,92 @@ describe('Helix Server', () => {
       }
     });
 
+    it('turns a content/ section-metadata block into section classes/data-attributes', async () => {
+      const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
+      await fse.ensureDir(path.join(cwd, CONTENT_DIR));
+      await fse.writeFile(
+        path.join(cwd, CONTENT_DIR, 'index.html'),
+        '<body><main><div>'
+        + '<h1>Ramen</h1>'
+        + '<div class="section-metadata">'
+        + '<div><div>style</div><div>highlight, dark</div></div>'
+        + '</div>'
+        + '</div></main></body>',
+      );
+      await fse.writeFile(
+        path.join(cwd, 'head.html'),
+        '<link rel="stylesheet" href="/styles.css"/>',
+      );
+
+      nock('http://main--foo--bar.aem.page')
+        .get('/head.html')
+        .reply(200, '', { 'content-type': 'text/html' })
+        .get('/metadata.json')
+        .reply(200, { data: [] });
+
+      const project = new HelixProject()
+        .withCwd(cwd)
+        .withProxyUrl('http://main--foo--bar.aem.page')
+        .withHttpPort(0);
+      await project.init();
+      try {
+        await project.start();
+        const resp = await getFetch()(`http://127.0.0.1:${project.server.port}/index.html`);
+        assert.strictEqual(resp.status, 200);
+        const body = await resp.text();
+        assert.ok(!body.includes('class="section-metadata"'));
+        assert.ok(body.includes('class="highlight dark"'));
+      } finally {
+        await project.stop();
+      }
+    });
+
+    it('falls back to raw content merged with local head.html when the pipeline fails to render', async () => {
+      const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
+      await fse.ensureDir(path.join(cwd, CONTENT_DIR));
+      // invalid json-ld makes html2md throw (ConstraintsError), forcing renderContentHtml to
+      // return null -- this content already has its own <head>, exercising the merge branch
+      // (as opposed to the wrap-a-fresh-<head> branch) of the server-level fallback.
+      await fse.writeFile(
+        path.join(cwd, CONTENT_DIR, 'index.html'),
+        '<html><head><script type="application/ld+json">{not valid json</script></head>'
+        + '<body><main><div><p>local content</p></div></main></body></html>',
+      );
+      await fse.writeFile(
+        path.join(cwd, 'head.html'),
+        '<link rel="stylesheet" href="/styles.css"/>',
+      );
+
+      nock('http://main--foo--bar.aem.page')
+        .get('/head.html')
+        .reply(200, '', { 'content-type': 'text/html' })
+        .get('/metadata.json')
+        .reply(200, { data: [] });
+
+      const project = new HelixProject()
+        .withCwd(cwd)
+        .withProxyUrl('http://main--foo--bar.aem.page')
+        .withHttpPort(0);
+      await project.init();
+      try {
+        await project.start();
+        const resp = await getFetch()(`http://127.0.0.1:${project.server.port}/index.html`);
+        assert.strictEqual(resp.status, 200);
+        const body = await resp.text();
+        assert.ok(body.includes('local content'), 'should still serve the raw content on failure');
+        assert.ok(body.includes('/styles.css'), 'should still merge local head.html on failure');
+        assert.ok(body.includes('{not valid json'), 'raw content is served as-is, unprocessed');
+      } finally {
+        await project.stop();
+      }
+    });
+
     it('rewrites content.da.live image src to the site preview domain', async () => {
       const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
       await fse.ensureDir(path.join(cwd, CONTENT_DIR));
       await fse.writeFile(
         path.join(cwd, CONTENT_DIR, 'index.html'),
-        '<body><header></header><main><img src="https://content.da.live/bar/foo/media_123.png"></main><footer></footer></body>',
+        '<body><header></header><main><div><img src="https://content.da.live/bar/foo/media_123.png"></div></main><footer></footer></body>',
       );
       await fse.writeFile(
         path.join(cwd, 'head.html'),
@@ -1423,7 +1543,7 @@ describe('Helix Server', () => {
       await fse.ensureDir(path.join(cwd, CONTENT_DIR));
       await fse.writeFile(
         path.join(cwd, CONTENT_DIR, 'index.html'),
-        '<body><header></header><main><p>no images here</p></main><footer></footer></body>',
+        '<body><header></header><main><div><p>no images here</p></div></main><footer></footer></body>',
       );
       await fse.writeFile(
         path.join(cwd, 'head.html'),
@@ -1460,7 +1580,7 @@ describe('Helix Server', () => {
       await fse.ensureDir(path.join(cwd, CONTENT_DIR));
       await fse.writeFile(
         path.join(cwd, CONTENT_DIR, 'index.html'),
-        '<body><header></header><main><img src="https://main--foo--bar.preview.da.live/media_123.png"></main><footer></footer></body>',
+        '<body><header></header><main><div><img src="https://main--foo--bar.preview.da.live/media_123.png"></div></main><footer></footer></body>',
       );
       await fse.writeFile(
         path.join(cwd, 'head.html'),
@@ -1599,7 +1719,9 @@ describe('Helix Server', () => {
         const resp = await getFetch()(`http://127.0.0.1:${project.server.port}/foo.plain.html`);
         assert.strictEqual(resp.status, 200);
         const body = await resp.text();
-        assert.strictEqual(body, innerFragment);
+        // the pipeline's stringify step pretty-prints (rehype-format), so tolerate the
+        // resulting leading/trailing whitespace rather than requiring exact byte equality
+        assert.strictEqual(body.trim(), innerFragment.trim());
       } finally {
         await project.stop();
       }

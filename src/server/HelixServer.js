@@ -22,7 +22,7 @@ import { asyncHandler, BaseServer } from './BaseServer.js';
 import LiveReload from './LiveReload.js';
 import { saveSiteTokenToFile } from '../config/config-utils.js';
 import { CONTENT_DIR } from '../content/content-shared.js';
-import { transformContentMetadataHtml } from '../content/content-metadata-html.js';
+import { renderContentHtml } from '../content/content-html-pipeline.js';
 import { DA_IMS_CLIENT_ID, DA_IMS_SCOPE, startDaLoginRedirect } from '../content/da-auth.js';
 
 const LOGIN_ROUTE = '/.aem/cli/login';
@@ -42,26 +42,6 @@ const daContentAuthRateLimit = rateLimit({
 // First entry takes precedence when multiple candidates exist on disk.
 const HTML_FOLDER_EXTENSIONS = ['.html', '.plain.html'];
 const HTML_FOLDER_EXTENSIONS_PREFER_PLAIN = [...HTML_FOLDER_EXTENSIONS].reverse();
-
-/**
- * @param {import('express').Request} req
- * @param {import('./RequestContext.js').default} ctx
- * @returns {string}
- */
-function absolutePageUrlFromRequest(req, ctx) {
-  const raw = req.headers['x-forwarded-proto'];
-  const proto = (Array.isArray(raw) ? raw[0] : raw) || req.protocol || 'http';
-  const host = req.get('host');
-  if (!host) {
-    return '';
-  }
-  try {
-    const pathWithQuery = req.originalUrl || ctx.url;
-    return new URL(pathWithQuery, `${proto}://${host}`).href;
-  } catch {
-    return '';
-  }
-}
 
 export class HelixServer extends BaseServer {
   /**
@@ -517,11 +497,22 @@ export class HelixServer extends BaseServer {
             // Content may already reference the preview host directly (not just via
             // the content.da.live rewrite above), so gate on presence, not on rewrite.
             const needsDaContentAuth = !!previewOrigin && htmlContent.includes(previewOrigin);
+            if (this._project.metadataSheet) {
+              this._project.metadataSheet.setCookie(req.headers.cookie || '');
+              await this._project.metadataSheet.ensureLoaded();
+            }
+            const metadataModifiers = this._project.metadataSheet?.getModifiers();
             if (isPlainFallback) {
               if (liveReload) {
                 liveReload.registerFile(ctx.requestId, servedFilePath);
               }
-              const fragment = utils.extractMainContent(htmlContent);
+              const rendered = await renderContentHtml(htmlContent, {
+                path: ctx.path,
+                log,
+                metadataModifiers,
+                headers: req.headers,
+              });
+              const fragment = rendered ?? utils.extractMainContent(htmlContent);
               res.set({
                 'content-type': 'text/html; charset=utf-8',
                 'access-control-allow-origin': '*',
@@ -530,29 +521,24 @@ export class HelixServer extends BaseServer {
               log.debug(`${pfx}served from ${CONTENT_DIR}/: ${ctx.path}`);
               return;
             }
-            const absolutePageUrl = absolutePageUrlFromRequest(req, ctx);
-            if (this._project.metadataSheet) {
-              this._project.metadataSheet.setCookie(req.headers.cookie || '');
-              await this._project.metadataSheet.ensureLoaded();
-            }
-            const sheetRow = this._project.metadataSheet?.matchPath(ctx.path) ?? null;
-            const { htmlFragment, metaTagsHtml } = transformContentMetadataHtml(htmlContent, {
-              absolutePageUrl,
-              sheetRow,
+            await this._project.headHtml.update();
+            const headHtml = this._project.headHtml.localHtml || '';
+            const rendered = await renderContentHtml(htmlContent, {
+              path: ctx.path,
+              log,
+              headHtml,
+              metadataModifiers,
+              headers: req.headers,
             });
-            htmlContent = htmlFragment;
-            // content/ files are plain HTML (body only, no <head>)
-            // wrap with a full document and inject local head.html
-            if (!htmlContent.includes('<head>')) {
-              await this._project.headHtml.update();
-              const headHtml = this._project.headHtml.localHtml || '';
-              htmlContent = `<html><head>${headHtml}${metaTagsHtml}</head>${htmlContent}</html>`;
+            if (rendered !== null) {
+              htmlContent = rendered;
+            } else if (!htmlContent.includes('<head>')) {
+              // pipeline failed to render -- fall back to a minimal wrap so local dev never
+              // breaks outright on a rendering bug.
+              htmlContent = `<html><head>${headHtml}</head>${htmlContent}</html>`;
             } else {
-              await this._project.headHtml.setCookie(req.headers.cookie);
-              htmlContent = await this._project.headHtml.replace(htmlContent);
-              if (metaTagsHtml) {
-                htmlContent = htmlContent.replace(/<\/head>/i, `${metaTagsHtml}</head>`);
-              }
+              // content already had its own <head> -- still merge in the local head.html
+              htmlContent = htmlContent.replace(/<\/head>/i, `${headHtml}</head>`);
             }
             const proxyPageUrl = new URL(ctx.url, proxyUrl);
             for (const [key, value] of proxyUrl.searchParams.entries()) {
