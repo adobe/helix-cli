@@ -77,8 +77,6 @@ describe('content-html-pipeline', () => {
 
   describe('page metadata', () => {
     it('removes the metadata block section and emits custom meta tags plus SEO defaults', async () => {
-      // the metadata block is authored as its own section (top-level div under <main>),
-      // same as any other block -- da.live convention.
       const input = '<body><main>'
         + '<div><h1>Ramen</h1></div>'
         + '<div><div class="metadata">'

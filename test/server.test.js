@@ -1275,8 +1275,7 @@ describe('Helix Server', () => {
     it('serves a body-only HTML file from content/ and injects head.html', async () => {
       const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
       await fse.ensureDir(path.join(cwd, CONTENT_DIR));
-      // content/ files are plain HTML (body only, no <head>) as stored by da.live -- each
-      // section is its own top-level <div> under <main>, matching da.live's authoring convention
+      // da.live convention: body only (no <head>), each section its own top-level <div>
       await fse.writeFile(
         path.join(cwd, CONTENT_DIR, 'index.html'),
         '<body><header></header><main><div><p>local content</p></div></main><footer></footer></body>',
@@ -1350,8 +1349,7 @@ describe('Helix Server', () => {
       await fse.ensureDir(recipeDir);
       await fse.writeFile(
         path.join(recipeDir, 'chicken.html'),
-        // metadata is authored as its own section (top-level div under <main>), same as any
-        // other block -- da.live convention.
+        // da.live convention: metadata is its own section (top-level div under <main>)
         '<body><main>'
         + '<div><h1>Ramen</h1></div>'
         + '<div><div class="metadata">'
@@ -1718,8 +1716,7 @@ describe('Helix Server', () => {
         const resp = await getFetch()(`http://127.0.0.1:${project.server.port}/foo.plain.html`);
         assert.strictEqual(resp.status, 200);
         const body = await resp.text();
-        // the pipeline's stringify step pretty-prints (rehype-format), so tolerate the
-        // resulting leading/trailing whitespace rather than requiring exact byte equality
+        // tolerate leading/trailing space due to pipeline pretty-printing
         assert.strictEqual(body.trim(), innerFragment.trim());
       } finally {
         await project.stop();

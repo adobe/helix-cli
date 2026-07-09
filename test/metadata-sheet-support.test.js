@@ -17,7 +17,6 @@ import { buildMetadataModifiers } from '../src/server/MetadataSheetSupport.js';
 describe('MetadataSheetSupport', () => {
   describe('buildMetadataModifiers', () => {
     it('uses template from specific row and nav from broader when specific leaves nav empty', () => {
-      // real metadata.json convention: broad rule first, specific override later
       const rows = [
         { URL: '/ca/fr_ca/**', nav: '/nav1', template: 'broad' },
         { URL: '/ca/fr_ca/recipes/**', nav: '', template: 'recipe' },
