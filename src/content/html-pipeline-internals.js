@@ -13,8 +13,8 @@
 /**
  * Single point of entry for reaching into `@adobe/helix-html-pipeline` internals: individual
  * pipeline steps and `Modifiers` aren't part of its public API (only the top-level pipe
- * functions and `Pipeline*` classes are, via the package root). Centralized here so there's
- * one place to update if these internal paths ever move.
+ * functions and `Pipeline*` classes are, via the package root). Centralized here to make any
+ * future updates simpler.
  */
 /* eslint-disable import/no-unresolved, import/extensions */
 export { Modifiers } from '@adobe/helix-html-pipeline/src/utils/modifiers.js';

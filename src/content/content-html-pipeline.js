@@ -11,11 +11,9 @@
  */
 
 /**
- * Renders da.live-authored content HTML from `content/` the way production does: through the
- * real `html2md` -> `helix-html-pipeline` markdown-rendering chain, run locally against a
- * hand-built minimal pipeline state (no S3 loader, no network, no live site config). This
- * replaces hand-porting individual pipeline steps (icons, page metadata, section metadata)
- * one at a time, so local preview can't drift from what production actually renders.
+ * Renders da.live-authored content HTML from `content/` through the
+ * `html2md` -> `helix-html-pipeline` markdown-rendering chain, run locally against a hand-built
+ * minimal pipeline state.
  */
 
 import { html2md } from '@adobe/helix-html2md';
@@ -96,11 +94,9 @@ export async function renderContentHtml(rawHtml, {
     state.metadata = metadataModifiers;
     state.mappedMetadata = Modifiers.EMPTY;
 
-    // Mirrors the markdown-branch step sequence in htmlPipe() (skipping the network/S3-bound
-    // fetch/config/header steps, which aren't relevant to local rendering):
-    // https://github.com/adobe/helix-html-pipeline/blob/v6.29.6/src/html-pipe.js#L160-L179
-    // This list and order is hand-copied, so there is a drift risk when the html-pipeline
-    // dependency is updated.
+    // Mirrors the step sequence in htmlPipe() (skipping stops not relevant to local rendering):
+    // See for source https://github.com/adobe/helix-html-pipeline/blob/v6.29.6/src/html-pipe.js#L160-L179
+    // List/order is copied, so there is a drift risk when the html-pipeline dependency is updated.
     await parseMarkdown(state);
     await splitSections(state);
     await getMetadata(state);
