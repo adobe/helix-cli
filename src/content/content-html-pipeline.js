@@ -96,6 +96,12 @@ export async function renderContentHtml(rawHtml, {
     state.metadata = metadataModifiers;
     state.mappedMetadata = Modifiers.EMPTY;
 
+    // Mirrors the markdown-branch step sequence in htmlPipe() (skipping the network/S3-bound
+    // fetch/config/header steps, which aren't relevant to local rendering):
+    // https://github.com/adobe/helix-html-pipeline/blob/v6.29.6/src/html-pipe.js#L160-L179
+    // This list and order is hand-copied, not introspected -- if a future version of
+    // @adobe/helix-html-pipeline reorders, adds, or removes a step there, this won't fail
+    // loudly on its own. Re-check against the pinned version's html-pipe.js whenever it bumps.
     await parseMarkdown(state);
     await splitSections(state);
     await getMetadata(state);
