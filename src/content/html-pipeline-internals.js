@@ -23,7 +23,7 @@ export { default as parseMarkdown } from '@adobe/helix-html-pipeline/src/steps/p
 export { default as splitSections } from '@adobe/helix-html-pipeline/src/steps/split-sections.js';
 export { default as getMetadata } from '@adobe/helix-html-pipeline/src/steps/get-metadata.js';
 export { default as unwrapSoleImages } from '@adobe/helix-html-pipeline/src/steps/unwrap-sole-images.js';
-export { default as makeHtml } from '@adobe/helix-html-pipeline/src/steps/make-html.js';
+export { default as html } from '@adobe/helix-html-pipeline/src/steps/make-html.js';
 export { default as rewriteUrls } from '@adobe/helix-html-pipeline/src/steps/rewrite-urls.js';
 export { default as fixSections } from '@adobe/helix-html-pipeline/src/steps/fix-sections.js';
 export { default as createPageBlocks } from '@adobe/helix-html-pipeline/src/steps/create-page-blocks.js';
@@ -33,5 +33,5 @@ export { default as extractMetaData } from '@adobe/helix-html-pipeline/src/steps
 export { default as rewriteIcons } from '@adobe/helix-html-pipeline/src/steps/rewrite-icons.js';
 export { default as addHeadingIds } from '@adobe/helix-html-pipeline/src/steps/add-heading-ids.js';
 export { default as render } from '@adobe/helix-html-pipeline/src/steps/render.js';
-export { default as stringify } from '@adobe/helix-html-pipeline/src/steps/stringify-response.js';
+export { default as tohtml } from '@adobe/helix-html-pipeline/src/steps/stringify-response.js';
 /* eslint-enable import/no-unresolved, import/extensions */

@@ -29,7 +29,7 @@ import {
   splitSections,
   getMetadata,
   unwrapSoleImages,
-  makeHtml,
+  html,
   rewriteUrls,
   fixSections,
   createPageBlocks,
@@ -39,7 +39,7 @@ import {
   rewriteIcons,
   addHeadingIds,
   render,
-  stringify,
+  tohtml,
 } from './html-pipeline-internals.js';
 
 /**
@@ -105,7 +105,7 @@ export async function renderContentHtml(rawHtml, {
     await splitSections(state);
     await getMetadata(state);
     await unwrapSoleImages(state);
-    await makeHtml(state);
+    await html(state);
     await rewriteUrls(state);
     await fixSections(state);
     await createPageBlocks(state);
@@ -115,7 +115,7 @@ export async function renderContentHtml(rawHtml, {
     await rewriteIcons(state);
     await addHeadingIds(state);
     await render(state, req, res);
-    await stringify(state, req, res);
+    await tohtml(state, req, res);
 
     return res.body;
   } catch (e) {
