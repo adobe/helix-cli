@@ -95,7 +95,7 @@ export async function renderContentHtml(rawHtml, {
     state.mappedMetadata = Modifiers.EMPTY;
 
     // Mirrors the step sequence in htmlPipe() (skipping stops not relevant to local rendering):
-    // See for source https://github.com/adobe/helix-html-pipeline/blob/v6.29.6/src/html-pipe.js#L160-L179
+    // See for source https://github.com/adobe/helix-html-pipeline/blob/v6.29.6/src/html-pipe.js#L161-L180
     // List/order is copied, so there is a drift risk when the html-pipeline dependency is updated.
     await parseMarkdown(state);
     await splitSections(state);
