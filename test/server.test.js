@@ -1462,9 +1462,8 @@ describe('Helix Server', () => {
     it('falls back to raw content merged with local head.html when the pipeline fails to render', async () => {
       const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
       await fse.ensureDir(path.join(cwd, CONTENT_DIR));
-      // invalid json-ld makes html2md throw (ConstraintsError), forcing renderContentHtml to
-      // return null -- this content already has its own <head>, exercising the merge branch
-      // (as opposed to the wrap-a-fresh-<head> branch) of the server-level fallback.
+      // invalid json-ld makes html2md throw (ConstraintsError), forcing renderContentHtml
+      // to return null.
       await fse.writeFile(
         path.join(cwd, CONTENT_DIR, 'index.html'),
         '<html><head><script type="application/ld+json">{not valid json</script></head>'
