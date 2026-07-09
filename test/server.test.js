@@ -1402,7 +1402,6 @@ describe('Helix Server', () => {
         assert.ok(body.includes('content="00:17:30"'));
         assert.ok(body.includes('property="og:title"'));
         assert.ok(body.includes('content="Ramen"'));
-        // og:url is always built with a hardcoded https:// scheme (production assumption)
         assert.ok(body.includes(`property="og:url" content="https://127.0.0.1:${port}/ca/fr_ca/recipes/chicken"`));
         assert.ok(body.includes('name="template"'));
         assert.ok(body.includes('content="recipe"'));
