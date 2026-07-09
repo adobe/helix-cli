@@ -10,9 +10,8 @@
  * governing permissions and limitations under the License.
  */
 
-// eslint-disable-next-line import/no-unresolved, import/extensions
-import { Modifiers } from '@adobe/helix-html-pipeline/src/utils/modifiers.js';
 import { getFetch } from '../fetch-utils.js';
+import { Modifiers } from '../content/html-pipeline-internals.js';
 
 /**
  * @param {unknown} body

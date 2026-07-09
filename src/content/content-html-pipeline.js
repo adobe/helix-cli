@@ -22,25 +22,25 @@ import { html2md } from '@adobe/helix-html2md';
 import {
   PipelineState, PipelineRequest, PipelineResponse,
 } from '@adobe/helix-html-pipeline';
-/* eslint-disable import/no-unresolved, import/extensions */
-import { Modifiers } from '@adobe/helix-html-pipeline/src/utils/modifiers.js';
-import initConfig from '@adobe/helix-html-pipeline/src/steps/init-config.js';
-import parseMarkdown from '@adobe/helix-html-pipeline/src/steps/parse-markdown.js';
-import splitSections from '@adobe/helix-html-pipeline/src/steps/split-sections.js';
-import getMetadata from '@adobe/helix-html-pipeline/src/steps/get-metadata.js';
-import unwrapSoleImages from '@adobe/helix-html-pipeline/src/steps/unwrap-sole-images.js';
-import makeHtml from '@adobe/helix-html-pipeline/src/steps/make-html.js';
-import rewriteUrls from '@adobe/helix-html-pipeline/src/steps/rewrite-urls.js';
-import fixSections from '@adobe/helix-html-pipeline/src/steps/fix-sections.js';
-import createPageBlocks from '@adobe/helix-html-pipeline/src/steps/create-page-blocks.js';
-import createPictures from '@adobe/helix-html-pipeline/src/steps/create-pictures.js';
-import extractSectionMetadata from '@adobe/helix-html-pipeline/src/steps/extract-section-metadata.js';
-import extractMetaData from '@adobe/helix-html-pipeline/src/steps/extract-metadata.js';
-import rewriteIcons from '@adobe/helix-html-pipeline/src/steps/rewrite-icons.js';
-import addHeadingIds from '@adobe/helix-html-pipeline/src/steps/add-heading-ids.js';
-import render from '@adobe/helix-html-pipeline/src/steps/render.js';
-import stringify from '@adobe/helix-html-pipeline/src/steps/stringify-response.js';
-/* eslint-enable import/no-unresolved, import/extensions */
+import {
+  Modifiers,
+  initConfig,
+  parseMarkdown,
+  splitSections,
+  getMetadata,
+  unwrapSoleImages,
+  makeHtml,
+  rewriteUrls,
+  fixSections,
+  createPageBlocks,
+  createPictures,
+  extractSectionMetadata,
+  extractMetaData,
+  rewriteIcons,
+  addHeadingIds,
+  render,
+  stringify,
+} from './html-pipeline-internals.js';
 
 /**
  * @param {string} rawHtml body-only or partial HTML from content/, as stored by da.live
