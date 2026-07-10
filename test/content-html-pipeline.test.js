@@ -163,6 +163,33 @@ describe('content-html-pipeline', () => {
       assert.ok(html.includes('<meta name="template" content="article">'));
       assert.ok(!html.includes('content="recipe"'));
     });
+
+    it('falls back to the broader rule when the specific pattern does not match', async () => {
+      const metadataSheetRows = [
+        { URL: '/ca/fr_ca/**', nav: '/nav1', template: 'section' },
+        { URL: '/ca/fr_ca/recipes/**', template: 'recipe' },
+      ];
+      const input = '<body><main><div><h1>About</h1></div></main></body>';
+      const html = await renderContentHtml(input, {
+        path: '/ca/fr_ca/about.html',
+        log: console,
+        metadataSheetRows,
+      });
+      assert.ok(html.includes('<meta name="nav" content="/nav1">'));
+      assert.ok(html.includes('<meta name="template" content="section">'));
+      assert.ok(!html.includes('content="recipe"'));
+    });
+
+    it('applies no sheet-based metadata for a path that matches no row', async () => {
+      const metadataSheetRows = [{ URL: '/x/**', nav: '/n' }];
+      const input = '<body><main><div><h1>Y</h1></div></main></body>';
+      const html = await renderContentHtml(input, {
+        path: '/y/page.html',
+        log: console,
+        metadataSheetRows,
+      });
+      assert.ok(!html.includes('name="nav"'));
+    });
   });
 
   describe('section metadata', () => {
