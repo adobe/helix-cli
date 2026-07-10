@@ -511,6 +511,8 @@ export class HelixServer extends BaseServer {
                 log,
                 metadataSheetRows,
                 headers: req.headers,
+                org: this._project.org,
+                site: this._project.site,
               });
               const fragment = rendered ?? utils.extractMainContent(htmlContent);
               res.set({
@@ -529,6 +531,8 @@ export class HelixServer extends BaseServer {
               headHtml,
               metadataSheetRows,
               headers: req.headers,
+              org: this._project.org,
+              site: this._project.site,
             });
             if (rendered !== null) {
               htmlContent = rendered;

@@ -37,7 +37,7 @@ function toContentPath(path) {
   const clean = path.endsWith('.html') ? path.slice(0, -'.html'.length) : path;
   // a literal "index" path segment is a reserved internal artifact -- fetchContent rejects it
   // outright, so an index document maps back to its containing directory, same as "/".
-  if (clean === '/index' || clean.endsWith('/index')) {
+  if (clean.endsWith('/index')) {
     return clean.slice(0, -'index'.length) || '/';
   }
   return clean;
@@ -82,6 +82,8 @@ function createLocalLoader(md, metadataSheetRows) {
  *   metadata overrides
  * @param {object} [options.headers] incoming request headers (e.g. `req.headers`), used to
  *   resolve a real host for canonical/og:url instead of a placeholder
+ * @param {string} [options.org] the AEM org this content belongs to, if known
+ * @param {string} [options.site] the AEM site this content belongs to, if known
  * @returns {Promise<string | null>} the rendered HTML (full document, or a bare fragment for
  *   `.plain.html` paths), or `null` if rendering failed and the caller should fall back to
  *   serving the raw file
@@ -92,6 +94,8 @@ export async function renderContentHtml(rawHtml, {
   headHtml = '',
   metadataSheetRows = [],
   headers = {},
+  org = 'local',
+  site = 'local',
 } = {}) {
   try {
     const md = await html2md(rawHtml, { log, url: new URL(path, 'http://localhost').href });
@@ -100,8 +104,8 @@ export async function renderContentHtml(rawHtml, {
     const state = new PipelineState({
       path: contentPath,
       log,
-      org: 'local',
-      site: 'local',
+      org: org || 'local',
+      site: site || 'local',
       ref: 'local',
       partition: 'preview',
       s3Loader: createLocalLoader(md, metadataSheetRows),
