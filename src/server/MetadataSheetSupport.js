@@ -11,7 +11,6 @@
  */
 
 import { getFetch } from '../fetch-utils.js';
-import { Modifiers } from '../content/html-pipeline-internals.js';
 
 /**
  * @param {unknown} body
@@ -28,16 +27,6 @@ function extractDataRows(body) {
   return /** @type {object[]} */ (data.filter((r) => r && typeof r === 'object'));
 }
 
-/**
- * Builds a `Modifiers` instance (the same class `helix-html-pipeline` uses to resolve
- * sheet-based metadata overrides in production) from raw metadata.json sheet rows.
- * @param {object[]} rows
- * @returns {Modifiers}
- */
-export function buildMetadataModifiers(rows) {
-  return Modifiers.fromModifierSheet(rows);
-}
-
 export default class MetadataSheetSupport {
   /**
    * @param {{ proxyUrl: string, log: object, allowInsecure: boolean, siteToken?: string }} opts
@@ -51,8 +40,9 @@ export default class MetadataSheetSupport {
     this.allowInsecure = allowInsecure;
     this.siteToken = siteToken || '';
     this.cookie = '';
-    /** @type {Modifiers | null} */
-    this._modifiers = null;
+    /** @type {object[] | null} raw metadata.json sheet rows, fed to helix-html-pipeline's own
+     *   `fetchSourcedMetadata` step so it builds the sheet-based overrides itself */
+    this._rows = null;
     /** @type {Promise<void> | null} */
     this._loadPromise = null;
   }
@@ -61,7 +51,7 @@ export default class MetadataSheetSupport {
     const next = cookie || '';
     if (this.cookie !== next) {
       this.cookie = next;
-      this._modifiers = null;
+      this._rows = null;
       this._loadPromise = null;
     }
   }
@@ -70,18 +60,18 @@ export default class MetadataSheetSupport {
     const next = siteToken || '';
     if (this.siteToken !== next) {
       this.siteToken = next;
-      this._modifiers = null;
+      this._rows = null;
       this._loadPromise = null;
     }
   }
 
   invalidate() {
-    this._modifiers = null;
+    this._rows = null;
     this._loadPromise = null;
   }
 
   async ensureLoaded() {
-    if (this._modifiers !== null) {
+    if (this._rows !== null) {
       return;
     }
     if (this._loadPromise) {
@@ -111,25 +101,23 @@ export default class MetadataSheetSupport {
       });
       if (!resp.ok) {
         this.log.debug(`metadata.json not loaded (${resp.status}) from ${this.url}`);
-        this._modifiers = Modifiers.EMPTY;
+        this._rows = [];
         return;
       }
       const text = await resp.text();
       const body = JSON.parse(text);
-      const rows = extractDataRows(body);
-      this._modifiers = buildMetadataModifiers(rows);
-      this.log.debug(`loaded metadata.json (${rows.length} row(s)) from ${this.url}`);
+      this._rows = extractDataRows(body);
+      this.log.debug(`loaded metadata.json (${this._rows.length} row(s)) from ${this.url}`);
     } catch (e) {
       this.log.debug(`metadata.json fetch/parse failed: ${e.message || e}`);
-      this._modifiers = Modifiers.EMPTY;
+      this._rows = [];
     }
   }
 
   /**
-   * @returns {Modifiers} the sheet-based metadata modifiers, matched by URL pattern the same
-   *   way production resolves them (`Modifiers.getModifiers(path)`)
+   * @returns {object[]} raw metadata.json sheet rows, or an empty array if none were loaded
    */
-  getModifiers() {
-    return this._modifiers ?? Modifiers.EMPTY;
+  getRows() {
+    return this._rows ?? [];
   }
 }

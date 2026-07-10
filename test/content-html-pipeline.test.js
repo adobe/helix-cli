@@ -13,7 +13,6 @@
 /* eslint-env mocha */
 import assert from 'assert';
 import { renderContentHtml } from '../src/content/content-html-pipeline.js';
-import { buildMetadataModifiers } from '../src/server/MetadataSheetSupport.js';
 
 describe('content-html-pipeline', () => {
   it('renders a basic content/ HTML fragment into a full HTML document', async () => {
@@ -128,17 +127,17 @@ describe('content-html-pipeline', () => {
 
   describe('sheet-based metadata overrides', () => {
     it('applies nav/footer/template from a URL-pattern-matched metadata.json row', async () => {
-      const metadataModifiers = buildMetadataModifiers([
+      const metadataSheetRows = [
         {
           URL: '/ca/fr_ca/**', nav: '/ca/fr_ca/nav/nav', footer: '/ca/fr_ca/footer/footer', template: 'section',
         },
         { URL: '/ca/fr_ca/recipes/**', template: 'recipe' },
-      ]);
+      ];
       const input = '<body><main><div><h1>Ramen</h1></div></main></body>';
       const html = await renderContentHtml(input, {
         path: '/ca/fr_ca/recipes/chicken.html',
         log: console,
-        metadataModifiers,
+        metadataSheetRows,
       });
       assert.ok(html.includes('<meta name="nav" content="/ca/fr_ca/nav/nav">'));
       assert.ok(html.includes('<meta name="footer" content="/ca/fr_ca/footer/footer">'));
@@ -147,9 +146,9 @@ describe('content-html-pipeline', () => {
     });
 
     it('lets local page metadata override a sheet value for the same name', async () => {
-      const metadataModifiers = buildMetadataModifiers([
+      const metadataSheetRows = [
         { URL: '/x/**', template: 'recipe' },
-      ]);
+      ];
       const input = '<body><main>'
         + '<div><h1>T</h1></div>'
         + '<div><div class="metadata">'
@@ -159,7 +158,7 @@ describe('content-html-pipeline', () => {
       const html = await renderContentHtml(input, {
         path: '/x/page.html',
         log: console,
-        metadataModifiers,
+        metadataSheetRows,
       });
       assert.ok(html.includes('<meta name="template" content="article">'));
       assert.ok(!html.includes('content="recipe"'));

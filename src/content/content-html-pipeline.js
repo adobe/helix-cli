@@ -12,33 +12,64 @@
 
 /**
  * Renders da.live-authored content HTML from `content/` through the
- * `html2md` -> `helix-html-pipeline` markdown-rendering chain, run locally against a hand-built
- * minimal pipeline state.
+ * `html2md` -> `helix-html-pipeline` markdown-rendering chain, run locally by calling
+ * `htmlPipe()` (the same entry point production uses) against a hand-built minimal pipeline
+ * state and a fake in-memory content-bus loader.
  */
 
 import { html2md } from '@adobe/helix-html2md';
 import {
-  PipelineState, PipelineRequest, PipelineResponse,
+  PipelineState, PipelineRequest, PipelineResponse, htmlPipe,
 } from '@adobe/helix-html-pipeline';
-import {
-  Modifiers,
-  initConfig,
-  parseMarkdown,
-  splitSections,
-  getMetadata,
-  unwrapSoleImages,
-  html,
-  rewriteUrls,
-  fixSections,
-  createPageBlocks,
-  createPictures,
-  extractSectionMetadata,
-  extractMetaData,
-  rewriteIcons,
-  addHeadingIds,
-  render,
-  tohtml,
-} from './html-pipeline-internals.js';
+
+/**
+ * `htmlPipe` treats a literal `.html` path (no selector) as a code-bus (statically deployed)
+ * resource and skips markdown rendering entirely -- production only ever requests pages at
+ * extension-less paths (`/foo`), reserving `.html` for real static files. `.plain.html` is
+ * exempt: its `plain` selector already routes through the content-bus/markdown branch.
+ * @param {string} path
+ * @returns {string}
+ */
+function toContentPath(path) {
+  if (path.endsWith('.plain.html')) {
+    return path;
+  }
+  const clean = path.endsWith('.html') ? path.slice(0, -'.html'.length) : path;
+  // a literal "index" path segment is a reserved internal artifact -- fetchContent rejects it
+  // outright, so an index document maps back to its containing directory, same as "/".
+  if (clean === '/index' || clean.endsWith('/index')) {
+    return clean.slice(0, -'index'.length) || '/';
+  }
+  return clean;
+}
+
+/**
+ * A minimal `s3Loader` stand-in. With no folder mapping configured, `htmlPipe` only ever
+ * makes two content-bus lookups: the page's own markdown, and (if configured) the
+ * metadata.json sheet for the `fetchSourcedMetadata` step.
+ * @param {string} md
+ * @param {object[]} metadataSheetRows
+ * @returns {object}
+ */
+function createLocalLoader(md, metadataSheetRows) {
+  return {
+    async getObject(bucketId, key) {
+      if (bucketId === 'helix-content-bus' && key.endsWith('/metadata.json')) {
+        if (metadataSheetRows.length > 0) {
+          return new PipelineResponse(JSON.stringify({ data: metadataSheetRows }));
+        }
+        return new PipelineResponse('', { status: 404 });
+      }
+      if (bucketId === 'helix-content-bus') {
+        return new PipelineResponse(md);
+      }
+      return new PipelineResponse('', { status: 404 });
+    },
+    async headObject() {
+      return new PipelineResponse('', { status: 404 });
+    },
+  };
+}
 
 /**
  * @param {string} rawHtml body-only or partial HTML from content/, as stored by da.live
@@ -46,8 +77,9 @@ import {
  * @param {string} [options.path] request path, e.g. `/foo.html` or `/foo.plain.html`
  * @param {Console} [options.log]
  * @param {string} [options.headHtml] local head.html content, injected into <head>
- * @param {Modifiers} [options.metadataModifiers] sheet-based metadata overrides, matched by
- *   URL pattern (from the site's /metadata.json), in the same shape production uses
+ * @param {object[]} [options.metadataSheetRows] raw rows from the site's /metadata.json, fed
+ *   through the same `fetchSourcedMetadata` step production uses to build sheet-based
+ *   metadata overrides
  * @param {object} [options.headers] incoming request headers (e.g. `req.headers`), used to
  *   resolve a real host for canonical/og:url instead of a placeholder
  * @returns {Promise<string | null>} the rendered HTML (full document, or a bare fragment for
@@ -58,61 +90,39 @@ export async function renderContentHtml(rawHtml, {
   path = '/index.html',
   log = console,
   headHtml = '',
-  metadataModifiers = Modifiers.EMPTY,
+  metadataSheetRows = [],
   headers = {},
 } = {}) {
   try {
-    const url = new URL(path, 'http://localhost');
-    const md = await html2md(rawHtml, { log, url: url.href });
+    const md = await html2md(rawHtml, { log, url: new URL(path, 'http://localhost').href });
 
+    const contentPath = toContentPath(path);
     const state = new PipelineState({
-      path,
+      path: contentPath,
       log,
       org: 'local',
       site: 'local',
       ref: 'local',
       partition: 'preview',
+      s3Loader: createLocalLoader(md, metadataSheetRows),
       config: {
         contentBusId: 'local',
         owner: 'local',
         repo: 'local',
         cdn: {},
-        metadata: {},
+        metadata: { source: ['metadata.json'] },
         headers: {},
         features: { rendering: { version: 2 } },
         head: { html: headHtml },
       },
     });
-    state.content.data = md;
 
-    const req = new PipelineRequest(url, { headers });
-    const res = new PipelineResponse();
-
-    initConfig(state, req, res);
-    // initConfig derives state.metadata from state.config.metadata, which we don't populate --
-    // override with the caller's real sheet-based Modifiers instead.
-    state.metadata = metadataModifiers;
-    state.mappedMetadata = Modifiers.EMPTY;
-
-    // Mirrors the step sequence in htmlPipe() (skipping stops not relevant to local rendering):
-    // See for source https://github.com/adobe/helix-html-pipeline/blob/v6.29.6/src/html-pipe.js#L161-L180
-    // List/order is copied, so there is a drift risk when the html-pipeline dependency is updated.
-    await parseMarkdown(state);
-    await splitSections(state);
-    await getMetadata(state);
-    await unwrapSoleImages(state);
-    await html(state);
-    await rewriteUrls(state);
-    await fixSections(state);
-    await createPageBlocks(state);
-    await createPictures(state);
-    await extractSectionMetadata(state);
-    await extractMetaData(state, req);
-    await rewriteIcons(state);
-    await addHeadingIds(state);
-    await render(state, req, res);
-    await tohtml(state, req, res);
-
+    const req = new PipelineRequest(new URL(contentPath, 'http://localhost'), { headers });
+    const res = await htmlPipe(state, req);
+    if (res.error) {
+      log.warn?.(`content-html-pipeline: failed to render ${path}: ${res.error}`);
+      return null;
+    }
     return res.body;
   } catch (e) {
     log.warn?.(`content-html-pipeline: failed to render ${path}: ${e.message}`);

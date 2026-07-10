@@ -501,7 +501,7 @@ export class HelixServer extends BaseServer {
               this._project.metadataSheet.setCookie(req.headers.cookie || '');
               await this._project.metadataSheet.ensureLoaded();
             }
-            const metadataModifiers = this._project.metadataSheet?.getModifiers();
+            const metadataSheetRows = this._project.metadataSheet?.getRows();
             if (isPlainFallback) {
               if (liveReload) {
                 liveReload.registerFile(ctx.requestId, servedFilePath);
@@ -509,7 +509,7 @@ export class HelixServer extends BaseServer {
               const rendered = await renderContentHtml(htmlContent, {
                 path: ctx.path,
                 log,
-                metadataModifiers,
+                metadataSheetRows,
                 headers: req.headers,
               });
               const fragment = rendered ?? utils.extractMainContent(htmlContent);
@@ -527,7 +527,7 @@ export class HelixServer extends BaseServer {
               path: ctx.path,
               log,
               headHtml,
-              metadataModifiers,
+              metadataSheetRows,
               headers: req.headers,
             });
             if (rendered !== null) {
