@@ -95,7 +95,7 @@ jobs:
       - name: Use Node.js 24.11 (LTS)
         uses: actions/setup-node@v6
         with:
-          node-version: '24.17.0'
+          node-version: '24.18.0'
       - run: npm i
       - name: Check npm version
         run: npm --version
