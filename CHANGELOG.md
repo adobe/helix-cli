@@ -1,3 +1,10 @@
+# [16.21.0](https://github.com/adobe/helix-cli/compare/v16.20.13...v16.21.0) (2026-07-15)
+
+
+### Features
+
+* **content:** render DA content via the real html2md -> html-pipeline chain ([d40bf69](https://github.com/adobe/helix-cli/commit/d40bf69e11d308317e63b73890fd087b13a3844a)), closes [#2759](https://github.com/adobe/helix-cli/issues/2759) [#2756](https://github.com/adobe/helix-cli/issues/2756)
+
 ## [16.20.13](https://github.com/adobe/helix-cli/compare/v16.20.12...v16.20.13) (2026-07-15)
 
 
