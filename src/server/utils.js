@@ -16,7 +16,8 @@ import { Socket } from 'net';
 import { PassThrough } from 'stream';
 import { readFileSync } from 'fs';
 import { fileURLToPath } from 'url';
-import cookie from 'cookie';
+// eslint-disable-next-line import/no-unresolved
+import { parseCookie } from 'cookie';
 import { unified } from 'unified';
 import rehypeParse from 'rehype-parse';
 import { select } from 'hast-util-select';
@@ -281,7 +282,7 @@ window.LiveReloadOptions = {
 
     if (!opts.cookies) {
       // only pass through hlx-auth-token cookie
-      const cookies = cookie.parse(headers.cookie || '');
+      const cookies = parseCookie(headers.cookie || '');
       delete headers.cookie;
       const hlxAuthToken = cookies['hlx-auth-token'];
       if (hlxAuthToken) {
