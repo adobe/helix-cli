@@ -18,7 +18,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - name: Use Node.js 24.x
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v7
         with:
           node-version: '24.x'
       - run: npm i
@@ -71,7 +71,7 @@ jobs:
       - run: git config --global core.autocrlf false
       - uses: actions/checkout@v7
       - name: Use Node.js 24.x
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v7
         with:
           node-version: '24.x'
       - run: npm i
@@ -93,7 +93,7 @@ jobs:
         with:
           persist-credentials: false
       - name: Use Node.js 24.11 (LTS)
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v7
         with:
           node-version: '24.18.0'
       - run: npm i
