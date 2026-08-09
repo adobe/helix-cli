@@ -45,7 +45,7 @@
   "dependencies": {
     "@adobe/fetch": "4.3.1",
     "@adobe/helix-html-pipeline": "6.29.9",
-    "@adobe/helix-html2md": "2.2.2",
+    "@adobe/helix-html2md": "2.2.3",
     "@adobe/helix-log": "7.0.0",
     "@adobe/helix-shared-config": "11.1.30",
     "@adobe/helix-shared-git": "3.0.25",
