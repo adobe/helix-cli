@@ -13,13 +13,13 @@
   },
   "devDependencies": {
     "@adobe/eslint-config-helix": "^3.0.9",
-    "@eslint/config-helpers": "0.6.0",
+    "@eslint/config-helpers": "0.7.0",
     "@esm-bundle/chai": "4.3.4-fix.0",
     "@web/test-runner": "1.0.0",
     "@web/test-runner-playwright": "1.0.0",
     "@web/test-runner-junit-reporter": "1.0.0",
     "@web/test-runner-mocha": "1.0.0",
-    "playwright": "1.61.1"
+    "playwright": "1.62.1"
   },
   "dependencies": {
     "livereload-js": "4.0.2"
