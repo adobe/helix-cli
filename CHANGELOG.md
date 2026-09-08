@@ -1,3 +1,10 @@
+## [16.21.16](https://github.com/adobe/helix-cli/compare/v16.21.15...v16.21.16) (2026-09-08)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @adobe/helix-html2md to v2.2.4 ([#2786](https://github.com/adobe/helix-cli/issues/2786)) ([9ea31f6](https://github.com/adobe/helix-cli/commit/9ea31f631bfbce9e2ef936df19904fec28e4e133))
+
 ## [16.21.15](https://github.com/adobe/helix-cli/compare/v16.21.14...v16.21.15) (2026-09-01)
 
 
