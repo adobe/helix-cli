@@ -98,7 +98,7 @@
     "esmock": "2.7.6",
     "husky": "9.1.7",
     "junit-report-builder": "5.1.2",
-    "lint-staged": "17.3.0",
+    "lint-staged": "17.4.1",
     "mocha": "11.8.0",
     "mocha-multi-reporters": "1.5.1",
     "nock": "13.5.6",
