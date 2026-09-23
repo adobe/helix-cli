@@ -23,7 +23,7 @@ import LiveReload from './LiveReload.js';
 import { saveSiteTokenToFile } from '../config/config-utils.js';
 import { CONTENT_DIR } from '../content/content-shared.js';
 import { renderContentHtml } from '../content/content-html-pipeline.js';
-import { DA_IMS_CLIENT_ID, DA_IMS_SCOPE, startDaLoginRedirect } from '../content/da-auth.js';
+import { resolveDaImsClientId, resolveDaImsScope, startDaLoginRedirect } from '../content/da-auth.js';
 
 const LOGIN_ROUTE = '/.aem/cli/login';
 const LOGIN_ACK_ROUTE = '/.aem/cli/login/ack';
@@ -555,8 +555,8 @@ export class HelixServer extends BaseServer {
               htmlContent = utils.injectDaContentAuthScript(htmlContent, {
                 previewOrigin,
                 probePath: utils.findDaPreviewProbePath(htmlContent, previewOrigin),
-                clientId: DA_IMS_CLIENT_ID,
-                scope: DA_IMS_SCOPE,
+                clientId: resolveDaImsClientId(),
+                scope: resolveDaImsScope(),
               });
             }
             if (liveReload) {

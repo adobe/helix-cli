@@ -29,8 +29,14 @@ export const CONTENT_IO_CONCURRENCY = 10;
  * Reads and normalizes the content config from a content directory.
  * Accepts both current keys (org/site) and legacy keys (owner/repo) written
  * by earlier versions of clone. org/site take priority when both are present.
+ *
+ * `daAdmin` records the admin host the content was cloned from. Configs written
+ * before that key existed simply omit it, and callers then treat the backend as
+ * unknown rather than as a mismatch.
+ *
  * @param {string} contentDir - absolute path to the content/ directory
- * @returns {Promise<{org: string, site: string, rootPath: string|undefined}>}
+ * @returns {Promise<{org: string, site: string, rootPath: string|undefined,
+ *   daAdmin: string|undefined}>}
  * @throws if the config file is missing or org/site cannot be resolved
  */
 export async function readContentConfig(contentDir) {
@@ -44,7 +50,12 @@ export async function readContentConfig(contentDir) {
   if (!org || !site) {
     throw new Error(`Invalid config: org and site are required in ${configPath}.`);
   }
-  return { org, site, rootPath: raw.rootPath };
+  const daAdmin = typeof raw.daAdmin === 'string' && raw.daAdmin.trim()
+    ? raw.daAdmin.trim()
+    : undefined;
+  return {
+    org, site, rootPath: raw.rootPath, daAdmin,
+  };
 }
 
 /**

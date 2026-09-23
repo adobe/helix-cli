@@ -12,7 +12,15 @@
 
 /* eslint-env mocha */
 import assert from 'assert';
-import { DaClient, getContentType } from '../../src/content/da-api.js';
+import {
+  DaClient,
+  DEFAULT_DA_ADMIN,
+  DEFAULT_DA_ENV_LABEL,
+  getContentType,
+  isSameDaAdmin,
+  resolveDaAdmin,
+  resolveDaEnvLabel,
+} from '../../src/content/da-api.js';
 
 function mockResponse(status, body, ok = status >= 200 && status < 300, responseHeaders = {}) {
   const lower = Object.fromEntries(
@@ -88,11 +96,157 @@ describe('getContentType', () => {
   });
 });
 
-describe('DaClient', () => {
-  let client;
+describe('resolveDaAdmin', () => {
+  let saved;
 
   beforeEach(() => {
+    saved = process.env.AEM_DA_ADMIN;
+    delete process.env.AEM_DA_ADMIN;
+  });
+
+  afterEach(() => {
+    if (saved === undefined) {
+      delete process.env.AEM_DA_ADMIN;
+    } else {
+      process.env.AEM_DA_ADMIN = saved;
+    }
+  });
+
+  it('defaults to the public admin host', () => {
+    assert.strictEqual(resolveDaAdmin(), DEFAULT_DA_ADMIN);
+    assert.strictEqual(DEFAULT_DA_ADMIN, 'https://admin.da.live');
+  });
+
+  it('uses AEM_DA_ADMIN when set', () => {
+    process.env.AEM_DA_ADMIN = 'https://admin.example.com';
+    assert.strictEqual(resolveDaAdmin(), 'https://admin.example.com');
+  });
+
+  it('ignores an empty AEM_DA_ADMIN', () => {
+    process.env.AEM_DA_ADMIN = '  ';
+    assert.strictEqual(resolveDaAdmin(), DEFAULT_DA_ADMIN);
+  });
+
+  it('removes trailing slashes', () => {
+    process.env.AEM_DA_ADMIN = 'https://admin.example.com//';
+    assert.strictEqual(resolveDaAdmin(), 'https://admin.example.com');
+  });
+
+  it('prefers an explicit host over the environment', () => {
+    process.env.AEM_DA_ADMIN = 'https://admin.example.com';
+    assert.strictEqual(resolveDaAdmin('https://other.example.com'), 'https://other.example.com');
+  });
+
+  it('gives the client the resolved host', async () => {
+    process.env.AEM_DA_ADMIN = 'https://admin.example.com';
+    const client = new DaClient('test-token');
+    assert.strictEqual(client.daAdmin, 'https://admin.example.com');
+
+    let calledUrl;
+    client.fetch = async (url) => {
+      calledUrl = url;
+      return mockResponse(200, []);
+    };
+    await client.list('myorg', 'myrepo', '/some/path');
+    assert.strictEqual(calledUrl, 'https://admin.example.com/list/myorg/myrepo/some/path');
+
+    await client.getSource('myorg', 'myrepo', '/some/path.html');
+    assert.strictEqual(calledUrl, 'https://admin.example.com/source/myorg/myrepo/some/path.html');
+  });
+});
+
+describe('resolveDaEnvLabel', () => {
+  let saved;
+
+  beforeEach(() => {
+    saved = process.env.AEM_DA_ADMIN;
+    delete process.env.AEM_DA_ADMIN;
+  });
+
+  afterEach(() => {
+    if (saved === undefined) {
+      delete process.env.AEM_DA_ADMIN;
+    } else {
+      process.env.AEM_DA_ADMIN = saved;
+    }
+  });
+
+  it('labels the default admin host as the default environment', () => {
+    assert.strictEqual(resolveDaEnvLabel(), DEFAULT_DA_ENV_LABEL);
+    assert.strictEqual(DEFAULT_DA_ENV_LABEL, 'prod');
+  });
+
+  it('takes the label from an <label>-admin host', () => {
+    assert.strictEqual(resolveDaEnvLabel('https://stage-admin.example.com'), 'stage');
+  });
+
+  it('reads the host from AEM_DA_ADMIN', () => {
+    process.env.AEM_DA_ADMIN = 'https://qa-admin.example.com';
+    assert.strictEqual(resolveDaEnvLabel(), 'qa');
+  });
+
+  it('sanitizes any other host into a label', () => {
+    assert.strictEqual(resolveDaEnvLabel('https://content.example.com'), 'content-example-com');
+  });
+});
+
+describe('isSameDaAdmin', () => {
+  it('treats identical hosts as the same backend', () => {
+    assert.strictEqual(isSameDaAdmin(DEFAULT_DA_ADMIN, DEFAULT_DA_ADMIN), true);
+  });
+
+  it('ignores a trailing slash and the case', () => {
+    assert.strictEqual(
+      isSameDaAdmin('https://Admin-A.example.com/', 'https://admin-a.example.com'),
+      true,
+    );
+  });
+
+  it('detects a different host', () => {
+    assert.strictEqual(
+      isSameDaAdmin('https://admin-a.example.com', 'https://admin-b.example.com'),
+      false,
+    );
+  });
+
+  it('detects a different scheme or port', () => {
+    assert.strictEqual(
+      isSameDaAdmin('https://admin-a.example.com', 'http://admin-a.example.com'),
+      false,
+    );
+    assert.strictEqual(
+      isSameDaAdmin('https://admin-a.example.com', 'https://admin-a.example.com:8443'),
+      false,
+    );
+  });
+
+  it('compares values that are not URLs as plain text', () => {
+    assert.strictEqual(isSameDaAdmin('not a url', 'not a url'), true);
+    assert.strictEqual(isSameDaAdmin('not a url', 'other'), false);
+    assert.strictEqual(isSameDaAdmin(undefined, ''), true);
+  });
+});
+
+describe('DaClient', () => {
+  let client;
+  let savedAdmin;
+
+  beforeEach(() => {
+    savedAdmin = process.env.AEM_DA_ADMIN;
+    delete process.env.AEM_DA_ADMIN;
     client = new DaClient('test-token');
+  });
+
+  afterEach(() => {
+    if (savedAdmin === undefined) {
+      delete process.env.AEM_DA_ADMIN;
+    } else {
+      process.env.AEM_DA_ADMIN = savedAdmin;
+    }
+  });
+
+  it('uses the default admin host when AEM_DA_ADMIN is unset', () => {
+    assert.strictEqual(client.daAdmin, 'https://admin.da.live');
   });
 
   describe('authHeader', () => {
