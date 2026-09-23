@@ -35,6 +35,26 @@ export function resolveDaAdmin(daAdmin) {
 export const DEFAULT_DA_ENV_LABEL = 'prod';
 
 /**
+ * Compares two already resolved admin hosts. The comparison is on the origin only,
+ * so a trailing slash or a different case still counts as the same backend.
+ *
+ * @param {string} a first admin host
+ * @param {string} b second admin host
+ * @returns {boolean} true when both point at the same backend
+ */
+export function isSameDaAdmin(a, b) {
+  const origin = (value) => {
+    const normalized = String(value ?? '').trim().replace(/\/+$/, '');
+    try {
+      return new URL(normalized).origin.toLowerCase();
+    } catch {
+      return normalized.toLowerCase();
+    }
+  };
+  return origin(a) === origin(b);
+}
+
+/**
  * Derives a short environment label from the resolved DA admin host, so that per-host
  * state (the cached IMS token, for example) never clobbers another host's state.
  *

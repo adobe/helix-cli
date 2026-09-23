@@ -17,6 +17,7 @@ import {
   DEFAULT_DA_ADMIN,
   DEFAULT_DA_ENV_LABEL,
   getContentType,
+  isSameDaAdmin,
   resolveDaAdmin,
   resolveDaEnvLabel,
 } from '../../src/content/da-api.js';
@@ -186,6 +187,43 @@ describe('resolveDaEnvLabel', () => {
 
   it('sanitizes any other host into a label', () => {
     assert.strictEqual(resolveDaEnvLabel('https://content.example.com'), 'content-example-com');
+  });
+});
+
+describe('isSameDaAdmin', () => {
+  it('treats identical hosts as the same backend', () => {
+    assert.strictEqual(isSameDaAdmin(DEFAULT_DA_ADMIN, DEFAULT_DA_ADMIN), true);
+  });
+
+  it('ignores a trailing slash and the case', () => {
+    assert.strictEqual(
+      isSameDaAdmin('https://Admin-A.example.com/', 'https://admin-a.example.com'),
+      true,
+    );
+  });
+
+  it('detects a different host', () => {
+    assert.strictEqual(
+      isSameDaAdmin('https://admin-a.example.com', 'https://admin-b.example.com'),
+      false,
+    );
+  });
+
+  it('detects a different scheme or port', () => {
+    assert.strictEqual(
+      isSameDaAdmin('https://admin-a.example.com', 'http://admin-a.example.com'),
+      false,
+    );
+    assert.strictEqual(
+      isSameDaAdmin('https://admin-a.example.com', 'https://admin-a.example.com:8443'),
+      false,
+    );
+  });
+
+  it('compares values that are not URLs as plain text', () => {
+    assert.strictEqual(isSameDaAdmin('not a url', 'not a url'), true);
+    assert.strictEqual(isSameDaAdmin('not a url', 'other'), false);
+    assert.strictEqual(isSameDaAdmin(undefined, ''), true);
   });
 });
 

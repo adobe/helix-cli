@@ -14,7 +14,9 @@ import path from 'path';
 import fse from 'fs-extra';
 import git from 'isomorphic-git';
 import processQueue from '@adobe/helix-shared-process-queue';
-import { DaClient, getContentType } from './da-api.js';
+import {
+  DaClient, getContentType, isSameDaAdmin, resolveDaAdmin,
+} from './da-api.js';
 import { getValidToken } from './da-auth.js';
 import {
   CONTENT_DIR,
@@ -26,6 +28,7 @@ import {
   writeSyncedRef,
   statusMatrixHasUncommitted,
   diffCommitTrees,
+  listCommitFiles,
   getCommitCommitterTimeMs,
 } from './content-git.js';
 
@@ -186,7 +189,7 @@ export default class PushCommand {
   async run() {
     const { log } = this;
     const contentDir = path.resolve(this._dir, CONTENT_DIR);
-    const { org, site } = await readContentConfig(contentDir);
+    const { org, site, daAdmin: clonedFrom } = await readContentConfig(contentDir);
 
     const matrix = await git.statusMatrix({ fs, dir: contentDir });
     if (statusMatrixHasUncommitted(matrix)) {
@@ -197,24 +200,52 @@ export default class PushCommand {
     }
 
     const headOid = await git.resolveRef({ fs, dir: contentDir, ref: 'HEAD' });
-    const syncedOid = await resolveSyncedOid(fs, contentDir);
-    const lastSyncTime = await getCommitCommitterTimeMs(fs, contentDir, syncedOid);
 
-    const fullChanges = await diffCommitTrees(fs, contentDir, syncedOid, headOid);
+    // A push to a backend other than the one cloned from is a copy, not a sync: the local
+    // baseline describes the source backend, so it says nothing about the target.
+    const crossBackend = clonedFrom !== undefined
+      && !isSameDaAdmin(clonedFrom, resolveDaAdmin());
+    if (crossBackend && !this._force) {
+      log.warn(
+        'Push aborted: pushing to a different backend than cloned from; use --force to copy.',
+      );
+      process.exitCode = 1;
+      return;
+    }
 
     const scope = this._pushPath ? this._pushPath.replace(/\/+$/, '') : null;
     const inScope = (daPath) => scope === null
       || daPath === scope
       || daPath.startsWith(`${scope}/`);
-    const added = fullChanges.added.filter(inScope);
-    const modified = fullChanges.modified.filter(inScope);
-    const deleted = fullChanges.deleted.filter(inScope);
 
-    const fullCount = fullChanges.added.length
-      + fullChanges.modified.length
-      + fullChanges.deleted.length;
-    const scopeCount = added.length + modified.length + deleted.length;
-    const scopeIsComplete = fullCount === scopeCount;
+    let added;
+    let modified;
+    let deleted;
+    let scopeIsComplete;
+    let lastSyncTime = null;
+
+    if (crossBackend) {
+      // Overwrite copy: every file is uploaded, nothing is deleted on the target, and the
+      // sync baseline stays with the backend it belongs to.
+      added = (await listCommitFiles(fs, contentDir, headOid)).filter(inScope);
+      modified = [];
+      deleted = [];
+      scopeIsComplete = false;
+    } else {
+      const syncedOid = await resolveSyncedOid(fs, contentDir);
+      lastSyncTime = await getCommitCommitterTimeMs(fs, contentDir, syncedOid);
+
+      const fullChanges = await diffCommitTrees(fs, contentDir, syncedOid, headOid);
+      added = fullChanges.added.filter(inScope);
+      modified = fullChanges.modified.filter(inScope);
+      deleted = fullChanges.deleted.filter(inScope);
+
+      const fullCount = fullChanges.added.length
+        + fullChanges.modified.length
+        + fullChanges.deleted.length;
+      const scopeCount = added.length + modified.length + deleted.length;
+      scopeIsComplete = fullCount === scopeCount;
+    }
 
     if (added.length === 0 && modified.length === 0 && deleted.length === 0) {
       log.info('Nothing to push. No commits ahead of the last da.live sync.');
@@ -224,20 +255,28 @@ export default class PushCommand {
     const token = await getValidToken(log, this._token, this._dir);
 
     log.info(`Pushing content to da.live: ${org}/${site}`);
+    if (crossBackend) {
+      log.info(
+        'Target backend differs from the one cloned from: copying all files and '
+        + 'skipping the conflict check.',
+      );
+    }
     log.info(`${added.length} added, ${modified.length} modified, ${deleted.length} deleted`);
 
     const client = new DaClient(token);
 
-    const shouldAbort = await this._checkConflicts(
-      client,
-      org,
-      site,
-      modified,
-      deleted,
-      lastSyncTime,
-    );
-    if (shouldAbort) {
-      return;
+    if (!crossBackend) {
+      const shouldAbort = await this._checkConflicts(
+        client,
+        org,
+        site,
+        modified,
+        deleted,
+        lastSyncTime,
+      );
+      if (shouldAbort) {
+        return;
+      }
     }
 
     if (this._dryRun) {
@@ -277,7 +316,12 @@ export default class PushCommand {
     const pushErrors = putErrors + deleteErrors;
     const allOk = pushErrors === 0;
 
-    if (allOk && scopeIsComplete) {
+    if (allOk && crossBackend) {
+      log.info(
+        '\nCopied to a different backend. The local sync baseline still points at the '
+        + 'backend you cloned from.',
+      );
+    } else if (allOk && scopeIsComplete) {
       await writeSyncedRef(fs, contentDir, headOid);
     } else if (allOk) {
       log.info(
