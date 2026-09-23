@@ -31,6 +31,30 @@ export function resolveDaAdmin(daAdmin) {
   return (value || DEFAULT_DA_ADMIN).replace(/\/+$/, '');
 }
 
+/** Label used for the default admin host. */
+export const DEFAULT_DA_ENV_LABEL = 'prod';
+
+/**
+ * Derives a short environment label from the resolved DA admin host, so that per-host
+ * state (the cached IMS token, for example) never clobbers another host's state.
+ *
+ * The default host keeps the {@link DEFAULT_DA_ENV_LABEL} label. A host whose first
+ * name ends in `-admin` contributes the part before it, so `foo-admin.example.com`
+ * becomes `foo`. Anything else falls back to the sanitized host name.
+ *
+ * @param {string} [daAdmin] explicit admin host, overriding the environment
+ * @returns {string} label safe to use in a file name
+ */
+export function resolveDaEnvLabel(daAdmin) {
+  const sanitize = (value) => value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+  const { hostname } = new URL(resolveDaAdmin(daAdmin));
+  if (hostname.toLowerCase() === new URL(DEFAULT_DA_ADMIN).hostname) {
+    return DEFAULT_DA_ENV_LABEL;
+  }
+  const prefix = hostname.toLowerCase().split('.')[0].match(/^(.+)-admin$/);
+  return sanitize(prefix ? prefix[1] : hostname) || DEFAULT_DA_ENV_LABEL;
+}
+
 /** Response header used to page past the per-request list limit (e.g. 1000 items). */
 const LIST_CONTINUATION_HEADER = 'da-continuation-token';
 

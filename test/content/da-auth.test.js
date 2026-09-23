@@ -16,6 +16,15 @@ import path from 'path';
 import esmock from 'esmock';
 import fse from 'fs-extra';
 import { makeLogger } from './content-test-utils.js';
+import {
+  DEFAULT_DA_IMS_CLIENT_ID,
+  DEFAULT_DA_IMS_ORIGIN,
+  DEFAULT_DA_IMS_SCOPE,
+  resolveDaImsClientId,
+  resolveDaImsOrigin,
+  resolveDaImsScope,
+  resolveDaTokenFile,
+} from '../../src/content/da-auth.js';
 
 const TEST_PROJECT_DIR = '/tmp/test-da-project';
 
@@ -184,7 +193,7 @@ describe('getValidToken', () => {
     });
     const log = makeLogger();
     await getValidToken(log, undefined, TEST_PROJECT_DIR);
-    assert.strictEqual(gitIgnoredEntry, path.join('.hlx', '.da-token.json'));
+    assert.strictEqual(gitIgnoredEntry, path.join('.hlx', '.da-token*.json'));
   });
 
   it('reads token file from the content directory', async () => {
@@ -206,6 +215,123 @@ describe('getValidToken', () => {
     const log = makeLogger();
     await getValidToken(log, undefined, TEST_PROJECT_DIR);
     assert.strictEqual(readPath, path.join(TEST_PROJECT_DIR, '.hlx', '.da-token.json'));
+  });
+});
+
+const DA_ENV_VARS = ['AEM_DA_ADMIN', 'AEM_DA_IMS_ORIGIN', 'AEM_DA_IMS_CLIENT_ID', 'AEM_DA_IMS_SCOPE'];
+
+/** Clears the DA environment variables for a test and restores them afterwards. */
+function withCleanDaEnv() {
+  let saved;
+  beforeEach(() => {
+    saved = Object.fromEntries(DA_ENV_VARS.map((name) => [name, process.env[name]]));
+    DA_ENV_VARS.forEach((name) => delete process.env[name]);
+  });
+  afterEach(() => {
+    DA_ENV_VARS.forEach((name) => {
+      if (saved[name] === undefined) {
+        delete process.env[name];
+      } else {
+        process.env[name] = saved[name];
+      }
+    });
+  });
+}
+
+describe('IMS configuration', () => {
+  withCleanDaEnv();
+
+  it('defaults to the prod IMS origin, client and scope', () => {
+    assert.strictEqual(resolveDaImsOrigin(), 'https://ims-na1.adobelogin.com');
+    assert.strictEqual(resolveDaImsOrigin(), DEFAULT_DA_IMS_ORIGIN);
+    assert.strictEqual(resolveDaImsClientId(), 'darkalley');
+    assert.strictEqual(resolveDaImsClientId(), DEFAULT_DA_IMS_CLIENT_ID);
+    assert.strictEqual(resolveDaImsScope(), DEFAULT_DA_IMS_SCOPE);
+    assert.ok(resolveDaImsScope().includes('AdobeID'));
+  });
+
+  it('uses AEM_DA_IMS_ORIGIN when set, without a trailing slash', () => {
+    process.env.AEM_DA_IMS_ORIGIN = 'https://ims.example.com/';
+    assert.strictEqual(resolveDaImsOrigin(), 'https://ims.example.com');
+  });
+
+  it('uses AEM_DA_IMS_CLIENT_ID when set', () => {
+    process.env.AEM_DA_IMS_CLIENT_ID = 'other-client';
+    assert.strictEqual(resolveDaImsClientId(), 'other-client');
+  });
+
+  it('uses AEM_DA_IMS_SCOPE when set', () => {
+    process.env.AEM_DA_IMS_SCOPE = 'AdobeID,openid';
+    assert.strictEqual(resolveDaImsScope(), 'AdobeID,openid');
+  });
+
+  it('ignores empty environment values', () => {
+    process.env.AEM_DA_IMS_ORIGIN = '  ';
+    process.env.AEM_DA_IMS_CLIENT_ID = '';
+    process.env.AEM_DA_IMS_SCOPE = ' ';
+    assert.strictEqual(resolveDaImsOrigin(), DEFAULT_DA_IMS_ORIGIN);
+    assert.strictEqual(resolveDaImsClientId(), DEFAULT_DA_IMS_CLIENT_ID);
+    assert.strictEqual(resolveDaImsScope(), DEFAULT_DA_IMS_SCOPE);
+  });
+
+  it('builds the authorize url from the resolved values', async () => {
+    process.env.AEM_DA_IMS_ORIGIN = 'https://ims.example.com';
+    process.env.AEM_DA_IMS_CLIENT_ID = 'other-client';
+    process.env.AEM_DA_IMS_SCOPE = 'AdobeID,openid';
+    const { startDaLoginRedirect } = await esmock('../../src/content/da-auth.js', {
+      'node:http': {
+        default: {
+          createServer: () => ({ listen: () => {}, close: () => {}, on: () => {} }),
+        },
+      },
+    });
+    const parsed = new URL(startDaLoginRedirect('http://127.0.0.1:54321/index.html'));
+    assert.strictEqual(parsed.origin, 'https://ims.example.com');
+    assert.strictEqual(parsed.searchParams.get('client_id'), 'other-client');
+    assert.strictEqual(parsed.searchParams.get('scope'), 'AdobeID,openid');
+  });
+});
+
+describe('resolveDaTokenFile', () => {
+  withCleanDaEnv();
+
+  it('keeps the unchanged prod token file when no host is configured', () => {
+    assert.strictEqual(resolveDaTokenFile(), path.join('.hlx', '.da-token.json'));
+  });
+
+  it('keeps the unchanged prod token file for the default admin host', () => {
+    process.env.AEM_DA_ADMIN = 'https://admin.da.live';
+    assert.strictEqual(resolveDaTokenFile(), path.join('.hlx', '.da-token.json'));
+  });
+
+  it('appends the env label for another admin host', () => {
+    process.env.AEM_DA_ADMIN = 'https://stage-admin.example.com';
+    assert.strictEqual(resolveDaTokenFile(), path.join('.hlx', '.da-token-stage.json'));
+  });
+
+  it('prefers an explicit host over the environment', () => {
+    process.env.AEM_DA_ADMIN = 'https://stage-admin.example.com';
+    assert.strictEqual(
+      resolveDaTokenFile('https://qa-admin.example.com'),
+      path.join('.hlx', '.da-token-qa.json'),
+    );
+  });
+
+  it('reads the per-env token file in getValidToken', async () => {
+    process.env.AEM_DA_ADMIN = 'https://stage-admin.example.com';
+    let readPath;
+    const { getValidToken } = await esmock('../../src/content/da-auth.js', {
+      'fs-extra': {
+        ...fse,
+        pathExists: async (p) => {
+          readPath = p;
+          return true;
+        },
+        readJson: async () => ({ access_token: 'valid', expires_at: Date.now() + 3_600_000 }),
+      },
+    });
+    await getValidToken(makeLogger(), undefined, TEST_PROJECT_DIR);
+    assert.strictEqual(readPath, path.join(TEST_PROJECT_DIR, '.hlx', '.da-token-stage.json'));
   });
 });
 

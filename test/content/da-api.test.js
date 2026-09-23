@@ -15,8 +15,10 @@ import assert from 'assert';
 import {
   DaClient,
   DEFAULT_DA_ADMIN,
+  DEFAULT_DA_ENV_LABEL,
   getContentType,
   resolveDaAdmin,
+  resolveDaEnvLabel,
 } from '../../src/content/da-api.js';
 
 function mockResponse(status, body, ok = status >= 200 && status < 300, responseHeaders = {}) {
@@ -149,6 +151,41 @@ describe('resolveDaAdmin', () => {
 
     await client.getSource('myorg', 'myrepo', '/some/path.html');
     assert.strictEqual(calledUrl, 'https://admin.example.com/source/myorg/myrepo/some/path.html');
+  });
+});
+
+describe('resolveDaEnvLabel', () => {
+  let saved;
+
+  beforeEach(() => {
+    saved = process.env.AEM_DA_ADMIN;
+    delete process.env.AEM_DA_ADMIN;
+  });
+
+  afterEach(() => {
+    if (saved === undefined) {
+      delete process.env.AEM_DA_ADMIN;
+    } else {
+      process.env.AEM_DA_ADMIN = saved;
+    }
+  });
+
+  it('labels the default admin host as the default environment', () => {
+    assert.strictEqual(resolveDaEnvLabel(), DEFAULT_DA_ENV_LABEL);
+    assert.strictEqual(DEFAULT_DA_ENV_LABEL, 'prod');
+  });
+
+  it('takes the label from an <label>-admin host', () => {
+    assert.strictEqual(resolveDaEnvLabel('https://stage-admin.example.com'), 'stage');
+  });
+
+  it('reads the host from AEM_DA_ADMIN', () => {
+    process.env.AEM_DA_ADMIN = 'https://qa-admin.example.com';
+    assert.strictEqual(resolveDaEnvLabel(), 'qa');
+  });
+
+  it('sanitizes any other host into a label', () => {
+    assert.strictEqual(resolveDaEnvLabel('https://content.example.com'), 'content-example-com');
   });
 });
 

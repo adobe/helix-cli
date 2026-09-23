@@ -482,8 +482,8 @@ describe('Helix Server', () => {
       let calledWith;
       const { HelixServer: MockedHelixServer } = await esmock('../src/server/HelixServer.js', {
         '../src/content/da-auth.js': {
-          DA_IMS_CLIENT_ID: 'darkalley',
-          DA_IMS_SCOPE: 'AdobeID,openid',
+          resolveDaImsClientId: () => 'darkalley',
+          resolveDaImsScope: () => 'AdobeID,openid',
           startDaLoginRedirect: (finalRedirectUrl) => {
             calledWith = finalRedirectUrl;
             return 'https://ims-na1.adobelogin.com/ims/authorize/v2?client_id=darkalley&redirect_uri=http%3A%2F%2Flocalhost%3A9898%2Fcallback';
