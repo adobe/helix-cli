@@ -14,7 +14,22 @@ import processQueue from '@adobe/helix-shared-process-queue';
 import { getFetch } from '../fetch-utils.js';
 import { CONTENT_IO_CONCURRENCY } from './content-shared.js';
 
-const DA_ADMIN = 'https://admin.da.live';
+/** Default DA admin host. */
+export const DEFAULT_DA_ADMIN = 'https://admin.da.live';
+
+/**
+ * Resolves the DA admin host to use.
+ *
+ * Order: explicit value, then the `AEM_DA_ADMIN` environment variable, then the default.
+ * Trailing slashes are removed so the host can be concatenated with API paths.
+ *
+ * @param {string} [daAdmin] explicit admin host, overriding the environment
+ * @returns {string} admin host without a trailing slash
+ */
+export function resolveDaAdmin(daAdmin) {
+  const value = (daAdmin ?? process.env.AEM_DA_ADMIN ?? '').trim();
+  return (value || DEFAULT_DA_ADMIN).replace(/\/+$/, '');
+}
 
 /** Response header used to page past the per-request list limit (e.g. 1000 items). */
 const LIST_CONTINUATION_HEADER = 'da-continuation-token';
@@ -27,8 +42,13 @@ export function getContentType(ext) {
 }
 
 export class DaClient {
-  constructor(token) {
+  /**
+   * @param {string} token IMS bearer token
+   * @param {string} [daAdmin] admin host, defaults to {@link resolveDaAdmin}
+   */
+  constructor(token, daAdmin) {
     this.token = token;
+    this.daAdmin = resolveDaAdmin(daAdmin);
     this.fetch = getFetch(false);
   }
 
@@ -44,7 +64,7 @@ export class DaClient {
    * @returns {Promise<Array<{path, name, ext?, lastModified}>>}
    */
   async list(org, site, daPath) {
-    const url = `${DA_ADMIN}/list/${org}/${site}${daPath}`;
+    const url = `${this.daAdmin}/list/${org}/${site}${daPath}`;
     const aggregated = [];
     let continuation = null;
 
@@ -125,7 +145,7 @@ export class DaClient {
    * @returns {Promise<Response|null>}
    */
   async getSource(org, site, daPath) {
-    const url = `${DA_ADMIN}/source/${org}/${site}${daPath}`;
+    const url = `${this.daAdmin}/source/${org}/${site}${daPath}`;
     const res = await this.fetch(url, { headers: this.authHeader });
     if (res.status === 401) {
       throw new Error('Unauthorized: invalid or missing token');
@@ -149,7 +169,7 @@ export class DaClient {
    * @returns {Promise<object>} API response body
    */
   async putSource(org, site, daPath, buffer, contentType) {
-    const url = `${DA_ADMIN}/source/${org}/${site}${daPath}`;
+    const url = `${this.daAdmin}/source/${org}/${site}${daPath}`;
     const res = await this.fetch(url, {
       method: 'PUT',
       headers: { ...this.authHeader, 'Content-Type': contentType },
@@ -169,7 +189,7 @@ export class DaClient {
    * Throws on transport or server errors so callers don't silently treat them as success.
    */
   async deleteSource(org, site, daPath) {
-    const url = `${DA_ADMIN}/source/${org}/${site}${daPath}`;
+    const url = `${this.daAdmin}/source/${org}/${site}${daPath}`;
     const res = await this.fetch(url, {
       method: 'DELETE',
       headers: this.authHeader,
@@ -191,7 +211,7 @@ export class DaClient {
    * @returns {Promise<number|null>}
    */
   async getRemoteLastModified(org, site, daPath) {
-    const url = `${DA_ADMIN}/source/${org}/${site}${daPath}`;
+    const url = `${this.daAdmin}/source/${org}/${site}${daPath}`;
     const res = await this.fetch(url, { method: 'HEAD', headers: this.authHeader });
     if (res.status === 401) {
       throw new Error('Unauthorized: invalid or missing token');

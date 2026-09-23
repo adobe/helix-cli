@@ -13,8 +13,15 @@ import yargs from 'yargs';
 import camelcase from 'camelcase';
 import path from 'path';
 import chalk from 'chalk-template';
+import dotenv from 'dotenv';
 import { resetContext } from './fetch-utils.js';
 import pkgJson from './package.cjs';
+
+// Load the project's .env before any command is built, so that AEM_* variables are
+// available to yargs' .env('AEM_') parsing and to the commands themselves. This does not
+// override variables already present in the real environment (the shell wins), and it also
+// covers programmatic use of this module, where index.js is not the entry point.
+dotenv.config({ quiet: true });
 
 const MIN_MSG = 'You need at least one command.';
 

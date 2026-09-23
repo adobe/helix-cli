@@ -10,3 +10,4 @@ logs
 test-results.xml
 .idea/
 .hlx
+.env

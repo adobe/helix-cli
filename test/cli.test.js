@@ -27,6 +27,21 @@ function runCLI(...args) {
   return shell.exec(cmd);
 }
 
+/**
+ * Imports src/cli.js in a child process running in `cwd` and reports the AEM_DA_ADMIN
+ * variable as seen after the module loaded the project's .env file.
+ */
+function readDaAdminAfterCliLoad(cwd, env = {}) {
+  const cliPath = path.resolve(__rootdir, 'src', 'cli.js').split(path.sep).join('/');
+  const script = `import('file://${cliPath}').then(() => {`
+    + ' process.stdout.write(String(process.env.AEM_DA_ADMIN)); });';
+  return shell.exec(`node -e ${JSON.stringify(script)}`, {
+    cwd,
+    silent: true,
+    env: { ...process.env, ...env },
+  });
+}
+
 describe('hlx command line', () => {
   let cwd;
   let deleted;
@@ -84,6 +99,24 @@ describe('hlx command line', () => {
     shell.cd(cwd);
     await fse.remove(testRoot);
   }).timeout(4000);
+
+  it('loads AEM_ variables from the project .env', async () => {
+    const testRoot = await createTestRoot();
+    await fse.writeFile(path.resolve(testRoot, '.env'), 'AEM_DA_ADMIN=https://env-file.example.com\n', 'utf-8');
+    const cmd = readDaAdminAfterCliLoad(testRoot);
+    assert.equal(cmd.code, 0);
+    assert.equal(cmd.stdout.trim(), 'https://env-file.example.com');
+    await fse.remove(testRoot);
+  }).timeout(10000);
+
+  it('lets the real environment win over the .env file', async () => {
+    const testRoot = await createTestRoot();
+    await fse.writeFile(path.resolve(testRoot, '.env'), 'AEM_DA_ADMIN=https://env-file.example.com\n', 'utf-8');
+    const cmd = readDaAdminAfterCliLoad(testRoot, { AEM_DA_ADMIN: 'https://shell.example.com' });
+    assert.equal(cmd.code, 0);
+    assert.equal(cmd.stdout.trim(), 'https://shell.example.com');
+    await fse.remove(testRoot);
+  }).timeout(10000);
 
   it('un-supported node version should give warning', async () => {
     const testVersions = [
