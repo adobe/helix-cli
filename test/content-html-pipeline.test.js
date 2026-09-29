@@ -31,7 +31,7 @@ describe('content-html-pipeline', () => {
       log: console,
       headers: { host: '127.0.0.1:3000' },
     });
-    assert.ok(html.includes('<meta property="og:url" content="https://127.0.0.1:3000/recipe">'));
+    assert.ok(html.includes('<meta property="og:url" content="http://127.0.0.1:3000/recipe">'));
   });
 
   describe('icons', () => {
