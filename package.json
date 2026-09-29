@@ -44,11 +44,11 @@
   },
   "dependencies": {
     "@adobe/fetch": "4.3.1",
-    "@adobe/helix-html-pipeline": "6.32.1",
+    "@adobe/helix-html-pipeline": "6.32.4",
     "@adobe/helix-html2md": "2.2.4",
     "@adobe/helix-log": "7.0.0",
-    "@adobe/helix-shared-config": "11.2.2",
-    "@adobe/helix-shared-git": "3.0.25",
+    "@adobe/helix-shared-config": "11.2.3",
+    "@adobe/helix-shared-git": "3.0.26",
     "@adobe/helix-shared-indexer": "2.2.10",
     "@adobe/helix-shared-process-queue": "3.1.9",
     "camelcase": "9.0.0",
@@ -89,7 +89,7 @@
     "yargs": "18.1.0"
   },
   "devDependencies": {
-    "@adobe/eslint-config-helix": "3.0.31",
+    "@adobe/eslint-config-helix": "3.0.32",
     "@eslint/config-helpers": "0.7.0",
     "@semantic-release/changelog": "7.0.0",
     "@semantic-release/git": "11.0.1",
