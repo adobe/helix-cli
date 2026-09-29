@@ -1402,7 +1402,7 @@ describe('Helix Server', () => {
         assert.ok(body.includes('content="00:17:30"'));
         assert.ok(body.includes('property="og:title"'));
         assert.ok(body.includes('content="Ramen"'));
-        assert.ok(body.includes(`property="og:url" content="https://127.0.0.1:${port}/ca/fr_ca/recipes/chicken"`));
+        assert.ok(body.includes(`property="og:url" content="http://127.0.0.1:${port}/ca/fr_ca/recipes/chicken"`));
         assert.ok(body.includes('name="template"'));
         assert.ok(body.includes('content="recipe"'));
         assert.ok(!body.includes('content="section"'));
