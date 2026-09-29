@@ -19,12 +19,6 @@ import { makeLogger } from './content-test-utils.js';
 
 const TEST_PROJECT_DIR = '/tmp/test-da-project';
 
-function waitForTimeout(ms) {
-  return new Promise((resolve) => {
-    setTimeout(resolve, ms);
-  });
-}
-
 describe('getValidToken', () => {
   it('returns override token immediately without reading stored token', async () => {
     let fseCalled = false;
@@ -60,6 +54,36 @@ describe('getValidToken', () => {
     assert.strictEqual(result, 'stored-token');
   });
 
+  // Mock http so no real socket is bound and no real 5-minute timeout timer is
+  // started (the real waitForToken() callback server would otherwise leak an
+  // open handle/timer past the end of the test, delaying the whole suite's exit).
+  // When listen() is called, simulate the /token request firing immediately.
+  // Also stub ensureGitIgnored, since it's covered by its own dedicated test below
+  // and would otherwise try to write a real .gitignore under TEST_PROJECT_DIR.
+  const mockHttp = {
+    'node:http': {
+      default: {
+        createServer: (reqHandler) => {
+          const mockServer = {
+            listen: () => {
+              setImmediate(() => {
+                const fakeReq = { url: '/token?access_token=test-token&expires_in=3600' };
+                const fakeRes = { writeHead: () => {}, end: () => {} };
+                reqHandler(fakeReq, fakeRes);
+              });
+            },
+            close: () => {},
+            on: () => {},
+          };
+          return mockServer;
+        },
+      },
+    },
+    '../../src/content/content-git.js': {
+      ensureGitIgnored: async () => {},
+    },
+  };
+
   it('logs expiry message and calls login when stored token is expired', async () => {
     const tokenData = {
       access_token: 'old-token',
@@ -74,22 +98,13 @@ describe('getValidToken', () => {
         writeJson: async () => {},
       },
       open: async () => {},
+      ...mockHttp,
     });
     const log = makeLogger();
-    try {
-      await Promise.race([
-        getValidToken(log, undefined, TEST_PROJECT_DIR),
-        waitForTimeout(100).then(() => { throw new Error('timeout'); }),
-      ]);
-    } catch (err) {
-      const msgs = log.logs.map((l) => l.msg).join(' ');
-      const isExpectedError = err.message === 'timeout'
-        || err.message.includes('login')
-        || err.message.includes('EADDRINUSE')
-        || err.message.includes('callback');
-      const hasExpiredLog = msgs.includes('expired') || msgs.includes('login') || msgs.includes('browser');
-      assert.ok(isExpectedError || hasExpiredLog);
-    }
+    const result = await getValidToken(log, undefined, TEST_PROJECT_DIR);
+    assert.strictEqual(result, 'test-token');
+    const msgs = log.logs.map((l) => l.msg).join(' ');
+    assert.ok(msgs.includes('expired'));
   });
 
   it('proceeds to login when no stored token file exists', async () => {
@@ -101,21 +116,11 @@ describe('getValidToken', () => {
         writeJson: async () => {},
       },
       open: async () => {},
+      ...mockHttp,
     });
     const log = makeLogger();
-    try {
-      await Promise.race([
-        getValidToken(log, undefined, TEST_PROJECT_DIR),
-        waitForTimeout(100).then(() => { throw new Error('timeout'); }),
-      ]);
-    } catch (err) {
-      assert.ok(
-        err.message === 'timeout'
-          || err.message.includes('login')
-          || err.message.includes('EADDRINUSE')
-          || err.message.includes('callback'),
-      );
-    }
+    const result = await getValidToken(log, undefined, TEST_PROJECT_DIR);
+    assert.strictEqual(result, 'test-token');
   });
 
   it('treats stored token without expires_at as expired', async () => {
@@ -129,21 +134,13 @@ describe('getValidToken', () => {
         writeJson: async () => {},
       },
       open: async () => {},
+      ...mockHttp,
     });
     const log = makeLogger();
-    try {
-      await Promise.race([
-        getValidToken(log, undefined, TEST_PROJECT_DIR),
-        waitForTimeout(100).then(() => { throw new Error('timeout'); }),
-      ]);
-    } catch (err) {
-      assert.ok(
-        err.message === 'timeout'
-          || err.message.includes('login')
-          || err.message.includes('EADDRINUSE')
-          || err.message.includes('callback'),
-      );
-    }
+    const result = await getValidToken(log, undefined, TEST_PROJECT_DIR);
+    assert.strictEqual(result, 'test-token');
+    const msgs = log.logs.map((l) => l.msg).join(' ');
+    assert.ok(msgs.includes('expired'));
   });
 
   it('calls ensureGitIgnored with the token file path after login', async () => {
@@ -211,12 +208,23 @@ describe('getValidToken', () => {
 
 describe('startDaLoginRedirect', () => {
   it('returns the fixed :9898 callback as redirect_uri, regardless of the return url\'s own port', async () => {
-    // Mock http so no real socket is bound (the fire-and-forget callback server
-    // this starts is never asked for a token in this test).
+    // Mock http so no real socket is bound, and simulate an immediate /token
+    // callback so the internal 5-minute timeout timer gets cleared right away
+    // instead of leaking a handle for 5 minutes past the end of the test.
     const { startDaLoginRedirect } = await esmock('../../src/content/da-auth.js', {
       'node:http': {
         default: {
-          createServer: () => ({ listen: () => {}, close: () => {}, on: () => {} }),
+          createServer: (reqHandler) => ({
+            listen: () => {
+              setImmediate(() => {
+                const fakeReq = { url: '/token?access_token=test-token&expires_in=3600' };
+                const fakeRes = { writeHead: () => {}, end: () => {} };
+                reqHandler(fakeReq, fakeRes);
+              });
+            },
+            close: () => {},
+            on: () => {},
+          }),
         },
       },
     });
