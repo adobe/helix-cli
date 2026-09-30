@@ -124,6 +124,22 @@ export async function diffCommitTrees(fs, dir, baseOid, headOid) {
   return { added, modified, deleted };
 }
 
+/** Files clone writes for local bookkeeping; they never belong on da.live. */
+const LOCAL_ONLY_FILES = new Set(['.gitignore']);
+
+/**
+ * All content files at a commit, as da.live paths (`/file`). Local bookkeeping
+ * files are left out. Used when the whole tree is copied instead of diffed.
+ * @param {import('isomorphic-git').FsClient} fs
+ * @param {string} dir
+ * @param {string} oid
+ * @returns {Promise<string[]>}
+ */
+export async function listCommitFiles(fs, dir, oid) {
+  const files = await git.listFiles({ fs, dir, ref: oid });
+  return files.filter((f) => !LOCAL_ONLY_FILES.has(f)).map((f) => `/${f}`);
+}
+
 /**
  * Number of commits reachable from `tipOid` before hitting `ancestorOid` (exclusive).
  * @param {import('isomorphic-git').FsClient} fs

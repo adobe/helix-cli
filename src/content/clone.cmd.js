@@ -17,7 +17,7 @@ import git from 'isomorphic-git';
 import processQueue from '@adobe/helix-shared-process-queue';
 import GitUtils from '../git-utils.js';
 import { prompt } from '../cli-util.js';
-import { DaClient } from './da-api.js';
+import { DaClient, resolveDaAdmin } from './da-api.js';
 import { getValidToken } from './da-auth.js';
 import {
   CONTENT_DIR,
@@ -144,7 +144,8 @@ export default class CloneCommand {
     const token = await getValidToken(log, this._token, this._dir);
 
     // 4. Fetch file list (no local content dir required yet)
-    const client = new DaClient(token);
+    const daAdmin = resolveDaAdmin();
+    const client = new DaClient(token, daAdmin);
     log.info('Fetching file list...');
     const showDiscoveryProgress = process.stdout.isTTY;
     const files = await client.listAll(org, site, this._rootPath, showDiscoveryProgress
@@ -222,11 +223,13 @@ export default class CloneCommand {
     const headOid = await git.resolveRef({ fs, dir: contentDir, ref: 'HEAD' });
     await writeSyncedRef(fs, contentDir, headOid);
 
-    // 8. Write config (not tracked by git)
+    // 8. Write config (not tracked by git). `daAdmin` records the backend this content
+    // came from, so push can tell a same-backend sync from a cross-backend copy.
     await fse.writeJson(path.join(contentDir, CONFIG_FILE), {
       org,
       site,
       rootPath: this._rootPath,
+      daAdmin,
     }, { spaces: 2 });
 
     log.info(`\nDone. ${downloaded.length} file(s) downloaded${errors > 0 ? `, ${errors} error(s)` : ''}.`);
