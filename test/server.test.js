@@ -284,6 +284,9 @@ describe('Helix Server', () => {
     // create a http proxy server
     process.env.ALL_PROXY = 'http://127.0.0.1:8002';
     const proxyRequests = [];
+    // create a single fetch context for the proxy so it can be reset (i.e. its
+    // sockets closed) once the test is done, instead of leaking one per request.
+    const proxyFetchCtx = h1NoCache();
     const proxy = await new Promise((resolve) => {
       const p = http
         .createServer(async (req, res) => {
@@ -291,7 +294,7 @@ describe('Helix Server', () => {
             // Delete accept header due to nock conflict
             delete req.headers.accept;
             console.log('http proxy request', req.url);
-            const resp = await h1NoCache().fetch(req.url, {});
+            const resp = await proxyFetchCtx.fetch(req.url, {});
             console.log('http proxy response for', req.url, resp.status);
             res.writeHead(resp.status, resp.headers.plain());
             res.write(await resp.buffer());
@@ -336,6 +339,7 @@ describe('Helix Server', () => {
       assert.deepStrictEqual(proxyRequests, [`http://127.0.0.1:${project.server.port}/readme.html`]);
     } finally {
       proxy.close();
+      await proxyFetchCtx.reset();
       await project.stop();
       delete process.env.ALL_PROXY;
     }

@@ -11,6 +11,16 @@
  */
 import { resolve } from 'path';
 import { fileURLToPath } from 'url';
+import { resetContext } from '../src/fetch-utils.js';
 
 // eslint-disable-next-line no-underscore-dangle
 global.__rootdir = resolve(fileURLToPath(import.meta.url), '..', '..');
+
+// eslint-disable-next-line import/prefer-default-export
+export const mochaHooks = {
+  async afterAll() {
+    // ensure keep-alive fetch contexts (and their sockets) don't keep the
+    // process alive after the test suite has finished.
+    await resetContext();
+  },
+};
