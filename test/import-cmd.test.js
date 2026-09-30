@@ -24,10 +24,17 @@ import {
 } from './utils.js';
 import ImportCommand from '../src/import.cmd.js';
 
-const { fetch } = fetchContext({ rejectUnauthorized: false });
+const importFetchCtx = fetchContext({ rejectUnauthorized: false });
+const { fetch } = importFetchCtx;
 
 const TEST_DIR = path.resolve(__rootdir, 'test', 'fixtures', 'import');
 const SAMPLE_HOST = 'http://www.sample.com';
+
+after(async () => {
+  // close the keep-alive sockets of the module-level fetch context so the
+  // test process doesn't hang after the suite finishes.
+  await importFetchCtx.reset();
+});
 
 describe('Integration test for import command', function suite() {
   let nock;
