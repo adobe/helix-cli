@@ -1,3 +1,10 @@
+## [16.21.24](https://github.com/adobe/helix-cli/compare/v16.21.23...v16.21.24) (2026-09-30)
+
+
+### Bug Fixes
+
+* **test:** close leaked fetch contexts and OAuth callback timers to stop suite hang ([#2797](https://github.com/adobe/helix-cli/issues/2797)) ([2ac3cf3](https://github.com/adobe/helix-cli/commit/2ac3cf3324e0ecb5e479b9e14e882c56df60bfc4))
+
 ## [16.21.23](https://github.com/adobe/helix-cli/compare/v16.21.22...v16.21.23) (2026-09-30)
 
 
