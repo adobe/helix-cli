@@ -12,10 +12,13 @@
 
 /* eslint-env mocha */
 import assert from 'assert';
+import fs from 'fs';
 import path from 'path';
 import fse from 'fs-extra';
+import git from 'isomorphic-git';
 import { createTestRoot } from '../utils.js';
-import { ensureGitIgnored } from '../../src/content/content-git.js';
+import { ensureGitIgnored, listCommitFiles } from '../../src/content/content-git.js';
+import { setupContentDir } from './content-test-utils.js';
 
 describe('ensureGitIgnored', () => {
   let testRoot;
@@ -48,5 +51,31 @@ describe('ensureGitIgnored', () => {
     await ensureGitIgnored(testRoot, 'content');
     const content = await fse.readFile(path.join(testRoot, '.gitignore'), 'utf-8');
     assert.ok(content.includes('content'));
+  });
+});
+
+describe('listCommitFiles', () => {
+  let testRoot;
+
+  beforeEach(async () => {
+    testRoot = await createTestRoot();
+  });
+
+  afterEach(async () => {
+    await fse.remove(testRoot);
+  });
+
+  it('returns every content file at a commit as a da.live path', async () => {
+    const contentDir = await setupContentDir(testRoot);
+    const headOid = await git.resolveRef({ fs, dir: contentDir, ref: 'HEAD' });
+    const files = await listCommitFiles(fs, contentDir, headOid);
+    assert.deepStrictEqual(files.sort(), ['/blog/post.html', '/index.html']);
+  });
+
+  it('leaves out the local .gitignore bookkeeping file', async () => {
+    const contentDir = await setupContentDir(testRoot);
+    const headOid = await git.resolveRef({ fs, dir: contentDir, ref: 'HEAD' });
+    const files = await listCommitFiles(fs, contentDir, headOid);
+    assert.ok(!files.includes('/.gitignore'));
   });
 });
