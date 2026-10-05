@@ -14,18 +14,70 @@ import path from 'path';
 import fse from 'fs-extra';
 import open from 'open';
 import { ensureGitIgnored } from './content-git.js';
+import { resolveDaEnvLabel, DEFAULT_DA_ENV_LABEL } from './da-api.js';
 
-const IMS_ORIGIN = 'https://ims-na1.adobelogin.com';
+/** Default IMS origin. */
+export const DEFAULT_DA_IMS_ORIGIN = 'https://ims-na1.adobelogin.com';
 /** Shared with da-live's own IMS client (see da-live/scripts/scripts.js). */
-export const DA_IMS_CLIENT_ID = 'darkalley';
-export const DA_IMS_SCOPE = 'ab.manage,AdobeID,gnav,openid,org.read,read_organizations,session,aem.frontend.all,additional_info.ownerOrg,additional_info.projectedProductContext,account_cluster.read';
-const CLIENT_ID = DA_IMS_CLIENT_ID;
-const SCOPE = DA_IMS_SCOPE;
+export const DEFAULT_DA_IMS_CLIENT_ID = 'darkalley';
+/** Default IMS scope. */
+export const DEFAULT_DA_IMS_SCOPE = 'ab.manage,AdobeID,gnav,openid,org.read,read_organizations,session,aem.frontend.all,additional_info.ownerOrg,additional_info.projectedProductContext,account_cluster.read';
 const CALLBACK_PORT = 9898;
 const REDIRECT_URI = `http://localhost:${CALLBACK_PORT}/callback`;
 
-/** Token file stored in the project's .hlx folder, alongside the site token. */
-export const DA_TOKEN_FILE = path.join('.hlx', '.da-token.json');
+/**
+ * Reads an environment variable, falling back to the given default when it is unset or empty.
+ * @param {string} name variable name
+ * @param {string} fallback default value
+ * @returns {string}
+ */
+function fromEnv(name, fallback) {
+  return (process.env[name] ?? '').trim() || fallback;
+}
+
+/**
+ * Resolves the IMS origin to use: the `AEM_DA_IMS_ORIGIN` environment variable,
+ * then {@link DEFAULT_DA_IMS_ORIGIN}.
+ * @returns {string} IMS origin without a trailing slash
+ */
+export function resolveDaImsOrigin() {
+  return fromEnv('AEM_DA_IMS_ORIGIN', DEFAULT_DA_IMS_ORIGIN).replace(/\/+$/, '');
+}
+
+/**
+ * Resolves the IMS client id to use: the `AEM_DA_IMS_CLIENT_ID` environment variable,
+ * then {@link DEFAULT_DA_IMS_CLIENT_ID}.
+ * @returns {string}
+ */
+export function resolveDaImsClientId() {
+  return fromEnv('AEM_DA_IMS_CLIENT_ID', DEFAULT_DA_IMS_CLIENT_ID);
+}
+
+/**
+ * Resolves the IMS scope to use: the `AEM_DA_IMS_SCOPE` environment variable,
+ * then {@link DEFAULT_DA_IMS_SCOPE}.
+ * @returns {string}
+ */
+export function resolveDaImsScope() {
+  return fromEnv('AEM_DA_IMS_SCOPE', DEFAULT_DA_IMS_SCOPE);
+}
+
+/** Git ignore entry covering the token file of every environment. */
+export const DA_TOKEN_IGNORE_ENTRY = path.join('.hlx', '.da-token*.json');
+
+/**
+ * Token file stored in the project's .hlx folder, alongside the site token, one per
+ * environment: the default environment keeps the plain `.hlx/.da-token.json` name, and
+ * every other environment gets its label appended, so their tokens never clobber each other.
+ *
+ * @param {string} [daAdmin] explicit admin host, overriding the environment
+ * @returns {string} token file path relative to the project directory
+ */
+export function resolveDaTokenFile(daAdmin) {
+  const label = resolveDaEnvLabel(daAdmin);
+  const name = label === DEFAULT_DA_ENV_LABEL ? '.da-token.json' : `.da-token-${label}.json`;
+  return path.join('.hlx', name);
+}
 
 // ─── Token storage ───────────────────────────────────────────────────────────
 
@@ -47,11 +99,11 @@ async function loadStoredToken(tokenFile) {
  * @param {object} tokenData
  */
 async function saveDaTokenToFile(projectDir, tokenData) {
-  const tokenFile = path.join(projectDir, DA_TOKEN_FILE);
+  const tokenFile = path.join(projectDir, resolveDaTokenFile());
   await fse.ensureDir(path.dirname(tokenFile));
   await fse.writeJson(tokenFile, tokenData, { spaces: 2 });
 
-  await ensureGitIgnored(projectDir, DA_TOKEN_FILE);
+  await ensureGitIgnored(projectDir, DA_TOKEN_IGNORE_ENTRY);
 }
 
 // ─── Token validity ──────────────────────────────────────────────────────────
@@ -161,11 +213,11 @@ function waitForToken(finalRedirectUrl) {
 async function login(log, projectDir) {
   const params = new URLSearchParams({
     response_type: 'token',
-    client_id: CLIENT_ID,
-    scope: SCOPE,
+    client_id: resolveDaImsClientId(),
+    scope: resolveDaImsScope(),
     redirect_uri: REDIRECT_URI,
   });
-  const authUrl = `${IMS_ORIGIN}/ims/authorize/v2?${params}`;
+  const authUrl = `${resolveDaImsOrigin()}/ims/authorize/v2?${params}`;
 
   log.info('Opening browser for da.live login...');
   log.info(`If the browser does not open automatically, visit:\n  ${authUrl}\n`);
@@ -180,7 +232,7 @@ async function login(log, projectDir) {
     expires_at: expiresIn ? Date.now() + (expiresIn * 1000) : null,
   });
 
-  log.info(`Login successful. Token saved to ${path.join(projectDir, DA_TOKEN_FILE)}`);
+  log.info(`Login successful. Token saved to ${path.join(projectDir, resolveDaTokenFile())}`);
   return token;
 }
 
@@ -202,13 +254,13 @@ async function login(log, projectDir) {
 export function startDaLoginRedirect(finalRedirectUrl) {
   const params = new URLSearchParams({
     response_type: 'token',
-    client_id: CLIENT_ID,
-    scope: SCOPE,
+    client_id: resolveDaImsClientId(),
+    scope: resolveDaImsScope(),
     redirect_uri: REDIRECT_URI,
   });
   // fire-and-forget: the callback server delivers the browser to finalRedirectUrl itself
   waitForToken(finalRedirectUrl).catch(() => {});
-  return `${IMS_ORIGIN}/ims/authorize/v2?${params}`;
+  return `${resolveDaImsOrigin()}/ims/authorize/v2?${params}`;
 }
 
 /**
@@ -216,7 +268,8 @@ export function startDaLoginRedirect(finalRedirectUrl) {
  *
  * Priority:
  *  1. Caller-supplied token (--token flag) — used as-is, not persisted
- *  2. Stored token in .hlx/.da-token.json that is still valid
+ *  2. Stored token in the environment's token file (see {@link resolveDaTokenFile})
+ *     that is still valid
  *  3. Full browser implicit login flow
  *
  * @param {object} log
@@ -229,7 +282,7 @@ export async function getValidToken(log, override, projectDir) {
     return override;
   }
 
-  const tokenFile = path.join(projectDir, DA_TOKEN_FILE);
+  const tokenFile = path.join(projectDir, resolveDaTokenFile());
   const stored = await loadStoredToken(tokenFile);
 
   if (stored?.access_token && !isTokenExpired(stored)) {
