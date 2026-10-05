@@ -35,7 +35,7 @@ function readDaAdminAfterCliLoad(cwd, env = {}) {
   const cliPath = path.resolve(__rootdir, 'src', 'cli.js').split(path.sep).join('/');
   const script = `import('file://${cliPath}').then(() => {`
     + ' process.stdout.write(String(process.env.AEM_DA_ADMIN)); });';
-  return shell.execFile('node', ['-e', script], {
+  return shell.exec(`node -e ${JSON.stringify(script)}`, {
     cwd,
     silent: true,
     env: { ...process.env, ...env },
