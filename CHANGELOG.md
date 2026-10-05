@@ -1,3 +1,10 @@
+# [16.22.0](https://github.com/adobe/helix-cli/compare/v16.21.25...v16.22.0) (2026-10-05)
+
+
+### Features
+
+* **content:** make the da.live backend and IMS provider configurable via env vars ([#2800](https://github.com/adobe/helix-cli/issues/2800)) ([21b735c](https://github.com/adobe/helix-cli/commit/21b735c1a6262644c5b2001bf2747284231a5af9))
+
 ## [16.21.25](https://github.com/adobe/helix-cli/compare/v16.21.24...v16.21.25) (2026-10-04)
 
 
