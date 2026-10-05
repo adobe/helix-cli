@@ -47,7 +47,7 @@
     "@adobe/helix-html-pipeline": "6.32.5",
     "@adobe/helix-html2md": "2.2.4",
     "@adobe/helix-log": "7.0.0",
-    "@adobe/helix-shared-config": "11.2.4",
+    "@adobe/helix-shared-config": "11.2.5",
     "@adobe/helix-shared-git": "3.0.26",
     "@adobe/helix-shared-indexer": "2.2.10",
     "@adobe/helix-shared-process-queue": "3.1.9",
