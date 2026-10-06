@@ -1,3 +1,10 @@
+## [16.22.3](https://github.com/adobe/helix-cli/compare/v16.22.2...v16.22.3) (2026-10-06)
+
+
+### Bug Fixes
+
+* ignore automatic IMS login ([#2801](https://github.com/adobe/helix-cli/issues/2801)) ([92b7772](https://github.com/adobe/helix-cli/commit/92b77726f8ebf5500c84a548bb082c0fa162ed54))
+
 ## [16.22.2](https://github.com/adobe/helix-cli/compare/v16.22.1...v16.22.2) (2026-10-06)
 
 
