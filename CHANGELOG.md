@@ -1,3 +1,10 @@
+## [16.22.2](https://github.com/adobe/helix-cli/compare/v16.22.1...v16.22.2) (2026-10-06)
+
+
+### Bug Fixes
+
+* **deps:** update dependency compression to v1.8.2 [security] ([#2804](https://github.com/adobe/helix-cli/issues/2804)) ([80af9c1](https://github.com/adobe/helix-cli/commit/80af9c1d823c803b45b87f11fd19cdeba61ec3b7))
+
 ## [16.22.1](https://github.com/adobe/helix-cli/compare/v16.22.0...v16.22.1) (2026-10-05)
 
 
