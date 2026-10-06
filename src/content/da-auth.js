@@ -216,6 +216,8 @@ async function login(log, projectDir) {
     client_id: resolveDaImsClientId(),
     scope: resolveDaImsScope(),
     redirect_uri: REDIRECT_URI,
+    prompt: 'login',
+    profile_filter: false,
   });
   const authUrl = `${resolveDaImsOrigin()}/ims/authorize/v2?${params}`;
 
@@ -257,6 +259,8 @@ export function startDaLoginRedirect(finalRedirectUrl) {
     client_id: resolveDaImsClientId(),
     scope: resolveDaImsScope(),
     redirect_uri: REDIRECT_URI,
+    prompt: 'login',
+    profile_filter: false,
   });
   // fire-and-forget: the callback server delivers the browser to finalRedirectUrl itself
   waitForToken(finalRedirectUrl).catch(() => {});
