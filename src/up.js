@@ -50,7 +50,7 @@ export default function up() {
         .option('port', {
           describe: 'Start development server on port',
           type: 'int',
-          default: 3000,
+          defaultDescription: '3000 (branch-derived in Git worktrees)',
         })
         .option('site-token', {
           alias: 'siteToken',
