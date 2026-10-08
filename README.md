@@ -200,6 +200,11 @@ If present, `ALL_PROXY` is used as fallback if there is no other match.
 | `--tls-key`       | `AEM_TLS_KEY`       | undefined   | Path to .key file (for enabling TLS)                        |
 | `--tls-cert`      | `AEM_TLS_CERT`      | undefined   | Path to .pem file (for enabling TLS)                        |
 
+In Git worktrees, the default port is derived from the branch name (3000-3999) to
+reduce conflicts between worktrees. An explicit `--port` or `AEM_PORT` setting
+(including in `.env`) overrides this automatic selection, even when set to `3000`.
+Command-line options take precedence over environment variables.
+
 ## Starting an import
 
 The AEM Importer is an application that supports importing content to AEM.
