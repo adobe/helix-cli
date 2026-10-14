@@ -1,3 +1,10 @@
+## [16.22.9](https://github.com/adobe/helix-cli/compare/v16.22.8...v16.22.9) (2026-10-14)
+
+
+### Bug Fixes
+
+* **deps:** update dependency dotenv to v18 ([#2813](https://github.com/adobe/helix-cli/issues/2813)) ([0bd11fb](https://github.com/adobe/helix-cli/commit/0bd11fb357f7309e63b893cf506736ba58783378))
+
 ## [16.22.8](https://github.com/adobe/helix-cli/compare/v16.22.7...v16.22.8) (2026-10-13)
 
 
