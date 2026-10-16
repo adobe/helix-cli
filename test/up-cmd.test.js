@@ -12,6 +12,8 @@
 
 /* eslint-env mocha */
 import assert from 'assert';
+import net from 'net';
+import os from 'os';
 import path from 'path';
 import fse from 'fs-extra';
 import esmock from 'esmock';
@@ -710,6 +712,60 @@ describe('Integration test for up command with git worktrees', function suite() 
         }
       }
       await fse.remove(worktreeDir).catch(() => {});
+    }
+  });
+
+  it('should not watch the git fsmonitor socket', async function test() {
+    if (process.platform === 'win32') {
+      this.skip();
+    }
+    initGit(testDir, 'https://github.com/adobe/dummy-foo.git');
+
+    // unix socket paths are limited to ~100 chars and silently truncated, so bind in a short
+    // temp dir and move the socket into the git directory afterwards
+    const socketDir = await fse.mkdtemp(path.join(os.tmpdir(), 'aem-'));
+    const socketServer = net.createServer();
+    await new Promise((resolve, reject) => {
+      socketServer.once('error', reject);
+      socketServer.listen(path.resolve(socketDir, 'f.ipc'), resolve);
+    });
+    await fse.move(
+      path.resolve(socketDir, 'f.ipc'),
+      path.resolve(testDir, '.git', 'fsmonitor--daemon.ipc'),
+    );
+
+    const cmd = new UpCommand()
+      .withLiveReload(false)
+      .withDirectory(testDir)
+      .withHttpPort(0);
+
+    try {
+      await new Promise((resolve, reject) => {
+        cmd
+          .on('started', async () => {
+            try {
+              // chokidar registers its watches asynchronously
+              await new Promise((r) => {
+                setTimeout(r, 500);
+              });
+              // eslint-disable-next-line no-underscore-dangle
+              const watched = Object.values(cmd._watcher.getWatched()).flat();
+              assert.ok(watched.includes('HEAD'), 'git HEAD should be watched');
+              assert.ok(!watched.includes('fsmonitor--daemon.ipc'), 'fsmonitor socket must not be watched');
+              await cmd.stop();
+            } catch (e) {
+              reject(e);
+            }
+          })
+          .on('stopped', resolve)
+          .run()
+          .catch(reject);
+      });
+    } finally {
+      await new Promise((resolve) => {
+        socketServer.close(resolve);
+      });
+      await fse.remove(socketDir);
     }
   });
 });
