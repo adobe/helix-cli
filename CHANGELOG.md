@@ -1,3 +1,10 @@
+## [16.22.10](https://github.com/adobe/helix-cli/compare/v16.22.9...v16.22.10) (2026-10-18)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @adobe/helix-html-pipeline to v6.32.7 ([#2815](https://github.com/adobe/helix-cli/issues/2815)) ([deea3f7](https://github.com/adobe/helix-cli/commit/deea3f786cb1ca7dec8f8ed192627de738a41a87))
+
 ## [16.22.9](https://github.com/adobe/helix-cli/compare/v16.22.8...v16.22.9) (2026-10-14)
 
 
