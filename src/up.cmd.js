@@ -232,6 +232,12 @@ export default class UpCommand extends AbstractServerCommand {
     this._watcher = chokidar.watch(gitDir, {
       persistent: true,
       ignoreInitial: true,
+      // git's fsmonitor daemon creates a unix socket that fs.watch cannot watch
+      ignored: /fsmonitor--daemon/,
+    });
+
+    this._watcher.on('error', (err) => {
+      this.log.warn(`unable to watch git directory: ${err.message}`);
     });
 
     this._watcher.on('all', (eventType, file) => {
