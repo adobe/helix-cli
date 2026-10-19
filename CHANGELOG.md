@@ -1,3 +1,10 @@
+## [16.22.11](https://github.com/adobe/helix-cli/compare/v16.22.10...v16.22.11) (2026-10-19)
+
+
+### Bug Fixes
+
+* ignore git fsmonitor socket in up watcher ([#2806](https://github.com/adobe/helix-cli/issues/2806)) ([a6000cf](https://github.com/adobe/helix-cli/commit/a6000cfb39521db3514cdaae53f36afe9253c786))
+
 ## [16.22.10](https://github.com/adobe/helix-cli/compare/v16.22.9...v16.22.10) (2026-10-18)
 
 
