@@ -1,3 +1,10 @@
+## [16.22.12](https://github.com/adobe/helix-cli/compare/v16.22.11...v16.22.12) (2026-10-19)
+
+
+### Bug Fixes
+
+* **up:** honor explicit port settings in git worktrees ([#2808](https://github.com/adobe/helix-cli/issues/2808)) ([21ec7b8](https://github.com/adobe/helix-cli/commit/21ec7b80826130ab9afe0231a4c1f51746fd0031))
+
 ## [16.22.11](https://github.com/adobe/helix-cli/compare/v16.22.10...v16.22.11) (2026-10-19)
 
 
