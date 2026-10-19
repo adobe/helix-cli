@@ -17,7 +17,7 @@ import fs from 'fs/promises';
 import { UnsecuredJWT } from 'jose';
 
 import path from 'path';
-import { clearHelixEnv } from './utils.js';
+import { clearHelixEnv, createTestRoot } from './utils.js';
 import CLI from '../src/cli.js';
 import UpCommand from '../src/up.cmd.js';
 import { saveSiteTokenToFile } from '../src/config/config-utils.js';
@@ -70,6 +70,7 @@ describe('hlx up', () => {
 
   it('hlx up runs w/o arguments', async () => {
     await cli.run(['up']);
+    sinon.assert.calledWithExactly(mockUp.withHttpPort, undefined);
     sinon.assert.calledWith(mockUp.withOpen, '/');
     sinon.assert.calledOnce(mockUp.run);
   });
@@ -124,6 +125,41 @@ describe('hlx up', () => {
     await cli.run(['up', '--port', '3210']);
     sinon.assert.calledWith(mockUp.withHttpPort, 3210);
     sinon.assert.calledOnce(mockUp.run);
+  });
+
+  it('aem up preserves an explicitly requested port 3000', async () => {
+    await cli.run(['up', '--port', '3000']);
+    sinon.assert.calledWithExactly(mockUp.withHttpPort, 3000);
+  });
+
+  it('aem up preserves port 3000 from the environment', async () => {
+    process.env.AEM_PORT = '3000';
+    await cli.run(['up']);
+    sinon.assert.calledWithExactly(mockUp.withHttpPort, 3000);
+  });
+
+  it('aem up preserves port 3000 from a .env file', async () => {
+    const testRoot = await createTestRoot();
+    try {
+      const envPath = path.resolve(testRoot, '.env');
+      await fs.writeFile(envPath, 'AEM_PORT=3000\n');
+      dotenv.config({ path: envPath, quiet: true });
+      await cli.run(['up']);
+      sinon.assert.calledWithExactly(mockUp.withHttpPort, 3000);
+    } finally {
+      await fs.rm(testRoot, { recursive: true, force: true });
+    }
+  });
+
+  it('aem up lets the command-line port override the environment', async () => {
+    process.env.AEM_PORT = '3210';
+    await cli.run(['up', '--port=3000']);
+    sinon.assert.calledWithExactly(mockUp.withHttpPort, 3000);
+  });
+
+  it('aem up preserves port zero for an ephemeral port', async () => {
+    await cli.run(['up', '--port', '0']);
+    sinon.assert.calledWithExactly(mockUp.withHttpPort, 0);
   });
 
   it('hlx up can specify bind address to run development server on', async () => {
