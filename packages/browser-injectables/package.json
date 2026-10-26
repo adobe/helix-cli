@@ -19,7 +19,7 @@
     "@web/test-runner-playwright": "1.0.0",
     "@web/test-runner-junit-reporter": "1.0.0",
     "@web/test-runner-mocha": "1.0.0",
-    "playwright": "1.63.0"
+    "playwright": "1.64.0"
   },
   "dependencies": {
     "livereload-js": "4.0.2"
