@@ -63,7 +63,7 @@
     "express-rate-limit": "8.7.1",
     "faye-websocket": "0.11.4",
     "fs-extra": "11.4.1",
-    "glob": "13.0.6",
+    "glob": "14.0.2",
     "hast-util-select": "6.0.4",
     "hast-util-to-html": "9.0.5",
     "http-proxy-agent": "9.1.0",
