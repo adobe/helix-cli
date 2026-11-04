@@ -55,7 +55,8 @@ function textContent(node) {
 /**
  * Converts a metadata name the same way the html pipeline does, so that e.g.
  * `Footer Variant` becomes `footer-variant`.
- * Copied from helix-html-pipeline `src/utils/modifiers.js#toMetaName` (not exported).
+ * Copied from helix-html-pipeline `src/utils/modifiers.js#toMetaName`, which is not exported
+ * from the package entry point.
  * @param {string} text raw name
  * @returns {string} meta name
  */
@@ -634,7 +635,8 @@ window.LiveReloadOptions = {
   /**
    * Extracts metadata block from plain HTML content.
    * Like the html pipeline, the first `div.metadata` is used wherever it is in the document,
-   * and its names are normalized with `toMetaName`.
+   * and its names are normalized with `toMetaName`. Values keep the existing rules (image src,
+   * otherwise text). A malformed block is left in place.
    * @param {string} html HTML content with potential metadata block
    * @returns {{content: string, metadata: object}} cleaned content and metadata object
    */
@@ -645,12 +647,18 @@ window.LiveReloadOptions = {
       return { content: html, metadata: {} };
     }
 
+    // A block without its own closing tag has swallowed the content after it, and every row
+    // must be a name/value pair: if either fails, leave the html untouched.
+    const rows = selectAll(':scope > div', $block)
+      .map(($row) => $row.children.filter((n) => n.type === 'element'));
+    const source = html.slice($block.position.start.offset, $block.position.end.offset);
+    if ((source.match(/<\/div\s*>/gi) || []).length < selectAll('div', $block).length
+      || rows.some((cells) => cells.length !== 2)) {
+      return { content: html, metadata: {} };
+    }
+
     const metadata = {};
-    selectAll(':scope > div', $block).forEach(($row) => {
-      const [$name, $value] = $row.children.filter((n) => n.type === 'element');
-      if (!$value) {
-        return;
-      }
+    rows.forEach(([$name, $value]) => {
       const key = toMetaName(textContent($name).trim());
       if (!key) {
         return;
@@ -659,10 +667,11 @@ window.LiveReloadOptions = {
       metadata[key] = $img ? $img.properties.src : textContent($value).trim();
     });
 
-    // If the block is alone in its section, remove the section too (no empty <div> left).
+    // If the block is alone in its section (a top-level div, or one directly in <main>), remove
+    // the section too (no empty <div> left).
     const parent = findParent(tree, $block);
-    const isOnlyContent = parent.type === 'element'
-      && parent.tagName === 'div'
+    const container = parent.tagName === 'div' && findParent(tree, parent);
+    const isOnlyContent = (container === tree || container?.tagName === 'main')
       && parent.children.every((n) => n === $block
         || n.type === 'comment'
         || (n.type === 'text' && !n.value.trim()));

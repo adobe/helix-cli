@@ -374,6 +374,7 @@ describe('Utils Test', () => {
         content: '<div><p>Content</p></div>\n\n<div><p>After</p></div>',
         metadata: { title: 'T' },
       });
+      assert.strictEqual(utils.extractMetadataBlock(`<main>${html}</main>`).content, '<main><div><p>Content</p></div>\n\n<div><p>After</p></div></main>');
     });
 
     it('matches a block with extra classes and attributes', () => {
@@ -391,7 +392,7 @@ describe('Utils Test', () => {
       });
     });
 
-    it('reads pretty-printed rows and skips rows without a name or value', () => {
+    it('reads pretty-printed rows and skips rows without a name', () => {
       const html = `<div>
   <div class="metadata">
     <div>
@@ -402,13 +403,39 @@ describe('Utils Test', () => {
       <div>image</div>
       <div><picture><img src="/media.png" alt="alt text"></picture></div>
     </div>
-    <div><div>only-a-name</div></div>
     <div><div></div><div>no name</div></div>
   </div>
 </div>`;
       assert.deepStrictEqual(utils.extractMetadataBlock(html), {
         content: '',
         metadata: { title: 'John Doe', image: '/media.png' },
+      });
+    });
+
+    it('decodes entities once and keeps CRLF content as authored', () => {
+      const html = `<div><p>a</p>\r\n${block([['image', '<img src="/a.png?w=1&amp;h=2">']])}\r\n</div>\r\n<div><p>b</p></div>`;
+      assert.deepStrictEqual(utils.extractMetadataBlock(html), {
+        content: '<div><p>a</p>\r\n\r\n</div>\r\n<div><p>b</p></div>',
+        metadata: { image: '/a.png?w=1&h=2' },
+      });
+    });
+
+    it('only removes the block when it is alone inside another block', () => {
+      const html = `<div><div class="columns"><div><div>${block([['title', 'T']])}</div><div>right</div></div></div></div>`;
+      assert.deepStrictEqual(utils.extractMetadataBlock(html), {
+        content: '<div><div class="columns"><div><div></div><div>right</div></div></div></div>',
+        metadata: { title: 'T' },
+      });
+    });
+
+    it('leaves a malformed block untouched', () => {
+      [
+        // missing </div>: the parser would put the following sections inside the block
+        '<div><h1>Hello</h1></div>\n<div><div class="metadata"><div><div>title</div><div>T</div></div>\n<div><p>Important</p><p>content</p></div>',
+        // a row that is not a name/value pair
+        '<div><div class="metadata"><div><div>title</div><div>T</div></div><div><div>oops</div></div></div></div>',
+      ].forEach((html) => {
+        assert.deepStrictEqual(utils.extractMetadataBlock(html), { content: html, metadata: {} });
       });
     });
 
