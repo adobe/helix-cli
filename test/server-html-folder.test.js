@@ -573,6 +573,45 @@ describe('Helix Server - HTML Folder', () => {
     }
   });
 
+  it('extracts a metadata block placed at the end of a content section', async () => {
+    const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
+
+    const draftsFolder = path.join(cwd, 'drafts');
+    await fs.mkdir(draftsFolder, { recursive: true });
+    const html = `<div><h1>Example post</h1>
+<p>First paragraph.</p>
+<div class="metadata"><div><div>Title</div><div>Example post title</div></div><div><div>Template</div><div>blog-post</div></div><div><div>Footer Variant</div><div>padded</div></div></div></div>`;
+    await fs.writeFile(path.join(draftsFolder, 'in-section.plain.html'), html);
+
+    nock('https://main--foo--bar.aem.page')
+      .get('/head.html')
+      .reply(404);
+
+    const project = new HelixProject()
+      .withCwd(cwd)
+      .withLogger(console)
+      .withHttpPort(0)
+      .withProxyUrl('https://main--foo--bar.aem.page/')
+      .withHtmlFolder('drafts');
+
+    await project.init();
+    try {
+      await project.start();
+
+      const response = await fetch(`http://127.0.0.1:${project.server.port}/drafts/in-section`);
+      assert.equal(response.status, 200);
+
+      const content = await response.text();
+      assert.ok(content.includes('<title>Example post title</title>'), 'Should use metadata title');
+      assert.ok(content.includes('<meta name="template" content="blog-post">'), 'Should have template meta tag');
+      assert.ok(content.includes('<meta name="footer-variant" content="padded">'), 'Should have normalized meta name');
+      assert.ok(!content.includes('class="metadata"'), 'Should not contain metadata block in body');
+      assert.ok(content.includes('<p>First paragraph.</p>'), 'Should keep the rest of the section');
+    } finally {
+      await project.stop();
+    }
+  });
+
   it('extracts image src from img tags in metadata', async () => {
     const cwd = await setupProject(path.join(__rootdir, 'test', 'fixtures', 'project'), testRoot);
 
