@@ -1,3 +1,10 @@
+## [16.22.18](https://github.com/adobe/helix-cli/compare/v16.22.17...v16.22.18) (2026-11-09)
+
+
+### Bug Fixes
+
+* **deps:** update dependency glob to v14 [security] ([#2822](https://github.com/adobe/helix-cli/issues/2822)) ([a55100d](https://github.com/adobe/helix-cli/commit/a55100d883bb1ceb899e1c2c7ae18115f848bbe0))
+
 ## [16.22.17](https://github.com/adobe/helix-cli/compare/v16.22.16...v16.22.17) (2026-11-09)
 
 
