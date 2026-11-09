@@ -24,12 +24,17 @@ jobs:
       - run: npm i
 
       # Sub-project setup and testing (conditional)
+      - name: Get OS release
+        id: os
+        if: hashFiles('packages/browser-injectables/**') != ''
+        run: echo "release=$(lsb_release -rs)" >> "$GITHUB_OUTPUT"
+
       - name: Cache Playwright browsers
         if: hashFiles('packages/browser-injectables/**') != ''
         uses: actions/cache@v6
         with:
           path: ~/.cache/ms-playwright
-          key: ${{ runner.os }}-playwright-${{ hashFiles('packages/browser-injectables/package-lock.json') }}
+          key: ${{ runner.os }}-${{ steps.os.outputs.release }}-playwright-${{ hashFiles('packages/browser-injectables/package-lock.json') }}
 
       - name: Install browser injectable dependencies
         if: hashFiles('packages/browser-injectables/**') != ''
