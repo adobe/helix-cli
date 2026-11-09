@@ -1,5 +1,5 @@
 name: Build
-on: [push]
+on: [push,pull_request]
 
 env:
   CI_BUILD_NUM: ${{ github.run_id }}
