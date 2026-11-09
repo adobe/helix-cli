@@ -20,7 +20,7 @@ import { fileURLToPath } from 'url';
 import { parseCookie } from 'cookie';
 import { unified } from 'unified';
 import rehypeParse from 'rehype-parse';
-import { select } from 'hast-util-select';
+import { select, selectAll } from 'hast-util-select';
 import { toHtml } from 'hast-util-to-html';
 import { getFetch } from '../fetch-utils.js';
 
@@ -36,6 +36,58 @@ const DA_CONTENT_AUTH_SCRIPT = readFileSync(
   path.join(__dirname, '../../packages/browser-injectables/src/da-content-auth.js'),
   'utf-8',
 );
+
+/**
+ * Recursively extracts the text of a hast node.
+ * @param {object} node hast node
+ * @returns {string} concatenated text content
+ */
+function textContent(node) {
+  if (node.type === 'text') {
+    return node.value;
+  }
+  if (node.children) {
+    return node.children.map(textContent).join('');
+  }
+  return '';
+}
+
+/**
+ * Converts a metadata name the same way the html pipeline does, so that e.g.
+ * `Footer Variant` becomes `footer-variant`.
+ * Copied from helix-html-pipeline `src/utils/modifiers.js#toMetaName`, which is not exported
+ * from the package entry point.
+ * @param {string} text raw name
+ * @returns {string} meta name
+ */
+function toMetaName(text) {
+  const name = text.replace(/[^0-9a-zA-Z:_-]/g, '-');
+  const lower = name.toLowerCase();
+  if (lower.startsWith('hreflang-') || lower.startsWith('hreflang:')) {
+    return `hreflang:${name.substring(9)}`;
+  }
+  return lower;
+}
+
+/**
+ * Finds the parent of a node in a hast tree.
+ * @param {object} node hast node to search from
+ * @param {object} target node whose parent to find
+ * @returns {object|null} parent node
+ */
+function findParent(node, target) {
+  const { children = [] } = node;
+  if (children.includes(target)) {
+    return node;
+  }
+  for (const child of children) {
+    const parent = findParent(child, target);
+    if (parent) {
+      return parent;
+    }
+  }
+  return null;
+}
 
 const utils = {
   status2level(status, debug3xx) {
@@ -557,22 +609,11 @@ window.LiveReloadOptions = {
    * @returns {string} plain text content
    */
   extractTextFromHtml(html) {
-    // Helper to recursively extract text from AST nodes
-    function extractText(node) {
-      if (node.type === 'text') {
-        return node.value;
-      }
-      if (node.children) {
-        return node.children.map(extractText).join('');
-      }
-      return '';
-    }
-
     try {
       const ast = unified()
         .use(rehypeParse, { fragment: true })
         .parse(html);
-      return extractText(ast).trim();
+      return textContent(ast).trim();
     } catch (e) {
       // If parsing fails, return empty string to avoid XSS vulnerabilities
       return '';
@@ -592,80 +633,53 @@ window.LiveReloadOptions = {
   },
 
   /**
-   * Extracts metadata block from plain HTML content
+   * Extracts metadata block from plain HTML content.
+   * Like the html pipeline, the first `div.metadata` is used wherever it is in the document,
+   * and its names are normalized with `toMetaName`. Values keep the existing rules (image src,
+   * otherwise text). A malformed block is left in place.
    * @param {string} html HTML content with potential metadata block
    * @returns {{content: string, metadata: object}} cleaned content and metadata object
    */
   extractMetadataBlock(html) {
-    // The metadata block structure is:
-    // <div>
-    //   <div class="metadata">
-    //     <div><div>key</div><div>value</div></div>
-    //   </div>
-    // </div>
-
-    // Find the outer div containing the metadata div
-    const outerDivRegex = /<div>\s*<div class="metadata">/;
-    const outerMatch = html.match(outerDivRegex);
-
-    if (!outerMatch) {
+    const tree = unified().use(rehypeParse, { fragment: true }).parse(html);
+    const $block = select('div.metadata', tree);
+    if (!$block) {
       return { content: html, metadata: {} };
     }
 
-    // Find the matching closing </div></div> by counting nested divs
-    // Start after <div><div class="metadata">
-    const startIndex = outerMatch.index + outerMatch[0].length;
-    let depth = 2; // Already inside two divs
-    let endIndex = startIndex;
-    let closingDivCount = 0;
-
-    for (let i = startIndex; i < html.length && closingDivCount < 2; i += 1) {
-      if (html.substr(i, 5) === '<div>') {
-        depth += 1;
-      } else if (html.substr(i, 6) === '</div>') {
-        depth -= 1;
-        if (depth < 2) {
-          closingDivCount += 1;
-          if (closingDivCount === 2) {
-            endIndex = i + 6; // Include the last </div>
-          }
-        }
-      }
-    }
-
-    if (closingDivCount !== 2) {
-      // Malformed HTML, return as-is
+    // A block without its own closing tag has swallowed the content after it, and every row
+    // must be a name/value pair: if either fails, leave the html untouched.
+    const rows = selectAll(':scope > div', $block)
+      .map(($row) => $row.children.filter((n) => n.type === 'element'));
+    const source = html.slice($block.position.start.offset, $block.position.end.offset);
+    if ((source.match(/<\/div\s*>/gi) || []).length < selectAll('div', $block).length
+      || rows.some((cells) => cells.length !== 2)) {
       return { content: html, metadata: {} };
     }
 
-    // Extract the metadata block content and remove entire outer div from HTML
-    const fullMetadataBlock = html.substring(outerMatch.index, endIndex);
-    const metadataBlock = html.substring(startIndex, endIndex - 12); // -12 for </div></div>
-    const cleanedContent = html.replace(fullMetadataBlock, '').trim();
-
-    // Parse metadata block to extract key-value pairs
-    const pairRegex = /<div>\s*<div>([^<]+)<\/div>\s*<div>([\s\S]*?)<\/div>\s*<\/div>/g;
     const metadata = {};
-    let pairMatch;
-
-    // eslint-disable-next-line no-cond-assign
-    while ((pairMatch = pairRegex.exec(metadataBlock)) !== null) {
-      const key = pairMatch[1].trim();
-      let value = pairMatch[2].trim();
-
-      // Handle <img> tags - extract src
-      const imgMatch = value.match(/<img[^>]+src="([^"]+)"/);
-      if (imgMatch) {
-        [, value] = imgMatch;
-      } else {
-        // Use proper HTML parsing to extract text content
-        value = utils.extractTextFromHtml(value);
+    rows.forEach(([$name, $value]) => {
+      const key = toMetaName(textContent($name).trim());
+      if (!key) {
+        return;
       }
+      const $img = select('img[src]', $value);
+      metadata[key] = $img ? $img.properties.src : textContent($value).trim();
+    });
 
-      metadata[key] = value;
-    }
+    // If the block is alone in its section (a top-level div, or one directly in <main>), remove
+    // the section too (no empty <div> left).
+    const parent = findParent(tree, $block);
+    const container = parent.tagName === 'div' && findParent(tree, parent);
+    const isOnlyContent = (container === tree || container?.tagName === 'main')
+      && parent.children.every((n) => n === $block
+        || n.type === 'comment'
+        || (n.type === 'text' && !n.value.trim()));
+    const { start, end } = (isOnlyContent ? parent : $block).position;
 
-    return { content: cleanedContent, metadata };
+    // Cut by source offsets so the rest of the document is served exactly as authored.
+    const content = `${html.slice(0, start.offset)}${html.slice(end.offset)}`.trim();
+    return { content, metadata };
   },
 
   /**

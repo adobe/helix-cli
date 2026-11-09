@@ -349,6 +349,113 @@ describe('Utils Test', () => {
     });
   });
 
+  describe('extractMetadataBlock', () => {
+    const block = (rows, attrs = 'class="metadata"') => `<div ${attrs}>${rows.map(([k, v]) => `<div><div>${k}</div><div>${v}</div></div>`).join('')}</div>`;
+
+    it('extracts a block at the end of a content section (importer output)', () => {
+      const html = `<div><h1>Example post</h1>\n<p>First paragraph.</p>\n${block([['Title', 'Example post'], ['Template', 'blog-post'], ['Date', '2013-08-28']])}</div>`;
+      assert.deepStrictEqual(utils.extractMetadataBlock(html), {
+        content: '<div><h1>Example post</h1>\n<p>First paragraph.</p>\n</div>',
+        metadata: { title: 'Example post', template: 'blog-post', date: '2013-08-28' },
+      });
+    });
+
+    it('extracts a block that directly follows another block in the same section', () => {
+      const html = `<div><div class="page-title"><div><div><h1>Home</h1></div></div></div>${block([['Title', 'Home']])}</div>\n<div><p>Next</p></div>`;
+      assert.deepStrictEqual(utils.extractMetadataBlock(html), {
+        content: '<div><div class="page-title"><div><div><h1>Home</h1></div></div></div></div>\n<div><p>Next</p></div>',
+        metadata: { title: 'Home' },
+      });
+    });
+
+    it('removes the whole section when the block is alone in it', () => {
+      const html = `<div><p>Content</p></div>\n<div>\n  ${block([['title', 'T']])}\n</div>\n<div><p>After</p></div>`;
+      assert.deepStrictEqual(utils.extractMetadataBlock(html), {
+        content: '<div><p>Content</p></div>\n\n<div><p>After</p></div>',
+        metadata: { title: 'T' },
+      });
+      assert.strictEqual(utils.extractMetadataBlock(`<main>${html}</main>`).content, '<main><div><p>Content</p></div>\n\n<div><p>After</p></div></main>');
+    });
+
+    it('matches a block with extra classes and attributes', () => {
+      const html = `<div id="s1">${block([['title', 'T']], 'class="metadata foo" data-x="1"')}</div><p>x</p>`;
+      assert.deepStrictEqual(utils.extractMetadataBlock(html), {
+        content: '<p>x</p>',
+        metadata: { title: 'T' },
+      });
+    });
+
+    it('normalizes names like the html pipeline', () => {
+      const html = `<div>${block([['Title', 'a'], ['Footer Variant', 'b'], ['title:suffix', 'c'], ['hreflang-en-US', 'd'], ['\n  Template\n', 'e']])}</div>`;
+      assert.deepStrictEqual(utils.extractMetadataBlock(html).metadata, {
+        title: 'a', 'footer-variant': 'b', 'title:suffix': 'c', 'hreflang:en-US': 'd', template: 'e',
+      });
+    });
+
+    it('reads pretty-printed rows and skips rows without a name', () => {
+      const html = `<div>
+  <div class="metadata">
+    <div>
+      <div>title</div>
+      <div><strong>John</strong> <em>Doe</em></div>
+    </div>
+    <div>
+      <div>image</div>
+      <div><picture><img src="/media.png" alt="alt text"></picture></div>
+    </div>
+    <div><div></div><div>no name</div></div>
+  </div>
+</div>`;
+      assert.deepStrictEqual(utils.extractMetadataBlock(html), {
+        content: '',
+        metadata: { title: 'John Doe', image: '/media.png' },
+      });
+    });
+
+    it('decodes entities once and keeps CRLF content as authored', () => {
+      const html = `<div><p>a</p>\r\n${block([['image', '<img src="/a.png?w=1&amp;h=2">']])}\r\n</div>\r\n<div><p>b</p></div>`;
+      assert.deepStrictEqual(utils.extractMetadataBlock(html), {
+        content: '<div><p>a</p>\r\n\r\n</div>\r\n<div><p>b</p></div>',
+        metadata: { image: '/a.png?w=1&h=2' },
+      });
+    });
+
+    it('only removes the block when it is alone inside another block', () => {
+      const html = `<div><div class="columns"><div><div>${block([['title', 'T']])}</div><div>right</div></div></div></div>`;
+      assert.deepStrictEqual(utils.extractMetadataBlock(html), {
+        content: '<div><div class="columns"><div><div></div><div>right</div></div></div></div>',
+        metadata: { title: 'T' },
+      });
+    });
+
+    it('leaves a malformed block untouched', () => {
+      [
+        // missing </div>: the parser would put the following sections inside the block
+        '<div><h1>Hello</h1></div>\n<div><div class="metadata"><div><div>title</div><div>T</div></div>\n<div><p>Important</p><p>content</p></div>',
+        // a row that is not a name/value pair
+        '<div><div class="metadata"><div><div>title</div><div>T</div></div><div><div>oops</div></div></div></div>',
+      ].forEach((html) => {
+        assert.deepStrictEqual(utils.extractMetadataBlock(html), { content: html, metadata: {} });
+      });
+    });
+
+    it('returns the input unchanged when there is no metadata block', () => {
+      const html = `<div><p>Hello</p>${block([['style', 'dark']], 'class="section-metadata"')}</div>`;
+      const result = utils.extractMetadataBlock(html);
+      assert.strictEqual(result.content, html);
+      assert.deepStrictEqual(result.metadata, {});
+    });
+
+    it('only uses and removes the first metadata block', () => {
+      const second = block([['title', 'second']]);
+      const html = `<div>${block([['title', 'first']])}</div><div><p>x</p>${second}</div>`;
+      assert.deepStrictEqual(utils.extractMetadataBlock(html), {
+        content: `<div><p>x</p>${second}</div>`,
+        metadata: { title: 'first' },
+      });
+    });
+  });
+
   describe('rewriteDaContentImageUrls', () => {
     it('rewrites content.da.live image src to the site preview domain', () => {
       const html = '<img src="https://content.da.live/bar/foo/media_123.png">';
