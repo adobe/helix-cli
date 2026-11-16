@@ -22,6 +22,6 @@
     "playwright": "1.64.0"
   },
   "dependencies": {
-    "livereload-js": "4.0.2"
+    "livereload-js": "4.0.3"
   }
 }
