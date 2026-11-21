@@ -47,7 +47,13 @@ export default class HeadHtmlSupport {
       }
     };
 
-    update(tree, ['type', 'tagName', 'value']);
+    if (tree.type === 'comment') {
+      // the rendered page re-indents every line of a multi-line comment, so ignore
+      // the indentation at the start of each comment line
+      update({ ...tree, value: tree.value.replace(/\n[ \t]*/g, '\n') }, ['type', 'value']);
+    } else {
+      update(tree, ['type', 'tagName', 'value']);
+    }
     if (tree.properties) {
       update(tree.properties, Object.keys(tree.properties));
     }
