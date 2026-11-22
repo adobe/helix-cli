@@ -78,6 +78,35 @@ describe('Head.html replacement tests', () => {
     assert.strictEqual(await hhs.replace(source), expected);
   });
 
+  it('replaces the head html with a multi-line comment re-indented by the pipeline', async () => {
+    const hhs = new HeadHtmlSupport(DEFAULT_OPTS());
+    hhs.isModified = true;
+    const remote = `<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<!--
+  Domain Verification
+  https://www.example.com/verify
+-->
+<script src="/scripts/scripts.js" type="module"></script>`;
+    const source = `<html>
+  <head>
+    <title></title>
+    <meta name="viewport" content="width=device-width, initial-scale=1"><!--
+      Domain Verification
+      https://www.example.com/verify
+    -->
+    <script src="/scripts/scripts.js" type="module"></script>
+  </head>
+</html>`;
+    const expected = `<html>
+  <head>
+    <title></title>
+    <!-- replaced -->
+  </head>
+</html>`;
+    await init(hhs, '<!-- replaced -->', remote);
+    assert.strictEqual(await hhs.replace(source), expected);
+  });
+
   it('replaces the empty head html at the end', async () => {
     const hhs = new HeadHtmlSupport(DEFAULT_OPTS());
     hhs.isModified = true;
