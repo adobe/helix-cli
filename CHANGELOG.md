@@ -1,3 +1,10 @@
+## [16.22.29](https://github.com/adobe/helix-cli/compare/v16.22.28...v16.22.29) (2026-11-27)
+
+
+### Bug Fixes
+
+* **deps:** update adobe fixes ([#2839](https://github.com/adobe/helix-cli/issues/2839)) ([7473fca](https://github.com/adobe/helix-cli/commit/7473fcaa72c90db889ad27ef48a1c8f63fed84ec))
+
 ## [16.22.28](https://github.com/adobe/helix-cli/compare/v16.22.27...v16.22.28) (2026-11-24)
 
 
